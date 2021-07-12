@@ -3,7 +3,15 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Verify/Browser-Performance.latest.gitlab-ci.yml
 
-# Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/browser_performance_testing.html
+template_metadata:
+  name: Browser Performance (Lastest)
+  desc: |
+    Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/browser_performance_testing.html
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Performance Testing"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 stages:
   - build

@@ -48,6 +48,199 @@ is determined by the directory it is in:
 
 Use the following guidelines to ensure your template submission follows standards:
 
+### Template metadata
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/335279) in GitLab 14.1.
+
+You **must** define the template metadata in a GitLab managed CI/CD template.
+
+For fabricating the template information, we extended the capability of the CI/CD templates
+to [have a structured metadata](https://gitlab.com/gitlab-org/gitlab/-/issues/334663)
+that can be [populated on UI/API](https://gitlab.com/gitlab-org/gitlab/-/issues/334772).
+Specifically, we've introduced `template_metadata` keyword to `.gitlab-ci.yml` that consists of the following attributes:
+
+| Attribute          | Description                                                                                                                       | Required |
+| ----               | --------------                                                                                                                    | ----     |
+| `name`             | The name of the template.                                                                                                         | Yes      |
+| `desc`             | The description of the template.                                                                                                  | Yes      |
+| `stages`           | The [GitLab DevOps Stages](https://about.gitlab.com/stages-devops-lifecycle/) that the template is involved.                      | Yes      |
+| `categories`       | The [GitLab Feature Categories](https://about.gitlab.com/handbook/product/categories/features/) that the template is involved.    | Yes      |
+| `maintainers`      | The [GitLab Groups](https://about.gitlab.com/handbook/product/categories/features/) which are responsible to maintain the template.   | Yes      |
+| `usage`            | How to use the template. See below for more details.                                                                              | Yes      |
+| `inclusion_type`   | How to use the template when `usage` is `inclusion`. See below for more details.                                                  | Yes      |
+
+The details of `usage` attributes:
+
+| Value                | Workflow management | Description                                           |
+| ----                 | --------------      | ----------------------------------------------------- |
+| `copy-paste`         | Decentralized       | The template is copy-pasted into a project workflow file and maintained/versioned in each repository. This is the tradional behavior of GitLab templates that provide a starter content to be a _new_ instance, like Issue/MR templates. |
+| `inclusion`          | Centralized         | The template is `include`d into a project workflow file and maintained/versioned in [the GitLab canonical repository](https://gitlab.com/gitlab-org/gitlab). This is the unique concept in GitLab CI/CD that _directly_ consumes a template. |
+
+The details of `inclusion_type` attributes:
+
+| Value                | Jobs defined? | Global keyword exists? | YAML anchors only?    | Description                         |
+| ----                 | ------------- | ---------------------  | --------------------- | -----------                         |
+| `shared-workflow`    | Yes           | Yes/No                 | No                    | The end-to-end CI/CD workflow to be shared with the other projects. |
+| `workflow-extension` | No            | Yes                    | No                    | The extension of the workflow-level configs (i.e. [global keywords](../../ci/yaml/index.md#global-keywords)) to be shared with the other projects.     |
+| `composable-job`     | No            | No                     | Yes                   | The [YAML anchors](../../ci/yaml/index.md#anchors) to be included into the project workflow for composing a job with [`extends`](../../ci/yaml/index.md#extends) or [`!reference`](../../ci/yaml/index.md#reference-tags). |
+| `other`              | Yes/No                   | Yes/No                    | Yes/No           |                                     |
+
+#### Usage Examples per `inclusion_type`
+
+<details>
+<summary>`shared-workflow`</summary>
+
+**Template**
+
+```yaml
+template_metadata:
+  name: AWS Auto Deploy
+  usage: inclusion
+  inclusion_type: shared-workflow
+
+stages:
+  - build
+  - test
+  - review
+  - deploy
+  - production
+  - cleanup
+
+variables:
+  AUTO_DEVOPS_PLATFORM_TARGET: ECS
+
+include:
+  - local: Jobs/Build.gitlab-ci.yml
+  - local: Jobs/Deploy/ECS.gitlab-ci.yml
+```
+
+**Project workflow file (If a project uses multiple workflows)**
+
+```yaml
+# A shared workflow is initiated as a child pipeline.
+# Since the shared workflow is sandboxed as an individual pipeline, it doesn't affect the
+# project specific workflow. They can even customize the order of the job/stage executions
+# to run a shared workflow at a desired point.
+<shared-workflow-name>:
+  stage: .pre
+  trigger:
+    include:
+      - template: <template-path>
+  strategy: depend
+
+# Project specific workflow
+build:
+  stage: build
+  script: echo 'Project-specific build script'
+
+test:
+  stage: test
+  script: echo 'Project-specific test script'
+
+deploy:
+  stage: deploy
+  script: echo 'Project-specific deploy script'
+```
+
+**Project workflow file (If a project uses the single workflow)**
+
+```yaml
+# A shared workflow is direcly imported into the project workflow.
+# In this case, the project specific workflow could be limited/affected by the shared workflow.
+include:
+  - template: <template-path>
+```
+
+</details>
+
+<details>
+<summary>`workflow-extension`</summary>
+
+**Template**
+
+```yaml
+template_metadata:
+  name: Merge Request Pipelines Configuration
+  usage: inclusion
+  inclusion_type: workflow-extension
+
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+**Project workflow file**
+
+```yaml
+include:
+  - template: <template-path>
+
+# Project specific workflow
+build:
+  stage: build
+  script: echo 'Project-specific build script'
+
+test:
+  stage: test
+  script: echo 'Project-specific test script'
+
+deploy:
+  stage: deploy
+  script: echo 'Project-specific deploy script'
+```
+
+</details>
+
+<details>
+<summary>`composable-job`</summary>
+
+**Template**
+
+```yaml
+template_metadata:
+  name: Accessibility Test Job
+  usage: inclusion
+  inclusion_type: composable-job
+
+.accessibility-test: &accessibility-test
+  image: registry.gitlab.com/gitlab-org/ci-cd/accessibility:5.3.0-gitlab.3
+  script: /gitlab-accessibility.sh $a11y_urls
+  artifacts:
+    when: always
+    expose_as: 'Accessibility Reports'
+    paths: ['reports/']
+    reports:
+      accessibility: reports/gl-accessibility.json
+```
+
+**Project workflow file**
+
+```yaml
+include:
+  - template: <template-path>
+
+# Project specific workflow
+build:
+  stage: build
+  script: echo 'Project-specific build script'
+
+test:
+  stage: test
+  script: echo 'Project-specific test script'
+
+a11y:
+  stage: test
+  extends: .accessibility-test
+
+deploy:
+  stage: deploy
+  script: echo 'Project-specific deploy script'
+```
+
+</details>
+
 ### Template types
 
 Templates have two different types that impact the way the template should be written

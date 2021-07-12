@@ -173,4 +173,44 @@ RSpec.describe 'CI YML Templates' do
       end
     end
   end
+
+  describe 'Template metadata is correctly defined' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:template_name) do
+      Gitlab::Template::GitlabCiYmlTemplate.all.map(&:name)
+    end
+
+    with_them do
+      let(:content) do
+        Gitlab::Template::GitlabCiYmlTemplate.find(template_name).content
+      end
+
+      let(:config) do
+        Gitlab::Ci::Config::Yaml.load!(content)
+      end
+
+      it 'has template metadata' do
+        expect(config[:template_metadata]).to be_present,
+          "The CI/CD template metadata must be defined in the template \"#{template_name}\", however, it doesn't exist currently. \n" \
+          "Please add it in the template file. If you're new to this process, \n" \
+          "see https://docs.gitlab.com/ee/development/cicd/templates.html#template-metadata for the instruction."
+      end
+
+      it "has correct GitLab groups in 'maintainers' attribute" do
+        expect(config[:template_metadata][:maintainers]).to be_present
+        expect(config[:template_metadata][:maintainers]).to all(be_start_with('group::'))
+      end
+
+      it "has correct GitLab DevOps stage as 'stages' attribute" do
+        expect(config[:template_metadata][:stages]).to be_present
+        expect(config[:template_metadata][:stages]).to all(be_start_with('devops::'))
+      end
+
+      it "has correct GitLab Feature Category as 'categories' attribute" do
+        expect(config[:template_metadata][:categories]).to be_present
+        expect(config[:template_metadata][:categories]).to all(be_start_with('Category:'))
+      end
+    end
+  end
 end

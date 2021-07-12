@@ -3,6 +3,15 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml
 
+template_metadata:
+  name: CF Provision and Deploy EC2
+  desc: This is a GitLab managed template.
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Continuous Delivery"]
+  usage: inclusion
+  inclusion_type: shared-workflow
+
 stages:
   - provision
   - review

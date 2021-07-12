@@ -3,9 +3,17 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/5-Minute-Production-App.gitlab-ci.yml
 
-# This template is on early stage of development.
-# Use it with caution. For usage instruction please read
-# https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template/-/blob/v2.3.0/README.md
+template_metadata:
+  name: 5 Minute Production App
+  desc: |
+    This template is on early stage of development.
+    Use it with caution. For usage instruction please read
+    https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template/-/blob/v2.3.0/README.md
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 include:
   # workflow rules to prevent duplicate detached pipelines

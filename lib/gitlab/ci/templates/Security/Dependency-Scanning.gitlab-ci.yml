@@ -3,10 +3,18 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Dependency-Scanning.gitlab-ci.yml
 
-# Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
-#
-# Configure dependency scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
-# List of available variables: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/index.html#available-variables
+template_metadata:
+  name: Dependency Scanning
+  desc: |
+    Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
+
+    Configure dependency scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
+    List of available variables: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/index.html#available-variables
+  stages: ["devops::secure"]
+  maintainers: ["group::composition analysis"]
+  categories: ["Category:Dependency Scanning"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 variables:
   # Setting this variable will affect all Security templates

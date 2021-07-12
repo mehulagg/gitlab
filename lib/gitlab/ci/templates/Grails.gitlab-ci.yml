@@ -3,15 +3,22 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Grails.gitlab-ci.yml
 
-# This template uses the java:8 docker image because there isn't any
-# official Grails image at this moment
-#
-# Grails Framework https://grails.org/ is a powerful Groovy-based web application framework for the JVM
-#
-# This yml works with Grails 3.x only
-# Feel free to change GRAILS_VERSION version with your project version (3.0.1, 3.1.1,...)
-# Feel free to change GRADLE_VERSION version with your gradle project version (2.13, 2.14,...)
-# If you use Angular profile, this yml it's prepared to work with it
+template_metadata:
+  name: Grails
+  desc: |
+    This template uses the java:8 docker image because there isn't any
+    official Grails image at this moment
+
+    Grails Framework https://grails.org/ is a powerful Groovy-based web application framework for the JVM
+
+    This yml works with Grails 3.x only
+    Feel free to change GRAILS_VERSION version with your project version (3.0.1, 3.1.1,...)
+    Feel free to change GRADLE_VERSION version with your gradle project version (2.13, 2.14,...)
+    If you use Angular profile, this yml it's prepared to work with it
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Build Artifacts"]
+  usage: copy-paste
 
 image: java:8
 

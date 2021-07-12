@@ -1,26 +1,33 @@
 # This template is provided and maintained by Indeni, an official Technology Partner with GitLab.
 # See https://about.gitlab.com/partners/technology-partners/#security for more information.
 
-# For more information about Indeni Cloudrail: https://indeni.com/cloudrail/
-#
-# This file shows an example of using Indeni Cloudrail with GitLab CI/CD.
-# It is not designed to be included in an existing CI/CD configuration with the "include:" keyword.
-# Documentation about this integration: https://indeni.com/doc-indeni-cloudrail/integrate-with-ci-cd/gitlab-instructions
-#
-# For an example of this used in a GitLab repository, see: https://gitlab.com/indeni/cloudrail-demo/-/blob/master/.gitlab-ci.yml
+template_metadata:
+  name: Indeni.Cloudrail
+  desc: |
+    For more information about Indeni Cloudrail: https://indeni.com/cloudrail/
 
-# The sast-report output complies with GitLab's format. This report displays Cloudrail's
-# results in the Security tab in the pipeline view, if you have that feature enabled
-# (GitLab Ultimate only). Otherwise, Cloudrail generates a JUnit report, which displays
-# in the "Test summary" in merge requests.
+    This file shows an example of using Indeni Cloudrail with GitLab CI/CD.
+    It is not designed to be included in an existing CI/CD configuration with the "include:" keyword.
+    Documentation about this integration: https://indeni.com/doc-indeni-cloudrail/integrate-with-ci-cd/gitlab-instructions
 
-# Note that Cloudrail's input is the Terraform plan. That is why we've included in this
-# template an example of doing that. You are welcome to replace it with your own way
-# of generating a Terraform plan.
+    For an example of this used in a GitLab repository, see: https://gitlab.com/indeni/cloudrail-demo/-/blob/master/.gitlab-ci.yml
 
-# Before you can use this template, get a Cloudrail API key from the Cloudrail web
-# user interface. Save it as a CI/CD variable named CLOUDRAIL_API_KEY in your project
-# settings.
+    The sast-report output complies with GitLab's format. This report displays Cloudrail's
+    results in the Security tab in the pipeline view, if you have that feature enabled
+    (GitLab Ultimate only). Otherwise, Cloudrail generates a JUnit report, which displays
+    in the "Test summary" in merge requests.
+
+    Note that Cloudrail's input is the Terraform plan. That is why we've included in this
+    template an example of doing that. You are welcome to replace it with your own way
+    of generating a Terraform plan.
+
+    Before you can use this template, get a Cloudrail API key from the Cloudrail web
+    user interface. Save it as a CI/CD variable named CLOUDRAIL_API_KEY in your project
+    settings.
+  stages: ["devops::secure"]
+  maintainers: ["group::static analysis"]
+  categories: ["Category:SAST"]
+  usage: copy-paste
 
 variables:
   TEST_ROOT: ${CI_PROJECT_DIR}/my_folder_with_terraform_content

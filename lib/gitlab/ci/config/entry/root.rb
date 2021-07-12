@@ -12,7 +12,8 @@ module Gitlab
           include ::Gitlab::Config::Entry::Configurable
 
           ALLOWED_KEYS = %i[default include before_script image services
-                            after_script variables stages types cache workflow].freeze
+                            after_script variables stages types cache workflow
+                            template_metadata].freeze
 
           validations do
             validates :config, allowed_keys: ALLOWED_KEYS
@@ -68,6 +69,9 @@ module Gitlab
           entry :workflow, Entry::Workflow,
             description: 'List of evaluable rules to determine Pipeline status',
             default: {}
+
+          entry :template_metadata, Entry::TemplateMetadata,
+            description: 'The CI/CD template metadata'
 
           dynamic_helpers :jobs
 

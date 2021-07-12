@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Django.gitlab-ci.yml
 
+template_metadata:
+  name: Django
+  desc: This is a GitLab managed template.
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python
 image: python:latest

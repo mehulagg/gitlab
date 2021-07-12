@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/SwaggerUI.gitlab-ci.yml
 
+template_metadata:
+  name: SwaggerUI
+  desc: This is a GitLab managed template.
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Pages"]
+  usage: copy-paste
+
 image: node:10-alpine
 
 # specify the location of the Open API Specification files within your project

@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Clojure.gitlab-ci.yml
 
+template_metadata:
+  name: Clojure
+  desc: This is a GitLab managed template.
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 # Based on openjdk:8, already includes lein
 image: clojure:lein-2.7.0
 # If you need to configure a database, add a `services` section here

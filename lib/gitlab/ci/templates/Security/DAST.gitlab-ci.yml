@@ -3,23 +3,31 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/DAST.gitlab-ci.yml
 
-# To use this template, add the following to your .gitlab-ci.yml file:
-#
-# include:
-#   template: DAST.gitlab-ci.yml
-#
-# You also need to add a `dast` stage to your `stages:` configuration. A sample configuration for DAST:
-#
-# stages:
-#   - build
-#   - test
-#   - deploy
-#   - dast
-#
-# Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dast/
-#
-# Configure DAST with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
-# List of available variables: https://docs.gitlab.com/ee/user/application_security/dast/#available-variables
+template_metadata:
+  name: DAST
+  desc: |
+    To use this template, add the following to your .gitlab-ci.yml file:
+
+    include:
+      template: DAST.gitlab-ci.yml
+
+    You also need to add a `dast` stage to your `stages:` configuration. A sample configuration for DAST:
+
+    stages:
+      - build
+      - test
+      - deploy
+      - dast
+
+    Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dast/
+
+    Configure DAST with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
+    List of available variables: https://docs.gitlab.com/ee/user/application_security/dast/#available-variables
+  stages: ["devops::secure"]
+  maintainers: ["group::dynamic analysis"]
+  categories: ["Category:DAST"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 variables:
   DAST_VERSION: 2

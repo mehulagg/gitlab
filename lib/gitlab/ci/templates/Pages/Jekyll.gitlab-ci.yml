@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/Jekyll.gitlab-ci.yml
 
+template_metadata:
+  name: Jekyll
+  desc: This is a GitLab managed template.
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Pages"]
+  usage: copy-paste
+
 # Template project: https://gitlab.com/pages/jekyll
 # Docs: https://docs.gitlab.com/ee/pages/
 image: ruby:2.6

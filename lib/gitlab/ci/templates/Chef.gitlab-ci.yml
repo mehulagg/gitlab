@@ -3,12 +3,19 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Chef.gitlab-ci.yml
 
-# This template uses Test Kitchen with the kitchen-dokken driver to
-# perform functional testing. Doing so requires that your runner be a
-# Docker runner configured for privileged mode. Please see
-# https://docs.gitlab.com/runner/executors/docker.html#use-docker-in-docker-with-privileged-mode
-# for help configuring your runner properly, or, if you want to switch
-# to a different driver, see http://kitchen.ci/docs/drivers
+template_metadata:
+  name: Chef
+  desc: |
+    This template uses Test Kitchen with the kitchen-dokken driver to
+    perform functional testing. Doing so requires that your runner be a
+    Docker runner configured for privileged mode. Please see
+    https://docs.gitlab.com/runner/executors/docker.html#use-docker-in-docker-with-privileged-mode
+    for help configuring your runner properly, or, if you want to switch
+    to a different driver, see http://kitchen.ci/docs/drivers
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
 
 image: "chef/chefdk"
 services:

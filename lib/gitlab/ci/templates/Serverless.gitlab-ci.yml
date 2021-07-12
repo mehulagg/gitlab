@@ -3,7 +3,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Serverless.gitlab-ci.yml
 
-# GitLab Serverless template
+template_metadata:
+  name: Serverless
+  desc: GitLab Serverless template
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Serverless"]
+  usage: copy-paste
 
 image: alpine:latest
 

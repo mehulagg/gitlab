@@ -1,17 +1,24 @@
-# This template is deprecated.
-#
-# If you have referenced this template in your CI pipeline, please
-# update your CI configuration by replacing the following occurrence(s):
-#
-# template: Deploy-ECS.gitlab-ci.yml
-#
-# with
-#
-# template: AWS/Deploy-ECS.gitlab-ci.yml
-#
-# --------------------
-#
-# Documentation: https://docs.gitlab.com/ee/ci/cloud_deployment/#deploy-your-application-to-the-aws-elastic-container-service-ecs
+template_metadata:
+  name: Deploy ECS
+  desc: |
+    This template is deprecated.
+
+    If you have referenced this template in your CI pipeline, please
+    update your CI configuration by replacing the following occurrence(s):
+
+    template: Deploy-ECS.gitlab-ci.yml
+
+    with
+
+    template: AWS/Deploy-ECS.gitlab-ci.yml
+
+    --------------------
+
+    Documentation: https://docs.gitlab.com/ee/ci/cloud_deployment/#deploy-your-application-to-the-aws-elastic-container-service-ecs
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
 
 stages:
   - build

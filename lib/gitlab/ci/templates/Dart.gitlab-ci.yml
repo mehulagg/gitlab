@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Dart.gitlab-ci.yml
 
+template_metadata:
+  name: Dart
+  desc: This is a GitLab managed template.
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 # https://hub.docker.com/r/google/dart
 image: google/dart:2.8.4
 

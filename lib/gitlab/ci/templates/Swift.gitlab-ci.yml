@@ -3,8 +3,16 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Swift.gitlab-ci.yml
 
-# Lifted from: https://about.gitlab.com/2016/03/10/setting-up-gitlab-ci-for-ios-projects/
-# This file assumes an own GitLab CI runner, setup on a macOS system.
+template_metadata:
+  name: Swift
+  desc: |
+    Lifted from: https://about.gitlab.com/2016/03/10/setting-up-gitlab-ci-for-ios-projects/
+    This file assumes an own GitLab CI runner, setup on a macOS system.
+  stages: ["devops::create"]
+  maintainers: ["group::source code"]
+  categories: ["Category:Source Code Management"]
+  usage: copy-paste
+
 stages:
   - build
   - test

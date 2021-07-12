@@ -3,18 +3,25 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Mono.gitlab-ci.yml
 
-# This is a simple gitlab continuous integration template (compatible with the shared runner provided on gitlab.com)
-# using the official mono docker image to build a visual studio project.
-#
-# MyProject.sln
-#   MyProject\
-#     MyProject\
-#        MyProject.csproj (console application)
-#     MyProject.Test\
-#        MyProject.Test.csproj (test library using nuget packages "NUnit" and "NUnit.ConsoleRunner")
-#
-# Please find the full example project here:
-# https://gitlab.com/tobiaskoch/gitlab-ci-example-mono
+template_metadata:
+  name: Mono
+  desc: |
+    This is a simple gitlab continuous integration template (compatible with the shared runner provided on gitlab.com)
+    using the official mono docker image to build a visual studio project.
+
+    MyProject.sln
+      MyProject\
+        MyProject\
+          MyProject.csproj (console application)
+        MyProject.Test\
+          MyProject.Test.csproj (test library using nuget packages "NUnit" and "NUnit.ConsoleRunner")
+
+    Please find the full example project here:
+    https://gitlab.com/tobiaskoch/gitlab-ci-example-mono
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Build Artifacts"]
+  usage: copy-paste
 
 # see https://hub.docker.com/_/mono/
 image: mono:latest
