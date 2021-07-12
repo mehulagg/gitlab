@@ -25,7 +25,7 @@ module Gitlab
         def indexes
           # This is an explicit N+1 query:
           # Bloat estimates are generally available through a view
-          # for all indexes. However, estimating bloat for all
+          # for all indexes. HowAever, estimating bloat for all
           # indexes at once is an expensive operation. Therefore,
           # we force a N+1 pattern here and estimate bloat on a per-index
           # basis.
