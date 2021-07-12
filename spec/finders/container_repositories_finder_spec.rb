@@ -7,12 +7,14 @@ RSpec.describe ContainerRepositoriesFinder do
   let_it_be(:guest) { create(:user) }
 
   let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:project_repository) { create(:container_repository, name: 'my_image', project: project) }
 
   let(:params) { {} }
 
   before do
+    project.project_feature.update!(container_registry_access_level: ProjectFeature::PRIVATE)
+
     group.add_reporter(reporter)
     project.add_reporter(reporter)
   end
@@ -96,9 +98,19 @@ RSpec.describe ContainerRepositoriesFinder do
     end
 
     context 'with unauthorized user' do
-      subject { described_class.new(user: guest, subject: group).execute }
+      subject { described_class.new(user: guest, subject: subject_type).execute }
 
-      it { is_expected.to be nil }
+      context 'when subject_type is group' do
+        let(:subject_type) { group }
+
+        it { is_expected.to be nil }
+      end
+
+      context 'when subject_type is project' do
+        let(:subject_type) { project }
+
+        it { is_expected.to be nil }
+      end
     end
   end
 end

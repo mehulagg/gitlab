@@ -519,6 +519,7 @@ class ProjectPolicy < BasePolicy
 
   rule { container_registry_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:container_image))
+    prevent(:build_read_container_image)
   end
 
   rule { anonymous & ~public_project }.prevent_all

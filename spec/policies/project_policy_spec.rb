@@ -1469,7 +1469,8 @@ RSpec.describe ProjectPolicy do
   describe 'container_image policies' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:guest_operations_permissions) { [:read_container_image] }
+    let(:anonymous_operations_permissions) { [:read_container_image] }
+    let(:guest_operations_permissions) { anonymous_operations_permissions + [:build_read_container_image] }
 
     let(:developer_operations_permissions) do
       guest_operations_permissions + [
@@ -1551,8 +1552,10 @@ RSpec.describe ProjectPolicy do
           maintainer_operations_permissions
         when :developer
           developer_operations_permissions
-        when :reporter, :guest, :anonymous
+        when :reporter, :guest
           guest_operations_permissions
+        when :anonymous
+          anonymous_operations_permissions
         else
           raise "Unknown role #{role}"
         end
