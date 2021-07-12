@@ -9,6 +9,7 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { flatten } from 'lodash';
 import { mapState, mapGetters } from 'vuex';
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 import createFlash from '~/flash';
@@ -17,8 +18,10 @@ import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import networkPoliciesQuery from '../graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from '../graphql/queries/scan_execution_policies.query.graphql';
+import { POLICY_TYPE_OPTIONS } from './constants';
 import EnvironmentPicker from './environment_picker.vue';
 import PolicyDrawer from './policy_drawer/policy_drawer.vue';
+import PolicyTypeFilter from './policy_type_filter.vue';
 
 const createPolicyFetchError = ({ gqlError, networkError }) => {
   const error =
@@ -46,6 +49,7 @@ export default {
     GlLink,
     GlIcon,
     EnvironmentPicker,
+    PolicyTypeFilter,
     PolicyDrawer,
   },
   directives: {
@@ -80,7 +84,7 @@ export default {
       },
       error: createPolicyFetchError,
       skip() {
-        return this.isLoadingEnvironments;
+        return this.isLoadingEnvironments || !this.shouldShowNetworkPolicies;
       },
     },
     scanExecutionPolicies: {
@@ -98,11 +102,10 @@ export default {
   },
   data() {
     return {
-      selectedPolicyName: null,
-      initialManifest: null,
-      initialEnforcementStatus: null,
+      selectedPolicy: null,
       networkPolicies: [],
       scanExecutionPolicies: [],
+      selectedPolicyType: POLICY_TYPE_OPTIONS.ALL.value,
     };
   },
   computed: {
@@ -112,14 +115,31 @@ export default {
       'isLoadingEnvironments',
     ]),
     ...mapGetters('threatMonitoring', ['currentEnvironmentGid']),
+    allPolicyTypes() {
+      return {
+        [POLICY_TYPE_OPTIONS.POLICY_TYPE_NETWORK.value]: this.networkPolicies,
+        [POLICY_TYPE_OPTIONS.POLICY_TYPE_SCAN_EXECUTION.value]: this.scanExecutionPolicies,
+      };
+    },
     documentationFullPath() {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
     },
-    policies() {
+    shouldShowNetworkPolicies() {
       return [
-        ...getPoliciesWithType(this.networkPolicies, s__('SecurityPolicies|Network')),
-        ...getPoliciesWithType(this.scanExecutionPolicies, s__('SecurityPolicies|Scan execution')),
-      ];
+        POLICY_TYPE_OPTIONS.ALL.value,
+        POLICY_TYPE_OPTIONS.POLICY_TYPE_NETWORK.value,
+      ].includes(this.selectedPolicyType);
+    },
+    policies() {
+      const policyTypes =
+        this.selectedPolicyType === POLICY_TYPE_OPTIONS.ALL.value
+          ? Object.keys(this.allPolicyTypes)
+          : [this.selectedPolicyType];
+      const policies = policyTypes.map((type) =>
+        getPoliciesWithType(this.allPolicyTypes[type], POLICY_TYPE_OPTIONS[type].text),
+      );
+
+      return flatten(policies);
     },
     isLoadingPolicies() {
       return (
@@ -129,11 +149,7 @@ export default {
       );
     },
     hasSelectedPolicy() {
-      return Boolean(this.selectedPolicyName);
-    },
-    selectedPolicy() {
-      if (!this.hasSelectedPolicy) return null;
-      return this.networkPolicies.find((policy) => policy.name === this.selectedPolicyName);
+      return Boolean(this.selectedPolicy);
     },
     hasAutoDevopsPolicy() {
       return Boolean(this.networkPolicies?.some((policy) => policy.fromAutoDevops));
@@ -141,8 +157,10 @@ export default {
     editPolicyPath() {
       return this.hasSelectedPolicy
         ? mergeUrlParams(
-            { environment_id: this.currentEnvironmentId },
-            this.newPolicyPath.replace('new', `${this.selectedPolicyName}/edit`),
+            !this.selectedPolicy.kind
+              ? { environment_id: this.currentEnvironmentId }
+              : { environment_id: this.currentEnvironmentId, kind: this.selectedPolicy.kind },
+            this.newPolicyPath.replace('new', `${this.selectedPolicy.name}/edit`),
           )
         : '';
     },
@@ -191,12 +209,10 @@ export default {
       if (rows.length === 0) return;
 
       const [selectedPolicy] = rows;
-      this.selectedPolicyName = selectedPolicy?.name;
-      this.initialManifest = selectedPolicy?.yaml;
-      this.initialEnforcementStatus = selectedPolicy?.enabled;
+      this.selectedPolicy = selectedPolicy;
     },
     deselectPolicy() {
-      this.selectedPolicyName = null;
+      this.selectedPolicy = null;
 
       const bTable = this.$refs.policiesTable.$children[0];
       bTable.clearSelected();
@@ -235,8 +251,15 @@ export default {
     </gl-alert>
 
     <div class="pt-3 px-3 bg-gray-light">
-      <div class="row justify-content-between align-items-center">
-        <environment-picker ref="environmentsPicker" :include-all="true" />
+      <div class="row gl-justify-content-space-between gl-align-items-center">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-5 row">
+          <policy-type-filter
+            v-model="selectedPolicyType"
+            class="col-6"
+            data-testid="policy-type-filter"
+          />
+          <environment-picker ref="environmentsPicker" class="col-6" :include-all="true" />
+        </div>
         <div class="col-sm-auto">
           <gl-button
             category="secondary"

@@ -7,15 +7,16 @@ module Gitlab
     include Gitlab::Utils::StrongMemoize
     include ActionView::Helpers::TextHelper
 
-    attr_reader :subscribable, :signed_in, :is_admin, :namespace
+    attr_reader :subscribable, :signed_in, :is_admin, :namespace, :force_notification
 
     delegate :auto_renew, to: :subscribable
 
-    def initialize(subscribable:, signed_in:, is_admin:, namespace: nil)
+    def initialize(subscribable:, signed_in:, is_admin:, namespace: nil, force_notification: false)
       @subscribable = subscribable
       @signed_in = signed_in
       @is_admin = is_admin
       @namespace = namespace
+      @force_notification = force_notification
     end
 
     def message
@@ -39,7 +40,7 @@ module Gitlab
     end
 
     def expired_subject
-      if show_downgrade_messaging?
+      if show_downgrade_messaging? && namespace
         if auto_renew
           _('Something went wrong with your automatic subscription renewal.')
         else
@@ -71,7 +72,7 @@ module Gitlab
     def block_changes_message
       return namespace_block_changes_message if namespace
 
-      _('You didn\'t renew your subscription so it was downgraded to the GitLab Core Plan.')
+      _('Please delete your current license if you want to downgrade to the free plan.')
     end
 
     def namespace_block_changes_message
@@ -127,6 +128,7 @@ module Gitlab
 
     def require_notification?
       return false if expiring_auto_renew? || ::License.future_dated.present?
+      return true if force_notification && subscribable.block_changes?
 
       auto_renew_choice_exists? && expired_subscribable_within_notification_window? && !subscription_future_renewal?
     end
@@ -154,7 +156,11 @@ module Gitlab
     end
 
     def show_downgrade_messaging?
-      subscribable.block_changes? && (self_managed? || plan_downgraded?)
+      if self_managed?
+        subscribable.block_changes?
+      else
+        subscribable.block_changes? && plan_downgraded?
+      end
     end
 
     def strong

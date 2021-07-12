@@ -213,9 +213,9 @@ export default {
         const el = this.$el.closest('.vue-recycle-scroller__item-view');
 
         if (this.glFeatures.diffsVirtualScrolling && el) {
-          // We can't add a class with Vue because of the way the virtual
+          // We can't add a style with Vue because of the way the virtual
           // scroller library renders the diff files
-          el.classList.toggle('gl-z-index-1', val);
+          el.style.zIndex = val ? '1' : null;
         }
       },
     },
@@ -306,7 +306,7 @@ export default {
       >
         <file-icon
           :file-name="filePath"
-          :size="18"
+          :size="16"
           aria-hidden="true"
           css-classes="gl-mr-2"
           :submodule="diffFile.submodule"
@@ -467,7 +467,7 @@ export default {
               :disabled="diffFile.isLoadingFullFile"
               @click="toggleFullDiff(diffFile.file_path)"
             >
-              <gl-loading-icon v-if="diffFile.isLoadingFullFile" inline />
+              <gl-loading-icon v-if="diffFile.isLoadingFullFile" size="sm" inline />
               {{ expandDiffToFullFileTitle }}
             </gl-dropdown-item>
           </template>

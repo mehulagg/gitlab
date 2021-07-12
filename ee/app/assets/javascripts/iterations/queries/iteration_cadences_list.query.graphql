@@ -19,6 +19,7 @@ query IterationCadences(
         id
         title
         durationInWeeks
+        automatic
       }
       pageInfo {
         ...PageInfo

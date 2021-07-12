@@ -222,7 +222,7 @@ RSpec.describe 'Issue Boards', :js do
 
   context 'weight' do
     let(:weight_widget) { find('[data-testid="sidebar-weight"]') }
-    let(:weight_value) { find('[data-testid="sidebar-weight"] .value') }
+    let(:weight_value) { find('[data-testid="sidebar-weight-value"]') }
 
     it 'displays weight async' do
       click_card(card1)

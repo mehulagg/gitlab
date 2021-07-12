@@ -91,7 +91,7 @@ export default {
       }
     },
     toggleSidebar() {
-      document.querySelector('.js-toggle-right-sidebar-button').dispatchEvent(new Event('click'));
+      this.$emit('sidebar-toggle');
     },
     expandSidebarAndOpenDropdown(dropdownButtonSelector) {
       // Expand the sidebar if not already expanded.
@@ -181,7 +181,7 @@ export default {
           class="btn-blank sidebar-collapsed-icon"
           @click="handleTodoButtonClick"
         >
-          <gl-loading-icon v-if="todoUpdateInProgress" />
+          <gl-loading-icon v-if="todoUpdateInProgress" size="sm" />
           <gl-icon v-else :name="todoIcon" :class="{ 'todo-undone': isTodoPending }" />
         </button>
       </div>

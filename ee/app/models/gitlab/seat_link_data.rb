@@ -40,7 +40,6 @@ module Gitlab
       {
         gitlab_version: Gitlab::VERSION,
         timestamp: timestamp.iso8601,
-        date: timestamp.to_date.to_s,
         license_key: key,
         max_historical_user_count: max_users,
         billable_users_count: billable_users_count,

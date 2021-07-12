@@ -41,7 +41,6 @@ export default {
   },
   computed: {
     ...mapState([
-      'featureFlags',
       'isLoading',
       'isLoadingStage',
       'currentGroup',
@@ -73,9 +72,6 @@ export default {
     },
     shouldDisplayFilters() {
       return !this.errorCode && !this.hasNoAccessError;
-    },
-    shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart;
     },
     selectedStageReady() {
       return !this.hasNoAccessError && this.selectedStage;
@@ -200,11 +196,7 @@ export default {
       <template v-else>
         <template v-if="isOverviewStageSelected">
           <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
-          <duration-chart
-            v-if="shouldDisplayDurationChart"
-            class="gl-mt-3"
-            :stages="activeStages"
-          />
+          <duration-chart class="gl-mt-3" :stages="activeStages" />
           <type-of-work-charts />
         </template>
         <stage-table

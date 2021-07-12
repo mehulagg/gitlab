@@ -155,7 +155,7 @@ module Integrations
     end
 
     def web_url(path = nil, **params)
-      return unless url.present?
+      return '' unless url.present?
 
       if Gitlab.com?
         params.merge!(ATLASSIAN_REFERRER_GITLAB_COM) unless Gitlab.staging?
@@ -537,7 +537,7 @@ module Integrations
 
     def update_deployment_type?
       (api_url_changed? || url_changed? || username_changed? || password_changed?) &&
-        can_test?
+        testable?
     end
 
     def update_deployment_type

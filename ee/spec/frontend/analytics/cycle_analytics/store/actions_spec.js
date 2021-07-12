@@ -54,9 +54,7 @@ describe('Value Stream Analytics actions', () => {
       createdAfter,
       createdBefore,
       stages: [],
-      featureFlags: {
-        hasDurationChart: true,
-      },
+      featureFlags: {},
       activeStages,
       selectedValueStream,
       ...mockGetters,
@@ -71,7 +69,7 @@ describe('Value Stream Analytics actions', () => {
 
   it.each`
     action                   | type                       | stateKey                | payload
-    ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ hasDurationChart: true }}
+    ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ someFeatureFlag: true }}
     ${'setSelectedProjects'} | ${'SET_SELECTED_PROJECTS'} | ${'selectedProjectIds'} | ${[10, 20, 30, 40]}
   `('$action should set $stateKey with $payload and type $type', ({ action, type, payload }) => {
     return testAction(

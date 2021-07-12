@@ -13,7 +13,7 @@ import Vuex from 'vuex';
 
 import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
 
 import {
   mockInitialConfig,

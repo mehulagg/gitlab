@@ -1,6 +1,6 @@
 /* global DocumentTouch */
 
-import sortableConfig from 'ee_else_ce/sortable/sortable_config';
+import sortableConfig from '~/sortable/sortable_config';
 import { NO_DRAG_CLASS } from '../constants';
 
 export default () => {

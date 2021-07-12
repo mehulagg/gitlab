@@ -1,6 +1,6 @@
 <script>
 import { cloneDeep } from 'lodash';
-import { __, s__ } from '~/locale';
+import { formatNumber, sprintf, __, s__ } from '~/locale';
 import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import BaseToken from '~/vue_shared/components/filtered_search_bar/tokens/base_token.vue';
@@ -58,6 +58,10 @@ export default {
       type: String,
       required: true,
     },
+    activeRunnersCount: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     // filtered_search_bar_root.vue may mutate the inital
@@ -100,9 +104,9 @@ export default {
           token: BaseToken,
           unique: true,
           options: [
-            { value: INSTANCE_TYPE, title: s__('Runners|shared') },
+            { value: INSTANCE_TYPE, title: s__('Runners|instance') },
             { value: GROUP_TYPE, title: s__('Runners|group') },
-            { value: PROJECT_TYPE, title: s__('Runners|specific') },
+            { value: PROJECT_TYPE, title: s__('Runners|project') },
           ],
           // TODO We should support more complex search rules,
           // search for multiple states (OR) or have NOT operators
@@ -118,6 +122,11 @@ export default {
           operators: OPERATOR_IS_ONLY,
         },
       ];
+    },
+    activeRunnersMessage() {
+      return sprintf(__('Runners currently online: %{active_runners_count}'), {
+        active_runners_count: formatNumber(this.activeRunnersCount),
+      });
     },
   },
   methods: {
@@ -144,16 +153,20 @@ export default {
 };
 </script>
 <template>
-  <filtered-search
-    v-bind="$attrs"
-    :namespace="namespace"
-    recent-searches-storage-key="runners-search"
-    :sort-options="$options.sortOptions"
-    :initial-filter-value="initialFilterValue"
-    :initial-sort-by="initialSortBy"
-    :tokens="searchTokens"
-    :search-input-placeholder="__('Search or filter results...')"
-    @onFilter="onFilter"
-    @onSort="onSort"
-  />
+  <div>
+    <filtered-search
+      v-bind="$attrs"
+      :namespace="namespace"
+      recent-searches-storage-key="runners-search"
+      :sort-options="$options.sortOptions"
+      :initial-filter-value="initialFilterValue"
+      :initial-sort-by="initialSortBy"
+      :tokens="searchTokens"
+      :search-input-placeholder="__('Search or filter results...')"
+      data-testid="runners-filtered-search"
+      @onFilter="onFilter"
+      @onSort="onSort"
+    />
+    <div class="gl-text-right" data-testid="active-runners-message">{{ activeRunnersMessage }}</div>
+  </div>
 </template>

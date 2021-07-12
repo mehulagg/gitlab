@@ -47,7 +47,7 @@ module EE
               .joins('INNER JOIN namespaces as project_namespaces ON project_namespaces.id = projects.namespace_id')
           else
             namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
-            ::Gitlab::ObjectHierarchy.new(namespaces, options: { skip_ordering: true }).roots
+            ::Gitlab::ObjectHierarchy.new(namespaces).roots
           end
         end
         # rubocop: enable CodeReuse/ActiveRecord

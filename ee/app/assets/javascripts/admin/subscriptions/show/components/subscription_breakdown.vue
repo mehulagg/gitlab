@@ -124,7 +124,7 @@ export default {
     },
   },
   methods: {
-    didDismissSuccessAlert() {
+    didDismissAlert() {
       this.shouldShowNotifications = false;
     },
     showActivationModal() {
@@ -136,7 +136,7 @@ export default {
       axios
         .post(this.subscriptionSyncPath)
         .then(() => {
-          this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_SUCCESS;
+          this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_PENDING;
         })
         .catch(() => {
           this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_FAILURE;
@@ -174,7 +174,7 @@ export default {
       v-if="shouldShowNotifications"
       class="mb-4"
       :sync-status="subscriptionSyncStatus"
-      @success-alert-dismissed="didDismissSuccessAlert"
+      @info-alert-dismissed="didDismissAlert"
     />
     <section class="row gl-mb-5">
       <div class="col-md-6 gl-mb-5">

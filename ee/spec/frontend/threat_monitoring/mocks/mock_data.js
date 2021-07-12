@@ -18,6 +18,7 @@ export const mockEnvironmentsResponse = {
 export const mockNetworkPoliciesResponse = [
   {
     name: 'policy',
+    kind: 'NetworkPolicy',
     yaml: `---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

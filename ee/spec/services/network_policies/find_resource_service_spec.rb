@@ -51,6 +51,16 @@ RSpec.describe NetworkPolicies::FindResourceService do
       end
     end
 
+    context 'with invalid policy kind' do
+      let(:kind) { 'InvalidKind' }
+
+      it 'returns error response' do
+        expect(subject).to be_error
+        expect(subject.http_status).to eq(:bad_request)
+        expect(subject.message).not_to be_nil
+      end
+    end
+
     context 'without deployment_platform' do
       let(:platform) { nil }
 

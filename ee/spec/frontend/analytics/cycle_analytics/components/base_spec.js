@@ -58,10 +58,6 @@ const defaultStubs = {
   UrlSync,
 };
 
-const defaultFeatureFlags = {
-  hasDurationChart: true,
-};
-
 const [selectedValueStream] = valueStreams;
 
 const initialCycleAnalyticsState = {
@@ -127,7 +123,6 @@ describe('EE Value Stream Analytics component', () => {
     await store.dispatch('initializeCycleAnalytics', {
       ...initialState,
       featureFlags: {
-        ...defaultFeatureFlags,
         ...featureFlags,
       },
     });

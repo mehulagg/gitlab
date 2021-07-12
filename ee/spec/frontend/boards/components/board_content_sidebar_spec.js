@@ -59,7 +59,12 @@ describe('ee/BoardContentSidebar', () => {
       store,
       stubs: {
         GlDrawer: stubComponent(GlDrawer, {
-          template: '<div><slot name="header"></slot><slot></slot></div>',
+          template: `
+            <div>
+              <slot name="title"></slot>
+              <slot name="header"></slot>
+              <slot></slot>
+            </div>`,
         }),
         BoardEditableItem: true,
         BoardSidebarTitle: true,
@@ -69,7 +74,7 @@ describe('ee/BoardContentSidebar', () => {
         SidebarConfidentialityWidget: true,
         SidebarDateWidget: true,
         SidebarSubscriptionsWidget: true,
-        BoardSidebarWeightInput: true,
+        SidebarWeightWidget: true,
         SidebarDropdownWidget: true,
         MountingPortal: true,
       },

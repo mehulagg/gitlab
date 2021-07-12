@@ -4,16 +4,28 @@
   = render "layouts/google_tag_manager_head"
 = render "layouts/google_tag_manager_body"
 
+- registration_form_content = capture do
+  %h2.gl-text-center.gl-pb-5.gl-my-0
+    = _('Start a Free Ultimate Trial')
+
+  .signup-page
+    = render 'devise/shared/signup_box',
+      url: trial_registrations_path,
+      button_text: _('Continue'),
+      show_omniauth_providers: social_signin_enabled?,
+      omniauth_providers_placement: :top
+
+    = render 'devise/shared/sign_in_link'
+
 .row
-  .col-md-6.offset-md-3
-    %h2.gl-text-center.gl-pb-5.gl-my-0
-      = _('Start a Free Ultimate Trial')
+  - experiment(:trial_registration_with_reassurance) do |e|
+    - e.use do
+      .col-md-6.offset-md-3
+        = registration_form_content
 
-    .signup-page
-      = render 'devise/shared/signup_box',
-        url: trial_registrations_path,
-        button_text: _('Continue'),
-        show_omniauth_providers: social_signin_enabled?,
-        omniauth_providers_placement: :top
-
-      = render 'devise/shared/sign_in_link'
+    - e.try do
+      .col-lg-6.gl-display-none.gl-lg-display-flex.gl-flex-direction-column.gl-justify-content-center.gl-align-items-center
+        .gl-w-grid-size-28
+          = render 'reassurances'
+      .col-md-6.offset-md-3.offset-lg-0
+        = registration_form_content

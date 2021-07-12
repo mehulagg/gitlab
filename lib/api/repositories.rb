@@ -122,7 +122,7 @@ module API
       get ':id/repository/compare' do
         ff_enabled = Feature.enabled?(:api_caching_rate_limit_repository_compare, user_project, default_enabled: :yaml)
 
-        cache_action_if(ff_enabled, [user_project, :repository_compare, current_user, declared_params], expires_in: 30.seconds) do
+        cache_action_if(ff_enabled, [user_project, :repository_compare, current_user, declared_params], expires_in: 1.minute) do
           if params[:from_project_id].present?
             target_project = MergeRequestTargetProjectFinder
               .new(current_user: current_user, source_project: user_project, project_feature: :repository)

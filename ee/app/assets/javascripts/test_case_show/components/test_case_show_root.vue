@@ -229,13 +229,14 @@ export default {
           {{ __('Cancel') }}
         </gl-button>
       </template>
-      <template #right-sidebar-items="{ sidebarExpanded }">
+      <template #right-sidebar-items="{ sidebarExpanded, toggleSidebar }">
         <test-case-sidebar
           :sidebar-expanded="sidebarExpanded"
           :selected-labels="selectedLabels"
           :todo="todo"
           :moved="testCase.moved"
           @test-case-updated="handleTestCaseUpdated"
+          @sidebar-toggle="toggleSidebar"
         />
       </template>
     </issuable-show>

@@ -12,10 +12,10 @@ import {
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import { mapState, mapActions, mapGetters } from 'vuex';
+import { dateFormats } from '~/analytics/shared/constants';
 import { beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Scatterplot from '../../shared/components/scatterplot.vue';
-import { dateFormats } from '../../shared/constants';
 import urlSyncMixin from '../../shared/mixins/url_sync_mixin';
 import { chartKeys } from '../constants';
 import MetricChart from './metric_chart.vue';

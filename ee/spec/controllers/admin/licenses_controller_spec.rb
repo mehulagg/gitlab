@@ -89,17 +89,8 @@ RSpec.describe Admin::LicensesController do
 
   describe 'GET show' do
     context 'with an existent license' do
-      it 'renders the license details' do
-        allow(License).to receive(:current).and_return(create(:license))
-
-        get :show
-
-        expect(response).to render_template(:show)
-      end
-
       it 'redirects to new path when a valid license is entered/uploaded' do
         allow(License).to receive(:current).and_return(create(:license))
-        stub_application_setting(cloud_license_enabled: true)
 
         get :show
 
@@ -113,7 +104,7 @@ RSpec.describe Admin::LicensesController do
 
         get :show
 
-        expect(response).to render_template(:missing)
+        expect(response).to redirect_to(admin_subscription_path)
       end
     end
   end

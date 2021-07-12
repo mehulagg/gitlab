@@ -292,8 +292,12 @@ module EE
       end
 
       def with_slack_application_disabled
-        joins('LEFT JOIN services ON services.project_id = projects.id AND services.type = \'GitlabSlackApplicationService\' AND services.active IS true')
-          .where(services: { id: nil })
+        joins(<<~SQL)
+          LEFT JOIN #{::Integration.table_name} ON #{::Integration.table_name}.project_id = projects.id
+            AND #{::Integration.table_name}.type = 'GitlabSlackApplicationService'
+            AND #{::Integration.table_name}.active IS true
+        SQL
+          .where(integrations: { id: nil })
       end
 
       override :with_web_entity_associations
@@ -319,7 +323,7 @@ module EE
     end
 
     def latest_pipeline_with_reports(reports)
-      all_pipelines.newest_first(ref: default_branch).with_reports(reports).take
+      all_pipelines.success.newest_first(ref: default_branch).with_reports(reports).take
     end
 
     def security_reports_up_to_date_for_ref?(ref)

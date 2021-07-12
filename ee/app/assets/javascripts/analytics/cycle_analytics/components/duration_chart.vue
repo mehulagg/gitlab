@@ -1,10 +1,10 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import { dateFormats } from '~/analytics/shared/constants';
 import { __ } from '~/locale';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import Scatterplot from '../../shared/components/scatterplot.vue';
-import { dateFormats } from '../../shared/constants';
 import StageDropdownFilter from './stage_dropdown_filter.vue';
 
 export default {

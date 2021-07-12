@@ -3,7 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import ProjectWithExcessStorage from 'ee/other_storage_counter/components/project_with_excess_storage.vue';
 import { formatUsageSize } from 'ee/other_storage_counter/utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
 import { projects } from '../mock_data';
 
 let wrapper;

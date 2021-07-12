@@ -41,6 +41,20 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
   end
 
+  describe '#load_from_index' do
+    it 'does not raise an exeption when connection refused' do
+      allow(Gitlab::Elastic::Helper.default).to receive(:get).and_raise(Faraday::ConnectionFailed)
+
+      expect(record.load_from_index).to be_nil
+    end
+
+    it 'does not raise an exeption when record does not exist' do
+      allow(Gitlab::Elastic::Helper.default).to receive(:get).and_raise(Elasticsearch::Transport::Transport::Errors::NotFound)
+
+      expect(record.load_from_index).to be_nil
+    end
+  end
+
   describe '#halt!' do
     it 'sets state for halted and halted_indexing_unpaused' do
       record.halt!
@@ -83,6 +97,13 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
 
     it 'returns empty array if no index present' do
       es_helper.delete_migrations_index
+
+      expect(described_class.load_versions(completed: true)).to eq([])
+      expect(described_class.load_versions(completed: false)).to eq([])
+    end
+
+    it 'returns empty array when exception is raised' do
+      allow(Gitlab::Elastic::Helper.default.client).to receive(:search).and_raise(Faraday::ConnectionFailed)
 
       expect(described_class.load_versions(completed: true)).to eq([])
       expect(described_class.load_versions(completed: false)).to eq([])

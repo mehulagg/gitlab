@@ -20,7 +20,7 @@ In a comment, you can enter [Markdown](../markdown.md) and use [quick actions](.
 You can [suggest code changes](../project/merge_requests/reviews/suggestions.md) in your commit diff comment,
 which the user can accept through the user interface.
 
-## Where you can create comments
+## Places you can add comments
 
 You can create comments in places like:
 
@@ -33,6 +33,141 @@ You can create comments in places like:
 - Snippets
 
 Each object can have as many as 5,000 comments.
+
+## Add a comment to a merge request diff
+
+You can add comments to a merge request diff. These comments
+persist, even when you:
+
+- Force-push after a rebase.
+- Amend a commit.
+
+To add a commit diff comment:
+
+1. To select a specific commit, on the merge request, select the **Commits** tab, select the commit
+   message. To view the latest commit, select the **Changes** tab.
+1. By the line you want to comment on, hover over the line number and select **{comment}**.
+   You can select multiple lines by dragging the **{comment}** icon.
+1. Type your comment and select **Start a review** or **Add comment now**.
+
+The comment is displayed on the merge request's **Discussions** tab.
+
+The comment is not displayed on your project's **Repository > Commits** page.
+
+NOTE:
+When your comment contains a reference to a commit included in the merge request,
+it's automatically converted to a link in the context of the current merge request.
+For example, `28719b171a056960dfdc0012b625d0b47b123196` becomes
+`https://gitlab.example.com/example-group/example-project/-/merge_requests/12345/diffs?commit_id=28719b171a056960dfdc0012b625d0b47b123196`.
+
+## Add a comment to a commit
+
+You can add comments and threads to a particular commit.
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Repository > Commits**.
+1. Below the commits, in the **Comment** field, enter a comment.
+1. Select **Comment** or select the down arrow (**{chevron-down}**) to select **Start thread**.
+
+WARNING:
+Threads created this way are lost if the commit ID changes after a
+force push.
+
+## Add a comment to an image
+
+In merge requests and commit detail views, you can add a comment to an image.
+This comment can also be a thread.
+
+1. Hover your mouse over the image.
+1. Select the location where you want to comment.
+
+An icon is displayed on the image and a comment field is displayed.
+
+![Start image thread](img/start_image_discussion.gif)
+
+## Reply to a comment by sending email
+
+If you have ["reply by email"](../../administration/reply_by_email.md) configured,
+you can reply to comments by sending an email.
+
+- When you reply to a standard comment, another standard comment is created.
+- When you reply to a threaded comment, it creates a reply in the thread.
+
+You can use [Markdown](../markdown.md) and [quick actions](../project/quick_actions.md) in your email replies.
+
+## Who can edit comments
+
+You can edit your own comment at any time.
+
+Anyone with the [Maintainer role](../permissions.md) or
+higher can also edit a comment made by someone else.
+
+## Prevent comments by locking an issue
+
+You can prevent public comments in an issue or merge request.
+When you do, only project members can add and edit comments.
+
+Prerequisite:
+
+- In merge requests, you must have at least the Developer role.
+- In issues, you must have at least the Reporter role.
+
+1. On the right sidebar, next to **Lock issue** or **Lock merge request**, select **Edit**.
+1. On the confirmation dialog, select **Lock**.
+
+Notes are added to the page details.
+
+If an issue or merge request is locked and closed, you cannot reopen it.
+
+## Mark a comment as confidential
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207473) in GitLab 13.9.
+> - [Deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to enable it. **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can make a comment confidential, so that it is visible only to project members
+who have at least the Reporter role.
+
+1. Below the comment, select the **Make this comment confidential** checkbox.
+1. Select **Comment**.
+
+![Confidential comments](img/confidential_comments_v13_9.png)
+
+## Show only comments
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26723) in GitLab 11.5.
+
+For issues and merge requests with many comments, you can filter the page to show comments only.
+
+1. Open a merge request's **Discussion** tab, or epic or issue's **Overview** tab.
+1. On the right side of the page, select from the filter:
+   - **Show all activity**: Display all user comments and system notes
+     (issue updates, mentions from other issues, changes to the description, and so on).
+   - **Show comments only**: Display only user comments.
+   - **Show history only**: Display only activity notes.
+
+![Notes filters dropdown options](img/index_notes_filters.png)
+
+GitLab saves your preference, so it persists when you visit the same page again
+from any device you're logged into.
+
+## Assign an issue to the commenting user
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/191455) in GitLab 13.1.
+
+You can assign an issue to a user who made a comment.
+
+1. In the comment, select the **More Actions** menu.
+1. Select **Assign to commenting user**.
+
+![Assign to commenting user](img/quickly_assign_commenter_v13_1.png)
+
+Select the button again to unassign the commenter.
 
 ## Create a thread by replying to a standard comment
 
@@ -77,23 +212,6 @@ To create a thread:
 A threaded comment is created.
 
 ![Thread comment](img/discussion_comment.png)
-
-## Reply to a comment by sending email
-
-If you have ["reply by email"](../../administration/reply_by_email.md) configured,
-you can reply to comments by sending an email.
-
-- When you reply to a standard comment, another standard comment is created.
-- When you reply to a threaded comment, it creates a reply in the thread.
-
-You can use [Markdown](../markdown.md) and [quick actions](../project/quick_actions.md) in your email replies.
-
-## Who can edit comments
-
-You can edit your own comment at any time.
-
-Anyone with the [Maintainer role](../permissions.md) or
-higher can also edit a comment made by someone else.
 
 ## Resolve a thread
 
@@ -172,174 +290,9 @@ with a new push.
 Threads are now resolved if a push makes a diff section outdated.
 Threads on lines that don't change and top-level resolvable threads are not resolved.
 
-## Commit threads in the context of a merge request
+## Enable or disable confidential comments **(FREE SELF)**
 
-For reviewers with commit-based workflow, it may be useful to add threads to
-specific commit diffs in the context of a merge request. These threads
-persist through a commit ID change when:
-
-- force-pushing after a rebase
-- amending a commit
-
-To create a commit diff thread:
-
-1. Navigate to the merge request **Commits** tab. A list of commits that
-   constitute the merge request are shown.
-
-   ![Merge request commits tab](img/merge_request_commits_tab.png)
-
-1. Navigate to a specific commit, select the **Changes** tab (where you
-   are only be presented diffs from the selected commit), and leave a comment.
-
-   ![Commit diff discussion in merge request context](img/commit_comment_mr_context.png)
-
-1. Any threads created this way are shown in the merge request's
-   **Discussions** tab and are resolvable.
-
-   ![Merge request Discussions tab](img/commit_comment_mr_discussions_tab.png)
-
-Threads created this way only appear in the original merge request
-and not when navigating to that commit under your project's
-**Repository > Commits** page.
-
-NOTE:
-When a link of a commit reference is found in a thread inside a merge
-request, it is automatically converted to a link in the context of the
-current merge request.
-
-## Add a comment to a commit
-
-You can add comments and threads to a particular commit.
-
-1. On the top bar, select **Menu > Projects** and find your project.
-1. On the left sidebar, select **Repository > Commits**.
-1. Below the commits, in the **Comment** field, enter a comment.
-1. Select **Comment** or select the down arrow (**{chevron-down}**) to select **Start thread**.
-
-WARNING:
-Threads created this way are lost if the commit ID changes after a
-force push.
-
-## Image threads
-
-Sometimes a thread is revolved around an image. With image threads,
-you can easily target a specific coordinate of an image and start a thread
-around it. Image threads are available in merge requests and commit detail views.
-
-To start an image thread, hover your mouse over the image. Your mouse pointer
-should convert into an icon, indicating that the image is available for commenting.
-Simply click anywhere on the image to create a new thread.
-
-![Start image thread](img/start_image_discussion.gif)
-
-After you select the image, a comment form is displayed that would be the start
-of your thread. After you save your comment, a new badge is displayed on
-top of your image. This badge represents your thread.
-
-NOTE:
-This thread badge is typically associated with a number that is only used as a visual
-reference for each thread. In the merge request thread tab,
-this badge is indicated with a comment icon, because each thread renders a new
-image section.
-
-Image threads also work on diffs that replace an existing image. In this diff view
-mode, you can toggle the different view modes and still see the thread point badges.
-
-| 2-up        | Swipe      | Onion Skin |
-|:-----------:|:----------:|:----------:|
-| ![2-up view](img/two_up_view.png) | ![swipe view](img/swipe_view.png) | ![onion skin view](img/onion_skin_view.png) |
-
-Image threads also work well with resolvable threads. Resolved threads
-on diffs (not on the merge request discussion tab) appear collapsed on page
-load and have a corresponding badge counter to match the counter on the image.
-
-![Image resolved thread](img/image_resolved_discussion.png)
-
-## Lock discussions
-
-For large projects with many contributors, it may be useful to stop threads
-in issues or merge requests in these scenarios:
-
-- The project maintainer has already resolved the thread and it is not helpful
-  for continued feedback.
-- The project maintainer has already directed new conversation
-  to newer issues or merge requests.
-- The people participating in the thread are trolling, abusive, or otherwise
-  being unproductive.
-
-In these cases, a user with Developer permissions or higher in the project can lock (and unlock)
-an issue or a merge request, using the "Lock" section in the sidebar. For issues,
-a user with Reporter permissions can lock (and unlock).
-
-| Unlock | Lock |
-| :-----------: | :----------: |
-| ![Turn off discussion lock](img/turn_off_lock.png) | ![Turn on discussion lock](img/turn_on_lock.png) |
-
-System notes indicate locking and unlocking.
-
-![Discussion lock system notes](img/discussion_lock_system_notes.png)
-
-In a locked issue or merge request, only team members can add new comments and
-edit existing comments. Non-team members are restricted from adding or editing comments.
-
-| Team member | Non-team member |
-| :-----------: | :----------: |
-| ![Comment form member](img/lock_form_member.png) | ![Comment form non-member](img/lock_form_non_member.png) |
-
-Additionally, locked issues and merge requests can't be reopened.
-
-## Confidential Comments
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207473) in GitLab 13.9.
-> - [Deployed behind a feature flag](../feature_flags.md), disabled by default.
-> - Disabled on GitLab.com.
-> - Not recommended for production use.
-> - To use in GitLab self-managed instances, ask a GitLab administrator to enable it. **(FREE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-When creating a comment, you can make it visible only to the project members (users with Reporter and higher permissions).
-
-To create a confidential comment, select the **Make this comment confidential** check box before you submit it.
-
-![Confidential comments](img/confidential_comments_v13_9.png)
-
-## Filtering notes
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26723) in GitLab 11.5.
-
-For issues with many comments like activity notes and user comments, sometimes
-finding useful information can be hard. There is a way to filter comments from single notes and threads for merge requests and issues.
-
-From a merge request's **Discussion** tab, or from an epic/issue overview, find the filter's dropdown menu on the right side of the page, from which you can choose one of the following options:
-
-- **Show all activity**: displays all user comments and system notes
-  (issue updates, mentions from other issues, changes to the description, etc).
-- **Show comments only**: only displays user comments in the list.
-- **Show history only**: only displays activity notes.
-
-![Notes filters dropdown options](img/index_notes_filters.png)
-
-After you select one of the filters in a given issue or merge request, GitLab saves
-your preference, so that it persists when you visit the same page again
-from any device you're logged into.
-
-## Assign an issue to the commenting user
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/191455) in GitLab 13.1.
-
-You can assign an issue to a user who made a comment.
-
-In the comment, select the **More Actions** menu, and then select **Assign to commenting user**.
-
-Select the button again to unassign the commenter.
-
-![Assign to commenting user](img/quickly_assign_commenter_v13_1.png)
-
-## Enable or disable Confidential Comments **(FREE SELF)**
-
-Confidential Comments is under development and not ready for production use. It is
+Confidential comments are under development and not ready for production use. The feature is
 deployed behind a feature flag that is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can enable it.

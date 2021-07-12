@@ -66,10 +66,10 @@ export const subscriptionTable = {
   type: s__('SuperSonics|Type'),
 };
 export const connectivityIssue = s__('SuperSonics|There is a connectivity issue.');
-export const manualSyncSuccessfulText = s__(
+export const manualSyncPendingText = s__(
   'SuperSonics|Your subscription details will sync shortly.',
 );
-export const manualSyncSuccessfulTitle = s__('SuperSonics|Sync subscription request.');
+export const manualSyncPendingTitle = s__('SuperSonics|Sync subscription request.');
 export const manualSyncFailureText = s__(
   'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
 );
@@ -84,8 +84,9 @@ export const subscriptionActivationForm = {
 
 export const subscriptionSyncStatus = {
   SYNC_FAILURE: 'SYNC_FAILURE',
-  SYNC_SUCCESS: 'SYNC_SUCCESS',
+  SYNC_PENDING: 'SYNC_PENDING',
 };
+
 export const subscriptionTypes = {
   CLOUD: 'cloud',
   LICENSE_FILE: 'license_file',

@@ -171,7 +171,7 @@ export default {
           data-qa-selector="new_iteration_button"
           :href="newIterationPath"
         >
-          {{ __('New iteration') }}
+          {{ s__('Iterations|New iteration') }}
         </gl-button>
       </li>
     </template>

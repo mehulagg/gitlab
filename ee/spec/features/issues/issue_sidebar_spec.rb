@@ -41,10 +41,10 @@ RSpec.describe 'Issue Sidebar' do
 
     it 'updates weight in sidebar to 1' do
       page.within '.weight' do
-        click_link 'Edit'
+        click_button 'Edit'
         find('input').send_keys 1, :enter
 
-        page.within '.value' do
+        page.within '[data-testid="sidebar-weight-value"]' do
           expect(page).to have_content '1'
         end
       end
@@ -52,16 +52,16 @@ RSpec.describe 'Issue Sidebar' do
 
     it 'updates weight in sidebar to no weight' do
       page.within '.weight' do
-        click_link 'Edit'
+        click_button 'Edit'
         find('input').send_keys 1, :enter
 
-        page.within '.value' do
+        page.within '[data-testid="sidebar-weight-value"]' do
           expect(page).to have_content '1'
         end
 
-        click_link 'remove weight'
+        click_button 'remove weight'
 
-        page.within '.value' do
+        page.within '[data-testid="sidebar-weight-value"]' do
           expect(page).to have_content 'None'
         end
       end

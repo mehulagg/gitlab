@@ -83,6 +83,7 @@ module EE
         mount_mutation ::Mutations::SecurityPolicy::CommitScanExecutionPolicy
         mount_mutation ::Mutations::SecurityPolicy::AssignSecurityPolicyProject
         mount_mutation ::Mutations::SecurityPolicy::CreateSecurityPolicyProject
+        mount_mutation ::Mutations::Security::CiConfiguration::ConfigureDependencyScanning
 
         prepend(Types::DeprecatedMutations)
       end

@@ -1,13 +1,4 @@
-import { masks } from 'dateformat';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
-
-const { isoDate, mediumDate } = masks;
-
-export const dateFormats = {
-  isoDate,
-  defaultDate: mediumDate,
-  defaultDateTime: 'mmm d, yyyy h:MMtt',
-};
 
 export const scatterChartLineProps = {
   default: {

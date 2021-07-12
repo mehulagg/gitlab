@@ -17,9 +17,9 @@ RSpec.describe Resolvers::IssuesResolver do
       let_it_be(:iteration1) { create(:iteration, group: group, start_date: 2.weeks.ago, due_date: 1.week.ago) }
       let_it_be(:current_iteration) { create(:iteration, group: group, start_date: Date.yesterday, due_date: 1.day.from_now) }
 
-      let_it_be(:issue1) { create :issue, project: project, epic: epic1, iteration: iteration1 }
-      let_it_be(:issue2) { create :issue, project: project, epic: epic2, weight: 1 }
-      let_it_be(:issue3) { create :issue, project: project, weight: 3, iteration: current_iteration }
+      let_it_be(:issue1) { create :issue, project: project, epic: epic1, iteration: iteration1, blocking_issues_count: 2 }
+      let_it_be(:issue2) { create :issue, project: project, epic: epic2, weight: 1, blocking_issues_count: 2 }
+      let_it_be(:issue3) { create :issue, project: project, weight: 3, iteration: current_iteration, blocking_issues_count: 4 }
       let_it_be(:issue4) { create :issue, :published, project: project }
 
       before do
@@ -62,6 +62,16 @@ RSpec.describe Resolvers::IssuesResolver do
 
           it 'sorts issues descending' do
             expect(resolve_issues(sort: :sla_due_at_desc).to_a).to eq [sla_due_last, sla_due_first]
+          end
+        end
+
+        context 'when sorting by blocking issues count (ties broken by id in desc order)' do
+          it 'sorts issues ascending' do
+            expect(resolve_issues(sort: :blocking_issues_asc).to_a).to eq [issue4, issue2, issue1, issue3]
+          end
+
+          it 'sorts issues descending' do
+            expect(resolve_issues(sort: :blocking_issues_desc).to_a).to eq [issue3, issue2, issue1, issue4]
           end
         end
       end

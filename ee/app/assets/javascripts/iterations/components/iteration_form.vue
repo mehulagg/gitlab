@@ -99,8 +99,10 @@ export default {
         .mutate({
           mutation: createIteration,
           variables: {
-            ...this.variables,
-            iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', this.cadenceId),
+            input: {
+              ...this.variables,
+              iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', this.cadenceId),
+            },
           },
         })
         .then(({ data }) => {
@@ -180,7 +182,7 @@ export default {
   <div>
     <div class="gl-display-flex">
       <h3 ref="pageTitle" class="page-title">
-        {{ isEditing ? __('Edit iteration') : __('New iteration') }}
+        {{ isEditing ? s__('Iterations|Edit iteration') : s__('Iterations|New iteration') }}
       </h3>
     </div>
     <hr class="gl-mt-0" />

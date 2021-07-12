@@ -12,12 +12,14 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
 
     let(:subscribable) { double(:license) }
     let(:namespace) { nil }
+    let(:force_notification) { false }
     let(:message) do
       described_class.new(
         subscribable: subscribable,
         signed_in: true,
         is_admin: true,
-        namespace: namespace
+        namespace: namespace,
+        force_notification: force_notification
       ).message
     end
 
@@ -100,12 +102,12 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   end
 
                   it 'has a nice subject' do
-                    expect(subject).to include('Your subscription has been downgraded.')
+                    expect(subject).to include('Your subscription expired!')
                   end
 
                   context 'no namespace' do
                     it 'has an expiration blocking message' do
-                      expect(subject).to include("You didn't renew your subscription so it was downgraded to the GitLab Core Plan")
+                      expect(subject).to include('Please delete your current license if you want to downgrade to the free plan')
                     end
                   end
 
@@ -316,7 +318,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                 let(:grace_period_effective_from) { today.to_date - 40.days }
 
                 it 'has a nice subject' do
-                  expect(subject).to include('Your subscription has been downgraded')
+                  expect(subject).to include('Your subscription expired!')
                 end
               end
 
@@ -325,6 +327,14 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
 
                 it 'stops displaying' do
                   expect(subject).to be nil
+                end
+
+                context 'and force_notification is true' do
+                  let(:force_notification) { true }
+
+                  it 'returns a message' do
+                    expect(subject).to include('Your subscription expired!')
+                  end
                 end
               end
 

@@ -49,8 +49,10 @@ The following table lists project permissions available for each role:
 | View allowed and denied licenses **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View License Compliance reports **(ULTIMATE)**    | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View Security reports **(ULTIMATE)**              | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| View Dependency list **(ULTIMATE)**               | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View License list **(ULTIMATE)**                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
+| View Dependency list **(ULTIMATE)**               |         |            | ✓           | ✓        | ✓      |
+| View License list **(ULTIMATE)**                  |         | ✓          | ✓           | ✓        | ✓      |
+| View [Threats list](application_security/threat_monitoring/#threat-monitoring) **(ULTIMATE)** |         |            | ✓           | ✓        | ✓      |
+| Create and run [on-demand DAST scans](application_security/dast/#on-demand-scans) |         |            | ✓           | ✓        | ✓      |
 | View licenses in Dependency list **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View [Design Management](project/issues/design_management.md) pages | ✓   | ✓   | ✓    | ✓        | ✓      |
 | View project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
@@ -105,8 +107,7 @@ The following table lists project permissions available for each role:
 | Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
 | Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
 | Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
-| Create/edit [releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
-| Delete [releases](project/releases/index.md)|   |            |            | ✓        | ✓      |
+| Create/edit/delete [releases](project/releases/index.md)|   |            | ✓ (*13*)    | ✓ (*13*) | ✓ (*13*) |
 | Manage merge approval rules (project settings)    |         |            |             | ✓        | ✓      |
 | Create new merge request                          |         |            | ✓           | ✓        | ✓      |
 | Create new branches                               |         |            | ✓           | ✓        | ✓      |
@@ -169,6 +170,8 @@ The following table lists project permissions available for each role:
 | Manage Project Operations                         |         |            |             | ✓        | ✓      |
 | Manage Terraform state                            |         |            |             | ✓        | ✓      |
 | Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
+| Manage security policy **(ULTIMATE)**             |         |            | ✓           | ✓        | ✓      |
+| Create or assign security policy project **(ULTIMATE)**     |         |            |             |          | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
 | Reposition comments on images (posted by any user)|✓ (*10*) | ✓ (*10*)   |  ✓ (*10*)   | ✓        | ✓      |
 | Manage Error Tracking                             |         |            |             | ✓        | ✓      |
@@ -205,6 +208,7 @@ The following table lists project permissions available for each role:
 1. Users can only view events based on their individual actions.
 1. Project access tokens are supported for self-managed instances on Free and above. They are also
    supported on GitLab SaaS Premium and above (excluding [trial licenses](https://about.gitlab.com/free-trial/)).
+1. If the [tag is protected](#release-permissions-with-protected-tags), this depends on the access Developers and Maintainers are given.
 
 ## Project features permissions
 
@@ -520,6 +524,14 @@ run CI/CD pipelines and execute actions on jobs that are related to those branch
 
 See [Security on protected branches](../ci/pipelines/index.md#pipeline-security-on-protected-branches)
 for details about the pipelines security model.
+
+## Release permissions with protected tags
+
+[The permission to create tags](project/protected_tags.md) is used to define if a user can
+create, edit, and delete [Releases](project/releases/index.md).
+
+See [Release permissions](project/releases/index.md#release-permissions)
+for more information.
 
 ## LDAP users permissions
 

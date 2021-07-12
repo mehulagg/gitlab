@@ -16,6 +16,8 @@ module ComplianceManagement
       belongs_to :compliance_management_framework, class_name: "ComplianceManagement::Framework", foreign_key: :framework_id
 
       validates :project, presence: true
+
+      delegate :full_path, to: :project
     end
   end
 end

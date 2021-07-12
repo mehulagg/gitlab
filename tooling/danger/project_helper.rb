@@ -10,6 +10,7 @@ module Tooling
         documentation
         duplicate_yarn_dependencies
         eslint
+        gitaly
         karma
         pajamas
         pipeline
@@ -54,6 +55,7 @@ module Tooling
         %r{\A(ee/)?scripts/frontend/} => :frontend,
         %r{(\A|/)(
           \.babelrc |
+          \.browserslistrc |
           \.eslintignore |
           \.eslintrc(\.yml)? |
           \.nvmrc |

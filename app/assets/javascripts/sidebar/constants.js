@@ -3,6 +3,7 @@ import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import epicConfidentialQuery from '~/sidebar/queries/epic_confidential.query.graphql';
 import epicDueDateQuery from '~/sidebar/queries/epic_due_date.query.graphql';
 import epicParticipantsQuery from '~/sidebar/queries/epic_participants.query.graphql';
+import epicReferenceQuery from '~/sidebar/queries/epic_reference.query.graphql';
 import epicStartDateQuery from '~/sidebar/queries/epic_start_date.query.graphql';
 import epicSubscribedQuery from '~/sidebar/queries/epic_subscribed.query.graphql';
 import epicTodoQuery from '~/sidebar/queries/epic_todo.query.graphql';
@@ -12,6 +13,7 @@ import issueDueDateQuery from '~/sidebar/queries/issue_due_date.query.graphql';
 import issueReferenceQuery from '~/sidebar/queries/issue_reference.query.graphql';
 import issueSubscribedQuery from '~/sidebar/queries/issue_subscribed.query.graphql';
 import issueTimeTrackingQuery from '~/sidebar/queries/issue_time_tracking.query.graphql';
+import mergeRequestMilestone from '~/sidebar/queries/merge_request_milestone.query.graphql';
 import mergeRequestReferenceQuery from '~/sidebar/queries/merge_request_reference.query.graphql';
 import mergeRequestSubscribed from '~/sidebar/queries/merge_request_subscribed.query.graphql';
 import mergeRequestTimeTrackingQuery from '~/sidebar/queries/merge_request_time_tracking.query.graphql';
@@ -24,6 +26,7 @@ import updateEpicSubscriptionMutation from '~/sidebar/queries/update_epic_subscr
 import updateIssueConfidentialMutation from '~/sidebar/queries/update_issue_confidential.mutation.graphql';
 import updateIssueDueDateMutation from '~/sidebar/queries/update_issue_due_date.mutation.graphql';
 import updateIssueSubscriptionMutation from '~/sidebar/queries/update_issue_subscription.mutation.graphql';
+import mergeRequestMilestoneMutation from '~/sidebar/queries/update_merge_request_milestone.mutation.graphql';
 import updateMergeRequestSubscriptionMutation from '~/sidebar/queries/update_merge_request_subscription.mutation.graphql';
 import updateAlertAssigneesMutation from '~/vue_shared/alert_details/graphql/mutations/alert_set_assignees.mutation.graphql';
 import getAlertAssignees from '~/vue_shared/components/sidebar/queries/get_alert_assignees.query.graphql';
@@ -93,6 +96,9 @@ export const referenceQueries = {
   [IssuableType.MergeRequest]: {
     query: mergeRequestReferenceQuery,
   },
+  [IssuableType.Epic]: {
+    query: epicReferenceQuery,
+  },
 };
 
 export const dateTypes = {
@@ -126,6 +132,11 @@ export const subscribedQueries = {
     query: mergeRequestSubscribed,
     mutation: updateMergeRequestSubscriptionMutation,
   },
+};
+
+export const Tracking = {
+  editEvent: 'click_edit_button',
+  rightSidebarLabel: 'right_sidebar',
 };
 
 export const timeTrackingQueries = {
@@ -171,10 +182,17 @@ export const issuableMilestoneQueries = {
     query: projectIssueMilestoneQuery,
     mutation: projectIssueMilestoneMutation,
   },
+  [IssuableType.MergeRequest]: {
+    query: mergeRequestMilestone,
+    mutation: mergeRequestMilestoneMutation,
+  },
 };
 
 export const milestonesQueries = {
   [IssuableType.Issue]: {
+    query: projectMilestonesQuery,
+  },
+  [IssuableType.MergeRequest]: {
     query: projectMilestonesQuery,
   },
 };

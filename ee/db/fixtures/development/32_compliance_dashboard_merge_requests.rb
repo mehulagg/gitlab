@@ -91,13 +91,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
   end
 
   def new_user
-    name = FFaker::Name.name
-    FactoryBot.create(
-      :user,
-      name: name,
-      username: FFaker::Internet.user_name(name),
-      email: FFaker::Internet.email
-    )
+    FactoryBot.create(:user)
   end
 end
 

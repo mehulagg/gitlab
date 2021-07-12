@@ -130,10 +130,6 @@ h1 {
   color: transparent;
   text-shadow: 0 0 0 #303030;
 }
-.form-control::-ms-input-placeholder {
-  color: #5e5e5e;
-  opacity: 1;
-}
 .form-control::placeholder {
   color: #5e5e5e;
   opacity: 1;
@@ -160,7 +156,6 @@ h1 {
   color: #303030;
   text-align: center;
   vertical-align: middle;
-  -moz-user-select: none;
   user-select: none;
   background-color: transparent;
   border: 1px solid transparent;
@@ -444,8 +439,7 @@ a {
   border-top: 1px solid #dbdbdb;
 }
 .toggle-sidebar-button .collapse-text,
-.toggle-sidebar-button .icon-chevron-double-lg-left,
-.toggle-sidebar-button .icon-chevron-double-lg-right {
+.toggle-sidebar-button .icon-chevron-double-lg-left {
   color: #666;
 }
 svg {
@@ -610,9 +604,6 @@ input {
 .form-control {
   border-radius: 4px;
   padding: 6px 10px;
-}
-.form-control::-ms-input-placeholder {
-  color: #868686;
 }
 .form-control::placeholder {
   color: #868686;
@@ -1314,10 +1305,8 @@ input {
 }
 .toggle-sidebar-button .collapse-text,
 .toggle-sidebar-button .icon-chevron-double-lg-left,
-.toggle-sidebar-button .icon-chevron-double-lg-right,
 .close-nav-button .collapse-text,
-.close-nav-button .icon-chevron-double-lg-left,
-.close-nav-button .icon-chevron-double-lg-right {
+.close-nav-button .icon-chevron-double-lg-left {
   color: inherit;
 }
 .collapse-text {
@@ -1455,7 +1444,6 @@ svg.s16 {
   top: 4px;
 }
 .search .search-input-wrap .search-icon {
-  -moz-user-select: none;
   user-select: none;
 }
 .search .search-input-wrap .clear-icon {
@@ -1504,12 +1492,6 @@ svg.s16 {
   height: 32px;
   margin-right: 8px;
 }
-.avatar.s40,
-.avatar-container.s40 {
-  width: 40px;
-  height: 40px;
-  margin-right: 8px;
-}
 .avatar {
   transition-property: none;
   width: 40px;
@@ -1536,10 +1518,6 @@ svg.s16 {
 .identicon.s32 {
   font-size: 14px;
   line-height: 32px;
-}
-.identicon.s40 {
-  font-size: 16px;
-  line-height: 38px;
 }
 .identicon.bg1 {
   background-color: #fcf1ef;
@@ -1580,10 +1558,6 @@ svg.s16 {
   margin: 0;
   align-self: center;
 }
-.avatar-container.s40 {
-  min-width: 40px;
-  min-height: 40px;
-}
 .rect-avatar {
   border-radius: 2px;
 }
@@ -1604,9 +1578,6 @@ svg.s16 {
   a
   .avatar-container.rect-avatar
   .avatar.s32 {
-  border-radius: 4px;
-}
-.rect-avatar.s40 {
   border-radius: 4px;
 }
 

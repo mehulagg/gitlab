@@ -32,18 +32,6 @@ RSpec.describe API::StatusChecks do
   describe 'GET :id/merge_requests/:merge_request_iid/status_checks' do
     subject { get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_checks", user), params: { external_status_check_id: rule.id, sha: sha } }
 
-    context 'feature flag is disabled' do
-      before do
-        stub_feature_flags(ff_external_status_checks: false)
-      end
-
-      it 'returns a not found error' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
     context 'when current_user has access' do
       before do
         stub_licensed_features(external_status_checks: true)
@@ -80,18 +68,6 @@ RSpec.describe API::StatusChecks do
 
   describe 'POST :id/:merge_requests/:merge_request_iid/status_check_responses' do
     subject { post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_check_responses", user), params: { external_status_check_id: rule.id, sha: sha } }
-
-    context 'feature flag is disabled' do
-      before do
-        stub_feature_flags(ff_external_status_checks: false)
-      end
-
-      it 'returns a not found error' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
 
     context 'when user has access' do
       before do
@@ -153,20 +129,15 @@ RSpec.describe API::StatusChecks do
     end
 
     context 'when feature is disabled, unlicensed or user has permission' do
-      where(:licensed, :flag, :project_owner, :status) do
-        false | false | false | :not_found
-        false | false | true  | :unauthorized
-        false | true  | true  | :unauthorized
-        false | true  | false | :not_found
-        true  | false | false | :not_found
-        true  | false | true  | :unauthorized
-        true  | true  | false | :not_found
-        true  | true  | true  | :success
+      where(:licensed, :project_owner, :status) do
+        false | false | :not_found
+        false | true  | :unauthorized
+        true  | false | :not_found
+        true  | true  | :success
       end
 
       with_them do
         before do
-          stub_feature_flags(ff_external_status_checks: flag)
           stub_licensed_features(external_status_checks: licensed)
         end
 
@@ -182,7 +153,6 @@ RSpec.describe API::StatusChecks do
   describe 'POST projects/:id/external_status_checks' do
     context 'successfully creating new external approval rule' do
       before do
-        stub_feature_flags(ff_external_status_checks: true)
         stub_licensed_features(external_status_checks: true)
       end
 
@@ -229,20 +199,15 @@ RSpec.describe API::StatusChecks do
     end
 
     context 'when feature is disabled, unlicensed or user has permission' do
-      where(:licensed, :flag, :project_owner, :status) do
-        false | false | false | :not_found
-        false | false | true  | :unauthorized
-        false | true  | true  | :unauthorized
-        false | true  | false | :not_found
-        true  | false | false | :not_found
-        true  | false | true  | :unauthorized
-        true  | true  | false | :not_found
-        true  | true  | true  | :created
+      where(:licensed, :project_owner, :status) do
+        false | false | :not_found
+        false | true  | :unauthorized
+        true  | false | :not_found
+        true  | true  | :created
       end
 
       with_them do
         before do
-          stub_feature_flags(ff_external_status_checks: flag)
           stub_licensed_features(external_status_checks: licensed)
         end
 
@@ -280,20 +245,15 @@ RSpec.describe API::StatusChecks do
     end
 
     context 'when feature is disabled, unlicensed or user has permission' do
-      where(:licensed, :flag, :project_owner, :status) do
-        false | false | false | :not_found
-        false | false | true  | :unauthorized
-        false | true  | true  | :unauthorized
-        false | true  | false | :not_found
-        true  | false | false | :not_found
-        true  | false | true  | :unauthorized
-        true  | true  | false | :not_found
-        true  | true  | true  | :success
+      where(:licensed, :project_owner, :status) do
+        false | false | :not_found
+        false | true  | :unauthorized
+        true  | false | :not_found
+        true  | true  | :success
       end
 
       with_them do
         before do
-          stub_feature_flags(ff_external_status_checks: flag)
           stub_licensed_features(external_status_checks: licensed)
         end
 
@@ -311,7 +271,6 @@ RSpec.describe API::StatusChecks do
 
     context 'successfully updating external approval rule' do
       before do
-        stub_feature_flags(ff_external_status_checks: true)
         stub_licensed_features(external_status_checks: true)
       end
 
@@ -362,20 +321,15 @@ RSpec.describe API::StatusChecks do
     end
 
     context 'when feature is disabled, unlicensed or user has permission' do
-      where(:licensed, :flag, :project_owner, :status) do
-        false | false | false | :not_found
-        false | false | true  | :unauthorized
-        false | true  | true  | :unauthorized
-        false | true  | false | :not_found
-        true  | false | false | :not_found
-        true  | false | true  | :unauthorized
-        true  | true  | false | :not_found
-        true  | true  | true  | :success
+      where(:licensed, :project_owner, :status) do
+        false | false | :not_found
+        false | true  | :unauthorized
+        true  | false | :not_found
+        true  | true  | :success
       end
 
       with_them do
         before do
-          stub_feature_flags(ff_external_status_checks: flag)
           stub_licensed_features(external_status_checks: licensed)
         end
 

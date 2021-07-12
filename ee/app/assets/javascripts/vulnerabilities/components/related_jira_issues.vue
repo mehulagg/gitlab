@@ -191,6 +191,7 @@ export default {
           <gl-loading-icon
             v-if="isFetchingRelatedIssues"
             ref="loadingIcon"
+            size="sm"
             :label="$options.i18n.loadingStateLabel"
             class="gl-my-3"
           />

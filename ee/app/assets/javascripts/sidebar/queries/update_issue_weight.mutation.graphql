@@ -1,0 +1,9 @@
+mutation issueSetWeight($input: IssueSetWeightInput!) {
+  issuableSetWeight: issueSetWeight(input: $input) {
+    issuable: issue {
+      id
+      weight
+    }
+    errors
+  }
+}

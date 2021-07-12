@@ -258,7 +258,7 @@ gem 'asana', '~> 0.10.3'
 gem 'ruby-fogbugz', '~> 0.2.1'
 
 # Kubernetes integration
-gem 'kubeclient', '~> 4.9.1'
+gem 'kubeclient', '~> 4.9.2'
 
 # Sanitize user input
 gem 'sanitize', '~> 5.2.1'
@@ -286,7 +286,7 @@ gem 'gitlab_chronic_duration', '~> 0.10.6.2'
 gem 'rack-proxy', '~> 0.6.0'
 
 gem 'sassc-rails', '~> 2.1.0'
-gem 'autoprefixer-rails', '10.2.0.0'
+gem 'autoprefixer-rails', '10.2.5.1'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
@@ -310,7 +310,7 @@ gem 'pg_query', '~> 2.1'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '~> 0.18.0'
+gem 'gitlab-labkit', '~> 0.20.0'
 # Thrift is a dependency of gitlab-labkit, we want a version higher than 0.14.0
 # because of https://gitlab.com/gitlab-org/gitlab/-/issues/321900
 gem 'thrift', '>= 0.14.0'
@@ -394,7 +394,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.1.2', require: false
+  gem 'gitlab-dangerfiles', '~> 2.2.2', require: false
 end
 
 group :development, :test, :coverage do
@@ -481,7 +481,7 @@ gem 'grpc', '~> 1.30.2'
 
 gem 'google-protobuf', '~> 3.17.1'
 
-gem 'toml-rb', '~> 1.0.0'
+gem 'toml-rb', '~> 2.0'
 
 # Feature toggles
 gem 'flipper', '~> 0.21.0'
