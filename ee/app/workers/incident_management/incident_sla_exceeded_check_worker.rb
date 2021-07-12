@@ -12,7 +12,7 @@ module IncidentManagement
     tags :exclude_from_kubernetes
 
     def perform
-      IssuableSla.exceeded_for_issues.find_each do |incident_sla|
+      IssuableSla.exceeded_for_issues.exceeded_label_not_applied.find_each do |incident_sla|
         ApplyIncidentSlaExceededLabelWorker.perform_async(incident_sla.issue_id)
       end
     end
