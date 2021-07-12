@@ -50,6 +50,10 @@ module Analytics
         end
       end
 
+      def hash_code
+        Digest::SHA1.hexdigest("#{start_event.hash_code}-#{end_event.hash_code}")
+      end
+
       def start_event_label_based?
         start_event_identifier && start_event.label_based?
       end
