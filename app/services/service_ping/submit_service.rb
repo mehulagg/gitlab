@@ -21,20 +21,13 @@ module ServicePing
       return unless Gitlab::CurrentSettings.usage_ping_enabled?
       return if User.single_user&.requires_usage_stats_consent?
 
-      usage_data = Gitlab::UsageData.data(force_refresh: true)
-
-      raise SubmissionError, 'Usage data is blank' if usage_data.blank?
-
-      raw_usage_data = save_raw_usage_data(usage_data)
-
-      response = Gitlab::HTTP.post(
-        url,
-        body: usage_data.to_json,
-        allow_local_requests: true,
-        headers: { 'Content-type' => 'application/json' }
-      )
-
-      raise SubmissionError, "Unsuccessful response code: #{response.code}" unless response.success?
+      begin
+        usage_data = BuildPayloadService.new.execute
+        raw_usage_data, response = submit_usage_data_payload(usage_data)
+      rescue SubmissionError
+        usage_data = Gitlab::UsageData.data(force_refresh: true)
+        raw_usage_data, response = submit_usage_data_payload(usage_data)
+      end
 
       version_usage_data_id = response.dig('conv_index', 'usage_data_id') || response.dig('dev_ops_score', 'usage_data_id')
 
@@ -48,6 +41,27 @@ module ServicePing
     end
 
     private
+
+    def submit_payload(usage_data)
+      Gitlab::HTTP.post(
+        url,
+        body: usage_data.to_json,
+        allow_local_requests: true,
+        headers: { 'Content-type' => 'application/json' }
+      )
+    end
+
+    def submit_usage_data_payload(usage_data)
+      raise SubmissionError, 'Usage data is blank' if usage_data.blank?
+
+      raw_usage_data = save_raw_usage_data(usage_data)
+
+      response = submit_payload(usage_data)
+
+      raise SubmissionError, "Unsuccessful response code: #{response.code}" unless response.success?
+
+      [raw_usage_data, response]
+    end
 
     def save_raw_usage_data(usage_data)
       RawUsageData.safe_find_or_create_by(recorded_at: usage_data[:recorded_at]) do |record|

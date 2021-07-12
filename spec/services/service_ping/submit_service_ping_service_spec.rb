@@ -217,6 +217,7 @@ RSpec.describe ServicePing::SubmitService do
 
     context 'and usage data is nil' do
       before do
+        allow(ServicePing::BuildPayloadService).to receive(:execute).and_return(nil)
         allow(Gitlab::UsageData).to receive(:data).and_return(nil)
       end
 
