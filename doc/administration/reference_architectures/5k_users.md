@@ -86,9 +86,9 @@ node "**Consul + Sentinel** x3" as consul_sentinel {
 }
 
 card "Redis" as redis {
-  collections "**Redis** x3" as redis_persistent #e6e727
+  collections "**Redis** x3" as redis_nodes #FF6347
 
-  redis_persistent <.[#e6e727]- sentinel
+  redis_nodes <.[#FF6347]- sentinel
 }
 
 cloud "**Object Storage**" as object_storage #white
@@ -2109,11 +2109,11 @@ services where applicable):
 
 | Service                                    | Nodes | Configuration           | GCP              |
 |--------------------------------------------|-------|-------------------------|------------------|
+| Redis(2)                                   | 3     | 2 vCPU, 7.5 GB memory   | `n1-standard-2`  |
 | Consul(1) + Sentinel(2)                    | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | PostgreSQL(1)                              | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
 | PgBouncer(1)                               | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Internal load balancing node(3)            | 1     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
-| Redis(2)                                   | 3     | 2 vCPU, 7.5 GB memory   | `n1-standard-2`  |
 | Gitaly                                     | 3     | 8 vCPU, 30 GB memory    | `n1-standard-8` |
 | Praefect                                   | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Praefect PostgreSQL(1)                     | 1+    | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
@@ -2171,9 +2171,9 @@ card "Database" as database {
 }
 
 card "Redis" as redis {
-  collections "**Redis** x3" as redis_persistent #FF6347
+  collections "**Redis** x3" as redis_nodes #FF6347
 
-  redis_persistent <.[#FF6347]- sentinel
+  redis_nodes <.[#FF6347]- sentinel
 }
 
 cloud "**Object Storage**" as object_storage #white
@@ -2223,7 +2223,7 @@ Each Webservice pod will consume roughly 4 vCPUs and 5 GB of memory using
 the [recommended topology](#cluster-topology) because four worker processes
 are created by default and each pod has other small processes running.
 
-For 10k users we recommend a total Puma worker count of around 40.
+For 5k users we recommend a total Puma worker count of around 40.
 With the [provided recommendations](#cluster-topology) this allows the deployment of up to 10
 Webservice pods with 4 workers per pod and 2 pods per node. Expand available resources using
 the ratio of 1 vCPU to 1.25 GB of memory _per each worker process_ for each additional
