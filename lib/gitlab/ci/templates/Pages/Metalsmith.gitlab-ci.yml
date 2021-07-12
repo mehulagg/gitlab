@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/Metalsmith.gitlab-ci.yml
 
+template_metadata:
+  name: Metalsmith
+  desc: This is a GitLab managed template.
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Pages"]
+  usage: copy-paste
+
 # Full project: https://gitlab.com/pages/metalsmith
 image: node:4.2.2
 

@@ -3,6 +3,15 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml
 
+template_metadata:
+  name: Terraform (Latest)
+  desc: This is a GitLab managed template.
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Infrastructure as Code"]
+  usage: inclusion
+  inclusion_type: shared-workflow
+
 include:
   - template: Terraform/Base.latest.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml
 

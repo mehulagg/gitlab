@@ -3,6 +3,15 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Verify/FailFast.gitlab-ci.yml
 
+template_metadata:
+  name: FailFast
+  desc: This is a GitLab managed template.
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Unknown"]
+  usage: inclusion
+  inclusion_type: shared-workflow
+
 rspec-rails-modified-path-specs:
   image: ruby:2.6
   stage: .pre

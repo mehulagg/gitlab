@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Flutter.gitlab-ci.yml
 
+template_metadata:
+  name: Flutter
+  desc: This is a GitLab managed template.
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 code_quality:
   stage: test
   image: "cirrusci/flutter:1.22.5"

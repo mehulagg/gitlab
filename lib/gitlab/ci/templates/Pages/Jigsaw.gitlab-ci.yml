@@ -3,9 +3,16 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/Jigsaw.gitlab-ci.yml
 
-# Jigsaw is a simple static sites generator with Laravel's Blade.
-#
-# Full project: https://github.com/tightenco/jigsaw
+template_metadata:
+  name: Jigsaw
+  desc: |
+    Jigsaw is a simple static sites generator with Laravel's Blade.
+
+    Full project: https://github.com/tightenco/jigsaw
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Pages"]
+  usage: copy-paste
 
 image: php:7.2
 

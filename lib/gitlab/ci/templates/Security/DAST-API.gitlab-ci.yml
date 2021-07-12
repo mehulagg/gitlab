@@ -3,20 +3,28 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Dast-API.gitlab-ci.yml
 
-# To use this template, add the following to your .gitlab-ci.yml file:
-#
-# include:
-#   template: DAST-API.gitlab-ci.yml
-#
-# You also need to add a `dast` stage to your `stages:` configuration. A sample configuration for DAST API:
-#
-# stages:
-#   - build
-#   - test
-#   - deploy
-#   - dast
+template_metadata:
+  name: DAST API
+  desc: |
+    To use this template, add the following to your .gitlab-ci.yml file:
 
-# Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dast_api/index.html
+    include:
+      template: DAST-API.gitlab-ci.yml
+
+    You also need to add a `dast` stage to your `stages:` configuration. A sample configuration for DAST API:
+
+    stages:
+      - build
+      - test
+      - deploy
+      - dast
+
+    Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dast_api/index.html
+  stages: ["devops::secure"]
+  maintainers: ["group::dynamic analysis"]
+  categories: ["Category:DAST"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 # Configure DAST API scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
 # List of available variables: https://docs.gitlab.com/ee/user/application_security/dast_api/index.html#available-cicd-variables

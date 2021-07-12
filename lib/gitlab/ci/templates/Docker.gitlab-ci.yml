@@ -9,6 +9,14 @@
 # This template uses one generic job with conditional builds
 # for the default branch and all other (MR) branches.
 
+template_metadata:
+  name: Docker
+  desc: This is a GitLab managed template.
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 docker-build:
   # Use the official docker image.
   image: docker:latest

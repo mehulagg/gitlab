@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/HTML.gitlab-ci.yml
 
+template_metadata:
+  name: HTML
+  desc: This is a GitLab managed template.
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Pages"]
+  usage: copy-paste
+
 # Full project: https://gitlab.com/pages/plain-html
 pages:
   stage: deploy

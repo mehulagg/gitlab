@@ -3,9 +3,17 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Scala.gitlab-ci.yml
 
-# Official OpenJDK Java image. Look for the different tagged releases at
-# https://hub.docker.com/_/openjdk/ . A Java image is not required
-# but an image with a JVM speeds up the build a bit.
+template_metadata:
+  name: Scala
+  desc: |
+    Official OpenJDK Java image. Look for the different tagged releases at
+    https://hub.docker.com/_/openjdk/ . A Java image is not required
+    but an image with a JVM speeds up the build a bit.
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 image: openjdk:8
 
 before_script:

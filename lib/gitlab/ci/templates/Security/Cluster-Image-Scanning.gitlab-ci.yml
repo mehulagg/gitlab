@@ -1,15 +1,23 @@
-# Use this template to enable cluster image scanning in your project.
-# You should add this template to an existing `.gitlab-ci.yml` file by using the `include:`
-# keyword.
-# The template should work without modifications but you can customize the template settings if
-# needed: https://docs.gitlab.com/ee/user/application_security/cluster_image_scanning/#customize-the-container-scanning-settings
-#
-# Requirements:
-# - A `test` stage to be present in the pipeline.
-# - You must define the `CIS_KUBECONFIG` variable to allow analyzer to connect to your Kubernetes cluster and fetch found vulnerabilities.
-#
-# Configure container scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/README.html).
-# List of available variables: https://docs.gitlab.com/ee/user/application_security/cluster_image_scanning/#available-variables
+template_metadata:
+  name: Cluster Image Scanning
+  desc: |
+    Use this template to enable cluster image scanning in your project.
+    You should add this template to an existing `.gitlab-ci.yml` file by using the `include:`
+    keyword.
+    The template should work without modifications but you can customize the template settings if
+    needed: https://docs.gitlab.com/ee/user/application_security/cluster_image_scanning/#customize-the-container-scanning-settings
+
+    Requirements:
+    - A `test` stage to be present in the pipeline.
+    - You must define the `CIS_KUBECONFIG` variable to allow analyzer to connect to your Kubernetes cluster and fetch found vulnerabilities.
+
+    Configure container scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/README.html).
+    List of available variables: https://docs.gitlab.com/ee/user/application_security/cluster_image_scanning/#available-variables
+  stages: ["devops::protect"]
+  maintainers: ["group::container security"]
+  categories: ["Category:Container Scanning"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 variables:
   CIS_ANALYZER_IMAGE: registry.gitlab.com/gitlab-org/security-products/analyzers/cluster-image-scanning:0

@@ -3,15 +3,23 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Secure-Binaries.gitlab-ci.yml
 
-# This template should be used when Security Products (https://about.gitlab.com/handbook/engineering/development/secure/#security-products)
-# have to be downloaded and stored locally.
-#
-# Usage:
-#
-# include:
-#   - template: Secure-Binaries.gitlab-ci.yml
-#
-# Docs: https://docs.gitlab.com/ee/topics/airgap/
+template_metadata:
+  name: Secure Binaries
+  desc: |
+    This template should be used when Security Products (https://about.gitlab.com/handbook/engineering/development/secure/#security-products)
+    have to be downloaded and stored locally.
+
+    Usage:
+
+    include:
+      - template: Secure-Binaries.gitlab-ci.yml
+
+    Docs: https://docs.gitlab.com/ee/topics/airgap/
+  stages: ["devops::secure"]
+  maintainers: ["group::static analysis"]
+  categories: ["Category:Secret Detection"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 variables:
   SECURE_BINARIES_ANALYZERS: >-

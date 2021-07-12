@@ -3,6 +3,15 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/DAST-On-Demand-Scan.gitlab-ci.yml
 
+template_metadata:
+  name: DAST On Demand Scan
+  desc: This is a GitLab managed template.
+  stages: ["devops::secure"]
+  maintainers: ["group::dynamic analysis"]
+  categories: ["Category:DAST"]
+  usage: inclusion
+  inclusion_type: shared-workflow
+
 stages:
   - build
   - test

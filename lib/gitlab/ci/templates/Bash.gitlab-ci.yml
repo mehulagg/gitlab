@@ -3,7 +3,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Bash.gitlab-ci.yml
 
-# See https://docs.gitlab.com/ee/ci/yaml/README.html for all available options
+template_metadata:
+  name: Bash
+  desc: See https://docs.gitlab.com/ee/ci/yaml/README.html for all available options
+  stages: ["devops::verify"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
 
 # you can delete this line if you're not using Docker
 image: busybox:latest

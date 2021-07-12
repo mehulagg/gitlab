@@ -3,9 +3,16 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
 
-# Read more about how to use this script on this blog post https://about.gitlab.com/2019/01/28/android-publishing-with-gitlab-and-fastlane/
-# You will also need to configure your build.gradle, Dockerfile, and fastlane configuration to make this work.
-# If you are looking for a simpler template that does not publish, see the Android template.
+template_metadata:
+  name: Android Fastlane
+  desc: |
+    Read more about how to use this script on this blog post https://about.gitlab.com/2019/01/28/android-publishing-with-gitlab-and-fastlane/
+    You will also need to configure your build.gradle, Dockerfile, and fastlane configuration to make this work.
+    If you are looking for a simpler template that does not publish, see the Android template.
+  stages: ["devops::release"]
+  maintainers: ["group::release"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
 
 stages:
   - environment

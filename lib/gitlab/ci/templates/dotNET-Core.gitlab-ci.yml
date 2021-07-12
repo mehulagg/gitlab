@@ -5,7 +5,15 @@
 
 # This is a simple example illustrating how to build and test .NET Core project
 # with GitLab Continuous Integration / Continuous Delivery.
-#
+
+template_metadata:
+  name: dotNET-Core
+  desc: This is a GitLab managed template.
+  stages: ["devops::configure"]
+  maintainers: ["group::configure"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 # ### Specify the Docker image
 #
 # Instead of installing .NET Core SDK manually, a docker image is used

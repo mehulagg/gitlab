@@ -1,5 +1,13 @@
-# This template moved to Jobs/SAST.gitlab-ci.yml in GitLab 14.0
-# Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/292977
+template_metadata:
+  name: SAST
+  desc: |
+    This template moved to Jobs/SAST.gitlab-ci.yml in GitLab 14.0
+    Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/292977
+  stages: ["devops::secure"]
+  maintainers: ["group::static analysis"]
+  categories: ["Category:SAST"]
+  usage: inclusion
+  inclusion_type: shared-workflow
 
 include:
   template: Jobs/SAST.gitlab-ci.yml

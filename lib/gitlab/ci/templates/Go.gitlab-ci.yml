@@ -3,6 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml
 
+template_metadata:
+  name: Go
+  desc: This is a GitLab managed template.
+  stages: ["devops::verify"]
+  maintainers: ["group::testing"]
+  categories: ["Category:Unknown"]
+  usage: copy-paste
+
 image: golang:latest
 
 variables:

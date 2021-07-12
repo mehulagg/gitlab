@@ -3,15 +3,22 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Maven.gitlab-ci.yml
 
-# Build JAVA applications using Apache Maven (http://maven.apache.org)
-# For docker image tags see https://hub.docker.com/_/maven/
-#
-# For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
+template_metadata:
+  name: Maven
+  desc: |
+    Build JAVA applications using Apache Maven (http://maven.apache.org)
+    For docker image tags see https://hub.docker.com/_/maven/
 
-# This template will build and test your projects
-# * Caches downloaded dependencies and plugins between invocation.
-# * Verify but don't deploy merge requests.
-# * Deploy built artifacts from master branch only.
+    For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
+
+    This template will build and test your projects
+    * Caches downloaded dependencies and plugins between invocation.
+    * Verify but don't deploy merge requests.
+    * Deploy built artifacts from master branch only.
+  stages: ["devops::verify", "devops::release"]
+  maintainers: ["group::testing", "group::release"]
+  categories: ["Category:Unknown", "Category:Continuous Delivery"]
+  usage: copy-paste
 
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
