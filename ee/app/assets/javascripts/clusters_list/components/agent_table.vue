@@ -7,6 +7,7 @@ export default {
     GlLink,
     GlTable,
   },
+  inject: ['integrationDocsUrl'],
   props: {
     agents: {
       required: true,
@@ -33,10 +34,7 @@ export default {
 <template>
   <div>
     <div class="gl-display-block gl-text-right gl-my-3">
-      <gl-link
-        href="https://docs.gitlab.com/ee/user/clusters/agent/#get-started-with-gitops-and-the-gitlab-agent"
-        target="_blank"
-      >
+      <gl-link :href="integrationDocsUrl" target="_blank">
         {{ s__('ClusterAgents|Learn more about installing the GitLab Agent') }}
       </gl-link>
     </div>

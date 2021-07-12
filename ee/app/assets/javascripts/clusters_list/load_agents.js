@@ -10,19 +10,28 @@ export default (Vue, VueApollo) => {
 
   const defaultClient = createDefaultClient();
 
-  const { emptyStateImage, defaultBranchName, projectPath } = el.dataset;
+  const {
+    emptyStateImage,
+    defaultBranchName,
+    projectPath,
+    agentDocsUrl,
+    installDocsUrl,
+    getStartedDocsUrl,
+    integrationDocsUrl,
+  } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider: new VueApollo({ defaultClient }),
-    render(createElement) {
-      return createElement(Agents, {
-        props: {
-          emptyStateImage,
-          defaultBranchName,
-          projectPath,
-        },
-      });
+    provide: {
+      emptyStateImage,
+      defaultBranchName,
+      projectPath,
+      agentDocsUrl,
+      installDocsUrl,
+      getStartedDocsUrl,
+      integrationDocsUrl,
     },
+    render: (createElement) => createElement(Agents),
   });
 };

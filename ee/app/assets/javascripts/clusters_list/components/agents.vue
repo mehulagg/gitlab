@@ -29,19 +29,12 @@ export default {
     GlKeysetPagination,
     GlLoadingIcon,
   },
-  props: {
-    emptyStateImage: {
-      required: true,
-      type: String,
+  inject: {
+    projectPath: {
+      default: '',
     },
     defaultBranchName: {
       default: '.noBranch',
-      required: false,
-      type: String,
-    },
-    projectPath: {
-      required: true,
-      type: String,
     },
   },
   data() {
@@ -124,12 +117,7 @@ export default {
       </div>
     </div>
 
-    <AgentEmptyState
-      v-else
-      :image="emptyStateImage"
-      :project-path="projectPath"
-      :has-configurations="hasConfigurations"
-    />
+    <AgentEmptyState v-else :has-configurations="hasConfigurations" />
   </section>
 
   <gl-alert v-else variant="danger" :dismissible="false">

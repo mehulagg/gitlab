@@ -14,7 +14,6 @@ describe('Agents', () => {
   let wrapper;
 
   const propsData = {
-    emptyStateImage: '/path/to/image',
     defaultBranchName: 'default',
     projectPath: 'path/to/project',
   };
@@ -137,10 +136,6 @@ describe('Agents', () => {
     it('should render empty state', () => {
       expect(findAgentTable().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(true);
-    });
-
-    it('should pass the correct project path to empty state component', () => {
-      expect(findEmptyState().props('projectPath')).toEqual('path/to/project');
     });
   });
 
