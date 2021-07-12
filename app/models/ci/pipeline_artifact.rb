@@ -15,7 +15,8 @@ module Ci
 
     DEFAULT_FILE_NAMES = {
       code_coverage: 'code_coverage.json',
-      code_quality_mr_diff: 'code_quality_mr_diff.json'
+      code_quality_mr_diff: 'code_quality_mr_diff.json',
+      builds_metadata: 'builds_metadata.json'
     }.freeze
 
     REPORT_TYPES = {
@@ -37,7 +38,8 @@ module Ci
 
     enum file_type: {
       code_coverage: 1,
-      code_quality_mr_diff: 2
+      code_quality_mr_diff: 2,
+      builds_metadata: 3
     }
 
     scope :unlocked, -> { joins(:pipeline).merge(::Ci::Pipeline.unlocked) }
