@@ -25,4 +25,7 @@
 
 ### Links
 
+### Deprecation Milestone
+<!-- In which milestone will this deprecation happen -->
+
 <!-- Add links to any relevant documentation or code that will provide additional details or clarity regarding the planned change. -->
