@@ -126,7 +126,9 @@ class Project < ApplicationRecord
   after_initialize :use_hashed_storage
   after_create :check_repository_absence!
 
-  acts_as_ordered_taggable_on :topics
+  # TODO: CI vertical
+  # Allow acts-as-taggable-on to use multiple tags/taggings table
+  #acts_as_ordered_taggable_on :topics
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
