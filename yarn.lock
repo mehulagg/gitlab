@@ -908,10 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@31.2.0":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1417297501/artifacts/raw/gitlab-ui.1482-chart-tooltip-deprecated-slot-syntax.tgz":
   version "31.2.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-31.2.0.tgz#7716500c9e811560d6e450d8553bf71bdcba79ec"
-  integrity sha512-hbW3Zd/gIN4C/AKx27ChZy4lf9yW8TBTJwG85dqQKSYvqWG3LuLx7o0kvc+UJqVFK3lk1iUC3pUSN2UrQ+isqg==
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1417297501/artifacts/raw/gitlab-ui.1482-chart-tooltip-deprecated-slot-syntax.tgz#aad629bdf78636ccbdcdc5169898bd4a95b40398"
   dependencies:
     "@babel/standalone" "^7.0.0"
     bootstrap-vue "2.18.1"
