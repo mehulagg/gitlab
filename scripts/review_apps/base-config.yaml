@@ -10,6 +10,8 @@ global:
       secretName: review-apps-tls
   initialRootPassword:
     secret: shared-gitlab-initial-root-password
+  nodeSelector:
+    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 certmanager:
   install: false
 gitlab:
@@ -24,6 +26,8 @@ gitlab:
     persistence:
       size: 10G
       storageClass: ssd
+    nodeSelector:
+      preemptible: false
   gitlab-exporter:
     enabled: false
   mailroom:
@@ -108,6 +112,8 @@ minio:
     limits:
       cpu: 15m
       memory: 280M
+  nodeSelector:
+    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 nginx-ingress:
   controller:
     config:
@@ -125,6 +131,8 @@ nginx-ingress:
       timeoutSeconds: 5
     readinessProbe:
       timeoutSeconds: 5
+    nodeSelector:
+      cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
   defaultBackend:
     resources:
       requests:
@@ -133,6 +141,8 @@ nginx-ingress:
       limits:
         cpu: 10m
         memory: 24M
+    nodeSelector:
+      cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 postgresql:
   metrics:
     enabled: false
@@ -143,6 +153,8 @@ postgresql:
     limits:
       cpu: 1300m
       memory: 1500M
+  nodeSelector:
+    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 prometheus:
   install: false
 redis:
@@ -155,6 +167,8 @@ redis:
     limits:
       cpu: 200m
       memory: 130M
+  nodeSelector:
+    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 registry:
   hpa:
     minReplicas: 1
@@ -165,3 +179,5 @@ registry:
     limits:
       cpu: 200m
       memory: 45M
+  nodeSelector:
+    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
