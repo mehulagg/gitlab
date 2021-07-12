@@ -27,7 +27,7 @@ export default {
   },
   computed: {
     text() {
-      return `Create ${this.path} in...`
+      return `Create ${this.label.toLowerCase()} in...`
     },
   },
   components: {
