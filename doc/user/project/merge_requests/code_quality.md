@@ -310,6 +310,34 @@ code_quality:
     - if: '$CI_COMMIT_TAG'                               # Run code quality job in pipelines for tags
 ```
 
+### Configuring Code Quality to use a private container image registry
+
+To reduce network time and external dependency, you can bring-your-own
+container image registry to host the Code Quality Docker images. Due to
+the nested architecture of container execution, the registry prefix must
+be specifically configured to be passed down into CodeClimate's subsequent
+`docker pull` commands for individual engines.
+
+The following two variables can address all of the required image pulls:
+
+```yaml
+include:
+  - template: Jobs/Code-Quality.gitlab-ci.yml
+
+code_quality:
+  variables:
+    CODE_QUALITY_IMAGE: "my-private-registry.local:12345/codequality:0.85.24"
+    CODECLIMATE_PREFIX: "my-private-registry.local:12345/"
+```
+
+- `CODE_QUALITY_IMAGE`: A fully prefixed image name, that can be located anywhere
+  accessible from your job environment. GitLab Container Registry can be used here
+  to host your own copy.
+- `CODECLIMATE_PREFIX`: The domain of your intended container image registry. This
+  is a configuration option supported by [CodeClimate CLI](https://github.com/codeclimate/codeclimate/pull/948).
+  - **Do not** include a protocol prefix, such as `https://`.
+  - **Do** include a trailing slash.
+
 ## Configuring jobs using variables
 
 The Code Quality job supports environment variables that users can set to
