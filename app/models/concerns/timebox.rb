@@ -71,7 +71,13 @@ module Timebox
       groups = groups.compact if groups.is_a? Array
       groups = [] if groups.nil?
 
-      from_union([where(project_id: projects), where(group_id: groups)], remove_duplicates: false)
+      if groups.empty?
+        where(project_id: projects)
+      elsif projects.empty?
+        where(group_id: groups)
+      else
+        from_union([where(project_id: projects), where(group_id: groups)], remove_duplicates: false)
+      end
     end
 
     # A timebox is within the timeframe (start_date, end_date) if it overlaps
