@@ -49,8 +49,11 @@ describe('Board Column Component', () => {
   const isCollapsed = () => wrapper.classes('is-collapsed');
 
   describe('Given different list types', () => {
-    it('is expandable when List Type is `backlog`', () => {
+    beforeEach(() => {
       initStore();
+    });
+
+    it('is expandable when List Type is `backlog`', () => {
       createComponent({ listType: ListType.backlog });
 
       expect(isExpandable()).toBe(true);
@@ -59,14 +62,12 @@ describe('Board Column Component', () => {
 
   describe('expanded / collapsed column', () => {
     it('has class is-collapsed when list is collapsed', () => {
-      initStore();
       createComponent({ collapsed: false });
 
       expect(isCollapsed()).toBe(false);
     });
 
     it('does not have class is-collapsed when list is expanded', () => {
-      initStore();
       createComponent({ collapsed: true });
 
       expect(isCollapsed()).toBe(true);
@@ -75,7 +76,6 @@ describe('Board Column Component', () => {
 
   describe('highlighting', () => {
     it('scrolls to column when highlighted', async () => {
-      initStore();
       createComponent();
 
       store.state.highlightedLists.push(listObj.id);

@@ -259,8 +259,8 @@ export default {
         }
 
         // Only fetch when board items havent been fetched on a collapsed list
-        if (!Object.prototype.hasOwnProperty.call(boardItemsByListId, listId)) {
-          dispatch('fetchItemsForList', { listId: data.updateBoardList.list.id });
+        if (!boardItemsByListId[listId]) {
+          dispatch('fetchItemsForList', { listId });
         }
       })
       .catch(() => {

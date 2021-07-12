@@ -493,7 +493,7 @@ describe('moveList', () => {
 
 describe('updateList', () => {
   const listId = 'gid://gitlab/List/1';
-  const state = (boardItemsByListId = {}) => ({
+  const createState = (boardItemsByListId = {}) => ({
     fullPath: 'gitlab-org',
     fullBoardId: 'gid://gitlab/Board/1',
     boardType: 'group',
@@ -518,7 +518,7 @@ describe('updateList', () => {
         },
       });
 
-      await actions.updateList({ commit: () => {}, state: state(), dispatch }, { listId });
+      await actions.updateList({ commit: () => {}, state: createState(), dispatch }, { listId });
 
       expect(dispatch.mock.calls).toEqual([['fetchItemsForList', { listId }]]);
     });
@@ -540,7 +540,10 @@ describe('updateList', () => {
         },
       });
 
-      await actions.updateList({ commit, state: state({ [listId]: [] }), dispatch }, { listId });
+      await actions.updateList(
+        { commit, state: createState({ [listId]: [] }), dispatch },
+        { listId },
+      );
 
       expect(dispatch.mock.calls).toEqual([]);
     });
@@ -559,7 +562,7 @@ describe('updateList', () => {
     testAction(
       actions.updateList,
       { listId: 'gid://gitlab/List/1', position: 1 },
-      state(),
+      createState(),
       [{ type: types.UPDATE_LIST_FAILURE }],
       [],
       done,
