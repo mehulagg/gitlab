@@ -166,7 +166,7 @@ In most cases, these pages are standalone.
 A tutorial is an end-to-end walkthrough of a complex workflow or scenario.
 In general, you might consider using a tutorial when:
 
-- The workflow requires number of sequential steps where each step consists
+- The workflow requires a number of sequential steps where each step consists
   of sub-steps.
 - The steps cover a variety of GitLab features or third-party tools.
 
