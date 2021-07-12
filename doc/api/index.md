@@ -23,6 +23,13 @@ For a list of the available resources and their endpoints, see
 For an introduction and basic steps, see
 [How to make GitLab API calls](https://www.youtube.com/watch?v=0LsMC3ZiXkA).
 
+## Background operations
+
+Please note that API calls that can take a long time are scheduled to be processed in the background.
+This means that the API call can quickly return an OK while the bulk of the task is being handled in the background.
+The results of the API call can take a bit of time to show up, until the background job is finished.
+(dependent on a few factors for example `queue size`, and `type of the task`)
+
 ## SCIM API **(PREMIUM SAAS)**
 
 GitLab provides an [SCIM API](scim.md) that both implements
