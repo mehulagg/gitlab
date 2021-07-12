@@ -134,6 +134,7 @@ module Gitlab
         # To get the next rows, we need to build the following conditions:
         #
         # (id < 3 AND created_at IS NULL) OR (created_at IS NOT NULL)
+        # rubocop: disable Metrics/AbcSize
         def build_where_values(values)
           return [] if values.blank?
 
@@ -150,16 +151,59 @@ module Gitlab
             conditions_for_column(column_definition, value).each do |condition|
               column_definitions_after_index = reversed_column_definitions.last(column_definitions.reverse.size - i - 1)
 
-              equal_conditon_for_rest = column_definitions_after_index.map do |definition|
-                definition.column_expression.eq(values[definition.attribute_name])
+              hashes = []
+              products = []
+              column_definitions_after_index.map do |definition|
+                cc1 = [
+                  definition.column_expression.eq(build_quoted(values[definition.attribute_name], definition.column_expression)),
+                  build_quoted(values[definition.attribute_name], definition.column_expression).not_eq(nil)
+                ]
+                cc2 = [
+                  definition.column_expression.eq(nil),
+                  build_quoted(values[definition.attribute_name], definition.column_expression).eq(nil)
+                ]
+
+                products << [cc1, cc2]
+                hashes << {
+                  not_null: cc1,
+                  null: cc2
+                }
               end
 
-              where_values << Arel::Nodes::Grouping.new(Arel::Nodes::And.new([condition, *equal_conditon_for_rest].compact))
+              arr = []
+
+              products.each_with_index do |v, i|
+                products.each_with_index do |vv, j|
+                  arr << [*v.first, *vv.last] if i != j
+                  arr << [*v.first, *vv.first] if i != j
+                  arr << [*v.last, *vv.last] if i != j
+                  arr << [*v.last, *vv.first] if i != j
+                end
+              end
+
+              if products.size == 1
+                arr = [products.first.first, products.last.last]
+              end
+
+              if products.empty?
+                where_values << condition
+              else
+                arr.each do |arrs|
+                  where_values << [*condition, *arrs].compact
+                end
+              end
             end
           end
 
-          where_values
+          where_values.uniq! do |items|
+            items.sort_by(&:to_sql).map(&:to_sql)
+          end
+
+          where_values.map do |vals|
+            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(vals))
+          end
         end
+        # rubocop: enable Metrics/AbcSize
 
         def where_values_with_or_query(values)
           build_or_query(build_where_values(values.with_indifferent_access))
@@ -225,19 +269,31 @@ module Gitlab
         def conditions_for_column(column_definition, value)
           conditions = []
           # Depending on the order, build a query condition fragment for taking the next rows
-          if column_definition.distinct? || (!column_definition.distinct? && value.present?)
-            conditions << compare_column_with_value(column_definition, value)
-          end
+          conditions << [compare_column_with_value(column_definition, value)]
 
           # When the column is nullable, additional conditions for NULL a NOT NULL values are necessary.
           # This depends on the position of the nulls (top or bottom of the resultset).
-          if column_definition.nulls_first? && value.blank?
-            conditions << column_definition.column_expression.not_eq(nil)
-          elsif column_definition.nulls_last? && value.present?
-            conditions << column_definition.column_expression.eq(nil)
+          if column_definition.nulls_first?
+            conditions << [
+              column_definition.column_expression.not_eq(nil),
+              build_quoted(value, column_definition.column_expression).eq(nil)
+            ]
+          elsif column_definition.nulls_last?
+            conditions << [
+              column_definition.column_expression.eq(nil),
+              build_quoted(value, column_definition.column_expression).not_eq(nil)
+            ]
           end
 
           conditions
+        end
+
+        def build_quoted(value, column_expression = nil)
+          if value.instance_of?(Arel::Nodes::SqlLiteral)
+            value
+          else
+            Arel::Nodes.build_quoted(value, column_expression)
+          end
         end
 
         def compare_column_with_value(column_definition, value)
