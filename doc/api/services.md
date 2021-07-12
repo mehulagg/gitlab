@@ -274,7 +274,7 @@ Parameters:
 | Parameter     | Type    | Required | Description                                                                                 |
 |---------------|---------|----------|---------------------------------------------------------------------------------------------|
 | `token`       | string  | true     | Campfire API token. To find it, log into Campfire and select **My info**.                   |
-| `subdomain`   | string  | false    | Campfire subdomain. What's between `https://` and `.campfirenow.com` when you're logged in. |
+| `subdomain`   | string  | false    | Campfire subdomain. Text between `https://` and `.campfirenow.com` when you're logged in. |
 | `room`        | string  | false    | Campfire room. The last part of the URL when you're in a room.                              |
 | `push_events` | boolean | false    | Enable notifications for push events.                                                       |
 
