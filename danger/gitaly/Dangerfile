@@ -15,7 +15,7 @@ during canary depoyment that can cause an incident.
 MSG
 
 changed_lines = helper.changed_lines('Gemfile.lock')
-if changed_lines.any? { |line| line =~ /^\+.+\bgitaly\b/ }
+if changed_lines.any? { |line| line =~ /^\+\s+gitaly \(/ }
   warn 'Changing gitaly gem can cause a multi-version incompatibility incident'
 
   markdown(TEMPLATE_MESSAGE)
