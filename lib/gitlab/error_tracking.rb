@@ -106,7 +106,7 @@ module Gitlab
       end
 
       def process_exception(exception, sentry: false, logging: true, extra:)
-        context_payload = Gitlab::ErrorTracking::ContextPayloadGenerator.generate(exception, extra)
+        context_payload = generate_context_payload(exception, extra)
 
         if sentry && Raven.configuration.server
           Raven.capture_exception(exception, **context_payload)
@@ -118,6 +118,13 @@ module Gitlab
 
           Gitlab::ErrorTracking::Logger.error(log_hash)
         end
+      end
+
+      def generate_context_payload(exception, extra)
+        Gitlab::ErrorTracking::ContextPayloadGenerator.generate(
+          exception,
+          extra
+        )
       end
 
       def sentry_dsn
