@@ -1074,6 +1074,74 @@ VM snapshots of the entire GitLab server. It's not uncommon however for a VM
 snapshot to require you to power down the server, which limits this solution's
 practical use.
 
+### General procedure to back up repository data separately
+
+First, ensure you back up existing GitLab data while [skipping repositories](#excluding-specific-directories-from-the-backup), using:
+
+```bash
+# for Omnibus GitLab package installations
+sudo gitlab-backup create SKIP=repositories
+
+# for installations from source:
+sudo -u git -H bundle exec rake gitlab:backup:create SKIP=repositories RAILS_ENV=production
+```
+
+For manually backing up the Git repository data on disk, there are multiple possible strategies:
+
+- Snapshots - as exemplified above: EBS drive snapshots, or LVM snapshots + rsync
+
+- [Preventing writes and copying the Git repository data](#preventing-writes-and-copying-the-Git-repository-data)
+
+- [Online backup through marking repositories as read-only (experimental)](#online-backup-through-marking-repositories-as-read-only-experimental)
+
+#### Preventing writes and copying the Git repository data
+
+Git repositories need to be copied in a consistent way, and they should not be simply copied while concurrent writes
+happen, as this can lead to inconsistency or corruption issues. For more details,
+[issue 270422](https://gitlab.com/gitlab-org/gitlab/-/issues/270422 "Provide documentation on preferred method of migrating Gitaly servers")
+has a longer discussion explaining the potential problems.
+
+To prevent writes to the Git repository data, there are two approaches possible:
+
+- Using [maintenance mode](../administration/maintenance_mode/index.md) to place GitLab in a read-only state
+- Explicit downtime, by stopping all Gitaly services before backing up the repositories, using:
+
+    ```bash
+    sudo gitlab-ctl stop gitaly
+    # execute git data copy step
+    sudo gitlab-ctl start gitaly
+    ```
+
+Copying the Git repository data can be done through any method, as long as writes are prevented on the data being copied
+(to eliminate the inconsistency/corruption issues), in order of preference and safety, they would be:
+
+1. A deleting checksumming archive-mode rsync approach, for example:
+
+    ```bash
+    rsync -aR --delete --checksum source destination # be extra safe with the order as it will delete existing data if inverted
+    ```
+
+1. `tar` piping the entire repositories directory to another server/location, as mentioned in the [Moving Repositories docs](../administration/operations/moving_repositories.md#tar-pipe-to-another-server)
+
+1. `sftp`, `scp`, `cp` or any other copying method
+
+#### Online backup through marking repositories as read-only (experimental)
+
+Using the read-only functionality for repositories, one way of backing up repositories without taking an instance-wide downtime
+is to programatically mark projects as read-only while copying the underlying data.
+
+There are a few possible downsides to this:
+
+- The immediate downside is having repositories read-only for a period of time that scales with the size of the repository
+
+- Backups taking a longer time to complete due to marking each project as read-only, potentially leading to inconsistencies, for example
+a possible date discrepancy between the last data available for the first project that gets backed up compared to
+the last project that gets backed up
+
+- Fork networks should be entirely read-only while the projects inside get backed up to prevent potential changes to the pool repository
+
+There is an **experimental** script that attempts to automate this process in [Snippet 2149205](https://gitlab.com/-/snippets/2149205).
+
 ## Backup and restore for installations using PgBouncer
 
 Do NOT backup or restore GitLab through a PgBouncer connection. These
