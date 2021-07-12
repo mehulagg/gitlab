@@ -95,7 +95,11 @@ module Types
     end
 
     def feature_documentation_message(key, description)
-      "#{description} Available only when feature flag `#{key}` is enabled."
+      message_parts = [description]
+      message_parts << "Available only when feature flag `#{key}` is enabled"
+      message_parts << "(it is #{Feature::Definition.has_definition?(key) && Feature::Definition.default_enabled?(key) ? 'enabled' : 'disabled'} by default)"
+
+      "#{message_parts.join(' ')}."
     end
 
     def check_feature_flag(args)
