@@ -6,9 +6,6 @@ class Groups::Security::ComplianceDashboardsController < Groups::ApplicationCont
   layout 'group'
 
   before_action :authorize_compliance_dashboard!
-  before_action do
-    push_frontend_feature_flag(:compliance_dashboard_drawer, @group, default_enabled: :yaml)
-  end
 
   track_unique_visits :show, target_id: 'g_compliance_dashboard'
 

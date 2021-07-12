@@ -1,8 +1,0 @@
----
-name: compliance_dashboard_drawer
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64771
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/334682
-milestone: '14.1'
-type: development
-group: group::compliance
-default_enabled: false
