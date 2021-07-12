@@ -56,6 +56,9 @@ module IssueResolverArguments
              as: :issue_types,
              description: 'Filter issues by the given issue types.',
              required: false
+    argument :milestone_title_wildcard, ::Types::MilestoneTitleWildcardEnum,
+              required: false,
+              description: 'Filter by milestone filter wildcard.'
     argument :not, Types::Issues::NegatedIssueFilterInputType,
              description: 'Negated arguments.',
              prepare: ->(negated_args, ctx) { negated_args.to_h },
@@ -75,6 +78,7 @@ module IssueResolverArguments
     args[:attempt_project_search_optimizations] = true if args[:search].present?
 
     prepare_assignee_username_params(args)
+    prepare_milestone_wildcard_params(args)
 
     finder = IssuesFinder.new(current_user, args)
 
@@ -82,10 +86,8 @@ module IssueResolverArguments
   end
 
   def ready?(**args)
-    if args.slice(*mutually_exclusive_assignee_username_args).compact.size > 1
-      arg_str = mutually_exclusive_assignee_username_args.map { |x| x.to_s.camelize(:lower) }.join(', ')
-      raise Gitlab::Graphql::Errors::ArgumentError, "only one of [#{arg_str}] arguments is allowed at the same time."
-    end
+    params_not_mutually_exclusive(args, mutually_exclusive_assignee_username_args)
+    params_not_mutually_exclusive(args.fetch(:not, {}).merge(args), mutually_exclusive_milestone_args)
 
     super
   end
@@ -104,6 +106,22 @@ module IssueResolverArguments
   def prepare_assignee_username_params(args)
     args[:assignee_username] = args.delete(:assignee_usernames) if args[:assignee_usernames].present?
     args[:not][:assignee_username] = args[:not].delete(:assignee_usernames) if args.dig(:not, :assignee_usernames).present?
+  end
+
+  def prepare_milestone_wildcard_params(args)
+    args[:milestone_title] = args.delete(:milestone_title_wildcard) if args[:milestone_title_wildcard].present?
+    args[:not][:milestone_title] = args[:not].delete(:milestone_title_wildcard) if args.dig(:not, :milestone_title_wildcard).present?
+  end
+
+  def params_not_mutually_exclusive(args, mutually_exclusive_args)
+    if args.slice(*mutually_exclusive_args).compact.size > 1
+      arg_str = mutually_exclusive_args.map { |x| x.to_s.camelize(:lower) }.join(', ')
+      raise ::Gitlab::Graphql::Errors::ArgumentError, "only one of [#{arg_str}] arguments is allowed at the same time."
+    end
+  end
+
+  def mutually_exclusive_milestone_args
+    [:milestone_title, :milestone_title_wildcard]
   end
 
   def mutually_exclusive_assignee_username_args

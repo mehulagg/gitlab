@@ -4,9 +4,11 @@ class IssuableFinder
   class Params < SimpleDelegator
     include Gitlab::Utils::StrongMemoize
 
-    # This is used as a common filter for None / Any
+    # This is used as a common filter for None / Any / Upcoming / Started
     FILTER_NONE = 'none'
     FILTER_ANY = 'any'
+    FILTER_STARTED = 'started'
+    FILTER_UPCOMING = 'upcoming'
 
     # This is used in unassigning users
     NONE = '0'
@@ -56,11 +58,11 @@ class IssuableFinder
     end
 
     def filter_by_upcoming_milestone?
-      params[:milestone_title] == Milestone::Upcoming.name
+      params[:milestone_title].to_s.downcase == FILTER_UPCOMING || params[:milestone_title] == Milestone::Upcoming.name
     end
 
     def filter_by_started_milestone?
-      params[:milestone_title] == Milestone::Started.name
+      params[:milestone_title].to_s.downcase == FILTER_STARTED || params[:milestone_title] == Milestone::Started.name
     end
 
     def filter_by_no_release?

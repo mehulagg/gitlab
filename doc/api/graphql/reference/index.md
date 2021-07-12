@@ -9501,6 +9501,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
 | <a id="groupissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
 | <a id="groupissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="groupissuesmilestonetitlewildcard"></a>`milestoneTitleWildcard` | [`MilestoneTitleWildcard`](#milestonetitlewildcard) | Filter by milestone filter wildcard. |
 | <a id="groupissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
 | <a id="groupissuessearch"></a>`search` | [`String`](#string) | Search query for issue title or description. |
 | <a id="groupissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
@@ -11740,6 +11741,7 @@ Returns [`Issue`](#issue).
 | <a id="projectissueiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
 | <a id="projectissuelabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
 | <a id="projectissuemilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="projectissuemilestonetitlewildcard"></a>`milestoneTitleWildcard` | [`MilestoneTitleWildcard`](#milestonetitlewildcard) | Filter by milestone filter wildcard. |
 | <a id="projectissuenot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
 | <a id="projectissuesearch"></a>`search` | [`String`](#string) | Search query for issue title or description. |
 | <a id="projectissuesort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
@@ -11771,6 +11773,7 @@ Returns [`IssueStatusCountsType`](#issuestatuscountstype).
 | <a id="projectissuestatuscountsiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
 | <a id="projectissuestatuscountslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
 | <a id="projectissuestatuscountsmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="projectissuestatuscountsmilestonetitlewildcard"></a>`milestoneTitleWildcard` | [`MilestoneTitleWildcard`](#milestonetitlewildcard) | Filter by milestone filter wildcard. |
 | <a id="projectissuestatuscountsnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
 | <a id="projectissuestatuscountssearch"></a>`search` | [`String`](#string) | Search query for issue title or description. |
 | <a id="projectissuestatuscountstypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
@@ -11806,6 +11809,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
 | <a id="projectissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
 | <a id="projectissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="projectissuesmilestonetitlewildcard"></a>`milestoneTitleWildcard` | [`MilestoneTitleWildcard`](#milestonetitlewildcard) | Filter by milestone filter wildcard. |
 | <a id="projectissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
 | <a id="projectissuessearch"></a>`search` | [`String`](#string) | Search query for issue title or description. |
 | <a id="projectissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
@@ -14881,6 +14885,17 @@ Current state of milestone.
 | <a id="milestonestateenumactive"></a>`active` | Milestone is currently active. |
 | <a id="milestonestateenumclosed"></a>`closed` | Milestone is closed. |
 
+### `MilestoneTitleWildcard`
+
+Milestone title wildcard values.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="milestonetitlewildcardany"></a>`ANY` | An milestone is assigned. |
+| <a id="milestonetitlewildcardnone"></a>`NONE` | No milestone is assigned. |
+| <a id="milestonetitlewildcardstarted"></a>`STARTED` | An open milestone with a start date that is before today. |
+| <a id="milestonetitlewildcardupcoming"></a>`UPCOMING` | An open milestone with a due date in the future. |
+
 ### `MoveType`
 
 The position to which the adjacent object should be moved.
@@ -14916,6 +14931,15 @@ Negated Iteration ID wildcard values.
 | Value | Description |
 | ----- | ----------- |
 | <a id="negatediterationwildcardidcurrent"></a>`CURRENT` | Current iteration. |
+
+### `NegatedMilestoneTitleWildcard`
+
+Negated Milestone title wildcard values.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="negatedmilestonetitlewildcardcurrent"></a>`CURRENT` | A current milestone is assigned. |
+| <a id="negatedmilestonetitlewildcardupcoming"></a>`UPCOMING` | An upcoming milestone is assigned. |
 
 ### `NetworkPolicyKind`
 
@@ -16607,6 +16631,7 @@ Represents an escalation rule.
 | <a id="negatedissuefilterinputiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by negated iteration ID wildcard. |
 | <a id="negatedissuefilterinputlabelname"></a>`labelName` | [`[String!]`](#string) | Labels not applied to this issue. |
 | <a id="negatedissuefilterinputmilestonetitle"></a>`milestoneTitle` | [`[String!]`](#string) | Milestone not applied to this issue. |
+| <a id="negatedissuefilterinputmilestonetitlewildcard"></a>`milestoneTitleWildcard` | [`NegatedMilestoneTitleWildcard`](#negatedmilestonetitlewildcard) | Filter by negated milestone title wildcard. |
 | <a id="negatedissuefilterinputweight"></a>`weight` | [`String`](#string) | Weight not applied to the issue. |
 
 ### `OncallRotationActivePeriodInputType`
