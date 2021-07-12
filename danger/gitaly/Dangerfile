@@ -2,7 +2,7 @@
 
 TEMPLATE_MESSAGE = <<~MSG
 This merge request requires coordination with gitaly deployments.
-Before this merging this merge request we should verify that gitaly
+Before merging this merge request we should verify that gitaly
 running in production already implements the new gRPC interface
 included here.
 
