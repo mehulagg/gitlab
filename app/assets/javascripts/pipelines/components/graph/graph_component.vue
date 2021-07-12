@@ -1,4 +1,5 @@
 <script>
+import * as d3 from 'd3';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { createJobsHash, generateJobNeedsDict, reportToSentry } from '../../utils';
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
@@ -57,6 +58,21 @@ export default {
       default: MAIN,
     },
   },
+  gitLabColorRotation: [
+    '#e17223',
+    '#83ab4a',
+    '#5772ff',
+    '#b24800',
+    '#25d2d2',
+    '#006887',
+    '#487900',
+    '#d84280',
+    '#3547de',
+    '#6f3500',
+    '#006887',
+    '#275600',
+    '#b31756',
+  ],
   pipelineTypeConstants: {
     DOWNSTREAM,
     UPSTREAM,
@@ -65,6 +81,7 @@ export default {
   BASE_CONTAINER_ID: 'pipeline-links-container',
   data() {
     return {
+      color: () => {},
       hoveredJobName: '',
       hoveredSourceJobName: '',
       highlightedJobs: [],
@@ -142,6 +159,7 @@ export default {
     // this.getMeasurements();
     const jobs = createJobsHash(this.layout);
     this.needsObject = generateJobNeedsDict(jobs);
+    this.color = this.initColors();
   },
   methods: {
     getAncestorJob(name) {
@@ -153,6 +171,10 @@ export default {
         width: this.$refs[this.containerId].scrollWidth,
         height: this.$refs[this.containerId].scrollHeight,
       };
+    },
+    initColors() {
+      const colorFn = d3.scaleOrdinal(this.$options.gitLabColorRotation);
+      return ({ name }) => colorFn(name);
     },
     onError(payload) {
       this.$emit('error', payload);
@@ -206,38 +228,14 @@ export default {
           />
         </template>
         <template #main>
-          <div :id="containerId" :ref="containerId">
-            <gl-dropdown :text="dropdownText">
-              <gl-dropdown-item v-for="item in allGroupNames" :key="item" @click="setDropJob(item)">
-                {{ item }}
-              </gl-dropdown-item>
-            </gl-dropdown>
-            <div v-for="group in allGroups" class="gl-mb-8">
-              <div v-if="group.name === selectedJob">
+          <div :id="containerId" :ref="containerId" class="gl-display-inline-flex gl-flex-wrap" :style="{ justifyContent: 'space-evenly'}">
+            <div v-for="group in allGroups" class="gl-mb-8 gl-mx-6">
               <h3> {{ group.name }} </h3>
-              <job-item
-                v-if="group.size === 1"
-                :job="group.jobs[0]"
-              />
-              <div v-else>
-                <job-group-dropdown
-                  :group="group"
-                  :pipeline-id="pipelineId"
-                />
-              </div>
+              <div class="gl-p-4 gl-text-white gl-font-weight-bold" :style="{ backgroundColor: color(group) }"> {{ group.name }} </div>
 
               <div v-for="ancestor in needsObject[group.name]">
-                <job-item
-                  v-if="getAncestorJob(ancestor).size === 1"
-                  :job="getAncestorJob(ancestor).jobs[0]"
-                />
-                <div v-else>
-                  <job-group-dropdown
-                    :group="getAncestorJob(ancestor)"
-                    :pipeline-id="pipelineId"
-                  />
-                </div>
-              </div>
+                <div class="gl-p-4 gl-text-white gl-font-weight-bold" :style="{ backgroundColor: color(getAncestorJob(ancestor)) }"> {{ getAncestorJob(ancestor).name }} </div>
+
               </div>
             </div>
             <hr />
