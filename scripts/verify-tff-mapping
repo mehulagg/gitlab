@@ -89,12 +89,6 @@ tests = [
   },
 
   {
-    explanation: 'EE views should map to respective spec',
-    source: 'ee/app/views/admin/licenses/show.html.haml',
-    expected: ['ee/spec/views/admin/licenses/show.html.haml_spec.rb']
-  },
-
-  {
     explanation: 'DB structure should map to schema spec',
     source: 'db/structure.sql',
     expected: ['spec/db/schema_spec.rb']
