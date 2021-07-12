@@ -11,13 +11,7 @@ module Ci
 
       # rubocop:disable CodeReuse/ActiveRecord
       def builds_for_shared_runner
-        relation = new_builds
-          # don't run projects which have not enabled shared runners and builds
-          .joins('INNER JOIN projects ON ci_pending_builds.project_id = projects.id')
-          .where(projects: { shared_runners_enabled: true, pending_delete: false })
-          .joins('LEFT JOIN project_features ON ci_pending_builds.project_id = project_features.project_id')
-          .where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0')
-
+        relation = builds_with_shared_runners_denormalized(new_builds)
         if Feature.enabled?(:ci_queueing_disaster_recovery_disable_fair_scheduling, runner, type: :ops, default_enabled: :yaml)
           # if disaster recovery is enabled, we fallback to FIFO scheduling
           relation.order('ci_pending_builds.build_id ASC')
@@ -62,6 +56,18 @@ module Ci
 
         ::Gitlab::SQL::CTE
           .new(:project_builds, running_builds, materialized: true)
+      end
+
+      def builds_with_shared_runners_denormalized(new_builds)
+        if ::Feature.enabled?(:ci_queueing_denormalize_data, type: :development, default_enabled: :yaml)
+          new_builds.joins('INNER JOIN projects ON ci_pending_builds.project_id = projects.id').with_runners_enabled
+        else
+          new_builds
+            .joins('INNER JOIN projects ON ci_pending_builds.project_id = projects.id')
+            .where(projects: { shared_runners_enabled: true, pending_delete: false })
+            .joins('LEFT JOIN project_features ON ci_pending_builds.project_id = project_features.project_id')
+            .where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0')
+        end
       end
       # rubocop:enable CodeReuse/ActiveRecord
     end
