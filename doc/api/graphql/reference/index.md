@@ -8913,6 +8913,7 @@ Relationship between an epic and an issue.
 | <a id="epicissueiid"></a>`iid` | [`ID!`](#id) | Internal ID of the issue. |
 | <a id="epicissueiteration"></a>`iteration` | [`Iteration`](#iteration) | Iteration of the issue. |
 | <a id="epicissuelabels"></a>`labels` | [`LabelConnection`](#labelconnection) | Labels of the issue. (see [Connections](#connections)) |
+| <a id="epicissuemergerequestscount"></a>`mergeRequestsCount` | [`Int!`](#int) | Number of merge requests associated with the issue. |
 | <a id="epicissuemetricimages"></a>`metricImages` | [`[MetricImage!]`](#metricimage) | Metric images associated to the issue. |
 | <a id="epicissuemilestone"></a>`milestone` | [`Milestone`](#milestone) | Milestone of the issue. |
 | <a id="epicissuemoved"></a>`moved` | [`Boolean`](#boolean) | Indicates if issue got moved from other project. |
@@ -9967,6 +9968,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="issueiid"></a>`iid` | [`ID!`](#id) | Internal ID of the issue. |
 | <a id="issueiteration"></a>`iteration` | [`Iteration`](#iteration) | Iteration of the issue. |
 | <a id="issuelabels"></a>`labels` | [`LabelConnection`](#labelconnection) | Labels of the issue. (see [Connections](#connections)) |
+| <a id="issuemergerequestscount"></a>`mergeRequestsCount` | [`Int!`](#int) | Number of merge requests associated with the issue. |
 | <a id="issuemetricimages"></a>`metricImages` | [`[MetricImage!]`](#metricimage) | Metric images associated to the issue. |
 | <a id="issuemilestone"></a>`milestone` | [`Milestone`](#milestone) | Milestone of the issue. |
 | <a id="issuemoved"></a>`moved` | [`Boolean`](#boolean) | Indicates if issue got moved from other project. |

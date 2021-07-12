@@ -60,6 +60,8 @@ module Types
           description: 'Number of upvotes the issue has received.'
     field :downvotes, GraphQL::INT_TYPE, null: false,
           description: 'Number of downvotes the issue has received.'
+    field :merge_requests_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of merge requests associated with the issue.'
     field :user_notes_count, GraphQL::INT_TYPE, null: false,
           description: 'Number of user notes of the issue.',
           resolver: Resolvers::UserNotesCountResolver
