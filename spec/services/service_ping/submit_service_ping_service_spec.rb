@@ -223,6 +223,22 @@ RSpec.describe ServicePing::SubmitService do
 
       it_behaves_like 'does not send a blank usage ping payload'
     end
+
+    context 'if payload service fails' do
+      before do
+        stub_response(body: with_dev_ops_score_params)
+        allow(ServicePing::BuildPayloadService).to receive(:execute).and_raise(described_class::SubmissionError, 'SubmissionError')
+      end
+
+      it 'calls UsageData .data method' do
+        recorded_at = Time.current
+        usage_data = { uuid: 'uuid', recorded_at: recorded_at }
+
+        expect(Gitlab::UsageData).to receive(:data).and_return(usage_data)
+
+        subject.execute
+      end
+    end
   end
 
   def stub_response(body:, status: 201)
