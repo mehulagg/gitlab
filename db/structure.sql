@@ -14120,7 +14120,8 @@ ALTER SEQUENCE issuable_severities_id_seq OWNED BY issuable_severities.id;
 CREATE TABLE issuable_slas (
     id bigint NOT NULL,
     issue_id bigint NOT NULL,
-    due_at timestamp with time zone NOT NULL
+    due_at timestamp with time zone NOT NULL,
+    label_applied boolean DEFAULT false
 );
 
 CREATE SEQUENCE issuable_slas_id_seq

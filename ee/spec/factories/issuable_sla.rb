@@ -8,5 +8,9 @@ FactoryBot.define do
     trait :exceeded do
       due_at { 1.hour.ago }
     end
+
+    trait :label_applied do
+      label_applied { true }
+    end
   end
 end

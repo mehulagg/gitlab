@@ -12,11 +12,12 @@ RSpec.describe IssuableSla do
   end
 
   describe 'scopes' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_reload(:issue) { create(:issue, project: project) }
+
     describe '.exceeded_for_issues' do
       subject { described_class.exceeded_for_issues }
 
-      let_it_be(:project) { create(:project) }
-      let_it_be_with_reload(:issue) { create(:issue, project: project) }
       let_it_be_with_reload(:issuable_sla) { create(:issuable_sla, issue: issue, due_at: 1.hour.ago) }
 
       context 'issue closed' do
@@ -39,6 +40,20 @@ RSpec.describe IssuableSla do
         context 'when due date has passed' do
           it { is_expected.to contain_exactly(issuable_sla) }
         end
+      end
+    end
+
+    describe '.label_applied' do
+      let!(:issuable_sla) { create(:issuable_sla, issue: issue) }
+
+      subject { described_class.exceeded_label_not_applied }
+
+      it { is_expected.to contain_exactly(issuable_sla) }
+
+      context 'label is applied' do
+        let!(:issuable_sla) { create(:issuable_sla, :label_applied, issue: issue) }
+
+        it { is_expected.to be_empty }
       end
     end
   end
