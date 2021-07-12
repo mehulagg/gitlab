@@ -7,10 +7,7 @@ module Gitlab
     end
 
     def format_message(severity, timestamp, progname, message)
-      data = {}
-      data[:severity] = severity
-      data[:time] = timestamp.utc.iso8601(3)
-      data[Labkit::Correlation::CorrelationId::LOG_KEY] = Labkit::Correlation::CorrelationId.current_id
+      data = default_attributes(severity, timestamp, progname, message)
 
       case message
       when String
@@ -20,6 +17,16 @@ module Gitlab
       end
 
       Gitlab::Json.dump(data) + "\n"
+    end
+
+    protected
+
+    def default_attributes(severity, timestamp, progname, message)
+      {
+        :severity => severity,
+        :time => timestamp.utc.iso8601(3),
+        Labkit::Correlation::CorrelationId::LOG_KEY => Labkit::Correlation::CorrelationId.current_id
+      }
     end
   end
 end
