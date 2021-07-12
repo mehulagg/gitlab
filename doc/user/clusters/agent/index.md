@@ -137,48 +137,23 @@ gitops:
 
 All the options for the [Kubernetes Agent configuration repository](repository.md) are documented separately.
 
-### Create an Agent record in GitLab
+### Create an Agent Record and Generate a token
 
 Next, create a GitLab Rails Agent record to associate it with
 the configuration repository project. Creating this record also creates a Secret needed to configure
-the Agent in subsequent steps. You can create an Agent record with GraphQL:
+the Agent in subsequent steps. 
 
-  ```graphql
-  mutation createAgent {
-    # agent-name should be the same as specified above in the config.yaml
-    createClusterAgent(input: { projectPath: "path-to/your-configuration-project", name: "<agent-name>" }) {
-      clusterAgent {
-        id
-        name
-      }
-      errors
-    }
-  }
+1. Navigate to the GitLab Agent Managed Clusters tab
+1. Click "Integrate with GitLab Agent"
 
-  mutation createToken {
-    clusterAgentTokenCreate(
-      input: {
-        clusterAgentId: "<cluster-agent-id-taken-from-the-previous-mutation>"
-        description: "<optional-description-of-token>"
-        name: "<required-name-given-to-token>"
-      }
-    ) {
-      secret # This is the value you need to use on the next step
-      token {
-        createdAt
-        id
-      }
-      errors
-    }
-  }
-  ```
+![GitLab Kubernetes Agent list UI](../img/dropdown.png)
 
-WARNING:
-GraphQL only displays the token and ids **one time** after creating it. Make sure to write down the `secret`, `clusterAgentId`, and `clusterAgentTokenId`; you'll need them later.
+1. Within the Install new Agent dialog box, select an Agent from the available list and click "Next"
 
-  If you are new to using the GitLab GraphQL API, refer to the
-  [Getting started with the GraphQL API page](../../../api/graphql/getting_started.md),
-  or the [GraphQL Explorer](https://gitlab.com/-/graphql-explorer).
+![GitLab Kubernetes Agent list UI](../img/agent-window.png)
+
+1. The subsequent screen reveals your Secret Token, please securely store this token as it will not be viewable again.
+1. Note the recommended installation method displayed on the same screen. This provides and easily method to install the Agent into your cluster using the above token.
 
 ### Install the Agent into the cluster
 
