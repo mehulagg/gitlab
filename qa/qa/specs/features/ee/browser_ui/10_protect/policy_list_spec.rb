@@ -38,12 +38,6 @@ module QA
       context 'with k8s cluster', :require_admin, :runner, :registry, :orchestrated do
         let(:policy_name) { 'l3-rule' }
         let!(:cluster) { Service::KubernetesCluster.new(provider_class: Service::ClusterProvider::K3sCilium).create! }
-        let!(:runner) do
-          Resource::Runner.fabricate_via_api! do |resource|
-            resource.project = project
-            resource.executor = :docker
-          end
-        end
 
         let(:optional_jobs) do
           %w[
@@ -60,12 +54,11 @@ module QA
         end
 
         after do
-          runner&.remove_via_api!
-        ensure
           cluster&.remove!
         end
 
         it 'loads a sample network policy under policies tab on the Threat Monitoring page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1855' do
+          cluster.install_gitlab_runner(project)
           Resource::KubernetesCluster::ProjectCluster.fabricate_via_browser_ui! do |k8s_cluster|
             k8s_cluster.project = project
             k8s_cluster.cluster = cluster

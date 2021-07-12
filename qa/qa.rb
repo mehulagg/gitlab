@@ -585,6 +585,7 @@ module QA
     autoload :KubernetesCluster, 'qa/service/kubernetes_cluster'
     autoload :Omnibus, 'qa/service/omnibus'
     autoload :PraefectManager, 'qa/service/praefect_manager'
+    autoload :Helm, 'qa/service/helm'
 
     module ClusterProvider
       autoload :Base, 'qa/service/cluster_provider/base'

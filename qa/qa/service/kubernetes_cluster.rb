@@ -8,6 +8,7 @@ module QA
   module Service
     class KubernetesCluster
       include Service::Shellout
+      include Service::Helm
 
       attr_reader :api_url, :ca_certificate, :token, :rbac, :provider
 
@@ -73,6 +74,10 @@ module QA
 
       def fetch_external_ip_for_ingress
         `kubectl get svc --all-namespaces --no-headers=true -l  app.kubernetes.io/name=ingress-nginx -o custom-columns=:'status.loadBalancer.ingress[0].ip' | grep -v 'none'`
+      end
+
+      def install_gitlab_runner(project)
+        install_gitlab_chart(chart: 'gitlab-runner', opts: "--set gitlabUrl=#{Runtime::Scenario.gitlab_address},runnerRegistrationToken=#{project.runners_token},locked=false,runUntagged=true,privileged=true")
       end
 
       private
