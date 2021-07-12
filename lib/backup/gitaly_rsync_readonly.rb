@@ -44,9 +44,12 @@ module Backup
       end
 
       projects_outside_fork_networks.find_each do |project|
+        toggle_write_access_for_project(project, write_access: false)
         backup_repository(project, type: Gitlab::GlRepository::PROJECT)
         backup_repository(project, type: Gitlab::GlRepository::WIKI)
         backup_repository(project, type: Gitlab::GlRepository::DESIGN)
+      ensure
+        toggle_write_access_for_project(project, write_access: true)
       end
     end
 
@@ -71,18 +74,22 @@ module Backup
 
     private
 
+    def toggle_write_access_for_project(project, write_access: false)
+      progress.puts "Toggling write access to #{write_access} for project ##{project.id}"
+
+      if write_access
+        project.set_repository_writable!
+      else
+        project.set_repository_read_only!(skip_git_transfer_check: true)
+      end
+    rescue StandardError => e
+      progress.puts "[Failed] Toggling write access to #{write_access} for project ##{project.id}"
+      progress.puts "Error #{e}"
+    end
+
     def toggle_write_access_for_projects_in_fork_network(fork_network, write_access: false)
       fork_network.projects.find_each do |project|
-        progress.puts "Toggling write access to #{write_access} for project ##{project.id}"
-
-        if write_access
-          project.set_repository_writable!
-        else
-          project.set_repository_read_only!(skip_git_transfer_check: true)
-        end
-      rescue StandardError => e
-        progress.puts "[Failed] Toggling write access to #{write_access} for project ##{project.id}"
-        progress.puts "Error #{e}"
+        toggle_write_access_for_project(project, write_access: write_access)
       end
     end
 
@@ -116,7 +123,7 @@ module Backup
       end
     end
 
-    def backup_repository(container, type:)
+    def backup_repository(container, type:, toggle_write_access: false)
       repository = type.repository_for(container)
       progress.puts " * #{repository.relative_path} ... "
 
