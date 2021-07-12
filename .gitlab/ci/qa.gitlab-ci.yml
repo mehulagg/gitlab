@@ -69,3 +69,5 @@ package-and-qa:
       artifacts: false
     - job: build-assets-image
       artifacts: false
+  variables:
+    QA_BRANCH: registry-scenario
