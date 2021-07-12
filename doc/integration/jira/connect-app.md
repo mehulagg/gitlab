@@ -126,7 +126,7 @@ DVCS means distributed version control system.
 
 ## Troubleshooting GitLab.com for Jira Cloud app
 
-The GitLab.com for Jira Cloud app uses an iframe to add namespaces on the settings page. Some browsers block cross-site cookies which can lead to a message saying that the user needs to log in on GitLab.com even though the user is already logged in.
+The GitLab.com for Jira Cloud app uses an iframe to add namespaces on the settings page. Some browsers block cross-site cookies, which can lead to a message saying that the user needs to log in on GitLab.com even though the user is already logged in.
 
 > "You need to sign in or sign up before continuing."
 

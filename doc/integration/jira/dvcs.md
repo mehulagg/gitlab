@@ -69,7 +69,7 @@ your integration.
    use to connect to GitLab. For Jira to access all projects,
    a user with [administrator](../../user/permissions.md) permissions must
    create the user with administrator permissions.
-1. Login as the `jira` user.
+1. Sign in as the `jira` user.
 1. In the top right corner, click the account's avatar, and select **Edit profile**.
 1. In the left sidebar, select **Applications**.
 1. In the **Name** field, enter a descriptive name for the integration, such as `Jira`.

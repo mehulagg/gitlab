@@ -39,8 +39,8 @@ After the integration is [set up on GitLab and Jira](#configure-the-integration)
   commit messages, and merge request titles.
 - See the linked branches, commits, and merge requests in Jira issues:
 
-At this time merge requests are called "pull requests" in Jira issues,
-this may change in a future Jira release.
+At this time, merge requests are called "pull requests" in Jira issues.
+This name may change in a future Jira release.
 
 Select the links to see your GitLab repository data.
 
@@ -103,10 +103,10 @@ To enable the integration in your GitLab project, after you
      Defaults to the **Web URL** value if not set. Leave blank if using **Jira on Atlassian cloud**.
    - **Username or Email**:
      For **Jira Server**, use `username`. For **Jira on Atlassian cloud**, use `email`.
-     See [authentication in Jira](index.md#direct-feature-comparison).
+     See [authentication in Jira](index.md#authentication-in-jira).
    - **Password/API token**:
      Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**.
-     See [authentication in Jira](index.md#direct-feature-comparison).
+     See [authentication in Jira](index.md#authentication-in-jira).
 1. To enable users to view Jira issues inside the GitLab project **(PREMIUM)**, select **Enable Jira issues** and
    enter a Jira project key.
 
