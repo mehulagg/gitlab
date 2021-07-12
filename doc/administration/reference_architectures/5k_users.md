@@ -2095,7 +2095,7 @@ future with further specific cloud provider details.
 | Service                                               | Nodes(1) | Configuration           | GCP              | Allocatable CPUs and Memory |
 |-------------------------------------------------------|----------|-------------------------|------------------|-----------------------------|
 | Webservice                                            | 5        | 16 vCPU, 14.4 GB memory | `n1-highcpu-16`  | 79.5 vCPU, 62 GB memory     |
-| Sidekiq                                               | 3        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 11.8 vCPU, 38,9 GB memory   |
+| Sidekiq                                               | 3        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 11.8 vCPU, 38.9 GB memory   |
 | Supporting services such as NGINX, Prometheus, etc.   | 2        | 2 vCPU, 7.5 GB memory   | `n1-standard-2`  | 3.9 vCPU, 11.8 GB memory    |
 
 <!-- Disable ordered list rule https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md029---ordered-list-item-prefix -->
