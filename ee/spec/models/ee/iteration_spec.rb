@@ -178,53 +178,46 @@ RSpec.describe Iteration do
         let(:start_date) { 5.days.from_now }
         let(:due_date) { 6.days.from_now }
 
-        shared_examples_for 'overlapping dates' do |skip_constraint_test: false|
+        shared_examples_for 'overlapping dates' do
+          shared_examples_for 'invalid dates' do
+            context 'with iterations_cadences FF disabled' do
+              before do
+                stub_feature_flags(iteration_cadences: false)
+              end
+
+              it 'is not valid' do
+                expect(subject).not_to be_valid
+                expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
+              end
+            end
+
+            it 'is not valid even if forced' do
+              subject.validate # to generate iid/etc
+              expect { subject.save!(validate: false) }.to raise_exception(ActiveRecord::StatementInvalid, /#{constraint_name}/)
+            end
+
+            it 'is not valid' do
+              expect(subject).not_to be_valid
+              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this iterations cadence')
+            end
+          end
+
           context 'when start_date overlaps' do
             let(:start_date) { 5.days.from_now }
             let(:due_date) { 3.weeks.from_now }
 
-            it 'is not valid' do
-              expect(subject).not_to be_valid
-              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
-            end
-
-            unless skip_constraint_test
-              it 'is not valid even if forced' do
-                subject.validate # to generate iid/etc
-                expect { subject.save!(validate: false) }.to raise_exception(ActiveRecord::StatementInvalid, /#{constraint_name}/)
-              end
-            end
+            it_behaves_like 'invalid dates'
           end
 
           context 'when due_date overlaps' do
             let(:start_date) { Time.current }
             let(:due_date) { 6.days.from_now }
 
-            it 'is not valid' do
-              expect(subject).not_to be_valid
-              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
-            end
-
-            unless skip_constraint_test
-              it 'is not valid even if forced' do
-                subject.validate # to generate iid/etc
-                expect { subject.save!(validate: false) }.to raise_exception(ActiveRecord::StatementInvalid, /#{constraint_name}/)
-              end
-            end
+            it_behaves_like 'invalid dates'
           end
 
           context 'when both overlap' do
-            it 'is not valid' do
-              expect(subject).not_to be_valid
-              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
-            end
-
-            unless skip_constraint_test
-              it 'is not valid even if forced' do
-                subject.validate # to generate iid/etc
-                expect { subject.save!(validate: false) }.to raise_exception(ActiveRecord::StatementInvalid, /#{constraint_name}/)
-              end
-            end
+            it_behaves_like 'invalid dates'
           end
         end
 

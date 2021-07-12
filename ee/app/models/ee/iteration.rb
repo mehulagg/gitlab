@@ -212,10 +212,11 @@ module EE
       return unless iterations_cadence
       return unless iterations_cadence.iterations.where.not(id: self.id).within_timeframe(start_date, due_date).exists?
 
-      # for now we only have a single default cadence within a group just to wrap the iterations into a set.
-      # once we introduce multiple cadences per group we need to change this message.
-      # related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/299312
-      errors.add(:base, s_("Iteration|Dates cannot overlap with other existing Iterations within this group"))
+      if group.iteration_cadences_feature_flag_enabled?
+        errors.add(:base, s_("Iteration|Dates cannot overlap with other existing Iterations within this iterations cadence"))
+      else
+        errors.add(:base, s_("Iteration|Dates cannot overlap with other existing Iterations within this group"))
+      end
     end
 
     def future_date
