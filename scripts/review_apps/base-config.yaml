@@ -153,8 +153,9 @@ postgresql:
     limits:
       cpu: 1300m
       memory: 1500M
-  nodeSelector:
-    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
+  master:
+    nodeSelector:
+      cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 prometheus:
   install: false
 redis:
@@ -167,8 +168,9 @@ redis:
     limits:
       cpu: 200m
       memory: 130M
-  nodeSelector:
-    cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
+  master:
+    nodeSelector:
+      cloud.google.com/gke-nodepool: e2-16cpu-64gb-preemp
 registry:
   hpa:
     minReplicas: 1
