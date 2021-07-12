@@ -31,7 +31,7 @@ Any change that requires access to the **Admin Area** needs to be done in the
 ### Step 1. Manually replicate secret GitLab values
 
 GitLab stores a number of secret values in the `/etc/gitlab/gitlab-secrets.json`
-file which *must* be the same on all sites. Until there is
+file which *must* be the same on all of a site's nodes. Until there is
 a means of automatically replicating these between sites (see [issue #3789](https://gitlab.com/gitlab-org/gitlab/-/issues/3789)),
 they must be manually replicated to the **secondary** site.
 
