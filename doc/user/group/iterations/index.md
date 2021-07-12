@@ -52,7 +52,7 @@ With iteration cadences enabled, you must first
 [create an iteration cadence](#create-an-iteration-cadence) before you can
 [create an iteration](#create-an-iteration).
 
-## Create an iteration cadence
+### Create an iteration cadence
 
 Prerequisites:
 
@@ -65,7 +65,7 @@ To create an iteration cadence:
 1. Select **New iteration cadence**.
 1. Fill out required fields, and select **Create iteration cadence**. The cadence list page opens.
 
-## Delete an iteration cadence
+### Delete an iteration cadence
 
 Prerequisites:
 
