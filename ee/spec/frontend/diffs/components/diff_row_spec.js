@@ -20,13 +20,7 @@ describe('EE DiffRow', () => {
     fileLineCoverage: () => ({}),
   };
 
-  const createComponent = ({
-    props,
-    state,
-    actions,
-    isLoggedIn = true,
-    codequalityMrDiffAnnotations,
-  }) => {
+  const createComponent = ({ props, state, actions, isLoggedIn = true }) => {
     const diffs = diffsModule();
     diffs.state = { ...diffs.state, ...state };
     diffs.actions = { ...diffs.actions, ...actions };
@@ -37,8 +31,6 @@ describe('EE DiffRow', () => {
       modules: { diffs },
       getters,
     });
-
-    window.gon = { features: { codequalityMrDiffAnnotations } };
 
     wrapper = shallowMount(DiffRow, {
       propsData: { ...defaultProps, ...props },
@@ -65,11 +57,10 @@ describe('EE DiffRow', () => {
     });
   });
 
-  describe('with feature flag enabled', () => {
+  describe('with a new code quality violation', () => {
     beforeEach(() => {
       createComponent({
         props: { line: { right: { codequality: [{ severity: 'critical' }] } } },
-        codequalityMrDiffAnnotations: true,
       });
     });
 
@@ -78,15 +69,14 @@ describe('EE DiffRow', () => {
     });
   });
 
-  describe('without feature flag enabled', () => {
+  describe('with no new code quality violations', () => {
     beforeEach(() => {
       createComponent({
-        props: { line: { right: { codequality: [{ severity: 'critical' }] } } },
-        codequalityMrDiffAnnotations: false,
+        props: { line: { right: { codequality: [] } } },
       });
     });
 
-    it('does not code quality gutter icon', () => {
+    it('does not show code quality gutter icon', () => {
       expect(findIcon().exists()).toBe(false);
     });
   });
