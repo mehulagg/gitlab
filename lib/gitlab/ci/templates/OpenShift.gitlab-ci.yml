@@ -3,6 +3,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/OpenShift.gitlab-ci.yml
 
+template:
+  name: OpenShift
+  desc: This is a GitLab managed template.
+  maintainers: ["group::testing"]
+  categories: ["Verify stage", "Release stage"]
+  usage: copy-paste
+
 image: openshift/origin-cli
 
 stages:

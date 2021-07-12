@@ -3,6 +3,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Rust.gitlab-ci.yml
 
+template:
+  name: Rust
+  desc: This is a GitLab managed template.
+  maintainers: ["group::verify"]
+  categories: ["Rust"]
+  usage: copy-paste
+
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/rust/tags/
 image: "rust:latest"

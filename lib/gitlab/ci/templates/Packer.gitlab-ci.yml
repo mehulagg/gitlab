@@ -3,6 +3,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Packer.gitlab-ci.yml
 
+template:
+  name: Packer
+  desc: This is a GitLab managed template.
+  maintainers: ["group::verify"]
+  categories: ["Packer"]
+  usage: copy-paste
+
 image:
   name: hashicorp/packer:latest
   entrypoint:

@@ -13,6 +13,13 @@
 # * Verify but don't deploy merge requests.
 # * Deploy built artifacts from master branch only.
 
+template:
+  name: Maven
+  desc: This is a GitLab managed template.
+  maintainers: ["group::testing", "group::release"]
+  categories: ["Verify stage", "Release stage"]
+  usage: copy-paste
+
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
   # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.

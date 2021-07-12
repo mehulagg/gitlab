@@ -5,6 +5,14 @@
 
 # Lifted from: https://about.gitlab.com/2016/03/10/setting-up-gitlab-ci-for-ios-projects/
 # This file assumes an own GitLab CI runner, setup on a macOS system.
+
+template:
+  name: Swift
+  desc: This is a GitLab managed template.
+  maintainers: ["group::configure"]
+  categories: ["Swift"]
+  usage: copy-paste
+
 stages:
   - build
   - test

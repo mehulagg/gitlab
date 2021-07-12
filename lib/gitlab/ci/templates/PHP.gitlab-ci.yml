@@ -3,6 +3,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/PHP.gitlab-ci.yml
 
+template:
+  name: PHP
+  desc: This is a GitLab managed template.
+  maintainers: ["group::verify"]
+  categories: ["PHP"]
+  usage: copy-paste
+
 # Select image from https://hub.docker.com/_/php/
 image: php:latest
 

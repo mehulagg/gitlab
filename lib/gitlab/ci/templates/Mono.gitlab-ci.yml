@@ -16,6 +16,13 @@
 # Please find the full example project here:
 # https://gitlab.com/tobiaskoch/gitlab-ci-example-mono
 
+template:
+  name: Mono
+  desc: This is a GitLab managed template.
+  maintainers: ["group::testing", "group::release"]
+  categories: ["Verify stage", "Release stage"]
+  usage: copy-paste
+
 # see https://hub.docker.com/_/mono/
 image: mono:latest
 

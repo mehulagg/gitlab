@@ -47,6 +47,14 @@
 # `.buildpacks` that contains the URLs, one on each line, in order.
 # Note: Auto CI does not work with multiple buildpacks yet
 
+template:
+  name: Auto DevOps
+  desc: This is a GitLab managed template.
+  maintainers: ["group::configure"]
+  categories: ["Auto DevOps"]
+  usage: inclusion
+  inclusion_type: shared-workflow
+
 image: alpine:latest
 
 variables:

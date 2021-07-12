@@ -6,6 +6,14 @@
 # Official OpenJDK Java image. Look for the different tagged releases at
 # https://hub.docker.com/_/openjdk/ . A Java image is not required
 # but an image with a JVM speeds up the build a bit.
+
+template:
+  name: Scala
+  desc: This is a GitLab managed template.
+  maintainers: ["group::verify"]
+  categories: ["Scala"]
+  usage: copy-paste
+
 image: openjdk:8
 
 before_script:

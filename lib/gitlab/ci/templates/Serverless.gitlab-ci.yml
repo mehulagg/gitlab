@@ -5,6 +5,13 @@
 
 # GitLab Serverless template
 
+template:
+  name: Serverless
+  desc: This is a GitLab managed template.
+  maintainers: ["group::configure"]
+  categories: ["Serverless"]
+  usage: copy-paste
+
 image: alpine:latest
 
 stages:

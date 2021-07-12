@@ -173,4 +173,25 @@ RSpec.describe 'CI YML Templates' do
       end
     end
   end
+
+  describe 'Template Metadata Existence' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:all_templates) { Gitlab::Template::GitlabCiYmlTemplate.all.map(&:full_name) }
+    let(:undefined_templates) { [] }
+
+    where(:template_name) do
+      all_templates - undefined_templates
+    end
+
+    with_them do
+      let(:content) do
+        Gitlab::Template::GitlabCiYmlTemplate.find(template_name).content
+      end
+
+      it 'has template metadata' do
+        is_expected.to include(:template)
+      end
+    end
+  end
 end
