@@ -52,7 +52,7 @@ With iteration cadences enabled, you must first
 [create an iteration cadence](#create-an-iteration-cadence) before you can
 [create an iteration](#create-an-iteration).
 
-### Create an iteration cadence
+## Create an iteration cadence
 
 Prerequisites:
 
