@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Customize the Help and Sign-in page messages
+# Customize the Help and sign-in page messages
 
 In large organizations, it is useful to have information about who to contact or where
 to go for help. You can customize and display this information on the GitLab  `/help` page and on
@@ -16,7 +16,7 @@ the GitLab sign-in page.
 You can add a help message, which is shown at the top of the GitLab `/help` page (for example,
 <https://gitlab.com/help>):
 
-1. On the top bar, select **Menu** > **{admin}** **Admin**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > Preferences**, then expand **Help page**.
 1. Under **Additional text to show on the Help page**, fill in the information you wish to display on `/help`.
 1. Select **Save changes**. You can now see the message on `/help`.
@@ -26,7 +26,7 @@ You can add a help message, which is shown at the top of the GitLab `/help` page
 You can add a help message, which is shown on the GitLab sign-in page. The message appears in a new
 section titled **Need Help?**, located below the sign-in page message:
 
-1. On the top bar, select **Menu** > **{admin}** **Admin**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > Preferences**, then expand **Help page**.
 1. Under **Additional text to show on the sign-in page**, fill in the information you wish to
    display on the sign-in page.
@@ -36,7 +36,7 @@ section titled **Need Help?**, located below the sign-in page message:
 
 GitLab marketing-related entries are occasionally shown on the Help page. To hide these entries:
 
-1. On the top bar, select **Menu** > **{admin}** **Admin**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > Preferences**, then expand **Help page**.
 1. Select the **Hide marketing-related entries from the Help page** checkbox.
 1. Select **Save changes**.
@@ -48,7 +48,7 @@ You can specify a custom URL to which users are directed when they:
 - Select **Support** from the Help dropdown.
 - Select **See our website for help** on the Help page.
 
-1. On the top bar, select **Menu** > **{admin}** **Admin**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > Preferences**, then expand **Help page**.
 1. Enter the URL in the **Support page URL** field.
 1. Select **Save changes**.
