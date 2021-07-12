@@ -200,9 +200,10 @@ module QA
           has_element?(:merge_button)
         end
 
-        def has_pipeline_status?(text)
+        def has_pipeline_status?(text, reload: false, wait: 60)
           # Pipelines can be slow, so we wait a bit longer than the usual 10 seconds
-          has_element?(:merge_request_pipeline_info_content, text: text, wait: 60)
+          wait_until(reload: reload, max_duration: wait, sleep_interval: 15) { has_element?(:merge_request_pipeline_info_content, text: text) }
+            #has_element?(:merge_request_pipeline_info_content, text: text, wait: 60)
         end
 
         def has_title?(title)
