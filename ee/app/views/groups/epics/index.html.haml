@@ -1,6 +1,7 @@
 - @can_bulk_update = can?(current_user, :admin_epic, @group) && @group.licensed_feature_available?(:group_bulk_edit)
 
 - page_title _("Epics")
+- is_signed_in = current_user.present?.to_s
 
 - if Feature.enabled?(:vue_epics_list, @group)
   #js-epics-list{ data: { can_create_epic: can?(current_user, :create_epic, @group).to_s,
@@ -18,7 +19,8 @@
     group_full_path: @group.full_path,
     group_labels_path: group_labels_path(@group, format: :json),
     group_milestones_path: group_milestones_path(@group, format: :json),
-    empty_state_path: image_path('illustrations/epics/list.svg') } }
+    empty_state_path: image_path('illustrations/epics/list.svg'),
+    is_signed_in: is_signed_in  } }
 - else
   .top-area
     = render 'shared/issuable/epic_nav', type: :epics
