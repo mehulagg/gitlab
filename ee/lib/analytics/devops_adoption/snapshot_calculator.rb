@@ -74,9 +74,10 @@ module Analytics
 
       # rubocop: disable CodeReuse/ActiveRecord
       def security_scan_succeeded
+        # TODO: CI Vertical cross-join to builds
         Security::Scan
-          .joins(:build)
-          .merge(Ci::Build.for_project(snapshot_project_ids))
+          #.joins(:build)
+          #.merge(Ci::Build.for_project(snapshot_project_ids))
           .created_before(range_end)
           .created_after(range_start)
           .exists?
