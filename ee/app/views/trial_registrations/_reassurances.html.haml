@@ -1,3 +1,6 @@
+.gl-mb-6
+  = image_tag 'illustrations/gitlab-features-orbiting-browser.svg'
+
 %h2.gl-mb-2.gl-text-center.gl-text-gray-800= s_('InProductMarketing|Free 30-day trial')
 %p.gl-font-lg.gl-text-center.gl-text-gray-800= s_('InProductMarketing|No credit card required.')
 
@@ -9,7 +12,7 @@
 
 %p.gl-mb-3.gl-text-gray-400.gl-font-sm.gl-line-height-24= s_('InProductMarketing|Used by more than 100,000 organizations from around the globe:')
 
-%ul.gl-display-flex.gl-flex-wrap.gl-pl-0.gl-font-sm.gl-text-gray-400.gl-font-weight-bold
+%ul.gl-display-flex.gl-flex-wrap.gl-justify-content-space-between.gl-pl-0.gl-font-sm.gl-text-gray-400.gl-font-weight-bold
   - ['NASA', 'ING', 'Goldman Sachs', 'Wish', 'Ticketmaster', 'Siemens', 'Nvidia', 'Hotjar'].each do |company|
-    %li.gl-display-flex.gl-align-items-center.gl-min-w-8.gl-h-8.gl-mr-5
-      = company
+    %li.gl-display-flex.gl-align-items-center.gl-min-w-7.gl-h-7.gl-mr-6.gl-mix-blend-mode-luminosity.gl-opacity-5
+      = image_tag "logos/#{company.parameterize}.svg", alt: s_('InProductMarketing|%{company_name} logo') % { company_name: company }, title: company

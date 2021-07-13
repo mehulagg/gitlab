@@ -247,6 +247,11 @@ $gl-line-height-42: px-to-rem(42px);
 }
 
 // Will be moved to @gitlab/ui by https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1491
-.gl-min-w-8 {
-  min-width: $gl-spacing-scale-8;
+.gl-min-w-7 {
+  min-width: $gl-spacing-scale-7;
+}
+
+// Will be moved to @gitlab/ui by https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1497
+.gl-mix-blend-mode-luminosity {
+  mix-blend-mode: luminosity;
 }
