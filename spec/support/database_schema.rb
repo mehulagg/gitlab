@@ -2,10 +2,9 @@
 
 module DatabaseSchemaHelper
   def with_search_paths(connection, search_path)
-    saved = connection.schema_search_path
-    connection.schema_search_path = search_path
-    yield
-  ensure
-    connection.schema_search_path = saved
+    connection.transaction(requires_new: true) do
+      connection.schema_search_path = search_path
+      yield
+    end
   end
 end
