@@ -1370,7 +1370,7 @@ recovery efforts by preventing writes that may conflict with the unreplicated wr
 To enable writes again, an administrator can:
 
 1. [Check](#check-for-data-loss) for data loss.
-1. Attempt to [recover](#data-recovery) missing data.
+1. Attempt to [recover](#automatic-reconciliation) missing data.
 1. Either [enable writes](#enable-writes-or-accept-data-loss) in the virtual storage or
    [accept data loss](#enable-writes-or-accept-data-loss) if necessary, depending on the version of
    GitLab.
@@ -1509,25 +1509,14 @@ Praefect provides the following sub-commands to re-enable writes:
 
 WARNING:
 `accept-dataloss` causes permanent data loss by overwriting other versions of the repository. Data
-[recovery efforts](#data-recovery) must be performed before using it.
-
-## Data recovery
-
-If a Gitaly node fails replication jobs for any reason, it ends up hosting outdated versions of the
-affected repositories. Praefect provides tools for:
-
-- [Automatic](#automatic-reconciliation) reconciliation, for GitLab 13.4 and later.
-- [Manual](#manual-reconciliation) reconciliation, for:
-  - GitLab 13.3 and earlier.
-  - Repositories upgraded to GitLab 13.4 and later without entries in the `repositories` table. In
-    GitLab 13.6 and later, [a migration is run](https://gitlab.com/gitlab-org/gitaly/-/issues/3033)
-    when Praefect starts for these repositories.
-
-These tools reconcile the outdated repositories to bring them fully up to date again.
+[recovery efforts](#automatic-reconciliation) must be performed before using it.
 
 ### Automatic reconciliation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/2717) in GitLab 13.4.
+
+If a Gitaly node fails replication jobs for any reason, it ends up hosting
+outdated versions of the affected repositories.
 
 Praefect automatically reconciles repositories that are not up to date. By default, this is done every
 five minutes. For each outdated repository on a healthy Gitaly node, the Praefect picks a
@@ -1551,26 +1540,6 @@ praefect['reconciliation_scheduling_interval'] = '30s' # reconcile every 30 seco
 ```ruby
 praefect['reconciliation_scheduling_interval'] = '0' # disable the feature
 ```
-
-### Manual reconciliation
-
-WARNING:
-The `reconcile` sub-command is deprecated and scheduled for removal in GitLab 14.0. Use
-[automatic reconciliation](#automatic-reconciliation) instead. Manual reconciliation may
-produce excess replication jobs and is limited in functionality. Manual reconciliation does
-not work when [repository-specific primary nodes](#repository-specific-primary-nodes) are
-enabled.
-
-The Praefect `reconcile` sub-command allows for the manual reconciliation between two Gitaly nodes. The
-command replicates every repository on a later version on the reference storage to the target storage.
-
-```shell
-sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml reconcile -virtual <virtual-storage> -reference <up-to-date-storage> -target <outdated-storage> -f
-```
-
-- Replace the placeholder `<virtual-storage>` with the virtual storage containing the Gitaly node storage to be checked.
-- Replace the placeholder `<up-to-date-storage>` with the Gitaly storage name containing up to date repositories.
-- Replace the placeholder `<outdated-storage>` with the Gitaly storage name containing outdated repositories.
 
 ## Migrate to Gitaly Cluster
 
