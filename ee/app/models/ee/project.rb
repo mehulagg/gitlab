@@ -13,6 +13,7 @@ module EE
     include IgnorableColumns
 
     GIT_LFS_DOWNLOAD_OPERATION = 'download'
+    PUBLIC_COST_FACTOR_RELEASE_DAY = Date.new(2021, 7, 17).freeze
 
     prepended do
       include Elastic::ProjectsSearch
@@ -825,6 +826,10 @@ module EE
       return false unless ci_cd_settings
 
       ci_cd_settings.auto_rollback_enabled?
+    end
+
+    def force_cost_factor?
+      ::Gitlab.com? && public? && namespace.created_at >= PUBLIC_COST_FACTOR_RELEASE_DAY
     end
 
     private
