@@ -3,6 +3,7 @@
 set -xeo pipefail
 
 export RAILS_ENV=test
+export ALL_SCHEMAS=true
 
 echo Reverting schema...
 rm -rf db/schema_migrations/ db/migrate/20211201000001_drop_ci_foreign_keys.rb

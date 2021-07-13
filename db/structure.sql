@@ -10,6 +10,10 @@ CREATE SCHEMA gitlab_partitions_static;
 
 COMMENT ON SCHEMA gitlab_partitions_static IS 'Schema to hold static partitions, e.g. for hash partitioning';
 
+CREATE SCHEMA gitlab_shared;
+
+COMMENT ON SCHEMA gitlab_shared IS 'Schema to hold all tables shared across all databases';
+
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -9810,6 +9814,92 @@ CREATE TABLE gitlab_partitions_static.product_analytics_events_experimental_63 (
 );
 ALTER TABLE ONLY product_analytics_events_experimental ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63 FOR VALUES WITH (modulus 64, remainder 63);
 
+CREATE TABLE gitlab_shared.background_migration_jobs (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    class_name text NOT NULL,
+    arguments jsonb NOT NULL,
+    CONSTRAINT check_b0de0a5852 CHECK ((char_length(class_name) <= 200))
+);
+
+CREATE SEQUENCE gitlab_shared.background_migration_jobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE gitlab_shared.background_migration_jobs_id_seq OWNED BY gitlab_shared.background_migration_jobs.id;
+
+CREATE TABLE gitlab_shared.batched_background_migration_jobs (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    started_at timestamp with time zone,
+    finished_at timestamp with time zone,
+    batched_background_migration_id bigint NOT NULL,
+    min_value bigint NOT NULL,
+    max_value bigint NOT NULL,
+    batch_size integer NOT NULL,
+    sub_batch_size integer NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    attempts smallint DEFAULT 0 NOT NULL,
+    metrics jsonb DEFAULT '{}'::jsonb NOT NULL,
+    pause_ms integer DEFAULT 100 NOT NULL
+);
+
+CREATE SEQUENCE gitlab_shared.batched_background_migration_jobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE gitlab_shared.batched_background_migration_jobs_id_seq OWNED BY gitlab_shared.batched_background_migration_jobs.id;
+
+CREATE TABLE gitlab_shared.batched_background_migrations (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    min_value bigint DEFAULT 1 NOT NULL,
+    max_value bigint NOT NULL,
+    batch_size integer NOT NULL,
+    sub_batch_size integer NOT NULL,
+    "interval" smallint NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    job_class_name text NOT NULL,
+    batch_class_name text DEFAULT 'PrimaryKeyBatchingStrategy'::text NOT NULL,
+    table_name text NOT NULL,
+    column_name text NOT NULL,
+    job_arguments jsonb DEFAULT '"[]"'::jsonb NOT NULL,
+    total_tuple_count bigint,
+    pause_ms integer DEFAULT 100 NOT NULL,
+    CONSTRAINT check_5bb0382d6f CHECK ((char_length(column_name) <= 63)),
+    CONSTRAINT check_6b6a06254a CHECK ((char_length(table_name) <= 63)),
+    CONSTRAINT check_batch_size_in_range CHECK ((batch_size >= sub_batch_size)),
+    CONSTRAINT check_e6c75b1e29 CHECK ((char_length(job_class_name) <= 100)),
+    CONSTRAINT check_fe10674721 CHECK ((char_length(batch_class_name) <= 100)),
+    CONSTRAINT check_max_value_in_range CHECK ((max_value >= min_value)),
+    CONSTRAINT check_positive_min_value CHECK ((min_value > 0)),
+    CONSTRAINT check_positive_sub_batch_size CHECK ((sub_batch_size > 0))
+);
+
+CREATE SEQUENCE gitlab_shared.batched_background_migrations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE gitlab_shared.batched_background_migrations_id_seq OWNED BY gitlab_shared.batched_background_migrations.id;
+
+CREATE TABLE gitlab_shared.schema_migrations (
+    version character varying NOT NULL,
+    finished_at timestamp with time zone DEFAULT now()
+);
+
 CREATE TABLE abuse_reports (
     id integer NOT NULL,
     reporter_id integer,
@@ -10808,25 +10898,6 @@ CREATE TABLE aws_roles (
     CONSTRAINT check_57adedab55 CHECK ((char_length(region) <= 255))
 );
 
-CREATE TABLE background_migration_jobs (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    class_name text NOT NULL,
-    arguments jsonb NOT NULL,
-    CONSTRAINT check_b0de0a5852 CHECK ((char_length(class_name) <= 200))
-);
-
-CREATE SEQUENCE background_migration_jobs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE background_migration_jobs_id_seq OWNED BY background_migration_jobs.id;
-
 CREATE TABLE badges (
     id integer NOT NULL,
     link_url character varying NOT NULL,
@@ -10847,68 +10918,6 @@ CREATE SEQUENCE badges_id_seq
     CACHE 1;
 
 ALTER SEQUENCE badges_id_seq OWNED BY badges.id;
-
-CREATE TABLE batched_background_migration_jobs (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    started_at timestamp with time zone,
-    finished_at timestamp with time zone,
-    batched_background_migration_id bigint NOT NULL,
-    min_value bigint NOT NULL,
-    max_value bigint NOT NULL,
-    batch_size integer NOT NULL,
-    sub_batch_size integer NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    attempts smallint DEFAULT 0 NOT NULL,
-    metrics jsonb DEFAULT '{}'::jsonb NOT NULL,
-    pause_ms integer DEFAULT 100 NOT NULL
-);
-
-CREATE SEQUENCE batched_background_migration_jobs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE batched_background_migration_jobs_id_seq OWNED BY batched_background_migration_jobs.id;
-
-CREATE TABLE batched_background_migrations (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    min_value bigint DEFAULT 1 NOT NULL,
-    max_value bigint NOT NULL,
-    batch_size integer NOT NULL,
-    sub_batch_size integer NOT NULL,
-    "interval" smallint NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    job_class_name text NOT NULL,
-    batch_class_name text DEFAULT 'PrimaryKeyBatchingStrategy'::text NOT NULL,
-    table_name text NOT NULL,
-    column_name text NOT NULL,
-    job_arguments jsonb DEFAULT '"[]"'::jsonb NOT NULL,
-    total_tuple_count bigint,
-    pause_ms integer DEFAULT 100 NOT NULL,
-    CONSTRAINT check_5bb0382d6f CHECK ((char_length(column_name) <= 63)),
-    CONSTRAINT check_6b6a06254a CHECK ((char_length(table_name) <= 63)),
-    CONSTRAINT check_batch_size_in_range CHECK ((batch_size >= sub_batch_size)),
-    CONSTRAINT check_e6c75b1e29 CHECK ((char_length(job_class_name) <= 100)),
-    CONSTRAINT check_fe10674721 CHECK ((char_length(batch_class_name) <= 100)),
-    CONSTRAINT check_max_value_in_range CHECK ((max_value >= min_value)),
-    CONSTRAINT check_positive_min_value CHECK ((min_value > 0)),
-    CONSTRAINT check_positive_sub_batch_size CHECK ((sub_batch_size > 0))
-);
-
-CREATE SEQUENCE batched_background_migrations_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE batched_background_migrations_id_seq OWNED BY batched_background_migrations.id;
 
 CREATE TABLE board_assignees (
     id integer NOT NULL,
@@ -17864,11 +17873,6 @@ CREATE SEQUENCE saml_providers_id_seq
 
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
 
-CREATE TABLE schema_migrations (
-    version character varying NOT NULL,
-    finished_at timestamp with time zone DEFAULT now()
-);
-
 CREATE TABLE scim_identities (
     id bigint NOT NULL,
     group_id bigint NOT NULL,
@@ -19787,6 +19791,12 @@ ALTER TABLE ONLY gitlab_ci.taggings ALTER COLUMN id SET DEFAULT nextval('gitlab_
 
 ALTER TABLE ONLY gitlab_ci.tags ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.tags_id_seq'::regclass);
 
+ALTER TABLE ONLY gitlab_shared.background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('gitlab_shared.background_migration_jobs_id_seq'::regclass);
+
+ALTER TABLE ONLY gitlab_shared.batched_background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('gitlab_shared.batched_background_migration_jobs_id_seq'::regclass);
+
+ALTER TABLE ONLY gitlab_shared.batched_background_migrations ALTER COLUMN id SET DEFAULT nextval('gitlab_shared.batched_background_migrations_id_seq'::regclass);
+
 ALTER TABLE ONLY abuse_reports ALTER COLUMN id SET DEFAULT nextval('abuse_reports_id_seq'::regclass);
 
 ALTER TABLE ONLY alert_management_alert_assignees ALTER COLUMN id SET DEFAULT nextval('alert_management_alert_assignees_id_seq'::regclass);
@@ -19849,13 +19859,7 @@ ALTER TABLE ONLY authentication_events ALTER COLUMN id SET DEFAULT nextval('auth
 
 ALTER TABLE ONLY award_emoji ALTER COLUMN id SET DEFAULT nextval('award_emoji_id_seq'::regclass);
 
-ALTER TABLE ONLY background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('background_migration_jobs_id_seq'::regclass);
-
 ALTER TABLE ONLY badges ALTER COLUMN id SET DEFAULT nextval('badges_id_seq'::regclass);
-
-ALTER TABLE ONLY batched_background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('batched_background_migration_jobs_id_seq'::regclass);
-
-ALTER TABLE ONLY batched_background_migrations ALTER COLUMN id SET DEFAULT nextval('batched_background_migrations_id_seq'::regclass);
 
 ALTER TABLE ONLY board_assignees ALTER COLUMN id SET DEFAULT nextval('board_assignees_id_seq'::regclass);
 
@@ -20935,6 +20939,18 @@ ALTER TABLE ONLY gitlab_partitions_static.product_analytics_events_experimental_
 ALTER TABLE ONLY gitlab_partitions_static.product_analytics_events_experimental_63
     ADD CONSTRAINT product_analytics_events_experimental_63_pkey PRIMARY KEY (id, project_id);
 
+ALTER TABLE ONLY gitlab_shared.background_migration_jobs
+    ADD CONSTRAINT background_migration_jobs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY gitlab_shared.batched_background_migration_jobs
+    ADD CONSTRAINT batched_background_migration_jobs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY gitlab_shared.batched_background_migrations
+    ADD CONSTRAINT batched_background_migrations_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY gitlab_shared.schema_migrations
+    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
 ALTER TABLE ONLY abuse_reports
     ADD CONSTRAINT abuse_reports_pkey PRIMARY KEY (id);
 
@@ -21040,17 +21056,8 @@ ALTER TABLE ONLY award_emoji
 ALTER TABLE ONLY aws_roles
     ADD CONSTRAINT aws_roles_pkey PRIMARY KEY (user_id);
 
-ALTER TABLE ONLY background_migration_jobs
-    ADD CONSTRAINT background_migration_jobs_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY badges
     ADD CONSTRAINT badges_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY batched_background_migration_jobs
-    ADD CONSTRAINT batched_background_migration_jobs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY batched_background_migrations
-    ADD CONSTRAINT batched_background_migrations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY board_assignees
     ADD CONSTRAINT board_assignees_pkey PRIMARY KEY (id);
@@ -22075,9 +22082,6 @@ ALTER TABLE ONLY saml_group_links
 ALTER TABLE ONLY saml_providers
     ADD CONSTRAINT saml_providers_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY schema_migrations
-    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
-
 ALTER TABLE ONLY scim_identities
     ADD CONSTRAINT scim_identities_pkey PRIMARY KEY (id);
 
@@ -22788,6 +22792,20 @@ CREATE INDEX product_analytics_events_exper_project_id_collector_tstamp_idx9 ON 
 
 CREATE INDEX product_analytics_events_experi_project_id_collector_tstamp_idx ON gitlab_partitions_static.product_analytics_events_experimental_00 USING btree (project_id, collector_tstamp);
 
+CREATE INDEX index_background_migration_jobs_for_partitioning_migrations ON gitlab_shared.background_migration_jobs USING btree (((arguments ->> 2))) WHERE (class_name = 'Gitlab::Database::PartitioningMigrationHelpers::BackfillPartitionedTable'::text);
+
+CREATE INDEX index_background_migration_jobs_on_class_name_and_arguments ON gitlab_shared.background_migration_jobs USING btree (class_name, arguments);
+
+CREATE INDEX index_background_migration_jobs_on_class_name_and_status_and_id ON gitlab_shared.background_migration_jobs USING btree (class_name, status, id);
+
+CREATE UNIQUE INDEX index_batched_background_migrations_on_unique_configuration ON gitlab_shared.batched_background_migrations USING btree (job_class_name, table_name, column_name, job_arguments);
+
+CREATE INDEX index_batched_jobs_by_batched_migration_id_and_id ON gitlab_shared.batched_background_migration_jobs USING btree (batched_background_migration_id, id);
+
+CREATE INDEX index_batched_jobs_on_batched_migration_id_and_status ON gitlab_shared.batched_background_migration_jobs USING btree (batched_background_migration_id, status);
+
+CREATE INDEX index_migration_jobs_on_migration_id_and_finished_at ON gitlab_shared.batched_background_migration_jobs USING btree (batched_background_migration_id, finished_at);
+
 CREATE INDEX active_billable_users ON users USING btree (id) WHERE (((state)::text = 'active'::text) AND ((user_type IS NULL) OR (user_type = ANY (ARRAY[NULL::integer, 6, 4]))) AND ((user_type IS NULL) OR (user_type <> ALL ('{2,6,1,3,7,8}'::smallint[]))));
 
 CREATE INDEX analytics_index_audit_events_part_on_created_at_and_author_id ON ONLY audit_events USING btree (created_at, author_id);
@@ -23110,21 +23128,9 @@ CREATE UNIQUE INDEX index_aws_roles_on_role_external_id ON aws_roles USING btree
 
 CREATE UNIQUE INDEX index_aws_roles_on_user_id ON aws_roles USING btree (user_id);
 
-CREATE INDEX index_background_migration_jobs_for_partitioning_migrations ON background_migration_jobs USING btree (((arguments ->> 2))) WHERE (class_name = 'Gitlab::Database::PartitioningMigrationHelpers::BackfillPartitionedTable'::text);
-
-CREATE INDEX index_background_migration_jobs_on_class_name_and_arguments ON background_migration_jobs USING btree (class_name, arguments);
-
-CREATE INDEX index_background_migration_jobs_on_class_name_and_status_and_id ON background_migration_jobs USING btree (class_name, status, id);
-
 CREATE INDEX index_badges_on_group_id ON badges USING btree (group_id);
 
 CREATE INDEX index_badges_on_project_id ON badges USING btree (project_id);
-
-CREATE UNIQUE INDEX index_batched_background_migrations_on_unique_configuration ON batched_background_migrations USING btree (job_class_name, table_name, column_name, job_arguments);
-
-CREATE INDEX index_batched_jobs_by_batched_migration_id_and_id ON batched_background_migration_jobs USING btree (batched_background_migration_id, id);
-
-CREATE INDEX index_batched_jobs_on_batched_migration_id_and_status ON batched_background_migration_jobs USING btree (batched_background_migration_id, status);
 
 CREATE INDEX index_board_assignees_on_assignee_id ON board_assignees USING btree (assignee_id);
 
@@ -24095,8 +24101,6 @@ CREATE INDEX index_metrics_dashboard_annotations_on_environment_id_and_3_col ON 
 CREATE INDEX index_metrics_dashboard_annotations_on_timespan_end ON metrics_dashboard_annotations USING btree (COALESCE(ending_at, starting_at));
 
 CREATE INDEX index_metrics_users_starred_dashboards_on_project_id ON metrics_users_starred_dashboards USING btree (project_id);
-
-CREATE INDEX index_migration_jobs_on_migration_id_and_finished_at ON batched_background_migration_jobs USING btree (batched_background_migration_id, finished_at);
 
 CREATE INDEX index_milestone_releases_on_release_id ON milestone_releases USING btree (release_id);
 
@@ -25656,25 +25660,10 @@ ALTER TABLE ONLY gitlab_ci.ci_unit_test_failures
     ADD CONSTRAINT fk_0f09856e1f FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT fk_190998ef09 FOREIGN KEY (external_pull_request_id) REFERENCES external_pull_requests(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
-    ADD CONSTRAINT fk_1e53c97c0a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_stages
-    ADD CONSTRAINT fk_2360681d1d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
     ADD CONSTRAINT fk_262d4c2d19 FOREIGN KEY (auto_canceled_by_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY gitlab_ci.ci_build_trace_sections
     ADD CONSTRAINT fk_264e112c66 FOREIGN KEY (section_name_id) REFERENCES gitlab_ci.ci_build_trace_section_names(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_freeze_periods
-    ADD CONSTRAINT fk_2e02bbd1a6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_group_variables
-    ADD CONSTRAINT fk_33ae4d58d8 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_builds
     ADD CONSTRAINT fk_3a9eaa254d FOREIGN KEY (stage_id) REFERENCES gitlab_ci.ci_stages(id) ON DELETE CASCADE;
@@ -25685,53 +25674,23 @@ ALTER TABLE ONLY gitlab_ci.ci_pipelines
 ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedule_variables
     ADD CONSTRAINT fk_41c35fda51 FOREIGN KEY (pipeline_schedule_id) REFERENCES gitlab_ci.ci_pipeline_schedules(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_runner_projects
-    ADD CONSTRAINT fk_4478a6f1e4 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_build_trace_sections
     ADD CONSTRAINT fk_4ebe41f502 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_builds
     ADD CONSTRAINT fk_6661f4f0e8 FOREIGN KEY (resource_group_id) REFERENCES gitlab_ci.ci_resource_groups(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY gitlab_ci.ci_resource_groups
-    ADD CONSTRAINT fk_774722d144 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_unit_tests
-    ADD CONSTRAINT fk_7a8fabf0a8 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT fk_86635dbd80 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_builds
     ADD CONSTRAINT fk_87f4cefcda FOREIGN KEY (upstream_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedules
-    ADD CONSTRAINT fk_8ead60fcc4 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedules
-    ADD CONSTRAINT fk_9ea99f58d2 FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY gitlab_ci.ci_builds
     ADD CONSTRAINT fk_a2141b1522 FOREIGN KEY (auto_canceled_by_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT fk_a23be95014 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
-    ADD CONSTRAINT fk_acd9737679 FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_variables
-    ADD CONSTRAINT fk_ada5eb64b3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_trigger_requests
     ADD CONSTRAINT fk_b8ec8b7245 FOREIGN KEY (trigger_id) REFERENCES gitlab_ci.ci_triggers(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
     ADD CONSTRAINT fk_be5624bf37 FOREIGN KEY (source_job_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT fk_befce0568a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_builds
     ADD CONSTRAINT fk_d3130c9a7f FOREIGN KEY (commit_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
@@ -25748,29 +25707,11 @@ ALTER TABLE ONLY gitlab_ci.ci_resources
 ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
     ADD CONSTRAINT fk_e1bad85861 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_triggers
-    ADD CONSTRAINT fk_e3e63f966e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_triggers
-    ADD CONSTRAINT fk_e8e10d1964 FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_pipeline_variables
     ADD CONSTRAINT fk_f29c5f4380 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_stages
     ADD CONSTRAINT fk_fb57e6cc56 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results
-    ADD CONSTRAINT fk_fd1858fefd FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_report_results
-    ADD CONSTRAINT fk_rails_056d298d48 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results
-    ADD CONSTRAINT fk_rails_0667f7608c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_subscriptions_projects
-    ADD CONSTRAINT fk_rails_0818751483 FOREIGN KEY (downstream_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_build_pending_states
     ADD CONSTRAINT fk_rails_0bbbfeaf9d FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
@@ -25787,50 +25728,23 @@ ALTER TABLE ONLY gitlab_ci.ci_build_report_results
 ALTER TABLE ONLY gitlab_ci.ci_unit_test_failures
     ADD CONSTRAINT fk_rails_259da3e79c FOREIGN KEY (unit_test_id) REFERENCES gitlab_ci.ci_unit_tests(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_job_token_project_scope_links
-    ADD CONSTRAINT fk_rails_35f7f506ce FOREIGN KEY (added_by_id) REFERENCES users(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY gitlab_ci.ci_build_needs
     ADD CONSTRAINT fk_rails_3cf221d4ed FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_refs
-    ADD CONSTRAINT fk_rails_4249db8cc3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_resources
     ADD CONSTRAINT fk_rails_430336af2d FOREIGN KEY (resource_group_id) REFERENCES gitlab_ci.ci_resource_groups(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_pending_builds
-    ADD CONSTRAINT fk_rails_480669c3b3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_artifacts
-    ADD CONSTRAINT fk_rails_4a70390ca6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_job_token_project_scope_links
-    ADD CONSTRAINT fk_rails_4b2ee3290b FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_project_monthly_usages
-    ADD CONSTRAINT fk_rails_508bcd4aa6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_running_builds
     ADD CONSTRAINT fk_rails_5ca491d360 FOREIGN KEY (runner_id) REFERENCES gitlab_ci.ci_runners(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_sources_projects
-    ADD CONSTRAINT fk_rails_64b6855cbc FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_pipeline_chat_data
     ADD CONSTRAINT fk_rails_64ebfab6b3 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_job_token_project_scope_links
-    ADD CONSTRAINT fk_rails_6904b38465 FOREIGN KEY (target_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_builds_runner_session
     ADD CONSTRAINT fk_rails_70707857d3 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_pending_builds
     ADD CONSTRAINT fk_rails_725a2644a3 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_subscriptions_projects
-    ADD CONSTRAINT fk_rails_7871f9a97b FOREIGN KEY (upstream_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_runner_namespaces
     ADD CONSTRAINT fk_rails_8767676b7a FOREIGN KEY (runner_id) REFERENCES gitlab_ci.ci_runners(id) ON DELETE CASCADE;
@@ -25841,14 +25755,8 @@ ALTER TABLE ONLY gitlab_ci.ci_pipeline_messages
 ALTER TABLE ONLY gitlab_ci.ci_pipelines_config
     ADD CONSTRAINT fk_rails_906c9a2533 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_job_artifacts
-    ADD CONSTRAINT fk_rails_9862d392f9 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_pipeline_artifacts
     ADD CONSTRAINT fk_rails_a9e811a466 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_sections
-    ADD CONSTRAINT fk_rails_ab7c104e26 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_job_artifacts
     ADD CONSTRAINT fk_rails_c5137cb2c1 FOREIGN KEY (job_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
@@ -25856,32 +25764,17 @@ ALTER TABLE ONLY gitlab_ci.ci_job_artifacts
 ALTER TABLE ONLY gitlab_ci.ci_running_builds
     ADD CONSTRAINT fk_rails_da45cfa165 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_running_builds
-    ADD CONSTRAINT fk_rails_dc1d0801e8 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_minutes_additional_packs
-    ADD CONSTRAINT fk_rails_e0e0c4e4b1 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_builds_metadata
     ADD CONSTRAINT fk_rails_e20479742e FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results
     ADD CONSTRAINT fk_rails_ee072d13b3 FOREIGN KEY (last_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_chat_data
-    ADD CONSTRAINT fk_rails_f300456b63 FOREIGN KEY (chat_name_id) REFERENCES chat_names(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_section_names
-    ADD CONSTRAINT fk_rails_f8cd72cd26 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_runner_namespaces
-    ADD CONSTRAINT fk_rails_f9d9ed3308 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY gitlab_ci.ci_job_variables
     ADD CONSTRAINT fk_rails_fbf3b34792 FOREIGN KEY (job_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY gitlab_ci.ci_builds_metadata
-    ADD CONSTRAINT fk_rails_ffcf702a02 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+ALTER TABLE ONLY gitlab_shared.batched_background_migration_jobs
+    ADD CONSTRAINT fk_rails_432153b86d FOREIGN KEY (batched_background_migration_id) REFERENCES gitlab_shared.batched_background_migrations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES integrations(id) ON DELETE CASCADE;
@@ -25892,14 +25785,8 @@ ALTER TABLE ONLY deployments
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_013c9f36ca FOREIGN KEY (due_date_sourcing_epic_id) REFERENCES epics(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY clusters_applications_runners
-    ADD CONSTRAINT fk_02de2ded36 FOREIGN KEY (runner_id) REFERENCES gitlab_ci.ci_runners(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_03c671965c FOREIGN KEY (design_id) REFERENCES design_management_designs(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY terraform_state_versions
-    ADD CONSTRAINT fk_04b91e4a9f FOREIGN KEY (ci_build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY ci_test_cases
     ADD CONSTRAINT fk_0526c30ded FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26057,9 +25944,6 @@ ALTER TABLE ONLY alert_management_alerts
 ALTER TABLE ONLY path_locks
     ADD CONSTRAINT fk_5265c98f24 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY dast_site_profiles_pipelines
-    ADD CONSTRAINT fk_53849b0ad5 FOREIGN KEY (ci_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY clusters_applications_prometheus
     ADD CONSTRAINT fk_557e773639 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
@@ -26098,9 +25982,6 @@ ALTER TABLE ONLY events
 
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_641731faff FOREIGN KEY (updated_by_id) REFERENCES users(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY project_pages_metadata
-    ADD CONSTRAINT fk_69366a119e FOREIGN KEY (artifacts_archive_id) REFERENCES gitlab_ci.ci_job_artifacts(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY application_settings
     ADD CONSTRAINT fk_693b8795e4 FOREIGN KEY (push_rule_id) REFERENCES push_rules(id) ON DELETE SET NULL;
@@ -26282,9 +26163,6 @@ ALTER TABLE ONLY deployment_merge_requests
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_a194299be1 FOREIGN KEY (moved_to_id) REFERENCES issues(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY dast_site_profiles_builds
-    ADD CONSTRAINT fk_a325505e99 FOREIGN KEY (ci_build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT fk_a44ff95be5 FOREIGN KEY (parent_id) REFERENCES bulk_import_entities(id) ON DELETE CASCADE;
 
@@ -26293,9 +26171,6 @@ ALTER TABLE ONLY users
 
 ALTER TABLE ONLY lfs_objects_projects
     ADD CONSTRAINT fk_a56e02279c FOREIGN KEY (lfs_object_id) REFERENCES lfs_objects(id) ON DELETE RESTRICT NOT VALID;
-
-ALTER TABLE ONLY dast_profiles_pipelines
-    ADD CONSTRAINT fk_a60cad829d FOREIGN KEY (ci_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_a6963e8447 FOREIGN KEY (target_project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26429,9 +26304,6 @@ ALTER TABLE ONLY web_hooks
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_d5af95fcd9 FOREIGN KEY (lfs_object_deleted_event_id) REFERENCES geo_lfs_object_deleted_events(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY ci_test_case_failures
-    ADD CONSTRAINT fk_d69404d827 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_d6cf4279f7 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
@@ -26462,9 +26334,6 @@ ALTER TABLE ONLY experiment_subjects
 ALTER TABLE ONLY gitlab_subscriptions
     ADD CONSTRAINT fk_e2595d00a1 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY dast_scanner_profiles_builds
-    ADD CONSTRAINT fk_e4c49200f8 FOREIGN KEY (ci_build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_e719a85f8a FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
 
@@ -26485,9 +26354,6 @@ ALTER TABLE ONLY sprints
 
 ALTER TABLE ONLY application_settings
     ADD CONSTRAINT fk_e8a145f3a7 FOREIGN KEY (instance_administrators_group_id) REFERENCES namespaces(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY vulnerability_statistics
-    ADD CONSTRAINT fk_e8b13c928f FOREIGN KEY (latest_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY integrations
     ADD CONSTRAINT fk_e8fe908a34 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -26542,9 +26408,6 @@ ALTER TABLE ONLY system_note_metadata
 
 ALTER TABLE ONLY vulnerability_remediations
     ADD CONSTRAINT fk_fc61a535a0 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY merge_requests
-    ADD CONSTRAINT fk_fd82eae0b9 FOREIGN KEY (head_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY project_import_data
     ADD CONSTRAINT fk_ffb9ee3a10 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26678,9 +26541,6 @@ ALTER TABLE ONLY project_deploy_tokens
 ALTER TABLE ONLY analytics_cycle_analytics_project_stages
     ADD CONSTRAINT fk_rails_1722574860 FOREIGN KEY (start_event_label_id) REFERENCES labels(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY packages_build_infos
-    ADD CONSTRAINT fk_rails_17a9a0dffc FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY security_orchestration_policy_rule_schedules
     ADD CONSTRAINT fk_rails_17ade83f17 FOREIGN KEY (security_orchestration_policy_configuration_id) REFERENCES security_orchestration_policy_configurations(id) ON DELETE CASCADE;
 
@@ -26749,9 +26609,6 @@ ALTER TABLE ONLY boards_epic_lists
 
 ALTER TABLE ONLY approval_merge_request_rules_groups
     ADD CONSTRAINT fk_rails_2020a7124a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY vulnerability_feedback
-    ADD CONSTRAINT fk_rails_20976e6fd9 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY user_statuses
     ADD CONSTRAINT fk_rails_2178592333 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -26861,9 +26718,6 @@ ALTER TABLE ONLY container_repositories
 ALTER TABLE ONLY clusters_applications_jupyter
     ADD CONSTRAINT fk_rails_331f0aff78 FOREIGN KEY (oauth_application_id) REFERENCES oauth_applications(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY merge_request_metrics
-    ADD CONSTRAINT fk_rails_33ae169d48 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY suggestions
     ADD CONSTRAINT fk_rails_33b03a535c FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
 
@@ -26924,9 +26778,6 @@ ALTER TABLE ONLY snippet_user_mentions
 ALTER TABLE ONLY clusters_applications_helm
     ADD CONSTRAINT fk_rails_3e2b1c06bc FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY packages_package_file_build_infos
-    ADD CONSTRAINT fk_rails_3e3f630188 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY epic_user_mentions
     ADD CONSTRAINT fk_rails_3eaf4d88cc FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;
 
@@ -26950,9 +26801,6 @@ ALTER TABLE ONLY epic_issues
 
 ALTER TABLE ONLY security_orchestration_policy_configurations
     ADD CONSTRAINT fk_rails_42ed6c25ec FOREIGN KEY (security_policy_management_project_id) REFERENCES projects(id) ON DELETE RESTRICT;
-
-ALTER TABLE ONLY batched_background_migration_jobs
-    ADD CONSTRAINT fk_rails_432153b86d FOREIGN KEY (batched_background_migration_id) REFERENCES batched_background_migrations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY operations_strategies_user_lists
     ADD CONSTRAINT fk_rails_43241e8d29 FOREIGN KEY (strategy_id) REFERENCES operations_strategies(id) ON DELETE CASCADE;
@@ -27025,9 +26873,6 @@ ALTER TABLE ONLY geo_repository_renamed_events
 
 ALTER TABLE ONLY aws_roles
     ADD CONSTRAINT fk_rails_4ed56f4720 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY security_scans
-    ADD CONSTRAINT fk_rails_4ef1e6b4c6 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_debian_publications
     ADD CONSTRAINT fk_rails_4fc8ebd03e FOREIGN KEY (distribution_id) REFERENCES packages_debian_project_distributions(id) ON DELETE CASCADE;
@@ -27145,9 +26990,6 @@ ALTER TABLE ONLY evidences
 
 ALTER TABLE ONLY jira_imports
     ADD CONSTRAINT fk_rails_63cbe52ada FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY vulnerability_occurrence_pipelines
-    ADD CONSTRAINT fk_rails_6421e35d7d FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_deploy_tokens
     ADD CONSTRAINT fk_rails_6477b01f6b FOREIGN KEY (deploy_token_id) REFERENCES deploy_tokens(id) ON DELETE CASCADE;
@@ -27683,9 +27525,6 @@ ALTER TABLE ONLY packages_nuget_dependency_link_metadata
 ALTER TABLE ONLY group_deploy_keys_groups
     ADD CONSTRAINT fk_rails_c3854f19f5 FOREIGN KEY (group_deploy_key_id) REFERENCES group_deploy_keys(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY pages_deployments
-    ADD CONSTRAINT fk_rails_c3a90cf29b FOREIGN KEY (ci_build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY merge_request_user_mentions
     ADD CONSTRAINT fk_rails_c440b9ea31 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
 
@@ -27860,9 +27699,6 @@ ALTER TABLE ONLY approval_merge_request_rule_sources
 ALTER TABLE ONLY prometheus_alerts
     ADD CONSTRAINT fk_rails_e6351447ec FOREIGN KEY (prometheus_metric_id) REFERENCES prometheus_metrics(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY requirements_management_test_reports
-    ADD CONSTRAINT fk_rails_e67d085910 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_rails_e6d7c24d1b FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
@@ -27976,9 +27812,6 @@ ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
 
 ALTER TABLE ONLY merge_requests_closing_issues
     ADD CONSTRAINT fk_rails_f8540692be FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY merge_trains
-    ADD CONSTRAINT fk_rails_f90820cb08 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT fk_rails_fb3308ad55 FOREIGN KEY (requirement_id) REFERENCES requirements(id) ON DELETE CASCADE;

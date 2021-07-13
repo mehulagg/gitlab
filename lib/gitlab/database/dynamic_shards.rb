@@ -13,6 +13,7 @@ module DynamicShards
       end
 
       ci_config = configs.include?("ci")
+      all_schemas = Gitlab::Utils.to_boolean(ENV["ALL_SCHEMAS"], default: false)
 
       configs.each do |config_name, config|
         if config_name == 'main'
@@ -21,9 +22,9 @@ module DynamicShards
           # Set to public,gitlab_ci to restore CI tables again
           #
           if ci_config
-            config["schema_search_path"] ||= "public"
+            config["schema_search_path"] ||= "public,gitlab_shared"
           else
-            config["schema_search_path"] ||= "public,gitlab_ci"
+            config["schema_search_path"] ||= "public,gitlab_ci,gitlab_shared"
           end
 
           config["migrations_paths"] ||= [
@@ -31,11 +32,15 @@ module DynamicShards
             ("db/post_migrate" unless skip_post_migrate?)
           ].compact
         elsif config_name == 'ci'
-          config["schema_search_path"] ||= "gitlab_ci"
+          config["schema_search_path"] ||= "gitlab_ci,gitlab_shared"
           config["migrations_paths"] ||= [
             "db/ci_migrate",
             ("db/ci_post_migrate" unless skip_post_migrate?)
           ].compact
+        end
+
+        if all_schemas
+          config["schema_search_path"] = "public,gitlab_ci,gitlab_shared"
         end
 
         # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
