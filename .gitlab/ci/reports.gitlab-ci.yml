@@ -45,7 +45,7 @@ gosec-sast:
   variables:
     GOPATH: "$CI_PROJECT_DIR/.go"
     COMPILE: "false"
-    GOSEC_GO_PKG_PATH: "$CI_PROJECT_DIR/workhorse"
+    GOSEC_GO_PKG_PATH: "$CI_PROJECT_DIR"
   before_script:
     - mkdir -p $GOPATH
     - cd workhorse
