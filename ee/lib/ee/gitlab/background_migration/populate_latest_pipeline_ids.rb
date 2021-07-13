@@ -6,6 +6,12 @@ module EE
       module PopulateLatestPipelineIds
         extend ::Gitlab::Utils::Override
 
+        class << self
+          def log_info(log_attributes)
+            ::Gitlab::BackgroundMigration::Logger.info(log_attributes.merge(migrator: name))
+          end
+        end
+
         module Routable
           extend ActiveSupport::Concern
 
@@ -308,7 +314,11 @@ module EE
         end
 
         def perform(start_id, end_id)
+          self.class.log_info(message: 'Migration started', start_id: start_id, end_id: end_id)
+
           projects = Project.by_range(start_id, end_id)
+
+          self.class.log_info(message: 'Projects fetched', count: projects.length)
 
           VulnerabilityStatistic.update_latest_pipeline_ids_for(projects)
         end
