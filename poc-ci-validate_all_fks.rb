@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
-schema_name = :gitlab_ci
 connection = ApplicationRecord.connection
 invalid_foreign_keys = nil
 
-connection.transaction(requires_new: true) do
-  connection.schema_search_path = schema_name
-  all_tables = connection.tables
-  connection.schema_search_path = :undefined
+invalid_foreign_keys = [:gitlab_ci, :public, :gitlab_shared].flat_map do |schema_name|
+  connection.transaction(requires_new: true) do
+    connection.schema_search_path = schema_name
+    all_tables = connection.tables.sort
+    connection.schema_search_path = :undefined
 
-  invalid_foreign_keys = all_tables.flat_map do |table_name|
-    connection.foreign_keys("#{schema_name}.#{table_name}")
-      .reject { |fk| fk.to_table.start_with?("#{schema_name}.") }
+    all_tables.flat_map do |table_name|
+      connection.foreign_keys("#{schema_name}.#{table_name}")
+        .reject { |fk| fk.to_table.start_with?("#{schema_name}.") }
+    end
   end
 end
 
