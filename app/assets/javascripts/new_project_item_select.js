@@ -1,11 +1,10 @@
 import Vue from 'vue';
 import NewProjectItemSelect from '~/vue_shared/components/new_project_item_select.vue';
 
-import * as UserApi from '~/api/user_api';
-
 export default () => {
   const el = document.getElementById('js-new-project-item-select');
   const userFrequentProjects = JSON.parse(localStorage.getItem(`${gon.current_username}/frequent-projects`)); 
+  console.log(userFrequentProjects)
 
   return new Vue({
     el,

@@ -43,15 +43,25 @@ export default {
     text() {
       return `Create ${this.label.toLowerCase()} in...`
     },
+    filteredProjectNames() {
+      return this.frequentProjects.filter(project => project.name.toLowerCase().includes(this.searchTerm.toLowerCase())).sort((a, b) => b.lastAccessedOn - a.lastAccessedOn);
+    },
+    filteredProjectNamesLength() {
+      return this.filteredProjectNames.length === 0;
+    },
   },
+  mounted() {
+    return console.log(this.filteredProjectNames, 'filtered names')
+  }
 };
 </script>
 
 <template>
   <gl-dropdown :text="text">
     <gl-search-box-by-type v-model.trim="searchTerm" />
-    <gl-dropdown-item v-for="project in frequentProjects" :key="project.id">
+    <gl-dropdown-item v-for="project in filteredProjectNames" :key="project.id" >
       {{ project.name }}
     </gl-dropdown-item>
+    <div v-show="filteredProjectNamesLength" class="text-secondary p-2">Nothing found…</div>
   </gl-dropdown>
 </template>
