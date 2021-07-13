@@ -432,8 +432,8 @@ the queries themselves have no timing variance.
 
 ### Background jobs tracking
 
-`queue_background_migration_jobs_by_range_at_intervals` has the ability to create records for each jobs that is scheduled to run
-you can turn this behavior on by passing `track_jobs: true`. Each record starts with a `pending` status. Make sure that your worker updates the job status to `succeeded` by calling `Gitlab::Database::BackgroundMigrationJob.mark_all_as_succeeded` in `perform` method of your background migration.
+`queue_background_migration_jobs_by_range_at_intervals` can create records for each job that is scheduled to run.
+You can enable this behavior by passing `track_jobs: true`. Each record starts with a `pending` status. Make sure that your worker updates the job status to `succeeded` by calling `Gitlab::Database::BackgroundMigrationJob.mark_all_as_succeeded` in the `perform` method of your background migration.
 
 ```ruby
 # Background migration code
@@ -485,7 +485,7 @@ See [`lib/gitlab/background_migration/drop_invalid_vulnerabilities.rb`](https://
 
 #### Rescheduling pending jobs
 
-You can reschedule pending migrations from `background_migration_jobs` table by creating a post-deployment migration and calling `requeue_background_migration_jobs_by_range_at_intervals` with the migration name and delay interval.
+You can reschedule pending migrations from the `background_migration_jobs` table by creating a post-deployment migration and calling `requeue_background_migration_jobs_by_range_at_intervals` with the migration name and delay interval.
 
 ```ruby
 # Post deployment migration
