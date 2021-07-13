@@ -10,6 +10,7 @@ def log_pool_size(db, previous_pool_size, current_pool_size)
   Gitlab::AppLogger.debug(log_message.join(' '))
 end
 
+# TODO: CI Vertical connection pools should be properly configured
 # Gitlab.ee do
 #   # We need to initialize the Geo database before
 #   # setting the Geo DB connection pool size.

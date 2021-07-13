@@ -26,6 +26,7 @@ module EE
         # Temporary location to be moved in the future. Please see gitlab-org/gitlab#330950 for more info.
         has_one :dast_site_profiles_pipeline, class_name: 'Dast::SiteProfilesPipeline', foreign_key: :ci_pipeline_id, inverse_of: :ci_pipeline
         has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_pipeline
+
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
         # Legacy way to fetch security reports based on job name. This has been replaced by the reports feature.
