@@ -31,7 +31,7 @@ class IssuesFinder < IssuableFinder
   CONFIDENTIAL_ACCESS_LEVEL = Gitlab::Access::REPORTER
 
   def self.scalar_params
-    @scalar_params ||= super + [:due_date]
+    @scalar_params ||= super + [:due_date, :subscribed]
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -81,7 +81,18 @@ class IssuesFinder < IssuableFinder
     issues = super
     issues = by_due_date(issues)
     issues = by_confidential(issues)
+    issues = by_subscribed(issues)
     by_issue_types(issues)
+  end
+
+  def by_subscribed(issues)
+    return issues unless params[:subscribed] && current_user
+
+    if params[:subscribed] == true
+      return issues.joins(:subscriptions).where(subscriptions: { user_id: current_user.id })
+    end
+
+    issues
   end
 
   def by_confidential(items)

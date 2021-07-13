@@ -60,6 +60,9 @@ module IssueResolverArguments
              description: 'Negated arguments.',
              prepare: ->(negated_args, ctx) { negated_args.to_h },
              required: false
+    argument :subscribed, GraphQL::BOOLEAN_TYPE,
+             description: 'Issues the current user is subscribed to.',
+             required: false
   end
 
   def resolve_with_lookahead(**args)
