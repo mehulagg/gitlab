@@ -11,7 +11,7 @@ import {
   GlFormTextarea,
 } from '@gitlab/ui';
 import { TYPE_ITERATIONS_CADENCE } from '~/graphql_shared/constants';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
 import createCadence from '../queries/cadence_create.mutation.graphql';
 import updateCadence from '../queries/cadence_update.mutation.graphql';
@@ -56,6 +56,7 @@ const i18n = Object.freeze({
     title: s__('Iterations|New iteration cadence'),
     save: s__('Iterations|Create cadence'),
   },
+  createAndStartIteration: s__('Iterations|Create cadence and start iteration'),
   cancel: __('Cancel'),
   requiredField: __('This field is required.'),
 });
@@ -122,6 +123,9 @@ export default {
     },
     page() {
       return this.isEdit ? 'edit' : 'new';
+    },
+    showStartIteration() {
+      return !this.isEdit && !this.automatic;
     },
     mutation() {
       return this.isEdit ? updateCadence : createCadence;
@@ -219,6 +223,20 @@ export default {
         this.durationInWeeks = 0;
       }
     },
+    saveAndCreateIteration() {
+      return this.save()?.then((cadenceId) => {
+        if (!this.errorMessage) {
+          this.$router.push({ name: 'newIteration', params: { cadenceId } });
+        }
+      });
+    },
+    saveAndViewList() {
+      this.save()?.then(() => {
+        if (!this.errorMessage) {
+          this.$router.push({ name: 'index' });
+        }
+      });
+    },
     save() {
       this.validateAllFields();
 
@@ -227,12 +245,12 @@ export default {
       }
 
       this.loading = true;
-      return this.createCadence();
+      return this.saveCadence();
     },
     cancel() {
       this.$router.push({ name: 'index' });
     },
-    createCadence() {
+    saveCadence() {
       return this.$apollo
         .mutate({
           mutation: this.mutation,
@@ -241,17 +259,17 @@ export default {
         .then(({ data, errors: topLevelErrors = [] } = {}) => {
           if (topLevelErrors.length > 0) {
             this.errorMessage = topLevelErrors[0].message;
-            return;
+            return null;
           }
 
-          const { errors } = data?.result || {};
+          const { errors, iterationCadence } = data?.result || {};
 
           if (errors?.length > 0) {
             [this.errorMessage] = errors;
-            return;
+            return null;
           }
 
-          this.$router.push({ name: 'index' });
+          return getIdFromGraphQLId(iterationCadence.id);
         })
         .catch((e) => {
           this.errorMessage = __('Unable to save cadence. Please try again');
@@ -410,9 +428,21 @@ export default {
           data-testid="save-cadence"
           variant="confirm"
           data-qa-selector="save_cadence_button"
-          @click="save"
+          @click="saveAndViewList"
         >
           {{ i18n[page].save }}
+        </gl-button>
+        <gl-button
+          v-if="showStartIteration"
+          :loading="loading"
+          class="gl-ml-3"
+          data-testid="save-cadence-create-iteration"
+          variant="confirm"
+          category="secondary"
+          data-qa-selector="save_cadence_start_iteration_button"
+          @click="saveAndCreateIteration"
+        >
+          {{ i18n.createAndStartIteration }}
         </gl-button>
         <gl-button class="gl-ml-3" data-testid="cancel-create-cadence" @click="cancel">
           {{ i18n.cancel }}
