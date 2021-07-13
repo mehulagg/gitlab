@@ -187,6 +187,10 @@ Do not use. Use **check for completeness** instead. ([Vale](../testing.md#vale) 
 
 Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page.
 
+## setup, set up
+
+Use "setup" as a noun, and "set up" as a verb. Examples: `Your remote office setup is amazing.` `To set up your remote office correctly, first consider the ergonomics of your work area.`
+
 ## simply
 
 Do not use. If the user doesn't find the process to be these things, we lose their trust.
