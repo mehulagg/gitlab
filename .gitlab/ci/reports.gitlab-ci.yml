@@ -43,7 +43,8 @@ semgrep-sast:
 
 gosec-sast:
   variables:
-    GOPATH: "$CI_PROJECT_DIR/.go"
+    # Dirty hack to let gosec ignore the cached dependencies ('vendor' is automatically skipped)
+    GOPATH: "$CI_PROJECT_DIR/workhorse/vendor"
     COMPILE: "false"
     GOSEC_GO_PKG_PATH: "$CI_PROJECT_DIR"
   before_script:
@@ -53,7 +54,7 @@ gosec-sast:
     - cd ..
   cache:
     paths:
-      - .go/pkg/mod
+      - ./workhorse/vendor
   rules: !reference [".reports:rules:sast", rules]
 
 .secret-analyzer:
