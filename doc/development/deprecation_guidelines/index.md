@@ -6,8 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Deprecation guidelines
 
-This page includes information about how and when to remove or make breaking
-changes to GitLab features.
+This page includes information about how and when to remove or make [breaking
+changes](https://about.gitlab.com/handbook/product/gitlab-the-product/#breaking-changes-deprecations-and-removing-features) to GitLab features.
 
 ## Terminology
 
