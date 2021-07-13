@@ -17,6 +17,13 @@ module EE
           end
 
           override :move_issue
+          def ready?
+            authorize_assignee!
+
+            super
+          end
+
+          override :move_issue
           def move_issue(board, issue, move_params)
             super
           rescue ::Issues::BaseService::EpicAssignmentError => e
@@ -35,6 +42,14 @@ module EE
             epic_arguments = args.slice(:epic_id).transform_values { |id| id&.model_id }
 
             super.merge!(epic_arguments)
+          end
+
+          private
+
+          def authorize_assignee!
+            return unless to_list.user_id
+
+            # Do authorize here
           end
         end
       end

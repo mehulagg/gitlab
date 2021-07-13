@@ -28,6 +28,7 @@ module Mutations
 
         argument :to_list_id, ListID,
                  required: false,
+                 loads: Types::BoardListType,
                  description: 'ID of the board list that the issue will be moved to.'
 
         argument :move_before_id, IssueID,
