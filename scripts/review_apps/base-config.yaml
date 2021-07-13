@@ -27,7 +27,7 @@ gitlab:
       size: 10G
       storageClass: ssd
     nodeSelector:
-      preemptible: false
+      preemptible: "false"
   gitlab-exporter:
     enabled: false
   mailroom:
