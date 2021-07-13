@@ -712,13 +712,14 @@ module Ci
         include_examples 'handles runner assignment'
       end
 
-      context 'when not using pending builds table' do
-        before do
-          stub_feature_flags(ci_pending_builds_queue_source: false)
-        end
+      # TODO: CI Vertical to be removed
+      # context 'when not using pending builds table' do
+      #   before do
+      #     stub_feature_flags(ci_pending_builds_queue_source: false)
+      #   end
 
-        include_examples 'handles runner assignment'
-      end
+      #   include_examples 'handles runner assignment'
+      # end
     end
 
     describe '#register_success' do

@@ -268,13 +268,14 @@ RSpec.describe Ci::RegisterJobService, '#execute' do
     end
   end
 
-  context 'when legacy queuing is being used' do
-    before do
-      stub_feature_flags(ci_pending_builds_queue_source: false)
-    end
+  # TODO: CI Vertical to be removed
+  # context 'when legacy queuing is being used' do
+  #   before do
+  #     stub_feature_flags(ci_pending_builds_queue_source: false)
+  #   end
 
-    include_examples 'namespace minutes quota'
-  end
+  #   include_examples 'namespace minutes quota'
+  # end
 
   context 'when new pending builds table is used' do
     before do

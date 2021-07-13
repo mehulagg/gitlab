@@ -12,11 +12,12 @@ module Ci
       # rubocop:disable CodeReuse/ActiveRecord
       def builds_for_shared_runner
         relation = new_builds
+          # TODO: CI Vertical: denormalization
           # don't run projects which have not enabled shared runners and builds
-          .joins('INNER JOIN projects ON ci_pending_builds.project_id = projects.id')
-          .where(projects: { shared_runners_enabled: true, pending_delete: false })
-          .joins('LEFT JOIN project_features ON ci_pending_builds.project_id = project_features.project_id')
-          .where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0')
+          #.joins('INNER JOIN projects ON ci_pending_builds.project_id = projects.id')
+          #.where(projects: { shared_runners_enabled: true, pending_delete: false })
+          #.joins('LEFT JOIN project_features ON ci_pending_builds.project_id = project_features.project_id')
+          #.where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0')
 
         if Feature.enabled?(:ci_queueing_disaster_recovery_disable_fair_scheduling, runner, type: :ops, default_enabled: :yaml)
           # if disaster recovery is enabled, we fallback to FIFO scheduling
