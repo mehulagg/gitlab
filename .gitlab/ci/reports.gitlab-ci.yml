@@ -42,6 +42,17 @@ semgrep-sast:
   rules: !reference [".reports:rules:sast", rules]
 
 gosec-sast:
+  variables:
+    GOPATH: "$CI_PROJECT_DIR/.go"
+    COMPILE: "false"
+    GOSEC_GO_PKG_PATH: "$CI_PROJECT_DIR/workhorse"
+  before_script:
+    - mkdir -p $GOPATH
+    - cd workhorse
+    - go build
+  cache:
+    paths:
+      - .go/pkk/mod
   rules: !reference [".reports:rules:sast", rules]
 
 .secret-analyzer:
