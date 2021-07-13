@@ -186,10 +186,11 @@ Jobs that exceed the timeout are marked as failed.
 
 You can override this value [for individual runners](../runners/configure_runners.md#set-maximum-job-timeout-for-a-runner).
 
-## Test coverage parsing
+## Add test coverage results to a merge request
 
-If you use test coverage in your code, GitLab can capture its output in the
-job log by using a regular expression.
+If you use test coverage in your code, you can use a regular expression to
+find coverage results in the job log. You can then include these results
+in the merge request in GitLab.
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Settings > CI/CD**.
@@ -207,6 +208,10 @@ averaged.
 ![MR widget coverage](img/pipelines_test_coverage_mr_widget.png)
 
 ![Build status coverage](img/pipelines_test_coverage_build.png)
+
+### Test coverage examples
+
+Use this regex for commonly used test tools.
 
 <!-- vale gitlab.Spelling = NO -->
 
