@@ -124,6 +124,15 @@ export default {
       this.setSelectedProjects(project, !isSelected);
       this.$emit('selected', this.selectedProjects);
     },
+    onMultiSelectClick({ project, isSelected }) {
+      this.setSelectedProjects(project, !isSelected);
+    },
+    onHide(ev) {
+      if (this.selectedProjects.length) {
+        this.$emit('selected', this.selectedProjects);
+      }
+      this.searchTerm = '';
+    },
     fetchData() {
       this.loading = true;
 
@@ -158,12 +167,12 @@ export default {
   },
 };
 </script>
-
 <template>
   <gl-dropdown
     ref="projectsDropdown"
     class="dropdown dropdown-projects"
     toggle-class="gl-shadow-none"
+    @hide="onHide"
   >
     <template #button-content>
       <div class="gl-display-flex gl-flex-grow-1">
@@ -184,29 +193,62 @@ export default {
     <gl-dropdown-section-header>{{ __('Projects') }}</gl-dropdown-section-header>
     <gl-search-box-by-type v-model.trim="searchTerm" />
 
-    <gl-dropdown-item
-      v-for="project in availableProjects"
-      :key="project.id"
-      :is-check-item="true"
-      :is-checked="isProjectSelected(project.id)"
-      @click.prevent="onClick({ project, isSelected: isProjectSelected(project.id) })"
-    >
-      <div class="gl-display-flex">
-        <gl-avatar
-          class="gl-mr-2 vertical-align-middle"
-          :alt="project.name"
-          :size="16"
-          :entity-id="getEntityId(project)"
-          :entity-name="project.name"
-          :src="project.avatarUrl"
-          shape="rect"
-        />
-        <div>
-          <div data-testid="project-name">{{ project.name }}</div>
-          <div class="gl-text-gray-500" data-testid="project-full-path">{{ project.fullPath }}</div>
+    <template v-if="multiSelect">
+      <gl-dropdown-item
+        v-for="project in availableProjects"
+        :key="project.id"
+        :is-check-item="true"
+        :is-checked="isProjectSelected(project.id)"
+        @click.native.capture.stop="
+          onMultiSelectClick({ project, isSelected: isProjectSelected(project.id) })
+        "
+      >
+        <div class="gl-display-flex">
+          <gl-avatar
+            class="gl-mr-2 vertical-align-middle"
+            :alt="project.name"
+            :size="16"
+            :entity-id="getEntityId(project)"
+            :entity-name="project.name"
+            :src="project.avatarUrl"
+            shape="rect"
+          />
+          <div>
+            <div data-testid="project-name">{{ project.name }}</div>
+            <div class="gl-text-gray-500" data-testid="project-full-path">
+              {{ project.fullPath }}
+            </div>
+          </div>
         </div>
-      </div>
-    </gl-dropdown-item>
+      </gl-dropdown-item>
+    </template>
+    <template v-else>
+      <gl-dropdown-item
+        v-for="project in availableProjects"
+        :key="project.id"
+        :is-check-item="true"
+        :is-checked="isProjectSelected(project.id)"
+        @click.stop="onClick({ project, isSelected: isProjectSelected(project.id) })"
+      >
+        <div class="gl-display-flex">
+          <gl-avatar
+            class="gl-mr-2 vertical-align-middle"
+            :alt="project.name"
+            :size="16"
+            :entity-id="getEntityId(project)"
+            :entity-name="project.name"
+            :src="project.avatarUrl"
+            shape="rect"
+          />
+          <div>
+            <div data-testid="project-name">{{ project.name }}</div>
+            <div class="gl-text-gray-500" data-testid="project-full-path">
+              {{ project.fullPath }}
+            </div>
+          </div>
+        </div>
+      </gl-dropdown-item>
+    </template>
     <gl-dropdown-item v-show="noResultsAvailable" class="gl-pointer-events-none text-secondary">{{
       __('No matching results')
     }}</gl-dropdown-item>
