@@ -50,7 +50,7 @@ gosec-sast:
   before_script:
     - mkdir -p $GOPATH
     - cd workhorse
-    - go build
+    - go get -d ./...
     - cd ..
   cache:
     paths:
