@@ -52,7 +52,8 @@ module Spam
     end
 
     def allowlisted?(user)
-      user.try(:gitlab_employee?) || user.try(:gitlab_bot?) || user.try(:gitlab_service_user?)
+      # TODO revert to using User#gitlab_employee? if https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64343 is merged
+      (user.try(:gitlab_tema_member?) && ::Gitlab.com?) || user.try(:gitlab_bot?) || user.try(:gitlab_service_user?)
     end
 
     ##
