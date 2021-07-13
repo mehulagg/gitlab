@@ -55,12 +55,12 @@ File.open("db/migrate/20211201000001_drop_ci_foreign_keys.rb", "wb") do |file|
   file.write <<-EOS.strip_heredoc
     # frozen_string_literal: true
 
-    disable_ddl_transaction!
-
     class DropCiForeignKeys < ActiveRecord::Migration[6.1]
-      include Gitlab::Database::SchemaHelpers
+      include Gitlab::Database::MigrationHelpers
 
       DOWNTIME = false
+
+      disable_ddl_transaction!
 
       def up
         #{emit_up(invalid_foreign_keys).join("\n        ")}

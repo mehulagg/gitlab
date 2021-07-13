@@ -1,4 +1,8 @@
 module DynamicShards
+  def skip_post_migrate?
+    Gitlab::Utils.to_boolean(ENV['SKIP_POST_DEPLOYMENT_MIGRATIONS'], default: false) && !Gitlab::Runtime.rake?
+  end
+
   # This is temporary hack to ensure that we don't affect development envs
   # using this MR, so we append to database name some string
   def database_configuration
@@ -16,9 +20,17 @@ module DynamicShards
           #
           config["schema_search_path"] ||= "public,gitlab_ci"
           # config["schema_search_path"] ||= "public"
+
+          config["migrations_paths"] ||= [
+            "db/migrate",
+            ("db/post_migrate" unless skip_post_migrate?)
+          ].compact
         elsif config_name == 'ci'
           #config["schema_search_path"] ||= "gitlab_ci"
-          config["migrations_paths"] ||= "db/ci_migrate"
+          config["migrations_paths"] ||= [
+            "db/ci_migrate",
+            ("db/ci_post_migrate" unless skip_post_migrate?)
+          ].compact
         end
 
         # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...

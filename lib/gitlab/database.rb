@@ -336,22 +336,6 @@ module Gitlab
 
     private_class_method :database_version
 
-    def self.add_post_migrate_path_to_rails(force: false)
-      return if ENV['SKIP_POST_DEPLOYMENT_MIGRATIONS'] && !force
-
-      Rails.application.config.paths['db'].each do |db_path|
-        path = Rails.root.join(db_path, 'post_migrate').to_s
-
-        unless Rails.application.config.paths['db/migrate'].include? path
-          Rails.application.config.paths['db/migrate'] << path
-
-          # Rails memoizes migrations at certain points where it won't read the above
-          # path just yet. As such we must also update the following list of paths.
-          ActiveRecord::Migrator.migrations_paths << path
-        end
-      end
-    end
-
     def self.dbname(ar_connection)
       if ar_connection.respond_to?(:pool) &&
           ar_connection.pool.respond_to?(:db_config) &&
