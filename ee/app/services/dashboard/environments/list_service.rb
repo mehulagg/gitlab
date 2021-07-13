@@ -24,10 +24,11 @@ module Dashboard
         ActiveRecord::Associations::Preloader.new.preload(projects, [
           :route,
           environments_for_dashboard: [
-            last_visible_pipeline: [
-              :user,
-              project: [:route, :group, :project_feature, namespace: :route]
-            ],
+            # TODO: CI Vertical: cross-join
+            # last_visible_pipeline: [
+            #   :user,
+            #   project: [:route, :group, :project_feature, namespace: :route]
+            # ],
             last_visible_deployment: [
               deployable: [
                 :metadata,
