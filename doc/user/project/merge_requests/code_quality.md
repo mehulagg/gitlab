@@ -338,6 +338,8 @@ code_quality:
   - Include a trailing slash (`/`).
   - Not include a protocol prefix, such as `https://`.
 
+This example is specific to GitLab CodeQuality. For more general instructions on how to configure DinD with a registry mirror, see the relevant [documentation](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#enable-registry-mirror-for-dockerdind-service).
+
 ## Configuring jobs using variables
 
 The Code Quality job supports environment variables that users can set to
