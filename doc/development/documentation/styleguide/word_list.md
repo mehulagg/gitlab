@@ -82,6 +82,20 @@ When possible, use present tense instead. For example, use `after you execute th
 
 Do not make possessive (GitLab's). This guidance follows [GitLab Brand Guidelines](https://about.gitlab.com/handbook/marketing/corporate-marketing/brand-activation/brand-guidelines/#trademark).
 
+### GitLab SaaS
+
+Refers to the type of product license that provides access to GitLab.com. Does not refer to the
+GitLab instance managed by GitLab itself.
+
+### GitLab self-managed
+
+Refers to the type of product license that provides access to features on GitLab instances
+managed by customers themselves.
+
+### GitLab.com
+
+Refers to the instance of GitLab managed by GitLab itself.
+
 ## Guest
 
 When writing about the Guest role:
