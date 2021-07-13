@@ -236,6 +236,7 @@ you can view a graph or download a CSV file with this data.
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Analytics > Repository**.
+
 The historic data for each job is listed in the dropdown above the graph.
 
 To view a CSV file of the data, select **Download raw data (`.csv`)**.
@@ -305,7 +306,7 @@ https://gitlab.example.com/<namespace>/<project>/badges/<branch>/pipeline.svg?ig
 
 ### Test coverage report badge
 
-You can define the regular expression for the [coverage report](#test-coverage-parsing) so
+You can define the regular expression for the [coverage report](#test-coverage-parsing)
 that each job log is matched against. This means that each job in the
 pipeline can have the test coverage percentage value defined.
 
