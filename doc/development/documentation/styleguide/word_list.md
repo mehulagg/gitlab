@@ -233,7 +233,7 @@ Do not use. If the user doesn't find the process to be simple, we lose their tru
 
 ## slashes
 
-Instead of **and/or**, use **or** or another sensible construction. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed.
+Instead of **and/or**, use **or** or re-write the sentence. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed.
 
 ## slave
 
