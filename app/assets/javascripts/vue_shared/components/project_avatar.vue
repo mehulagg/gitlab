@@ -1,6 +1,6 @@
 <script>
 import { GlAvatar } from '@gitlab/ui';
-
+// TODO remove
 export default {
   components: {
     GlAvatar,

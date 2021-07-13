@@ -1,6 +1,6 @@
 <script>
 import { getIdenticonBackgroundClass, getIdenticonTitle } from '~/helpers/avatar_helper';
-
+// hi
 export default {
   props: {
     entityId: {
