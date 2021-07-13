@@ -52,7 +52,11 @@ module Ci
     end
 
     def reports
-      @reports ||= pipeline.security_reports
+      @reports ||= pipeline.security_reports(report_types: project_vulnerability_rules)
+    end
+
+    def project_vulnerability_rules
+      @project_vulnerability_rules ||= pipeline.project.approval_rules.find_by(rule_type: :report_approver, name: ApprovalRuleLike::DEFAULT_NAME_FOR_VULNERABILITY_REPORT)&.scanners.to_a
     end
 
     def merge_requests_approved_coverage
