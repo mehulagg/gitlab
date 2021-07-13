@@ -5,7 +5,7 @@ module Mutations
     class Base < BaseMutation
       include Gitlab::Utils::UsageData
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: "The project the alert to mutate is in."
 

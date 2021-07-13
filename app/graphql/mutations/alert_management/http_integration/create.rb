@@ -8,7 +8,7 @@ module Mutations
 
         graphql_name 'HttpIntegrationCreate'
 
-        argument :project_path, GraphQL::ID_TYPE,
+        argument :project_path, GraphQL::Types::ID,
                  required: true,
                  description: 'The project to create the integration in.'
 

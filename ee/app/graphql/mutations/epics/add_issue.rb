@@ -9,7 +9,7 @@ module Mutations
 
       authorize :admin_epic
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: 'The full path of the project the issue belongs to.'
 

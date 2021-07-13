@@ -4,7 +4,7 @@ module Types
     module EntryType
       include Types::BaseInterface
 
-      field :id, GraphQL::ID_TYPE, null: false,
+      field :id, GraphQL::Types::ID, null: false,
             description: 'ID of the entry.'
       field :sha, GraphQL::STRING_TYPE, null: false,
             description: 'Last commit SHA for the entry.', method: :id

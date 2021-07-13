@@ -5,11 +5,11 @@ module Resolvers
     include TimeFrameArguments
     include LooksAhead
 
-    argument :iid, GraphQL::ID_TYPE,
+    argument :iid, GraphQL::Types::ID,
              required: false,
              description: 'IID of the epic, e.g., "1".'
 
-    argument :iids, [GraphQL::ID_TYPE],
+    argument :iids, [GraphQL::Types::ID],
              required: false,
              description: 'List of IIDs of epics, e.g., `[1, 2]`.'
 

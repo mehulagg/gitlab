@@ -7,7 +7,7 @@ module Types
       graphql_name 'ComplianceFramework'
       description 'Represents a ComplianceFramework associated with a Project'
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, GraphQL::Types::ID,
             null: false,
             description: 'Compliance framework ID.'
 

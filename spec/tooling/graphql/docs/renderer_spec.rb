@@ -20,7 +20,7 @@ RSpec.describe Tooling::Graphql::Docs::Renderer do
       Class.new(Types::BaseObject) { graphql_name 'Query' }.tap do |t|
         # this keeps type and field_description in scope.
         t.field :foo, type, null: true, description: field_description do
-          argument :id, GraphQL::ID_TYPE, required: false, description: 'ID of the object.'
+          argument :id, GraphQL::Types::ID, required: false, description: 'ID of the object.'
         end
       end
     end

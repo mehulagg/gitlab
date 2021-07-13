@@ -8,7 +8,7 @@ module Mutations
 
         graphql_name 'BoardEpicCreate'
 
-        argument :group_path, GraphQL::ID_TYPE,
+        argument :group_path, GraphQL::Types::ID,
                  required: true,
                  description: 'Group the epic to create is in.'
 

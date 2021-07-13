@@ -5,7 +5,7 @@ module Mutations
     extend ActiveSupport::Concern
 
     prepended do
-      argument :group_path, GraphQL::ID_TYPE,
+      argument :group_path, GraphQL::Types::ID,
                required: true,
                description: "The group the epic to mutate is in."
 
@@ -44,11 +44,11 @@ module Mutations
                 required: false,
                 description: 'Indicates end date should be sourced from due_date_fixed field not the issue milestones.'
       argument :add_label_ids,
-               [GraphQL::ID_TYPE],
+               [GraphQL::Types::ID],
                required: false,
                description: 'The IDs of labels to be added to the epic.'
       argument :remove_label_ids,
-               [GraphQL::ID_TYPE],
+               [GraphQL::Types::ID],
                required: false,
                description: 'The IDs of labels to be removed from the epic.'
     end

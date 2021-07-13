@@ -8,7 +8,7 @@ module Types
 
     authorize :read_container_image
 
-    field :id, GraphQL::ID_TYPE, null: false, description: 'ID of the container repository.'
+    field :id, GraphQL::Types::ID, null: false, description: 'ID of the container repository.'
     field :name, GraphQL::STRING_TYPE, null: false, description: 'Name of the container repository.'
     field :path, GraphQL::STRING_TYPE, null: false, description: 'Path of the container repository.'
     field :location, GraphQL::STRING_TYPE, null: false, description: 'URL of the container repository.'

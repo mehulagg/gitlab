@@ -10,7 +10,7 @@ module Mutations
 
       include CommonMutationArguments
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: 'Project full path the issue is associated with.'
 

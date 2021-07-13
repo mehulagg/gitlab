@@ -12,7 +12,7 @@ module Types
 
       expose_permissions Types::PermissionTypes::Ci::Pipeline
 
-      field :id, GraphQL::ID_TYPE, null: false,
+      field :id, GraphQL::Types::ID, null: false,
             description: 'ID of the pipeline.'
 
       field :iid, GraphQL::STRING_TYPE, null: false,

@@ -7,7 +7,7 @@ module Types
 
     authorize :read_release
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the link.'
     field :name, GraphQL::STRING_TYPE, null: true,
           description: 'Name of the link.'

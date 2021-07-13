@@ -19,11 +19,11 @@ module Mutations
                  description: 'The test case description.'
 
         argument :label_ids,
-                 [GraphQL::ID_TYPE],
+                 [GraphQL::Types::ID],
                  required: false,
                  description: 'The IDs of labels to be added to the test case.'
 
-        argument :project_path, GraphQL::ID_TYPE,
+        argument :project_path, GraphQL::Types::ID,
                  required: true,
                  description: 'The project full path to create the test case.'
 

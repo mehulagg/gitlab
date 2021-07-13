@@ -13,12 +13,12 @@ module Types
       authorize :read_alert_management_alert
 
       field :iid,
-            GraphQL::ID_TYPE,
+            GraphQL::Types::ID,
             null: false,
             description: 'Internal ID of the alert.'
 
       field :issue_iid,
-            GraphQL::ID_TYPE,
+            GraphQL::Types::ID,
             null: true,
             deprecated: { reason: 'Use issue field', milestone: '13.10' },
             description: 'Internal ID of the GitLab issue attached to the alert.'

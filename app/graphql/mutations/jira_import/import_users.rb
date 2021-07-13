@@ -14,7 +14,7 @@ module Mutations
             null: true,
             description: 'Users returned from Jira, matched by email and name if possible.'
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: 'The project to import the Jira users into.'
       argument :start_at, GraphQL::INT_TYPE,

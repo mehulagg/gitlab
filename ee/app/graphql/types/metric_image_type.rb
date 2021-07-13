@@ -7,10 +7,10 @@ module Types
 
     authorize :read_issuable_metric_image
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the metric upload.'
 
-    field :iid, GraphQL::ID_TYPE, null: false,
+    field :iid, GraphQL::Types::ID, null: false,
           description: 'Internal ID of the metric upload.'
 
     field :url, GraphQL::STRING_TYPE, null: false,

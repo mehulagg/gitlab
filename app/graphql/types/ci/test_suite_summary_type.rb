@@ -33,7 +33,7 @@ module Types
       field :suite_error, GraphQL::STRING_TYPE, null: true,
         description: 'Test suite error message.'
 
-      field :build_ids, [GraphQL::ID_TYPE], null: true,
+      field :build_ids, [GraphQL::Types::ID], null: true,
         description: 'IDs of the builds used to run the test suite.'
     end
     # rubocop: enable Graphql/AuthorizeTypes

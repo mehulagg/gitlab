@@ -6,7 +6,7 @@ module Types
       graphql_name 'EscalationRuleInput'
       description 'Represents an escalation rule'
 
-      argument :oncall_schedule_iid, GraphQL::ID_TYPE, # rubocop: disable Graphql/IDType
+      argument :oncall_schedule_iid, GraphQL::Types::ID, # rubocop: disable Graphql/IDType
         description: 'The on-call schedule to notify.',
         required: true
 

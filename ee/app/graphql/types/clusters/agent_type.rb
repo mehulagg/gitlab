@@ -19,7 +19,7 @@ module Types
             null: true,
             description: 'User object, containing information about the person who created the agent.'
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, GraphQL::Types::ID,
             null: false,
             description: 'ID of the cluster agent.'
 

@@ -7,7 +7,7 @@ module EE
       extend ::Gitlab::Utils::Override
 
       prepended do
-        argument :iteration_id, [::GraphQL::ID_TYPE, null: true],
+        argument :iteration_id, [::GraphQL::Types::ID, null: true],
                  required: false,
                  description: 'List of iteration Global IDs applied to the issue.'
         argument :iteration_wildcard_id, ::Types::IterationWildcardIdEnum,

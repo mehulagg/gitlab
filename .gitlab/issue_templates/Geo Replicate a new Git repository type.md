@@ -745,7 +745,7 @@ The GraphQL API is used by `Admin > Geo > Replication Details` views, and is dir
         graphql_name 'CoolWidgetRegistry'
         description 'Represents the Geo replication and verification state of a cool_widget'
 
-        field :cool_widget_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Cool Widget'
+        field :cool_widget_id, GraphQL::Types::ID, null: false, description: 'ID of the Cool Widget'
       end
     end
   end

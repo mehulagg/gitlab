@@ -14,7 +14,7 @@ module Resolvers
 
       authorize :read_pipeline
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: 'The project of the CI config.'
 

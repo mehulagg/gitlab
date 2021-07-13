@@ -7,7 +7,7 @@ module Resolvers
     type Types::UserType.connection_type, null: true
     description 'Find Users'
 
-    argument :ids, [GraphQL::ID_TYPE],
+    argument :ids, [GraphQL::Types::ID],
              required: false,
              description: 'List of user Global IDs.'
 

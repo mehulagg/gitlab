@@ -15,9 +15,9 @@ module Types
 
     present_using IssuePresenter
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: "ID of the issue."
-    field :iid, GraphQL::ID_TYPE, null: false,
+    field :iid, GraphQL::Types::ID, null: false,
           description: "Internal ID of the issue."
     field :title, GraphQL::STRING_TYPE, null: false,
           description: 'Title of the issue.'

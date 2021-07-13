@@ -7,7 +7,7 @@ module Types
         extend ActiveSupport::Concern
 
         included do
-          field :id, GraphQL::ID_TYPE, null: false,
+          field :id, GraphQL::Types::ID, null: false,
                 description: 'ID of the license.',
                 method: :license_id
 

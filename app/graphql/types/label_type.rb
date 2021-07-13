@@ -8,7 +8,7 @@ module Types
 
     authorize :read_label
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'Label ID.'
     field :description, GraphQL::STRING_TYPE, null: true,
           description: 'Description of the label (Markdown rendered as HTML for caching).'

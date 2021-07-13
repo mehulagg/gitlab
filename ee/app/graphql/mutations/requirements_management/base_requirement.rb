@@ -17,7 +17,7 @@ module Mutations
                required: false,
                description: 'Description of the requirement.'
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: 'Full project path the requirement is associated with.'
     end

@@ -15,7 +15,7 @@ module Mutations
             null: true,
             description: 'The current validation status.'
 
-      argument :full_path, GraphQL::ID_TYPE,
+      argument :full_path, GraphQL::Types::ID,
                required: true,
                description: 'The project the site profile belongs to.'
 

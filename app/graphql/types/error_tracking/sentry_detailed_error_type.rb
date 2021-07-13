@@ -10,7 +10,7 @@ module Types
 
       authorize :read_sentry_issue
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, GraphQL::Types::ID,
             null: false,
             description: 'ID (global ID) of the error.'
       field :sentry_id, GraphQL::STRING_TYPE,
@@ -47,7 +47,7 @@ module Types
       field :external_url, GraphQL::STRING_TYPE,
             null: false,
             description: 'External URL of the error.'
-      field :sentry_project_id, GraphQL::ID_TYPE,
+      field :sentry_project_id, GraphQL::Types::ID,
             method: :project_id,
             null: false,
             description: 'ID of the project (Sentry project).'

@@ -9,7 +9,7 @@ module Types
 
     present_using Releases::EvidencePresenter
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the evidence.'
     field :sha, GraphQL::STRING_TYPE, null: true,
           description: 'SHA1 ID of the evidence hash.'

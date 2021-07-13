@@ -7,7 +7,7 @@ module Types
 
       field_class Types::BaseField
 
-      field :id, GraphQL::ID_TYPE, description: 'The ID of this design.', null: false
+      field :id, GraphQL::Types::ID, description: 'The ID of this design.', null: false
       field :project, Types::ProjectType, null: false, description: 'The project the design belongs to.'
       field :issue, Types::IssueType, null: false, description: 'The issue the design belongs to.'
       field :filename, GraphQL::STRING_TYPE, null: false, description: 'The filename of the design.'

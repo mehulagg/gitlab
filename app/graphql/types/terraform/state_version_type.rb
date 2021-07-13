@@ -9,7 +9,7 @@ module Types
 
       authorize :read_terraform_state
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, GraphQL::Types::ID,
             null: false,
             description: 'ID of the Terraform state version.'
 

@@ -11,7 +11,7 @@ module Mutations
             null: true,
             description: 'ID of the scanner profile.'
 
-      argument :full_path, GraphQL::ID_TYPE,
+      argument :full_path, GraphQL::Types::ID,
                required: true,
                description: 'The project the scanner profile belongs to.'
 

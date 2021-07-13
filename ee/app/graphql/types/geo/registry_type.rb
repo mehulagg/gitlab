@@ -8,7 +8,7 @@ module Types
       included do
         authorize :read_geo_registry
 
-        field :id, GraphQL::ID_TYPE, null: false, description: "ID of the #{graphql_name}"
+        field :id, GraphQL::Types::ID, null: false, description: "ID of the #{graphql_name}"
         field :state, Types::Geo::RegistryStateEnum, null: true, method: :state_name, description: "Sync state of the #{graphql_name}"
         field :retry_count, GraphQL::INT_TYPE, null: true, description: "Number of consecutive failed sync attempts of the #{graphql_name}"
         field :last_sync_failure, GraphQL::STRING_TYPE, null: true, description: "Error message during sync of the #{graphql_name}"

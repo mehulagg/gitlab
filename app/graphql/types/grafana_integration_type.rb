@@ -6,7 +6,7 @@ module Types
 
     authorize :admin_operations
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
       description: 'Internal ID of the Grafana integration.'
     field :grafana_url, GraphQL::STRING_TYPE, null: false,
       description: 'URL for the Grafana host for the Grafana integration.'

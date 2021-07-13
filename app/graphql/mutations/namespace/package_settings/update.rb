@@ -11,7 +11,7 @@ module Mutations
         authorize :create_package_settings
 
         argument :namespace_path,
-                GraphQL::ID_TYPE,
+                GraphQL::Types::ID,
                 required: true,
                 description: 'The namespace path where the namespace package setting is located.'
 

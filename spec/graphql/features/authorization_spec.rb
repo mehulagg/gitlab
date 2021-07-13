@@ -332,7 +332,7 @@ RSpec.describe 'DeclarativePolicy authorization in GraphQL ' do
       type_factory do |type|
         type.graphql_name 'FakeIssueType'
         type.authorize :read_issue
-        type.field :id, GraphQL::ID_TYPE, null: false
+        type.field :id, GraphQL::Types::ID, null: false
       end
     end
 

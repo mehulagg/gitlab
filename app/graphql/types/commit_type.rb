@@ -8,7 +8,7 @@ module Types
 
     present_using CommitPresenter
 
-    field :id, type: GraphQL::ID_TYPE, null: false,
+    field :id, type: GraphQL::Types::ID, null: false,
           description: 'ID (global ID) of the commit.'
     field :sha, type: GraphQL::STRING_TYPE, null: false,
           description: 'SHA1 ID of the commit.'

@@ -9,7 +9,7 @@ module Mutations
 
       authorize :admin_project
 
-      argument :full_path, GraphQL::ID_TYPE,
+      argument :full_path, GraphQL::Types::ID,
         required: true,
         description: 'Full Path of the project the settings belong to.'
 

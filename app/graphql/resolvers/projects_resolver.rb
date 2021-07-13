@@ -12,7 +12,7 @@ module Resolvers
              required: false,
              description: 'Search query for project name, path, or description.'
 
-    argument :ids, [GraphQL::ID_TYPE],
+    argument :ids, [GraphQL::Types::ID],
              required: false,
              description: 'Filter projects by IDs.'
 

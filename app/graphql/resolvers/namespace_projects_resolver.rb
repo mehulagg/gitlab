@@ -17,7 +17,7 @@ module Resolvers
             default_value: nil,
             description: 'Sort projects by this criteria.'
 
-    argument :ids, [GraphQL::ID_TYPE],
+    argument :ids, [GraphQL::Types::ID],
              required: false,
              default_value: nil,
              description: 'Filter projects by IDs.'

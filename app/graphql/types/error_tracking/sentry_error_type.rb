@@ -9,7 +9,7 @@ module Types
 
       present_using SentryErrorPresenter
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, GraphQL::Types::ID,
             null: false,
             description: 'ID (global ID) of the error.'
       field :sentry_id, GraphQL::STRING_TYPE,
@@ -52,7 +52,7 @@ module Types
       field :frequency, [Types::ErrorTracking::SentryErrorFrequencyType],
             null: false,
             description: 'Last 24hr stats of the error.'
-      field :sentry_project_id, GraphQL::ID_TYPE,
+      field :sentry_project_id, GraphQL::Types::ID,
             method: :project_id,
             null: false,
             description: 'ID of the project (Sentry project).'

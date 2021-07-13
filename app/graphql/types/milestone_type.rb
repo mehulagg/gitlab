@@ -11,10 +11,10 @@ module Types
 
     alias_method :milestone, :object
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the milestone.'
 
-    field :iid, GraphQL::ID_TYPE, null: false,
+    field :iid, GraphQL::Types::ID, null: false,
           description: "Internal ID of the milestone."
 
     field :title, GraphQL::STRING_TYPE, null: false,

@@ -7,7 +7,7 @@ module Mutations
 
       graphql_name 'DastSiteValidationRevoke'
 
-      argument :full_path, GraphQL::ID_TYPE,
+      argument :full_path, GraphQL::Types::ID,
                required: true,
                description: 'The project the site validation belongs to.'
 

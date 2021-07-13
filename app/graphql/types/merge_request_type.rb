@@ -15,7 +15,7 @@ module Types
 
     present_using MergeRequestPresenter
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the merge request.'
     field :iid, GraphQL::STRING_TYPE, null: false,
           description: 'Internal ID of the merge request.'

@@ -13,7 +13,7 @@ module Mutations
             null: true,
             description: 'URL of the pipeline that was created.'
 
-      argument :full_path, GraphQL::ID_TYPE,
+      argument :full_path, GraphQL::Types::ID,
                required: true,
                description: 'The project the site profile belongs to.'
 

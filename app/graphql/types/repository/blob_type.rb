@@ -8,7 +8,7 @@ module Types
 
       graphql_name 'RepositoryBlob'
 
-      field :id, GraphQL::ID_TYPE, null: false,
+      field :id, GraphQL::Types::ID, null: false,
             description: 'ID of the blob.'
 
       field :oid, GraphQL::STRING_TYPE, null: false, method: :id,

@@ -7,7 +7,7 @@ module Types
       graphql_name 'AlertManagementIntegration'
 
       field :id,
-            GraphQL::ID_TYPE,
+            GraphQL::Types::ID,
             null: false,
             description: 'ID of the integration.'
 

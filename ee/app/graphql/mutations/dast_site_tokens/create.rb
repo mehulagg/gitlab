@@ -19,7 +19,7 @@ module Mutations
             null: true,
             description: 'The current validation status of the target.'
 
-      argument :full_path, GraphQL::ID_TYPE,
+      argument :full_path, GraphQL::Types::ID,
                required: true,
                description: 'The project the site token belongs to.'
 

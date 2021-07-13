@@ -7,7 +7,7 @@ module Types
       description 'Represents a package tag'
       authorize :read_package
 
-      field :id, GraphQL::ID_TYPE, null: false, description: 'The ID of the tag.'
+      field :id, GraphQL::Types::ID, null: false, description: 'The ID of the tag.'
       field :name, GraphQL::STRING_TYPE, null: false, description: 'The name of the tag.'
       field :created_at, Types::TimeType, null: false, description: 'The created date.'
       field :updated_at, Types::TimeType, null: false, description: 'The updated date.'

@@ -7,7 +7,7 @@ module Types
 
       authorize :read_geo_node
 
-      field :id, GraphQL::ID_TYPE, null: false, description: 'ID of this GeoNode.'
+      field :id, GraphQL::Types::ID, null: false, description: 'ID of this GeoNode.'
       field :primary, GraphQL::BOOLEAN_TYPE, null: true, description: 'Indicates whether this Geo node is the primary.'
       field :enabled, GraphQL::BOOLEAN_TYPE, null: true, description: 'Indicates whether this Geo node is enabled.'
       field :name, GraphQL::STRING_TYPE, null: true, description: 'The unique identifier for this Geo node.'

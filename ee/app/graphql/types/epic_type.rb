@@ -17,9 +17,9 @@ module Types
     implements(Types::CurrentUserTodos)
     implements(Types::EventableType)
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the epic.'
-    field :iid, GraphQL::ID_TYPE, null: false,
+    field :iid, GraphQL::Types::ID, null: false,
           description: 'Internal ID of the epic.'
     field :title, GraphQL::STRING_TYPE, null: true,
           description: 'Title of the epic.'

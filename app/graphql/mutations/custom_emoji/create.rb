@@ -14,7 +14,7 @@ module Mutations
             null: true,
             description: 'The new custom emoji.'
 
-      argument :group_path, GraphQL::ID_TYPE,
+      argument :group_path, GraphQL::Types::ID,
                required: true,
                description: 'Namespace full path the emoji is associated with.'
 

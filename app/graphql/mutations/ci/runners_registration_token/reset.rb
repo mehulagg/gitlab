@@ -8,7 +8,7 @@ module Mutations
 
         authorize :update_runners_registration_token
 
-        ScopeID = ::GraphQL::ID_TYPE
+        ScopeID = ::GraphQL::Types::ID
 
         argument :type, ::Types::Ci::RunnerTypeEnum,
                  required: true,

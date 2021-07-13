@@ -133,7 +133,7 @@ For example, `app/graphql/types/issue_type.rb`:
 ```ruby
 graphql_name 'Issue'
 
-field :iid, GraphQL::ID_TYPE, null: true
+field :iid, GraphQL::Types::ID, null: true
 field :title, GraphQL::STRING_TYPE, null: true
 
 # we also have a method here that we've defined, that extends `field`
@@ -145,7 +145,7 @@ markdown_field :description_html, null: true
 We give each type a name (in this case `Issue`).
 
 The `iid`, `title` and `description` are _scalar_ GraphQL types.
-`iid` is a `GraphQL::ID_TYPE`, a special string type that signifies a unique ID.
+`iid` is a `GraphQL::Types::ID`, a special string type that signifies a unique ID.
 `title` and `description` are regular `GraphQL::STRING_TYPE` types.
 
 When exposing a model through the GraphQL API, we do so by creating a
@@ -225,7 +225,7 @@ Using an example from
 [`Types::Notes::DiscussionType`](https://gitlab.com/gitlab-org/gitlab/-/blob/3c95bd9/app/graphql/types/notes/discussion_type.rb#L24-26):
 
 ```ruby
-field :reply_id, GraphQL::ID_TYPE
+field :reply_id, GraphQL::Types::ID
 
 def reply_id
   ::Gitlab::GlobalId.build(object, id: object.reply_id)
@@ -817,7 +817,7 @@ A description of a field or argument is given using the `description:`
 keyword. For example:
 
 ```ruby
-field :id, GraphQL::ID_TYPE, description: 'ID of the resource.'
+field :id, GraphQL::Types::ID, description: 'ID of the resource.'
 ```
 
 Descriptions of fields and arguments are viewable to users through:
@@ -844,7 +844,7 @@ descriptions:
 Example:
 
 ```ruby
-field :id, GraphQL::ID_TYPE, description: 'ID of the issue.'
+field :id, GraphQL::Types::ID, description: 'ID of the issue.'
 field :confidential, GraphQL::BOOLEAN_TYPE, description: 'Indicates the issue is confidential.'
 field :closed_at, Types::TimeType, description: 'Timestamp of when the issue was closed.'
 ```
@@ -1382,7 +1382,7 @@ defines these arguments (some
 [through inheritance](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/mutations/merge_requests/base.rb)):
 
 ```ruby
-argument :project_path, GraphQL::ID_TYPE,
+argument :project_path, GraphQL::Types::ID,
          required: true,
          description: "The project the merge request to mutate is in."
 

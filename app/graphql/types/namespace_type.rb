@@ -6,7 +6,7 @@ module Types
 
     authorize :read_namespace
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the namespace.'
 
     field :name, GraphQL::STRING_TYPE, null: false,
@@ -15,7 +15,7 @@ module Types
           description: 'Path of the namespace.'
     field :full_name, GraphQL::STRING_TYPE, null: false,
           description: 'Full name of the namespace.'
-    field :full_path, GraphQL::ID_TYPE, null: false,
+    field :full_path, GraphQL::Types::ID, null: false,
           description: 'Full path of the namespace.'
 
     field :description, GraphQL::STRING_TYPE, null: true,

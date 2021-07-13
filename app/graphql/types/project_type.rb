@@ -8,10 +8,10 @@ module Types
 
     expose_permissions Types::PermissionTypes::Project
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the project.'
 
-    field :full_path, GraphQL::ID_TYPE, null: false,
+    field :full_path, GraphQL::Types::ID, null: false,
           description: 'Full path of the project.'
     field :path, GraphQL::STRING_TYPE, null: false,
           description: 'Path of the project.'

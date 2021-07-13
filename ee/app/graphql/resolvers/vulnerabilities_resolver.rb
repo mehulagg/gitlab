@@ -6,7 +6,7 @@ module Resolvers
 
     type Types::VulnerabilityType, null: true
 
-    argument :project_id, [GraphQL::ID_TYPE],
+    argument :project_id, [GraphQL::Types::ID],
              required: false,
              description: 'Filter vulnerabilities by project.'
 

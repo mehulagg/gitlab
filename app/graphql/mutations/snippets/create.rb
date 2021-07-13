@@ -28,7 +28,7 @@ module Mutations
                description: 'The visibility level of the snippet.',
                required: true
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: false,
                description: 'The project full path the snippet is associated with.'
 

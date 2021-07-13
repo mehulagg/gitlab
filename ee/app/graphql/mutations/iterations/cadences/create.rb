@@ -10,7 +10,7 @@ module Mutations
 
         authorize :create_iteration_cadence
 
-        argument :group_path, GraphQL::ID_TYPE, required: true,
+        argument :group_path, GraphQL::Types::ID, required: true,
           description: "The group where the iteration cadence is created."
 
         argument :title, GraphQL::STRING_TYPE, required: false,

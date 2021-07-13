@@ -9,7 +9,7 @@ module Types
       authorize :read_incident_management_oncall_schedule
 
       field :iid,
-            GraphQL::ID_TYPE,
+            GraphQL::Types::ID,
             null: false,
             description: 'Internal ID of the on-call schedule.'
 

@@ -15,13 +15,13 @@ module Mutations
             null: true,
             description: 'Updated iteration.'
 
-      argument :group_path, GraphQL::ID_TYPE,
+      argument :group_path, GraphQL::Types::ID,
                required: true,
                description: 'Group of the iteration.'
 
       # rubocop:disable Graphql/IDType
       argument :id,
-               GraphQL::ID_TYPE,
+               GraphQL::Types::ID,
                required: true,
                description: 'Global ID of the iteration.'
       # rubocop:enable Graphql/IDType

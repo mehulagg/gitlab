@@ -10,7 +10,7 @@ module Types
 
     alias_method :list, :object
 
-    field :id, GraphQL::ID_TYPE, null: false,
+    field :id, GraphQL::Types::ID, null: false,
           description: 'ID (global ID) of the list.'
     field :title, GraphQL::STRING_TYPE, null: false,
           description: 'Title of the list.'

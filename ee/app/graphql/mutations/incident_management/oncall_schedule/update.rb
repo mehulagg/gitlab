@@ -6,7 +6,7 @@ module Mutations
       class Update < OncallScheduleBase
         graphql_name 'OncallScheduleUpdate'
 
-        argument :project_path, GraphQL::ID_TYPE,
+        argument :project_path, GraphQL::Types::ID,
                  required: true,
                  description: 'The project to update the on-call schedule in.'
 

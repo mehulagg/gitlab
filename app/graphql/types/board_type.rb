@@ -9,7 +9,7 @@ module Types
 
     present_using BoardPresenter
 
-    field :id, type: GraphQL::ID_TYPE, null: false,
+    field :id, type: GraphQL::Types::ID, null: false,
           description: 'ID (global ID) of the board.'
     field :name, type: GraphQL::STRING_TYPE, null: true,
           description: 'Name of the board.'

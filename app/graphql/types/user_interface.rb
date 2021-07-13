@@ -14,7 +14,7 @@ module Types
           method: :itself
 
     field :id,
-          type: GraphQL::ID_TYPE,
+          type: GraphQL::Types::ID,
           null: false,
           description: 'ID of the user.'
     field :bot,

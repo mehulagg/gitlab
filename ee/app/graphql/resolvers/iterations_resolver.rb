@@ -13,12 +13,12 @@ module Resolvers
              description: 'Fuzzy search by title.'
 
     # rubocop:disable Graphql/IDType
-    argument :id, GraphQL::ID_TYPE,
+    argument :id, GraphQL::Types::ID,
              required: false,
              description: 'Global ID of the Iteration to look up.'
     # rubocop:enable Graphql/IDType
 
-    argument :iid, GraphQL::ID_TYPE,
+    argument :iid, GraphQL::Types::ID,
              required: false,
              description: 'Internal ID of the Iteration to look up.'
     argument :include_ancestors, GraphQL::BOOLEAN_TYPE,

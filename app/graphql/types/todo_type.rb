@@ -9,7 +9,7 @@ module Types
 
     authorize :read_todo
 
-    field :id, GraphQL::ID_TYPE,
+    field :id, GraphQL::Types::ID,
           description: 'ID of the to-do item.',
           null: false
 

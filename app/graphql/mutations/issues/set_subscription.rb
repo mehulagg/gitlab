@@ -8,7 +8,7 @@ module Mutations
       include ResolvesSubscription
       include Mutations::ResolvesIssuable
 
-      argument :project_path, GraphQL::ID_TYPE,
+      argument :project_path, GraphQL::Types::ID,
                required: true,
                description: "The project the issue to mutate is in."
 
