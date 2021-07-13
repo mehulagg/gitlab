@@ -40,6 +40,14 @@ module EE
           end
         end
 
+        class AbstractRecord < ActiveRecord::Base
+          self.abstract_class = true
+
+          private
+
+          delegate :log_info, to: ::EE::Gitlab::BackgroundMigration::PopulateLatestPipelineIds
+        end
+
         class Namespace < ActiveRecord::Base
           include Routable
           include Visibility
@@ -282,7 +290,7 @@ module EE
           end
         end
 
-        class VulnerabilityStatistic < ActiveRecord::Base
+        class VulnerabilityStatistic < AbstractRecord
           self.table_name = 'vulnerability_statistics'
 
           UPSERT_SQL = <<~SQL
@@ -300,7 +308,9 @@ module EE
             def update_latest_pipeline_ids_for(projects)
               upsert_tuples = projects.map(&:stats_tuple).compact
 
-              run_upsert(upsert_tuples) if upsert_tuples.present?
+              return log_info(message: 'No projects to update') unless upsert_tuples.present?
+
+              run_upsert(upsert_tuples)
             end
 
             private
@@ -309,6 +319,7 @@ module EE
               upsert_sql = format(UPSERT_SQL, insert_tuples: tuples.join(', '))
 
               connection.execute(upsert_sql)
+              log_info(message: 'Update query has been executed', query: upsert_sql)
             end
           end
         end
