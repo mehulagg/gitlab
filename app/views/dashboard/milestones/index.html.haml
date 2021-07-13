@@ -8,9 +8,10 @@
 
   - if current_user
     .page-title-controls
-      = render 'shared/new_project_item_select',
-        path: '-/milestones/new', label: 'New milestone',
-        include_groups: true, type: :milestones
+      #js-new-project-item-select{ data: { path: 'milestones/new', label: "New milestone", with_feature_enabled: 'milestones', type: :milestones }}
+      -# = render 'shared/new_project_item_select',
+      -#   path: '-/milestones/new', label: 'New milestone',
+      -#   include_groups: true, type: :milestones
 
 .top-area
   = render 'shared/milestones_filter', counts: @milestone_states

@@ -45,7 +45,9 @@ export default {
     },
     filteredProjectNames() {
       return this.frequentProjects
-        .filter((project) => project.namespace.toLowerCase().includes(this.searchTerm.toLowerCase()))
+        .filter((project) =>
+          project.namespace.toLowerCase().includes(this.searchTerm.toLowerCase()),
+        )
         .sort((a, b) => b.lastAccessedOn - a.lastAccessedOn);
     },
     filteredProjectNamesLength() {
@@ -59,19 +61,14 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown 
-    variant="confirm"  
-    :text="text" 
-    header-text="Recent projects" 
-    right
-  >
+  <gl-dropdown variant="confirm" :text="text" header-text="Recent projects" right>
     <template #header>
       <gl-search-box-by-type v-model.trim="searchTerm" />
     </template>
     <gl-dropdown-item
       v-for="project in filteredProjectNames"
       :key="project.id"
-      :href="`${project.webUrl}/-/${type}/new`"
+      :href="`${project.webUrl}/-/${path}`"
     >
       {{ project.namespace }}
     </gl-dropdown-item>
