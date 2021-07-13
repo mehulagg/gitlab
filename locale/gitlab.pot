@@ -39508,6 +39508,9 @@ msgstr ""
 msgid "pending comment"
 msgstr ""
 
+msgid "pending deletion"
+msgstr ""
+
 msgid "pending removal"
 msgstr ""
 
