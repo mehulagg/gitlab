@@ -25,12 +25,13 @@ function withDefaultEmptyRule(rules = []) {
 }
 
 export const mapApprovalRuleRequest = (req) => ({
-  name: req.name,
-  approvals_required: req.approvalsRequired,
-  users: req.users,
-  groups: req.groups,
-  remove_hidden_groups: req.removeHiddenGroups,
-  protected_branch_ids: req.protectedBranchIds,
+    name: req.name,
+    approvals_required: req.approvalsRequired,
+    users: req.users,
+    groups: req.groups,
+    remove_hidden_groups: req.removeHiddenGroups,
+    protected_branch_ids: req.protectedBranchIds,
+    scanners: req.scanners,
 });
 
 export const mapApprovalFallbackRuleRequest = (req) => ({
@@ -50,6 +51,7 @@ export const mapApprovalRuleResponse = (res) => ({
   ruleType: res.rule_type,
   protectedBranches: res.protected_branches,
   overridden: res.overridden,
+  scanners: res.scanners,
 });
 
 export const mapApprovalSettingsResponse = (res) => ({

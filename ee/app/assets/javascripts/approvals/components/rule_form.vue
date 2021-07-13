@@ -1,5 +1,6 @@
 <script>
-import { GlFormGroup, GlFormInput } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { REPORT_TYPES } from 'ee/security_dashboard/store/constants';
 import { groupBy, isEqual, isNumber } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
@@ -18,12 +19,15 @@ function mapServerResponseToValidationErrors(messages) {
 }
 
 export default {
+  REPORT_TYPES,
   components: {
     ApproversList,
     ApproversSelect,
     GlFormGroup,
     GlFormInput,
     ProtectedBranchesSelector,
+    GlDropdown,
+    GlDropdownItem,
   },
   props: {
     initRule: {
@@ -55,6 +59,7 @@ export default {
       isFallback: false,
       containsHiddenGroups: false,
       serverValidationErrors: [],
+      scanners: [],
       ...this.getInitialData(),
     };
   },
@@ -126,12 +131,20 @@ export default {
 
       return '';
     },
+    invalidScanners() {
+      if (this.scanners.length <= 0) {
+        return this.$options.i18n.validations.scannersRequired;
+      }
+
+      return '';
+    },
     isValid() {
       return (
         this.isValidName &&
         this.isValidBranches &&
         this.isValidApprovalsRequired &&
-        this.isValidApprovers
+        this.isValidApprovers &&
+        this.areValidScanners
       );
     },
     isValidName() {
@@ -145,6 +158,9 @@ export default {
     },
     isValidApprovers() {
       return !this.showValidation || !this.invalidApprovers;
+    },
+    areValidScanners() {
+      return !this.showValidation || !this.isVulnerabilityCheck || !this.invalidScanners;
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -182,11 +198,15 @@ export default {
         groupRecords: this.groups,
         removeHiddenGroups: this.removeHiddenGroups,
         protectedBranchIds: this.branches.map((x) => x.id),
+        scanners: this.scanners,
       };
     },
     isEditing() {
       return Boolean(this.initRule);
     },
+    isVulnerabilityCheck(){
+      return DEFAULT_NAME_FOR_VULNERABILITY_CHECK === this.name
+    }
   },
   watch: {
     approversToAdd(value) {
@@ -302,7 +322,20 @@ export default {
             containsHiddenGroups && !removeHiddenGroups ? [{ type: TYPE_HIDDEN_GROUPS }] : [],
           ),
         branches,
+        scanners: this.initRule.scanners || [],
       };
+    },
+    isSelectedReport(report_type){
+      return this.scanners.includes(report_type)
+    },
+    setSelectedReport(report_type){
+      const index = this.scanners.indexOf(report_type);
+      if (index > -1) {
+        this.scanners.splice(index, 1);
+      }
+      else {
+        this.scanners.push(report_type);
+      }
     },
   },
   i18n: {
@@ -316,6 +349,9 @@ export default {
       protectedBranchDescription: __(
         'Apply this approval rule to any branch or a specific protected branch.',
       ),
+      scannersLabel: s__('ApprovalRule|Security scanners'),
+      scannersSelectLabel: s__('ApprovalRule|Select scanners'),
+      scannersDescription: s__('ApprovalRule|Apply this approval rule to consider only the selected security scanners.'),
     },
     validations: {
       approvalsRequiredNegativeNumber: __('Please enter a non-negative number'),
@@ -327,6 +363,7 @@ export default {
       branchesRequired: __('Please select a valid target branch'),
       ruleNameTaken: __('Rule name is already taken.'),
       ruleNameMissing: __('Please provide a name'),
+      scannersRequired: __('Please select at least one security scanner'),
     },
   },
 };
@@ -364,6 +401,27 @@ export default {
         :is-invalid="!isValidBranches"
         :selected-branches="branches"
       />
+    </gl-form-group>
+    <gl-form-group
+      v-if="isVulnerabilityCheck"
+      :label="$options.i18n.form.scannersLabel"
+      :description="$options.i18n.form.scannersDescription"
+      :state="areValidScanners"
+      :invalid-feedback="invalidScanners"
+    >
+      <gl-dropdown
+      :text=$options.i18n.form.scannersSelectLabel
+      >
+        <gl-dropdown-item
+            v-for="(value, key) in this.$options.REPORT_TYPES"
+            :key="key"
+            :is-check-item="true"
+            :is-checked="isSelectedReport( key )"
+            @click="setSelectedReport(key)"
+          >
+          {{value}}
+        </gl-dropdown-item>
+      </gl-dropdown>
     </gl-form-group>
     <gl-form-group
       :label="$options.i18n.form.approvalsRequiredLabel"
