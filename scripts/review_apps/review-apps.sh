@@ -284,6 +284,7 @@ HELM_CMD=$(cat << EOF
     --set gitlab.webservice.annotations.commit="${CI_COMMIT_SHORT_SHA}" \
     --set gitlab.webservice.image.repository="${gitlab_webservice_image_repository}" \
     --set gitlab.webservice.image.tag="${CI_COMMIT_REF_SLUG}" \
+    --set gitlab.webservice.workhorse.annotations.commit="${CI_COMMIT_SHORT_SHA}" \
     --set gitlab.webservice.workhorse.image="${gitlab_workhorse_image_repository}" \
     --set gitlab.webservice.workhorse.tag="${CI_COMMIT_REF_SLUG}" \
     --set gitlab.task-runner.image.repository="${gitlab_task_runner_image_repository}" \
