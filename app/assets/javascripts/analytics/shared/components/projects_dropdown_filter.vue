@@ -62,6 +62,7 @@ export default {
       projects: [],
       selectedProjects: this.defaultProjects || [],
       searchTerm: '',
+      isDirty: false,
     };
   },
   computed: {
@@ -126,12 +127,14 @@ export default {
     },
     onMultiSelectClick({ project, isSelected }) {
       this.setSelectedProjects(project, !isSelected);
+      this.isDirty = true;
     },
     onHide(ev) {
-      if (this.selectedProjects.length) {
+      if (this.isDirty) {
         this.$emit('selected', this.selectedProjects);
       }
       this.searchTerm = '';
+      this.isDirty = false;
     },
     fetchData() {
       this.loading = true;
