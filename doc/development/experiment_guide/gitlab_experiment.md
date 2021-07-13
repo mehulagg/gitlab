@@ -515,8 +515,8 @@ experiment(:example, :variant_name, foo: :bar).track(:my_event, value: 1, proper
 
 ### Recording and assignment tracking
 
-You can use the [tracks assignment and records the subject](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/support/shared_examples/lib/gitlab/experimentation_shared_examples.rb) 
-shared example for a simple test of `record!` and assignment tracking
+You can use or adopt the [tracks assignment and records the subject](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/support/shared_examples/lib/gitlab/experimentation_shared_examples.rb) 
+shared example for testing assignment tracking and the `record!` method.
 
 ## Experiments in the client layer
 
