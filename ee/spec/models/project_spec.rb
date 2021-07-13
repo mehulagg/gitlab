@@ -2951,18 +2951,33 @@ RSpec.describe Project do
   describe '#force_cost_factor?' do
     context 'on gitlab.com' do
       context 'when public' do
-        context 'when in a namespace created after 17 July, 2021' do
-          it 'returns true' do
-            allow(::Gitlab).to receive(:com?).and_return(true)
-            namespace = build(:group, created_at: Date.new(2021, 7, 17))
-            project = build(:project, :public, namespace: namespace)
+        context 'when ci_minutes_public_project_cost_factor is enabled' do
+          context 'when in a namespace created after 17 July, 2021' do
+            it 'returns true' do
+              stub_feature_flags(ci_minutes_public_project_cost_factor: true)
+              allow(::Gitlab).to receive(:com?).and_return(true)
+              namespace = build(:group, created_at: Date.new(2021, 7, 17))
+              project = build(:project, :public, namespace: namespace)
 
-            expect(project.force_cost_factor?).to be_truthy
+              expect(project.force_cost_factor?).to be_truthy
+            end
+          end
+
+          context 'when in a namespace created before 17 July, 2021' do
+            it 'returns false' do
+              stub_feature_flags(ci_minutes_public_project_cost_factor: true)
+              allow(::Gitlab).to receive(:com?).and_return(true)
+              namespace = build(:group, created_at: Date.new(2021, 7, 16))
+              project = build(:project, :public, namespace: namespace)
+
+              expect(project.force_cost_factor?).to be_falsy
+            end
           end
         end
 
-        context 'when in a namespace created before 17 July, 2021' do
+        context 'when ci_minutes_public_project_cost_factor is disabled' do
           it 'returns false' do
+            stub_feature_flags(ci_minutes_public_project_cost_factor: false)
             allow(::Gitlab).to receive(:com?).and_return(true)
             namespace = build(:group, created_at: Date.new(2021, 7, 16))
             project = build(:project, :public, namespace: namespace)
@@ -2974,6 +2989,7 @@ RSpec.describe Project do
 
       context 'when not public' do
         it 'returns false' do
+          stub_feature_flags(ci_minutes_public_project_cost_factor: true)
           allow(::Gitlab).to receive(:com?).and_return(true)
           namespace = build(:group, created_at: Date.new(2021, 7, 17))
           project = build(:project, :private, namespace: namespace)
@@ -2985,6 +3001,7 @@ RSpec.describe Project do
 
     context 'when not on gitlab.com' do
       it 'returns false' do
+        stub_feature_flags(ci_minutes_public_project_cost_factor: true)
         allow(::Gitlab).to receive(:com?).and_return(false)
         namespace = build(:group, created_at: Date.new(2021, 7, 17))
         project = build(:project, :public, namespace: namespace)
