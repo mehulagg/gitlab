@@ -146,7 +146,7 @@ Configure the GitLab integration with Jenkins in one of the following ways.
 ### Recommended Jenkins integration
 
 GitLab recommends this approach for Jenkins integrations because it is easier to configure.
-The same result can be archived using [Webhooks](#webhook-integration)
+The same result can be achieved using [Webhooks](#webhook-integration)
 
 1. Create a new GitLab project or choose an existing one.
 1. Go to **Settings > Integrations**, then select **Jenkins CI**.
