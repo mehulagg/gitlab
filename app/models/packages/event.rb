@@ -23,7 +23,9 @@ class Packages::Event < ApplicationRecord
     list_tags: 9,
     cli_metadata: 10,
     pull_manifest: 11,
-    pull_blob: 12
+    pull_manifest_from_cache: 12,
+    pull_blob: 13,
+    pull_blob_from_cache: 14
   }
 
   enum originator_type: { user: 0, deploy_token: 1, guest: 2 }
