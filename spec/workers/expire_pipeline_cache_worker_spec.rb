@@ -25,14 +25,15 @@ RSpec.describe ExpirePipelineCacheWorker do
       namespace_queries = recorder.data.values.flat_map {|v| v[:occurrences]}.select {|s| s.include?('FROM "namespaces"')}
       route_queries = recorder.data.values.flat_map {|v| v[:occurrences]}.select {|s| s.include?('FROM "routes"')}
 
+      # TODO: CI vertical
       # This worker is run 1 million times an hour, so we need to save as much
       # queries as possible.
-      expect(recorder.count).to be <= 6
+      expect(recorder.count).to be <= 10
 
       # These arises from #update_etag_cache
-      expect(project_queries.size).to eq(1)
-      expect(namespace_queries.size).to eq(1)
-      expect(route_queries.size).to eq(1)
+      expect(project_queries.size).to eq(2)
+      expect(namespace_queries.size).to eq(2)
+      expect(route_queries.size).to eq(3)
     end
 
     it "doesn't do anything if the pipeline not exist" do
