@@ -81,7 +81,7 @@ module Gitlab
     end
 
     def self.license_allows?
-      true || ::License.feature_available?(:geo)
+      ::License.feature_available?(:geo)
     end
 
     def self.configure_cron_jobs!
