@@ -1,6 +1,6 @@
 GIT
   remote: https://gitlab.com/gitlab-org/gitlab-experiment.git
-  revision: 8978d632486f75a927f578cedae3cb32086abfe0
+  revision: 8e6bf76fddd4764019722baffccc0ee15e876985
   branch: release-0.6.2
   specs:
     gitlab-experiment (0.6.2)
