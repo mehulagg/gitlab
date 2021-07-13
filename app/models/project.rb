@@ -128,7 +128,7 @@ class Project < ApplicationRecord
 
   # TODO: CI vertical
   # Allow acts-as-taggable-on to use multiple tags/taggings table
-  #acts_as_ordered_taggable_on :topics
+  acts_as_ordered_taggable_on :topics
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
