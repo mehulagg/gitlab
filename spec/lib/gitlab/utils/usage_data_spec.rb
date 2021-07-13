@@ -144,6 +144,8 @@ RSpec.describe Gitlab::Utils::UsageData do
       end
 
       it 'returns fallback if counter raises WRONG_CONFIGURATION_ERROR' do
+        allow(relation).to receive(:connection) { ApplicationRecord.connection }
+
         expect(described_class.estimate_batch_distinct_count(relation, 'id', start: 1, finish: 0)).to eq 3
       end
 
