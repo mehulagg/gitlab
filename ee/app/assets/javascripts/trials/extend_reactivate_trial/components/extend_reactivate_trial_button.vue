@@ -1,0 +1,111 @@
+<script>
+import { GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
+import { extendTrial, reactivateTrial } from 'ee/api/subscriptions_api';
+import createFlash, { FLASH_TYPES } from '~/flash';
+import { sprintf, __ } from '~/locale';
+import { i18n } from '../constants';
+
+export default {
+  name: 'ExtendTrialButton',
+  components: {
+    GlButton,
+    GlModal,
+  },
+  directives: {
+    GlModalDirective,
+  },
+  props: {
+    namespaceId: {
+      type: Number,
+      required: true,
+    },
+    action: {
+      type: String,
+      required: true,
+      default: 'extend',
+      validator: (value) => ['extend', 'reactivate'].includes(value),
+    },
+    planName: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      isButtonVisible: true,
+      isLoading: false,
+    };
+  },
+  computed: {
+    i18nContext() {
+      return this.action === 'extend' ? this.$options.i18n.extend : this.$options.i18n.reactivate;
+    },
+    modalText() {
+      return sprintf(this.i18nContext.modalText, {
+        action: this.actionName,
+        planName: sprintf(this.$options.i18n.planName, { planName: this.planName }),
+      });
+    },
+    actionPrimary() {
+      return {
+        text: this.i18nContext.buttonText,
+      };
+    },
+    actionSecondary() {
+      return {
+        text: __('Cancel'),
+      };
+    },
+  },
+  methods: {
+    async submit() {
+      this.isLoading = true;
+      this.$refs.modal.hide();
+
+      const action = this.action === 'extend' ? extendTrial : reactivateTrial;
+
+      await action(this.namespaceId)
+        .then(() => {
+          createFlash({ message: this.i18nContext.flashText, type: FLASH_TYPES.SUCCESS });
+          this.isButtonVisible = false;
+        })
+        .catch((error) => {
+          createFlash({
+            message: this.i18nContext.trialActionError,
+            captureError: true,
+            error,
+          });
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+  },
+  i18n,
+};
+</script>
+
+<template>
+  <div>
+    <gl-button
+      v-if="isButtonVisible"
+      v-gl-modal-directive.extend-trial
+      :loading="isLoading"
+      category="primary"
+      variant="info"
+    >
+      {{ i18nContext.buttonText }}
+    </gl-button>
+    <gl-modal
+      ref="modal"
+      modal-id="extend-trial"
+      :title="i18nContext.buttonText"
+      :action-primary="actionPrimary"
+      :action-secondary="actionSecondary"
+      data-testid="extend-reactivate-trial-modal"
+      @primary="submit"
+    >
+      {{ modalText }}
+    </gl-modal>
+  </div>
+</template>
