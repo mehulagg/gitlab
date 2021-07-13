@@ -12,10 +12,9 @@ module Ci
     self.schema_name = :gitlab_ci
 
     # TODO: CI Vertical
-    # TODO copy ci* tables to ci database
-    #if Gitlab::Database.has_config?(:ci)
-      #connects_to database: { writing: :ci, reading: :ci }
-    #end
+    if Gitlab::Database.has_config?(:ci)
+      connects_to database: { writing: :ci, reading: :ci }
+    end
 
     def self.table_name_prefix
       "ci_"

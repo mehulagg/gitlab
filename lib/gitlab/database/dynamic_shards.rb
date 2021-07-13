@@ -12,21 +12,26 @@ module DynamicShards
         configs = {"main" => configs}
       end
 
+      ci_config = configs.include?("ci")
+
       configs.each do |config_name, config|
         if config_name == 'main'
           # TODO: CI vertical
           # Set to public to see what features break if CI tables were "moved"
           # Set to public,gitlab_ci to restore CI tables again
           #
-          config["schema_search_path"] ||= "public,gitlab_ci"
-          # config["schema_search_path"] ||= "public"
+          if ci_config
+            config["schema_search_path"] ||= "public"
+          else
+            config["schema_search_path"] ||= "public,gitlab_ci"
+          end
 
           config["migrations_paths"] ||= [
             "db/migrate",
             ("db/post_migrate" unless skip_post_migrate?)
           ].compact
         elsif config_name == 'ci'
-          #config["schema_search_path"] ||= "gitlab_ci"
+          config["schema_search_path"] ||= "gitlab_ci"
           config["migrations_paths"] ||= [
             "db/ci_migrate",
             ("db/ci_post_migrate" unless skip_post_migrate?)
