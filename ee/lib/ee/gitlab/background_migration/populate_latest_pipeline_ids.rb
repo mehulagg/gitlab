@@ -6,9 +6,9 @@ module EE
       module PopulateLatestPipelineIds
         extend ::Gitlab::Utils::Override
 
-        class << self
+        module LogUtils
           def log_info(log_attributes)
-            ::Gitlab::BackgroundMigration::Logger.info(log_attributes.merge(migrator: name))
+            ::Gitlab::BackgroundMigration::Logger.info(log_attributes.merge(migrator: 'PopulateLatestPipelineIds'))
           end
         end
 
@@ -40,14 +40,6 @@ module EE
           end
         end
 
-        class AbstractRecord < ActiveRecord::Base
-          self.abstract_class = true
-
-          private
-
-          delegate :log_info, to: ::EE::Gitlab::BackgroundMigration::PopulateLatestPipelineIds
-        end
-
         class Namespace < ActiveRecord::Base
           include Routable
           include Visibility
@@ -71,10 +63,11 @@ module EE
           self.table_name = 'routes'
         end
 
-        class Project < AbstractRecord
+        class Project < ActiveRecord::Base
           include Routable
           include Visibility
           include ::Gitlab::Utils::StrongMemoize
+          include ::EE::Gitlab::BackgroundMigration::PopulateLatestPipelineIds::LogUtils
 
           self.table_name = 'projects'
 
@@ -152,6 +145,8 @@ module EE
               return nil
             end
 
+            log_info(message: 'latest_pipeline_id found', project_id: id)
+
             [id, DEFAULT_LETTER_GRADE, latest_pipeline_id, quoted_time, quoted_time].join(', ').then { |s| "(#{s})" }
           rescue StandardError => e
             ::Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
@@ -176,14 +171,13 @@ module EE
           end
 
           def pipeline_with_reports_sql
-            log_info(message: 'Pipeline with reports SQL requested', project_id: project.id, ref: default_branch)
+            log_info(message: 'Pipeline with reports SQL requested', project_id: id, ref: default_branch)
 
             format(LATEST_PIPELINE_WITH_REPORTS_SQL, project_id: id, ref: connection.quote(default_branch), file_types: FILE_TYPES.join(', '))
           end
 
-          ### Default branch related logic
           def default_branch
-            @default_branch ||= repository.root_ref || default_branch_from_preferences
+            strong_memoize(:default_branch) { repository.root_ref || default_branch_from_preferences }
           end
 
           def repository
@@ -296,7 +290,9 @@ module EE
           end
         end
 
-        class VulnerabilityStatistic < AbstractRecord
+        class VulnerabilityStatistic < ActiveRecord::Base
+          extend ::EE::Gitlab::BackgroundMigration::PopulateLatestPipelineIds::LogUtils
+
           self.table_name = 'vulnerability_statistics'
 
           UPSERT_SQL = <<~SQL
@@ -330,12 +326,14 @@ module EE
           end
         end
 
+        include ::EE::Gitlab::BackgroundMigration::PopulateLatestPipelineIds::LogUtils
+
         def perform(start_id, end_id)
-          self.class.log_info(message: 'Migration started', start_id: start_id, end_id: end_id)
+          log_info(message: 'Migration started', start_id: start_id, end_id: end_id)
 
           projects = Project.by_range(start_id, end_id)
 
-          self.class.log_info(message: 'Projects fetched', count: projects.length)
+          log_info(message: 'Projects fetched', count: projects.length)
 
           VulnerabilityStatistic.update_latest_pipeline_ids_for(projects)
         end
