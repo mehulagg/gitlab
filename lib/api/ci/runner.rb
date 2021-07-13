@@ -11,7 +11,7 @@ module API
 
       resource :runners do
         desc 'Registers a new Runner' do
-          success Entities::RunnerRegistrationDetails
+          success Entities::Ci::RunnerRegistrationDetails
           http_codes [[201, 'Runner was created'], [403, 'Forbidden']]
         end
         params do
@@ -47,7 +47,7 @@ module API
           @runner = ::Ci::Runner.create(attributes)
 
           if @runner.persisted?
-            present @runner, with: Entities::RunnerRegistrationDetails
+            present @runner, with: Entities::Ci::RunnerRegistrationDetails
           else
             render_validation_error!(@runner)
           end
