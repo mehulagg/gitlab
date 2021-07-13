@@ -117,7 +117,7 @@ module Gitlab
         private
 
         def track(values, event_name, context: '', time: Time.zone.now)
-          return unless Gitlab::CurrentSettings.usage_ping_enabled?
+          return unless usage_ping_enabled?
 
           event = event_for(event_name)
           Gitlab::ErrorTracking.track_and_raise_for_dev_exception(UnknownEvent.new("Unknown event #{event_name}")) unless event.present?
@@ -148,6 +148,10 @@ module Gitlab
           return FALLBACK unless keys.any?
 
           redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
+        end
+
+        def usage_ping_enabled?
+          Gitlab::CurrentSettings.usage_ping_enabled?
         end
 
         def feature_enabled?(event)

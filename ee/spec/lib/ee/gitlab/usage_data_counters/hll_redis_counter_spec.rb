@@ -96,4 +96,36 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       end
     end
   end
+
+  describe '.track_event' do
+    context 'when license usage_ping is disabled' do
+      context 'when settings usage_ping is disabled' do
+        before do
+          # License.current.usage_ping? == true
+          create_current_license(usage_ping_required_metrics_enabled: false)
+          stub_application_setting(usage_ping_enabled: false)
+        end
+
+        it 'does not track the event' do
+          expect(Gitlab::Redis::HLL).not_to receive(:add)
+
+          described_class.track_event(context_event, values: entity1, time: Date.current)
+        end
+      end
+
+      context 'when settings usage_ping is enabled' do
+        before do
+          # License.current.usage_ping? == true
+          create_current_license(usage_ping_required_metrics_enabled: false)
+          stub_application_setting(usage_ping_enabled: true)
+        end
+
+        it 'does tracks the event' do
+          expect(Gitlab::Redis::HLL).to receive(:add)
+
+          described_class.track_event(context_event, values: entity1, time: Date.current)
+        end
+      end
+    end
+  end
 end
