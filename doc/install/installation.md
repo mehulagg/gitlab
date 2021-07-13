@@ -1006,7 +1006,7 @@ Using Sidekiq directly is still supported until 14.0. So if you're experiencing 
 
 ### Prometheus Server Setup
 
-You can configure Prometheus server in config/gitlab.yml.
+You can configure Prometheus server in `config/gitlab.yml`
 
 ```yaml
 # example
