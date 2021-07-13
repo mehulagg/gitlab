@@ -921,7 +921,11 @@ module Ci
     end
 
     def environments_in_self_and_descendants
-      environment_ids = self_and_descendants.joins(:deployments).select(:'deployments.environment_id')
+      build_ids = self_and_descendants.joins(:builds).pluck("ci_builds.id")
+      environment_ids = Deployment
+        .where(deployable_type: CommitStatus, deployable_id: build_ids)
+        .distinct
+        .pluck(:environment_id)
 
       Environment.where(id: environment_ids)
     end
