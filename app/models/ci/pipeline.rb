@@ -920,6 +920,7 @@ module Ci
       Ci::Build.latest.where(pipeline: self_and_descendants)
     end
 
+    # TODO: CI Vertical: pluck might produce a lot's of objects
     def environments_in_self_and_descendants
       build_ids = self_and_descendants.joins(:builds).pluck("ci_builds.id")
       environment_ids = Deployment

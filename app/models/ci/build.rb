@@ -158,7 +158,7 @@ module Ci
 
     scope :with_project_and_metadata, -> do
       if Feature.enabled?(:non_public_artifacts, type: :development)
-        query = joins(:metadata).includes(:metadata).preload(:project)
+        joins(:metadata).includes(:metadata).preload(:project)
       end
     end
 
