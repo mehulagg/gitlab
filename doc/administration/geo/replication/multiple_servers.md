@@ -176,7 +176,7 @@ the instructions below.
    geo_postgresql['md5_auth_cidr_addresses'] = ['<replica_database_ip>/32']
    gitlab_rails['db_host'] = '<replica_database_ip>'
 
-   # Prevent reconfigure from attempting to run migrations on the replica DB
+   # Prevent reconfigure from attempting to run migrations on the replica database
    gitlab_rails['auto_migrate'] = false
 
    ##
@@ -241,7 +241,7 @@ then make the following modifications:
    gitlab_rails['auto_migrate'] = false
 
    ##
-   ## Configure the connection to the tracking DB.
+   ## Configure the connection to the tracking database
    ##
    geo_secondary['db_host'] = '<geo_tracking_db_host>'
    geo_secondary['db_password'] = '<geo_tracking_db_password>'
@@ -341,7 +341,7 @@ application servers above, with some changes to run only the `sidekiq` service:
    gitlab_rails['auto_migrate'] = false
 
    ##
-   ## Configure the connection to the tracking DB
+   ## Configure the connection to the tracking database
    ##
    geo_secondary['db_host'] = '<geo_tracking_db_host>'
    geo_secondary['db_password'] = '<geo_tracking_db_password>'
