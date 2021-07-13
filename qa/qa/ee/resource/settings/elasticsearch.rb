@@ -29,7 +29,7 @@ module QA
               es.click_submit
             end
 
-            sleep(180)
+            sleep(QA::Runtime::Search::INSERT_RECALL_THRESHOLD)
             # wait for the change to propagate before inserting records or else
             # Gitlab::CurrentSettings.elasticsearch_indexing and
             # Elastic::ApplicationVersionedSearch::searchable? will be false
@@ -39,7 +39,7 @@ module QA
 
           def fabricate_via_api!
             @es_enabled ? api_put : resource_web_url(api_get)
-            sleep(180)
+            sleep(QA::Runtime::Search::INSERT_RECALL_THRESHOLD)
           end
 
           def resource_web_url(resource)
