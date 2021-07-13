@@ -37308,6 +37308,9 @@ msgstr ""
 msgid "You are not allowed to approve a user"
 msgstr ""
 
+msgid "You are not allowed to ban a user"
+msgstr ""
+
 msgid "You are not allowed to log in using password"
 msgstr ""
 
@@ -37315,6 +37318,9 @@ msgid "You are not allowed to push into this branch. Create another branch or op
 msgstr ""
 
 msgid "You are not allowed to reject a user"
+msgstr ""
+
+msgid "You are not allowed to unban a user"
 msgstr ""
 
 msgid "You are not allowed to unlink your primary login account"

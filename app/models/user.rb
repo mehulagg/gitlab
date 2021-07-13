@@ -205,6 +205,7 @@ class User < ApplicationRecord
   has_one :user_canonical_email
   has_one :credit_card_validation, class_name: '::Users::CreditCardValidation'
   has_one :atlassian_identity, class_name: 'Atlassian::Identity'
+  has_one :banned_user, class_name: '::Users::BannedUser'
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
 
