@@ -30,7 +30,7 @@ module QA
             click_element(:import_project_button)
 
             wait_until(reload: false) do
-              has_notice?("The project was successfully imported.")
+              has_notice?("The project was successfully imported.") || page.has_no_content?('Import in progress')
             end
           end
         end
