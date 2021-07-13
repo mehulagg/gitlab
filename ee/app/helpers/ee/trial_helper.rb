@@ -59,15 +59,11 @@ module EE
     end
 
     def extend_reactivate_trial_button_data(namespace)
-      allow_extend_reactivate_trial_enabled = ::Feature.enabled?(:allow_extend_reactivate_trial, namespace, default_enabled: :yaml)
-
-      action = if allow_extend_reactivate_trial_enabled && namespace.can_extend?
-                 'extend'
-               elsif allow_extend_reactivate_trial_enabled && namespace.can_reactivate?
-                 'reactivate'
-               else
-                 nil
-               end
+       action = if show_extend_reactivate_trial_button?(namespace)
+                  namespace.can_extend? ? 'extend' : 'reactivate'
+                else
+                  nil
+                end
 
       {
         namespace_id: namespace.id,
