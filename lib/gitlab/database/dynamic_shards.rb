@@ -12,8 +12,12 @@ module DynamicShards
         configs = {"main" => configs}
       end
 
-      ci_config = configs.include?("ci")
-      all_schemas = Gitlab::Utils.to_boolean(ENV["ALL_SCHEMAS"], default: false)
+      # Drop CI if configured if running in a single mode
+      if Gitlab::Utils.to_boolean(ENV["FORCE_SINGLE_DB"])
+        configs.delete("ci")
+      end
+
+      multiple_dbs = configs.include?("ci")
 
       configs.each do |config_name, config|
         if config_name == 'main'
@@ -21,37 +25,47 @@ module DynamicShards
           # Set to public to see what features break if CI tables were "moved"
           # Set to public,gitlab_ci to restore CI tables again
           #
-          if ci_config
-            config["schema_search_path"] ||= "public,gitlab_shared"
-          else
-            config["schema_search_path"] ||= "public,gitlab_ci,gitlab_shared"
-          end
+          config["schema_search_path"] ||=
+            if multiple_dbs # limit schema visibility if multiple DBs
+              "public,gitlab_shared"
+            else
+              "public,gitlab_ci,gitlab_shared"
+            end
 
-          config["migrations_paths"] ||= [
-            "db/migrate",
-            ("db/post_migrate" unless skip_post_migrate?)
-          ].compact
+          config["migrations_paths"] ||= db_migration_paths.compact
         elsif config_name == 'ci'
           config["schema_search_path"] ||= "gitlab_ci,gitlab_shared"
-          config["migrations_paths"] ||= [
-            "db/ci_migrate",
-            ("db/ci_post_migrate" unless skip_post_migrate?)
-          ].compact
+          config["migrations_paths"] ||= db_migration_paths("ci_").compact
         end
+        config["use_metadata_table"] = false
 
-        if all_schemas
-          config["schema_search_path"] = "public,gitlab_ci,gitlab_shared"
-        end
-
-        # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
-        next if Gitlab::Utils.to_boolean(ENV['CI']) && config_name == 'main'
-
-        config["database"] += "_poc"
+        # Add suffix for local env
+        config["database"] += db_suffix if db_suffix
       end
 
       [env, configs]
     end
   end
+
+  def db_suffix
+    "_poc" unless Gitlab::Utils.to_boolean(ENV['CI'])
+  end
+
+  def db_migration_paths(prefix = nil)
+    [
+      "db/#{prefix}migrate",
+      !skip_post_migrate? && "db/#{prefix}post_migrate"
+    ].compact
+  end
 end
 
 Rails::Application::Configuration.prepend(DynamicShards)
+
+ActiveSupport.on_load(:active_record) do
+  db_configs = Rails.application.config.database_configuration[Rails.env]
+  if db_configs.include?("ci")
+    warn "Using multiple databases"
+  else
+    warn "Using single database"
+  end
+end
