@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
-disable_ddl_transaction!
-
 class DropCiForeignKeys < ActiveRecord::Migration[6.1]
-  include Gitlab::Database::SchemaHelpers
+  include Gitlab::Database::MigrationHelpers
 
   DOWNTIME = false
 
+  disable_ddl_transaction!
+
   def up
+    remove_foreign_key_if_exists(:ci_job_artifacts, :projects, name: "fk_rails_9862d392f9")
+    remove_foreign_key_if_exists(:ci_job_token_project_scope_links, :users, name: "fk_rails_35f7f506ce")
+    remove_foreign_key_if_exists(:ci_job_token_project_scope_links, :projects, name: "fk_rails_4b2ee3290b")
+    remove_foreign_key_if_exists(:ci_job_token_project_scope_links, :projects, name: "fk_rails_6904b38465")
     remove_foreign_key_if_exists(:ci_build_report_results, :projects, name: "fk_rails_056d298d48")
     remove_foreign_key_if_exists(:ci_build_trace_section_names, :projects, name: "fk_rails_f8cd72cd26")
     remove_foreign_key_if_exists(:ci_build_trace_sections, :projects, name: "fk_rails_ab7c104e26")
@@ -17,10 +21,6 @@ class DropCiForeignKeys < ActiveRecord::Migration[6.1]
     remove_foreign_key_if_exists(:ci_daily_build_group_report_results, :projects, name: "fk_rails_0667f7608c")
     remove_foreign_key_if_exists(:ci_freeze_periods, :projects, name: "fk_2e02bbd1a6")
     remove_foreign_key_if_exists(:ci_group_variables, :namespaces, name: "fk_33ae4d58d8")
-    remove_foreign_key_if_exists(:ci_job_artifacts, :projects, name: "fk_rails_9862d392f9")
-    remove_foreign_key_if_exists(:ci_job_token_project_scope_links, :users, name: "fk_rails_35f7f506ce")
-    remove_foreign_key_if_exists(:ci_job_token_project_scope_links, :projects, name: "fk_rails_4b2ee3290b")
-    remove_foreign_key_if_exists(:ci_job_token_project_scope_links, :projects, name: "fk_rails_6904b38465")
     remove_foreign_key_if_exists(:ci_minutes_additional_packs, :namespaces, name: "fk_rails_e0e0c4e4b1")
     remove_foreign_key_if_exists(:ci_pending_builds, :projects, name: "fk_rails_480669c3b3")
     remove_foreign_key_if_exists(:ci_pipeline_artifacts, :projects, name: "fk_rails_4a70390ca6")
@@ -49,6 +49,10 @@ class DropCiForeignKeys < ActiveRecord::Migration[6.1]
   end
 
   def down
+    add_concurrent_foreign_key(:ci_job_artifacts, :projects, name: "fk_rails_9862d392f9", column: :project_id, target_column: :id, on_delete: "cascade")
+    add_concurrent_foreign_key(:ci_job_token_project_scope_links, :users, name: "fk_rails_35f7f506ce", column: :added_by_id, target_column: :id, on_delete: "nullify")
+    add_concurrent_foreign_key(:ci_job_token_project_scope_links, :projects, name: "fk_rails_4b2ee3290b", column: :source_project_id, target_column: :id, on_delete: "cascade")
+    add_concurrent_foreign_key(:ci_job_token_project_scope_links, :projects, name: "fk_rails_6904b38465", column: :target_project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_build_report_results, :projects, name: "fk_rails_056d298d48", column: :project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_build_trace_section_names, :projects, name: "fk_rails_f8cd72cd26", column: :project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_build_trace_sections, :projects, name: "fk_rails_ab7c104e26", column: :project_id, target_column: :id, on_delete: "cascade")
@@ -58,10 +62,6 @@ class DropCiForeignKeys < ActiveRecord::Migration[6.1]
     add_concurrent_foreign_key(:ci_daily_build_group_report_results, :projects, name: "fk_rails_0667f7608c", column: :project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_freeze_periods, :projects, name: "fk_2e02bbd1a6", column: :project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_group_variables, :namespaces, name: "fk_33ae4d58d8", column: :group_id, target_column: :id, on_delete: "cascade")
-    add_concurrent_foreign_key(:ci_job_artifacts, :projects, name: "fk_rails_9862d392f9", column: :project_id, target_column: :id, on_delete: "cascade")
-    add_concurrent_foreign_key(:ci_job_token_project_scope_links, :users, name: "fk_rails_35f7f506ce", column: :added_by_id, target_column: :id, on_delete: "nullify")
-    add_concurrent_foreign_key(:ci_job_token_project_scope_links, :projects, name: "fk_rails_4b2ee3290b", column: :source_project_id, target_column: :id, on_delete: "cascade")
-    add_concurrent_foreign_key(:ci_job_token_project_scope_links, :projects, name: "fk_rails_6904b38465", column: :target_project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_minutes_additional_packs, :namespaces, name: "fk_rails_e0e0c4e4b1", column: :namespace_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_pending_builds, :projects, name: "fk_rails_480669c3b3", column: :project_id, target_column: :id, on_delete: "cascade")
     add_concurrent_foreign_key(:ci_pipeline_artifacts, :projects, name: "fk_rails_4a70390ca6", column: :project_id, target_column: :id, on_delete: "cascade")
