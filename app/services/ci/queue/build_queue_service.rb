@@ -24,17 +24,21 @@ module Ci
 
       # rubocop:disable CodeReuse/ActiveRecord
       def builds_for_group_runner
+        # TODO: CI Vertical
         # Workaround for weird Rails bug, that makes `runner.groups.to_sql` to return `runner_id = NULL`
-        groups = ::Group.joins(:runner_namespaces).merge(runner.runner_namespaces)
+        group_ids = runner.runner_namespaces.pluck(:namespace_id)
+        groups = Group.where(id: group_ids)
 
         hierarchy_groups = Gitlab::ObjectHierarchy
           .new(groups, options: { use_distinct: ::Feature.enabled?(:use_distinct_in_register_job_object_hierarchy) })
           .base_and_descendants
 
+        # TODO: CI Vertical: fetch IDs
         projects = Project.where(namespace_id: hierarchy_groups)
           .with_group_runners_enabled
           .with_builds_enabled
           .without_deleted
+          .ids
 
         relation = new_builds.where(project: projects)
 
@@ -42,8 +46,13 @@ module Ci
       end
 
       def builds_for_project_runner
-        relation = new_builds
-          .where(project: runner.projects.without_deleted.with_builds_enabled)
+        projects = runner.projects
+          .without_deleted
+          .with_builds_enabled
+          .ids
+
+        # TODO: CI Vertical: fetch IDs
+        relation = new_builds.where(project: projects)
 
         order(relation)
       end

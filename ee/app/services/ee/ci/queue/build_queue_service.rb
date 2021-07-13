@@ -9,6 +9,9 @@ module EE
 
         override :builds_for_shared_runner
         def builds_for_shared_runner
+          # TODO: CI Vertical: quota not supported
+          return super
+
           # if disaster recovery is enabled, we disable quota
           if ::Feature.enabled?(:ci_queueing_disaster_recovery_disable_quota, runner, type: :ops, default_enabled: :yaml)
             super
