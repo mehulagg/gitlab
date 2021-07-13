@@ -78,7 +78,7 @@ RSpec.describe ClustersHelper do
 
     it 'generates docs urls' do
       expect(subject[:agent_docs_url]).to eq(help_page_path('user/clusters/agent/index'))
-      expect(subject[:install_docs_url]).to eq(help_page_path('administration/clusters/kas', anchor: 'install-the-kubernetes-agent-server-kas'))
+      expect(subject[:install_docs_url]).to eq(help_page_path('administration/clusters/kas'))
       expect(subject[:get_started_docs_url]).to eq(help_page_path('user/clusters/agent/index', anchor: 'define-a-configuration-repository'))
       expect(subject[:integration_docs_url]).to eq(help_page_path('user/clusters/agent/index', anchor: 'get-started-with-gitops-and-the-gitlab-agent'))
     end

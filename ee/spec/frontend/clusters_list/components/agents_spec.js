@@ -15,10 +15,13 @@ describe('Agents', () => {
 
   const propsData = {
     defaultBranchName: 'default',
+  };
+  const provideData = {
     projectPath: 'path/to/project',
   };
 
   const createWrapper = ({ agents = [], pageInfo = null, trees = [] }) => {
+    const provide = provideData;
     const apolloQueryResponse = {
       data: {
         project: {
@@ -29,13 +32,14 @@ describe('Agents', () => {
     };
 
     const apolloProvider = createMockApollo([
-      [getAgentsQuery, jest.fn().mockResolvedValue(apolloQueryResponse)],
+      [getAgentsQuery, jest.fn().mockResolvedValue(apolloQueryResponse, provide)],
     ]);
 
     wrapper = shallowMount(Agents, {
       localVue,
       apolloProvider,
       propsData,
+      provide: provideData,
     });
 
     return wrapper.vm.$nextTick();
@@ -179,7 +183,7 @@ describe('Agents', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMount(Agents, { mocks, propsData });
+      wrapper = shallowMount(Agents, { mocks, propsData, provide: provideData });
 
       return wrapper.vm.$nextTick();
     });

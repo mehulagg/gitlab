@@ -29,12 +29,12 @@ export default {
     GlKeysetPagination,
     GlLoadingIcon,
   },
-  inject: {
-    projectPath: {
-      default: '',
-    },
+  inject: ['projectPath'],
+  props: {
     defaultBranchName: {
       default: '.noBranch',
+      required: false,
+      type: String,
     },
   },
   data() {

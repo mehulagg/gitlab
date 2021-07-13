@@ -2,6 +2,13 @@ import { GlAlert, GlEmptyState, GlSprintf } from '@gitlab/ui';
 import AgentEmptyState from 'ee/clusters_list/components/agent_empty_state.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
+const emptyStateImage = '/path/to/image';
+const projectPath = 'path/to/project';
+const agentDocsUrl = 'path/to/agentDocs';
+const installDocsUrl = 'path/to/installDocs';
+const getStartedDocsUrl = 'path/to/getStartedDocs';
+const integrationDocsUrl = 'path/to/integrationDocs';
+
 describe('AgentEmptyStateComponent', () => {
   let wrapper;
 
@@ -9,12 +16,12 @@ describe('AgentEmptyStateComponent', () => {
     hasConfigurations: false,
   };
   const provideData = {
-    emptyStateImage: '/path/to/image',
-    projectPath: 'path/to/project',
-    agentDocsUrl: 'path/to/agentDocs',
-    installDocsUrl: 'path/to/installDocs',
-    getStartedDocsUrl: 'path/to/getStartedDocs',
-    integrationDocsUrl: 'path/to/integrationDocs',
+    emptyStateImage,
+    projectPath,
+    agentDocsUrl,
+    installDocsUrl,
+    getStartedDocsUrl,
+    integrationDocsUrl,
   };
 
   const findConfigurationsAlert = () => wrapper.findComponent(GlAlert);
@@ -39,8 +46,8 @@ describe('AgentEmptyStateComponent', () => {
   });
 
   it('renders correct herf attributes for the links', () => {
-    expect(findAgentDocsLink().attributes('href')).toBe('path/to/agentDocs');
-    expect(findInstallDocsLink().attributes('href')).toBe('path/to/installDocs');
+    expect(findAgentDocsLink().attributes('href')).toBe(agentDocsUrl);
+    expect(findInstallDocsLink().attributes('href')).toBe(installDocsUrl);
   });
 
   describe('when there are no agent configurations in repository', () => {
@@ -68,7 +75,7 @@ describe('AgentEmptyStateComponent', () => {
     });
 
     it('should render correct href for the integration button', () => {
-      expect(findIntegrationButton().attributes('href')).toBe('path/to/integrationDocs');
+      expect(findIntegrationButton().attributes('href')).toBe(integrationDocsUrl);
     });
   });
 });

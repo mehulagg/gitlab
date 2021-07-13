@@ -25,13 +25,18 @@ export default (Vue, VueApollo) => {
     apolloProvider: new VueApollo({ defaultClient }),
     provide: {
       emptyStateImage,
-      defaultBranchName,
       projectPath,
       agentDocsUrl,
       installDocsUrl,
       getStartedDocsUrl,
       integrationDocsUrl,
     },
-    render: (createElement) => createElement(Agents),
+    render(createElement) {
+      return createElement(Agents, {
+        props: {
+          defaultBranchName,
+        },
+      });
+    },
   });
 };
