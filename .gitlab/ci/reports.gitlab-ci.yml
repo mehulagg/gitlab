@@ -50,9 +50,10 @@ gosec-sast:
     - mkdir -p $GOPATH
     - cd workhorse
     - go build
+    - cd ..
   cache:
     paths:
-      - .go/pkk/mod
+      - .go/pkg/mod
   rules: !reference [".reports:rules:sast", rules]
 
 .secret-analyzer:
