@@ -20,9 +20,9 @@ RSpec.describe 'projects/_flash_messages' do
       let_it_be(:project) { create(:project) }
       let_it_be(:terraform_state) { create(:terraform_state, :locked, :with_version, project: project) }
 
-      it "doesn't show the terraform notification banner 2" do
+      it "doesn't show the terraform notification banner" do
         render(template, project: project)
-        expect(view.content_for(:flash_message)).not_to have_selector('#js-terraform-notification')
+        expect(view.content_for(:flash_message)).not_to have_selector('.js-terraform-notification')
       end
     end
 
@@ -40,9 +40,9 @@ RSpec.describe 'projects/_flash_messages' do
         end
       end
 
-      it "doesn't show the terraform notification banner 2" do
+      it "doesn't show the terraform notification banner" do
         render(template, project: project)
-        expect(view.content_for(:flash_message)).not_to have_selector('#js-terraform-notification')
+        expect(view.content_for(:flash_message)).not_to have_selector('.js-terraform-notification')
       end
     end
 
@@ -62,7 +62,7 @@ RSpec.describe 'projects/_flash_messages' do
 
       it 'shows the terraform notification banner' do
         render(template, project: project)
-        expect(view.content_for(:flash_message)).to have_selector('#js-terraform-notification')
+        expect(view.content_for(:flash_message)).to have_selector('.js-terraform-notification')
       end
     end
   end

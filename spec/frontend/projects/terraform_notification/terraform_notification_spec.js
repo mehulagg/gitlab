@@ -1,41 +1,34 @@
 import { GlBanner } from '@gitlab/ui';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { shallowMount } from '@vue/test-utils';
 import { setCookie, getCookie, removeCookie } from '~/lib/utils/common_utils';
 import TerraformNotification from '~/projects/terraform_notification/components/terraform_notification.vue';
 
 describe('TerraformNotificationBanner', () => {
   let wrapper;
 
-  const provideData = {
+  const propsData = {
     projectId: 1,
-    docsUrl: 'path/to/docs/url',
   };
   const getCookieName = () => wrapper.vm.bannerDissmisedKey;
   const findBanner = () => wrapper.findComponent(GlBanner);
 
   beforeEach(() => {
-    wrapper = shallowMountExtended(TerraformNotification, {
+    wrapper = shallowMount(TerraformNotification, {
+      propsData,
       stubs: { GlBanner },
-      provide: provideData,
     });
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
-  });
-
-  it('should correctly compute bannerDissmisedKey property', () => {
-    expect(wrapper.vm.bannerDissmisedKey).toBe(getCookieName());
+    wrapper.destroy();
+    removeCookie(getCookieName());
   });
 
   describe('when the dismiss cookie is set', () => {
     beforeEach(() => {
       setCookie(getCookieName(), true);
-      wrapper = shallowMountExtended(TerraformNotification, {
-        provide: provideData,
+      wrapper = shallowMount(TerraformNotification, {
+        propsData,
       });
     });
 
@@ -45,10 +38,6 @@ describe('TerraformNotificationBanner', () => {
 
     it('should not render the banner', () => {
       expect(findBanner().exists()).toBe(false);
-    });
-
-    afterEach(() => {
-      removeCookie(getCookieName());
     });
   });
 

@@ -634,6 +634,10 @@ module ProjectsHelper
       link_to(name, url)
     end
   end
+
+  def show_terraform_banner?(project)
+    project.repository_languages.find { |lang| lang.name == 'HCL' } && project.terraform_states.empty?
+  end
 end
 
 ProjectsHelper.prepend_mod_with('ProjectsHelper')
