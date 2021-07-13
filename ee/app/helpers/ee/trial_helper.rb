@@ -57,6 +57,21 @@ module EE
 
       namespace.can_extend? || namespace.can_reactivate?
     end
+
+    def extend_reactivate_trial_button_data(namespace)
+      action = if namespace.can_extend?
+                 'extend'
+               else
+                 'reactivate'
+               end
+
+      {
+        namespace_id: namespace.id,
+        plan_name: namespace.actual_plan_name.titleize,
+        action: action
+      }
+    end
+
     private
 
     def trial_group_namespaces

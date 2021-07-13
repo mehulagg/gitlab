@@ -210,4 +210,30 @@ RSpec.describe EE::TrialHelper do
       end
     end
   end
+
+  describe '#extend_reactivate_trial_button_data' do
+    let(:namespace) { build(:namespace, id: 1) }
+
+    subject(:extend_reactivate_trial_button_data) { helper.extend_reactivate_trial_button_data(namespace) }
+
+    before do
+      allow(namespace).to receive(:actual_plan_name).and_return('ultimate')
+    end
+
+    context 'when trial can be extended' do
+      before do
+        allow(namespace).to receive(:can_extend?).and_return(true)
+      end
+
+      it { is_expected.to eq({ namespace_id: 1, plan_name: 'Ultimate', action: 'extend' }) }
+    end
+
+    context 'when trial can be reactivated' do
+      before do
+        allow(namespace).to receive(:can_reactivate?).and_return(true)
+      end
+
+      it { is_expected.to eq({ namespace_id: 1, plan_name: 'Ultimate', action: 'reactivate' }) }
+    end
+  end
 end
