@@ -52,6 +52,11 @@ module EE
       namespace&.errors&.full_messages&.to_sentence&.presence || service_result&.dig(:errors)&.presence
     end
 
+    def show_extend_reactivate_trial_button?(namespace)
+      return false unless ::Feature.enabled?(:allow_extend_reactivate_trial, namespace, default_enabled: :yaml)
+
+      namespace.can_extend? || namespace.can_reactivate?
+    end
     private
 
     def trial_group_namespaces

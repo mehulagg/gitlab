@@ -180,4 +180,34 @@ RSpec.describe EE::TrialHelper do
       end
     end
   end
+
+  describe '#show_extend_reactivate_trial_button?' do
+    let(:namespace) { build(:namespace) }
+
+    subject(:show_extend_reactivate_trial_button) { helper.show_extend_reactivate_trial_button?(namespace) }
+
+    context 'when feature flag is disabled' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when feature flag is enabled' do
+      where(:can_extend, :can_reactivate, :result) do
+        false | false | false
+        true  | false | true
+        false | true  | true
+        true  | true  | true
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(allow_extend_reactivate_trial: true)
+
+          allow(namespace).to receive(:can_extend?).and_return(can_extend)
+          allow(namespace).to receive(:can_reactivate?).and_return(can_reactivate)
+        end
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
 end
