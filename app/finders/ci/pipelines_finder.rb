@@ -110,7 +110,9 @@ module Ci
     # rubocop: disable CodeReuse/ActiveRecord
     def by_name(items)
       if params[:name].present?
-        items.joins(:user).where(users: { name: params[:name] })
+        # TODO: CI Vertical: cross-join
+        users_ids = User.where(name: params[:name]).ids
+        items.where(user_id: users_ids)
       else
         items
       end
@@ -120,7 +122,9 @@ module Ci
     # rubocop: disable CodeReuse/ActiveRecord
     def by_username(items)
       if params[:username].present?
-        items.joins(:user).where(users: { username: params[:username] })
+        # TODO: CI Vertical: cross-join
+        users_ids = User.where(username: params[:username]).ids
+        items.where(user_id: users_ids)
       else
         items
       end
