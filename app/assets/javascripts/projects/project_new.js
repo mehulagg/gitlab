@@ -139,13 +139,7 @@ const bindEvents = () => {
     const url = $projectImportUrl.val();
     const URL_PATTERN = /(?:git|https?):\/\/.*\/.*\.git$/;
     const isUrlValid = URL_PATTERN.test(url);
-    if (isUrlValid && !$projectImportUrlWarning.hasClass('hide')) {
-      $projectImportUrlWarning.addClass('hide');
-    }
-
-    if (!isUrlValid && $projectImportUrlWarning.hasClass('hide')) {
-      $projectImportUrlWarning.removeClass('hide');
-    }
+    $projectImportUrlWarning.toggleClass('hide', isUrlValid);
   }
 
   let isProjectImportUrlDirty = false;
