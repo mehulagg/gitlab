@@ -10,15 +10,15 @@ RSpec.describe 'projects/_flash_messages' do
   let_it_be(:html) { create(:programming_language, name: 'HTML') }
   let_it_be(:hcl) { create(:programming_language, name: 'HCL') }
 
+  before do
+    allow(view).to receive(:current_user).and_return(user)
+    allow(view).to receive(:can?).with(user, :download_code, project).and_return(true)
+  end
+
   context 'when current_user has download_code permission' do
     context 'when user has a terraform state' do
       let_it_be(:project) { create(:project) }
       let_it_be(:terraform_state) { create(:terraform_state, :locked, :with_version, project: project) }
-
-      before do
-        allow(view).to receive(:current_user).and_return(user)
-        allow(view).to receive(:can?).with(user, :download_code, project).and_return(true)
-      end
 
       it "doesn't show the terraform notification banner 2" do
         render(template, project: project)
@@ -38,8 +38,6 @@ RSpec.describe 'projects/_flash_messages' do
             create(:repository_language, project: project, programming_language: lang, share: share)
           end
         end
-        allow(view).to receive(:current_user).and_return(user)
-        allow(view).to receive(:can?).with(user, :download_code, project).and_return(true)
       end
 
       it "doesn't show the terraform notification banner 2" do
@@ -60,8 +58,6 @@ RSpec.describe 'projects/_flash_messages' do
             create(:repository_language, project: project, programming_language: lang, share: share)
           end
         end
-        allow(view).to receive(:current_user).and_return(user)
-        allow(view).to receive(:can?).with(user, :download_code, project).and_return(true)
       end
 
       it 'shows the terraform notification banner' do
