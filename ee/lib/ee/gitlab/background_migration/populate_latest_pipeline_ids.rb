@@ -71,7 +71,7 @@ module EE
           self.table_name = 'routes'
         end
 
-        class Project < ActiveRecord::Base
+        class Project < AbstractRecord
           include Routable
           include Visibility
           include ::Gitlab::Utils::StrongMemoize
@@ -146,7 +146,11 @@ module EE
           end
 
           def stats_tuple
-            return unless latest_pipeline_id
+            unless latest_pipeline_id
+              log_info(message: 'No latest_pipeline_id found', project_id: id)
+
+              return nil
+            end
 
             [id, DEFAULT_LETTER_GRADE, latest_pipeline_id, quoted_time, quoted_time].join(', ').then { |s| "(#{s})" }
           rescue StandardError => e
@@ -172,6 +176,8 @@ module EE
           end
 
           def pipeline_with_reports_sql
+            log_info(message: 'Pipeline with reports SQL requested', project_id: project.id, ref: default_branch)
+
             format(LATEST_PIPELINE_WITH_REPORTS_SQL, project_id: id, ref: connection.quote(default_branch), file_types: FILE_TYPES.join(', '))
           end
 
