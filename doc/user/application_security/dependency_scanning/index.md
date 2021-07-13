@@ -60,18 +60,19 @@ The current detection logic limits the maximum search depth to two levels. For e
 
 The following languages and dependency managers are supported:
 
-| Package Managers | Languages  | Supported files | Scan tools |
-| ------------------- | --------- | --------------- | ------------ |
-| [Bundler](https://bundler.io/) | Ruby | `Gemfile.lock`, `gems.locked` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium), [bundler-audit](https://github.com/rubysec/bundler-audit) |
-| [Composer](https://getcomposer.org/) | PHP | `composer.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [Conan](https://conan.io/) | C, C++ | [`conan.lock`](https://docs.conan.io/en/latest/versioning/lockfiles.html) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [Golang](https://golang.org/) | Go | `go.sum` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) | Java | `build.gradle`, `build.gradle.kts`, `pom.xml` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [npm](https://www.npmjs.com/), [yarn](https://classic.yarnpkg.com/en/) 1.x | JavaScript | `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [npm](https://www.npmjs.com/) (7 and earlier), [yarn](https://classic.yarnpkg.com/en/) 1.x | JavaScript | `package.json` | [Retire.js](https://retirejs.github.io/retire.js/) |
-| [NuGet](https://www.nuget.org/) 4.9+ | .NET, C# | [`packages.lock.json`](https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#enabling-lock-file) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [`setuptools`](https://setuptools.readthedocs.io/en/latest/), [pip](https://pip.pypa.io/en/stable/), [Pipenv](https://pipenv.pypa.io/en/latest/) (*1*) | Python | `setup.py`, `requirements.txt`, `requirements.pip`, `requires.txt`, `Pipfile`, `Pipfile.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
-| [sbt](https://www.scala-sbt.org/) (*2*) | Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| Package Managers                                                                                                                                       | Languages  | Supported files                                                                                                                        | [Processes multiple files?](#how-multiple-files-are-processed) | Scan tools                                                                       |
+| -------------------                                                                                                                                    | ---------  | ---------------                                                                                                                        | ---------------                                                | ------------                                                                     |
+| [Bundler](https://bundler.io/)                                                                                                                         | Ruby       | `Gemfile.lock`, `gems.locked`                                                                                                          | Y                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Bundler](https://bundler.io/)                                                                                                                         | Ruby       | `Gemfile.lock`, `gems.locked`                                                                                                          | N                                                              | [bundler-audit](https://github.com/rubysec/bundler-audit)                        |
+| [Composer](https://getcomposer.org/)                                                                                                                   | PHP        | `composer.lock`                                                                                                                        | Y                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Conan](https://conan.io/)                                                                                                                             | C, C++     | [`conan.lock`](https://docs.conan.io/en/latest/versioning/lockfiles.html)                                                              | Y                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Golang](https://golang.org/)                                                                                                                          | Go         | `go.sum`                                                                                                                               | Y                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/)                                                                                      | Java       | `build.gradle`, `build.gradle.kts`, `pom.xml`                                                                                          | N                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [npm](https://www.npmjs.com/), [yarn](https://classic.yarnpkg.com/en/) 1.x                                                                             | JavaScript | `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock`                                                                                | Y                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [npm](https://www.npmjs.com/) (7 and earlier), [yarn](https://classic.yarnpkg.com/en/) 1.x                                                             | JavaScript | `package.json`                                                                                                                         | N                                                              | [Retire.js](https://retirejs.github.io/retire.js/)                               |
+| [NuGet](https://www.nuget.org/) 4.9+                                                                                                                   | .NET, C#   | [`packages.lock.json`](https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#enabling-lock-file) | Y                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [`setuptools`](https://setuptools.readthedocs.io/en/latest/), [pip](https://pip.pypa.io/en/stable/), [Pipenv](https://pipenv.pypa.io/en/latest/) (*1*) | Python     | `setup.py`, `requirements.txt`, `requirements.pip`, `requires.txt`, `Pipfile`, `Pipfile.lock`                                          | N                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [sbt](https://www.scala-sbt.org/) (*2*)                                                                                                                | Scala      | `build.sbt`                                                                                                                            | N                                                              | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
 
 1. [Pipenv](https://pipenv.pypa.io/en/latest/) projects are scanned when a `Pipfile` is present.
 1. Support for [sbt](https://www.scala-sbt.org/) 1.3 and above was added in GitLab 13.9.
@@ -82,6 +83,33 @@ For workarounds, see the [Troubleshooting section](#troubleshooting)
 | Package Managers    | Languages | Supported files | Scan tools | Issue |
 | ------------------- | --------- | --------------- | ---------- | ----- |
 | [Poetry](https://python-poetry.org/) | Python | `poetry.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) | [GitLab#7006](https://gitlab.com/gitlab-org/gitlab/-/issues/7006) |
+
+## How multiple files are processed
+
+### Ruby
+
+In the case of Ruby, gemnasium supports multiple lockfiles, yet bundler-audit does not (explain how bundler-audit determines which
+`Gemfile.lock` to scan when multiple exist)
+
+### PHP, NuGet, Go, everything else
+
+Insert details on how these other analyzers process multiple files
+
+### Python
+
+In the case of python, the analyzer will install the dependencies for the file it has detected, such as `requirements.txt` or any
+variation of this file (eg `requirements.pip` or `requires.txt`).
+
+### Java
+
+In the case of Java, we only execute one build in the directory where a build file has been detected, such as `build.sbt`.
+Please note, we support the following types of Java project stuctures:
+
+- [multi-project sbt builds](https://www.scala-sbt.org/1.x/docs/Multi-Project.html)
+- [multi-project gradle builds](https://docs.gradle.org/current/userguide/intro_multi_project_builds.html)
+- [multi-module maven projects](https://maven.apache.org/pom.html#Aggregation)
+
+If you've run into problems while scaning multiple files, please contribute a comment to [this issue](insert-new-feedback-issue-link)
 
 ## Contribute your scanner
 
