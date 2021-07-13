@@ -1072,7 +1072,7 @@ Tiers: `ultimate`
 
 ### `counts.coverage_fuzzing_jobs`
 
-Count of coverage-guided Fuzz testing jobs
+Count of coverage-guided fuzz testing jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183146_coverage_fuzzing_jobs.yml)
 
@@ -1114,7 +1114,7 @@ Tiers: `ultimate`
 
 ### `counts.dast_on_demand_pipelines`
 
-Count of on-demand DAST pipelines
+Count of all on-demand DAST pipelines
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183149_dast_on_demand_pipelines.yml)
 
@@ -4353,6 +4353,8 @@ The total count of Helm packages that have been published.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210625095025_package_events_i_package_helm_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `implemented`
 
@@ -20198,7 +20200,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.secure.api_fuzzing_scans`
 
-Counts API fuzzing jobs
+Count of API fuzz testing jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180353_api_fuzzing_scans.yml)
 
@@ -20378,7 +20380,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_coverage_fuzzing_jobs`
 
-Distinct count per user of coverage-guided Fuzz testing job run
+Usage count of coverage-guided fuzz testing jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183514_user_coverage_fuzzing_jobs.yml)
 
@@ -20392,7 +20394,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_coverage_fuzzing_scans`
 
-Number of users who have run a coverage-guided Fuzz testing scan
+Number of users who have run a Coverage Fuzzing scan
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607044040_user_coverage_fuzzing_scans.yml)
 
@@ -22696,7 +22698,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.coverage_fuzzing_scans`
 
-Count of coverage-guided Fuzz Testing scans
+Count of coverage-guided fuzz test scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183836_coverage_fuzzing_scans.yml)
 
