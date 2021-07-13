@@ -28726,9 +28726,6 @@ msgstr ""
 msgid "Search for a user"
 msgstr ""
 
-msgid "Search for project"
-msgstr ""
-
 msgid "Search for projects, issues, etc."
 msgstr ""
 
