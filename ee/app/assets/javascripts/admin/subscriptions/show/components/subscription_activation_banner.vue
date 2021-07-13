@@ -44,9 +44,6 @@ export default {
   >
     <p>
       <gl-sprintf :message="$options.i18n.bannerText">
-        <template #blogPostLink="{ content }">
-          <gl-link href="#" target="_blank">{{ content }}</gl-link>
-        </template>
         <template #portalLink="{ content }">
           <gl-link :href="customersPortalUrl" target="_blank">{{ content }}</gl-link>
         </template>

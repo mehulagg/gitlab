@@ -14,7 +14,7 @@ describe('SubscriptionActivationBanner', () => {
   let wrapper;
 
   const findBanner = () => wrapper.findComponent(GlBanner);
-  const findLink = (at) => wrapper.findAllComponents(GlLink).at(at);
+  const findLink = () => wrapper.findComponent(GlLink);
 
   const customersPortalUrl = 'customers.dot';
   const congratulationSvgPath = '/path/to/svg';
@@ -50,12 +50,8 @@ describe('SubscriptionActivationBanner', () => {
     expect(findBanner().text()).toMatchInterpolatedText(subscriptionBannerText);
   });
 
-  it('contains a link to the blog post', () => {
-    expect(findLink(0).attributes('href')).toBe('#');
-  });
-
   it('contains a link to the customers portal', () => {
-    expect(findLink(1).attributes('href')).toBe(customersPortalUrl);
+    expect(findLink().attributes('href')).toBe(customersPortalUrl);
   });
 
   it('emits an event when the primary button is clicked', () => {
