@@ -65,22 +65,21 @@ const removeFlashClickListener = (flashEl, fadeTransition) => {
   getCloseEl(flashEl)?.addEventListener('click', () => hideFlash(flashEl, fadeTransition));
 };
 
-/*
- *  Flash banner supports different types of Flash configurations
- *  along with ability to provide actionConfig which can be used to show
- *  additional action or link on banner next to message
- *
- *  @param {Object} options                   Options to control the flash message
- *  @param {String} options.message           Flash message text
- *  @param {String} options.type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
- *  @param {Object} options.parent            Reference to parent element under which Flash needs to appear
- *  @param {Object} options.actionConfig      Map of config to show action on banner
- *    @param {String} href                    URL to which action config should point to (default: '#')
- *    @param {String} title                   Title of action
- *    @param {Function} clickHandler          Method to call when action is clicked on
- *  @param {Boolean} options.fadeTransition   Boolean to determine whether to fade the alert out
- *  @param {Boolean} options.captureError     Boolean to determine whether to send error to sentry
- *  @param {Object} options.error              Error to be captured in sentry
+/**
+ * Flash banner supports different types of Flash configurations
+ * along with ability to provide actionConfig which can be used to show
+ * additional action or link on banner next to message
+ * @param {Object} options                               - Options to control the flash message
+ * @param {String} options.message                       - Flash message text
+ * @param {String} options.type                          - Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
+ * @param {Object} options.parent                        - Reference to parent element under which Flash needs to appear
+ * @param {Object} options.actionConfig                  - Map of config to show action on banner
+ * @param {String} options.actionConfig.href             - URL to which action config should point to (default: '#')
+ * @param {String} options.actionConfig.title            - Title of action
+ * @param {Function} options.actionConfig.clickHandler   - Method to call when action is clicked on
+ * @param {Boolean} options.fadeTransition               - Boolean to determine whether to fade the alert out
+ * @param {Boolean} options.captureError                 - Boolean to determine whether to send error to sentry
+ * @param {Object} options.error                         - Error to be captured in sentry
  */
 const createFlash = function createFlash({
   message,
