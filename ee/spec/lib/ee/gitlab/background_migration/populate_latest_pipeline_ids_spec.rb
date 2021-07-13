@@ -70,7 +70,8 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
     subject(:populate_latest_pipeline_ids) { migrator.perform(project_1.id, project_6.id) }
 
     before do
-      allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
+      allow(::Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
+      allow(::Gitlab::BackgroundMigration::Logger).to receive(:info)
 
       # Raise a RuntimeError while retreiving the `pipeline_with_reports` for the `project_6`
       allow_next_found_instance_of(described_class::Project) do |project_instance|
@@ -89,7 +90,8 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
                                              .and change { vulnerability_statistics.find_by(project_id: project_1.id)&.latest_pipeline_id }.from(nil).to(project_1_latest_pipeline.id)
                                              .and not_change { project_2_stats.reload.latest_pipeline_id }.from(project_2_pipeline.id)
 
-      expect(Gitlab::ErrorTracking).to have_received(:track_and_raise_for_dev_exception).once
+      expect(::Gitlab::ErrorTracking).to have_received(:track_and_raise_for_dev_exception).once
+      expect(::Gitlab::BackgroundMigration::Logger).to have_received(:info).exactly(9).times
     end
   end
 
