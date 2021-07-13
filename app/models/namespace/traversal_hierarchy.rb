@@ -15,8 +15,64 @@ class Namespace
   class TraversalHierarchy
     attr_accessor :root
 
+    UnboundedSearch = Class.new(StandardError)
+
     def self.for_namespace(namespace)
       new(recursive_root_ancestor(namespace))
+    end
+
+    def self.subtrees(*ranges, top_only: [], bottom_only: [])
+      top_only_range = top_only.map { |top| [top, nil] }
+      ranges.concat(top_only_range)
+
+      bottom_only_range = bottom_only.map { |bottom| [nil, bottom] }
+      ranges.concat(bottom_only_range)
+
+      subtrees = ranges.map do |top, bottom|
+        subtree(top: top, bottom: bottom)
+      end
+
+      if subtrees.one?
+        subtrees.first
+      else
+        Namespace.from_union(subtrees, remove_duplicates: false, remove_order: true)
+      end
+    end
+
+    def self.subtree(top: nil, bottom: nil)
+      raise UnboundedSearch, 'Must bound search by either top or bottom' if top.blank? && bottom.blank?
+
+      # Make sure we drop the STI `type = 'Group'` condition for better performance.
+      # Logically equivalent so long as hierarchies remain homogeneous.
+      skope = Namespace.unscope(where: :type)
+
+      skope = case top
+              when ActiveRecord::Base
+                skope.where("traversal_ids @> (?)", "{#{top.id}}")
+              when Array
+                skope.where("traversal_ids @> (?)", "{#{top.join(',')}}")
+              when ActiveRecord::Relation
+                sql = top.select('traversal_ids').to_sql
+                join_sql = "inner join (#{sql}) ns on namespaces.traversal_ids @> ns.traversal_ids"
+                skope.joins(join_sql)
+              else
+                skope
+              end
+
+      if bottom
+        value = case bottom
+                when ActiveRecord::Base
+                  bottom.traversal_ids[0..-1]
+                when Array
+                  bottom
+                when ActiveRecord::Relation
+                  bottom.select('unnest(traversal_ids)')
+                end
+
+        skope = skope.where(id: value)
+      end
+
+      skope
     end
 
     def initialize(root)

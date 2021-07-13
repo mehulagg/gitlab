@@ -99,4 +99,16 @@ FactoryBot.define do
       end
     end
   end
+
+  trait :with_ancestors do
+    transient do
+      depth { 4 }
+    end
+
+    after(:build) do |group, evaluator|
+      if evaluator.depth > 1
+        group.parent = FactoryBot.build(:group, :with_ancestors, depth: evaluator.depth - 1)
+      end
+    end
+  end
 end

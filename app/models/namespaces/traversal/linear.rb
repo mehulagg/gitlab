@@ -38,14 +38,11 @@ module Namespaces
     module Linear
       extend ActiveSupport::Concern
 
-      UnboundedSearch = Class.new(StandardError)
-
       included do
         before_update :lock_both_roots, if: -> { sync_traversal_ids? && parent_id_changed? }
         after_create :sync_traversal_ids, if: -> { sync_traversal_ids? }
         after_update :sync_traversal_ids, if: -> { sync_traversal_ids? && saved_change_to_parent_id? }
 
-        scope :traversal_ids_contains, ->(ids) { where("traversal_ids @> (?)", ids) }
         # When filtering namespaces by the traversal_ids column to compile a
         # list of namespace IDs, it's much faster to reference the ID in
         # traversal_ids than the primary key ID column.
@@ -164,25 +161,9 @@ module Namespaces
         Namespace.lock.select(:id).where(id: roots).order(id: :asc).load
       end
 
-      # Make sure we drop the STI `type = 'Group'` condition for better performance.
-      # Logically equivalent so long as hierarchies remain homogeneous.
-      def without_sti_condition
-        self.class.unscope(where: :type)
-      end
-
       # Search this namespace's lineage. Bound inclusively by top node.
       def lineage(top: nil, bottom: nil, hierarchy_order: nil)
-        raise UnboundedSearch, 'Must bound search by either top or bottom' unless top || bottom
-
-        skope = without_sti_condition
-
-        if top
-          skope = skope.traversal_ids_contains("{#{top.id}}")
-        end
-
-        if bottom
-          skope = skope.where(id: bottom.traversal_ids[0..-1])
-        end
+        skope = Namespace::TraversalHierarchy.subtree(top: top, bottom: bottom)
 
         # The original `with_depth` attribute in ObjectHierarchy increments as you
         # walk away from the "base" namespace. This direction changes depending on
