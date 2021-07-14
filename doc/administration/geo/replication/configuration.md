@@ -43,7 +43,7 @@ they must be manually replicated to **all servers of the secondary site**.
 
    This displays the secrets that need to be replicated, in JSON format.
 
-1. SSH **into each node on your secondary Geo site** and login as the `root` user:
+1. SSH **into each Rails, Sidekiq and Gitaly server on your secondary Geo site** and login as the `root` user:
 
    ```shell
    sudo -i
