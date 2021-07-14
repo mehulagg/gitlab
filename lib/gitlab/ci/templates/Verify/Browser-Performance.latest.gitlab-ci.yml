@@ -4,7 +4,7 @@
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Verify/Browser-Performance.latest.gitlab-ci.yml
 
 template_metadata:
-  name: Browser Performance (Lastest)
+  name: Browser Performance (Latest)
   desc: |
     Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/browser_performance_testing.html
   stages: ["devops::verify"]
