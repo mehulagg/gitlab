@@ -46,6 +46,7 @@ gosec-sast:
     GOPATH: "$CI_PROJECT_DIR/vendor/go"
     COMPILE: "false"
     GOSEC_GO_PKG_PATH: "$CI_PROJECT_DIR"
+    SECURE_LOG_LEVEL: "debug"
   before_script:
     - mkdir -p $GOPATH
     - cd workhorse
