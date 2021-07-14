@@ -79,7 +79,7 @@ export const selectedStage = {
   isUserAllowed: true,
   emptyStageText:
     'The issue stage shows the time it takes from creating an issue to assigning the issue to a milestone, or add the issue to a list on your Issue Board. Begin creating issues to see data for this stage.',
-  component: 'stage-issue-component',
+
   slug: 'issue',
 };
 
@@ -281,10 +281,9 @@ export const rawValueStreamStages = [
   },
 ];
 
-export const valueStreamStages = rawValueStreamStages.map((s) => ({
-  ...convertObjectPropsToCamelCase(s, { deep: true }),
-  component: `stage-${s.id}-component`,
-}));
+export const valueStreamStages = rawValueStreamStages.map((s) =>
+  convertObjectPropsToCamelCase(s, { deep: true }),
+);
 
 // Temporary workaronud until we have relevant backend fixtures endpoints
 export const testEvents = [

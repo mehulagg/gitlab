@@ -49,13 +49,13 @@ export default {
   props: {
     selectedStage: {
       type: Object,
-      required: true,
+      required: false,
+      default: () => ({ custom: false }),
     },
     isLoading: {
       type: Boolean,
       required: true,
     },
-
     stageEvents: {
       type: Array,
       required: true,
@@ -68,6 +68,11 @@ export default {
     noDataSvgPath: {
       type: String,
       required: true,
+    },
+    emptyStateTitle: {
+      type: String,
+      required: false,
+      default: null,
     },
     emptyStateMessage: {
       type: String,
@@ -97,9 +102,8 @@ export default {
     isEmptyStage() {
       return !this.stageEvents.length;
     },
-    emptyStateTitle() {
-      const { emptyStateMessage } = this;
-      return emptyStateMessage || NOT_ENOUGH_DATA_ERROR;
+    emptyStateTitleText() {
+      return this.emptyStateTitle || NOT_ENOUGH_DATA_ERROR;
     },
     isDefaultTestStage() {
       const { selectedStage } = this;
@@ -166,7 +170,12 @@ export default {
 <template>
   <div data-testid="vsa-stage-table">
     <gl-loading-icon v-if="isLoading" class="gl-mt-4" size="md" />
-    <gl-empty-state v-else-if="isEmptyStage" :title="emptyStateTitle" :svg-path="noDataSvgPath" />
+    <gl-empty-state
+      v-else-if="isEmptyStage"
+      :title="emptyStateTitleText"
+      :description="emptyStateMessage"
+      :svg-path="noDataSvgPath"
+    />
     <gl-table
       v-else
       head-variant="white"

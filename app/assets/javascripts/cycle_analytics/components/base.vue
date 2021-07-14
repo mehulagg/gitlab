@@ -60,12 +60,18 @@ export default {
       return !this.isLoadingStage && this.selectedStage;
     },
     emptyStageTitle() {
+      if (this.displayNoAccess) {
+        return __('You need permission.');
+      }
       return this.selectedStageError
         ? this.selectedStageError
         : __("We don't have enough data to show this stage.");
     },
     emptyStageText() {
-      return !this.selectedStageError ? this.selectedStage.emptyStageText : '';
+      if (this.displayNoAccess) {
+        return __('Want to see the data? Please ask an administrator for access.');
+      }
+      return !this.selectedStageError && this.selectedStage?.emptyStageText ? this.selectedStage?.emptyStageText : '';
     },
   },
   methods: {
@@ -150,7 +156,8 @@ export default {
         :stage-events="selectedStageEvents"
         :selected-stage="selectedStage"
         :stage-count="null"
-        :empty-state-message="selectedStageError"
+        :empty-state-title="emptyStageTitle"
+        :empty-state-message="emptyStageText"
         :no-data-svg-path="noDataSvgPath"
         :pagination="null"
       />

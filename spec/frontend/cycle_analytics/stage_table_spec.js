@@ -19,7 +19,7 @@ let wrapper = null;
 let trackingSpy = null;
 
 const noDataSvgPath = 'path/to/no/data';
-const emptyStateMessage = 'Too much data';
+const emptyStateTitle = 'Too much data';
 const notEnoughDataError = "We don't have enough data to show this stage.";
 const [firstIssueEvent] = issueEvents;
 const [firstStagingEvent] = stagingEvents;
@@ -273,14 +273,14 @@ describe('StageTable', () => {
     });
   });
 
-  describe('emptyStateMessage set', () => {
+  describe('emptyStateTitle set', () => {
     beforeEach(() => {
-      wrapper = createComponent({ stageEvents: [], emptyStateMessage });
+      wrapper = createComponent({ stageEvents: [], emptyStateTitle });
     });
 
     it('will display the custom message', () => {
       expect(wrapper.html()).not.toContain(notEnoughDataError);
-      expect(wrapper.html()).toContain(emptyStateMessage);
+      expect(wrapper.html()).toContain(emptyStateTitle);
     });
   });
 

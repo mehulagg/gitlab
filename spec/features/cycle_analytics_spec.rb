@@ -12,6 +12,8 @@ RSpec.describe 'Value Stream Analytics', :js do
   let(:mr) { create_merge_request_closing_issue(user, project, issue, commit_message: "References #{issue.to_reference}") }
   let(:pipeline) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr.source_branch, sha: mr.source_branch_sha, head_pipeline_of: mr) }
 
+  let_it_be(:stage_table_selector){ '[data-testid="vsa-stage-table"]' }
+
   context 'as an allowed user' do
     context 'when project is new' do
       before(:all) do
@@ -119,13 +121,13 @@ RSpec.describe 'Value Stream Analytics', :js do
     end
 
     it 'needs permissions to see restricted stages' do
-      expect(find('.stage-events')).to have_content(issue.title)
+      expect(find(stage_table_selector)).to have_content(issue.title)
 
       click_stage('Code')
-      expect(find('.stage-events')).to have_content('You need permission.')
+      expect(find(stage_table_selector)).to have_content('You need permission.')
 
       click_stage('Review')
-      expect(find('.stage-events')).to have_content('You need permission.')
+      expect(find(stage_table_selector)).to have_content('You need permission.')
     end
   end
 
@@ -154,21 +156,21 @@ RSpec.describe 'Value Stream Analytics', :js do
   end
 
   def expect_issue_to_be_present
-    expect(find('.stage-events')).to have_content(issue.title)
-    expect(find('.stage-events')).to have_content(issue.author.name)
-    expect(find('.stage-events')).to have_content("##{issue.iid}")
+    expect(find(stage_table_selector)).to have_content(issue.title)
+    expect(find(stage_table_selector)).to have_content(issue.author.name)
+    expect(find(stage_table_selector)).to have_content("##{issue.iid}")
   end
 
   def expect_build_to_be_present
-    expect(find('.stage-events')).to have_content(@build.ref)
-    expect(find('.stage-events')).to have_content(@build.short_sha)
-    expect(find('.stage-events')).to have_content("##{@build.id}")
+    expect(find(stage_table_selector)).to have_content(@build.ref)
+    expect(find(stage_table_selector)).to have_content(@build.short_sha)
+    expect(find(stage_table_selector)).to have_content("##{@build.id}")
   end
 
   def expect_merge_request_to_be_present
-    expect(find('.stage-events')).to have_content(mr.title)
-    expect(find('.stage-events')).to have_content(mr.author.name)
-    expect(find('.stage-events')).to have_content("!#{mr.iid}")
+    expect(find(stage_table_selector)).to have_content(mr.title)
+    expect(find(stage_table_selector)).to have_content(mr.author.name)
+    expect(find(stage_table_selector)).to have_content("!#{mr.iid}")
   end
 
   def click_stage(stage_name)
