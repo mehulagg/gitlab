@@ -155,7 +155,11 @@ module API
           else
             # We received build that is invalid due to concurrency conflict
             Gitlab::Metrics.add_event(:build_invalid)
-            conflict!
+            if result.failure_reason.present?
+              bad_request!(failure_reason)
+            else
+              conflict!
+            end
           end
         end
 

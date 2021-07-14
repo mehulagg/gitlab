@@ -8,7 +8,7 @@ module Ci
 
     TEMPORARY_LOCK_TIMEOUT = 3.seconds
 
-    Result = Struct.new(:build, :build_json, :valid?)
+    Result = Struct.new(:build, :build_json, :valid?, :failure_reason)
 
     class InvalidSessionException < RuntimeError
       attr_accessor :details
@@ -107,7 +107,7 @@ module Ci
       @metrics.observe_queue_depth(:not_found, depth) if valid
       @metrics.register_failure
 
-      Result.new(nil, nil, valid)
+      Result.new(nil, nil, valid, nil)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -192,16 +192,16 @@ module Ci
       # to make sure that this is properly handled by runner.
       @metrics.increment_queue_operation(:build_conflict_lock)
 
-      Result.new(nil, nil, false)
+      Result.new(nil, nil, false, nil)
     rescue StateMachines::InvalidTransition
       @metrics.increment_queue_operation(:build_conflict_transition)
 
-      Result.new(nil, nil, false)
+      Result.new(nil, nil, false, nil)
     rescue InvalidSessionException => ex
       @metrics.increment_queue_operation(:build_invalid_session)
 
       track_exception_for_build(ex, build, ex.details)
-      Result.new(nil, nil, false)
+      Result.new(nil, nil, false, ex.to_s)
     rescue StandardError => ex
       @metrics.increment_queue_operation(:build_conflict_exception)
 
@@ -224,7 +224,7 @@ module Ci
       # may fail, and we need to ensure the response has been generated.
       presented_build = ::Ci::BuildRunnerPresenter.new(build) # rubocop:disable CodeReuse/Presenter
       build_json = ::API::Entities::JobRequest::Response.new(presented_build).to_json
-      Result.new(build, build_json, true)
+      Result.new(build, build_json, true, nil)
     end
 
     def assign_runner!(build, params)
