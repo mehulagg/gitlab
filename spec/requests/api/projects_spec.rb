@@ -3136,6 +3136,16 @@ RSpec.describe API::Projects do
 
         expect(json_response['topics']).to eq(%w[topic2])
       end
+
+      it 'updates squash_option' do
+        project_param = { squash_option: "default_on" }
+
+        put api("/projects/#{project3.id}", user), params: project_param
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(project3.reload.squash_option).to eq("default_on")
+        expect(json_response['squash_option']).to eq("default_on")
+      end
     end
 
     context 'when authenticated as project maintainer' do
