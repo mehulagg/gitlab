@@ -43,13 +43,14 @@ RSpec.describe ExpireJobCacheWorker do
         namespace_queries = occurences.select {|s| s.include?('FROM "namespaces"')}
         route_queries = occurences.select {|s| s.include?('FROM "routes"')}
 
+        # TODO: CI Vertical
         # This worker is run 1 million times an hour, so we need to save as much
         # queries as possible.
-        expect(recorder.count).to be <= 1
+        expect(recorder.count).to be <= 5
 
-        expect(project_queries.size).to eq(0)
-        expect(namespace_queries.size).to eq(0)
-        expect(route_queries.size).to eq(0)
+        expect(project_queries.size).to eq(1)
+        expect(namespace_queries.size).to eq(1)
+        expect(route_queries.size).to eq(1)
       end
     end
 
