@@ -10,6 +10,8 @@ RSpec.describe 'Database config initializer for GitLab EE' do
   let(:max_threads) { 8 }
 
   before do
+    skip "CI Vertical: not yet supported"
+
     allow(Gitlab::Runtime).to receive(:max_threads).and_return(max_threads)
     allow(ActiveRecord::Base).to receive(:establish_connection)
 

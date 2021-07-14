@@ -49,7 +49,7 @@ class Deployment < ApplicationRecord
   scope :active, -> { where(status: %i[created running]) }
   scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
   # TODO: CI Vertical remove join
-  scope :with_deployable, -> { preload(:deployable) }
+  scope :with_deployable, -> { where.not(deployable_id: nil).preload(:deployable) }
   scope :with_api_entity_associations, -> { preload({ deployable: { runner: [], tags: [], user: [], job_artifacts_archive: [] } }) }
 
   scope :finished_after, ->(date) { where('finished_at >= ?', date) }
