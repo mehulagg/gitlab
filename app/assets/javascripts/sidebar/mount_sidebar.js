@@ -24,6 +24,7 @@ import trackShowInviteMemberLink from '~/sidebar/track_invite_members';
 import Translate from '../vue_shared/translate';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import CopyEmailToClipboard from './components/copy_email_to_clipboard.vue';
+import SidebarStatus from './components/incidents/status/status_sidebar.vue';
 import SidebarLabels from './components/labels/sidebar_labels.vue';
 import IssuableLockForm from './components/lock/issuable_lock_form.vue';
 import SidebarReviewers from './components/reviewers/sidebar_reviewers.vue';
@@ -475,6 +476,30 @@ function mountSeverityComponent() {
   });
 }
 
+function mountStatusComponent() {
+  const statusContainerEl = document.querySelector('#js-incident-status');
+
+  if (!statusContainerEl) {
+    return false;
+  }
+
+  const { id } = getSidebarOptions();
+
+  return new Vue({
+    el: statusContainerEl,
+    apolloProvider,
+    components: {
+      SidebarStatus,
+    },
+    render: (createElement) =>
+      createElement('sidebar-status', {
+        props: {
+          issuableId: id,
+        },
+      }),
+  });
+}
+
 function mountCopyEmailComponent() {
   const el = document.getElementById('issuable-copy-email');
 
@@ -521,6 +546,7 @@ export function mountSidebar(mediator) {
   mountTimeTrackingComponent();
 
   mountSeverityComponent();
+  mountStatusComponent();
 }
 
 export { getSidebarOptions };

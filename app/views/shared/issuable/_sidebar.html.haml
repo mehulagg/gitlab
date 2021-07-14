@@ -57,6 +57,9 @@
       - if issuable_sidebar[:supports_severity]
         #js-severity
 
+      -# - if issuable_sidebar[:supports_status]
+      #js-incident-status
+
       - if issuable_sidebar.dig(:features_available, :health_status)
         .js-sidebar-status-entry-point{ data: sidebar_status_data(issuable_sidebar, @project) }
 
