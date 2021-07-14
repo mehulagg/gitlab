@@ -246,4 +246,12 @@ namespace :gitlab do
       Rake::Task['gitlab:db:execute_batched_migrations'].invoke if Rails.env.development?
     end
   end
+
+  Rake::Task['db:migrate'].enhance do
+    #binding.pry
+    #Gitlab::Database::PostgresqlDatabaseTasks::TrackMigrationTimeMixin.update_migration_records!
+  rescue StandardError => e
+    binding.pry
+    Gitlab::AppLogger.warn "Unable to record migration timings: #{e}"
+  end
 end
