@@ -48,25 +48,23 @@ export const packageData = (extend) => ({
   ...extend,
 });
 
-export const packageDetailsQuery = [
-  {
-    data: {
-      package: {
-        ...packageData(),
-        tags: {
-          nodes: packageTags(),
-          __typename: 'PackageTagConnection',
-        },
-        pipelines: {
-          nodes: packagePipelines(),
-          __typename: 'PipelineConnection',
-        },
-        packageFiles: {
-          nodes: packageFiles(),
-          __typename: 'PackageFileConnection',
-        },
-        __typename: 'PackageDetailsType',
+export const packageDetailsQuery = () => ({
+  data: {
+    package: {
+      ...packageData(),
+      tags: {
+        nodes: packageTags(),
+        __typename: 'PackageTagConnection',
       },
+      pipelines: {
+        nodes: packagePipelines(),
+        __typename: 'PipelineConnection',
+      },
+      packageFiles: {
+        nodes: packageFiles(),
+        __typename: 'PackageFileConnection',
+      },
+      __typename: 'PackageDetailsType',
     },
   },
-];
+});
