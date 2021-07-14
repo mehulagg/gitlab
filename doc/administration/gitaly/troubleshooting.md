@@ -225,16 +225,10 @@ update the secrets file on the Gitaly server to match the Gitaly client, then
 
 ### Repository pushes fail with a `deny updating a hidden ref` error
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36628) in GitLab 13.12.
+Because of a [merge request](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/3426)
+introduced in GitLab 13.12, you can encounter this error when running `git push --mirror`.
 
-As a result of [Git: Reject pushes into internal ref namespaces](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/3426)
-this failure may be encountered when doing a
-
-```shell
-git push --mirror https://...
-```
-
-This article describes a workaround, see [! [remote rejected] errors after mirroring a Git repository](https://stackoverflow.com/questions/34265266/remote-rejected-errors-after-mirroring-a-git-repository)
+For a workaround, see this [relevant resource](https://stackoverflow.com/questions/34265266/remote-rejected-errors-after-mirroring-a-git-repository).
 
 ### Command line tools cannot connect to Gitaly
 
