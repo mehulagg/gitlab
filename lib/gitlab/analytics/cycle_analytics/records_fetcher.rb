@@ -40,19 +40,18 @@ module Gitlab
           strong_memoize(:serialized_records) do
             # special case (legacy): 'Test' and 'Staging' stages should show Ci::Build records
             if default_test_stage? || default_staging_stage?
-              ci_build_join = mr_metrics_table
-                .join(build_table)
-                .on(mr_metrics_table[:pipeline_id].eq(build_table[:commit_id]))
-                .join_sources
+              # TODO CI Vertical
+              # Validate this entire block does the right thing
+              pipeline_ids = ordered_and_limited_query.map{ |mr| mr.metrics.pipeline_id }
+              builds = CommitStatus.in_pipelines(pipeline_ids)
 
               records = ordered_and_limited_query
-                .joins(ci_build_join)
-                .select(build_table[:id], *time_columns)
+                .where(mr_metrics_table[:pipeline_id].in(builds.pluck(:pipeline_id)))
+                .select(*time_columns)
 
               yield records if block_given?
-              ci_build_records = preload_ci_build_associations(records)
 
-              AnalyticsBuildSerializer.new.represent(ci_build_records.map { |e| e['build'] })
+              AnalyticsBuildSerializer.new.represent(builds)
             else
               records = ordered_and_limited_query.select(*columns, *time_columns)
 
