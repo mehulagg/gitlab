@@ -17,7 +17,7 @@ template_metadata:
     Documentation: https://docs.gitlab.com/ee/ci/cloud_deployment/#deploy-your-application-to-the-aws-elastic-container-service-ecs
   stages: ["devops::release"]
   maintainers: ["group::release"]
-  categories: ["Category:Unknown"]
+  categories: ["Category:Continuous Delivery"]
   usage: copy-paste
 
 stages:

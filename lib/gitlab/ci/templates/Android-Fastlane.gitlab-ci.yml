@@ -11,7 +11,7 @@ template_metadata:
     If you are looking for a simpler template that does not publish, see the Android template.
   stages: ["devops::release"]
   maintainers: ["group::release"]
-  categories: ["Category:Unknown"]
+  categories: ["Category:Continuous Delivery"]
   usage: copy-paste
 
 stages:

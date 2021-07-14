@@ -10,8 +10,8 @@ template_metadata:
     https://gradle.org/
     https://github.com/gradle/gradle
   stages: ["devops::verify"]
-  maintainers: ["group::testing"]
-  categories: ["Category:Unknown"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 image: gradle:alpine

@@ -16,8 +16,8 @@ template_metadata:
     Feel free to change GRADLE_VERSION version with your gradle project version (2.13, 2.14,...)
     If you use Angular profile, this yml it's prepared to work with it
   stages: ["devops::verify"]
-  maintainers: ["group::testing"]
-  categories: ["Category:Build Artifacts"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 image: java:8

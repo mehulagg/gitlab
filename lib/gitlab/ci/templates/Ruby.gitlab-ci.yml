@@ -7,8 +7,8 @@ template_metadata:
   name: Ruby
   desc: This is a GitLab managed template.
   stages: ["devops::verify"]
-  maintainers: ["group::testing"]
-  categories: ["Category:Unknown"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 # Official language image. Look for the different tagged releases at:

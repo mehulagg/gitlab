@@ -7,8 +7,8 @@ template_metadata:
   name: LaTeX
   desc: This is a GitLab managed template.
   stages: ["devops::verify"]
-  maintainers: ["group::testing"]
-  categories: ["Category:Build Artifacts"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 ---

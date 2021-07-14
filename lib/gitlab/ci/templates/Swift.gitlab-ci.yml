@@ -8,9 +8,9 @@ template_metadata:
   desc: |
     Lifted from: https://about.gitlab.com/2016/03/10/setting-up-gitlab-ci-for-ios-projects/
     This file assumes an own GitLab CI runner, setup on a macOS system.
-  stages: ["devops::create"]
-  maintainers: ["group::source code"]
-  categories: ["Category:Source Code Management"]
+  stages: ["devops::verify"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 stages:

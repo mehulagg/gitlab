@@ -6,9 +6,9 @@
 template_metadata:
   name: Packer
   desc: This is a GitLab managed template.
-  stages: ["devops::release"]
-  maintainers: ["group::release"]
-  categories: ["Category:Continuous Delivery"]
+  stages: ["devops::verify"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 image:

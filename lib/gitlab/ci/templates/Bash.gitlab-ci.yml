@@ -8,7 +8,7 @@ template_metadata:
   desc: See https://docs.gitlab.com/ee/ci/yaml/README.html for all available options
   stages: ["devops::verify"]
   maintainers: ["group::pipeline authoring"]
-  categories: ["Category:Unknown"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 # you can delete this line if you're not using Docker

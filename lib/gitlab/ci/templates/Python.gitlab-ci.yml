@@ -6,9 +6,9 @@
 template_metadata:
   name: Python
   desc: This is a GitLab managed template.
-  stages: ["devops::verify", "devops::release"]
-  maintainers: ["group::testing", "group::release"]
-  categories: ["Category:Unknown", "Category:Pages"]
+  stages: ["devops::verify"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 # Official language image. Look for the different tagged releases at:

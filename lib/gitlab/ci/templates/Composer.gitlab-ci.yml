@@ -6,9 +6,9 @@
 template_metadata:
   name: Composer
   desc: This is a GitLab managed template.
-  stages: ["devops::configure"]
-  maintainers: ["group::configure"]
-  categories: ["Category:Unknown"]
+  stages: ["devops::package"]
+  maintainers: ["group::package"]
+  categories: ["Category:Package Registry"]
   usage: copy-paste
 
 # Publishes a tag/branch to Composer Packages of the current project

@@ -15,9 +15,9 @@ template_metadata:
     * Caches downloaded dependencies and plugins between invocation.
     * Verify but don't deploy merge requests.
     * Deploy built artifacts from master branch only.
-  stages: ["devops::verify", "devops::release"]
-  maintainers: ["group::testing", "group::release"]
-  categories: ["Category:Unknown", "Category:Continuous Delivery"]
+  stages: ["devops::verify", "devops::package"]
+  maintainers: ["group::pipeline authoring", "group::package"]
+  categories: ["Category:Pipeline Authoring", "Category:Package Registry"]
   usage: copy-paste
 
 variables:
