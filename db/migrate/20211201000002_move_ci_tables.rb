@@ -57,7 +57,10 @@ class MoveCiTables < ActiveRecord::Migration[6.1]
     "ci_triggers",
     "ci_unit_test_failures",
     "ci_unit_tests",
-    "ci_variables"
+    "ci_variables",
+    "ci_platform_metrics",
+    "ci_test_cases",
+    "ci_test_case_failures"
   ]
 
   def up

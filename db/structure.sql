@@ -802,6 +802,24 @@ CREATE SEQUENCE gitlab_ci.ci_pipelines_id_seq
 
 ALTER SEQUENCE gitlab_ci.ci_pipelines_id_seq OWNED BY gitlab_ci.ci_pipelines.id;
 
+CREATE TABLE gitlab_ci.ci_platform_metrics (
+    id bigint NOT NULL,
+    recorded_at timestamp with time zone NOT NULL,
+    platform_target text NOT NULL,
+    count integer NOT NULL,
+    CONSTRAINT check_f922abc32b CHECK ((char_length(platform_target) <= 255)),
+    CONSTRAINT ci_platform_metrics_check_count_positive CHECK ((count > 0))
+);
+
+CREATE SEQUENCE gitlab_ci.ci_platform_metrics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE gitlab_ci.ci_platform_metrics_id_seq OWNED BY gitlab_ci.ci_platform_metrics.id;
+
 CREATE TABLE gitlab_ci.ci_project_monthly_usages (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -1025,6 +1043,38 @@ CREATE SEQUENCE gitlab_ci.ci_subscriptions_projects_id_seq
     CACHE 1;
 
 ALTER SEQUENCE gitlab_ci.ci_subscriptions_projects_id_seq OWNED BY gitlab_ci.ci_subscriptions_projects.id;
+
+CREATE TABLE gitlab_ci.ci_test_case_failures (
+    id bigint NOT NULL,
+    failed_at timestamp with time zone,
+    test_case_id bigint NOT NULL,
+    build_id bigint NOT NULL
+);
+
+CREATE SEQUENCE gitlab_ci.ci_test_case_failures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE gitlab_ci.ci_test_case_failures_id_seq OWNED BY gitlab_ci.ci_test_case_failures.id;
+
+CREATE TABLE gitlab_ci.ci_test_cases (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    key_hash text NOT NULL,
+    CONSTRAINT check_dd3c5d1c15 CHECK ((char_length(key_hash) <= 64))
+);
+
+CREATE SEQUENCE gitlab_ci.ci_test_cases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE gitlab_ci.ci_test_cases_id_seq OWNED BY gitlab_ci.ci_test_cases.id;
 
 CREATE TABLE gitlab_ci.ci_trigger_requests (
     id integer NOT NULL,
@@ -11374,56 +11424,6 @@ CREATE SEQUENCE chat_teams_id_seq
 
 ALTER SEQUENCE chat_teams_id_seq OWNED BY chat_teams.id;
 
-CREATE TABLE ci_platform_metrics (
-    id bigint NOT NULL,
-    recorded_at timestamp with time zone NOT NULL,
-    platform_target text NOT NULL,
-    count integer NOT NULL,
-    CONSTRAINT check_f922abc32b CHECK ((char_length(platform_target) <= 255)),
-    CONSTRAINT ci_platform_metrics_check_count_positive CHECK ((count > 0))
-);
-
-CREATE SEQUENCE ci_platform_metrics_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE ci_platform_metrics_id_seq OWNED BY ci_platform_metrics.id;
-
-CREATE TABLE ci_test_case_failures (
-    id bigint NOT NULL,
-    failed_at timestamp with time zone,
-    test_case_id bigint NOT NULL,
-    build_id bigint NOT NULL
-);
-
-CREATE SEQUENCE ci_test_case_failures_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE ci_test_case_failures_id_seq OWNED BY ci_test_case_failures.id;
-
-CREATE TABLE ci_test_cases (
-    id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    key_hash text NOT NULL,
-    CONSTRAINT check_dd3c5d1c15 CHECK ((char_length(key_hash) <= 64))
-);
-
-CREATE SEQUENCE ci_test_cases_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE ci_test_cases_id_seq OWNED BY ci_test_cases.id;
-
 CREATE TABLE cluster_agent_tokens (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -19753,6 +19753,8 @@ ALTER TABLE ONLY gitlab_ci.ci_pipelines ALTER COLUMN id SET DEFAULT nextval('git
 
 ALTER TABLE ONLY gitlab_ci.ci_pipelines_config ALTER COLUMN pipeline_id SET DEFAULT nextval('gitlab_ci.ci_pipelines_config_pipeline_id_seq'::regclass);
 
+ALTER TABLE ONLY gitlab_ci.ci_platform_metrics ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_platform_metrics_id_seq'::regclass);
+
 ALTER TABLE ONLY gitlab_ci.ci_project_monthly_usages ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_project_monthly_usages_id_seq'::regclass);
 
 ALTER TABLE ONLY gitlab_ci.ci_refs ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_refs_id_seq'::regclass);
@@ -19776,6 +19778,10 @@ ALTER TABLE ONLY gitlab_ci.ci_sources_projects ALTER COLUMN id SET DEFAULT nextv
 ALTER TABLE ONLY gitlab_ci.ci_stages ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_stages_id_seq'::regclass);
 
 ALTER TABLE ONLY gitlab_ci.ci_subscriptions_projects ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_subscriptions_projects_id_seq'::regclass);
+
+ALTER TABLE ONLY gitlab_ci.ci_test_case_failures ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_test_case_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY gitlab_ci.ci_test_cases ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_test_cases_id_seq'::regclass);
 
 ALTER TABLE ONLY gitlab_ci.ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_trigger_requests_id_seq'::regclass);
 
@@ -19906,12 +19912,6 @@ ALTER TABLE ONLY bulk_imports ALTER COLUMN id SET DEFAULT nextval('bulk_imports_
 ALTER TABLE ONLY chat_names ALTER COLUMN id SET DEFAULT nextval('chat_names_id_seq'::regclass);
 
 ALTER TABLE ONLY chat_teams ALTER COLUMN id SET DEFAULT nextval('chat_teams_id_seq'::regclass);
-
-ALTER TABLE ONLY ci_platform_metrics ALTER COLUMN id SET DEFAULT nextval('ci_platform_metrics_id_seq'::regclass);
-
-ALTER TABLE ONLY ci_test_case_failures ALTER COLUMN id SET DEFAULT nextval('ci_test_case_failures_id_seq'::regclass);
-
-ALTER TABLE ONLY ci_test_cases ALTER COLUMN id SET DEFAULT nextval('ci_test_cases_id_seq'::regclass);
 
 ALTER TABLE ONLY cluster_agent_tokens ALTER COLUMN id SET DEFAULT nextval('cluster_agent_tokens_id_seq'::regclass);
 
@@ -20687,6 +20687,9 @@ ALTER TABLE ONLY gitlab_ci.ci_pipelines_config
 ALTER TABLE ONLY gitlab_ci.ci_pipelines
     ADD CONSTRAINT ci_pipelines_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY gitlab_ci.ci_platform_metrics
+    ADD CONSTRAINT ci_platform_metrics_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY gitlab_ci.ci_project_monthly_usages
     ADD CONSTRAINT ci_project_monthly_usages_pkey PRIMARY KEY (id);
 
@@ -20722,6 +20725,12 @@ ALTER TABLE ONLY gitlab_ci.ci_stages
 
 ALTER TABLE ONLY gitlab_ci.ci_subscriptions_projects
     ADD CONSTRAINT ci_subscriptions_projects_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY gitlab_ci.ci_test_case_failures
+    ADD CONSTRAINT ci_test_case_failures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY gitlab_ci.ci_test_cases
+    ADD CONSTRAINT ci_test_cases_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY gitlab_ci.ci_trigger_requests
     ADD CONSTRAINT ci_trigger_requests_pkey PRIMARY KEY (id);
@@ -21139,15 +21148,6 @@ ALTER TABLE group_import_states
 
 ALTER TABLE sprints
     ADD CONSTRAINT check_df3816aed7 CHECK ((due_date IS NOT NULL)) NOT VALID;
-
-ALTER TABLE ONLY ci_platform_metrics
-    ADD CONSTRAINT ci_platform_metrics_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY ci_test_case_failures
-    ADD CONSTRAINT ci_test_case_failures_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY ci_test_cases
-    ADD CONSTRAINT ci_test_cases_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY cluster_agent_tokens
     ADD CONSTRAINT cluster_agent_tokens_pkey PRIMARY KEY (id);
@@ -22618,6 +22618,10 @@ CREATE INDEX index_ci_subscriptions_projects_on_upstream_project_id ON gitlab_ci
 
 CREATE UNIQUE INDEX index_ci_subscriptions_projects_unique_subscription ON gitlab_ci.ci_subscriptions_projects USING btree (downstream_project_id, upstream_project_id);
 
+CREATE INDEX index_ci_test_case_failures_on_build_id ON gitlab_ci.ci_test_case_failures USING btree (build_id);
+
+CREATE UNIQUE INDEX index_ci_test_cases_on_project_id_and_key_hash ON gitlab_ci.ci_test_cases USING btree (project_id, key_hash);
+
 CREATE INDEX index_ci_trigger_requests_on_commit_id ON gitlab_ci.ci_trigger_requests USING btree (commit_id);
 
 CREATE INDEX index_ci_trigger_requests_on_trigger_id_and_id ON gitlab_ci.ci_trigger_requests USING btree (trigger_id, id DESC);
@@ -22653,6 +22657,8 @@ CREATE INDEX index_taggings_on_taggable_id_and_taggable_type_and_context ON gitl
 CREATE UNIQUE INDEX index_tags_on_name ON gitlab_ci.tags USING btree (name);
 
 CREATE INDEX index_tags_on_name_trigram ON gitlab_ci.tags USING gin (name gin_trgm_ops);
+
+CREATE UNIQUE INDEX index_test_case_failures_unique_columns ON gitlab_ci.ci_test_case_failures USING btree (test_case_id, failed_at DESC, build_id);
 
 CREATE INDEX index_unit_test_failures_failed_at ON gitlab_ci.ci_unit_test_failures USING btree (failed_at DESC);
 
@@ -23229,10 +23235,6 @@ CREATE UNIQUE INDEX index_chat_names_on_service_id_and_team_id_and_chat_id ON ch
 CREATE UNIQUE INDEX index_chat_names_on_user_id_and_service_id ON chat_names USING btree (user_id, service_id);
 
 CREATE UNIQUE INDEX index_chat_teams_on_namespace_id ON chat_teams USING btree (namespace_id);
-
-CREATE INDEX index_ci_test_case_failures_on_build_id ON ci_test_case_failures USING btree (build_id);
-
-CREATE UNIQUE INDEX index_ci_test_cases_on_project_id_and_key_hash ON ci_test_cases USING btree (project_id, key_hash);
 
 CREATE INDEX index_cluster_agent_tokens_on_agent_id_and_last_used_at ON cluster_agent_tokens USING btree (agent_id, last_used_at DESC NULLS LAST);
 
@@ -24978,8 +24980,6 @@ CREATE UNIQUE INDEX index_terraform_states_on_project_id_and_name ON terraform_s
 
 CREATE UNIQUE INDEX index_terraform_states_on_uuid ON terraform_states USING btree (uuid);
 
-CREATE UNIQUE INDEX index_test_case_failures_unique_columns ON ci_test_case_failures USING btree (test_case_id, failed_at DESC, build_id);
-
 CREATE INDEX index_timelogs_on_issue_id ON timelogs USING btree (issue_id);
 
 CREATE INDEX index_timelogs_on_merge_request_id ON timelogs USING btree (merge_request_id);
@@ -25698,6 +25698,9 @@ ALTER TABLE ONLY gitlab_ci.ci_builds
 ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
     ADD CONSTRAINT fk_d4e29af7d7 FOREIGN KEY (source_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY gitlab_ci.ci_test_case_failures
+    ADD CONSTRAINT fk_d69404d827 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY gitlab_ci.ci_pipelines
     ADD CONSTRAINT fk_d80e161c54 FOREIGN KEY (ci_ref_id) REFERENCES gitlab_ci.ci_refs(id) ON DELETE SET NULL;
 
@@ -25767,6 +25770,9 @@ ALTER TABLE ONLY gitlab_ci.ci_running_builds
 ALTER TABLE ONLY gitlab_ci.ci_builds_metadata
     ADD CONSTRAINT fk_rails_e20479742e FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY gitlab_ci.ci_test_case_failures
+    ADD CONSTRAINT fk_rails_eab6349715 FOREIGN KEY (test_case_id) REFERENCES gitlab_ci.ci_test_cases(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results
     ADD CONSTRAINT fk_rails_ee072d13b3 FOREIGN KEY (last_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
 
@@ -25787,9 +25793,6 @@ ALTER TABLE ONLY epics
 
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_03c671965c FOREIGN KEY (design_id) REFERENCES design_management_designs(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY ci_test_cases
-    ADD CONSTRAINT fk_0526c30ded FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_05f1e72feb FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -27728,9 +27731,6 @@ ALTER TABLE ONLY merge_request_blocks
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_e9eb8dc025 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY ci_test_case_failures
-    ADD CONSTRAINT fk_rails_eab6349715 FOREIGN KEY (test_case_id) REFERENCES ci_test_cases(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY alert_management_alert_user_mentions
     ADD CONSTRAINT fk_rails_eb2de0cdef FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
