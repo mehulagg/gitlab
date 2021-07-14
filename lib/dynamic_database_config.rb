@@ -1,6 +1,6 @@
-module DynamicShards
+module DynamicDatabaseConfig
   def skip_post_migrate?
-    Gitlab::Utils.to_boolean(ENV['SKIP_POST_DEPLOYMENT_MIGRATIONS'], default: false) && !Gitlab::Runtime.rake?
+    Gitlab::Utils.to_boolean(ENV['SKIP_POST_DEPLOYMENT_MIGRATIONS'], default: false) #&& !Gitlab::Runtime.rake?
   end
 
   # This is temporary hack to ensure that we don't affect development envs
@@ -59,7 +59,7 @@ module DynamicShards
   end
 end
 
-Rails::Application::Configuration.prepend(DynamicShards)
+Rails::Application::Configuration.prepend(::DynamicDatabaseConfig)
 
 unless Gitlab::Utils.to_boolean(ENV['CI'])
   ActiveSupport.on_load(:active_record) do
@@ -68,6 +68,11 @@ unless Gitlab::Utils.to_boolean(ENV['CI'])
       warn "Using multiple databases"
     else
       warn "Using single database"
+    end
+    if db_configs["main"]["migrations_paths"].join(",").include?("post_migrate")
+      warn "Using post_migrate"
+    else
+      warn "Not using post_migrate"
     end
   end
 end
