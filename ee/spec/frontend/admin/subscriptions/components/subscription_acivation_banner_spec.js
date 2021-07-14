@@ -6,7 +6,6 @@ import SubscriptionActivationBanner, {
 } from 'ee/admin/subscriptions/show/components/subscription_activation_banner.vue';
 import {
   activateCloudLicense,
-  subscriptionBannerBlogPostUrl,
   subscriptionBannerText,
   subscriptionBannerTitle,
 } from 'ee/admin/subscriptions/show/constants';
@@ -52,7 +51,7 @@ describe('SubscriptionActivationBanner', () => {
   });
 
   it('contains a link to the blog post', () => {
-    expect(findLink(0).attributes('href')).toBe(subscriptionBannerBlogPostUrl);
+    expect(findLink(0).attributes('href')).toBe('#');
   });
 
   it('contains a link to the customers portal', () => {
