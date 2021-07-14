@@ -350,6 +350,10 @@ module ProjectsHelper
     nil
   end
 
+  def show_terraform_banner?(project)
+    project.repository_languages.find { |lang| lang.name == 'HCL' } && project.terraform_states.empty?
+  end
+
   private
 
   def tab_ability_map
@@ -633,10 +637,6 @@ module ProjectsHelper
       push_to_schema_breadcrumb(name, url)
       link_to(name, url)
     end
-  end
-
-  def show_terraform_banner?(project)
-    project.repository_languages.find { |lang| lang.name == 'HCL' } && project.terraform_states.empty?
   end
 end
 
