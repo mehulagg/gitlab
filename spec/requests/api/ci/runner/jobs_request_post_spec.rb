@@ -138,6 +138,10 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
         context 'when shared runner requests job for project without shared_runners_enabled' do
           let(:runner) { create(:ci_runner, :instance) }
 
+          before do
+            skip "CI Vertical: Not yet supported"
+          end
+
           it_behaves_like 'no jobs available'
         end
 

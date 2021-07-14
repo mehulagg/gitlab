@@ -180,6 +180,7 @@ class ProjectsFinder < UnionFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def by_topics(items)
+    # TODO: CI Vertical: Cross-join to taggings
     params[:topic].present? ? items.tagged_with(params[:topic]) : items
   end
 

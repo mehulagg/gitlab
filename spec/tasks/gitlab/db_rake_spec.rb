@@ -68,6 +68,8 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
       let(:rails_paths) { { 'db' => ['db'], 'db/migrate' => ['db/migrate'] } }
 
       before do
+        skip "CI Vertical: Not supported yet"
+
         allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with('SKIP_POST_DEPLOYMENT_MIGRATIONS').and_return true
 

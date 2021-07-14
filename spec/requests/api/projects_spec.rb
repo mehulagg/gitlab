@@ -272,6 +272,8 @@ RSpec.describe API::Projects do
 
       context 'filter by topic (column topic_list)' do
         before do
+          skip "CI Vertical: Filtering by topics is not supported"
+
           project.update!(topic_list: %w(ruby javascript))
         end
 
