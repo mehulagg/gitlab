@@ -213,3 +213,43 @@ The code for this resides in:
 - `lib/gitlab/github_import/label_finder.rb`
 - `lib/gitlab/github_import/milestone_finder.rb`
 - `lib/gitlab/github_import/caching.rb`
+
+## Logs
+
+> Introduced in 13.7 (https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48512/diffs)
+
+The import progress can be checked in the `logs/importer.log` file. Each
+relevant import information is logged with `"import_source": "github"`
+and the `"project_id"`.
+
+> Introduced in 14.1 (https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64256)
+
+The last log entry reports the number of objects fetched and imported.
+
+```json
+{
+  "message": "GitHub project import finished",
+  "duration_s": 347.25,
+  "objects_imported": {
+    "fetched": {
+      "diff_note": 93,
+      "issue": 321,
+      "note": 794,
+      "pull_request": 108,
+      "pull_request_merged_by": 92,
+      "pull_request_review": 81
+    },
+    "imported": {
+      "diff_note": 93,
+      "issue": 321,
+      "note": 794,
+      "pull_request": 108,
+      "pull_request_merged_by": 92,
+      "pull_request_review": 81
+    }
+  },
+  "import_source": "github",
+  "project_id": 47,
+  "import_stage": "Gitlab::GithubImport::Stage::FinishImportWorker"
+}
+```
