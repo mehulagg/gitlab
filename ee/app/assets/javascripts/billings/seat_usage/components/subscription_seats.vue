@@ -10,11 +10,11 @@ import {
   GlModalDirective,
   GlIcon,
   GlPagination,
-  GlSearchBoxByType,
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { parseInt, debounce } from 'lodash';
+
 import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   FIELDS,
@@ -25,9 +25,37 @@ import {
   CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
   CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
 } from 'ee/billings/seat_usage/constants';
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
 import SubscriptionSeatDetails from './subscription_seat_details.vue';
+import FilterSortContainerRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+
+const sortOptions = [
+  {
+    id: 10,
+    title: __('Last Actitivy'),
+    sortDirection: {
+      descending: 'start_date_desc',
+      ascending: 'start_date_asc',
+    },
+  },
+  {
+    id: 20,
+    title: __('User'),
+    sortDirection: {
+      descending: 'end_date_desc',
+      ascending: 'end_date_asc',
+    },
+  },
+  {
+    id: 30,
+    title: __('Email'),
+    sortDirection: {
+      descending: 'title_desc',
+      ascending: 'title_asc',
+    },
+  },
+];
 
 export default {
   directives: {
@@ -44,10 +72,10 @@ export default {
     GlModal,
     GlIcon,
     GlPagination,
-    GlSearchBoxByType,
     GlTable,
     RemoveBillableMemberModal,
     SubscriptionSeatDetails,
+    FilterSortContainerRoot,
   },
   data() {
     return {
@@ -135,6 +163,7 @@ export default {
     emailNotVisibleTooltipText: s__(
       'Billing|An email address is only visible for users with public emails.',
     ),
+    filterUsersPlaceholder: __('Filter users'),
   },
   avatarSize: AVATAR_SIZE,
   fields: FIELDS,
@@ -142,6 +171,7 @@ export default {
   cannotRemoveModalId: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
   cannotRemoveModalTitle: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
   cannotRemoveModalText: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
+  sortOptions,
 };
 </script>
 
@@ -160,11 +190,14 @@ export default {
         </h4>
         <gl-badge>{{ total }}</gl-badge>
       </div>
+    </div>
 
-      <gl-search-box-by-type
-        v-model.trim="searchQuery"
-        :placeholder="s__('Billing|Type to search')"
-        @keydown.enter.prevent="onSearchEnter"
+    <div class="gl-bg-gray-10 gl-p-3">
+      <filter-sort-container-root
+        :namespace="namespaceId"
+        :tokens="[]"
+        :search-input-placeholder="$options.i18n.filterUsersPlaceholder"
+        :sort-options="$options.sortOptions"
       />
     </div>
 

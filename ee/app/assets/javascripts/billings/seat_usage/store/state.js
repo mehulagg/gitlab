@@ -1,4 +1,4 @@
-export default ({ namespaceId = null, namespaceName = null } = {}) => ({
+export default ({ namespaceId = null, namespaceName = null, tableSortableFields, filteredSearchBar } = {}) => ({
   isLoading: false,
   hasError: false,
   namespaceId,
@@ -9,4 +9,6 @@ export default ({ namespaceId = null, namespaceName = null } = {}) => ({
   perPage: null,
   billableMemberToRemove: null,
   userDetails: {},
+  tableSortableFields,
+  filteredSearchBar,
 });
