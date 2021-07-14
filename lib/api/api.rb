@@ -3,6 +3,7 @@
 module API
   class API < ::API::Base
     include APIGuard
+    extend GitlabRoutingHelper
 
     LOG_FILENAME = Rails.root.join("log", "api_json.log")
 
@@ -10,6 +11,7 @@ module API
     NAMESPACE_OR_PROJECT_REQUIREMENTS = { id: NO_SLASH_URL_PART_REGEX }.freeze
     COMMIT_ENDPOINT_REQUIREMENTS = NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(sha: NO_SLASH_URL_PART_REGEX).freeze
     USER_REQUIREMENTS = { user_id: NO_SLASH_URL_PART_REGEX }.freeze
+    ALLOWED_CI_LINT_POST_ROUTE = [api_v4_ci_lint_path].freeze
     LOG_FILTERS = ::Rails.application.config.filter_parameters + [/^output$/]
 
     insert_before Grape::Middleware::Error,
@@ -30,7 +32,8 @@ module API
                   ]
 
     allow_access_with_scope :api
-    allow_access_with_scope :read_api, if: -> (request) { request.get? || request.head? }
+    allow_access_with_scope :read_api, if: -> (request) { request.get? || request.head? || (request.post? && ALLOWED_CI_LINT_POST_ROUTE.include?(request.path)) }
+
     prefix :api
 
     version 'v3', using: :path do
