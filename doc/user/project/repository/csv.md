@@ -1,9 +1,10 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
+
 # CSV Files **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14174) in GitLab 14.1.
@@ -18,6 +19,6 @@ The CSV file format is not fully standardized. Other characters can be used as c
 Fields may or may not be surrounded to escape special characrers.
 
 When added to a repository, files with a `.csv` extension are rendered as a table when viewed in
-GitLab:
+GitLab.
 
-![CSV Output](img/csv.png)
+![CSV file rendered as a table](img/csv_file_rendered_as_table_v14_1.png)
