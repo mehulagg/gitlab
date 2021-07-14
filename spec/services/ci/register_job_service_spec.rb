@@ -843,6 +843,16 @@ module Ci
       it 'not present it does not configure the runner session' do
         expect(execute(specific_runner).runner_session).to be_nil
       end
+
+      it 'drops the build if invalid session parameters are set' do
+        runner_session_params = { session: { 'url' => 'badurl' } }
+
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+          an_instance_of(described_class::InvalidSessionException), anything).and_call_original
+        expect(execute(specific_runner, runner_session_params)).to be_nil
+        expect(pending_job.reload.status).to eq('failed')
+        expect(pending_job.failure_reason).to eq('session_invalid')
+      end
     end
 
     context 'when max queue depth is reached' do

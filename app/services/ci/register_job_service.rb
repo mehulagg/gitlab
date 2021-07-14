@@ -10,6 +10,15 @@ module Ci
 
     Result = Struct.new(:build, :build_json, :valid?)
 
+    class InvalidSessionException < RuntimeError
+      attr_accessor :details
+
+      def initialize(msg, details)
+        super(msg)
+        @details = details
+      end
+    end
+
     ##
     # The queue depth limit number has been determined by observing 95
     # percentile of effective queue depth on gitlab.com. This is only likely to
@@ -188,6 +197,11 @@ module Ci
       @metrics.increment_queue_operation(:build_conflict_transition)
 
       Result.new(nil, nil, false)
+    rescue InvalidSessionException => ex
+      @metrics.increment_queue_operation(:build_invalid_session)
+
+      track_exception_for_build(ex, build, ex.details)
+      Result.new(nil, nil, false)
     rescue StandardError => ex
       @metrics.increment_queue_operation(:build_conflict_exception)
 
@@ -222,6 +236,8 @@ module Ci
       if failure_reason
         @metrics.increment_queue_operation(:runner_pre_assign_checks_failed)
 
+        handle_invalid_session!(build, params) if failure_reason == :session_invalid
+
         build.drop!(failure_reason)
       else
         @metrics.increment_queue_operation(:runner_pre_assign_checks_success)
@@ -230,6 +246,18 @@ module Ci
       end
 
       !failure_reason
+    end
+
+    def handle_invalid_session!(build, params)
+      byebug
+      ex = InvalidSessionException.new(
+        "Invalid runner session: #{build.runner_session.errors.full_messages.join(', ')}",
+        { session_params: params[:session] }
+      )
+
+      build.runner_session = nil
+      build.drop!(:session_invalid)
+      raise ex
     end
 
     def acquire_temporary_lock(build_id)
@@ -254,21 +282,23 @@ module Ci
       track_exception_for_build(ex, build)
     end
 
-    def track_exception_for_build(ex, build)
-      Gitlab::ErrorTracking.track_exception(ex,
+    def track_exception_for_build(ex, build, details = {})
+      details.merge!({
         build_id: build.id,
         build_name: build.name,
         build_stage: build.stage,
         pipeline_id: build.pipeline_id,
         project_id: build.project_id
-      )
+      })
+      Gitlab::ErrorTracking.track_exception(ex, details)
     end
 
     def pre_assign_runner_checks
       {
         missing_dependency_failure: -> (build, _) { !build.has_valid_build_dependencies? },
         runner_unsupported: -> (build, params) { !build.supported_runner?(params.dig(:info, :features)) },
-        archived_failure: -> (build, _) { build.archived? }
+        archived_failure: -> (build, _) { build.archived? },
+        session_invalid: -> (build, _) { !build&.runner_session&.valid? }
       }
     end
   end

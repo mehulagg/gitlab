@@ -26,6 +26,7 @@ module Gitlab
           :build_conflict_lock,
           :build_conflict_exception,
           :build_conflict_transition,
+          :build_invalid_session,
           :queue_attempt,
           :queue_conflict,
           :queue_iteration,
