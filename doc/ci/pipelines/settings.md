@@ -78,7 +78,7 @@ To avoid this scenario:
 1. Select the **Skip outdated deployment jobs** checkbox.
 1. Select **Save changes**.
 
-Older deployment job are skipped when a new deployment starts. Jobs age is determined by when the timestamp of the job start rather than the commit time, so a newer commit can be skipped in some circrumstances.
+Older deployment job are skipped when a new deployment starts. Jobs age is determined by when the timestamp of the job start rather than the commit time, so a newer commit can be skipped in some circumstances.
 
 For more information, see [Deployment safety](../environments/deployment_safety.md).
 
