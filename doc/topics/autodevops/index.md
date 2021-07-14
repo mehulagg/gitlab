@@ -335,5 +335,16 @@ spec:
       value: "PUT_YOUR_HTTPS_PROXY_HERE"
 ```
 
+## Upgrading
+
+When upgrading GitLab, see:
+
+- [Upgrading Auto DevOps dependencies](upgrading_auto_deploy_dependencies.md).
+- [Upgrading PostgreSQL](upgrading_postgresql.md).
+
+## Troubleshooting
+
+See [troubleshooting Auto DevOps](troubleshooting.md).
+
 <!-- DO NOT ADD TROUBLESHOOTING INFO HERE -->
 <!-- Troubleshooting information has moved to troubleshooting.md -->
