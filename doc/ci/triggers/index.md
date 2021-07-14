@@ -126,7 +126,7 @@ branches or tags. The `:id` of a project can be found by
 [querying the API](../../api/projects.md) or by visiting the **CI/CD**
 settings page which provides self-explanatory examples.
 
-When a rerun of a pipeline is triggered, jobs are tagged as `triggered` in
+When a rerun of a pipeline is triggered, jobs are labeled as `triggered` in
 **CI/CD > Jobs**.
 
 You can see which trigger caused a job to run by visiting the single job page.
