@@ -44,8 +44,8 @@ RSpec.describe Ci::Build do
     it { is_expected.to have_many(:security_scans) }
   end
 
-  describe '#shared_runners_minutes_limit_enabled?' do
-    subject { job.shared_runners_minutes_limit_enabled? }
+  describe '#cost_factor_enabled?' do
+    subject { job.cost_factor_enabled? }
 
     shared_examples 'depends on runner presence and type' do
       context 'for shared runner' do

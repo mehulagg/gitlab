@@ -5,6 +5,17 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Minutes::CostFactor do
   using RSpec::Parameterized::TableSyntax
 
+  let(:created_at) { Time.current }
+  let(:namespace) { create(:group, shared_runners_minutes_limit: 400, created_at: created_at) }
+
+  let(:project) do
+    create(:project,
+      group: namespace,
+      visibility_level: visibility_level,
+      shared_runners_enabled: true
+    )
+  end
+
   let(:runner) do
     build_stubbed(:ci_runner,
       runner_type,
@@ -22,8 +33,6 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
   end
 
   describe '#enabled?' do
-    let(:project) { build_stubbed(:project, visibility_level: visibility_level) }
-
     subject { described_class.new(runner.runner_matcher).enabled?(project) }
 
     where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
@@ -47,8 +56,6 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
   end
 
   describe '#disabled?' do
-    let(:project) { build_stubbed(:project, visibility_level: visibility_level) }
-
     subject { described_class.new(runner.runner_matcher).disabled?(project) }
 
     where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
@@ -72,14 +79,10 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
   end
 
   describe '#for_project' do
-    let(:project) { build_stubbed(:project, namespace: namespace, visibility_level: visibility_level) }
-
     subject { described_class.new(runner.runner_matcher).for_project(project) }
 
     context 'before the public project cost factor release date' do
-      let_it_be(:namespace) do
-        create(:group, created_at: Date.new(2021, 7, 16))
-      end
+      let(:created_at) { Date.new(2021, 7, 16) }
 
       where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
         :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
@@ -99,9 +102,7 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
     end
 
     context 'after the public project cost factor release date' do
-      let_it_be(:namespace) do
-        create(:group, created_at: Date.new(2021, 7, 17))
-      end
+      let(:created_at) { Date.new(2021, 7, 17) }
 
       before do
         allow(Gitlab).to receive(:com?).and_return(true)
@@ -121,18 +122,6 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
 
       with_them do
         it { is_expected.to eq(result) }
-      end
-    end
-
-    context 'when the project has an invalid visibility level' do
-      let(:namespace) { nil }
-      let(:private_cost_factor) { 1 }
-      let(:public_cost_factor) { 1 }
-      let(:runner_type) { :instance }
-      let(:visibility_level) { 123 }
-
-      it 'raises an error' do
-        expect { subject }.to raise_error(ArgumentError)
       end
     end
   end
