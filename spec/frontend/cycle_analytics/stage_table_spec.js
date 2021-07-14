@@ -1,9 +1,9 @@
 import { GlEmptyState, GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
-import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import { PAGINATION_SORT_FIELD_DURATION } from 'ee/analytics/cycle_analytics/constants';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import StageTable from '~/cycle_analytics/components/stage_table.vue';
 import {
   stagingEvents,
   stagingStage,
@@ -13,7 +13,7 @@ import {
   testStage,
   reviewStage,
   reviewEvents,
-} from '../mock_data';
+} from './mock_data';
 
 let wrapper = null;
 let trackingSpy = null;
