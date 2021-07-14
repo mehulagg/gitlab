@@ -1,9 +1,24 @@
 #import "../fragments/user.fragment.graphql"
 #import "~/graphql_shared/fragments/user_availability.fragment.graphql"
 
-query usersSearch($search: String!, $fullPath: ID!) {
-  workspace: project(fullPath: $fullPath) {
+query usersSearch(
+  $search: String!
+  $fullPath: ID!
+  $isGroup: Boolean = false
+  $isProject: Boolean = false
+) {
+  workspace: project(fullPath: $fullPath) @include(if: $isProject) {
     users: projectMembers(search: $search, relations: [DIRECT, INHERITED, INVITED_GROUPS]) {
+      nodes {
+        user {
+          ...User
+          ...UserAvailability
+        }
+      }
+    }
+  }
+  workspace: group(fullPath: $fullPath) @include(if: $isGroup) {
+    users: groupMembers(search: $search, relations: [DIRECT, INHERITED, INVITED_GROUPS]) {
       nodes {
         user {
           ...User

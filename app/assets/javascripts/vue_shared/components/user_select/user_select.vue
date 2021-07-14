@@ -102,6 +102,7 @@ export default {
           fullPath: this.fullPath,
           search: this.search,
           first: 20,
+          isProject: true,
         };
       },
       skip() {
