@@ -198,6 +198,10 @@ hr {
   color: transparent;
   text-shadow: 0 0 0 #303030;
 }
+.form-control::-ms-input-placeholder {
+  color: #5e5e5e;
+  opacity: 1;
+}
 .form-control::placeholder {
   color: #5e5e5e;
   opacity: 1;
@@ -225,6 +229,7 @@ hr {
   color: #303030;
   text-align: center;
   vertical-align: middle;
+  -moz-user-select: none;
   user-select: none;
   background-color: transparent;
   border: 1px solid transparent;
@@ -314,6 +319,13 @@ fieldset:disabled a.btn {
   appearance: none;
   -moz-appearance: none;
 }
+.gl-form-input:not(.form-control-plaintext):-moz-read-only,
+.gl-form-input.form-control:not(.form-control-plaintext):-moz-read-only {
+  background-color: #fafafa;
+  color: #868686;
+  box-shadow: inset 0 0 0 1px #dbdbdb;
+  cursor: not-allowed;
+}
 .gl-form-input:disabled,
 .gl-form-input:not(.form-control-plaintext):read-only,
 .gl-form-input.form-control:disabled,
@@ -322,6 +334,10 @@ fieldset:disabled a.btn {
   color: #868686;
   box-shadow: inset 0 0 0 1px #dbdbdb;
   cursor: not-allowed;
+}
+.gl-form-input::-ms-input-placeholder,
+.gl-form-input.form-control::-ms-input-placeholder {
+  color: #868686;
 }
 .gl-form-input::placeholder,
 .gl-form-input.form-control::placeholder {
@@ -479,6 +495,7 @@ hr {
   z-index: 1;
 }
 .flash-container.sticky {
+  position: -webkit-sticky;
   position: sticky;
   top: 48px;
   z-index: 251;
@@ -503,6 +520,9 @@ label.label-bold {
 .form-control {
   border-radius: 4px;
   padding: 6px 10px;
+}
+.form-control::-ms-input-placeholder {
+  color: #868686;
 }
 .form-control::placeholder {
   color: #868686;
@@ -748,6 +768,62 @@ svg {
   .devise-layout-html body .navless-container {
     padding: 0 15px 65px;
   }
+}
+.gl-border-solid {
+  border-style: solid;
+}
+.gl-border-gray-100 {
+  border-color: #dbdbdb;
+}
+.gl-border-1 {
+  border-width: 1px;
+}
+.gl-rounded-base {
+  border-radius: 0.25rem;
+}
+.gl-text-green-600 {
+  color: #217645;
+}
+.gl-text-red-500 {
+  color: #dd2b0e;
+}
+.gl-display-flex {
+  display: flex;
+}
+.gl-display-block {
+  display: block;
+}
+.gl-align-items-center {
+  align-items: center;
+}
+.gl-w-full {
+  width: 100%;
+}
+.gl-p-2 {
+  padding: 0.25rem;
+}
+.gl-p-4 {
+  padding: 0.75rem;
+}
+.gl-mt-2 {
+  margin-top: 0.25rem;
+}
+.gl-mb-2 {
+  margin-bottom: 0.25rem;
+}
+.gl-mb-3 {
+  margin-bottom: 0.5rem;
+}
+.gl-mb-5 {
+  margin-bottom: 1rem;
+}
+@media (min-width: 36rem) {
+  .gl-sm-mt-0 {
+    margin-top: 0;
+  }
+}
+.gl-text-left {
+  text-align: left;
 }
 
 .gl-border-solid {
