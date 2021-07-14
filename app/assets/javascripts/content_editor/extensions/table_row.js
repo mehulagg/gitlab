@@ -1,4 +1,6 @@
 import { TableRow } from '@tiptap/extension-table-row';
+import { isBlockTable } from './table';
+import { shouldRenderInline } from './table_cell';
 
 export const tiptapExtension = TableRow.extend({
   allowGapCursor: false,
@@ -6,6 +8,8 @@ export const tiptapExtension = TableRow.extend({
 
 export function serializer(state, node) {
   const isHeaderRow = node.child(0).type.name === 'tableHeader';
+  const open = (tag, align) => `<${tag}${align ? ` align="${align}"` : ''}>`;
+  const close = (tag) => `</${tag}>`;
 
   const renderRow = () => {
     const cellWidths = [];
@@ -43,7 +47,21 @@ export function serializer(state, node) {
     state.closeBlock(node);
   };
 
-  if (isHeaderRow) {
+  if (isBlockTable(node)) {
+    const tag = isHeaderRow ? 'th' : 'td';
+
+    state.write(open('tr'));
+    node.forEach((cell, _, i) => {
+      state.write(open(tag, cell.attrs.align));
+      if (!shouldRenderInline(cell)) {
+        state.write('\n\n');
+      }
+      state.render(cell, node, i);
+      state.flushClose(1);
+      state.write(close(tag));
+    });
+    state.write(close('tr'));
+  } else if (isHeaderRow) {
     renderHeaderRow(renderRow());
   } else {
     renderRow();

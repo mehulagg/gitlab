@@ -1,0 +1,7 @@
+.ProseMirror {
+  td, th, li {
+    :only-child {
+      margin-bottom: 0 !important;
+    }
+  }
+}
