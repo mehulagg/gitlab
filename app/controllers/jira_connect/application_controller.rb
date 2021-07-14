@@ -46,7 +46,7 @@ class JiraConnect::ApplicationController < ApplicationController
   end
 
   def claims
-    strong_memoize(:installation_from_jwt) do
+    strong_memoize(:claims) do
       next {} unless auth_token
 
       # Decode without verification to get `client_key` in `iss`

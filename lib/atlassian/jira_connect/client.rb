@@ -31,7 +31,8 @@ module Atlassian
       end
 
       def user_info(account_id)
-        r = get('/rest/api/3/user', { accountId: account_id })
+        r = get('/rest/api/3/user', { accountId: account_id, expand: 'groups,applicationRoles' })
+        Rails.logger.info("Atlassian account info: #{account_id} => #{r.code}: #{r.parsed_response}")
 
         r.parsed_response if r.code == 200
       end
@@ -41,8 +42,9 @@ module Atlassian
       def get(path, query_params)
         uri = URI.join(@base_uri, path)
         uri.query = URI.encode_www_form(query_params)
+        Rails.logger.info("Atlassian Client get: #{uri}")
 
-        self.class.get(uri, headers: headers(uri))
+        self.class.get(uri, headers: headers(uri, 'GET'))
       end
 
       def store_ff_info(project:, feature_flags:, **opts)
@@ -112,10 +114,11 @@ module Atlassian
         self.class.post(uri, headers: headers(uri), body: metadata.merge(payload).to_json)
       end
 
-      def headers(uri)
+      def headers(uri, http_method = 'POST')
         {
-          'Authorization' => "JWT #{jwt_token('POST', uri)}",
-          'Content-Type' => 'application/json'
+          'Authorization' => "JWT #{jwt_token(http_method, uri)}",
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
         }
       end
 
