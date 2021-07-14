@@ -25,7 +25,8 @@ module EE
         def selective_sync_scope(node)
           return all unless node.selective_sync?
 
-          project_id_in(node.projects)
+          # TODO: CI Vertical: cross-join
+          project_id_in(node.projects.ids)
         end
       end
     end

@@ -10,16 +10,15 @@ def log_pool_size(db, previous_pool_size, current_pool_size)
   Gitlab::AppLogger.debug(log_message.join(' '))
 end
 
-# TODO: CI Vertical connection pools should be properly configured
-# Gitlab.ee do
-#   # We need to initialize the Geo database before
-#   # setting the Geo DB connection pool size.
-#   if File.exist?(Rails.root.join('config/database_geo.yml'))
-#     Rails.application.configure do
-#       config.geo_database = config_for(:database_geo)
-#     end
-#   end
-# end
+Gitlab.ee do
+  # We need to initialize the Geo database before
+  # setting the Geo DB connection pool size.
+  if File.exist?(Rails.root.join('config/database_geo.yml'))
+    Rails.application.configure do
+      config.geo_database = config_for(:database_geo)
+    end
+  end
+end
 
 # # Not supported for sharding
 # # db_config = Gitlab::Database.config ||
