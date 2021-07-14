@@ -33,6 +33,7 @@ class UsersFinder
 
   def execute
     users = User.all.order_id_desc
+    users = by_saml_provider_id(users)
     users = by_username(users)
     users = by_id(users)
     users = by_admins(users)
@@ -75,6 +76,12 @@ class UsersFinder
     return users unless params[:search].present?
 
     users.search(params[:search])
+  end
+
+  def by_saml_provider_id(users)
+    return users unless params[:by_saml_provider_id]
+
+    users.by_saml_provider_id(params[:by_saml_provider_id])
   end
 
   def by_blocked(users)

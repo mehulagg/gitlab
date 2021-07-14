@@ -30,6 +30,24 @@ RSpec.describe API::Users do
       end
     end
 
+    context 'querying users by saml provider id' do
+      let(:group) { create(:group) }
+      let(:saml_provider) { create(:saml_provider, group: group, enabled: true, enforced_sso: true) }
+
+      it 'returns only users for the saml_provider_id' do
+        saml_user = create(:user)
+        create(:identity, provider: 'group_saml1', saml_provider_id: saml_provider.id, user: saml_user)
+        non_saml_user = create(:user)
+
+        get api("/users", user), params: { by_saml_provider_id: saml_provider.id }
+
+        expect(response).to match_response_schema('public_api/v4/user/basics')
+        expect(response).to include_pagination_headers
+        expect(json_response.map { |u| u['id'] }).to include(saml_user.id)
+        expect(json_response.map { |u| u['id'] }).not_to include(non_saml_user.id)
+      end
+    end
+
     context 'when `disable_name_update_for_users` feature is available' do
       before do
         stub_licensed_features(disable_name_update_for_users: true)

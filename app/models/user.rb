@@ -399,6 +399,7 @@ class User < ApplicationRecord
   scope :by_name, -> (names) { iwhere(name: Array(names)) }
   scope :by_user_email, -> (emails) { iwhere(email: Array(emails)) }
   scope :by_emails, -> (emails) { joins(:emails).where(emails: { email: Array(emails).map(&:downcase) }) }
+  scope :by_saml_provider_id, -> (saml_provider_id) { joins('LEFT JOIN identities ON users.id = identities.user_id').where('identities.saml_provider_id': saml_provider_id) }
   scope :for_todos, -> (todos) { where(id: todos.select(:user_id).distinct) }
   scope :with_emails, -> { preload(:emails) }
   scope :with_dashboard, -> (dashboard) { where(dashboard: dashboard) }

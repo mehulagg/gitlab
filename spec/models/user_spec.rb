@@ -2030,6 +2030,22 @@ RSpec.describe User do
     it { expect(described_class.without_projects).to include user_without_project2 }
   end
 
+  describe '.by_saml_provider_id' do
+    let(:group) { create(:group) }
+    let(:saml_provider) { create(:saml_provider, group: group, enabled: true, enforced_sso: true) }
+
+    it 'returns only users for the saml_provider_id' do
+      subject = described_class.by_saml_provider_id(saml_provider.id)
+
+      saml_user = create(:user)
+      create(:identity, provider: 'group_saml1', saml_provider_id: saml_provider.id, user: saml_user)
+      non_saml_user = create(:user)
+
+      expect(subject.map { |u| u['id'] }).to include(saml_user.id)
+      expect(subject.map { |u| u['id'] }).not_to include(non_saml_user.id)
+    end
+  end
+
   describe 'user creation' do
     describe 'normal user' do
       let(:user) { create(:user, name: 'John Smith') }
