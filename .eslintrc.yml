@@ -89,6 +89,7 @@ rules:
           group: internal
       alphabetize:
         order: asc
+  '@gitlab/vue-emit-events-with-two-args': error
 overrides:
   - files:
       - '**/spec/**/*'
