@@ -45,7 +45,7 @@ describe('AgentEmptyStateComponent', () => {
     }
   });
 
-  it('renders correct herf attributes for the links', () => {
+  it('renders correct href attributes for the links', () => {
     expect(findAgentDocsLink().attributes('href')).toBe(agentDocsUrl);
     expect(findInstallDocsLink().attributes('href')).toBe(installDocsUrl);
   });
