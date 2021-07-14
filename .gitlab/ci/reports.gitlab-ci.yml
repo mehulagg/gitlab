@@ -43,10 +43,9 @@ semgrep-sast:
 
 gosec-sast:
   variables:
-    GOPATH: "$CI_PROJECT_DIR/.go"
+    GOPATH: "$CI_PROJECT_DIR/vendor/go"
     COMPILE: "false"
     GOSEC_GO_PKG_PATH: "$CI_PROJECT_DIR"
-    SAST_EXCLUDED_PATHS: ".go"
   before_script:
     - mkdir -p $GOPATH
     - cd workhorse
@@ -54,7 +53,7 @@ gosec-sast:
     - cd ..
   cache:
     paths:
-      - .go/pkg/mod
+      - vendor/go
   rules: !reference [".reports:rules:sast", rules]
 
 .secret-analyzer:
