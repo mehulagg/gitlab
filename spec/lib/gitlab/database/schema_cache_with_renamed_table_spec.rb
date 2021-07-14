@@ -16,6 +16,8 @@ RSpec.describe Gitlab::Database::SchemaCacheWithRenamedTable do
   end
 
   before do
+    skip("TODO: CI Vertical: not supported")
+
     stub_const('Gitlab::Database::TABLES_TO_BE_RENAMED', { 'projects' => 'projects_new' })
   end
 
