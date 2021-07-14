@@ -55,6 +55,7 @@ export default {
       type: Boolean,
       required: true,
     },
+
     stageEvents: {
       type: Array,
       required: true,
@@ -75,17 +76,22 @@ export default {
     },
     pagination: {
       type: Object,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   data() {
-    const {
-      pagination: { sort, direction },
-    } = this;
-    return {
-      sort,
-      sortDesc: direction === PAGINATION_SORT_DIRECTION_DESC,
-    };
+    if (this.pagination) {
+      const {
+        pagination: { sort, direction },
+      } = this;
+      return {
+        sort,
+        direction,
+        sortDesc: direction === PAGINATION_SORT_DIRECTION_DESC,
+      };
+    }
+    return { sort: null, direction: null, sortDesc: null };
   },
   computed: {
     isEmptyStage() {
@@ -168,18 +174,18 @@ export default {
       thead-class="border-bottom"
       show-empty
       :sort-by.sync="sort"
-      :sort-direction.sync="pagination.direction"
+      :sort-direction.sync="direction"
       :sort-desc.sync="sortDesc"
       :fields="fields"
       :items="stageEvents"
       :empty-text="emptyStateMessage"
       @sort-changed="onSort"
     >
-      <template #head(end_event)="data">
+      <template v-if="stageCount" #head(end_event)="data">
         <span>{{ data.label }}</span
-        ><gl-badge class="gl-ml-2" size="sm">
-          <formatted-stage-count :stage-count="stageCount" />
-        </gl-badge>
+        ><gl-badge class="gl-ml-2" size="sm"
+          ><formatted-stage-count :stage-count="stageCount"
+        /></gl-badge>
       </template>
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
@@ -273,7 +279,7 @@ export default {
       </template>
     </gl-table>
     <gl-pagination
-      v-if="!isLoading && !isEmptyStage"
+      v-if="pagination && !isLoading && !isEmptyStage"
       :value="pagination.page"
       :prev-page="prevPage"
       :next-page="nextPage"

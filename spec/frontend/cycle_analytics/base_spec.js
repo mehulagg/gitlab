@@ -5,6 +5,7 @@ import Vuex from 'vuex';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BaseComponent from '~/cycle_analytics/components/base.vue';
 import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
+import StageTable from '~/cycle_analytics/components/stage_table.vue';
 import initState from '~/cycle_analytics/store/state';
 import { selectedStage, convertedEvents as selectedStageEvents } from './mock_data';
 
@@ -45,9 +46,9 @@ function createComponent({ initialState } = {}) {
 const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
 const findPathNavigation = () => wrapper.findComponent(PathNavigation);
 const findOverviewMetrics = () => wrapper.findByTestId('vsa-stage-overview-metrics');
-const findStageTable = () => wrapper.findByTestId('vsa-stage-table');
+const findStageTable = () => wrapper.findComponent(StageTable);
 const findEmptyStage = () => wrapper.findComponent(GlEmptyState);
-const findStageEvents = () => wrapper.findByTestId('stage-table-events');
+const findStageEvents = () => findStageTable().props('stageEvents');
 
 describe('Value stream analytics component', () => {
   beforeEach(() => {
@@ -175,6 +176,9 @@ describe('Value stream analytics component', () => {
     beforeEach(() => {
       wrapper = createComponent({
         initialState: { selectedStage: null, isEmptyStage: true },
+        stubs: {
+          StageTable,
+        },
       });
     });
 
