@@ -129,7 +129,7 @@ The following options are available:
 
 - For non-Geo installations, either:
   - Use one of the documented [PostgreSQL setups](../postgresql/index.md).
-  - Use your own third-party database setup. This will require [manual setup](#manual-database-setup).
+  - Use your own third-party database setup. This requires [manual setup](#manual-database-setup).
 - For Geo instances, either:
   - Set up a separate [PostgreSQL instance](https://www.postgresql.org/docs/11/high-availability.html).
   - Use a cloud-managed PostgreSQL service. AWS
@@ -457,7 +457,7 @@ On the **Praefect** node:
    In [GitLab 13.8 and earlier](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4988),
    Gitaly nodes were configured directly under the virtual storage, and not under the `nodes` key.
 
-1. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2013) in GitLab 13.1 and later, enable [distribution of reads](#distributed-reads).
+1. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2013) in GitLab 13.1 and later, enable [distribution of reads](#configure-distributed-reads).
 
 1. Save the changes to `/etc/gitlab/gitlab.rb` and [reconfigure
    Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure):
@@ -1073,55 +1073,9 @@ Gitaly does not directly connect to Praefect. However, requests from Gitaly to t
 load balancer may still be blocked unless firewalls on the Praefect nodes allow traffic from
 the Gitaly nodes.
 
-## Distributed reads
+## Configure strong consistency
 
-> - Introduced in GitLab 13.1 in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) with feature flag `gitaly_distributed_reads` set to disabled.
-> - [Made generally available and enabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/2951) in GitLab 13.3.
-> - [Disabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/3178) in GitLab 13.5.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/3334) in GitLab 13.8.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitaly/-/issues/3383) in GitLab 13.11.
-
-Praefect supports distribution of read operations across Gitaly nodes that are
-configured for the virtual node.
-
-All RPCs marked with `ACCESSOR` option like
-[GetBlob](https://gitlab.com/gitlab-org/gitaly/-/blob/v12.10.6/proto/blob.proto#L16)
-are redirected to an up to date and healthy Gitaly node.
-
-_Up to date_ in this context means that:
-
-- There is no replication operations scheduled for this node.
-- The last replication operation is in _completed_ state.
-
-If there is no such nodes, or any other error occurs during node selection, the primary
-node is chosen to serve the request.
-
-To track distribution of read operations, you can use the `gitaly_praefect_read_distribution`
-Prometheus counter metric. It has two labels:
-
-- `virtual_storage`.
-- `storage`.
-
-They reflect configuration defined for this instance of Praefect.
-
-## Strong consistency
-
-> - Introduced in GitLab 13.1 in [alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga), disabled by default.
-> - Entered [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) in GitLab 13.2, disabled by default.
-> - In GitLab 13.3, disabled unless primary-wins voting strategy is disabled.
-> - From GitLab 13.4, enabled by default.
-> - From GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable strong consistency.
-> - From GitLab 13.6, primary-wins voting strategy and `gitaly_reference_transactions_primary_wins` feature flag were removed from the source code.
-
-Praefect guarantees eventual consistency by replicating all writes to secondary nodes
-after the write to the primary Gitaly node has happened.
-
-Praefect can instead provide strong consistency by creating a transaction and writing
-changes to all Gitaly nodes at once.
-If enabled, transactions are only available for a subset of RPCs. For more
-information, see the [strong consistency epic](https://gitlab.com/groups/gitlab-org/-/epics/1189).
-
-To enable strong consistency:
+To enable [strong consistency](index.md#strong-consistency):
 
 - In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable strong consistency.
 - In GitLab 13.4 and later, the strong consistency voting strategy has been improved and enabled by default.
@@ -1155,14 +1109,7 @@ To monitor strong consistency, you can use the following Prometheus metrics:
 - `gitaly_hook_transaction_voting_delay_seconds`: Client-side delay introduced
   by waiting for the transaction to be committed.
 
-## Replication factor
-
-Replication factor is the number of copies Praefect maintains of a given repository. A higher
-replication factor offers better redundancy and distribution of read workload, but also results
-in a higher storage cost. By default, Praefect replicates repositories to every storage in a
-virtual storage.
-
-### Configure replication factor
+## Configure replication factor
 
 WARNING:
 Configurable replication factors require [repository-specific primary nodes](#repository-specific-primary-nodes) to be used.
