@@ -19,8 +19,8 @@ template_metadata:
     Please find the full example project here:
     https://gitlab.com/tobiaskoch/gitlab-ci-example-mono
   stages: ["devops::verify"]
-  maintainers: ["group::testing"]
-  categories: ["Category:Build Artifacts"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 # see https://hub.docker.com/_/mono/

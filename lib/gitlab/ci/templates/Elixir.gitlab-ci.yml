@@ -6,9 +6,9 @@
 template_metadata:
   name: Elixir
   desc: This is a GitLab managed template.
-  stages: ["devops::configure"]
-  maintainers: ["group::configure"]
-  categories: ["Category:Unknown"]
+  stages: ["devops::verify"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 image: elixir:latest

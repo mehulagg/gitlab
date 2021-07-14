@@ -3,15 +3,14 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET-Core.yml
 
-# This is a simple example illustrating how to build and test .NET Core project
-# with GitLab Continuous Integration / Continuous Delivery.
-
 template_metadata:
   name: dotNET-Core
-  desc: This is a GitLab managed template.
-  stages: ["devops::configure"]
-  maintainers: ["group::configure"]
-  categories: ["Category:Unknown"]
+  desc: |
+    This is a simple example illustrating how to build and test .NET Core project
+    with GitLab Continuous Integration / Continuous Delivery.
+  stages: ["devops::verify"]
+  maintainers: ["group::pipeline authoring"]
+  categories: ["Category:Pipeline Authoring"]
   usage: copy-paste
 
 # ### Specify the Docker image

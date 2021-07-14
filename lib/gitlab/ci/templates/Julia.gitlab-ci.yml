@@ -16,8 +16,8 @@ template_metadata:
     [1]: http://julialang.org/
     [2]: https://docs.julialang.org/en/v1/manual/documentation/index.html
   stages: ["devops::verify", "devops::release"]
-  maintainers: ["group::testing", "group::release"]
-  categories: ["Category:Unknown", "Category:Pages"]
+  maintainers: ["group::pipeline authoring", "group::release"]
+  categories: ["Category:Pipeline Authoring", "Category:Pages"]
   usage: copy-paste
 
 # Below is the template to run your tests in Julia
