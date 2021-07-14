@@ -13,49 +13,20 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { parseInt, debounce } from 'lodash';
-
 import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   FIELDS,
   AVATAR_SIZE,
-  SEARCH_DEBOUNCE_MS,
   REMOVE_BILLABLE_MEMBER_MODAL_ID,
   CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
   CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
   CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
+  SORT_OPTIONS,
 } from 'ee/billings/seat_usage/constants';
 import { s__, __ } from '~/locale';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
 import SubscriptionSeatDetails from './subscription_seat_details.vue';
 import FilterSortContainerRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-
-const sortOptions = [
-  {
-    id: 10,
-    title: __('Last Actitivy'),
-    sortDirection: {
-      descending: 'start_date_desc',
-      ascending: 'start_date_asc',
-    },
-  },
-  {
-    id: 20,
-    title: __('User'),
-    sortDirection: {
-      descending: 'end_date_desc',
-      ascending: 'end_date_asc',
-    },
-  },
-  {
-    id: 30,
-    title: __('Email'),
-    sortDirection: {
-      descending: 'title_desc',
-      ascending: 'title_asc',
-    },
-  },
-];
 
 export default {
   directives: {
@@ -77,11 +48,6 @@ export default {
     SubscriptionSeatDetails,
     FilterSortContainerRoot,
   },
-  data() {
-    return {
-      searchQuery: '',
-    };
-  },
   computed: {
     ...mapState([
       'isLoading',
@@ -91,44 +57,26 @@ export default {
       'namespaceName',
       'namespaceId',
       'billableMemberToRemove',
+      'search',
+      'sort',
     ]),
     ...mapGetters(['tableItems']),
     currentPage: {
       get() {
-        return parseInt(this.page, 10);
+        return this.page;
       },
       set(val) {
-        this.fetchBillableMembersList({ page: val, search: this.searchQuery });
+        this.setCurrentPage(val);
       },
     },
-    perPageFormatted() {
-      return parseInt(this.perPage, 10);
-    },
-    totalFormatted() {
-      return parseInt(this.total, 10);
-    },
     emptyText() {
-      if (this.searchQuery?.length < 3) {
+      if (this.search?.length < 3) {
         return s__('Billing|Enter at least three characters to search.');
       }
       return s__('Billing|No users to display.');
     },
   },
-  watch: {
-    searchQuery() {
-      this.executeQuery();
-    },
-  },
   created() {
-    // This method is defined here instead of in `methods`
-    // because we need to access the .cancel() method
-    // lodash attaches to the function, which is
-    // made inaccessible by Vue. More info:
-    // https://stackoverflow.com/a/52988020/1063392
-    this.debouncedSearch = debounce(function search() {
-      this.fetchBillableMembersList({ search: this.searchQuery });
-    }, SEARCH_DEBOUNCE_MS);
-
     this.fetchBillableMembersList();
   },
   methods: {
@@ -136,20 +84,15 @@ export default {
       'fetchBillableMembersList',
       'resetBillableMembers',
       'setBillableMemberToRemove',
+      'setSearchQuery',
+      'setCurrentPage',
+      'setSortOption',
     ]),
-    onSearchEnter() {
-      this.debouncedSearch.cancel();
-      this.executeQuery();
+    applyFilter(filter) {
+      this.setSearchQuery(filter[0]?.value?.data || null);
     },
-    executeQuery() {
-      const queryLength = this.searchQuery?.length;
-      const MIN_SEARCH_LENGTH = 3;
-
-      if (queryLength === 0 || queryLength >= MIN_SEARCH_LENGTH) {
-        this.debouncedSearch();
-      } else if (queryLength < MIN_SEARCH_LENGTH) {
-        this.resetBillableMembers();
-      }
+    handleSortOptionChange(sortOption) {
+      this.setSortOption(sortOption);
     },
     displayRemoveMemberModal(user) {
       if (user.removable) {
@@ -171,7 +114,7 @@ export default {
   cannotRemoveModalId: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
   cannotRemoveModalTitle: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
   cannotRemoveModalText: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
-  sortOptions,
+  SORT_OPTIONS,
 };
 </script>
 
@@ -198,6 +141,9 @@ export default {
         :tokens="[]"
         :search-input-placeholder="$options.i18n.filterUsersPlaceholder"
         :sort-options="$options.sortOptions"
+        initial-sort-by="last_activity_on_desc"
+        @onFilter="applyFilter"
+        @onSort="handleSortOptionChange"
       />
     </div>
 
@@ -282,8 +228,8 @@ export default {
     <gl-pagination
       v-if="currentPage"
       v-model="currentPage"
-      :per-page="perPageFormatted"
-      :total-items="totalFormatted"
+      :per-page="perPage"
+      :total-items="total"
       align="center"
       class="gl-mt-5"
     />

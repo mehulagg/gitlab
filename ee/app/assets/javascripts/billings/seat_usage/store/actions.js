@@ -1,18 +1,17 @@
-import Api from 'ee/api';
 import * as GroupsApi from 'ee/api/groups_api';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import { s__ } from '~/locale';
 import * as types from './mutation_types';
 
-export const fetchBillableMembersList = ({ dispatch, state }, { page, search } = {}) => {
-  dispatch('requestBillableMembersList');
+export const fetchBillableMembersList = ({ commit, dispatch, state }) => {
+  commit(types.REQUEST_BILLABLE_MEMBERS)
 
-  return Api.fetchBillableGroupMembersList(state.namespaceId, { page, search })
+  const { page, search, sort } = state;
+
+  return GroupsApi.fetchBillableGroupMembersList(state.namespaceId, { page, search, sort })
     .then((data) => dispatch('receiveBillableMembersListSuccess', data))
     .catch(() => dispatch('receiveBillableMembersListError'));
 };
-
-export const requestBillableMembersList = ({ commit }) => commit(types.REQUEST_BILLABLE_MEMBERS);
 
 export const receiveBillableMembersListSuccess = ({ commit }, response) =>
   commit(types.RECEIVE_BILLABLE_MEMBERS_SUCCESS, response);
@@ -68,7 +67,7 @@ export const fetchBillableMemberDetails = ({ dispatch, commit, state }, memberId
 
   commit(types.FETCH_BILLABLE_MEMBER_DETAILS, memberId);
 
-  return Api.fetchBillableGroupMemberMemberships(state.namespaceId, memberId)
+  return GroupsApi.fetchBillableGroupMemberMemberships(state.namespaceId, memberId)
     .then(({ data }) =>
       commit(types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS, { memberId, memberships: data }),
     )
@@ -82,3 +81,21 @@ export const fetchBillableMemberDetailsError = ({ commit }, memberId) => {
     message: s__('Billing|An error occurred while getting a billable member details'),
   });
 };
+
+export const setSearchQuery = ({ commit, dispatch }, searchQuery) => {
+  commit(types.SET_SEARCH_QUERY, searchQuery);
+
+  dispatch('fetchBillableMembersList');
+};
+
+export const setCurrentPage = ({ commit, dispatch }, page) => {
+  commit(types.SET_CURRENT_PAGE, page);
+
+  dispatch('fetchBillableMembersList');
+}
+
+export const setSortOption = ({ commit, dispatch }, sortOption) => {
+  commit(types.SET_SORT_OPTION, sortOption);
+
+  dispatch('fetchBillableMembersList');
+}
