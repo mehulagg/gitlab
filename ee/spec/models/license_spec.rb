@@ -113,6 +113,37 @@ RSpec.describe License do
       end
     end
 
+    describe '#check_restricted_user_count' do
+      context 'when skip_true_up is true' do
+        context 'when restricted_user_count is equal or more than active_user_count' do
+          before do
+            set_restrictions(restricted_user_count: 10, skip_true_up: true)
+          end
+
+          it { is_expected.to be_valid }
+        end
+
+        context 'when the restricted_user_count is less than active_user_count' do
+          before do
+            set_restrictions(restricted_user_count: 2, skip_true_up: true)
+            create_list(:user, 6)
+            create(:historical_data, recorded_at: described_class.current.starts_at, active_user_count: 100)
+          end
+
+          it 'add limit error' do
+            expect(license.valid?).to be_falsey
+
+            expect(license.errors.full_messages.to_sentence).to include(
+              'This GitLab installation currently has 6 active users, exceeding this license\'s limit of 2 by 4 users'
+            )
+            expect(license.errors.full_messages.to_sentence).not_to include(
+              'During the year before this license started'
+            )
+          end
+        end
+      end
+    end
+
     describe '#check_users_limit' do
       context 'for each plan' do
         before do
@@ -488,26 +519,26 @@ RSpec.describe License do
       context 'when addon included' do
         let(:plan) { 'premium' }
 
-        it{ is_expected.to eq(true) }
+        it { is_expected.to eq(true) }
       end
 
       context 'when addon not included' do
         let(:plan) { 'starter' }
 
-        it{ is_expected.to eq(false) }
+        it { is_expected.to eq(false) }
       end
 
       context 'when plan is not set' do
         let(:plan) { nil }
 
-        it{ is_expected.to eq(false) }
+        it { is_expected.to eq(false) }
       end
 
       context 'when feature does not exists' do
         let(:plan) { 'premium' }
         let(:feature) { nil }
 
-        it{ is_expected.to eq(false) }
+        it { is_expected.to eq(false) }
       end
     end
 
