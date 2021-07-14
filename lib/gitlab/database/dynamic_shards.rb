@@ -61,11 +61,13 @@ end
 
 Rails::Application::Configuration.prepend(DynamicShards)
 
-ActiveSupport.on_load(:active_record) do
-  db_configs = Rails.application.config.database_configuration[Rails.env]
-  if db_configs.include?("ci")
-    warn "Using multiple databases"
-  else
-    warn "Using single database"
+unless Gitlab::Utils.to_boolean(ENV['CI'])
+  ActiveSupport.on_load(:active_record) do
+    db_configs = Rails.application.config.database_configuration[Rails.env]
+    if db_configs.include?("ci")
+      warn "Using multiple databases"
+    else
+      warn "Using single database"
+    end
   end
 end
