@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, n__, sprintf } from '~/locale';
@@ -12,6 +12,7 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
+    GlLoadingIcon,
     GlPopover,
     IssuesLaneList,
   },
@@ -48,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['filterParams']),
+    ...mapState(['epicsFlags', 'filterParams']),
     ...mapGetters(['getIssuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
@@ -80,12 +81,33 @@ export default {
     epicDateString() {
       return formatDate(this.epic.createdAt);
     },
+    isLoading() {
+      return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
+    },
     shouldDisplay() {
-      return this.issuesCount > 0;
+      return this.issuesCount > 0 || this.isLoading;
+    },
+    showUnassignedLane() {
+      return !this.isCollapsed && this.issuesCount > 0;
     },
   },
+  watch: {
+    'filterParams.epicId': {
+      handler(epicId) {
+        if (!epicId || epicId === this.epic.id) {
+          this.fetchIssuesForEpic(this.epic.id);
+        }
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    if (this.issuesCount === 0) {
+      this.fetchIssuesForEpic(this.epic.id);
+    }
+  },
   methods: {
-    ...mapActions(['updateBoardEpicUserPreferences', 'setError']),
+    ...mapActions(['updateBoardEpicUserPreferences', 'setError', 'fetchIssuesForEpic']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
 
@@ -101,7 +123,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="shouldDisplay">
+  <div v-if="shouldDisplay" class="board-epic-lane-container">
     <div
       class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block"
       data-testid="board-epic-lane"
@@ -115,7 +137,6 @@ export default {
           class="gl-mr-2 gl-cursor-pointer"
           category="tertiary"
           size="small"
-          data-testid="epic-lane-chevron"
           @click="toggleCollapsed"
         />
         <h4
@@ -131,6 +152,7 @@ export default {
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
         </gl-popover>
         <span
+          v-if="!isLoading"
           v-gl-tooltip.hover
           :title="issuesCountTooltipText"
           class="gl-display-flex gl-align-items-center gl-text-gray-500"
@@ -141,9 +163,14 @@ export default {
           <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
+        <gl-loading-icon v-else class="gl-p-2" />
       </div>
     </div>
-    <div v-if="!isCollapsed" class="gl-display-flex gl-pb-5" data-testid="board-epic-lane-issues">
+    <div
+      v-if="showUnassignedLane"
+      class="gl-display-flex gl-pb-5 board-epic-lane-issues"
+      data-testid="board-epic-lane-issues"
+    >
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

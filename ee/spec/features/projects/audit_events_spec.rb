@@ -120,7 +120,7 @@ RSpec.describe 'Projects > Audit Events', :js do
         click_button 'Maintainer'
       end
 
-      page.within('.qa-project-sidebar') do
+      page.within('.sidebar-top-level-items') do
         find(:link, text: 'Security & Compliance').click
         click_link 'Audit Events'
       end
@@ -149,7 +149,7 @@ RSpec.describe 'Projects > Audit Events', :js do
 
       wait_for_all_requests
 
-      page.within('.qa-project-sidebar') do
+      page.within('.sidebar-top-level-items') do
         click_link 'Security & Compliance'
         click_link 'Audit Events'
       end

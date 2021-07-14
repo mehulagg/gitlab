@@ -11,7 +11,7 @@ export default {
   },
   computed: {
     enforcementStatusLabel() {
-      return this.policy?.isEnabled ? __('Enabled') : __('Disabled');
+      return this.policy?.enabled ? __('Enabled') : __('Disabled');
     },
   },
 };

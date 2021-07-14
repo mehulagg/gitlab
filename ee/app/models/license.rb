@@ -498,6 +498,8 @@ class License < ApplicationRecord
   end
 
   def validate_with_trueup?
+    return false if restricted_attr(:skip_true_up)
+
     [restricted_attr(:trueup_quantity),
      restricted_attr(:trueup_from),
      restricted_attr(:trueup_to)].all?(&:present?)
@@ -576,8 +578,8 @@ class License < ApplicationRecord
     !!license&.cloud_licensing?
   end
 
-  def usage_ping?
-    !!license&.usage_ping_required_metrics?
+  def customer_service_enabled?
+    !!license&.operational_metrics?
   end
 
   def license_type

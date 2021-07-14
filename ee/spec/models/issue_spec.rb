@@ -528,6 +528,16 @@ RSpec.describe Issue do
           issue.update!(title: 'the new title')
         end
       end
+
+      context 'when changing upvotes' do
+        it 'calls maintain_elasticsearch_update' do
+          expect(issue).to receive(:maintain_elasticsearch_update).twice
+
+          award_emoji = create(:award_emoji, :upvote, awardable: issue)
+
+          award_emoji.destroy
+        end
+      end
     end
   end
 

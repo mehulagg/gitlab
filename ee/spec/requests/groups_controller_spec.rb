@@ -335,6 +335,38 @@ RSpec.describe GroupsController, type: :request do
     end
   end
 
+  describe 'PUT #transfer' do
+    let(:new_parent_group) { create(:group) }
+
+    before do
+      group.add_owner(user)
+      new_parent_group.add_owner(user)
+      create(:gitlab_subscription, :ultimate, namespace: group)
+      login_as(user)
+    end
+
+    it 'does not transfer a group with a gitlab saas subscription' do
+      put transfer_group_path(group),
+        params: { new_parent_group_id: new_parent_group.id }
+
+      expect(response).to redirect_to(edit_group_path(group))
+      expect(flash[:alert]).to include('Transfer failed')
+      expect(group.reload.parent_id).to be_nil
+    end
+
+    it 'transfers a subgroup with a parent group with a gitlab saas subscription' do
+      subgroup = create(:group, parent: group)
+
+      put transfer_group_path(subgroup),
+        params: { new_parent_group_id: new_parent_group.id }
+
+      subgroup.reload
+      expect(response).to redirect_to(group_path(subgroup))
+      expect(flash[:alert]).to be_nil
+      expect(subgroup.parent_id).to eq(new_parent_group.id)
+    end
+  end
+
   describe 'DELETE #destroy' do
     before do
       group.add_owner(user)

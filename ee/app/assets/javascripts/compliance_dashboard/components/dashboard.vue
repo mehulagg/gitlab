@@ -2,7 +2,6 @@
 import { GlTabs, GlTab } from '@gitlab/ui';
 import Cookies from 'js-cookie';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { COMPLIANCE_TAB_COOKIE_KEY } from '../constants';
 import MergeRequestDrawer from './drawer.vue';
 import EmptyState from './empty_state.vue';
@@ -19,7 +18,6 @@ export default {
     GlTabs,
     MergeCommitsExportButton,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     emptyStateSvgPath: {
       type: String,
@@ -52,9 +50,6 @@ export default {
     },
     hasMergeCommitsCsvExportPath() {
       return this.mergeCommitsCsvExportPath !== '';
-    },
-    drawerEnabled() {
-      return this.glFeatures.complianceDashboardDrawer;
     },
   },
   methods: {
@@ -114,11 +109,9 @@ export default {
       v-else
       :merge-requests="mergeRequests"
       :is-last-page="isLastPage"
-      :drawer-enabled="drawerEnabled"
       @toggleDrawer="toggleDrawer"
     />
     <merge-request-drawer
-      v-if="drawerEnabled"
       :show-drawer="showDrawer"
       :merge-request="drawerData"
       z-index="252"

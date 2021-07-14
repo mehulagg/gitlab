@@ -2,8 +2,10 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlKeysetPagination, GlTab, GlTabs } from '@gitlab/ui';
 import produce from 'immer';
 import { __, s__ } from '~/locale';
+import { Namespace } from '../constants';
 import destroyIterationCadence from '../queries/destroy_cadence.mutation.graphql';
-import query from '../queries/iteration_cadences_list.query.graphql';
+import groupQuery from '../queries/group_iteration_cadences_list.query.graphql';
+import projectQuery from '../queries/project_iteration_cadences_list.query.graphql';
 import IterationCadenceListItem from './iteration_cadence_list_item.vue';
 
 const pageSize = 20;
@@ -20,8 +22,10 @@ export default {
     GlTabs,
   },
   apollo: {
-    group: {
-      query,
+    workspace: {
+      query() {
+        return this.query;
+      },
       variables() {
         return this.queryVariables;
       },
@@ -30,10 +34,10 @@ export default {
       },
     },
   },
-  inject: ['groupPath', 'cadencesListPath', 'canCreateCadence'],
+  inject: ['fullPath', 'cadencesListPath', 'canCreateCadence', 'namespaceType'],
   data() {
     return {
-      group: {
+      workspace: {
         iterationCadences: {
           nodes: [],
           pageInfo: {
@@ -48,9 +52,18 @@ export default {
     };
   },
   computed: {
+    query() {
+      if (this.namespaceType === Namespace.Group) {
+        return groupQuery;
+      }
+      if (this.namespaceType === Namespace.Project) {
+        return projectQuery;
+      }
+      throw new Error('Must provide a namespaceType');
+    },
     queryVariables() {
       const vars = {
-        fullPath: this.groupPath,
+        fullPath: this.fullPath,
       };
 
       if (this.pagination.beforeCursor) {
@@ -64,13 +77,13 @@ export default {
       return vars;
     },
     cadences() {
-      return this.group?.iterationCadences?.nodes || [];
+      return this.workspace?.iterationCadences?.nodes || [];
     },
     pageInfo() {
-      return this.group?.iterationCadences?.pageInfo || {};
+      return this.workspace?.iterationCadences?.pageInfo || {};
     },
     loading() {
-      return this.$apollo.queries.group.loading;
+      return this.$apollo.queries.workspace.loading;
     },
     state() {
       switch (this.tabIndex) {
@@ -111,18 +124,18 @@ export default {
             }
 
             const sourceData = store.readQuery({
-              query,
+              query: this.query,
               variables: this.queryVariables,
             });
 
             const data = produce(sourceData, (draftData) => {
-              draftData.group.iterationCadences.nodes = draftData.group.iterationCadences.nodes.filter(
+              draftData.workspace.iterationCadences.nodes = draftData.workspace.iterationCadences.nodes.filter(
                 ({ id }) => id !== cadenceId,
               );
             });
 
             store.writeQuery({
-              query,
+              query: this.query,
               variables: this.queryVariables,
               data,
             });

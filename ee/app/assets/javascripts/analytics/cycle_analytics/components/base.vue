@@ -121,7 +121,6 @@ export default {
     ]),
     onProjectsSelect(projects) {
       this.setSelectedProjects(projects);
-      this.fetchCycleAnalyticsData();
     },
     onStageSelect(stage) {
       if (stage.slug === OVERVIEW_STAGE_ID) {

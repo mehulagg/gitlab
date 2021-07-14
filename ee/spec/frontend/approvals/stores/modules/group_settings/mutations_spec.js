@@ -75,4 +75,19 @@ describe('Group settings store mutations', () => {
       expect(state.isLoading).toBe(false);
     });
   });
+
+  describe.each`
+    mutation                               | prop
+    ${'SET_PREVENT_AUTHOR_APPROVAL'}       | ${'preventAuthorApproval'}
+    ${'SET_PREVENT_COMMITTERS_APPROVAL'}   | ${'preventCommittersApproval'}
+    ${'SET_PREVENT_MR_APPROVAL_RULE_EDIT'} | ${'preventMrApprovalRuleEdit'}
+    ${'SET_REMOVE_APPROVALS_ON_PUSH'}      | ${'removeApprovalsOnPush'}
+    ${'SET_REQUIRE_USER_PASSWORD'}         | ${'requireUserPassword'}
+  `('$mutation', ({ mutation, prop }) => {
+    it(`sets the ${prop}`, () => {
+      mutations[mutation](state, true);
+
+      expect(state.settings[prop]).toBe(true);
+    });
+  });
 });

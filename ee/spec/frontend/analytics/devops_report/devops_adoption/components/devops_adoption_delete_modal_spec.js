@@ -4,7 +4,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
-import { DEVOPS_ADOPTION_DELETE_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
+import { DELETE_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
 import disableDevopsAdoptionNamespaceMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -72,7 +72,7 @@ describe('DevopsAdoptionDeleteModal', () => {
       const modal = findModal();
 
       expect(modal.exists()).toBe(true);
-      expect(modal.props('modalId')).toBe(DEVOPS_ADOPTION_DELETE_MODAL_ID);
+      expect(modal.props('modalId')).toBe(DELETE_MODAL_ID);
     });
 
     it('displays the confirmation message', () => {

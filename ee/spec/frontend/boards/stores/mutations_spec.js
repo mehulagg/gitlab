@@ -1,15 +1,20 @@
 import mutations from 'ee/boards/stores/mutations';
-import { mockEpics, mockEpic, mockLists } from '../mock_data';
+import { mockEpics, mockEpic, mockLists, mockIssue, mockIssue2 } from '../mock_data';
 
 const initialBoardListsState = {
   'gid://gitlab/List/1': mockLists[0],
   'gid://gitlab/List/2': mockLists[1],
 };
 
+const epicId = mockEpic.id;
+
 let state = {
   boardItemsByListId: {},
   boardItems: {},
   boardLists: initialBoardListsState,
+  epicsFlags: {
+    [epicId]: { isLoading: true },
+  },
 };
 
 describe('SET_SHOW_LABELS', () => {
@@ -22,6 +27,53 @@ describe('SET_SHOW_LABELS', () => {
     mutations.SET_SHOW_LABELS(state, false);
 
     expect(state.isShowingLabels).toBe(false);
+  });
+});
+
+describe('REQUEST_ISSUES_FOR_EPIC', () => {
+  it('sets isLoading epicsFlags in state for epicId to true', () => {
+    state = {
+      ...state,
+      epicsFlags: {
+        [epicId]: { isLoading: false },
+      },
+    };
+
+    mutations.REQUEST_ISSUES_FOR_EPIC(state, epicId);
+
+    expect(state.epicsFlags[epicId].isLoading).toBe(true);
+  });
+});
+
+describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
+  it('sets boardItemsByListId and issues state for epic issues and loading state to false', () => {
+    const listIssues = {
+      'gid://gitlab/List/1': [mockIssue.id],
+      'gid://gitlab/List/2': [mockIssue2.id],
+    };
+    const issues = {
+      436: mockIssue,
+      437: mockIssue2,
+    };
+
+    mutations.RECEIVE_ISSUES_FOR_EPIC_SUCCESS(state, {
+      listData: listIssues,
+      boardItems: issues,
+      epicId,
+    });
+
+    expect(state.boardItemsByListId).toEqual(listIssues);
+    expect(state.boardItems).toEqual(issues);
+    expect(state.epicsFlags[epicId].isLoading).toBe(false);
+  });
+});
+
+describe('RECEIVE_ISSUES_FOR_EPIC_FAILURE', () => {
+  it('sets loading state to false for epic and error message', () => {
+    mutations.RECEIVE_ISSUES_FOR_EPIC_FAILURE(state, epicId);
+
+    expect(state.error).toEqual('An error occurred while fetching issues. Please reload the page.');
+    expect(state.epicsFlags[epicId].isLoading).toBe(false);
   });
 });
 
@@ -88,17 +140,19 @@ describe('SET_EPICS_SWIMLANES', () => {
 });
 
 describe('DONE_LOADING_SWIMLANES_ITEMS', () => {
-  it('set listItemsFetchInProgress to false', () => {
+  it('set listItemsFetchInProgress to false ans resets error', () => {
     state = {
       ...state,
       epicsSwimlanesFetchInProgress: {
         listItemsFetchInProgress: true,
       },
+      error: 'Houston, we have a problem.',
     };
 
     mutations.DONE_LOADING_SWIMLANES_ITEMS(state);
 
     expect(state.epicsSwimlanesFetchInProgress.listItemsFetchInProgress).toBe(false);
+    expect(state.error).toBe(undefined);
   });
 });
 
@@ -131,6 +185,21 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
     expect(state.error).toEqual(
       'An error occurred while fetching the board swimlanes. Please reload the page.',
     );
+  });
+});
+
+describe('REQUEST_MORE_EPICS', () => {
+  it('sets epicLanesFetchMoreInProgress to true', () => {
+    state = {
+      ...state,
+      epicsSwimlanesFetchInProgress: {
+        epicLanesFetchMoreInProgress: false,
+      },
+    };
+
+    mutations.REQUEST_MORE_EPICS(state);
+
+    expect(state.epicsSwimlanesFetchInProgress.epicLanesFetchMoreInProgress).toBe(true);
   });
 });
 

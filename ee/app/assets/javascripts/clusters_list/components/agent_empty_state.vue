@@ -9,15 +9,15 @@ export default {
     GlSprintf,
     GlAlert,
   },
+  inject: [
+    'emptyStateImage',
+    'projectPath',
+    'agentDocsUrl',
+    'installDocsUrl',
+    'getStartedDocsUrl',
+    'integrationDocsUrl',
+  ],
   props: {
-    image: {
-      type: String,
-      required: true,
-    },
-    projectPath: {
-      type: String,
-      required: true,
-    },
     hasConfigurations: {
       type: Boolean,
       required: true,
@@ -33,7 +33,7 @@ export default {
 
 <template>
   <gl-empty-state
-    :svg-path="image"
+    :svg-path="emptyStateImage"
     :title="s__('ClusterAgents|Integrate Kubernetes with a GitLab Agent')"
     class="empty-state--agent"
   >
@@ -47,7 +47,7 @@ export default {
           "
         >
           <template #link="{ content }">
-            <gl-link href="https://docs.gitlab.com/ee/user/clusters/agent/" target="_blank">
+            <gl-link :href="agentDocsUrl" target="_blank" data-testid="agent-docs-link">
               {{ content }}
             </gl-link>
           </template>
@@ -63,10 +63,7 @@ export default {
           "
         >
           <template #link="{ content }">
-            <gl-link
-              href="https://docs.gitlab.com/ee/user/clusters/agent/#install-the-agent-server"
-              target="_blank"
-            >
+            <gl-link :href="installDocsUrl" target="_blank" data-testid="install-docs-link">
               {{ content }}
             </gl-link>
           </template>
@@ -89,7 +86,7 @@ export default {
           <gl-button
             category="primary"
             variant="info"
-            href="https://docs.gitlab.com/ee/user/clusters/agent/#define-a-configuration-repository"
+            :href="getStartedDocsUrl"
             target="_blank"
             class="gl-ml-0!"
           >
@@ -108,7 +105,7 @@ export default {
         data-testid="integration-primary-button"
         category="primary"
         variant="success"
-        href="https://docs.gitlab.com/ee/user/clusters/agent/#get-started-with-gitops-and-the-gitlab-agent"
+        :href="integrationDocsUrl"
         target="_blank"
       >
         {{ s__('ClusterAgents|Integrate with the GitLab Agent') }}

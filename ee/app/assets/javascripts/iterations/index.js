@@ -130,7 +130,7 @@ export function initCadenceApp({ namespaceType }) {
   }
 
   const {
-    groupFullPath: groupPath,
+    fullPath,
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
@@ -158,8 +158,7 @@ export function initCadenceApp({ namespaceType }) {
     router,
     apolloProvider,
     provide: {
-      fullPath: groupPath,
-      groupPath,
+      fullPath,
       cadencesListPath,
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
@@ -178,3 +177,4 @@ export function initCadenceApp({ namespaceType }) {
 }
 
 export const initGroupCadenceApp = () => initCadenceApp({ namespaceType: Namespace.Group });
+export const initProjectCadenceApp = () => initCadenceApp({ namespaceType: Namespace.Project });

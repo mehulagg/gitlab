@@ -42,6 +42,16 @@ FactoryBot.define do
       end
     end
 
+    trait :dast_14_0_2 do
+      file_format { :raw }
+      file_type { :dast }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-report-14.0.2.json'), 'application/json')
+      end
+    end
+
     trait :dast_feature_branch do
       file_format { :raw }
       file_type { :dast }

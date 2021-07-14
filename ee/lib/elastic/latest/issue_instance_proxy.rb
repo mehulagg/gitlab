@@ -20,7 +20,7 @@ module Elastic
         data['visibility_level'] = target.project.visibility_level
         data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues)
 
-        data['upvotes'] = count_emoji
+        data['upvotes'] = target.upvotes_count
 
         data.merge(generic_attributes)
       end
@@ -29,12 +29,6 @@ module Elastic
 
       def generic_attributes
         super.except('join_field')
-      end
-
-      def count_emoji
-        target.award_emoji.count do |c|
-          c.name == AwardEmoji::UPVOTE_NAME
-        end
       end
     end
   end

@@ -5,6 +5,7 @@ module World
   extend self
 
   DENYLIST = ['Iran (Islamic Republic of)', 'Sudan', 'Syrian Arab Republic', 'Korea (Democratic People\'s Republic of)', 'Cuba'].freeze
+  JH_MARKET = ['China', 'Hong Kong', 'Macao'].freeze
 
   def countries_for_select
     strong_memoize(:countries_for_select) { all_countries.sort_by(&:name).map { |c| [c.name, c.alpha2] } }
@@ -23,7 +24,7 @@ module World
   end
 
   def all_countries
-    strong_memoize(:all_countries) { ISO3166::Country.all.reject {|item| DENYLIST.include?(item.name) } }
+    strong_memoize(:all_countries) { ISO3166::Country.all.reject {|item| DENYLIST.include?(item.name) || JH_MARKET.include?(item.name) } }
   end
 
   def alpha3_from_alpha2(alpha2)

@@ -217,6 +217,22 @@ describe('fetchEpicsSwimlanes', () => {
     },
   };
 
+  const queryResponseWithNextPage = {
+    data: {
+      group: {
+        board: {
+          epics: {
+            edges: [{ node: mockEpic }],
+            pageInfo: {
+              hasNextPage: true,
+              endCursor: 'ENDCURSOR',
+            },
+          },
+        },
+      },
+    },
+  };
+
   it('should commit mutation RECEIVE_EPICS_SUCCESS on success', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
@@ -235,35 +251,26 @@ describe('fetchEpicsSwimlanes', () => {
     );
   });
 
-  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', (done) => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+  it('should commit mutation REQUEST_MORE_EPICS when fetchNext is true', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
       actions.fetchEpicsSwimlanes,
-      {},
+      { fetchNext: true },
       state,
-      [{ type: types.RECEIVE_SWIMLANES_FAILURE }],
+      [
+        { type: types.REQUEST_MORE_EPICS },
+        {
+          type: types.RECEIVE_EPICS_SUCCESS,
+          payload: { epics: [mockEpic] },
+        },
+      ],
       [],
       done,
     );
   });
 
-  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', (done) => {
-    const queryResponseWithNextPage = {
-      data: {
-        group: {
-          board: {
-            epics: {
-              edges: [{ node: mockEpic }],
-              pageInfo: {
-                hasNextPage: true,
-                endCursor: 'ENDCURSOR',
-              },
-            },
-          },
-        },
-      },
-    };
+  it('should commit mutation RECEIVE_EPICS_SUCCESS on success with hasMoreEpics when hasNextPage', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponseWithNextPage);
 
     testAction(
@@ -273,15 +280,23 @@ describe('fetchEpicsSwimlanes', () => {
       [
         {
           type: types.RECEIVE_EPICS_SUCCESS,
-          payload: { epics: [mockEpic] },
+          payload: { epics: [mockEpic], hasMoreEpics: true, epicsEndCursor: 'ENDCURSOR' },
         },
       ],
-      [
-        {
-          type: 'fetchEpicsSwimlanes',
-          payload: { endCursor: 'ENDCURSOR' },
-        },
-      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      {},
+      state,
+      [{ type: types.RECEIVE_SWIMLANES_FAILURE }],
+      [],
       done,
     );
   });
@@ -330,7 +345,7 @@ describe('fetchItemsForList', () => {
     [listId]: pageInfo,
   };
 
-  it('add epicWildcardId with ANY as value when forSwimlanes is true', () => {
+  it('add epicWildcardId with NONE as value when noEpicIssues is true', () => {
     state = {
       ...state,
       isShowingEpicsSwimlanes: true,
@@ -339,7 +354,7 @@ describe('fetchItemsForList', () => {
 
     testAction(
       actions.fetchItemsForList,
-      { listId, forSwimlanes: true },
+      { listId, noEpicIssues: true },
       state,
       [
         {
@@ -348,7 +363,7 @@ describe('fetchItemsForList', () => {
         },
         {
           type: types.RECEIVE_ITEMS_FOR_LIST_SUCCESS,
-          payload: { listItems: formattedIssues, listPageInfo, listId, noEpicIssues: false },
+          payload: { listItems: formattedIssues, listPageInfo, listId, noEpicIssues: true },
         },
       ],
       [],
@@ -358,12 +373,14 @@ describe('fetchItemsForList', () => {
           variables: {
             boardId: 'gid://gitlab/Board/1',
             filters: {
-              epicWildcardId: 'ANY',
+              epicWildcardId: 'NONE',
             },
             fullPath: 'gitlab-org',
             id: 'gid://gitlab/List/1',
             isGroup: true,
             isProject: false,
+            after: undefined,
+            first: 10,
           },
           context: {
             isSingleRequest: true,
@@ -513,6 +530,71 @@ describe('updateListWipLimit', () => {
       { isShowingEpicsSwimlanes: true, ...getters },
       [{ type: types.UPDATE_LIST_FAILURE }],
       [],
+    );
+  });
+});
+
+describe('fetchIssuesForEpic', () => {
+  const listId = mockLists[0].id;
+  const epicId = mockEpic.id;
+
+  const state = {
+    fullPath: 'gitlab-org',
+    boardId: 1,
+    filterParams: {},
+    boardType: 'group',
+  };
+
+  const queryResponse = {
+    data: {
+      group: {
+        board: {
+          lists: {
+            nodes: [
+              {
+                id: listId,
+                issues: {
+                  edges: [{ node: [mockIssue] }],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  };
+
+  const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
+
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ITEMS_FOR_LIST_SUCCESS on success', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchIssuesForEpic,
+      epicId,
+      state,
+      [
+        { type: types.REQUEST_ISSUES_FOR_EPIC, payload: epicId },
+        { type: types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, payload: { ...formattedIssues, epicId } },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ITEMS_FOR_LIST_FAILURE on failure', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(
+      actions.fetchIssuesForEpic,
+      epicId,
+      state,
+      [
+        { type: types.REQUEST_ISSUES_FOR_EPIC, payload: epicId },
+        { type: types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, payload: epicId },
+      ],
+      [],
+      done,
     );
   });
 });

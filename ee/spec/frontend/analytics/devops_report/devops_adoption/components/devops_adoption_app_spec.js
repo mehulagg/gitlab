@@ -8,7 +8,9 @@ import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/compon
 import DevopsAdoptionOverview from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_overview.vue';
 import DevopsAdoptionSection from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_section.vue';
 import {
-  DEVOPS_ADOPTION_STRINGS,
+  I18N_GROUPS_QUERY_ERROR,
+  I18N_ENABLE_NAMESPACE_MUTATION_ERROR,
+  I18N_ENABLED_NAMESPACE_QUERY_ERROR,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
@@ -170,7 +172,7 @@ describe('DevopsAdoptionApp', () => {
       it('displays the error message and calls Sentry', () => {
         const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
-        expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
+        expect(alert.text()).toBe(I18N_GROUPS_QUERY_ERROR);
         expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(NETWORK_ERROR);
       });
     });
@@ -270,7 +272,7 @@ describe('DevopsAdoptionApp', () => {
             it('displays the error message ', () => {
               const alert = wrapper.findComponent(GlAlert);
               expect(alert.exists()).toBe(true);
-              expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.addEnabledNamespacesError);
+              expect(alert.text()).toBe(I18N_ENABLE_NAMESPACE_MUTATION_ERROR);
             });
 
             it('calls Sentry', () => {
@@ -301,7 +303,7 @@ describe('DevopsAdoptionApp', () => {
       it('displays the error message ', () => {
         const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
-        expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.enabledNamespacesError);
+        expect(alert.text()).toBe(I18N_ENABLED_NAMESPACE_QUERY_ERROR);
       });
 
       it('calls Sentry', () => {

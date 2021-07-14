@@ -172,8 +172,8 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       select_search_scope('Code')
 
       expect(page).to have_selector('.file-content .code')
-
       expect(page).to have_selector("span.line[lang='javascript']")
+      expect(page).to have_button('Copy file path')
     end
 
     it 'ignores nonexistent projects from stale index' do

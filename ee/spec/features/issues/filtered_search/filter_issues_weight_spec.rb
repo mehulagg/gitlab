@@ -5,8 +5,13 @@ require 'spec_helper'
 RSpec.describe 'Filter issues weight', :js do
   include FilteredSearchHelpers
 
-  let!(:project) { create(:project) }
-  let!(:user) { create(:user, name: 'administrator', username: 'root') }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user, name: 'administrator', username: 'root') }
+  let_it_be(:label) { create(:label, project: project, title: 'urgent') }
+  let_it_be(:milestone) { create(:milestone, title: 'version1', project: project) }
+  let_it_be(:issue1) { create(:issue, project: project, weight: 1) }
+  let_it_be(:issue2) { create(:issue, project: project, weight: 2, title: 'Bug report 1', milestone: milestone, author: user, assignees: [user], labels: [label]) }
+
   let(:js_dropdown_weight) { '#js-dropdown-weight' }
 
   shared_examples 'filters by negated weight' do
@@ -29,19 +34,6 @@ RSpec.describe 'Filter issues weight', :js do
   before do
     project.add_maintainer(user)
     sign_in(user)
-
-    label = create(:label, project: project, title: 'urgent')
-    milestone = create(:milestone, title: 'version1', project: project)
-
-    create(:issue, project: project, weight: 1)
-    issue = create(:issue,
-      project: project,
-      weight: 2,
-      title: 'Bug report 1',
-      milestone: milestone,
-      author: user,
-      assignees: [user])
-    issue.labels << label
 
     visit project_issues_path(project)
   end

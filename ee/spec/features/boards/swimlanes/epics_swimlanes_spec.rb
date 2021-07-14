@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'epics swimlanes', :js do
+  include BoardHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:project) { create(:project, :public, group: group) }
@@ -38,8 +40,12 @@ RSpec.describe 'epics swimlanes', :js do
       expect(epic_lanes.length).to eq(2)
     end
 
-    it 'displays issue not assigned to epic in unassigned issues lane' do
+    it 'displays issue not assigned to epic title and unassigned issues lane only on expand' do
       page.within('.board-lane-unassigned-issues-title') do
+        expect(page).not_to have_selector('span[data-testid="issues-lane-issue-count"]')
+
+        load_unassigned_issues
+
         expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
       end
     end
@@ -61,7 +67,7 @@ RSpec.describe 'epics swimlanes', :js do
     stub_licensed_features(epics: true, swimlanes: true)
     sign_in(user)
     visit_board_page
-    select_epics
+    load_epic_swimlanes
   end
 
   context 'switch to swimlanes view' do
@@ -72,8 +78,12 @@ RSpec.describe 'epics swimlanes', :js do
       expect(epic_lanes.length).to eq(2)
     end
 
-    it 'displays issue not assigned to epic in unassigned issues lane' do
+    it 'displays issue not assigned to epic title and unassigned issues lane only on expand' do
       page.within('.board-lane-unassigned-issues-title') do
+        expect(page).not_to have_selector('span[data-testid="issues-lane-issue-count"]')
+
+        load_unassigned_issues
+
         expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
       end
     end
@@ -102,6 +112,12 @@ RSpec.describe 'epics swimlanes', :js do
   end
 
   context 'add issue to swimlanes list' do
+    before do
+      wait_for_all_requests
+
+      load_unassigned_issues
+    end
+
     it 'displays new issue button' do
       expect(first('.board')).to have_selector('.issue-count-badge-add-button', count: 1)
     end
@@ -163,13 +179,6 @@ RSpec.describe 'epics swimlanes', :js do
   def visit_board_page
     visit project_boards_path(project)
     wait_for_requests
-  end
-
-  def select_epics
-    page.within('.board-swimlanes-toggle-wrapper') do
-      page.find('.dropdown-toggle').click
-      page.find('.dropdown-item', text: 'Epic').click
-    end
   end
 
   def visit_epics_swimlanes_page

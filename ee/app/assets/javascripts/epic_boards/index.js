@@ -93,6 +93,7 @@ export default () => {
       return {
         state: {},
         loading: 0,
+        allowSubEpics: parseBoolean($boardApp.dataset.subEpicsFeatureAvailable),
         boardsEndpoint: $boardApp.dataset.boardsEndpoint,
         recentBoardsEndpoint: $boardApp.dataset.recentBoardsEndpoint,
         listsEndpoint: $boardApp.dataset.listsEndpoint,
@@ -107,6 +108,7 @@ export default () => {
     },
     created() {
       this.setInitialBoardData({
+        allowSubEpics: this.allowSubEpics,
         boardId: $boardApp.dataset.boardId,
         fullBoardId: fullEpicBoardId($boardApp.dataset.boardId),
         fullPath: $boardApp.dataset.fullPath,

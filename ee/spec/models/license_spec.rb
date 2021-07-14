@@ -5,24 +5,118 @@ require "spec_helper"
 RSpec.describe License do
   using RSpec::Parameterized::TableSyntax
 
-  let(:gl_license) { build(:gitlab_license) }
-  let(:license)    { build(:license, data: gl_license.export) }
+  subject(:license) { build(:license, data: gl_license.export) }
 
-  describe "Validation" do
-    describe "Valid license" do
-      context "when the license is provided" do
-        it "is valid" do
+  let(:gl_license) { build(:gitlab_license) }
+
+  describe 'validations' do
+    describe '#valid_license' do
+      context 'when the license is provided' do
+        it 'is valid' do
           expect(license).to be_valid
         end
       end
 
-      context "when no license is provided" do
+      context 'when no license is provided' do
         before do
           license.data = nil
         end
 
-        it "is invalid" do
+        it 'is invalid' do
           expect(license).not_to be_valid
+        end
+      end
+    end
+
+    describe '#check_trueup' do
+      let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
+      let(:date)              { described_class.current.starts_at }
+
+      before do
+        create(:historical_data, recorded_at: date, active_user_count: active_user_count)
+      end
+
+      context 'when skip_true_up is true on the license' do
+        it 'does not add errors for invalid true up' do
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, skip_true_up: true)
+
+          expect(license).to be_valid
+        end
+      end
+
+      context 'when skip_true_up is false on the license' do
+        it 'adds errors for invalid true up figures' do
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, skip_true_up: false)
+
+          expect(license).not_to be_valid
+          expect(license.errors.full_messages.to_sentence)
+            .to include 'You have applied a True-up for 8 users but you need one for 10 users'
+        end
+      end
+
+      context 'when skip_true_up is not present on the license' do
+        it 'adds errors for invalid true up figures' do
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8)
+
+          expect(license).not_to be_valid
+          expect(license.errors.full_messages.to_sentence)
+            .to include 'You have applied a True-up for 8 users but you need one for 10 users'
+        end
+      end
+
+      context 'when quantity is ok' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 10)
+        end
+
+        it 'is valid' do
+          expect(license).to be_valid
+        end
+
+        context 'but active users exceeds restricted user count' do
+          it 'is invalid' do
+            create_list(:user, 6)
+
+            expect(license).not_to be_valid
+          end
+        end
+      end
+
+      context 'when quantity is wrong' do
+        it 'is invalid' do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 8)
+
+          expect(license).not_to be_valid
+        end
+      end
+
+      context 'when previous user count is not present' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 7)
+        end
+
+        it 'uses current active user count to calculate the expected true-up' do
+          create_list(:user, 3)
+
+          expect(license).to be_valid
+        end
+
+        context 'with wrong true-up quantity' do
+          it 'is invalid' do
+            create_list(:user, 2)
+
+            expect(license).not_to be_valid
+          end
+        end
+      end
+
+      context 'when previous user count is present' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 6, previous_user_count: 4)
+        end
+
+        it 'uses it to calculate the expected true-up' do
+          expect(license).to be_valid
         end
       end
     end
@@ -131,184 +225,126 @@ RSpec.describe License do
           end
         end
       end
-    end
 
-    describe "Historical active user count" do
-      let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
-      let(:date)              { described_class.current.starts_at }
-      let!(:historical_data)  { create(:historical_data, recorded_at: date, active_user_count: active_user_count) }
+      describe 'Historical active user count' do
+        let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
+        let(:date)              { described_class.current.starts_at }
+        let!(:historical_data)  { create(:historical_data, recorded_at: date, active_user_count: active_user_count) }
 
-      context "when there is no active user count restriction" do
-        it "is valid" do
-          expect(license).to be_valid
-        end
-      end
-
-      context 'without historical data' do
-        before do
-          create_list(:user, 2)
-
-          gl_license.restrictions = {
-            previous_user_count: 1,
-            active_user_count: described_class.current.daily_billable_users_count - 1
-          }
-
-          HistoricalData.delete_all
+        context 'when there is no active user count restriction' do
+          it 'is valid' do
+            expect(license).to be_valid
+          end
         end
 
-        context 'with previous_user_count and active users above of license limit' do
-          it 'is invalid' do
-            expect(license).to be_invalid
+        context 'without historical data' do
+          before do
+            create_list(:user, 2)
+
+            gl_license.restrictions = {
+              previous_user_count: 1,
+              active_user_count: described_class.current.daily_billable_users_count - 1
+            }
+
+            HistoricalData.delete_all
           end
 
-          it 'shows the proper error message' do
-            license.valid?
+          context 'with previous_user_count and active users above of license limit' do
+            it 'is invalid' do
+              expect(license).to be_invalid
+            end
 
-            error_msg = "This GitLab installation currently has 2 active users, exceeding this license's limit of 1 by 1 user. " \
+            it 'shows the proper error message' do
+              license.valid?
+
+              error_msg = "This GitLab installation currently has 2 active users, exceeding this license's limit of 1 by 1 user. " \
                         "Please upload a license for at least 2 users or contact sales at https://about.gitlab.com/sales/"
 
-            expect(license.errors[:base].first).to eq(error_msg)
-          end
-        end
-      end
-
-      context "when the active user count restriction is exceeded" do
-        before do
-          gl_license.restrictions = { active_user_count: active_user_count - 1 }
-        end
-
-        context "when the license started" do
-          it "is invalid" do
-            expect(license).not_to be_valid
+              expect(license.errors[:base].first).to eq(error_msg)
+            end
           end
         end
 
-        context "after the license started" do
-          let(:date) { Date.current }
-
-          it "is valid" do
-            expect(license).to be_valid
-          end
-        end
-
-        context "in the year before the license started" do
-          let(:date) { described_class.current.starts_at - 6.months }
-
-          it "is invalid" do
-            expect(license).not_to be_valid
-          end
-        end
-
-        context "earlier than a year before the license started" do
-          let(:date) { described_class.current.starts_at - 2.years }
-
-          it "is valid" do
-            expect(license).to be_valid
-          end
-        end
-      end
-
-      context "when the active user count restriction is not exceeded" do
-        before do
-          gl_license.restrictions = { active_user_count: active_user_count + 1 }
-        end
-
-        it "is valid" do
-          expect(license).to be_valid
-        end
-      end
-
-      context "when the active user count is met exactly" do
-        it "is valid" do
-          active_user_count = 100
-          gl_license.restrictions = { active_user_count: active_user_count }
-
-          expect(license).to be_valid
-        end
-      end
-
-      context 'with true-up info' do
-        context 'when quantity is ok' do
+        context 'when the active user count restriction is exceeded' do
           before do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 10)
+            gl_license.restrictions = { active_user_count: active_user_count - 1 }
+          end
+
+          context 'when the license started' do
+            it 'is invalid' do
+              expect(license).not_to be_valid
+            end
+          end
+
+          context 'after the license started' do
+            let(:date) { Date.current }
+
+            it 'is valid' do
+              expect(license).to be_valid
+            end
+          end
+
+          context 'in the year before the license started' do
+            let(:date) { described_class.current.starts_at - 6.months }
+
+            it 'is invalid' do
+              expect(license).not_to be_valid
+            end
+          end
+
+          context 'earlier than a year before the license started' do
+            let(:date) { described_class.current.starts_at - 2.years }
+
+            it 'is valid' do
+              expect(license).to be_valid
+            end
+          end
+        end
+
+        context 'when the active user count restriction is not exceeded' do
+          before do
+            gl_license.restrictions = { active_user_count: active_user_count + 1 }
           end
 
           it 'is valid' do
             expect(license).to be_valid
           end
-
-          context 'but active users exceeds restricted user count' do
-            it 'is invalid' do
-              create_list(:user, 6)
-
-              expect(license).not_to be_valid
-            end
-          end
         end
 
-        context 'when quantity is wrong' do
-          it 'is invalid' do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 8)
+        context 'when the active user count is met exactly' do
+          it 'is valid' do
+            active_user_count = 100
+            gl_license.restrictions = { active_user_count: active_user_count }
 
-            expect(license).not_to be_valid
-          end
-        end
-
-        context 'when previous user count is not present' do
-          before do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 7)
-          end
-
-          it 'uses current active user count to calculate the expected true-up' do
-            create_list(:user, 3)
-
-            expect(license).to be_valid
-          end
-
-          context 'with wrong true-up quantity' do
-            it 'is invalid' do
-              create_list(:user, 2)
-
-              expect(license).not_to be_valid
-            end
-          end
-        end
-
-        context 'when previous user count is present' do
-          before do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 6, previous_user_count: 4)
-          end
-
-          it 'uses it to calculate the expected true-up' do
             expect(license).to be_valid
           end
         end
       end
     end
 
-    describe "Not expired" do
+    describe '#not_expired' do
       context "when the license doesn't expire" do
-        it "is valid" do
+        it 'is valid' do
           expect(license).to be_valid
         end
       end
 
-      context "when the license has expired" do
+      context 'when the license has expired' do
         before do
           gl_license.expires_at = Date.yesterday
         end
 
-        it "is invalid" do
+        it 'is invalid' do
           expect(license).not_to be_valid
         end
       end
 
-      context "when the license has yet to expire" do
+      context 'when the license has yet to expire' do
         before do
           gl_license.expires_at = Date.tomorrow
         end
 
-        it "is valid" do
+        it 'is valid' do
           expect(license).to be_valid
         end
       end
@@ -1437,8 +1473,9 @@ RSpec.describe License do
       previous_user_count: opts[:previous_user_count],
       trueup_quantity: opts[:trueup_quantity],
       trueup_from: (date - 1.year).to_s,
-      trueup_to: date.to_s
-    }
+      trueup_to: date.to_s,
+      skip_true_up: opts[:skip_true_up]
+    }.compact
   end
 
   describe '#paid?' do
@@ -1520,8 +1557,8 @@ RSpec.describe License do
     end
   end
 
-  describe '#usage_ping?' do
-    subject { license.usage_ping? }
+  describe '#customer_service_enabled?' do
+    subject { license.customer_service_enabled? }
 
     context 'when no license provided' do
       before do
@@ -1532,13 +1569,13 @@ RSpec.describe License do
     end
 
     context 'when the license has usage ping required metrics disabled' do
-      let(:gl_license) { build(:gitlab_license, usage_ping_required_metrics_enabled: false) }
+      let(:gl_license) { build(:gitlab_license, operational_metrics_enabled: false) }
 
       it { is_expected.to be false }
     end
 
     context 'when the license has usage ping required metrics enabled' do
-      let(:gl_license) { build(:gitlab_license, usage_ping_required_metrics_enabled: true) }
+      let(:gl_license) { build(:gitlab_license, operational_metrics_enabled: true) }
 
       it { is_expected.to be true }
     end

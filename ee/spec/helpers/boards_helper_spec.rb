@@ -118,7 +118,8 @@ RSpec.describe BoardsHelper do
       context "group-level licensed features" do
         [[:board_iteration_lists, :iteration_lists_available],
          [:epics, :epic_feature_available],
-         [:iterations, :iteration_feature_available]].each do |feature_name, feature_key|
+         [:iterations, :iteration_feature_available],
+         [:subepics, :sub_epics_feature_available]].each do |feature_name, feature_key|
           include_examples "serializes the availability of a licensed feature", feature_name, feature_key
         end
       end

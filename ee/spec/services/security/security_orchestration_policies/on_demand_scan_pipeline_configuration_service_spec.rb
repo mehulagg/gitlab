@@ -70,7 +70,7 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
             DAST_USERNAME: site_profile.auth_username,
             DAST_USERNAME_FIELD: site_profile.auth_username_field,
             DAST_USE_AJAX_SPIDER: 'false',
-            DAST_VERSION: 1,
+            DAST_VERSION: 2,
             DAST_WEBSITE: site_profile.dast_site.url,
             SECURE_ANALYZERS_PREFIX: secure_analyzers_prefix
           },

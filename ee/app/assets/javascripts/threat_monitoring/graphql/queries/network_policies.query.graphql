@@ -1,3 +1,5 @@
+#import "./environments.fragment.graphql"
+
 query networkPolicies($fullPath: ID!, $environmentId: EnvironmentID) {
   project(fullPath: $fullPath) {
     networkPolicies(environmentId: $environmentId) {
@@ -8,6 +10,7 @@ query networkPolicies($fullPath: ID!, $environmentId: EnvironmentID) {
         enabled
         fromAutoDevops
         updatedAt
+        ...Environments
       }
     }
   }

@@ -343,6 +343,54 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#has_security_reports?' do
+    subject { job.has_security_reports? }
+
+    context 'when build has a security report' do
+      let!(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when build does not have a security report' do
+      it { is_expected.to be false }
+    end
+  end
+
+  describe '#unmerged_security_reports' do
+    subject(:security_reports) { job.unmerged_security_reports }
+
+    context 'when build has a security report' do
+      context 'when there is a sast report' do
+        let!(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+
+        it 'parses blobs and add the results to the report' do
+          expect(security_reports.get_report('sast', artifact).findings.size).to eq(5)
+        end
+      end
+
+      context 'when there are multiple reports' do
+        let!(:sast_artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+        let!(:ds_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: job.project) }
+        let!(:cs_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: job, project: job.project) }
+        let!(:dast_artifact) { create(:ee_ci_job_artifact, :dast, job: job, project: job.project) }
+
+        it 'parses blobs and adds unmerged results to the reports' do
+          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(5)
+          expect(security_reports.get_report('dependency_scanning', ds_artifact).findings.size).to eq(4)
+          expect(security_reports.get_report('container_scanning', cs_artifact).findings.size).to eq(8)
+          expect(security_reports.get_report('dast', dast_artifact).findings.size).to eq(24)
+        end
+      end
+    end
+
+    context 'when build has no security reports' do
+      it 'has no parsed reports' do
+        expect(security_reports.reports).to be_empty
+      end
+    end
+  end
+
   describe '#collect_security_reports!' do
     let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
 

@@ -60,26 +60,12 @@ See also the Code Climate list of [Supported Languages for Maintainability](http
 > - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/284140) in GitLab 13.12.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284140) in GitLab 14.1.
-> - [Feature enhanced](https://gitlab.com/gitlab-org/gitlab/-/issues/2526) in GitLab 14.0.
+> - [Inline annotation added](https://gitlab.com/gitlab-org/gitlab/-/issues/2526) in GitLab 14.1.
 
 Changes to files in merge requests can cause Code Quality to fall if merged. In these cases,
 the merge request's diff view displays an indicator next to lines with new Code Quality violations. For example:
 
 ![Code Quality MR diff report](img/code_quality_mr_diff_report_v14.png)
-
-Previously, an indicator was displayed (**{information-o}** **Code Quality**) on the file in the merge request's diff view:
-
-![Code Quality MR diff report](img/code_quality_mr_diff_report_v13_11.png)
-
-To switch to the previous version of this feature, a GitLab administrator can run the following in a
-[Rails console](../../../administration/operations/rails_console.md):
-
-```ruby
-# For the instance
-Feature.disable(:codequality_mr_diff_annotations)
-# For a single project
-Feature.disable(:codequality_mr_diff_annotations, Project.find(<project id>))
-```
 
 ## Example configuration
 
@@ -362,6 +348,8 @@ Example:
 NOTE:
 Although the Code Climate spec supports more properties, those are ignored by
 GitLab.
+The GitLab parser does not allow a [byte order mark](https://en.wikipedia.org/wiki/Byte_order_mark)
+at the beginning of the file.
 
 ## Code Quality reports **(PREMIUM)**
 

@@ -828,6 +828,15 @@
   :idempotent:
   :tags:
   - :exclude_from_kubernetes
+- :name: security_scans:security_track_secure_scans
+  :worker_name: Security::TrackSecureScansWorker
+  :feature_category: :vulnerability_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent:
+  :tags: []
 - :name: security_scans:store_security_reports
   :worker_name: StoreSecurityReportsWorker
   :feature_category: :vulnerability_management

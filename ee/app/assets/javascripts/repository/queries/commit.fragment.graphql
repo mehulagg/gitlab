@@ -5,6 +5,7 @@ fragment TreeEntryCommit on LogTreeCommit {
   committedDate
   commitPath
   fileName
+  filePath
   type
   lockLabel
 }

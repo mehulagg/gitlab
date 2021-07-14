@@ -7,6 +7,7 @@ import { APPROVAL_SETTINGS_I18N } from 'ee/approvals/constants';
 import { createStoreOptions } from 'ee/approvals/stores';
 import groupSettingsModule from 'ee/approvals/stores/modules/group_settings';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -60,9 +61,10 @@ describe('ApprovalSettings', () => {
   `('with $testid checkbox', ({ testid, setting, labelKey, anchor }) => {
     let checkbox = null;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       store.modules.approvals.state.settings[setting] = false;
       createWrapper();
+      await waitForPromises();
       checkbox = wrapper.findByTestId(testid);
     });
 
@@ -83,24 +85,33 @@ describe('ApprovalSettings', () => {
 
     it('updates the store when the value is changed', async () => {
       await checkbox.vm.$emit('input', true);
+      await waitForPromises();
 
       expect(store.modules.approvals.state.settings[setting]).toBe(true);
     });
   });
 
   describe('loading', () => {
-    it('renders enabled button when not loading', () => {
+    it('does not render the form if the settings are not there yet', () => {
+      createWrapper();
+
+      expect(findForm().exists()).toBe(false);
+    });
+
+    it('renders enabled button when not loading', async () => {
       store.modules.approvals.state.isLoading = false;
 
       createWrapper();
+      await waitForPromises();
 
       expect(findSaveButton().props('disabled')).toBe(false);
     });
 
-    it('renders disabled button when loading', () => {
+    it('renders disabled button when loading', async () => {
       store.modules.approvals.state.isLoading = true;
 
       createWrapper();
+      await waitForPromises();
 
       expect(findSaveButton().props('disabled')).toBe(true);
     });
@@ -109,7 +120,7 @@ describe('ApprovalSettings', () => {
   describe('form submission', () => {
     it('update settings via API', async () => {
       createWrapper();
-
+      await waitForPromises();
       await findForm().vm.$emit('submit', { preventDefault: () => {} });
 
       expect(actions.updateSettings).toHaveBeenCalledWith(expect.any(Object), approvalSettingsPath);

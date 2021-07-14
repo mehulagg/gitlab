@@ -110,6 +110,31 @@ The results are saved as a
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest dependency scanning artifact available.
 
+### Enable Dependency Scanning via an automatic merge request
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4908) in GitLab 14.1.
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-configure-dependency-scanning-via-a-merge-request). **(ULTIMATE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+There can be
+[risks when disabling released features](../../../user/feature_flags.md#risks-when-disabling-released-features).
+Refer to this feature's version history for more details.
+
+To enable Dependency Scanning in a project, you can create a merge request
+from the Security Configuration page.
+
+1. In the project where you want to enable Dependency Scanning, navigate to
+   **Security & Compliance > Configuration**.
+1. In the **Dependency Scanning** row, select **Configure via Merge Request**.
+
+This automatically creates a merge request with the changes necessary to enable Dependency Scanning
+that you can review and merge to complete the configuration.
+
 ### Customizing the dependency scanning settings
 
 The dependency scanning settings can be changed through [CI/CD variables](#available-cicd-variables) by using the
@@ -189,7 +214,7 @@ The following variables are used for configuring specific analyzers (used for a 
 | `GEMNASIUM_DB_REMOTE_URL`            | `gemnasium`        | `https://gitlab.com/gitlab-org/security-products/gemnasium-db.git` | Repository URL for fetching the Gemnasium database. |
 | `GEMNASIUM_DB_REF_NAME`              | `gemnasium`        | `master`                     | Branch name for remote repository database. `GEMNASIUM_DB_REMOTE_URL` is required. |
 | `DS_REMEDIATE`                       | `gemnasium`        | `"true"`                     | Enable automatic remediation of vulnerable dependencies. |
-| `DS_JAVA_VERSION`                    | `gemnasium-maven`  | `11`                         | Version of Java. Available versions: `8`, `11`, `13`, `14`, `15`, `16`. Maven and Gradle use the Java version specified by this value (Dependency Scanning for Gradle does not currently support Java `16`). |
+| `DS_JAVA_VERSION`                    | `gemnasium-maven`  | `11`                         | Version of Java. Available versions: `8`, `11`, `13`, `14`, `15`, `16`. |
 | `MAVEN_CLI_OPTS`                     | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](../index.md#using-private-maven-repositories). |
 | `GRADLE_CLI_OPTS`                    | `gemnasium-maven`  |                              | List of command line arguments that are passed to `gradle` by the analyzer. |
 | `SBT_CLI_OPTS`                       | `gemnasium-maven`  |                              | List of command-line arguments that the analyzer passes to `sbt`. |
@@ -656,3 +681,22 @@ with a dependency on this version of Python should use `retire.js` version 2.10.
 ### Error: `dependency_scanning is used for configuration only, and its script should not be executed`
 
 For information on this, see the [GitLab Secure troubleshooting section](../index.md#error-job-is-used-for-configuration-only-and-its-script-should-not-be-executed).
+
+### Enable or disable Configure Dependency Scanning via a Merge Request
+
+Configure Dependency Scanning via a Merge Request is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To disable it:
+
+```ruby
+Feature.disable(:sec_dependency_scanning_ui_enable)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:sec_dependency_scanning_ui_enable)
+```

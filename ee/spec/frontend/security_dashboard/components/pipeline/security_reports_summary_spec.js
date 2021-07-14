@@ -79,13 +79,14 @@ describe('Security reports summary component', () => {
   );
 
   it.each`
-    summaryProp                                              | string
-    ${{ dast: { vulnerabilitiesCount: 123 } }}               | ${'DAST'}
-    ${{ sast: { vulnerabilitiesCount: 123 } }}               | ${'SAST'}
-    ${{ containerScanning: { vulnerabilitiesCount: 123 } }}  | ${'Container Scanning'}
-    ${{ dependencyScanning: { vulnerabilitiesCount: 123 } }} | ${'Dependency Scanning'}
-    ${{ apiFuzzing: { vulnerabilitiesCount: 123 } }}         | ${'API Fuzzing'}
-    ${{ coverageFuzzing: { vulnerabilitiesCount: 123 } }}    | ${'Coverage Fuzzing'}
+    summaryProp                                                | string
+    ${{ dast: { vulnerabilitiesCount: 123 } }}                 | ${'DAST'}
+    ${{ sast: { vulnerabilitiesCount: 123 } }}                 | ${'SAST'}
+    ${{ containerScanning: { vulnerabilitiesCount: 123 } }}    | ${'Container Scanning'}
+    ${{ dependencyScanning: { vulnerabilitiesCount: 123 } }}   | ${'Dependency Scanning'}
+    ${{ apiFuzzing: { vulnerabilitiesCount: 123 } }}           | ${'API Fuzzing'}
+    ${{ coverageFuzzing: { vulnerabilitiesCount: 123 } }}      | ${'Coverage Fuzzing'}
+    ${{ clusterImageScanning: { vulnerabilitiesCount: 123 } }} | ${'Cluster Image Scanning'}
   `('shows user-friendly scanner name for $string', ({ summaryProp, string }) => {
     createWrapper({
       propsData: {
@@ -97,13 +98,14 @@ describe('Security reports summary component', () => {
   });
 
   it.each`
-    summaryProp                     | report
-    ${{ dast: null }}               | ${'DAST'}
-    ${{ sast: null }}               | ${'SAST'}
-    ${{ containerScanning: null }}  | ${'Container Scanning'}
-    ${{ dependencyScanning: null }} | ${'Dependency Scanning'}
-    ${{ apiFuzzing: null }}         | ${'API Fuzzing'}
-    ${{ coverageFuzzing: null }}    | ${'Coverage Fuzzing'}
+    summaryProp                       | report
+    ${{ dast: null }}                 | ${'DAST'}
+    ${{ sast: null }}                 | ${'SAST'}
+    ${{ containerScanning: null }}    | ${'Container Scanning'}
+    ${{ dependencyScanning: null }}   | ${'Dependency Scanning'}
+    ${{ apiFuzzing: null }}           | ${'API Fuzzing'}
+    ${{ coverageFuzzing: null }}      | ${'Coverage Fuzzing'}
+    ${{ clusterImageScanning: null }} | ${'Cluster Image Scanning'}
   `('does not show $report report if scanner did not run', ({ summaryProp, report }) => {
     createWrapper({
       propsData: {

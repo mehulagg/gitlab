@@ -1,10 +1,6 @@
 <script>
 import { GlTooltipDirective } from '@gitlab/ui';
-import { DEVOPS_ADOPTION_STRINGS } from '../constants';
-
-const {
-  tableCell: { trueText, falseText },
-} = DEVOPS_ADOPTION_STRINGS;
+import { I18N_CELL_FLAG_TRUE_TEXT, I18N_CELL_FLAG_FALSE_TEXT } from '../constants';
 
 export default {
   name: 'DevopsAdoptionTableCellFlag',
@@ -24,7 +20,7 @@ export default {
   },
   computed: {
     tooltipText() {
-      return this.enabled ? trueText : falseText;
+      return this.enabled ? I18N_CELL_FLAG_TRUE_TEXT : I18N_CELL_FLAG_FALSE_TEXT;
     },
   },
 };

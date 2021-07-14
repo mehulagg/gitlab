@@ -13,6 +13,7 @@ export const i18n = {
   cancel: __('Cancel'),
   addSchedule: s__('OnCallSchedules|Add schedule'),
   editSchedule: s__('OnCallSchedules|Edit schedule'),
+  saveChanges: __('Save changes'),
   addErrorMsg: s__('OnCallSchedules|Failed to edit schedule'),
   editErrorMsg: s__('OnCallSchedules|Failed to add schedule'),
 };
@@ -60,7 +61,7 @@ export default {
     actionsProps() {
       return {
         primary: {
-          text: this.title,
+          text: this.primaryBtnText,
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
@@ -89,6 +90,9 @@ export default {
     },
     title() {
       return this.isEditMode ? i18n.editSchedule : i18n.addSchedule;
+    },
+    primaryBtnText() {
+      return this.isEditMode ? i18n.saveChanges : i18n.addSchedule;
     },
   },
   methods: {

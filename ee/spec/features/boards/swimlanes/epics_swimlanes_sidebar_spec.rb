@@ -31,6 +31,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
       wait_for_requests
 
       load_epic_swimlanes
+
+      load_unassigned_issues
     end
 
     it_behaves_like 'issue boards sidebar'
@@ -44,6 +46,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
       wait_for_requests
 
       load_epic_swimlanes
+
+      load_unassigned_issues
     end
 
     it_behaves_like 'issue boards sidebar'
@@ -56,5 +60,15 @@ RSpec.describe 'epics swimlanes sidebar', :js do
 
   def first_card_with_epic
     find("[data-testid='board-epic-lane-issues']").first("[data-testid='board_card']")
+  end
+
+  def refresh_and_click_first_card
+    page.refresh
+
+    wait_for_requests
+
+    load_unassigned_issues
+
+    first_card.click
   end
 end

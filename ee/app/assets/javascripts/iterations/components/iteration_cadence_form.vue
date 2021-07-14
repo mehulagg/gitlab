@@ -83,7 +83,7 @@ export default {
     GlFormSelect,
     GlFormTextarea,
   },
-  inject: ['groupPath', 'cadencesListPath'],
+  inject: ['fullPath', 'cadencesListPath'],
   data() {
     return {
       group: {
@@ -133,7 +133,7 @@ export default {
       const id = this.isEdit
         ? convertToGraphQLId(TYPE_ITERATIONS_CADENCE, this.cadenceId)
         : undefined;
-      const groupPath = this.isEdit ? undefined : this.groupPath;
+      const groupPath = this.isEdit ? undefined : this.fullPath;
 
       const vars = {
         input: {
@@ -160,7 +160,7 @@ export default {
       query: readCadence,
       variables() {
         return {
-          fullPath: this.groupPath,
+          fullPath: this.fullPath,
           id: this.cadenceId,
         };
       },

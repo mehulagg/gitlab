@@ -98,6 +98,34 @@ RSpec.describe ServicePing::SubmitService do
     it_behaves_like 'does not run'
   end
 
+  context 'when product_intelligence_enabled is false' do
+    before do
+      allow_next_instance_of(ServicePing::PermitDataCategoriesService) do |service|
+        allow(service).to receive(:product_intelligence_enabled?).and_return(false)
+      end
+    end
+
+    it_behaves_like 'does not run'
+  end
+
+  context 'when product_intelligence_enabled is true' do
+    before do
+      stub_usage_data_connections
+
+      allow_next_instance_of(ServicePing::PermitDataCategoriesService) do |service|
+        allow(service).to receive(:product_intelligence_enabled?).and_return(true)
+      end
+    end
+
+    it 'generates service ping' do
+      stub_response(body: with_dev_ops_score_params)
+
+      expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_call_original
+
+      subject.execute
+    end
+  end
+
   context 'when usage ping is enabled' do
     before do
       stub_usage_data_connections
@@ -217,10 +245,62 @@ RSpec.describe ServicePing::SubmitService do
 
     context 'and usage data is nil' do
       before do
+        allow(ServicePing::BuildPayloadService).to receive(:execute).and_return(nil)
         allow(Gitlab::UsageData).to receive(:data).and_return(nil)
       end
 
       it_behaves_like 'does not send a blank usage ping payload'
+    end
+
+    context 'if payload service fails' do
+      before do
+        stub_response(body: with_dev_ops_score_params)
+        allow(ServicePing::BuildPayloadService).to receive(:execute).and_raise(described_class::SubmissionError, 'SubmissionError')
+      end
+
+      it 'calls UsageData .data method' do
+        usage_data = build_usage_data
+
+        expect(Gitlab::UsageData).to receive(:data).and_return(usage_data)
+
+        subject.execute
+      end
+    end
+
+    context 'calls BuildPayloadService first' do
+      before do
+        stub_response(body: with_dev_ops_score_params)
+      end
+
+      it 'returns usage data' do
+        usage_data = build_usage_data
+
+        expect_next_instance_of(ServicePing::BuildPayloadService) do |service|
+          expect(service).to receive(:execute).and_return(usage_data)
+        end
+
+        subject.execute
+      end
+    end
+
+    context 'if version app response fails' do
+      before do
+        stub_response(body: with_dev_ops_score_params, status: 404)
+
+        usage_data = build_usage_data
+        allow_next_instance_of(ServicePing::BuildPayloadService) do |service|
+          allow(service).to receive(:execute).and_return(usage_data)
+        end
+      end
+
+      it 'calls UsageData .data method' do
+        usage_data = build_usage_data
+
+        expect(Gitlab::UsageData).to receive(:data).and_return(usage_data)
+
+        # SubmissionError is raised as a result of 404 in response from HTTP Request
+        expect { subject.execute }.to raise_error(described_class::SubmissionError)
+      end
     end
   end
 
@@ -231,5 +311,9 @@ RSpec.describe ServicePing::SubmitService do
         body: body.to_json,
         status: status
       )
+  end
+
+  def build_usage_data
+    { uuid: 'uuid', recorded_at: Time.current }
   end
 end

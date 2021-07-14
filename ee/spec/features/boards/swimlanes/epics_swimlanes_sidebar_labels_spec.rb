@@ -21,6 +21,7 @@ RSpec.describe 'Issue boards sidebar labels using epic swimlanes', :js do
       before do
         load_board group_board_path(group, group_board)
         load_epic_swimlanes
+        load_unassigned_issues
       end
 
       context 'selecting an issue from a direct descendant project' do

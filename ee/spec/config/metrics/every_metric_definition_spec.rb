@@ -29,6 +29,7 @@ RSpec.describe 'Every metric definition' do
       geo_node_usage
       mock_ci
       mock_monitoring
+      projects_with_enabled_alert_integrations_histogram
       user_auth_by_provider
       user_dast_scans
       user_sast_scans
@@ -37,13 +38,14 @@ RSpec.describe 'Every metric definition' do
       user_secret_detection_scans
       user_coverage_fuzzing_scans
       user_api_fuzzing_scans
+      topology
     ).freeze
   end
 
   let(:metric_files_key_paths) do
     Gitlab::Usage::MetricDefinition
       .definitions
-      .reject { |k, v| v.status == 'removed' || v.value_type == 'object' || v.key_path =~ Regexp.union(ignored_metric_files_key_patterns)}
+      .reject { |k, v| v.status == 'removed' || v.key_path =~ Regexp.union(ignored_metric_files_key_patterns)}
       .keys
       .sort
   end

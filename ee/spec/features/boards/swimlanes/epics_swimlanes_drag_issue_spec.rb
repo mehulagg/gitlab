@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'epics swimlanes', :js do
   include DragTo
   include MobileHelpers
+  include BoardHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
@@ -33,7 +34,8 @@ RSpec.describe 'epics swimlanes', :js do
 
     sign_in(user)
     visit_board_page
-    select_epics
+    load_epic_swimlanes
+    load_unassigned_issues
   end
 
   context 'drag and drop issue' do

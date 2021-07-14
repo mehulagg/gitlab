@@ -27,6 +27,8 @@ exports[`CiliumNetworkPolicy component supported YAML renders policy preview tab
     >
       Disabled
     </policy-info-row-stub>
+     
+    <!---->
   </div>
    
   <policy-preview-stub

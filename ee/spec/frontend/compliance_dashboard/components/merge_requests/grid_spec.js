@@ -18,12 +18,11 @@ describe('MergeRequestsGrid component', () => {
   const findApprovers = () => wrapper.findComponent(Approvers);
   const findBranchDetails = () => wrapper.findComponent(BranchDetails);
 
-  const createComponent = (mergeRequests = {}, drawerEnabled = false) => {
+  const createComponent = (mergeRequests = {}) => {
     return shallowMountExtended(MergeRequestsGrid, {
       propsData: {
         mergeRequests,
         isLastPage: false,
-        drawerEnabled,
       },
       stubs: {
         MergeRequest: {
@@ -38,98 +37,91 @@ describe('MergeRequestsGrid component', () => {
     wrapper.destroy();
   });
 
-  // TODO: Remove the each with https://gitlab.com/gitlab-org/gitlab/-/issues/334682
-  describe.each([true, false])('when drawer enabled is %s', (drawerEnabled) => {
-    describe('when initialized', () => {
-      beforeEach(() => {
-        wrapper = createComponent(createMergeRequests({ count: 2, props: {} }), drawerEnabled);
-      });
-
-      it('matches the snapshot', () => {
-        expect(wrapper.element).toMatchSnapshot();
-      });
-
-      it('renders a list of merge requests', () => {
-        expect(findMergeRequests()).toHaveLength(2);
-      });
-
-      it('renders the approvers list', () => {
-        expect(findApprovers().exists()).toBe(true);
-      });
-
-      it('renders the "merged at" time', () => {
-        expect(findTime().props('time')).toEqual(mergedAt());
-      });
+  describe('when initialized', () => {
+    beforeEach(() => {
+      wrapper = createComponent(createMergeRequests({ count: 2, props: {} }));
     });
 
-    describe('statuses', () => {
-      const mergeRequest = createMergeRequests({ count: 1 });
-
-      beforeEach(() => {
-        wrapper = createComponent(mergeRequest, drawerEnabled);
-      });
-
-      it('passes the correct props to the statuses', () => {
-        findStatuses().wrappers.forEach((status) => {
-          const { type, data } = status.props('status');
-
-          switch (type) {
-            case 'pipeline':
-              expect(data).toEqual(mergeRequest[0].pipeline_status);
-              break;
-
-            case 'approval':
-              expect(data).toEqual(mergeRequest[0].approval_status);
-              break;
-
-            default:
-              throw new Error('Unknown status type');
-          }
-        });
-      });
+    it('matches the snapshot', () => {
+      expect(wrapper.element).toMatchSnapshot();
     });
 
-    describe('branch details', () => {
-      it('does not render if there are no branch details', () => {
-        wrapper = createComponent(createMergeRequests({ count: 2, props: {} }), drawerEnabled);
+    it('renders a list of merge requests', () => {
+      expect(findMergeRequests()).toHaveLength(2);
+    });
 
-        expect(findBranchDetails().exists()).toBe(false);
-      });
+    it('renders the approvers list', () => {
+      expect(findApprovers().exists()).toBe(true);
+    });
 
-      it('renders if there are branch details', () => {
-        wrapper = createComponent(
-          createMergeRequests({
-            count: 2,
-            props: { target_branch: 'main', source_branch: 'feature' },
-          }),
-          drawerEnabled,
-        );
+    it('renders the "merged at" time', () => {
+      expect(findTime().props('time')).toEqual(mergedAt());
+    });
+  });
 
-        expect(findBranchDetails().exists()).toBe(true);
+  describe('statuses', () => {
+    const mergeRequest = createMergeRequests({ count: 1 });
+
+    beforeEach(() => {
+      wrapper = createComponent(mergeRequest);
+    });
+
+    it('passes the correct props to the statuses', () => {
+      findStatuses().wrappers.forEach((status) => {
+        const { type, data } = status.props('status');
+
+        switch (type) {
+          case 'pipeline':
+            expect(data).toEqual(mergeRequest[0].pipeline_status);
+            break;
+
+          case 'approval':
+            expect(data).toEqual(mergeRequest[0].approval_status);
+            break;
+
+          default:
+            throw new Error('Unknown status type');
+        }
       });
     });
   });
 
-  describe('when the drawer is enabled', () => {
-    const mergeRequests = createMergeRequests({ count: 2, props: {} });
+  describe('branch details', () => {
+    it('does not render if there are no branch details', () => {
+      wrapper = createComponent(createMergeRequests({ count: 2, props: {} }));
+
+      expect(findBranchDetails().exists()).toBe(false);
+    });
+
+    it('renders if there are branch details', () => {
+      wrapper = createComponent(
+        createMergeRequests({
+          count: 2,
+          props: { target_branch: 'main', source_branch: 'feature' },
+        }),
+      );
+
+      expect(findBranchDetails().exists()).toBe(true);
+    });
+  });
+
+  describe.each(['click', 'keypress.enter'])('when the %s event is triggered', (event) => {
+    const mergeRequest = createMergeRequests({ count: 1 });
 
     beforeEach(() => {
-      const mergeRequest = createMergeRequests({ count: 1 });
       wrapper = createComponent(mergeRequest, true);
     });
 
-    describe.each(['click', 'keypress.enter'])('when the %s event is triggered', (event) => {
-      it('toggles the drawer when a merge request drawer toggle is the target', () => {
-        findMergeRequestDrawerToggles().at(0).trigger(event);
+    it('toggles the drawer when a merge request drawer toggle is the target', () => {
+      findMergeRequestDrawerToggles().at(0).trigger(event);
 
-        expect(wrapper.emitted('toggleDrawer')[0][0]).toStrictEqual(mergeRequests[0]);
-      });
+      expect(wrapper.emitted('toggleDrawer')[0][0]).toStrictEqual(mergeRequest[0]);
+    });
 
-      it('does not toggle the drawer if an inner link is the target', () => {
-        findMergeRequestLinks().at(0).trigger(event);
+    it('does not toggle the drawer if an inner link is the target', () => {
+      findMergeRequestLinks().at(0).trigger(event);
 
-        expect(wrapper.emitted('toggleDrawer')).toBe(undefined);
-      });
+      expect(wrapper.emitted('toggleDrawer')).toBe(undefined);
     });
   });
 });

@@ -2,6 +2,7 @@
 import { GlBanner, GlLink, GlSprintf } from '@gitlab/ui';
 import {
   activateCloudLicense,
+  subscriptionBannerBlogPostUrl,
   subscriptionBannerText,
   subscriptionBannerTitle,
 } from '../constants';
@@ -11,6 +12,7 @@ export const CLOSE_ACTIVATE_SUBSCRIPTION_BANNER_EVENT = 'close';
 
 export default {
   name: 'SubscriptionActivationBanner',
+  subscriptionBannerBlogPostUrl,
   i18n: {
     bannerText: subscriptionBannerText,
     buttonText: activateCloudLicense,
@@ -45,7 +47,9 @@ export default {
     <p>
       <gl-sprintf :message="$options.i18n.bannerText">
         <template #blogPostLink="{ content }">
-          <gl-link href="#" target="_blank">{{ content }}</gl-link>
+          <gl-link :href="$options.subscriptionBannerBlogPostUrl" target="_blank">{{
+            content
+          }}</gl-link>
         </template>
         <template #portalLink="{ content }">
           <gl-link :href="customersPortalUrl" target="_blank">{{ content }}</gl-link>

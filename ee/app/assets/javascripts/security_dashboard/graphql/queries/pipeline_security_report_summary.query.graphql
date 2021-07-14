@@ -38,6 +38,10 @@ query pipelineSecuritySummary($fullPath: ID!, $pipelineIid: ID!) {
           vulnerabilitiesCount
           ...SecurityReportSummaryScans
         }
+        clusterImageScanning {
+          vulnerabilitiesCount
+          ...SecurityReportSummaryScans
+        }
       }
     }
   }

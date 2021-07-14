@@ -49,6 +49,28 @@ export default {
     Vue.set(state.boardItemsByListId, listId, state.backupItemsList);
   },
 
+  [mutationTypes.REQUEST_ISSUES_FOR_EPIC]: (state, epicId) => {
+    Vue.set(state.epicsFlags, epicId, { isLoading: true });
+  },
+
+  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_SUCCESS]: (state, { listData, boardItems, epicId }) => {
+    Object.entries(listData).forEach(([listId, list]) => {
+      Vue.set(
+        state.boardItemsByListId,
+        listId,
+        union(state.boardItemsByListId[listId] || [], list),
+      );
+    });
+
+    Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
+    Vue.set(state.epicsFlags, epicId, { isLoading: false });
+  },
+
+  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_FAILURE]: (state, epicId) => {
+    state.error = s__('Boards|An error occurred while fetching issues. Please reload the page.');
+    Vue.set(state.epicsFlags, epicId, { isLoading: false });
+  },
+
   [mutationTypes.TOGGLE_EPICS_SWIMLANES]: (state) => {
     state.isShowingEpicsSwimlanes = !state.isShowingEpicsSwimlanes;
     Vue.set(state, 'epicsSwimlanesFetchInProgress', {
@@ -70,6 +92,7 @@ export default {
       ...state.epicsSwimlanesFetchInProgress,
       listItemsFetchInProgress: false,
     });
+    state.error = undefined;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, boardLists) => {
@@ -86,11 +109,27 @@ export default {
     });
   },
 
-  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
+  [mutationTypes.REQUEST_MORE_EPICS]: (state) => {
+    Vue.set(state, 'epicsSwimlanesFetchInProgress', {
+      ...state.epicsSwimlanesFetchInProgress,
+      epicLanesFetchMoreInProgress: true,
+    });
+  },
+  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (
+    state,
+    { epics, canAdminEpic, hasMoreEpics, epicsEndCursor },
+  ) => {
     Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
+    Vue.set(state, 'hasMoreEpics', hasMoreEpics);
+    Vue.set(state, 'epicsEndCursor', epicsEndCursor);
     if (canAdminEpic !== undefined) {
       state.canAdminEpic = canAdminEpic;
     }
+    Vue.set(state, 'epicsSwimlanesFetchInProgress', {
+      ...state.epicsSwimlanesFetchInProgress,
+      epicLanesFetchInProgress: false,
+      epicLanesFetchMoreInProgress: false,
+    });
   },
 
   [mutationTypes.RESET_EPICS]: (state) => {

@@ -12,6 +12,7 @@ import SwimlanesLoadingSkeleton from 'ee/boards/components/swimlanes_loading_ske
 import { EPIC_LANE_BASE_HEIGHT } from 'ee/boards/constants';
 import getters from 'ee/boards/stores/getters';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { mockLists, mockEpics, mockIssuesByListId, issues } from '../mock_data';
 
 Vue.use(Vuex);
@@ -20,11 +21,18 @@ jest.mock('ee/boards/boards_util');
 describe('EpicsSwimlanes', () => {
   let wrapper;
 
+  const findDraggable = () => wrapper.findComponent(Draggable);
+  const findLoadMoreEpicsButton = () => wrapper.findByTestId('load-more-epics');
+
   const fetchItemsForListSpy = jest.fn();
+  const fetchIssuesForEpicSpy = jest.fn();
+  const fetchEpicsSwimlanesSpy = jest.fn();
 
   const createStore = ({
     epicLanesFetchInProgress = false,
     listItemsFetchInProgress = false,
+    epicLanesFetchMoreInProgress = false,
+    hasMoreEpics = false,
   } = {}) => {
     return new Vuex.Store({
       state: {
@@ -46,11 +54,15 @@ describe('EpicsSwimlanes', () => {
         epicsSwimlanesFetchInProgress: {
           epicLanesFetchInProgress,
           listItemsFetchInProgress,
+          epicLanesFetchMoreInProgress,
         },
+        hasMoreEpics,
       },
       getters,
       actions: {
         fetchItemsForList: fetchItemsForListSpy,
+        fetchIssuesForEpic: fetchIssuesForEpicSpy,
+        fetchEpicsSwimlanes: fetchEpicsSwimlanesSpy,
       },
     });
   };
@@ -60,29 +72,32 @@ describe('EpicsSwimlanes', () => {
     swimlanesBufferedRendering = false,
     epicLanesFetchInProgress = false,
     listItemsFetchInProgress = false,
+    hasMoreEpics = false,
   } = {}) => {
-    const store = createStore({ epicLanesFetchInProgress, listItemsFetchInProgress });
+    const store = createStore({ epicLanesFetchInProgress, listItemsFetchInProgress, hasMoreEpics });
     const defaultProps = {
       lists: mockLists,
       disabled: false,
     };
 
-    wrapper = shallowMount(EpicsSwimlanes, {
-      propsData: { ...defaultProps, canAdminList },
-      store,
-      provide: {
-        glFeatures: { swimlanesBufferedRendering },
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(EpicsSwimlanes, {
+        propsData: { ...defaultProps, canAdminList },
+        store,
+        provide: {
+          glFeatures: { swimlanesBufferedRendering },
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  it('calls fetchItemsForList on mounted', () => {
+  it('calls fetchIssuesForEpic on mounted', () => {
     createComponent();
-    expect(fetchItemsForListSpy).toHaveBeenCalled();
+    expect(fetchIssuesForEpicSpy).toHaveBeenCalled();
   });
 
   describe('computed', () => {
@@ -93,7 +108,7 @@ describe('EpicsSwimlanes', () => {
         });
 
         it('should return Draggable reference when canAdminList prop is true', () => {
-          expect(wrapper.find(Draggable).exists()).toBe(true);
+          expect(findDraggable().exists()).toBe(true);
         });
       });
 
@@ -103,7 +118,7 @@ describe('EpicsSwimlanes', () => {
         });
 
         it('should not return Draggable reference when canAdminList prop is false', () => {
-          expect(wrapper.find(Draggable).exists()).toBe(false);
+          expect(findDraggable().exists()).toBe(false);
         });
       });
     });
@@ -115,20 +130,31 @@ describe('EpicsSwimlanes', () => {
     });
 
     it('displays BoardListHeader components for lists', () => {
-      expect(wrapper.findAll(BoardListHeader)).toHaveLength(4);
+      expect(wrapper.findAllComponents(BoardListHeader)).toHaveLength(4);
     });
 
     it('displays EpicLane components for epic', () => {
-      expect(wrapper.findAll(EpicLane)).toHaveLength(5);
+      expect(wrapper.findAllComponents(EpicLane)).toHaveLength(5);
     });
 
-    it('displays IssueLaneList component', () => {
-      expect(wrapper.find(IssueLaneList).exists()).toBe(true);
+    it('does not display IssueLaneList component by default', () => {
+      expect(wrapper.findComponent(IssueLaneList).exists()).toBe(false);
+    });
+
+    it('does not display load more epics button if there are no more epics', () => {
+      expect(findLoadMoreEpicsButton().exists()).toBe(false);
+    });
+
+    it('displays IssueLaneList component when toggling unassigned issues lane', async () => {
+      wrapper.findByTestId('unassigned-lane-toggle').vm.$emit('click');
+
+      await wrapper.vm.$nextTick();
+      expect(wrapper.findComponent(IssueLaneList).exists()).toBe(true);
     });
 
     it('displays issues icon and count for unassigned issue', () => {
-      expect(wrapper.find(GlIcon).props('name')).toEqual('issues');
-      expect(wrapper.find('[data-testid="issues-lane-issue-count"]').text()).toEqual('2');
+      expect(wrapper.findComponent(GlIcon).props('name')).toBe('issues');
+      expect(wrapper.findByTestId('issues-lane-issue-count').text()).toBe('2');
     });
 
     it('makes non preset lists draggable', () => {
@@ -144,19 +170,37 @@ describe('EpicsSwimlanes', () => {
     });
   });
 
+  describe('load more epics', () => {
+    beforeEach(() => {
+      createComponent({ hasMoreEpics: true });
+    });
+
+    it('displays load more epics button if there are more epics', () => {
+      expect(findLoadMoreEpicsButton().exists()).toBe(true);
+    });
+
+    it('calls fetchEpicsSwimlanes action when loading more epics', async () => {
+      findLoadMoreEpicsButton().vm.$emit('click');
+
+      await wrapper.vm.$nextTick();
+
+      expect(fetchEpicsSwimlanesSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('Loading skeleton', () => {
     it.each`
       epicLanesFetchInProgress | listItemsFetchInProgress | expected
       ${true}                  | ${true}                  | ${true}
-      ${false}                 | ${true}                  | ${false}
-      ${true}                  | ${false}                 | ${false}
+      ${false}                 | ${true}                  | ${true}
+      ${true}                  | ${false}                 | ${true}
       ${false}                 | ${false}                 | ${false}
     `(
       'loading is $expected when epicLanesFetchInProgress is $epicLanesFetchInProgress and listItemsFetchInProgress is $listItemsFetchInProgress',
       ({ epicLanesFetchInProgress, listItemsFetchInProgress, expected }) => {
         createComponent({ epicLanesFetchInProgress, listItemsFetchInProgress });
 
-        expect(wrapper.find(SwimlanesLoadingSkeleton).exists()).toBe(expected);
+        expect(wrapper.findComponent(SwimlanesLoadingSkeleton).exists()).toBe(expected);
       },
     );
   });
