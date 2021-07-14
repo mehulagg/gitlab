@@ -18,6 +18,7 @@ end
 
 def quote(name)
   return "null" if name.nil?
+  return "\"set null\"" if name == :nullify
 
   "\"#{name}\""
 end
