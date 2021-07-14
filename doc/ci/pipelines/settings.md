@@ -68,7 +68,7 @@ Your project may have multiple concurrent deployment jobs that are
 scheduled to run in the same time frame.
 
 This can lead to a situation where an older deployment job runs after a
-newer one, which may not be what you want.
+newer one, which may not be what you want. An out-of-date deploment is cancelled with reason `fowrard_deployment_failure`.
 
 To avoid this scenario:
 
@@ -78,7 +78,7 @@ To avoid this scenario:
 1. Select the **Skip outdated deployment jobs** checkbox.
 1. Select **Save changes**.
 
-Older deployment job are skipped when a new deployment starts.
+Older deployment job are skipped when a new deployment starts. Jobs age is determined by when the timestamp of the job start rather than the commit time, so a newer commit can be skipped in some circrumstances.
 
 For more information, see [Deployment safety](../environments/deployment_safety.md).
 
