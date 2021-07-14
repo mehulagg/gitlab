@@ -16,6 +16,10 @@ We offer extensive integrations to help you connect and manage your Kubernetes c
 
 Read through this document to get started.
 
+## Kubernetes Agent
+
+The documentation below describes benefits and methods for integrating your Kubernetes Cluster with GitLab via our [Certificate Method]() which is now deprecated. Our recommended method for integrating your Kubernetes Cluster with GitLab is the [Kubernetes Agent]().
+
 ## Clusters infrastructure
 
 Use [Infrastructure as Code](../../infrastructure) to create and manage your clusters with the GitLab integration with Terraform.
