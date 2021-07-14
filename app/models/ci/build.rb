@@ -902,6 +902,12 @@ module Ci
       dependencies.valid?
     end
 
+    def has_no_session_or_valid_runner_session?
+      return true unless runner_session
+
+      runner_session.valid?
+    end
+
     def invalid_dependencies
       dependencies.invalid_local
     end

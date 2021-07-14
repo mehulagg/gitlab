@@ -249,7 +249,6 @@ module Ci
     end
 
     def handle_invalid_session!(build, params)
-      byebug
       ex = InvalidSessionException.new(
         "Invalid runner session: #{build.runner_session.errors.full_messages.join(', ')}",
         { session_params: params[:session] }
@@ -298,7 +297,7 @@ module Ci
         missing_dependency_failure: -> (build, _) { !build.has_valid_build_dependencies? },
         runner_unsupported: -> (build, params) { !build.supported_runner?(params.dig(:info, :features)) },
         archived_failure: -> (build, _) { build.archived? },
-        session_invalid: -> (build, _) { !build&.runner_session&.valid? }
+        session_invalid: -> (build, _) { !build.has_no_session_or_valid_runner_session? }
       }
     end
   end
