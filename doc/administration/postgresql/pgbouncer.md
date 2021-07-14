@@ -200,6 +200,37 @@ Once you've performed the tasks or procedure, switch back to using PgBouncer:
    sudo gitlab-ctl reconfigure
    ```
 
+## Fine-tuning
+
+PgBouncer comes with good defaults that are usually enough for the majority of installations. 
+In specific cases you may want to change the performance/resource specific variables to either increase possible 
+throughput or to limit resource utilization that could cause memory exhaustion on the database.
+
+You can find the parameters and respective documentation on the [official PgBouncer documentation](https://www.pgbouncer.org/config.html).
+Listed below are the most relevant ones and their defaults on a Omnibus installation:
+
+- `pgbouncer['max_client_conn']` (default: `2048`, depends on server file descriptor limits)
+- `pgbouncer['default_pool_size']` (default: `100`)
+
+When changing any of the parameters above, consider the total amount of connections the database is expected to receive,
+and if you are using more than one PgBouncer behind an internal load-balancer, you need to take that into 
+account as well.
+
+The ideal number for `default_pool_size` must be enough to handle all provisioned services that needs to access 
+the database. Each of the listed services below use the following formula to define database pool size: 
+
+- `puma` : `max_threads + headroom` (default `14`)
+    * `max_threads` is configured via: `gitlab['puma']['max_threads']` (default: `4`)
+    * `headroom` can be configured via `DB_POOL_HEADROOM` env variable (default to `10`)
+- `sidekiq` : `max_concurrency + 1 + headroom` (default: `61`)
+    * `max_concurrency` is configured via: `sidekiq['max_concurrency']` (default: `50`)
+    * `headroom` can be configured via `DB_POOL_HEADROOM` env variable (default to `10`)
+- `geo-logcursor`: `1+headroom` (default: `11`)
+    * `headroom` can be configured via `DB_POOL_HEADROOM` env variable (default to `10`)
+
+Consider the values above and multiply by the number of instances running: `puma`, `sidekiq` and `geo-logcursor` 
+connecting to this PgBouncer instance.
+
 ## Troubleshooting
 
 In case you are experiencing any issues connecting through PgBouncer, the first
