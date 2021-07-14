@@ -218,6 +218,10 @@ RSpec.configure do |config|
     # Reload all feature flags definitions
     Feature.register_definitions
 
+    # TODO: CI Vertical
+    # Ensure that all partitions are created
+    Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+
     # Enable all features by default for testing
     # Reset any changes in after hook.
     stub_all_feature_flags
