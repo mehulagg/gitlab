@@ -86,7 +86,7 @@ export default {
       return this.$apollo.queries?.weight?.loading || this.loading;
     },
     hasWeight() {
-      return this.weight != null;
+      return this.weight !== null;
     },
     weightLabel() {
       return this.hasWeight ? this.weight : this.$options.i18n.noWeightLabel;
