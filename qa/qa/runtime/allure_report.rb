@@ -15,6 +15,7 @@ module QA
           configure_allure
           configure_attachments
           configure_rspec
+          add_environment_info
         end
 
         private
@@ -84,6 +85,20 @@ module QA
               example.add_link(name: "Job(#{Env.ci_job_name})", url: Env.ci_job_url) if Env.running_in_ci?
             end
           end
+        end
+
+        # Add custom environment data to report
+        #
+        # @return [void]
+        def add_environment_info
+          return unless Env.running_in_ci?
+
+          Allure.add_environment(
+            {
+              deploy_version: Env.deploy_version,
+              commit_sha: ENV["TOP_UPSTREAM_SOURCE_SHA"] || ENV["CI_COMMIT_SHA"]
+            }
+          )
         end
       end
     end
