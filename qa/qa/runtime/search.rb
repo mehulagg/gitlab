@@ -8,7 +8,7 @@ module QA
       extend self
       extend Support::Api
 
-      RETRY_MAX_ITERATION = 10
+      RETRY_MAX_ITERATION = 20
       RETRY_SLEEP_INTERVAL = 60
       INSERT_RECALL_THRESHOLD = RETRY_MAX_ITERATION * RETRY_SLEEP_INTERVAL
 
