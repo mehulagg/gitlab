@@ -95,7 +95,7 @@ module TestEnv
   TMP_TEST_PATH = Rails.root.join('tmp', 'tests').freeze
   REPOS_STORAGE = 'default'
   SECOND_STORAGE_PATH = Rails.root.join('tmp', 'tests', 'second_storage')
-  SETUP_METHODS = %i[setup_gitaly setup_gitlab_shell setup_workhorse setup_factory_repo setup_forked_repo].freeze
+  SETUP_METHODS = %i[setup_cache setup_gitaly setup_gitlab_shell setup_workhorse setup_factory_repo setup_forked_repo].freeze
 
   # Can be overriden
   def setup_methods
@@ -131,6 +131,14 @@ module TestEnv
     start_gitaly(gitaly_dir)
   end
 
+  def setup_cache
+    FileUtils.mkdir_p(cache_path)
+  end
+
+  def cache_path
+    TMP_TEST_PATH.join('cache')
+  end
+
   # Clean /tmp/tests
   #
   # Keeps gitlab-shell and gitlab-test
@@ -155,6 +163,19 @@ module TestEnv
   end
 
   def setup_gitaly
+    current_gitaly_version = Gitlab::GitalyClient.expected_server_version
+    sha_dir = cache_path.join("gitaly-#{current_gitaly_version}")
+
+    if Dir.exist?(sha_dir) && File.symlink?(gitaly_dir)
+      # TODO check readlink is starts with cache_path
+      puts "Existing cached dir #{sha_dir}, symlinking to #{gitaly_dir}..."
+
+      FileUtils.rm(gitaly_dir)
+      File.symlink(sha_dir, gitaly_dir)
+
+      return
+    end
+
     component_timed_setup('Gitaly',
       install_dir: gitaly_dir,
       version: Gitlab::GitalyClient.expected_server_version,
@@ -179,7 +200,14 @@ module TestEnv
           }
         )
         Gitlab::SetupHelper::Praefect.create_configuration(gitaly_dir, { 'praefect' => repos_path }, force: true)
+
+        # Make the gitaly dir a symlink
+        FileUtils.rm_rf(sha_dir)
+        FileUtils.mv(gitaly_dir, sha_dir)
+        File.symlink(sha_dir, gitaly_dir)
       end
+
+    #TODO clean last 10 cached directories
   end
 
   def gitaly_socket_path
@@ -458,6 +486,7 @@ module TestEnv
   # These are directories that should be preserved at cleanup time
   def test_dirs
     @test_dirs ||= %w[
+      cache
       frontend
       gitaly
       gitlab-shell
@@ -557,6 +586,7 @@ module TestEnv
 
   def component_needs_update?(component_folder, expected_version)
     # Allow local overrides of the component for tests during development
+    # TODO allow gitaly component to update if it's a cached symlink
     return false if Rails.env.test? && File.symlink?(component_folder)
 
     return false if component_matches_git_sha?(component_folder, expected_version)
