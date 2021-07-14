@@ -36,9 +36,9 @@ and see the [Development section](../../index.md) for the required guidelines.
 ## Merge request guidelines
 
 If you find an issue, please submit a merge request with a fix or improvement, if
-you can, and include tests. If you don't know how to fix the issue but can write a test
-that exposes the issue, we will accept that as well. In general, bug fixes that
-include a regression test are merged quickly, while new features without proper
+you can, and include tests. If the issue has not been verified by a product manager or member of the team,
+please start a dicussion with a PM. If you don't know how to fix the issue but can write a test that exposes the issue,
+we will accept that as well. In general, bug fixes that include a regression test are merged quickly, while new features without proper
 tests might be slower to receive feedback. The workflow to make a merge
 request is as follows:
 
