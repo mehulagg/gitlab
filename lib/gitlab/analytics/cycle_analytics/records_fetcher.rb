@@ -41,7 +41,7 @@ module Gitlab
             # special case (legacy): 'Test' and 'Staging' stages should show Ci::Build records
             if default_test_stage? || default_staging_stage?
               # TODO CI Vertical
-              # Validate this entire block does the right thing
+              # Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/334680
               pipeline_ids = ordered_and_limited_query.map{ |mr| mr.metrics.pipeline_id }
               builds = CommitStatus.in_pipelines(pipeline_ids)
 
