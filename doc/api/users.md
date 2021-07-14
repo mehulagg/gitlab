@@ -109,6 +109,7 @@ GET /users
 | `two_factor`       | string  | no       | Filter users by Two-factor authentication. Filter values are `enabled` or `disabled`. By default it returns all users |
 | `without_projects` | boolean | no       | Filter users without projects. Default is `false`, which means that all users are returned, with and without projects. |
 | `admins`           | boolean | no       | Return only admin users. Default is `false`                                 |
+| `by_saml_provider_id` | number | no     | Return only users created by the SAML provider ID. If not included it returns all users. |
 
 ```json
 [
