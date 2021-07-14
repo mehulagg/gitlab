@@ -12,9 +12,7 @@ RSpec.describe License do
   describe 'validations' do
     describe '#valid_license' do
       context 'when the license is provided' do
-        it 'is valid' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
 
       context 'when no license is provided' do
@@ -22,9 +20,7 @@ RSpec.describe License do
           license.data = nil
         end
 
-        it 'is invalid' do
-          expect(license).not_to be_valid
-        end
+        it { is_expected.not_to be_valid }
       end
     end
 
@@ -37,11 +33,11 @@ RSpec.describe License do
       end
 
       context 'when skip_true_up is true on the license' do
-        it 'does not add errors for invalid true up' do
+        before do
           set_restrictions(restricted_user_count: 10, trueup_quantity: 8, skip_true_up: true)
-
-          expect(license).to be_valid
         end
+
+        it { is_expected.to be_valid }
       end
 
       context 'when skip_true_up is false on the license' do
@@ -69,25 +65,23 @@ RSpec.describe License do
           set_restrictions(restricted_user_count: 5, trueup_quantity: 10)
         end
 
-        it 'is valid' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
 
         context 'but active users exceeds restricted user count' do
-          it 'is invalid' do
+          before do
             create_list(:user, 6)
-
-            expect(license).not_to be_valid
           end
+
+          it { is_expected.not_to be_valid }
         end
       end
 
       context 'when quantity is wrong' do
-        it 'is invalid' do
+        before do
           set_restrictions(restricted_user_count: 5, trueup_quantity: 8)
-
-          expect(license).not_to be_valid
         end
+
+        it { is_expected.not_to be_valid }
       end
 
       context 'when previous user count is not present' do
@@ -102,11 +96,11 @@ RSpec.describe License do
         end
 
         context 'with wrong true-up quantity' do
-          it 'is invalid' do
+          before do
             create_list(:user, 2)
-
-            expect(license).not_to be_valid
           end
+
+          it { is_expected.not_to be_valid }
         end
       end
 
@@ -115,9 +109,7 @@ RSpec.describe License do
           set_restrictions(restricted_user_count: 5, trueup_quantity: 6, previous_user_count: 4)
         end
 
-        it 'uses it to calculate the expected true-up' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
     end
 
@@ -232,9 +224,7 @@ RSpec.describe License do
         let!(:historical_data)  { create(:historical_data, recorded_at: date, active_user_count: active_user_count) }
 
         context 'when there is no active user count restriction' do
-          it 'is valid' do
-            expect(license).to be_valid
-          end
+          it { is_expected.to be_valid }
         end
 
         context 'without historical data' do
@@ -250,9 +240,7 @@ RSpec.describe License do
           end
 
           context 'with previous_user_count and active users above of license limit' do
-            it 'is invalid' do
-              expect(license).to be_invalid
-            end
+            it { is_expected.not_to be_valid }
 
             it 'shows the proper error message' do
               license.valid?
@@ -271,33 +259,25 @@ RSpec.describe License do
           end
 
           context 'when the license started' do
-            it 'is invalid' do
-              expect(license).not_to be_valid
-            end
+            it { is_expected.not_to be_valid }
           end
 
           context 'after the license started' do
             let(:date) { Date.current }
 
-            it 'is valid' do
-              expect(license).to be_valid
-            end
+            it { is_expected.to be_valid }
           end
 
           context 'in the year before the license started' do
             let(:date) { described_class.current.starts_at - 6.months }
 
-            it 'is invalid' do
-              expect(license).not_to be_valid
-            end
+            it { is_expected.not_to be_valid }
           end
 
           context 'earlier than a year before the license started' do
             let(:date) { described_class.current.starts_at - 2.years }
 
-            it 'is valid' do
-              expect(license).to be_valid
-            end
+            it { is_expected.to be_valid }
           end
         end
 
@@ -306,9 +286,7 @@ RSpec.describe License do
             gl_license.restrictions = { active_user_count: active_user_count + 1 }
           end
 
-          it 'is valid' do
-            expect(license).to be_valid
-          end
+          it { is_expected.to be_valid }
         end
 
         context 'when the active user count is met exactly' do
@@ -324,9 +302,7 @@ RSpec.describe License do
 
     describe '#not_expired' do
       context "when the license doesn't expire" do
-        it 'is valid' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
 
       context 'when the license has expired' do
@@ -334,9 +310,7 @@ RSpec.describe License do
           gl_license.expires_at = Date.yesterday
         end
 
-        it 'is invalid' do
-          expect(license).not_to be_valid
-        end
+        it { is_expected.not_to be_valid }
       end
 
       context 'when the license has yet to expire' do
@@ -344,9 +318,7 @@ RSpec.describe License do
           gl_license.expires_at = Date.tomorrow
         end
 
-        it 'is valid' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
     end
 
@@ -370,9 +342,7 @@ RSpec.describe License do
           set_restrictions(restricted_user_count: 10, previous_user_count: 15)
         end
 
-        it 'is valid' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
     end
   end
@@ -518,34 +488,26 @@ RSpec.describe License do
       context 'when addon included' do
         let(:plan) { 'premium' }
 
-        it 'returns true' do
-          is_expected.to eq(true)
-        end
+        it{ is_expected.to eq(true) }
       end
 
       context 'when addon not included' do
         let(:plan) { 'starter' }
 
-        it 'returns false' do
-          is_expected.to eq(false)
-        end
+        it{ is_expected.to eq(false) }
       end
 
       context 'when plan is not set' do
         let(:plan) { nil }
 
-        it 'returns false' do
-          is_expected.to eq(false)
-        end
+        it{ is_expected.to eq(false) }
       end
 
       context 'when feature does not exists' do
         let(:plan) { 'premium' }
         let(:feature) { nil }
 
-        it 'returns false' do
-          is_expected.to eq(false)
-        end
+        it{ is_expected.to eq(false) }
       end
     end
 
