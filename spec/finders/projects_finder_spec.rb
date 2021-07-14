@@ -137,6 +137,8 @@ RSpec.describe ProjectsFinder do
         before do
           public_project.topic_list = 'foo'
           public_project.save!
+
+          skip "CI Vertical: This is not yet supported"
         end
 
         let(:params) { { tag: 'foo' } }
@@ -148,6 +150,8 @@ RSpec.describe ProjectsFinder do
         before do
           public_project.topic_list = 'foo, bar'
           public_project.save!
+
+          skip "CI Vertical: This is not yet supported"
         end
 
         context 'single topic' do

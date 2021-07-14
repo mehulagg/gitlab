@@ -71,6 +71,8 @@ RSpec.describe Resolvers::ProjectsResolver do
           let(:filters) { { topics: %w(ruby) } }
 
           it 'returns matching project' do
+            skip "CI Vertical: Not yet supported"
+
             is_expected.to contain_exactly(project)
           end
         end
@@ -151,6 +153,8 @@ RSpec.describe Resolvers::ProjectsResolver do
           let(:filters) { { topics: %w(ruby) } }
 
           it 'returns matching project' do
+            skip "CI Vertical: Not yet supported"
+
             is_expected.to contain_exactly(project)
           end
         end
