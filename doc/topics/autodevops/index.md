@@ -335,11 +335,18 @@ spec:
       value: "PUT_YOUR_HTTPS_PROXY_HERE"
 ```
 
-## Upgrading
+## Upgrade Auto DevOps dependencies when updating GitLab
 
-When upgrading GitLab, see:
+When updating GitLab, you may need to upgrade Auto DevOps dependencies to
+match your new GitLab version:
 
-- [Upgrading Auto DevOps dependencies](upgrading_auto_deploy_dependencies.md).
+- [Upgrading Auto DevOps resources](upgrading_auto_deploy_dependencies.md):
+  - Auto DevOps template.
+  - Auto Deploy template.
+  - Auto Deploy image.
+  - Helm.
+  - Kubernetes.
+  - Environment variables.
 - [Upgrading PostgreSQL](upgrading_postgresql.md).
 
 ## Troubleshooting
