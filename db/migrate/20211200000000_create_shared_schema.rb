@@ -20,15 +20,15 @@ class CreateSharedSchema < ActiveRecord::Migration[6.1]
     EOS
 
     TABLES.each do |table|
-      execute "ALTER TABLE #{table} SET SCHEMA gitlab_shared"
+      execute "ALTER TABLE public.#{table} SET SCHEMA gitlab_shared"
     end
   end
 
   def down
-    drop_schema('gitlab_shared')
-
     TABLES.each do |table|
-      execute "ALTER TABLE #{table} SET SCHEMA public"
+      execute "ALTER TABLE gitlab_shared.#{table} SET SCHEMA public"
     end
+
+    drop_schema('gitlab_shared')
   end
 end

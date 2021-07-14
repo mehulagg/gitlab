@@ -2,7 +2,11 @@
 
 module MigrationsHelpers
   def active_record_base
-    ActiveRecord::Base
+    if self.class.metadata[:ci]
+      ApplicationRecord
+    else
+      Ci::ApplicationRecord
+    end
   end
 
   def table(name)
@@ -17,11 +21,15 @@ module MigrationsHelpers
   end
 
   def migrations_paths
-    ActiveRecord::Migrator.migrations_paths
+    # TODO: CI Vertical
+    active_record_base.connection.migrations_paths
+    # ActiveRecord::Migrator.migrations_paths
   end
 
   def migration_context
-    ActiveRecord::MigrationContext.new(migrations_paths, ActiveRecord::SchemaMigration)
+    # TODO: CI Vertical
+    active_record_base.connection.migration_context
+    # ActiveRecord::MigrationContext.new(migrations_paths, ActiveRecord::SchemaMigration)
   end
 
   def migrations
@@ -35,7 +43,8 @@ module MigrationsHelpers
   end
 
   def foreign_key_exists?(source, target = nil, column: nil)
-    ActiveRecord::Base.connection.foreign_keys(source).any? do |key|
+    # TODO: CI Vertical
+    active_record_base.connection.foreign_keys(source).any? do |key|
       if column
         key.options[:column].to_s == column.to_s
       else
