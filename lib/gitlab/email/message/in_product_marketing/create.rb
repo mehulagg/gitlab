@@ -84,7 +84,7 @@ module Gitlab
           end
 
           def basics_link
-            link(s_('InProductMarketing|Git basics'), help_page_url('gitlab-basics/README'))
+            link(s_('InProductMarketing|Git basics'), help_page_url('gitlab-basics/indexq'))
           end
 
           def import_link
