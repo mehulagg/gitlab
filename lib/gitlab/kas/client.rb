@@ -53,10 +53,10 @@ module Gitlab
       end
 
       def credentials
-        if Rails.env.test? || Rails.env.development?
-          :this_channel_is_insecure
-        else
+        if URI(Gitlab::Kas.internal_url).scheme == 'tls'
           GRPC::Core::ChannelCredentials.new
+        else
+          :this_channel_is_insecure
         end
       end
 
