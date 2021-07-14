@@ -42,6 +42,9 @@ export const DELETE_PACKAGE_FILE_ERROR_MESSAGE = s__(
 export const DELETE_PACKAGE_FILE_SUCCESS_MESSAGE = s__(
   'PackageRegistry|Package file deleted successfully',
 );
+export const FETCH_PACKAGE_DETAILS_ERROR_MESSAGE = s__(
+  'PackageRegistry|Failed to load the package data',
+);
 
 export const PACKAGE_ERROR_STATUS = 'error';
 export const PACKAGE_DEFAULT_STATUS = 'default';
