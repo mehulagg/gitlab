@@ -30,7 +30,20 @@ module Atlassian
         responses.compact
       end
 
+      def user_info(account_id)
+        r = get('/rest/api/3/user', { accountId: account_id })
+
+        r.parsed_response if r.code == 200
+      end
+
       private
+
+      def get(path, query_params)
+        uri = URI.join(@base_uri, path)
+        uri.query = URI.encode_www_form(query_params)
+
+        self.class.get(uri, headers: headers(uri))
+      end
 
       def store_ff_info(project:, feature_flags:, **opts)
         items = feature_flags.map { |flag| ::Atlassian::JiraConnect::Serializers::FeatureFlagEntity.represent(flag, opts) }

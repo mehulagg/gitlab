@@ -27,6 +27,8 @@ class JiraConnect::SubscriptionsController < JiraConnect::ApplicationController
   def create
     result = create_service.execute
 
+    Rails.logger.info("Jira User: #{jira_user}")
+
     if result[:status] == :success
       render json: { success: true }
     else
