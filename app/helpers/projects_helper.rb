@@ -351,7 +351,7 @@ module ProjectsHelper
   end
 
   def show_terraform_banner?(project)
-    project.repository_languages.find { |lang| lang.name == 'HCL' } && project.terraform_states.empty?
+    project.repository_languages.with_programming_language('HCL').exists? && project.terraform_states.empty?
   end
 
   private

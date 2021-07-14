@@ -1,5 +1,4 @@
 - project = local_assigns.fetch(:project)
-- @content_class = "container-limited limit-container-width" unless fluid_layout
 
 = content_for :flash_message do
   = render partial: 'deletion_failed', locals: { project: project }
@@ -10,7 +9,4 @@
       = render 'shared/auto_devops_implicitly_enabled_banner', project: project
     = render_if_exists 'projects/above_size_limit_warning', project: project
     = render_if_exists 'shared/shared_runners_minutes_limit', project: project, classes: [container_class, ("limit-container-width" unless fluid_layout)]
-
-    - if show_terraform_banner?(project)
-      .container-fluid{ class: @content_class }
-        .js-terraform-notification{ data: { project_id: project.id } }
+    = render_if_exists 'projects/terraform_banner', project: project
