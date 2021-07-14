@@ -113,7 +113,7 @@ gemnasium-python-dependency_scanning:
 package_hunter-yarn:
   extends:
     - .package_hunter-base
-    - .reports:rules:package_hunter-yarn
+    - .if-merge-request
   script:
     - node /usr/src/app/cli.js analyze --format gitlab --manager yarn gitlab.tgz | tee $CI_PROJECT_DIR/gl-dependency-scanning-report.json
 
