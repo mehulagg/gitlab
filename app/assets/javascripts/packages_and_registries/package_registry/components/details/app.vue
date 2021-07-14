@@ -14,6 +14,8 @@ import {
   GlTabs,
   GlSprintf,
 } from '@gitlab/ui';
+import createFlash from '~/flash';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
 import { s__, __ } from '~/locale';
@@ -24,12 +26,14 @@ import { s__, __ } from '~/locale';
 // import PackageHistory from '~/packages/details/components/package_history.vue';
 // import PackageListRow from '~/packages/shared/components/package_list_row.vue';
 import PackagesListLoader from '~/packages/shared/components/packages_list_loader.vue';
+import { packageTypeToTrackCategory } from '~/packages/shared/utils';
 import {
   PackageType,
   TrackingActions,
   SHOW_DELETE_SUCCESS_ALERT,
-} from '~/packages/shared/constants';
-import { packageTypeToTrackCategory } from '~/packages/shared/utils';
+  FETCH_PACKAGE_DETAILS_ERROR_MESSAGE,
+} from '~/packages_and_registries/package_registry/constants';
+import getPackageDetails from '~/packages_and_registries/package_registry/graphql/queries/get_package_details.query.graphql';
 import Tracking from '~/tracking';
 
 export default {
@@ -42,7 +46,8 @@ export default {
     GlTab,
     GlTabs,
     GlSprintf,
-    PackageTitle: () => import('~/packages/details/components/package_title.vue'),
+    PackageTitle: () =>
+      import('~/packages_and_registries/package_registry/components/details/package_title.vue'),
     TerraformTitle: () =>
       import('~/packages_and_registries/infrastructure_registry/components/details_title.vue'),
     PackagesListLoader,
@@ -59,6 +64,7 @@ export default {
   },
   mixins: [Tracking.mixin()],
   inject: [
+    'packageId',
     'titleComponent',
     'projectName',
     'canDelete',
@@ -75,15 +81,34 @@ export default {
       packageEntity: {},
     };
   },
+  apollo: {
+    packageEntity: {
+      query: getPackageDetails,
+      variables() {
+        return this.queryVariables;
+      },
+      update(data) {
+        return data.package;
+      },
+      error(e) {
+        createFlash({ message: FETCH_PACKAGE_DETAILS_ERROR_MESSAGE });
+      },
+    },
+  },
   computed: {
+    queryVariables() {
+      return {
+        id: convertToGraphQLId('Packages::Package', this.packageId),
+      };
+    },
     packageFiles() {
       return this.packageEntity.packageFiles;
     },
     isLoading() {
-      return false;
+      return this.$apollo.queries.package;
     },
     isValidPackage() {
-      return Boolean(this.packageEntity.name);
+      return Boolean(this.packageEntity?.name);
     },
     tracking() {
       return {
@@ -176,7 +201,7 @@ export default {
   />
 
   <div v-else class="packages-app">
-    <component :is="titleComponent">
+    <component :is="titleComponent" :package-entity="packageEntity">
       <template #delete-button>
         <gl-button
           v-if="canDelete"
