@@ -29,12 +29,6 @@ module Users
       Users::BannedUser.create(user: user)
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def hide_contributions(user)
-      Users::HideContributionsWorker.perform_async(user.id)
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
     def log_event(user)
       Gitlab::AppLogger.info(message: "User banned", user: "#{user.username}", email: "#{user.email}", banned_by: "#{current_user.username}", ip_address: "#{current_user.current_sign_in_ip}")
     end
