@@ -22,7 +22,7 @@ export const fetchSettings = ({ commit }, endpoint) => {
     .catch(({ response }) => {
       const error = response?.data?.message;
 
-      commit(types.RECEIVE_SETTINGS_ERROR, error);
+      commit(types.RECEIVE_SETTINGS_ERROR);
       createFlash({
         message: __('There was an error loading merge request approval settings.'),
         captureError: true,
@@ -46,7 +46,7 @@ export const updateSettings = ({ commit, state }, endpoint) => {
     .catch(({ response }) => {
       const error = response?.data?.message;
 
-      commit(types.UPDATE_SETTINGS_ERROR, error);
+      commit(types.UPDATE_SETTINGS_ERROR);
       createFlash({
         message: __('There was an error updating merge request approval settings.'),
         captureError: true,

@@ -1,10 +1,10 @@
-import { GlButton, GlForm } from '@gitlab/ui';
+import { GlButton, GlForm, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
 import { APPROVAL_SETTINGS_I18N } from 'ee/approvals/constants';
-import { createStoreOptions } from 'ee/approvals/stores';
+import createStore from 'ee/approvals/stores';
 import groupSettingsModule from 'ee/approvals/stores/modules/group_settings';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -23,21 +23,24 @@ describe('ApprovalSettings', () => {
     wrapper = extendedWrapper(
       shallowMount(ApprovalSettings, {
         localVue,
-        store: new Vuex.Store(store),
+        store,
         propsData: { approvalSettingsPath },
       }),
     );
   };
 
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findForm = () => wrapper.findComponent(GlForm);
   const findSaveButton = () => wrapper.findComponent(GlButton);
 
   beforeEach(() => {
-    store = createStoreOptions(groupSettingsModule());
+    const module = groupSettingsModule();
 
-    actions = store.modules.approvals.actions;
+    actions = module.actions;
     jest.spyOn(actions, 'fetchSettings').mockImplementation();
     jest.spyOn(actions, 'updateSettings').mockImplementation();
+
+    store = createStore(module);
   });
 
   afterEach(() => {
@@ -92,9 +95,20 @@ describe('ApprovalSettings', () => {
   });
 
   describe('loading', () => {
-    it('does not render the form if the settings are not there yet', () => {
+    it('renders the loading icon and not the form if the settings are not there yet', () => {
       createWrapper();
 
+      expect(findLoadingIcon().exists()).toBe(true);
+      expect(findForm().exists()).toBe(false);
+    });
+
+    it('renders the loading icon and not the form if any initial error occurs', async () => {
+      createWrapper();
+
+      await store.commit('RECEIVE_SETTINGS_ERROR');
+      await waitForPromises();
+
+      expect(findLoadingIcon().exists()).toBe(true);
       expect(findForm().exists()).toBe(false);
     });
 

@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlForm, GlFormGroup } from '@gitlab/ui';
+import { GlButton, GlForm, GlFormGroup, GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { mapComputed } from '~/vuex_shared/bindings';
 import { APPROVAL_SETTINGS_I18N } from '../constants';
@@ -11,6 +11,7 @@ export default {
     GlButton,
     GlForm,
     GlFormGroup,
+    GlLoadingIcon,
   },
   props: {
     approvalSettingsPath: {
@@ -20,12 +21,13 @@ export default {
   },
   data() {
     return {
-      hasFormLoaded: false,
+      isFormLoaded: false,
     };
   },
   computed: {
     ...mapState({
       isLoading: (state) => state.approvals.isLoading,
+      hasInitialError: (state) => state.approvals.hasInitialError,
     }),
     ...mapComputed(
       [
@@ -38,10 +40,13 @@ export default {
       undefined,
       (state) => state.approvals.settings,
     ),
+    hideForm() {
+      return !this.isFormLoaded || this.hasInitialError;
+    },
   },
   async created() {
     await this.fetchSettings(this.approvalSettingsPath);
-    this.hasFormLoaded = true;
+    this.isFormLoaded = true;
   },
   methods: {
     ...mapActions(['fetchSettings', 'updateSettings']),
@@ -62,7 +67,8 @@ export default {
 </script>
 
 <template>
-  <gl-form v-if="hasFormLoaded" @submit.prevent="onSubmit">
+  <gl-loading-icon v-if="hideForm" size="lg" />
+  <gl-form v-else @submit.prevent="onSubmit">
     <gl-form-group>
       <approval-settings-checkbox
         v-model="preventAuthorApproval"

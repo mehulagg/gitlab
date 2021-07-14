@@ -53,10 +53,7 @@ describe('EE approvals group settings module actions', () => {
           actions.fetchSettings,
           approvalSettingsPath,
           state,
-          [
-            { type: types.REQUEST_SETTINGS },
-            { type: types.RECEIVE_SETTINGS_ERROR, payload: data.message },
-          ],
+          [{ type: types.REQUEST_SETTINGS }, { type: types.RECEIVE_SETTINGS_ERROR }],
           [],
         ).then(() => {
           expect(createFlash).toHaveBeenCalledWith({
@@ -120,10 +117,7 @@ describe('EE approvals group settings module actions', () => {
           actions.updateSettings,
           approvalSettingsPath,
           state,
-          [
-            { type: types.REQUEST_UPDATE_SETTINGS },
-            { type: types.UPDATE_SETTINGS_ERROR, payload: data.message },
-          ],
+          [{ type: types.REQUEST_UPDATE_SETTINGS }, { type: types.UPDATE_SETTINGS_ERROR }],
           [],
         ).then(() => {
           expect(createFlash).toHaveBeenCalledWith({

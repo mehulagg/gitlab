@@ -13,6 +13,7 @@ describe('Group settings store mutations', () => {
       mutations.REQUEST_SETTINGS(state);
 
       expect(state.isLoading).toBe(true);
+      expect(state.hasInitialError).toBe(false);
     });
   });
 
@@ -40,6 +41,7 @@ describe('Group settings store mutations', () => {
       mutations.RECEIVE_SETTINGS_ERROR(state);
 
       expect(state.isLoading).toBe(false);
+      expect(state.hasInitialError).toBe(true);
     });
   });
 

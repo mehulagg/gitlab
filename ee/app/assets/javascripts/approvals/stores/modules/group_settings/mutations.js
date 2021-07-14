@@ -11,6 +11,7 @@ const mapDataToState = (data) => ({
 export default {
   [types.REQUEST_SETTINGS](state) {
     state.isLoading = true;
+    state.hasInitialError = false;
   },
   [types.RECEIVE_SETTINGS_SUCCESS](state, data) {
     state.settings = { ...mapDataToState(data) };
@@ -18,6 +19,7 @@ export default {
   },
   [types.RECEIVE_SETTINGS_ERROR](state) {
     state.isLoading = false;
+    state.hasInitialError = true;
   },
   [types.REQUEST_UPDATE_SETTINGS](state) {
     state.isLoading = true;
