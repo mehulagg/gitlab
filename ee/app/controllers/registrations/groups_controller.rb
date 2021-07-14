@@ -2,12 +2,9 @@
 
 module Registrations
   class GroupsController < ApplicationController
-    include ::Gitlab::Utils::StrongMemoize
+    include Registrations::GroupsControllerConcern
 
     layout 'minimal'
-
-    before_action :check_if_gl_com_or_dev
-    before_action :authorize_create_group!, only: :new
 
     feature_category :onboarding
 
@@ -26,112 +23,6 @@ module Registrations
         create_successful_flow
       else
         render action: :new
-      end
-    end
-
-    protected
-
-    def show_confirm_warning?
-      false
-    end
-
-    private
-
-    def create_successful_flow
-      if helpers.in_trial_onboarding_flow?
-        apply_trial_for_trial_onboarding_flow
-      else
-        registration_onboarding_flow
-      end
-    end
-
-    def authorize_create_group!
-      access_denied! unless can?(current_user, :create_group)
-    end
-
-    def group_params
-      params.require(:group).permit(:name, :path, :visibility_level)
-    end
-
-    def apply_trial_for_trial_onboarding_flow
-      if apply_trial
-        record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
-        record_experiment_user(:trial_onboarding_issues, namespace_id: @group.id)
-        record_experiment_conversion_event(:remove_known_trial_form_fields)
-        record_experiment_conversion_event(:trial_onboarding_issues)
-
-        redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: helpers.in_trial_during_signup_flow?, trial_onboarding_flow: true)
-      else
-        render action: :new
-      end
-    end
-
-    def registration_onboarding_flow
-      record_experiment_conversion_event(:learn_gitlab_a, namespace_id: @group.id)
-      record_experiment_conversion_event(:learn_gitlab_b, namespace_id: @group.id)
-
-      if helpers.in_trial_during_signup_flow?
-        create_lead_and_apply_trial_flow
-      else
-        redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: false)
-      end
-    end
-
-    def create_lead_and_apply_trial_flow
-      if create_lead && apply_trial
-        redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: true)
-      else
-        render action: :new
-      end
-    end
-
-    def create_lead
-      trial_params = {
-        trial_user: params.permit(
-          :company_name,
-          :company_size,
-          :phone_number,
-          :number_of_users,
-          :country
-        ).merge(
-          work_email: current_user.email,
-          first_name: current_user.first_name,
-          last_name: current_user.last_name,
-          uid: current_user.id,
-          skip_email_confirmation: true,
-          gitlab_com_trial: true,
-          provider: 'gitlab',
-          newsletter_segment: current_user.email_opted_in
-        )
-      }
-      result = GitlabSubscriptions::CreateLeadService.new.execute(trial_params)
-      flash[:alert] = result&.dig(:errors) unless result&.dig(:success)
-
-      result&.dig(:success)
-    end
-
-    def apply_trial
-      apply_trial_params = {
-        uid: current_user.id,
-        trial_user: params.permit(:glm_source, :glm_content).merge({
-                                                                     namespace_id: @group.id,
-                                                                     gitlab_com_trial: true,
-                                                                     sync_to_gl: true
-                                                                   })
-      }
-
-      result = GitlabSubscriptions::ApplyTrialService.new.execute(apply_trial_params)
-      flash[:alert] = result&.dig(:errors) unless result&.dig(:success)
-
-      result&.dig(:success)
-    end
-
-    def learn_gitlab_context
-      strong_memoize(:learn_gitlab_context) do
-        in_experiment_group_a = Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user)
-        in_experiment_group_b = !in_experiment_group_a && Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
-
-        { in_experiment_group_a: in_experiment_group_a, in_experiment_group_b: in_experiment_group_b }
       end
     end
   end
