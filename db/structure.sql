@@ -23789,6 +23789,8 @@ CREATE INDEX index_issuable_metric_images_on_issue_id ON issuable_metric_images 
 
 CREATE UNIQUE INDEX index_issuable_severities_on_issue_id ON issuable_severities USING btree (issue_id);
 
+CREATE INDEX index_issuable_slas_on_id_due_at_label_applied ON issuable_slas USING btree (id, due_at) WHERE (label_applied = false);
+
 CREATE UNIQUE INDEX index_issuable_slas_on_issue_id ON issuable_slas USING btree (issue_id);
 
 CREATE INDEX index_issue_assignees_on_user_id ON issue_assignees USING btree (user_id);
