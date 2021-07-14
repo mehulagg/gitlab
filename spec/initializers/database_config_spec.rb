@@ -16,6 +16,8 @@ RSpec.describe 'Database config initializer' do
   end
 
   before do
+    skip "CI Vertical: not yet supported"
+
     allow(Gitlab::Runtime).to receive(:max_threads).and_return(max_threads)
   end
 

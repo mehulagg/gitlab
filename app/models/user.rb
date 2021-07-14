@@ -1617,13 +1617,17 @@ class User < ApplicationRecord
 
   def ci_owned_runners
     @ci_owned_runners ||= begin
+      # TODO: CI Vertical
+      project_ids = authorized_projects(Gitlab::Access::MAINTAINER).ids
       project_runners = Ci::RunnerProject
-        .where(project: authorized_projects(Gitlab::Access::MAINTAINER))
+        .where(project: project_ids)
         .joins(:runner)
         .select('ci_runners.*')
 
+      # TODO: CI Vertical
+      group_ids = Gitlab::ObjectHierarchy.new(owned_groups).base_and_descendants.ids
       group_runners = Ci::RunnerNamespace
-        .where(namespace_id: Gitlab::ObjectHierarchy.new(owned_groups).base_and_descendants.select(:id))
+        .where(namespace_id: group_ids)
         .joins(:runner)
         .select('ci_runners.*')
 

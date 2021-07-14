@@ -462,6 +462,7 @@ RSpec.describe Deployment do
       it 'retrieves deployments with deployable builds' do
         with_deployable = create(:deployment)
         create(:deployment, deployable: nil)
+        # TODO: CI Vertical
         create(:deployment, deployable_type: 'CommitStatus', deployable_id: non_existing_record_id)
 
         is_expected.to contain_exactly(with_deployable)

@@ -30,12 +30,10 @@ module Ci
       end
 
       def all_projects
+        # TODO: CI Vertical
         Project.from_union([
           Project.id_in(source_project),
-          Project.where_exists(
-            Ci::JobToken::ProjectScopeLink
-              .from_project(source_project)
-              .where('projects.id = ci_job_token_project_scope_links.target_project_id'))
+          Project.where(id: Ci::JobToken::ProjectScopeLink.from_project(source_project).pluck(:target_project_id))
         ], remove_duplicates: false)
       end
     end

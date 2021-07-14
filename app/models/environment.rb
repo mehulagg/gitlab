@@ -181,25 +181,50 @@ class Environment < ApplicationRecord
     # NOTE: The count of environments should be small~medium (e.g. < 5000)
     def stop_actions
       # TODO: CI Vertical: cross-join between environments/deployments and ci_builds
-      cte = cte_for_deployments_with_stop_action
-      ci_builds = Ci::Build.arel_table
+      if true
+        deployments = Deployment.where(environment: all)
+          .distinct_on_environment
+          .stoppable
 
-      inner_join_stop_actions = ci_builds.join(cte.table).on(
-        ci_builds[:project_id].eq(cte.table[:project_id])
-          .and(ci_builds[:ref].eq(cte.table[:ref]))
-          .and(ci_builds[:name].eq(cte.table[:on_stop]))
-      ).join_sources
+        # This likely can be written as `(id, project_id, ref) IN ((1,2,3),(1,3,4),...)`
+        builds = deployments.pluck(:project_id, :ref, :on_stop, :deployable_id).map do |project_id, ref, on_stop, deployable_id|
+          parent_build = Ci::Build.where(
+            project_id: project_id,
+            ref: ref,
+            id: deployable_id)
 
-      pipeline_ids = ci_builds.join(cte.table).on(
-        ci_builds[:id].eq(cte.table[:deployable_id])
-      ).project(:commit_id)
+          parent_pipeline = parent_build.select(:commit_id)
 
-      Ci::Build.joins(inner_join_stop_actions)
-               .with(cte.to_arel)
-               .where(ci_builds[:commit_id].in(pipeline_ids))
-               .where(status: Ci::HasStatus::BLOCKED_STATUS)
-               .preload_project_and_pipeline_project
-               .preload(:user, :metadata, :deployment)
+          Ci::Build
+            .where(name: on_stop)
+            .where(pipeline: parent_pipeline)
+            .where(status: Ci::HasStatus::BLOCKED_STATUS)
+        end
+
+        Ci::Build.from_union(builds)
+          .preload_project_and_pipeline_project
+          .preload(:user, :metadata, :deployment)
+      else
+        cte = cte_for_deployments_with_stop_action
+        ci_builds = Ci::Build.arel_table
+
+        inner_join_stop_actions = ci_builds.join(cte.table).on(
+          ci_builds[:project_id].eq(cte.table[:project_id])
+            .and(ci_builds[:ref].eq(cte.table[:ref]))
+            .and(ci_builds[:name].eq(cte.table[:on_stop]))
+        ).join_sources
+
+        pipeline_ids = ci_builds.join(cte.table).on(
+          ci_builds[:id].eq(cte.table[:deployable_id])
+        ).project(:commit_id)
+
+        Ci::Build.joins(inner_join_stop_actions)
+                .with(cte.to_arel)
+                .where(ci_builds[:commit_id].in(pipeline_ids))
+                .where(status: Ci::HasStatus::BLOCKED_STATUS)
+                .preload_project_and_pipeline_project
+                .preload(:user, :metadata, :deployment)
+      end
     end
 
     def count_by_state

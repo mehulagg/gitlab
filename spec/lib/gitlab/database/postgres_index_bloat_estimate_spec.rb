@@ -5,13 +5,13 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::PostgresIndexBloatEstimate do
   before do
     ActiveRecord::Base.connection.execute(<<~SQL)
-      ANALYZE schema_migrations
+      ANALYZE gitlab_shared.schema_migrations
     SQL
   end
 
   subject { described_class.find(identifier) }
 
-  let(:identifier) { 'public.schema_migrations_pkey' }
+  let(:identifier) { 'gitlab_shared.schema_migrations_pkey' }
 
   describe '#bloat_size' do
     it 'returns the bloat size in bytes' do
