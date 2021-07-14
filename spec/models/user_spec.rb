@@ -1787,35 +1787,41 @@ RSpec.describe User do
   describe 'groups' do
     let(:user) { create(:user) }
     let(:group) { create(:group) }
+    let(:other_group) { create(:group) }
 
     before do
       group.add_owner(user)
+      other_group.add_developer(user)
     end
 
     it { expect(user.several_namespaces?).to be_truthy }
-    it { expect(user.authorized_groups).to eq([group]) }
+    it { expect(user.authorized_groups).to eq([group, other_group]) }
     it { expect(user.owned_groups).to eq([group]) }
-    it { expect(user.namespaces).to contain_exactly(user.namespace, group) }
-    it { expect(user.manageable_namespaces).to contain_exactly(user.namespace, group) }
+    it { expect(user.namespaces).to contain_exactly(user.namespace, group, other_group) }
+    it { expect(user.manageable_namespaces).to contain_exactly(user.namespace, group, other_group) }
+
+    context 'with owned groups only' do
+      it { expect(user.namespaces(owned_only: true)).to contain_exactly(user.namespace, group) }
+    end
 
     context 'with child groups' do
       let!(:subgroup) { create(:group, parent: group) }
 
       describe '#manageable_namespaces' do
         it 'includes all the namespaces the user can manage' do
-          expect(user.manageable_namespaces).to contain_exactly(user.namespace, group, subgroup)
+          expect(user.manageable_namespaces).to contain_exactly(user.namespace, group, other_group, subgroup)
         end
       end
 
       describe '#manageable_groups' do
         it 'includes all the namespaces the user can manage' do
-          expect(user.manageable_groups).to contain_exactly(group, subgroup)
+          expect(user.manageable_groups).to contain_exactly(group, other_group, subgroup)
         end
 
         it 'does not include duplicates if a membership was added for the subgroup' do
           subgroup.add_owner(user)
 
-          expect(user.manageable_groups).to contain_exactly(group, subgroup)
+          expect(user.manageable_groups).to contain_exactly(group, other_group, subgroup)
         end
       end
 

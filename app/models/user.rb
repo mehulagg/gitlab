@@ -1576,8 +1576,8 @@ class User < ApplicationRecord
       .order('routes.path')
   end
 
-  def namespaces
-    namespace_ids = groups.pluck(:id)
+  def namespaces(owned_only: false)
+    namespace_ids = (owned_only ? owned_groups : groups).pluck(:id)
     namespace_ids.push(namespace.id)
     Namespace.where(id: namespace_ids)
   end
