@@ -372,7 +372,7 @@ RSpec.describe Admin::UsersController do
       context 'when unsuccessful' do
         let(:user) { create(:user, :blocked) }
 
-        it 'does not ban user' do
+        it 'does not ban user', :aggregate_failures do
           put :ban, params: { id: user.username }
 
           user.reload
@@ -387,7 +387,7 @@ RSpec.describe Admin::UsersController do
         stub_feature_flags(ban_user_feature_flag: false)
       end
 
-      it 'does not ban user, renders 404' do
+      it 'does not ban user, renders 404', :aggregate_failures do
         put :ban, params: { id: user.username }
 
         user.reload
@@ -400,7 +400,7 @@ RSpec.describe Admin::UsersController do
   describe 'PUT unban/:id' do
     let(:banned_user) { create(:user, :banned) }
 
-    it 'unbans user' do
+    it 'unbans user', :aggregate_failures do
       put :unban, params: { id: banned_user.username }
 
       banned_user.reload
