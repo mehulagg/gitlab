@@ -55,7 +55,7 @@ they must be manually replicated to **all servers of the secondary site**.
    mv /etc/gitlab/gitlab-secrets.json /etc/gitlab/gitlab-secrets.json.`date +%F`
    ```
 
-1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails server on your primary** site to the **each  Rails, Sidekiq and Gitaly server on your secondary** site, or
+1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails server on your primary** site to the **each Rails, Sidekiq and Gitaly server on your secondary** site, or
    copy-and-paste the file contents between servers:
 
    ```shell
@@ -72,7 +72,7 @@ they must be manually replicated to **all servers of the secondary site**.
    chmod 0600 /etc/gitlab/gitlab-secrets.json
    ```
 
-1. Reconfigure **each  Rails, Sidekiq and Gitaly servers on your secondary** site for the change to take effect:
+1. Reconfigure **each Rails, Sidekiq and Gitaly servers on your secondary** site for the change to take effect:
 
    ```shell
    gitlab-ctl reconfigure
