@@ -1,0 +1,53 @@
+diff --git a/app/assets/javascripts/jobs/utils.js b/app/assets/javascripts/jobs/utils.js
+index 13360ff7700..1ccecf3eb53 100644
+--- a/app/assets/javascripts/jobs/utils.js
++++ b/app/assets/javascripts/jobs/utils.js
+@@ -3,10 +3,10 @@
+  *   https?:\/\/
+  *
+  * up until a disallowed character or whitespace
+- *   [^"<>()[\]\\^`{|}\s]+
++ *   [^"<>()\\^`{|}\s]+
+  *
+  * and a disallowed character or whitespace, including non-ending chars .,:;!?
+- *   [^"<>()[\]\\^`{|}\s.,:;!?]
++ *   [^"<>()\\^`{|}\s.,:;!?]
+  */
+-export const linkRegex = /(https?:\/\/[^"<>()[\]\\^`{|}\s]+[^"<>()[\]\\^`{|}\s.,:;!?])/g;
++export const linkRegex = /(https?:\/\/[^"<>()\\^`{|}\s]+[^"<>()\\^`{|}\s.,:;!?])/g;
+ export default { linkRegex };
+diff --git a/spec/frontend/jobs/components/log/line_spec.js b/spec/frontend/jobs/components/log/line_spec.js
+index f7f6ae2f9b1..2d3238685a5 100644
+--- a/spec/frontend/jobs/components/log/line_spec.js
++++ b/spec/frontend/jobs/components/log/line_spec.js
+@@ -94,6 +94,16 @@ describe('Job Log Line', () => {
+       expect(findLinkAttributeByIndex(0).href).toBe(queryUrl);
+     });
+ 
++    it('renders links that have brackets `[]` in their parameters', () => {
++      const url = `${httpUrl}?label_name[]=frontend`;
++
++      createComponent(mockProps({ text: url }));
++
++      expect(findLine().text()).toBe(url);
++      expect(findLinks().at(0).text()).toBe(url);
++      expect(findLinks().at(0).attributes('href')).toBe(url);
++    });
++
+     it('renders multiple links surrounded by text', () => {
+       createComponent(
+         mockProps({ text: `Well, my HTTP url: ${httpUrl} and my HTTPS url: ${httpsUrl}` }),
+@@ -125,10 +135,10 @@ describe('Job Log Line', () => {
+       expect(findLinkAttributeByIndex(4).href).toBe(httpsUrl);
+     });
+ 
+-    it('renders multiple links surrounded by brackets', () => {
+-      createComponent(mockProps({ text: `(${httpUrl}) [${httpUrl}] {${httpsUrl}}` }));
++    it('renders multiple links surrounded by parentheses and curly brackets', () => {
++      createComponent(mockProps({ text: `(${httpUrl}) <${httpUrl}> {${httpsUrl}}` }));
+       expect(findLine().text()).toBe(
+-        '(http://example.com) [http://example.com] {https://example.com}',
++        '(http://example.com) <http://example.com> {https://example.com}',
+       );
+ 
+       const links = findLinks();

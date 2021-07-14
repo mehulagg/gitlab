@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/browser';
-import $ from 'jquery';
 import { __ } from '~/locale';
 
 const IGNORE_ERRORS = [
@@ -76,29 +75,6 @@ const SentryConfig = {
   setUser() {
     Sentry.setUser({
       id: this.options.currentUserId,
-    });
-  },
-
-  bindSentryErrors() {
-    $(document).on('ajaxError.sentry', this.handleSentryErrors);
-  },
-
-  handleSentryErrors(event, req, config, err) {
-    const error = err || req.statusText;
-    const { responseText = __('Unknown response text') } = req;
-    const { type, url, data } = config;
-    const { status } = req;
-
-    Sentry.captureMessage(error, {
-      extra: {
-        type,
-        url,
-        data,
-        status,
-        response: responseText,
-        error,
-        event,
-      },
     });
   },
 };
