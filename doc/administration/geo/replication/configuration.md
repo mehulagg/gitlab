@@ -43,7 +43,7 @@ they must be manually replicated to **all servers of the secondary site**.
 
    This displays the secrets that need to be replicated, in JSON format.
 
-1. SSH **into each Rails, Sidekiq and Gitaly server on your secondary Geo site** and login as the `root` user:
+1. SSH **into each server on your secondary Geo site** and login as the `root` user:
 
    ```shell
    sudo -i
@@ -55,7 +55,7 @@ they must be manually replicated to **all servers of the secondary site**.
    mv /etc/gitlab/gitlab-secrets.json /etc/gitlab/gitlab-secrets.json.`date +%F`
    ```
 
-1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails server on your primary** site to the **each Rails, Sidekiq and Gitaly server on your secondary** site, or
+1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails server on your primary** site to the **each server on your secondary** site, or
    copy-and-paste the file contents between servers:
 
    ```shell
