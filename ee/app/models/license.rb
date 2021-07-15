@@ -498,7 +498,7 @@ class License < ApplicationRecord
   end
 
   def validate_with_trueup?
-    return false if restricted_attr(:skip_true_up)
+    return false if restricted_attr(:reconciliation_completed)
 
     [restricted_attr(:trueup_quantity),
      restricted_attr(:trueup_from),

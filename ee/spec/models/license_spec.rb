@@ -36,17 +36,17 @@ RSpec.describe License do
         create(:historical_data, recorded_at: date, active_user_count: active_user_count)
       end
 
-      context 'when skip_true_up is true on the license' do
+      context 'when reconciliation_completed is true on the license' do
         it 'does not add errors for invalid true up' do
-          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, skip_true_up: true)
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, reconciliation_completed: true)
 
           expect(license).to be_valid
         end
       end
 
-      context 'when skip_true_up is false on the license' do
+      context 'when reconciliation_completed is false on the license' do
         it 'adds errors for invalid true up figures' do
-          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, skip_true_up: false)
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, reconciliation_completed: false)
 
           expect(license).not_to be_valid
           expect(license.errors.full_messages.to_sentence)
@@ -54,7 +54,7 @@ RSpec.describe License do
         end
       end
 
-      context 'when skip_true_up is not present on the license' do
+      context 'when reconciliation_completed is not present on the license' do
         it 'adds errors for invalid true up figures' do
           set_restrictions(restricted_user_count: 10, trueup_quantity: 8)
 
@@ -1474,7 +1474,7 @@ RSpec.describe License do
       trueup_quantity: opts[:trueup_quantity],
       trueup_from: (date - 1.year).to_s,
       trueup_to: date.to_s,
-      skip_true_up: opts[:skip_true_up]
+      reconciliation_completed: opts[:reconciliation_completed]
     }.compact
   end
 
