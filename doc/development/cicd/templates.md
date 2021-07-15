@@ -92,12 +92,12 @@ Depending on the type, the template may or may not:
 
 #### Usage Examples per `inclusion_type`
 
+##### `shared-workflow`
+
 <details>
-<summary>`shared-workflow`</summary>
+<summary>Click here to view example content of a template.</summary>
 
-**Template**
-
-```yaml
+<pre><code>
 template_metadata:
   name: AWS Auto Deploy
   usage: inclusion
@@ -117,20 +117,23 @@ variables:
 include:
   - local: Jobs/Build.gitlab-ci.yml
   - local: Jobs/Deploy/ECS.gitlab-ci.yml
-```
+</code></pre>
 
-**Project workflow file (If a project uses multiple workflows)**
+</details>
 
-```yaml
+<details>
+<summary>Click here to view example content of a project workflow file when a project uses multiple workflows.</summary>
+
+<pre><code>
 # A shared workflow is initiated as a child pipeline.
 # Since the shared workflow is sandboxed as an individual pipeline, it doesn't affect the
 # project specific workflow. They can even customize the order of the job/stage executions
 # to run a shared workflow at a desired point.
-<shared-workflow-name>:
+shared-workflow-name:
   stage: .pre
   trigger:
     include:
-      - template: <template-path>
+      - template: template-path
   strategy: depend
 
 # Project specific workflow
@@ -145,25 +148,28 @@ test:
 deploy:
   stage: deploy
   script: echo 'Project-specific deploy script'
-```
-
-**Project workflow file (If a project uses the single workflow)**
-
-```yaml
-# A shared workflow is direcly imported into the project workflow.
-# In this case, the project specific workflow could be limited/affected by the shared workflow.
-include:
-  - template: <template-path>
-```
+</code></pre>
 
 </details>
 
 <details>
-<summary>`workflow-extension`</summary>
+<summary>Click here to view example content of a project workflow file when a project uses the single workflow.</summary>
 
-**Template**
+<pre><code>
+# A shared workflow is direcly imported into the project workflow.
+# In this case, the project specific workflow could be limited/affected by the shared workflow.
+include:
+  - template: template-path
+</code></pre>
 
-```yaml
+</details>
+
+##### `workflow-extension`
+
+<details>
+<summary>Click here to view example content of a template.</summary>
+
+<pre><code>
 template_metadata:
   name: Merge Request Pipelines Configuration
   usage: inclusion
@@ -174,13 +180,16 @@ workflow:
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-```
+</code></pre>
 
-**Project workflow file**
+</details>
 
-```yaml
+<details>
+<summary>Click here to view example content of a project workflow file.</summary>
+
+<pre><code>
 include:
-  - template: <template-path>
+  - template: template-path
 
 # Project specific workflow
 build:
@@ -194,16 +203,16 @@ test:
 deploy:
   stage: deploy
   script: echo 'Project-specific deploy script'
-```
+</code></pre>
 
 </details>
 
+##### `composable-job`
+
 <details>
-<summary>`composable-job`</summary>
+<summary>Click here to view example content of a template.</summary>
 
-**Template**
-
-```yaml
+<pre><code>
 template_metadata:
   name: Accessibility Test Job
   usage: inclusion
@@ -218,13 +227,16 @@ template_metadata:
     paths: ['reports/']
     reports:
       accessibility: reports/gl-accessibility.json
-```
+</code></pre>
 
-**Project workflow file**
+</details>
 
-```yaml
+<details>
+<summary>Click here to view example content of a project workflow file.</summary>
+
+<pre><code>
 include:
-  - template: <template-path>
+  - template: template-path
 
 # Project specific workflow
 build:
@@ -242,7 +254,7 @@ a11y:
 deploy:
   stage: deploy
   script: echo 'Project-specific deploy script'
-```
+</code></pre>
 
 </details>
 
