@@ -71,7 +71,9 @@ export default {
       if (this.displayNoAccess) {
         return __('Want to see the data? Please ask an administrator for access.');
       }
-      return !this.selectedStageError && this.selectedStage?.emptyStageText ? this.selectedStage?.emptyStageText : '';
+      return !this.selectedStageError && this.selectedStage?.emptyStageText
+        ? this.selectedStage?.emptyStageText
+        : '';
     },
   },
   methods: {

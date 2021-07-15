@@ -6,13 +6,12 @@ RSpec.describe 'Value Stream Analytics', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:guest) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:stage_table_selector) { '[data-testid="vsa-stage-table"]' }
 
   let(:issue) { create(:issue, project: project, created_at: 2.days.ago) }
   let(:milestone) { create(:milestone, project: project) }
   let(:mr) { create_merge_request_closing_issue(user, project, issue, commit_message: "References #{issue.to_reference}") }
   let(:pipeline) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr.source_branch, sha: mr.source_branch_sha, head_pipeline_of: mr) }
-
-  let_it_be(:stage_table_selector){ '[data-testid="vsa-stage-table"]' }
 
   context 'as an allowed user' do
     context 'when project is new' do
