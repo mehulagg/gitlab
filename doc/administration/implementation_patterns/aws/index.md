@@ -83,7 +83,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                            |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 18vCPU, 33 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul)<br />Tested with Graviton ARM | **db.r6g.xlarge** x 3 nodes <br />(12vCPU, 96 GB)       | 3 nodes x $0.52 = $1.56/hr |
 | **Redis**                                                    | 9vCPU, 24GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m6g.xlarge** x 3 nodes<br />(12vCPU, 39GB)      | 3 nodes x $0.30 = $0.90/hr |
-| **<u>Gitaly Cluster</u>**                                    |                                                              |                                                         |                            |
+| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |                                                              |                                                         |                            |
 | Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr      |
 | Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr       |
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                         |
@@ -128,7 +128,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                            |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 18vCPU, 33 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul)<br />Tested with Graviton ARM | **db.r6g.xlarge** x 3 nodes <br />(12vCPU, 96 GB)       | 3 nodes x $0.52 = $1.56/hr |
 | **Redis**                                                    | 9vCPU, 24GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m6g.xlarge** x 3 nodes<br />(12vCPU, 39GB)      | 3 nodes x $0.30 = $0.90/hr |
-| **<u>Gitaly Cluster</u>**                                    |                                                              |                                                         |                            |
+| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |                                                              |                                                         |                            |
 | Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr      |
 | Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr       |
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                         |
@@ -341,7 +341,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)** | 1 HA instance in ASG | **t2.micro** for prod, **m4.2xlarge** for perf. testing |  |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 36vCPU, 100 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul) | **db.r6g.2xlarge** x 3 nodes <br />(24vCPU, 192 GB) | 3 nodes x $1.04 = $3.12/hr |
 | **Redis** | 30vCPU, 114GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m5.2xlarge** x 3 nodes<br />(24vCPU, 78GB) | 3 nodes x $0.62 = $1.86/hr |
-| **<u>Gitaly Cluster</u>** |  |  |  |
+| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |  |  |  |
 | Gitaly Instances (in ASG) | 48 vCPU, 180GB<br />(across 3 nodes) | **m5.4xlarge** x 3 nodes<br />(48 vCPU, 180 GB) | $0.77 x 3 = $2.31/hr |
 | Praefect (Instances in ASG with load balancer) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB) | $0.09 x 3 = $0.21/hr |
 | Praefect PostgreSQL(1) [AWS RDS] | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |
