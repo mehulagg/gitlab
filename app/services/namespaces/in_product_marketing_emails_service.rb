@@ -49,7 +49,7 @@ module Namespaces
 
       groups_for_track.each_batch do |groups|
         groups.each do |group|
-          send_email_for_group(group)
+          send_email_for_group(group) unless group.trial_active?
         end
       end
     end

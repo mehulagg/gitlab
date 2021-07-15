@@ -211,4 +211,10 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
       expect { execute_service }.not_to raise_error
     end
   end
+
+  context 'when group is on a trial license' do
+    let(:group) { create(:group_with_plan, trial_ends_on: Date.tomorrow) }
+
+    it { is_expected.not_to send_in_product_marketing_email }
+  end
 end
