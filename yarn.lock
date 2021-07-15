@@ -908,9 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1427106229/artifacts/raw/gitlab-ui.leipert-update-browser-versions.tgz":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1427273377/artifacts/raw/gitlab-ui.leipert-update-browser-versions.tgz":
   version "31.5.0"
-  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1427106229/artifacts/raw/gitlab-ui.leipert-update-browser-versions.tgz#ea5752609bee3311a112be823d0715a630cd7f1a"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1427273377/artifacts/raw/gitlab-ui.leipert-update-browser-versions.tgz#18c216cd14edb133f85fdbef2724cef61c008f5a"
   dependencies:
     "@babel/standalone" "^7.0.0"
     bootstrap-vue "2.18.1"
