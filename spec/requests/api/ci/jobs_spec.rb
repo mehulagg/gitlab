@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Jobs do
+RSpec.describe API::Ci::Jobs do
   include HttpBasicAuthHelpers
   include DependencyProxyHelpers
 
@@ -114,7 +114,7 @@ RSpec.describe API::Jobs do
 
     context 'with job token authentication header' do
       include_context 'with auth headers' do
-        let(:header) { { API::Helpers::Runner::JOB_TOKEN_HEADER => running_job.token } }
+        let(:header) { { API::Ci::Helpers::Runner::JOB_TOKEN_HEADER => running_job.token } }
       end
 
       it_behaves_like 'returns common job data' do
@@ -150,7 +150,7 @@ RSpec.describe API::Jobs do
 
     context 'with non running job' do
       include_context 'with auth headers' do
-        let(:header) { { API::Helpers::Runner::JOB_TOKEN_HEADER => job.token } }
+        let(:header) { { API::Ci::Helpers::Runner::JOB_TOKEN_HEADER => job.token } }
       end
 
       it_behaves_like 'returns unauthorized'
