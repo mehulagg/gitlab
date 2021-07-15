@@ -25,6 +25,10 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
   let_it_be(:report_cs) { create(:ci_reports_security_report, type: :container_scanning) }
   let_it_be(:scan_cs) { create(:security_scan, scan_type: :container_scanning, build: build_cs) }
 
+  before do
+    skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/336198"
+  end
+
   before(:all) do
     ds_content = File.read(artifact_ds.file.path)
     Gitlab::Ci::Parsers::Security::DependencyScanning.parse!(ds_content, report_ds)
