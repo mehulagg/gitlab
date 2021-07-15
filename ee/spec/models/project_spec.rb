@@ -433,6 +433,10 @@ RSpec.describe Project do
     end
 
     describe '.with_code_coverage' do
+      before do
+        skip "CI Vertical: not yet supported (Verify) https://gitlab.com/gitlab-org/gitlab/-/issues/336199"
+      end
+
       let_it_be(:project_1) { create(:project) }
       let_it_be(:project_2) { create(:project) }
       let_it_be(:project_3) { create(:project) }
