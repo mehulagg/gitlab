@@ -10,7 +10,6 @@ module Users
       return error(_('You are not allowed to ban a user'), :forbidden) unless allowed?
 
       if user.ban
-        create_banned_user(user)
         log_event(user)
         success
       else

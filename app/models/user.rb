@@ -381,6 +381,14 @@ class User < ApplicationRecord
       NotificationService.new.user_deactivated(user.name, user.notification_email)
     end
     # rubocop: enable CodeReuse/ServiceClass
+
+    after_transition active: :banned do |user|
+      user.create_banned_user
+    end
+
+    after_transition banned: :active do |user|
+      user.banned_user&.destroy
+    end
   end
 
   # Scopes

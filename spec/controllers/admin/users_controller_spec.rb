@@ -397,7 +397,7 @@ RSpec.describe Admin::UsersController do
     end
   end
 
-  describe 'PUT unban/:id', :enable_admin_mode do
+  describe 'PUT unban/:id' do
     let(:banned_user) { create(:user, :banned) }
 
     it 'unbans user', :aggregate_failures do

@@ -10,7 +10,6 @@ module Users
       return error(_('You are not allowed to unban a user'), :forbidden) unless allowed?
 
       if user.activate
-        destroy_banned_user(user)
         log_event(user)
         success
       else

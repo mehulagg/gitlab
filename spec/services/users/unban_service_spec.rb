@@ -13,20 +13,20 @@ RSpec.describe Users::UnbanService do
 
     context 'when successful', :enable_admin_mode do
       before do
-        Users::BanService.new(current_user).execute(user)
+        user.ban!
       end
 
       it { is_expected.to eq(status: :success) }
 
-      it 'unbans the user', :aggregate_failures do
-        expect { operation }.to change {user.state}.from('banned').to('active')
+      it 'unbans the user' do
+        expect { operation }.to change { user.state }.from('banned').to('active')
       end
 
-      it 'removes the BannedUser object' do
+      it 'removes the BannedUser' do
         expect { operation }.to change { Users::BannedUser.count }.by(-1)
       end
 
-      it 'logs ban in application logs' do
+      it 'logs unban in application logs' do
         allow(Gitlab::AppLogger).to receive(:info)
 
         operation
@@ -36,29 +36,30 @@ RSpec.describe Users::UnbanService do
     end
 
     context 'when failed' do
-      context 'when user is not already banned', :enable_admin_mode do
-        it 'error result' do
+      context 'when user is already active', :enable_admin_mode do
+        it 'returns state error message' do
           expect(operation[:status]).to eq(:error)
           expect(operation[:message]).to match(/State cannot transition/)
         end
 
-        it 'does not change the user state', :aggregate_failures do
-          expect { operation }.not_to change { user.state }
+        it 'does not unban the user' do
+          expect { operation }.not_to change { Users::BannedUser.count }
         end
       end
 
       context 'when user is not an admin' do
         before do
-          Users::BanService.new(current_user).execute(user)
+          user.ban!
         end
 
-        it 'error result' do
+        it 'returns permissions error message' do
           expect(operation[:status]).to eq(:error)
           expect(operation[:message]).to match(/You are not allowed to unban a user/)
         end
 
-        it 'does not change the user state', :aggregate_failures do
-          expect { operation }.not_to change { user.state }
+        it 'does not unban the user', :aggregate_failures do
+          expect { operation }.not_to change { Users::BannedUser.count }
+          expect(user.state).to eq('banned')
         end
       end
     end
