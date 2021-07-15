@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import { getParameterValues } from '~/lib/utils/url_utility';
 import { __, n__ } from '~/locale';
 import {
@@ -173,7 +174,14 @@ export function suggestionCommitMessage(state, _, rootState) {
     });
 }
 
-export const isVirtualScrollingEnabled = (state) =>
-  !state.viewDiffsFileByFile &&
-  (window.gon?.features?.diffsVirtualScrolling ||
-    getParameterValues('virtual_scrolling')[0] === 'true');
+export const isVirtualScrollingEnabled = (state) => {
+  if (Cookies.get('diffs_virtual_scrolling') === 'false') {
+    return false;
+  }
+
+  return (
+    !state.viewDiffsFileByFile &&
+    (window.gon?.features?.diffsVirtualScrolling ||
+      getParameterValues('virtual_scrolling')[0] === 'true')
+  );
+};
