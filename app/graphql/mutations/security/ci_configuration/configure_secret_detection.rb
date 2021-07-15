@@ -12,10 +12,8 @@ module Mutations
           response.
         DESC
 
-        def resolve(project_path:, configuration: nil)
-          super do |project|
-            ::Security::CiConfiguration::SecretDetectionCreateService.new(project, current_user).execute
-          end
+        def configure_analyzer(project, _args)
+          ::Security::CiConfiguration::SecretDetectionCreateService.new(project, current_user).execute
         end
       end
     end

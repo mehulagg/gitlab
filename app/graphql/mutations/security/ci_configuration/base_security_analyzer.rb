@@ -18,14 +18,18 @@ module Mutations
 
         authorize :push_code
 
-        def resolve(project_path:, configuration: nil)
+        def resolve(project_path:, **args)
           project = authorized_find!(project_path)
 
-          result = yield(project)
+          result = configure_analyzer(project, **args)
           prepare_response(result)
         end
 
         private
+
+        def configure_analyzer(project, **args)
+          raise NotImplementedError
+        end
 
         def prepare_response(result)
           {

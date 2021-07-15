@@ -11,10 +11,8 @@ module Mutations
           create a Merge Request are a part of the response.
         DESC
 
-        def resolve(project_path:, configuration: nil)
-          super do |project|
-            ::Security::CiConfiguration::DependencyScanningCreateService.new(project, current_user).execute
-          end
+        def configure_analyzer(project, _args)
+          ::Security::CiConfiguration::DependencyScanningCreateService.new(project, current_user).execute
         end
       end
     end

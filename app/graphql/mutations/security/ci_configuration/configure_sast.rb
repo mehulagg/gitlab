@@ -15,12 +15,10 @@ module Mutations
           required: true,
           description: 'SAST CI configuration for the project.'
 
-        def resolve(project_path:, configuration: nil)
-          raise ArgumentError, 'Missing keyword: configuration' if configuration.nil?
+        def configure_analyzer(project, args)
+          raise ArgumentError, 'Missing keyword: configuration' unless args[:configuration]
 
-          super do |project|
-            ::Security::CiConfiguration::SastCreateService.new(project, current_user, configuration).execute
-          end
+          ::Security::CiConfiguration::SastCreateService.new(project, current_user, args[:configuration]).execute
         end
       end
     end
