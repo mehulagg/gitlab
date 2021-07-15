@@ -50,8 +50,6 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 | 3K   | [3K Omnibus](../../reference_architectures/3k_users.md)      | [3k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/3k) | [10K Cloud Native on EKS](#10k-cloud-native-on-eks-build-manifest) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 | 5K   | [5K Omnibus](../../reference_architectures/5k_users.md)      | [5k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/5k) | [5K Cloud Native on EKS](#10k-cloud-native-on-eks-build-manifest) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 | 10K  | [10K Cloud Native](../../reference_architectures/10k_users.md#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) | [10k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/10k) | [10K Cloud Native on EKS](#10k-cloud-native-on-eks-build-manifest) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
-| 25K  |                                                              |                                                              |                                                              |                                                              |                                                              |                                                              |
-| 50K  |                                                              |                                                              |                                                              |                                                              |                                                              |                                                              |
 
 ### 10K Cloud Native on EKS Build Manifest
 
@@ -62,75 +60,33 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 
 **Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
 
-| Service                                                   | Target Allocatable CPUs and Memory (Full Scaled) | Example Idling Cost <br />(min suggested nodes)<br />(On Demand, US East) | Example Full Scaled Cost<br />(On Demand, US East) |
-| --------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------ | -------------------------------------------------- |
-| Webservice                                                | 127.5 vCPU, 118 GB memory                        |                                                              |                                                    |
-| Sidekiq                                                   | 15.5 vCPU, 50 GB memory                          |                                                              |                                                    |
-| Supporting services such as NGINX, Prometheus, etc        | 7.75 vCPU, 25 GB memory                          |                                                              |                                                    |
-| **Ref Arch Total**                                        | **151 vCPU, 193 GB memory**                      |                                                              |                                                    |
-|                                                           |                                                  |                                                              |                                                    |
-| EKS Cluster (Control Plane)                               | n/a                                              | $0.10/hr                                                     | $0.10/hr                                                   |
-| **BOM Total:** EKS Nodes c5.4xlarge (16vcpu/32GB)  | 160 vCPU, 320 GB memory                          | (5 nodes) $3.40/hr                                           | (10 nodes) $6.80/hr<br />                                                    |
+NOTE:
+For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
+
+| Service                                                      | Ref Arch Raw (Full Scaled)                          | AWS BOM                                                      | Example Full Scaled Cost<br />(On Demand, US East) |
+| ------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------- |
+| Webservice                                                   | 20 pods x 5 vCPU & 6.25 GB = <br />100 vCPU, 125 GB |                                                              |                                                    |
+| Sidekiq                                                      | 14 pods x 1 vCPU & 2 GB<br />14 vCPU, 28 GB         |                                                              |                                                    |
+| Supporting services such as NGINX, Prometheus, etc           | 2 pods x 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB       |                                                              |                                                    |
+| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **128 vCPU, 158 GB**                                | **c5.4xlarge** (16vcpu/32GB) x **8 nodes**<br />128 vCPU, 256GB | $5.44/hr                                           |
+| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                   | **c5.4xlarge** (16 vCPU/32GB) x **1 nodes**<br />16 vCPU, 32GB | $0.68/hr                                           |
 
 NOTE:
-Picking more of a smaller size instance allows scaling costs to be more granular.
 
-**BOM Total:** = Bill of Materials Total - this is what you use when building this configuration
+IMPORTANT: If EKS node autoscaling is employed, it is likely that your average loading will run lower than this - especially during non-working hours and weekends.
 
-**Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
+| Non-Kubernetes Compute | Ref Arch Raw Total | AWS BOM          | Example Cost<br />US East       |
+| ------------------------------------------------------------ | ------------------------------ | ------------------------------- | ------------------------------------------------------------ |
+| **Bastion Host (Quick Start)** | 1 HA instance in ASG | **t2.micro** for prod, **m4.2xlarge** for perf. testing |  |
+| **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 36vCPU, 100 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul) | **db.r6g.2xlarge** x 3 nodes <br />(24vCPU, 192 GB) | 3 nodes x $1.04 = $3.12/hr |
+| **Redis** | 30vCPU, 114GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m5.2xlarge** x 3 nodes<br />(24vCPU, 78GB) | 3 nodes x $0.62 = $1.86/hr |
+| **<u>Gitaly Cluster</u>** |  |  |  |
+| Gitaly Instances (in ASG) | 48 vCPU, 180GB<br />(across 3 nodes) | **m5.4xlarge** x 3 nodes<br />(48 vCPU, 180 GB) | $0.77 x 3 = $2.31/hr |
+| Praefect (Instances in ASG with load balancer) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB) | $0.09 x 3 = $0.21/hr |
+| Praefect PostgreSQL(1) [AWS RDS] | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |
+| Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $15/mon |
 
-| PostgreSQL Service                                           | Advised <br />Nodes | Configuration                  | Total                        | Example Cost<br />US East       |
-| ------------------------------------------------------------ | ------------------- | ------------------------------ | ---------------------------- | ------------------------------- |
-|                                                              |                     |                                |                              |                                 |
-| **PostgreSQL (GitLab Data)**                                 |                     |                                |                              |                                 |
-| **BOM Total:** AWS Aurora RDS Nodes Configuration (GPT tested)   | 3                   | db.r6g.2xlarge (8vCPU, 64 GB, ARM)   | 24vCPU, 192 GB               | $1.04 x 3 = $3.12/hr            |
-| **Ref Arch Raw Total:** VM Specification on AWS: | 9                   |                                | 36vCPU, 100 GB               | $1.73/hr (non-managed)          |
 
-<details>
-<summary>Click to Expand and See Which GitLab Services are Handled by AWS Aurora PostgreSQL PaaS</summary>
-
-| GitLab Services Handled by PostgreSQL PaaS                   | Advised <br />Nodes | Configuration                  | Total                        | Example Cost<br />US East       |
-| ------------------------------------------------------------ | ------------------- | ------------------------------ | ---------------------------- | ------------------------------- |
-|                                                              |                     |                                |                              |                                 |
-| - PostgreSQL(1)                                              | 3                   | 8 vCPU, 30 GB memory           | 24vCPU, 90 GB                | m5.2xlarge $0.38 x 3 = $1.14/hr |
-| - PgBouncer(1)                                               | 3                   | 2 vCPU, 1.8 GB memory          | 6vCPU, 5.4 GB                | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Consul(1)                                                  | 3                   | 2 vCPU, 1.8 GB memory          | 6vCPU, 5.4 GB                | Combined with PgBouncer         |
-|                                                              |                     |                                |                              |                                 |
-
-</details>
-
-| Redis Service                                                | Advised <br />Nodes | Configuration                  | Total                        | Example Cost<br />US East       |
-| ------------------------------------------------------------ | ------------------- | ------------------------------ | ---------------------------- | ------------------------------- |
-|                                                              |                     |                                |                              |                                 |
-| **Redis**                                                    |                     |                                |                              |                                 |
-| **BOM Total:** AWS Redis Elasticache Configuration (GPT Tested)  | 3                   | cache.m5.2xlarge (8vCPU, 26 GB) | 24vCPU, 78GB                 | $0.62 x 3 = $1.86/hr            |
-| **Ref Arch Raw Total:** Reference Architecture VM Specification on AWS, consisting of (add up below rows): | 12                  |                                | 30vCPU, 114GB                | $1.71/hr (non-managed)          |
-|                                                              |                     |                                |                              |                                 |
-
-<details>
-<summary>Click to Expand and See Which GitLab Services are Handled by AWS Redis Elasticache PaaS</summary>
-
-| GitLab Services Handled by Redis PaaS                        | Advised <br />Nodes | Configuration                  | Total                        | Example Cost<br />US East       |
-| ------------------------------------------------------------ | ------------------- | ------------------------------ | ---------------------------- | ------------------------------- |
-|                                                              |                     |                                |                              |                                 |
-| - Redis - Cache(2)                                           | 3                   | 4 vCPU, 15 GB memory           | 12vCPU, 45GB                 | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Redis - Queues / Shared State(2)                           | 3                   | 4 vCPU, 15 GB memory           | 12vCPU, 45GB                 | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Redis Sentinel - Cache(2)                                  | 3                   | 1 vCPU, 3.75 GB memory         | 3vCPU, 12GB                  | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Redis Sentinel - Queues / Shared State(2)                  | 3                   | 1 vCPU, 3.75 GB memory         | 3vCPU, 12GB                  | Combined with Sentinel - Cache  |
-|                                                              |                     |                                |                              |                                 |
-
-</details>
-
-| Gitaly Service (No PaaS Equivalent)                      | Advised <br />Nodes | Configuration         | Total                        | Example Cost<br />US East |
-| -------------------------------------------------------- | ------------------- | --------------------- | ---------------------------- | ------------------------- |
-|                                                          |                     |                       |                              |                           |
-| **Gitaly Cluster (Git file system) on Instance Compute** |                     |                       |                              |                           |
-| **BOM total**                                            | 9                   |                       |                              | $2.73/hr + $15/mon        |
-| **Ref Arch raw total**, consisting of:                   | 10                  |                       |                              | $2.94/hr                  |
-| Gitaly (Instance in an ASG)                              | 3                   | 16 vCPU, 60 GB memory | m5.4xlarge                   | $0.77 x 3 = $2.31/hr      |
-| Praefect (Instances in ASG with load balancer)           | 3                   | 2 vCPU, 1.8 GB memory | c5.large                     | $0.09 x 3 = $0.21/hr      |
-| Praefect PostgreSQL(1) [AWS RDS]                         | 3                   | 2 vCPU, 1.8 GB memory | c5.large                     | $0.09 x 3 = $0.21/hr      |
-| Internal load balancing node(3) [ELB]                    | 1                   | 2 vCPU, 1.8 GB memory | c5.large <br />(ELB for AWS) | $0.09 x 3 = $0.21/hr      |
 
 ### 10K Cloud Native Hybrid on EKS Test Results 
 
@@ -146,7 +102,7 @@ Date:                      | 2021-07-08
 Run Time:                  | 1h 6m 21.52s (Start: 19:46:47 UTC, End: 20:53:09 UTC)   
 GPT Version:               | v2.8.0                                                  
 
-❯ Overall Results Score: 97.8%
+**Overall Results Score:** 97.8%
 
 NAME                                                     | RPS   | RPS RESULT           | TTFB AVG  | TTFB P90             | REQ STATUS     | RESULT         
 ---------------------------------------------------------|-------|----------------------|-----------|----------------------|----------------|----------------
@@ -233,7 +189,7 @@ Date:                      | 2021-07-09
 Run Time:                  | 1h 17m 19.04s (Start: 11:51:39 UTC, End: 13:08:58 UTC)
 GPT Version:               | v2.8.0
 
-❯ Overall Results Score: 97.46%
+**Overall Results Score:** 97.46%
 
 NAME                                                     | RPS   | RPS RESULT           | TTFB AVG  | TTFB P90              | REQ STATUS     | RESULT          
 ---------------------------------------------------------|-------|----------------------|-----------|-----------------------|----------------|-----------------
