@@ -1142,6 +1142,33 @@ registry = Geo::PackageFileRegistry.find(registry_id)
 registry.replicator.send(:download)
 ```
 
+#### Verify package files on the secondary manually
+
+This will iterate over all package files on the secondary, looking at the
+`verification_checksum` stored in the database (which came from the primary)
+and then calculate this value on the secondary to check if they match. This
+won't actually change anything in the UI.
+
+```ruby
+# Run on secondary
+status = {}
+
+Packages::PackageFile.find_each do |package_file|
+  primary_checksum = package_file.verification_checksum
+  secondary_checksum = Packages::PackageFile.hexdigest(package_file.file.path)
+  verification_status = (primary_checksum == secondary_checksum)
+
+  status[verification_status.to_s] ||= []
+  status[verification_status.to_s] << package_file.id
+end
+
+# Count how many of each value we get
+status.keys.each {|key| puts "#{key} count: #{status[key].count}"}
+
+# See the output in its entirety
+status
+```
+
 ### Repository types newer than project/wiki repositories
 
 - `SnippetRepository`
