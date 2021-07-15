@@ -44,7 +44,8 @@ RSpec.describe Gitlab::Utils::UsageData do
     let(:relation) { double(:relation) }
 
     before do
-      allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
+      allow(ApplicationRecord.connection).to receive(:transaction_open?).and_return(false)
+      allow(Ci::ApplicationRecord.connection).to receive(:transaction_open?).and_return(false)
     end
 
     it 'delegates counting to counter class instance' do
