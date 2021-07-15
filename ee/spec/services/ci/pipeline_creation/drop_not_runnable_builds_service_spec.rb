@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::PipelineCreation::DropNotRunnableBuildsService do
-  let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:group) { create(:group, shared_runners_minutes_limit: 400) }
+  let_it_be(:project) { create(:project, shared_runners_enabled: true, group: group) }
 
   let_it_be_with_reload(:pipeline) do
     create(:ci_pipeline, project: project, status: :created)

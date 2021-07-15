@@ -39,18 +39,26 @@ RSpec.describe EE::Ci::Runner do
       end
 
       context 'with private visibility level' do
-        let(:project) { create(:project, visibility_level: ::Gitlab::VisibilityLevel::PRIVATE) }
+        let(:project) do
+          create(:project,
+                 namespace: create(:group, shared_runners_minutes_limit: 400),
+                 shared_runners_enabled: true,
+                 visibility_level: ::Gitlab::VisibilityLevel::PRIVATE)
+        end
 
         it { is_expected.to eq(1.1) }
       end
 
       context 'with public visibility level' do
-        let(:project) { create(:project, namespace: namespace, visibility_level: ::Gitlab::VisibilityLevel::PUBLIC) }
+        let(:project) do
+          create(:project,
+                 namespace: create(:group, shared_runners_minutes_limit: 400, created_at: created_at),
+                 shared_runners_enabled: true,
+                 visibility_level: ::Gitlab::VisibilityLevel::PUBLIC)
+        end
 
         context 'after the release date for public project cost factors' do
-          let(:namespace) do
-            create(:group, created_at: Date.new(2021, 7, 17))
-          end
+          let(:created_at) { Date.new(2021, 7, 17) }
 
           before do
             allow(Gitlab).to receive(:com?).and_return(true)
@@ -60,34 +68,29 @@ RSpec.describe EE::Ci::Runner do
         end
 
         context 'before the release date for public project cost factors' do
-          let(:namespace) do
-            create(:group, created_at: Date.new(2021, 7, 16))
-          end
+          let(:created_at) { Date.new(2021, 7, 16) }
 
           it { is_expected.to eq(0.0) }
         end
       end
 
       context 'with internal visibility level' do
-        let(:project) { create(:project, visibility_level: ::Gitlab::VisibilityLevel::INTERNAL) }
+        let(:project) do
+          create(:project,
+                 namespace: create(:group, shared_runners_minutes_limit: 400),
+                 shared_runners_enabled: true,
+                 visibility_level: ::Gitlab::VisibilityLevel::INTERNAL)
+        end
 
         it { is_expected.to eq(1.1) }
-      end
-
-      context 'with invalid visibility level' do
-        let(:project) { create(:project, visibility_level: 123) }
-
-        it 'raises an error' do
-          expect { subject }.to raise_error(ArgumentError)
-        end
       end
     end
   end
 
   describe '#cost_factor_enabled?' do
     let_it_be(:project) do
-      namespace = create(:group, created_at: Date.new(2021, 7, 16))
-      create(:project, namespace: namespace)
+      namespace = create(:group, shared_runners_minutes_limit: 400, created_at: Date.new(2021, 7, 16))
+      create(:project, shared_runners_enabled: true, namespace: namespace)
     end
 
     context 'when the project has any cost factor' do

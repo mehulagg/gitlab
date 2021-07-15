@@ -16,7 +16,12 @@ RSpec.describe Gitlab::Ci::Matching::RunnerMatcher do
   end
 
   describe '#matches_quota?' do
-    let(:project) { build_stubbed(:project, project_attributes) }
+    let(:project) do
+      create(:project,
+             namespace: create(:group, shared_runners_minutes_limit: 400),
+             shared_runners_enabled: true,
+             **project_attributes)
+    end
 
     let(:build) do
       build_stubbed(:ci_build, project: project)
@@ -53,6 +58,7 @@ RSpec.describe Gitlab::Ci::Matching::RunnerMatcher do
         :instance_type  | :private                 | true                  | false
         :instance_type  | :private                 | false                 | true
       end
+
       with_them do
         let(:runner_attributes) do
           { runner_type: runner_type }
