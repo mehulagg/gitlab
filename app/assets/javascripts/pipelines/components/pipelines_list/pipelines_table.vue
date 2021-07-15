@@ -76,6 +76,8 @@ export default {
   ],
   components: {
     GlTable,
+    LinkedPipelinesMiniList: () =>
+      import('ee_component/vue_shared/components/linked_pipelines_mini_list.vue'),
     PipelinesCommit,
     PipelineMiniGraph,
     PipelineOperations,
@@ -182,11 +184,22 @@ export default {
         <div class="stage-cell">
           <!-- This empty div should be removed, see https://gitlab.com/gitlab-org/gitlab/-/issues/323488 -->
           <div></div>
+          <linked-pipelines-mini-list
+            v-if="item.triggered_by"
+            :triggered-by="[item.triggered_by]"
+            data-testid="upstream"
+          />
           <pipeline-mini-graph
             v-if="item.details && item.details.stages && item.details.stages.length > 0"
+            class="gl-display-inline"
             :stages="item.details.stages"
             :update-dropdown="updateGraphDropdown"
             @pipelineActionRequestComplete="onPipelineActionRequestComplete"
+          />
+          <linked-pipelines-mini-list
+            v-if="item.triggered.length"
+            :triggered="item.triggered"
+            data-testid="downstream"
           />
         </div>
       </template>
