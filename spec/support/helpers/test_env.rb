@@ -448,7 +448,8 @@ module TestEnv
 
   # looking for a top-level `describe`
   def topmost_example_group
-    example_group = current_example_group
+    # TODO: CI Vertical in some cases `current_example_group` is not set
+    example_group = current_example_group || {}
     example_group = example_group[:parent_example_group] until example_group[:parent_example_group].nil?
     example_group
   end

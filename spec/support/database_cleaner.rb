@@ -35,10 +35,24 @@ RSpec.configure do |config|
       puts "Recreating the database"
       start = Gitlab::Metrics::System.monotonic_time
 
+      BeforeAllAdapter.all_connection_pools.each(&:disconnect!)
+
+      # TODO: CI Vertical: these tasks do not work properly
+      # with many databases, especially the `.migrate`
       ActiveRecord::Tasks::DatabaseTasks.drop_current
       ActiveRecord::Tasks::DatabaseTasks.create_current
       ActiveRecord::Tasks::DatabaseTasks.load_schema_current
-      ActiveRecord::Tasks::DatabaseTasks.migrate
+      #ActiveRecord::Tasks::DatabaseTasks.migrate
+
+      begin
+        original_db_config = ActiveRecord::Base.connection_db_config
+        ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env).each do |db_config|
+          ActiveRecord::Base.establish_connection(db_config)
+          ActiveRecord::Tasks::DatabaseTasks.migrate
+        end
+      ensure
+        ActiveRecord::Base.establish_connection(original_db_config)
+      end
 
       puts "Database re-creation done in #{Gitlab::Metrics::System.monotonic_time - start}"
     end
