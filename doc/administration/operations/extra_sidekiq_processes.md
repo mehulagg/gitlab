@@ -128,7 +128,6 @@ is set, all `queue_groups` must follow the aforementioned syntax.
 In `/etc/gitlab/gitlab.rb`:
 
 ```ruby
-sidekiq['enable'] = true
 sidekiq['queue_selector'] = true
 sidekiq['queue_groups'] = [
   # Run all non-CPU-bound queues that are high urgency
@@ -150,7 +149,6 @@ By default, the Sidekiq service runs `sidekiq-cluster`. To disable this behavior
 add the following to the Sidekiq configuration:
 
 ```ruby
-sidekiq['enable'] = true
 sidekiq['cluster'] = false
 ```
 
@@ -194,7 +192,6 @@ one only processes imports and the other processes all other queues:
 1. Edit `/etc/gitlab/gitlab.rb` and add:
 
    ```ruby
-   sidekiq['enable'] = true
    sidekiq['queue_selector'] = true
    sidekiq['queue_groups'] = [
      "feature_category=importers",
