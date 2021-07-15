@@ -14,6 +14,18 @@ class Projects::Ci::PipelineEditorController < Projects::ApplicationController
   def show
   end
 
+  def templates
+    templates = TemplateFinder.new(:gitlab_ci_ymls, @project, {}).execute
+
+    respond_to do |format|
+      format.json do
+        render json: Ci::TemplateSerializer
+                        .new(project: project, current_user: current_user)
+                        .represent(templates)
+      end
+    end
+  end
+
   private
 
   def check_can_collaborate!
