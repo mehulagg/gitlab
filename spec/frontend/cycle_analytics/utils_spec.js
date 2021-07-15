@@ -20,11 +20,11 @@ import {
 
 describe('Value stream analytics utils', () => {
   describe('decorateEvents', () => {
-    const [result] = decorateEvents(rawEvents, selectedStage);
+    const [result] = decorateEvents(rawEvents);
     const eventKeys = Object.keys(result);
     const authorKeys = Object.keys(result.author);
     it('will return the same number of events', () => {
-      expect(decorateEvents(rawEvents, selectedStage).length).toBe(rawEvents.length);
+      expect(decorateEvents(rawEvents).length).toBe(rawEvents.length);
     });
 
     it('will set all the required event fields', () => {

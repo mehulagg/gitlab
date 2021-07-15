@@ -3,23 +3,16 @@ import { sanitize } from '~/lib/dompurify';
 import { roundToNearestHalf, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { parseSeconds } from '~/lib/utils/datetime_utility';
 import { s__, sprintf } from '../locale';
-import DEFAULT_EVENT_OBJECTS from './default_event_objects';
 
 /**
  * These `decorate` methods will be removed when me migrate to the
  * new table layout https://gitlab.com/gitlab-org/gitlab/-/issues/326704
  */
-const mapToEvent = (event, stage) => {
-  return convertObjectPropsToCamelCase(
-    {
-      ...DEFAULT_EVENT_OBJECTS[stage.slug],
-      ...event,
-    },
-    { deep: true },
-  );
+const mapToEvent = (event) => {
+  return convertObjectPropsToCamelCase(event, { deep: true });
 };
 
-export const decorateEvents = (events, stage) => events.map((event) => mapToEvent(event, stage));
+export const decorateEvents = (events) => events.map((event) => mapToEvent(event));
 
 const mapToSummary = ({ value, ...rest }) => ({ ...rest, value: value || '-' });
 const mapToMedians = ({ name: id, value }) => ({ id, value });
