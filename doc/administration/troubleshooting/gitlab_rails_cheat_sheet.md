@@ -1172,15 +1172,15 @@ registry = Geo::SnippetRepositoryRegistry.find(registry_id)
 registry.replicator.send(:sync_repository)
 ```
 
-### Generate Service Ping
+## Generate Service Ping
 
-#### Generate or get the cached Service Ping
+### Generate or get the cached Service Ping
 
 ```ruby
 Gitlab::UsageData.to_json
 ```
 
-#### Generate a fresh new Service Ping
+### Generate a fresh new Service Ping
 
 This will also refresh the cached Service Ping displayed in the admin area
 
@@ -1188,7 +1188,7 @@ This will also refresh the cached Service Ping displayed in the admin area
 Gitlab::UsageData.to_json(force_refresh: true)
 ```
 
-#### Generate and print
+### Generate and print
 
 Generates Service Ping data in JSON format.
 
@@ -1196,7 +1196,7 @@ Generates Service Ping data in JSON format.
 rake gitlab:usage_data:generate
 ```
 
-#### Generate and send Service Ping
+### Generate and send Service Ping
 
 Prints the metrics saved in `conversational_development_index_metrics`.
 
