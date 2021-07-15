@@ -3,9 +3,9 @@
 module MigrationsHelpers
   def active_record_base
     if self.class.metadata[:ci]
-      ApplicationRecord
-    else
       Ci::ApplicationRecord
+    else
+      ApplicationRecord
     end
   end
 
