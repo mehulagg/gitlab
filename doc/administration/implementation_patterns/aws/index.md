@@ -312,6 +312,8 @@ This test:
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
+---
+
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
 
@@ -345,12 +347,15 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS] | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |
 | Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $15/mon |
 
-</details>
+---
 
+</details>
 ### 10K Cloud Native Hybrid on EKS Test Results
 
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
+
+---
 
 Attribute                  | Value                                                   
 ---------------------------|---------------------------------------------------------
@@ -429,10 +434,14 @@ web_project_repository_compare                           | 20/s  | 4.73/s (>0.80
 web_project_tags                                         | 20/s  | 19.02/s (>12.80/s)   | 514.64ms  | 576.85ms (<1505ms)   | 100.00% (>99%) | Passed
 web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed
 
+---
+
 </details>
 
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Test Results </summary>
+
+---
 
 This test:
 
@@ -517,6 +526,8 @@ web_project_tags                                         | 20/s  | 19.03/s (>12.
 web_user                                                 | 20/s  | 19.82/s (>9.60/s)    | 145.82ms  | 224.83ms (<4005ms)    | 100.00% (>99%) | Passed 
 
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
+
+---
 
 </details>
 
