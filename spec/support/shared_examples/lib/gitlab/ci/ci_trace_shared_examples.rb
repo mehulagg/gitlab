@@ -562,7 +562,7 @@ RSpec.shared_examples 'trace with disabled live trace feature' do
               .and_return(%w[Error Error])
           end
 
-          it_behaves_like 'source trace file stays intact', error: GitlabUploader::ObjectNotReadyError
+          it_behaves_like 'source trace file stays intact', error: ActiveRecord::RecordInvalid
         end
       end
 
@@ -592,7 +592,7 @@ RSpec.shared_examples 'trace with disabled live trace feature' do
               .and_return(%w[Error Error])
           end
 
-          it_behaves_like 'source trace in database stays intact', error: GitlabUploader::ObjectNotReadyError
+          it_behaves_like 'source trace in database stays intact', error: ActiveRecord::RecordInvalid
         end
 
         context 'when there is a validation error on Ci::Build' do
@@ -808,7 +808,11 @@ RSpec.shared_examples 'trace with enabled live trace feature' do
         create(:ci_job_artifact, :trace, job: build)
       end
 
-      it { is_expected.to be_truthy }
+      it do
+        expect(trace.send(:trace_artifact).file.exists?).to be(true) # ensure setup is correct
+
+        is_expected.to be_truthy
+      end
     end
 
     context 'when archived trace record exists but file is not stored' do
@@ -816,7 +820,11 @@ RSpec.shared_examples 'trace with enabled live trace feature' do
         ::Ci::JobArtifact.create!(job: build, project: build.project, file_type: :trace)
       end
 
-      it { is_expected.to be_falsy }
+      it 'is falsy' do
+        expect(trace.send(:trace_artifact).file.exists?).to be(false) # ensure setup is correct
+
+        is_expected.to be_falsy
+      end
     end
 
     context 'when live trace exists' do
@@ -910,7 +918,7 @@ RSpec.shared_examples 'trace with enabled live trace feature' do
               .and_return(%w[Error Error])
           end
 
-          it_behaves_like 'source trace in ChunkedIO stays intact', error: GitlabUploader::ObjectNotReadyError
+          it_behaves_like 'source trace in ChunkedIO stays intact', error: ActiveRecord::RecordInvalid
         end
       end
     end

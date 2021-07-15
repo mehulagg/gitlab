@@ -1,0 +1,8 @@
+---
+name: store_trace_outside_transaction
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/66203
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/336280
+milestone: '14.1'
+type: development
+group: group::continuous integration
+default_enabled: false

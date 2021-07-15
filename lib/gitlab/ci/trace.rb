@@ -75,7 +75,7 @@ module Gitlab
       end
 
       def archived_trace_exist?
-        trace_artifact&.exists? && !trace_artifact.file.nil?
+        trace_artifact&.exists?
       end
 
       def live_trace_exist?
@@ -248,15 +248,15 @@ module Gitlab
       end
 
       def create_build_trace!(job, path)
-        # TODO: Set `file_format: :raw` after we've cleaned up legacy traces migration
-        # https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20307
-        job_artifact = ::Ci::JobArtifact.find_or_create_by(job: job, project: job.project, file_type: :trace) # rubocop:disable CodeReuse/ActiveRecord
-        job_artifact.file_sha256 = self.class.hexdigest(path)
         File.open(path) do |stream|
-          job_artifact.file = stream
+          # TODO: Set `file_format: :raw` after we've cleaned up legacy traces migration
+          # https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20307
+          job.create_job_artifacts_trace!(
+            project: job.project,
+            file_type: :trace,
+            file: stream,
+            file_sha256: self.class.hexdigest(path))
         end
-        job_artifact.store_file!
-        job_artifact.save!
       end
 
       def ensure_path

@@ -122,6 +122,11 @@ module Ci
 
     mount_file_store_uploader JobArtifactUploader
 
+    if Feature.enabled?(:store_trace_outside_transaction)
+      skip_callback :save, :after, :store_file!
+      set_callback :commit, :after, :store_file!
+    end
+
     validates :file_format, presence: true, unless: :trace?, on: :create
     validate :validate_file_format!, unless: :trace?, on: :create
     before_save :set_size, if: :file_changed?
