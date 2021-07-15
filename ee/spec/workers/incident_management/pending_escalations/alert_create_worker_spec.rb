@@ -2,23 +2,25 @@
 
 require 'spec_helper'
 
-RSpec.describe IncidentManagement::PendingEscalations::AlertCheckWorker do
+RSpec.describe IncidentManagement::PendingEscalations::AlertCreateWorker do
   let(:worker) { described_class.new }
 
-  let_it_be(:escalation) { create(:incident_management_pending_alert_escalation) }
+  let_it_be(:alert) { create(:alert_management_alert) }
 
   describe '#perform' do
-    subject { worker.perform(escalation.id) }
+    let(:args) { [alert.id] }
+
+    subject { worker.perform(*args) }
 
     it 'processes the escalation' do
-      expect_next_instance_of(IncidentManagement::PendingEscalations::ProcessService, escalation) do |service|
+      expect_next_instance_of(IncidentManagement::PendingEscalations::CreateService, alert) do |service|
         expect(service).to receive(:execute)
       end
 
       subject
     end
 
-    context 'without valid escalation' do
+    context 'without valid alert' do
       let(:args) { [non_existing_record_id] }
 
       it 'does nothing' do
