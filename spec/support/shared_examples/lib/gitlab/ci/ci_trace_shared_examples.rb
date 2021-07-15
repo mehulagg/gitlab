@@ -562,7 +562,7 @@ RSpec.shared_examples 'trace with disabled live trace feature' do
               .and_return(%w[Error Error])
           end
 
-          it_behaves_like 'source trace file stays intact', error: ActiveRecord::RecordInvalid
+          it_behaves_like 'source trace file stays intact', error: GitlabUploader::ObjectNotReadyError
         end
       end
 
@@ -592,7 +592,7 @@ RSpec.shared_examples 'trace with disabled live trace feature' do
               .and_return(%w[Error Error])
           end
 
-          it_behaves_like 'source trace in database stays intact', error: ActiveRecord::RecordInvalid
+          it_behaves_like 'source trace in database stays intact', error: GitlabUploader::ObjectNotReadyError
         end
 
         context 'when there is a validation error on Ci::Build' do
@@ -902,7 +902,7 @@ RSpec.shared_examples 'trace with enabled live trace feature' do
               .and_return(%w[Error Error])
           end
 
-          it_behaves_like 'source trace in ChunkedIO stays intact', error: ActiveRecord::RecordInvalid
+          it_behaves_like 'source trace in ChunkedIO stays intact', error: GitlabUploader::ObjectNotReadyError
         end
       end
     end
