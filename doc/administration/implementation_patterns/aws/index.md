@@ -74,7 +74,6 @@ For EKS Nodes, picking more of a smaller size instance allows scaling costs to b
 | One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                | 8 vCPU, 16GB                                             | $0.34/hr                                           |
 
 NOTE:
-
 IMPORTANT: If EKS node autoscaling is employed, it is likely that your average loading will run lower than this - especially during non-working hours and weekends.
 
 | Non-Kubernetes Compute                                       | Ref Arch Raw Total                                           | AWS BOM<br />(Directly Usable in AWS Quick Start)       | Example Cost<br />US East  |
@@ -131,7 +130,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 ### 3K Cloud Native Hybrid on EKS Test Results 
 
 <details>
-<summary markdown="span">Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
+
+#### 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results
 
 | Attribute            | Value                                                 |
 | -------------------- | ----------------------------------------------------- |
@@ -213,7 +214,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 </details>
 
 <details>
-<summary markdown="span">Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
+
+#### 3K Cloud Native Hybrid on EKS **AutoScaling** Test Results
 
 This test:
 
@@ -301,7 +304,12 @@ This test:
 
 </details>
 
-### 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+### 10K Cloud Native Hybrid on EKS
+
+<details>
+<summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
+
+#### 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -336,10 +344,14 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS] | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |
 | Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $15/mon |
 
-### 10K Cloud Native Hybrid on EKS Test Results 
+</details>
+
+### 10K Cloud Native Hybrid on EKS
 
 <details>
-<summary markdown="span">Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
+
+#### 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results
 
 Attribute                  | Value                                                   
 ---------------------------|---------------------------------------------------------
@@ -421,7 +433,7 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 </details>
 
 <details>
-<summary markdown="span">Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Test Results </summary>
 
 This test:
 
