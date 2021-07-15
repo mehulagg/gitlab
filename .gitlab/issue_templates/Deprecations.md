@@ -28,9 +28,9 @@ The description of the deprecation should state what actions the user should tak
 
 ### Checklist
 
-- [ ] @mention your stage's stable counterparts on this issue. (Customer support, Customer Success (Technical Account Manager), Product Marketing Manager)
-     - To see who the stable counterparts are for a product team visit [product categories](https://about.gitlab.com/handbook/product/categories/)
-- [ ] @mention your GPM so that they are aware of planned deprecations. The goal is that reviews occur at minimum two releases prior to the final removal of the feature or introduction of a breaking change.
+- [ ] @mention your stage's stable counterparts on this issue. For example, Customer Support, Customer Success (Technical Account Manager), Product Marketing Manager.
+  - To find the stable counterparts for a product team, see the [product categories](https://about.gitlab.com/handbook/product/categories/) page.
+- [ ] @mention your GPM so that they are aware of planned deprecations. The goal is to have reviews happen at least two releases before the final removal of the feature or introduction of a breaking change.
 
 ### Links
 
