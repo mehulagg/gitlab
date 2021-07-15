@@ -72,4 +72,11 @@ RSpec.describe Key do
       end
     end
   end
+
+  describe '#audit_details' do
+    it 'equals to the title' do
+      key = build(:personal_key)
+      expect(key.audit_details).to eq(key.title)
+    end
+  end
 end

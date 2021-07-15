@@ -4,4 +4,4 @@
 .text-warning.center.prepend-top-20
   %p
     = sprite_icon('warning-solid', size: 12)
-    = _("This project will be removed on %{date} since its parent group '%{parent_group_name}' has been scheduled for removal.") % { date: permanent_deletion_date(ancestor_marked_for_deletion.marked_for_deletion_on), parent_group_name: ancestor_marked_for_deletion.name }
+    = _("This project will be deleted on %{date} since its parent group '%{parent_group_name}' has been scheduled for deletion.") % { date: permanent_deletion_date(ancestor_marked_for_deletion.marked_for_deletion_on), parent_group_name: ancestor_marked_for_deletion.name }

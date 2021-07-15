@@ -53,7 +53,6 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
 
           before do
             stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-            stub_feature_flags(escalation_policies_mvc: project)
           end
 
           it_behaves_like 'does not send on-call notification'
@@ -65,14 +64,6 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
             let!(:pending_escalation) { create(:incident_management_pending_alert_escalation, alert: target) }
 
             include_examples "deletes the target's escalations"
-
-            context 'with escalation policy feature disabled' do
-              before do
-                stub_feature_flags(escalation_policies_mvc: false)
-              end
-
-              include_examples "deletes the target's escalations"
-            end
           end
         end
       end

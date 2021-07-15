@@ -16,10 +16,6 @@ RSpec.describe Projects::Alerting::NotifyService do
       }
     end
 
-    before do
-      stub_feature_flags(escalation_policies_mvc: false)
-    end
-
     subject { service.execute(token, integration) }
 
     context 'existing alert with same payload fingerprint' do
@@ -101,7 +97,6 @@ RSpec.describe Projects::Alerting::NotifyService do
 
         before do
           stub_licensed_features(oncall_schedules: project, escalation_policies: true)
-          stub_feature_flags(escalation_policies_mvc: project)
         end
 
         it_behaves_like 'does not send on-call notification'
@@ -129,14 +124,6 @@ RSpec.describe Projects::Alerting::NotifyService do
               let(:target) { alert }
 
               include_examples "deletes the target's escalations"
-
-              context 'with escalation policy feature disabled' do
-                before do
-                  stub_feature_flags(escalation_policies_mvc: false)
-                end
-
-                include_examples "deletes the target's escalations"
-              end
             end
           end
         end

@@ -26,9 +26,7 @@ export const i18n = {
       emptyScheduleValidationMsg: s__(
         'EscalationPolicies|A schedule is required for adding an escalation policy.',
       ),
-      invalidTimeValidationMsg: s__(
-        'EscalationPolicies|Elapsed time must be greater than or equal to zero.',
-      ),
+      invalidTimeValidationMsg: s__('EscalationPolicies|Minutes must be between 0 and 1440.'),
     },
   },
 };

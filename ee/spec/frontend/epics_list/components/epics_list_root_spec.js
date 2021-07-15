@@ -56,6 +56,7 @@ const mockProvide = {
   groupMilestonesPath: '/gitlab-org/-/milestone.json',
   listEpicsPath: '/gitlab-org/-/epics',
   emptyStatePath: '/assets/illustrations/empty-state/epics.svg',
+  isSignedIn: false,
 };
 
 const mockPageInfo = {

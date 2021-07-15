@@ -9,7 +9,6 @@ RSpec.describe 'On-call Schedules', :js do
 
   before do
     stub_licensed_features(oncall_schedules: true)
-    stub_feature_flags(multiple_oncall_schedules: true)
 
     project.add_maintainer(user)
     sign_in(user)

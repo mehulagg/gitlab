@@ -377,6 +377,8 @@ class Project < ApplicationRecord
   has_one :operations_feature_flags_client, class_name: 'Operations::FeatureFlagsClient'
   has_many :operations_feature_flags_user_lists, class_name: 'Operations::FeatureFlags::UserList'
 
+  has_many :error_tracking_errors, inverse_of: :project, class_name: 'ErrorTracking::Error'
+
   has_many :timelogs
 
   accepts_nested_attributes_for :variables, allow_destroy: true
@@ -416,6 +418,7 @@ class Project < ApplicationRecord
     prefix: :import, to: :import_state, allow_nil: true
   delegate :squash_always?, :squash_never?, :squash_enabled_by_default?, :squash_readonly?, to: :project_setting
   delegate :squash_option, to: :project_setting
+  delegate :previous_default_branch, :previous_default_branch=, to: :project_setting
   delegate :no_import?, to: :import_state, allow_nil: true
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :members, to: :team, prefix: true

@@ -44,7 +44,10 @@ exports[`ComplianceDashboard component when there are merge requests and the sho
     </b-tab-stub>
   </gl-tabs-stub>
    
-  <!---->
+  <merge-request-drawer-stub
+    mergerequest="[object Object]"
+    z-index="252"
+  />
 </div>
 `;
 
@@ -76,7 +79,10 @@ exports[`ComplianceDashboard component when there are merge requests matches the
     mergerequests="[object Object],[object Object]"
   />
    
-  <!---->
+  <merge-request-drawer-stub
+    mergerequest="[object Object]"
+    z-index="252"
+  />
 </div>
 `;
 

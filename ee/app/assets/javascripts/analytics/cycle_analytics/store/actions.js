@@ -27,8 +27,18 @@ export const setPaths = ({ dispatch }, options) => {
 export const setFeatureFlags = ({ commit }, featureFlags) =>
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
-export const setSelectedProjects = ({ commit }, projects) =>
+const refreshData = ({ selectedStage, isOverviewStageSelected, dispatch }) => {
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
+  return dispatch('fetchCycleAnalyticsData');
+};
+
+export const setSelectedProjects = (
+  { commit, dispatch, getters: { isOverviewStageSelected }, state: { selectedStage } },
+  projects,
+) => {
   commit(types.SET_SELECTED_PROJECTS, projects);
+  return refreshData({ dispatch, selectedStage, isOverviewStageSelected });
+};
 
 export const setSelectedStage = ({ commit }, stage) => commit(types.SET_SELECTED_STAGE, stage);
 
@@ -383,8 +393,7 @@ export const setFilters = ({
   getters: { isOverviewStageSelected },
   state: { selectedStage },
 }) => {
-  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
-  return dispatch('fetchCycleAnalyticsData');
+  return refreshData({ dispatch, isOverviewStageSelected, selectedStage });
 };
 
 export const updateStageTablePagination = (

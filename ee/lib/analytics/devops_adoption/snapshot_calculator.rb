@@ -96,26 +96,32 @@ module Analytics
       end
 
       def sast_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
-
         projects_count_with_artifact(Ci::JobArtifact.sast_reports)
       end
 
       def dast_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
-
         projects_count_with_artifact(Ci::JobArtifact.dast_reports)
       end
 
       def dependency_scanning_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_dependency_scanning, enabled_namespace.namespace, default_enabled: :yaml)
-
         projects_count_with_artifact(Ci::JobArtifact.dependency_list_reports)
       end
 
       def coverage_fuzzing_enabled_count
         projects_count_with_artifact(Ci::JobArtifact.coverage_fuzzing_reports)
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def vulnerability_management_used_count
+        subquery = Vulnerability.not_detected
+                                .created_in_time_range(from: range_start, to: range_end)
+                                .where(Vulnerability.arel_table[:project_id].eq(Project.arel_table[:id])).arel.exists
+
+        snapshot_project_ids.each_slice(1000).sum do |project_ids|
+          Project.where(id: project_ids).where(subquery).count
+        end
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       # rubocop: disable CodeReuse/ActiveRecord
       def projects_count_with_artifact(artifacts_scope)

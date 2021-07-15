@@ -130,7 +130,7 @@ RSpec.describe Gitlab::Ci::Config do
                   image: { name: '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION' },
                   variables: {
                     DAST_AUTH_URL: dast_site_profile.auth_url,
-                    DAST_VERSION: 1,
+                    DAST_VERSION: 2,
                     SECURE_ANALYZERS_PREFIX: secure_analyzers_prefix,
                     DAST_WEBSITE: dast_site_profile.dast_site.url,
                     DAST_FULL_SCAN_ENABLED: 'false',

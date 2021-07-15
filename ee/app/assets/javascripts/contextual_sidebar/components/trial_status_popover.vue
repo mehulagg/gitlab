@@ -2,6 +2,7 @@
 import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
+import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
@@ -24,7 +25,7 @@ export default {
   },
   mixins: [trackingMixin],
   inject: {
-    containerId: { default: null },
+    containerId: {},
     groupName: {},
     planName: {},
     plansHref: {},
@@ -32,6 +33,8 @@ export default {
     startInitiallyShown: { default: false },
     targetId: {},
     trialEndDate: {},
+    userCalloutsPath: {},
+    userCalloutsFeatureId: {},
   },
   data() {
     return {
@@ -62,6 +65,7 @@ export default {
       this.forciblyShowing = true;
       this.showCloseButton = true;
       this.show = true;
+      this.onForciblyShown();
     }
   },
   mounted() {
@@ -77,6 +81,18 @@ export default {
 
       const { action, ...options } = this.$options.trackingEvents.closeBtnClick;
       this.track(action, options);
+    },
+    onForciblyShown() {
+      if (this.userCalloutsPath && this.userCalloutsFeatureId) {
+        axios
+          .post(this.userCalloutsPath, {
+            feature_name: this.userCalloutsFeatureId,
+          })
+          .catch((e) => {
+            // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
+            console.error('Failed to dismiss trial status popover.', e);
+          });
+      }
     },
     onResize() {
       this.updateDisabledState();

@@ -13,6 +13,7 @@ import BlobContentViewer from '~/repository/components/blob_content_viewer.vue';
 import BlobEdit from '~/repository/components/blob_edit.vue';
 import { loadViewer, viewerProps } from '~/repository/components/blob_viewers';
 import DownloadViewer from '~/repository/components/blob_viewers/download_viewer.vue';
+import EmptyViewer from '~/repository/components/blob_viewers/empty_viewer.vue';
 import TextViewer from '~/repository/components/blob_viewers/text_viewer.vue';
 import blobInfoQuery from '~/repository/queries/blob_info.query.graphql';
 
@@ -57,23 +58,36 @@ const richMockData = {
     renderError: null,
   },
 };
-const userPermissionsMockData = {
+
+const projectMockData = {
   userPermissions: {
     pushCode: true,
+  },
+  repository: {
+    empty: false,
   },
 };
 
 const localVue = createLocalVue();
 const mockAxios = new MockAdapter(axios);
 
-const createComponentWithApollo = (mockData, mockPermissionData = true) => {
+const createComponentWithApollo = (mockData = {}) => {
   localVue.use(VueApollo);
+
+  const defaultPushCode = projectMockData.userPermissions.pushCode;
+  const defaultEmptyRepo = projectMockData.repository.empty;
+  const { blobs, emptyRepo = defaultEmptyRepo, canPushCode = defaultPushCode } = mockData;
 
   const mockResolver = jest.fn().mockResolvedValue({
     data: {
       project: {
-        userPermissions: { pushCode: mockPermissionData },
-        repository: { blobs: { nodes: [mockData] } },
+        userPermissions: { pushCode: canPushCode },
+        repository: {
+          empty: emptyRepo,
+          blobs: {
+            nodes: [blobs],
+          },
+        },
       },
     },
   });
@@ -124,8 +138,6 @@ describe('Blob content viewer component', () => {
   const findBlobEdit = () => wrapper.findComponent(BlobEdit);
   const findBlobContent = () => wrapper.findComponent(BlobContent);
   const findBlobButtonGroup = () => wrapper.findComponent(BlobButtonGroup);
-  const findTextViewer = () => wrapper.findComponent(TextViewer);
-  const findDownloadViewer = () => wrapper.findComponent(DownloadViewer);
 
   afterEach(() => {
     wrapper.destroy();
@@ -210,14 +222,14 @@ describe('Blob content viewer component', () => {
 
   describe('legacy viewers', () => {
     it('does not load a legacy viewer when a rich viewer is not available', async () => {
-      createComponentWithApollo(simpleMockData);
+      createComponentWithApollo({ blobs: simpleMockData });
       await waitForPromises();
 
       expect(mockAxios.history.get).toHaveLength(0);
     });
 
     it('loads a legacy viewer when a rich viewer is available', async () => {
-      createComponentWithApollo(richMockData);
+      createComponentWithApollo({ blobs: richMockData });
       await waitForPromises();
 
       expect(mockAxios.history.get).toHaveLength(1);
@@ -225,9 +237,9 @@ describe('Blob content viewer component', () => {
   });
 
   describe('Blob viewer', () => {
-    beforeEach(() => {
-      loadViewer.mockClear();
-      viewerProps.mockClear();
+    afterEach(() => {
+      loadViewer.mockRestore();
+      viewerProps.mockRestore();
     });
 
     it('does not render a BlobContent component if a Blob viewer is available', () => {
@@ -237,39 +249,36 @@ describe('Blob content viewer component', () => {
       expect(findBlobContent().exists()).toBe(false);
     });
 
-    it('renders a TextViewer for text files', () => {
-      loadViewer.mockReturnValueOnce(TextViewer);
-      viewerProps.mockReturnValueOnce({ content: 'test', fileName: 'test.js', readOnly: true });
+    it.each`
+      viewer        | loadViewerReturnValue | viewerPropsReturnValue
+      ${'empty'}    | ${EmptyViewer}        | ${{}}
+      ${'download'} | ${DownloadViewer}     | ${{ filePath: '/some/file/path', fileName: 'test.js', fileSize: 100 }}
+      ${'text'}     | ${TextViewer}         | ${{ content: 'test', fileName: 'test.js', readOnly: true }}
+    `(
+      'renders viewer component for $viewer files',
+      async ({ viewer, loadViewerReturnValue, viewerPropsReturnValue }) => {
+        loadViewer.mockReturnValue(loadViewerReturnValue);
+        viewerProps.mockReturnValue(viewerPropsReturnValue);
 
-      factory({ mockData: { blobInfo: simpleMockData } });
+        factory({
+          mockData: {
+            blobInfo: {
+              ...simpleMockData,
+              fileType: null,
+              simpleViewer: {
+                ...simpleMockData.simpleViewer,
+                fileType: viewer,
+              },
+            },
+          },
+        });
 
-      expect(findTextViewer().exists()).toBe(true);
-    });
+        await nextTick();
 
-    it('renders a DownloadViewer for download files', async () => {
-      loadViewer.mockReturnValue(DownloadViewer);
-      viewerProps.mockReturnValue({
-        filePath: '/some/file/path',
-        fileName: 'test.js',
-        fileSize: 100,
-      });
-
-      const downloadSimpleMockData = {
-        ...simpleMockData,
-        fileType: null,
-        simpleViewer: {
-          ...simpleMockData.simpleViewer,
-          fileType: 'download',
-        },
-      };
-
-      factory({ mockData: { blobInfo: downloadSimpleMockData } });
-
-      await nextTick();
-
-      expect(loadViewer).toHaveBeenCalledWith('download');
-      expect(findDownloadViewer().exists()).toBe(true);
-    });
+        expect(loadViewer).toHaveBeenCalledWith(viewer);
+        expect(wrapper.findComponent(loadViewerReturnValue).exists()).toBe(true);
+      },
+    );
   });
 
   describe('BlobHeader action slot', () => {
@@ -324,16 +333,20 @@ describe('Blob content viewer component', () => {
     });
 
     describe('BlobButtonGroup', () => {
-      const { name, path, replacePath } = simpleMockData;
+      const { name, path, replacePath, webPath } = simpleMockData;
       const {
         userPermissions: { pushCode },
-      } = userPermissionsMockData;
+        repository: { empty },
+      } = projectMockData;
 
       it('renders component', async () => {
         window.gon.current_user_id = 1;
 
         fullFactory({
-          mockData: { blobInfo: simpleMockData, project: userPermissionsMockData },
+          mockData: {
+            blobInfo: simpleMockData,
+            project: { userPermissions: { pushCode }, repository: { empty } },
+          },
           stubs: {
             BlobContent: true,
             BlobButtonGroup: true,
@@ -346,7 +359,9 @@ describe('Blob content viewer component', () => {
           name,
           path,
           replacePath,
+          deletePath: webPath,
           canPushCode: pushCode,
+          emptyRepo: empty,
         });
       });
 

@@ -16,7 +16,7 @@ module EE
         return [] unless product_intelligence_enabled?
 
         optional_enabled = ::Gitlab::CurrentSettings.usage_ping_enabled?
-        customer_service_enabled = ::License.current.usage_ping?
+        customer_service_enabled = ::License.current.customer_service_enabled?
 
         [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY].tap do |categories|
           categories << OPERATIONAL_CATEGORY << OPTIONAL_CATEGORY if optional_enabled
@@ -28,7 +28,7 @@ module EE
 
       override :pings_enabled?
       def pings_enabled?
-        ::License.current&.usage_ping? || super
+        ::License.current&.customer_service_enabled? || super
       end
     end
   end

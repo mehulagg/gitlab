@@ -76,6 +76,7 @@ RSpec.describe 'Test Cases', :js do
         page.within('.issuable-list-container .issuable-list li.issue', match: :first) do
           expect(page.find('.issue-title')).to have_content(test_case1.title)
           expect(page.find('.issuable-reference')).to have_content("##{test_case1.iid}")
+          expect(page.find('.issuable-info')).to have_link(label.title, href: "?label_name[]=#{label.title}")
           expect(page.find('.issuable-authored')).to have_content('created 5 days ago by')
           expect(page.find('.author')).to have_content(user.name)
           expect(page.find('div.issuable-updated-at')).to have_content('updated 2 days ago')

@@ -27,7 +27,7 @@ RSpec.describe TrialStatusWidgetHelper do
       {
         container_id: 'trial-status-sidebar-widget',
         plan_name: 'Ultimate',
-        plans_href: '/groups/pants-group/-/billings'
+        plans_href: group_billings_path(group)
       }
     end
 
@@ -36,79 +36,95 @@ RSpec.describe TrialStatusWidgetHelper do
       stub_experiments(forcibly_show_trial_status_popover: :candidate)
     end
 
+    after do
+      travel_back
+    end
+
     describe '#trial_status_popover_data_attrs' do
-      let(:popover_shared_expected_attrs) do
-        shared_expected_attrs.merge(
-          group_name: group.name,
-          purchase_href: new_subscriptions_path(namespace_id: group.id, plan_id: described_class::ZUORA_ULTIMATE_PLAN_ID),
-          target_id: shared_expected_attrs[:container_id],
-          start_initially_shown: false,
-          trial_end_date: trial_end_date
-        )
+      using RSpec::Parameterized::TableSyntax
+
+      d14_callout_id = described_class::D14_CALLOUT_ID
+      d3_callout_id = described_class::D3_CALLOUT_ID
+
+      let_it_be(:user) { create(:user) }
+
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+        allow(user).to receive(:dismissed_callout?).with(feature_name: user_callouts_feature_id).and_return(dismissed_callout)
       end
 
       subject(:data_attrs) { helper.trial_status_popover_data_attrs(group) }
 
-      shared_examples 'returned data attributes' do |shown: false|
-        it 'returns the correct set of data attributes' do
+      shared_examples 'has correct data attributes' do
+        it 'returns the needed data attributes for mounting the popover Vue component' do
           expect(data_attrs).to match(
-            popover_shared_expected_attrs.merge(
-              start_initially_shown: shown
+            shared_expected_attrs.merge(
+              group_name: group.name,
+              purchase_href: new_subscriptions_path(namespace_id: group.id, plan_id: described_class::ZUORA_ULTIMATE_PLAN_ID),
+              target_id: shared_expected_attrs[:container_id],
+              start_initially_shown: start_initially_shown,
+              trial_end_date: trial_end_date,
+              user_callouts_path: user_callouts_path,
+              user_callouts_feature_id: user_callouts_feature_id
             )
           )
         end
       end
 
-      context 'when more than 14 days remain' do
-        where trial_days_remaining: [15, 22, 30]
-
-        with_them do
-          include_examples 'returned data attributes'
-        end
+      where(:trial_days_remaining, :user_callouts_feature_id, :dismissed_callout, :start_initially_shown) do
+        # days| callout ID      | dismissed?  | shown?
+        30    | nil             | false       | false
+        20    | nil             | false       | false
+        15    | nil             | false       | false
+        14    | d14_callout_id  | false       | true
+        14    | d14_callout_id  | true        | false
+        10    | d14_callout_id  | false       | true
+        10    | d14_callout_id  | true        | false
+        7     | d14_callout_id  | false       | true
+        7     | d14_callout_id  | true        | false
+        # days| callout ID      | dismissed?  | shown?
+        6     | nil             | false       | false
+        4     | nil             | false       | false
+        3     | d3_callout_id   | false       | true
+        3     | d3_callout_id   | true        | false
+        1     | d3_callout_id   | false       | true
+        1     | d3_callout_id   | true        | false
+        0     | d3_callout_id   | false       | true
+        0     | d3_callout_id   | true        | false
+        -1    | nil             | false       | false
       end
 
-      context 'when between 7 & 14 days remain' do
-        where trial_days_remaining: [7, 10, 14]
-
-        with_them do
-          include_examples 'returned data attributes', shown: true
-        end
-      end
-
-      context 'when between 4 & 6 days remain' do
-        where trial_days_remaining: [4, 5, 6]
-
-        with_them do
-          include_examples 'returned data attributes'
-        end
-      end
-
-      context 'when between 0 & 3 days remain' do
-        where trial_days_remaining: [0, 1, 3]
-
-        with_them do
-          include_examples 'returned data attributes', shown: true
-        end
-      end
-
-      context 'when fewer than 0 days remain' do
-        where trial_days_remaining: [-1, -5, -12]
-
-        with_them do
-          include_examples 'returned data attributes'
-        end
-      end
+      with_them { include_examples 'has correct data attributes' }
 
       context 'when not part of the experiment' do
         before do
           stub_experiments(forcibly_show_trial_status_popover: :control)
         end
 
-        where trial_days_remaining: [2, 5, 9, 14, 20]
-
-        with_them do
-          include_examples 'returned data attributes', shown: false
+        where(:trial_days_remaining, :user_callouts_feature_id, :dismissed_callout, :start_initially_shown) do
+          # days| callout ID      | dismissed?  | shown?
+          30    | nil             | false       | false
+          20    | nil             | false       | false
+          15    | nil             | false       | false
+          14    | d14_callout_id  | false       | false
+          14    | d14_callout_id  | true        | false
+          10    | d14_callout_id  | false       | false
+          10    | d14_callout_id  | true        | false
+          7     | d14_callout_id  | false       | false
+          7     | d14_callout_id  | true        | false
+          # days| callout ID      | dismissed?  | shown?
+          6     | nil             | false       | false
+          4     | nil             | false       | false
+          3     | d3_callout_id   | false       | false
+          3     | d3_callout_id   | true        | false
+          1     | d3_callout_id   | false       | false
+          1     | d3_callout_id   | true        | false
+          0     | d3_callout_id   | false       | false
+          0     | d3_callout_id   | true        | false
+          -1    | nil             | false       | false
         end
+
+        with_them { include_examples 'has correct data attributes' }
       end
     end
 
@@ -119,7 +135,7 @@ RSpec.describe TrialStatusWidgetHelper do
 
       subject(:data_attrs) { helper.trial_status_widget_data_attrs(group) }
 
-      it 'returns the needed data attributes for mounting the Vue component' do
+      it 'returns the needed data attributes for mounting the widget Vue component' do
         expect(data_attrs).to match(
           shared_expected_attrs.merge(
             days_remaining: trial_days_remaining,

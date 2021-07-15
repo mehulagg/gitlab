@@ -242,6 +242,13 @@ module EE
       issue_type_supports?(:epics) && project.group.present?
     end
 
+    override :update_upvotes_count
+    def update_upvotes_count
+      maintain_elasticsearch_update if maintaining_elasticsearch?
+
+      super
+    end
+
     private
 
     def blocking_issues_ids

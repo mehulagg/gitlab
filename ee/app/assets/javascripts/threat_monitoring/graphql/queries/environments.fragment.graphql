@@ -1,0 +1,7 @@
+fragment Environments on NetworkPolicy {
+  environments {
+    nodes {
+      name
+    }
+  }
+}

@@ -41,7 +41,6 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
 
   before do
     stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-    stub_feature_flags(escalation_policies_mvc: project)
   end
 
   before_all do
@@ -84,14 +83,6 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
     context 'when license is not enabled' do
       before do
         stub_licensed_features(oncall_schedules: true, escalation_policies: false)
-      end
-
-      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
-    end
-
-    context 'when feature is not available' do
-      before do
-        stub_feature_flags(escalation_policies_mvc: false)
       end
 
       it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'

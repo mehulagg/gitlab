@@ -1,4 +1,4 @@
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export const TYPE_USER = 'user';
 export const TYPE_GROUP = 'group';
@@ -19,23 +19,31 @@ export const RULE_NAME_ANY_APPROVER = 'All Members';
 
 export const VULNERABILITY_CHECK_NAME = 'Vulnerability-Check';
 export const LICENSE_CHECK_NAME = 'License-Check';
+export const COVERAGE_CHECK_NAME = 'Coverage-Check';
 
 export const LICENSE_SCANNING = 'license_scanning';
 
 export const APPROVAL_RULE_CONFIGS = {
   [VULNERABILITY_CHECK_NAME]: {
-    title: __('Vulnerability-Check'),
-    popoverText: __(
-      'A merge request approval is required when a security report contains a new vulnerability of high, critical, or unknown severity.',
+    title: s__('SecurityApprovals|Vulnerability-Check'),
+    popoverText: s__(
+      'SecurityApprovals|A merge request approval is required when a security report contains a new vulnerability of high, critical, or unknown severity.',
     ),
-    documentationText: __('Learn more about Vulnerability-Check'),
+    documentationText: s__('SecurityApprovals|Learn more about Vulnerability-Check'),
   },
   [LICENSE_CHECK_NAME]: {
-    title: __('License-Check'),
-    popoverText: __(
-      'A merge request approval is required when the license compliance report contains a denied license.',
+    title: s__('SecurityApprovals|License-Check'),
+    popoverText: s__(
+      'SecurityApprovals|A merge request approval is required when the license compliance report contains a denied license.',
     ),
-    documentationText: __('Learn more about License-Check'),
+    documentationText: s__('SecurityApprovals|Learn more about License-Check'),
+  },
+  [COVERAGE_CHECK_NAME]: {
+    title: s__('SecurityApprovals|Coverage-Check'),
+    popoverText: s__(
+      'SecurityApprovals|A merge request approval is required when test coverage declines.',
+    ),
+    documentationText: s__('SecurityApprovals|Learn more about Coverage-Check'),
   },
 };
 

@@ -343,46 +343,6 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_shared_runners_limit_enabled' do
-      let(:public_cost_factor) { 1.0 }
-
-      before do
-        create(:ci_runner, :instance, public_projects_minutes_cost_factor: public_cost_factor)
-      end
-
-      it 'does not return projects without shared runners' do
-        project_with_shared_runners = create(:project, shared_runners_enabled: true)
-        project_without_shared_runners = create(:project, shared_runners_enabled: false)
-
-        expect(described_class.with_shared_runners_limit_enabled).to include(project_with_shared_runners)
-        expect(described_class.with_shared_runners_limit_enabled).not_to include(project_without_shared_runners)
-      end
-
-      it 'return projects with shared runners with positive public cost factor with any visibility levels' do
-        public_project_with_shared_runners = create(:project, :public, shared_runners_enabled: true)
-        internal_project_with_shared_runners = create(:project, :internal, shared_runners_enabled: true)
-        private_project_with_shared_runners = create(:project, :private, shared_runners_enabled: true)
-
-        expect(described_class.with_shared_runners_limit_enabled).to include(public_project_with_shared_runners)
-        expect(described_class.with_shared_runners_limit_enabled).to include(internal_project_with_shared_runners)
-        expect(described_class.with_shared_runners_limit_enabled).to include(private_project_with_shared_runners)
-      end
-
-      context 'and shared runners public cost factors set to 0' do
-        let(:public_cost_factor) { 0.0 }
-
-        it 'return projects with any visibility levels except public' do
-          public_project_with_shared_runners = create(:project, :public, shared_runners_enabled: true)
-          internal_project_with_shared_runners = create(:project, :internal, shared_runners_enabled: true)
-          private_project_with_shared_runners = create(:project, :private, shared_runners_enabled: true)
-
-          expect(described_class.with_shared_runners_limit_enabled).not_to include(public_project_with_shared_runners)
-          expect(described_class.with_shared_runners_limit_enabled).to include(internal_project_with_shared_runners)
-          expect(described_class.with_shared_runners_limit_enabled).to include(private_project_with_shared_runners)
-        end
-      end
-    end
-
     describe '.has_vulnerabilities' do
       let_it_be(:project_1) { create(:project) }
       let_it_be(:project_2) { create(:project) }
@@ -2944,6 +2904,69 @@ RSpec.describe Project do
 
       it 'returns a list with specific runners' do
         is_expected.to match_array([group_runner, project_runner])
+      end
+    end
+  end
+
+  describe '#force_cost_factor?' do
+    context 'on gitlab.com' do
+      context 'when public' do
+        context 'when ci_minutes_public_project_cost_factor is enabled' do
+          context 'when in a namespace created after 17 July, 2021' do
+            it 'returns true' do
+              stub_feature_flags(ci_minutes_public_project_cost_factor: true)
+              allow(::Gitlab).to receive(:com?).and_return(true)
+              namespace = build(:group, created_at: Date.new(2021, 7, 17))
+              project = build(:project, :public, namespace: namespace)
+
+              expect(project.force_cost_factor?).to be_truthy
+            end
+          end
+
+          context 'when in a namespace created before 17 July, 2021' do
+            it 'returns false' do
+              stub_feature_flags(ci_minutes_public_project_cost_factor: true)
+              allow(::Gitlab).to receive(:com?).and_return(true)
+              namespace = build(:group, created_at: Date.new(2021, 7, 16))
+              project = build(:project, :public, namespace: namespace)
+
+              expect(project.force_cost_factor?).to be_falsy
+            end
+          end
+        end
+
+        context 'when ci_minutes_public_project_cost_factor is disabled' do
+          it 'returns false' do
+            stub_feature_flags(ci_minutes_public_project_cost_factor: false)
+            allow(::Gitlab).to receive(:com?).and_return(true)
+            namespace = build(:group, created_at: Date.new(2021, 7, 16))
+            project = build(:project, :public, namespace: namespace)
+
+            expect(project.force_cost_factor?).to be_falsy
+          end
+        end
+      end
+
+      context 'when not public' do
+        it 'returns false' do
+          stub_feature_flags(ci_minutes_public_project_cost_factor: true)
+          allow(::Gitlab).to receive(:com?).and_return(true)
+          namespace = build(:group, created_at: Date.new(2021, 7, 17))
+          project = build(:project, :private, namespace: namespace)
+
+          expect(project.force_cost_factor?).to be_falsy
+        end
+      end
+    end
+
+    context 'when not on gitlab.com' do
+      it 'returns false' do
+        stub_feature_flags(ci_minutes_public_project_cost_factor: true)
+        allow(::Gitlab).to receive(:com?).and_return(false)
+        namespace = build(:group, created_at: Date.new(2021, 7, 17))
+        project = build(:project, :public, namespace: namespace)
+
+        expect(project.force_cost_factor?).to be_falsy
       end
     end
   end

@@ -12,7 +12,7 @@ export default (apolloProvider) => {
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {}),
   };
-  const { fullPath } = el.dataset;
+
   if (!el) {
     return null;
   }
@@ -21,10 +21,12 @@ export default (apolloProvider) => {
     el,
     provide: {
       initialFilterParams,
-      fullPath,
     },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider,
-    render: (createElement) => createElement(EpicFilteredSearch),
+    render: (createElement) =>
+      createElement(EpicFilteredSearch, {
+        props: { fullPath: store.state?.fullPath || '', boardType: store.state?.boardType || '' },
+      }),
   });
 };

@@ -15,7 +15,6 @@ RSpec.describe AlertManagement::Alerts::UpdateService do
 
   before do
     stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-    stub_feature_flags(escalation_policies_mvc: project)
   end
 
   before_all do
@@ -44,14 +43,6 @@ RSpec.describe AlertManagement::Alerts::UpdateService do
         let(:target) { alert }
 
         include_examples "deletes the target's escalations"
-
-        context 'with escalation policy feature disabled' do
-          before do
-            stub_feature_flags(escalation_policies_mvc: false)
-          end
-
-          include_examples "deletes the target's escalations"
-        end
       end
 
       context 'moving from a status of the same group' do

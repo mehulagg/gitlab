@@ -34,4 +34,10 @@ RSpec.describe Auditable do
       end
     end
   end
+
+  describe '#audit_details' do
+    it 'raises error to prompt for implementation' do
+      expect { instance.audit_details }.to raise_error(/does not implement audit_details/)
+    end
+  end
 end

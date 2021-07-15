@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Projects::ServiceHookLogsController < Projects::HookLogsController
+  extend Gitlab::Utils::Override
+
   before_action :integration, only: [:show, :retry]
 
   def retry
@@ -10,12 +12,12 @@ class Projects::ServiceHookLogsController < Projects::HookLogsController
 
   private
 
-  def hook
-    @hook ||= integration.service_hook
-  end
-
   def integration
     @integration ||= @project.find_or_initialize_integration(params[:service_id])
-    @service = @integration # TODO: remove when https://gitlab.com/gitlab-org/gitlab/-/issues/330300 is complete
+  end
+
+  override :hook
+  def hook
+    @hook ||= integration.service_hook || not_found
   end
 end

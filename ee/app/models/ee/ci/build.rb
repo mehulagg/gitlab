@@ -73,7 +73,7 @@ module EE
       end
 
       def shared_runners_minutes_limit_enabled?
-        project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
+        project.shared_runners_minutes_limit_enabled? && runner&.cost_factor_enabled?(project)
       end
 
       def log_geo_deleted_event
@@ -87,6 +87,10 @@ module EE
           artifacts_metadata?
       end
 
+      def has_security_reports?
+        job_artifacts.security_reports.any?
+      end
+
       def collect_security_reports!(security_reports)
         each_report(::Ci::JobArtifact::SECURITY_REPORT_FILE_TYPES) do |file_type, blob, report_artifact|
           security_reports.get_report(file_type, report_artifact).tap do |security_report|
@@ -97,6 +101,17 @@ module EE
             security_report.add_error('ParsingError')
           end
         end
+      end
+
+      def unmerged_security_reports
+        security_reports = ::Gitlab::Ci::Reports::Security::Reports.new(pipeline)
+
+        each_report(::Ci::JobArtifact::SECURITY_REPORT_FILE_TYPES) do |file_type, blob, report_artifact|
+          report = security_reports.get_report(file_type, report_artifact)
+          parse_raw_security_artifact_blob(report, blob)
+        end
+
+        security_reports
       end
 
       def collect_license_scanning_reports!(license_scanning_report)
@@ -213,9 +228,13 @@ module EE
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        signatures_enabled = ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone, signatures_enabled).parse!
+        parse_raw_security_artifact_blob(report_clone, blob)
         security_report.merge!(report_clone)
+      end
+
+      def parse_raw_security_artifact_blob(security_report, blob)
+        signatures_enabled = ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, security_report, signatures_enabled).parse!
       end
 
       def ee_runner_required_feature_names

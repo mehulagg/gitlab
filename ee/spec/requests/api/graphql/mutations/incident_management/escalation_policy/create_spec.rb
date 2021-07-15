@@ -34,7 +34,6 @@ RSpec.describe 'creating escalation policy' do
 
   before do
     stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-    stub_feature_flags(escalation_policies_mvc: project)
     project.add_maintainer(current_user)
   end
 
@@ -80,18 +79,6 @@ RSpec.describe 'creating escalation policy' do
         resolve
 
         expect(mutation_response['errors'][0]).to eq('Escalation policies must have at least one rule')
-      end
-    end
-
-    context 'feature flag disabled' do
-      before do
-        stub_feature_flags(escalation_policies_mvc: false)
-      end
-
-      it 'raises an error' do
-        resolve
-
-        expect_graphql_errors_to_include('Escalation policies are not supported for this project')
       end
     end
   end

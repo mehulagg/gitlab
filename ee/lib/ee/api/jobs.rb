@@ -22,7 +22,7 @@ module EE
 
             {
               allowed_agents: ::API::Entities::Clusters::Agent.represent(allowed_agents),
-              job: ::API::Entities::JobRequest::JobInfo.represent(current_authenticated_job),
+              job: ::API::Entities::Ci::JobRequest::JobInfo.represent(current_authenticated_job),
               pipeline: ::API::Entities::Ci::PipelineBasic.represent(pipeline),
               project: ::API::Entities::ProjectIdentity.represent(project),
               user: ::API::Entities::UserBasic.represent(current_user)

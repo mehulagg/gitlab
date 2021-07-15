@@ -6,6 +6,7 @@ import { POPOVER, TRACKING_PROPERTY } from 'ee/contextual_sidebar/components/con
 import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_popover.vue';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import axios from '~/lib/utils/axios_utils';
 
 Vue.config.ignoredElements = ['gl-emoji'];
 
@@ -28,12 +29,16 @@ describe('TrialStatusPopover component', () => {
     return extendedWrapper(
       mountFn(TrialStatusPopover, {
         provide: {
+          containerId: undefined,
           groupName: 'Some Test Group',
           planName: 'Ultimate',
           plansHref: 'billing/path-for/group',
           purchaseHref: 'transactions/new',
+          startInitiallyShown: undefined,
           targetId: 'target-element-identifier',
           trialEndDate: new Date('2021-02-28'),
+          userCalloutsPath: undefined,
+          userCalloutsFeatureId: undefined,
           ...providers,
         },
       }),
@@ -52,7 +57,7 @@ describe('TrialStatusPopover component', () => {
 
   describe('interpolated strings', () => {
     it('correctly interpolates them all', () => {
-      wrapper = createComponent(mount);
+      wrapper = createComponent(undefined, mount);
 
       expect(wrapper.text()).not.toMatch(/%{\w+}/);
     });
@@ -75,6 +80,15 @@ describe('TrialStatusPopover component', () => {
   });
 
   describe('startInitiallyShown', () => {
+    const userCalloutProviders = {
+      userCalloutsPath: 'user_callouts/path',
+      userCalloutsFeatureId: 'feature_id',
+    };
+
+    beforeEach(() => {
+      jest.spyOn(axios, 'post').mockResolvedValue('success');
+    });
+
     describe('when set to true', () => {
       beforeEach(() => {
         wrapper = createComponent({ startInitiallyShown: true });
@@ -87,11 +101,32 @@ describe('TrialStatusPopover component', () => {
       it('removes the popover triggers', () => {
         expect(findGlPopover().attributes('triggers')).toBe('');
       });
+
+      describe('and the user callout values are provided', () => {
+        beforeEach(() => {
+          wrapper = createComponent({
+            startInitiallyShown: true,
+            ...userCalloutProviders,
+          });
+        });
+
+        it('sends a request to update the specified UserCallout record', () => {
+          expect(axios.post).toHaveBeenCalledWith(userCalloutProviders.userCalloutsPath, {
+            feature_name: userCalloutProviders.userCalloutsFeatureId,
+          });
+        });
+      });
+
+      describe('but the user callout values are not provided', () => {
+        it('does not send a request to update a UserCallout record', () => {
+          expect(axios.post).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('when set to false', () => {
       beforeEach(() => {
-        wrapper = createComponent({ startInitiallyShown: false });
+        wrapper = createComponent({ ...userCalloutProviders });
       });
 
       it('does not cause the popover to be shown by default', () => {
@@ -100,6 +135,10 @@ describe('TrialStatusPopover component', () => {
 
       it('uses the standard triggers for the popover', () => {
         expect(findGlPopover().attributes('triggers')).toBe('hover focus');
+      });
+
+      it('never sends a request to update a UserCallout record', () => {
+        expect(axios.post).not.toHaveBeenCalled();
       });
     });
   });

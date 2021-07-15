@@ -34,7 +34,7 @@ RSpec.describe 'User views iteration' do
 
       it 'shows iteration info' do
         aggregate_failures 'expect Iterations highlighted on left sidebar' do
-          page.within '.qa-group-sidebar' do
+          page.within '.sidebar-top-level-items' do
             expect(page).to have_css('li.active > a', text: 'Iterations')
           end
         end

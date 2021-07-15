@@ -11,7 +11,6 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { escalationPolicyUrl } from '../constants';
 import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
@@ -32,13 +31,7 @@ export const i18n = {
   successNotification: {
     title: s__('OnCallSchedules|Try adding a rotation'),
     description: s__(
-      'OnCallSchedules|Your schedule has been successfully created. To add individual users to this schedule, use the add a rotation button.',
-    ),
-    descriptionSingle: s__(
-      'OnCallSchedules|To create an escalation policy using this schedule, visit the %{linkStart}escalation policy%{linkEnd} page.',
-    ),
-    descriptionMulti: s__(
-      'OnCallSchedules|To create an escalation policy that defines which schedule is used when, visit the %{linkStart}escalation policy%{linkEnd} page.',
+      'OnCallSchedules|Your schedule has been successfully created. To add individual users to this schedule, use the add a rotation button. To create an escalation policy that defines which schedule is used when, visit the %{linkStart}escalation policy%{linkEnd} page.',
     ),
   },
 };
@@ -61,7 +54,6 @@ export default {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagMixin()],
   inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   data() {
     return {
@@ -78,11 +70,7 @@ export default {
         };
       },
       update(data) {
-        const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
-        if (this.glFeatures.multipleOncallSchedules) {
-          return nodes;
-        }
-        return nodes.length ? [nodes[nodes.length - 1]] : [];
+        return data.project?.incidentManagementOncallSchedules?.nodes ?? [];
       },
       error(error) {
         Sentry.captureException(error);
@@ -90,18 +78,6 @@ export default {
     },
   },
   computed: {
-    alertMessage() {
-      const {
-        $options: {
-          i18n: {
-            successNotification: { description, descriptionMulti, descriptionSingle },
-          },
-        },
-      } = this;
-      return this.glFeatures.multipleOncallSchedules
-        ? `${description} ${descriptionMulti}`
-        : `${description} ${descriptionSingle}`;
-    },
     isLoading() {
       return this.$apollo.queries.schedules.loading;
     },
@@ -120,7 +96,6 @@ export default {
       <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
         <h2>{{ $options.i18n.title }}</h2>
         <gl-button
-          v-if="glFeatures.multipleOncallSchedules"
           v-gl-modal="$options.addScheduleModalId"
           v-gl-tooltip.left.viewport.hover
           :title="$options.i18n.add.tooltip"
@@ -140,7 +115,7 @@ export default {
         class="gl-my-3"
         @dismiss="showSuccessNotification = false"
       >
-        <gl-sprintf :message="alertMessage">
+        <gl-sprintf :message="$options.i18n.successNotification.description">
           <template #link="{ content }">
             <gl-link :href="$options.escalationPolicyUrl" target="_blank">
               {{ content }}

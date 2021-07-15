@@ -9,10 +9,9 @@ RSpec.shared_examples 'sends on-call notification if enabled' do
 
     it_behaves_like 'sends on-call notification'
 
-    context 'escalation policy features are disabled' do
+    context 'with escalation policy feature disabled' do
       before do
         stub_licensed_features(oncall_schedules: true, escalation_policies: false)
-        stub_feature_flags(escalation_policies_mvc: false)
       end
 
       it_behaves_like 'sends on-call notification'

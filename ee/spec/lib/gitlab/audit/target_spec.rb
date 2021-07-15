@@ -26,7 +26,7 @@ RSpec.describe Gitlab::Audit::Target do
   describe '#details' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:name, :title, :details) do
+    where(:name, :audit_details, :details) do
       'jackie' | 'wanderer' | 'jackie'
       'jackie' | nil        | 'jackie'
       nil      | 'wanderer' | 'wanderer'
@@ -35,7 +35,7 @@ RSpec.describe Gitlab::Audit::Target do
 
     before do
       allow(object).to receive(:name).and_return(name) if name
-      allow(object).to receive(:title).and_return(title) if title
+      allow(object).to receive(:audit_details).and_return(audit_details) if audit_details
     end
 
     with_them do

@@ -77,11 +77,7 @@ module QA
 
       it 'creates a multi-project pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/560' do
         Page::MergeRequest::Show.perform do |show|
-          pipeline_passed = show.retry_until(reload: true, max_attempts: 20, sleep_interval: 6) do
-            show.has_content?(/Pipeline #\d+ passed/)
-          end
-
-          expect(pipeline_passed).to be_truthy, "The pipeline did not pass."
+          expect(show.has_pipeline_status?('passed')).to be_truthy
 
           show.click_pipeline_link
         end

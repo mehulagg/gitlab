@@ -1459,12 +1459,6 @@ msgstr ""
 msgid "A member of the abuse team will review your report as soon as possible."
 msgstr ""
 
-msgid "A merge request approval is required when a security report contains a new vulnerability of high, critical, or unknown severity."
-msgstr ""
-
-msgid "A merge request approval is required when the license compliance report contains a denied license."
-msgstr ""
-
 msgid "A merge request hasn't yet been merged"
 msgstr ""
 
@@ -2192,6 +2186,15 @@ msgid "Additional minutes:"
 msgstr ""
 
 msgid "Additional text"
+msgstr ""
+
+msgid "Additional text for the sign-in and Help page."
+msgstr ""
+
+msgid "Additional text to show on the Help page"
+msgstr ""
+
+msgid "Additional text to show on the sign-in page"
 msgstr ""
 
 msgid "Address"
@@ -3369,6 +3372,9 @@ msgstr ""
 msgid "Allow owners to manually add users outside of LDAP"
 msgstr ""
 
+msgid "Allow project maintainers to configure repository mirroring"
+msgstr ""
+
 msgid "Allow projects and subgroups to override the group setting"
 msgstr ""
 
@@ -3382,9 +3388,6 @@ msgid "Allow rendering of PlantUML diagrams in Asciidoc documents."
 msgstr ""
 
 msgid "Allow rendering of diagrams in AsciiDoc and Markdown documents using %{link}."
-msgstr ""
-
-msgid "Allow repository mirroring to be configured by project maintainers"
 msgstr ""
 
 msgid "Allow requests to the local network from hooks and services."
@@ -3465,7 +3468,7 @@ msgstr ""
 msgid "Also unassign this user from related issues and merge requests"
 msgstr ""
 
-msgid "Alternate support URL for help page and help dropdown"
+msgid "Alternate support URL for Help page and Help dropdown"
 msgstr ""
 
 msgid "Alternatively, you can convert your account to a managed account by the %{group_name} group."
@@ -3853,6 +3856,9 @@ msgid "An error occurred while updating the configuration."
 msgstr ""
 
 msgid "An error occurred while updating the notification settings. Please try again."
+msgstr ""
+
+msgid "An error occurred while uploading the image. Please try again."
 msgstr ""
 
 msgid "An error occurred while validating group path"
@@ -4606,6 +4612,9 @@ msgid "Assigns %{reviewer_users_sentence} as %{reviewer_text}."
 msgstr ""
 
 msgid "At least one approval from a code owner is required to change files matching the respective CODEOWNER rules."
+msgstr ""
+
+msgid "At least one field of %{one_of_required_fields} must be present"
 msgstr ""
 
 msgid "At least one of group_id or project_id must be specified"
@@ -5676,6 +5685,9 @@ msgid "Bulk update"
 msgstr ""
 
 msgid "BulkImport|Existing groups"
+msgstr ""
+
+msgid "BulkImport|Filter by source group"
 msgstr ""
 
 msgid "BulkImport|From source group"
@@ -7900,19 +7912,10 @@ msgstr ""
 msgid "CodeOwner|Pattern"
 msgstr ""
 
-msgid "CodeQuality|Code quality"
-msgstr ""
-
 msgid "CodeQuality|Code quality: %{severity} - %{description}"
 msgstr ""
 
-msgid "CodeQuality|New code quality degradations in this file"
-msgstr ""
-
 msgid "CodeQuality|New code quality degradations on this line"
-msgstr ""
-
-msgid "CodeQuality|Some changes in this file degrade the code quality."
 msgstr ""
 
 msgid "Cohorts|Inactive users"
@@ -10668,7 +10671,7 @@ msgstr ""
 msgid "Deleting the project will delete its repository and all related resources including issues, merge requests, etc."
 msgstr ""
 
-msgid "Deletion pending. This project will be removed on %{date}. Repository and other project resources are read-only."
+msgid "Deletion pending. This project will be deleted on %{date}. Repository and other project resources are read-only."
 msgstr ""
 
 msgid "Denied"
@@ -12208,9 +12211,6 @@ msgstr ""
 msgid "Enable maintenance mode"
 msgstr ""
 
-msgid "Enable mirror configuration"
-msgstr ""
-
 msgid "Enable or disable the Pseudonymizer data collection."
 msgstr ""
 
@@ -13078,9 +13078,6 @@ msgstr ""
 msgid "EscalationPolicies|Edit escalation policy"
 msgstr ""
 
-msgid "EscalationPolicies|Elapsed time must be greater than or equal to zero."
-msgstr ""
-
 msgid "EscalationPolicies|Email on-call user in schedule"
 msgstr ""
 
@@ -13097,6 +13094,12 @@ msgid "EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} %{then} T
 msgstr ""
 
 msgid "EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} minutes"
+msgstr ""
+
+msgid "EscalationPolicies|Maximum of 10 rules has been reached."
+msgstr ""
+
+msgid "EscalationPolicies|Minutes must be between 0 and 1440."
 msgstr ""
 
 msgid "EscalationPolicies|Remove escalation rule"
@@ -14366,6 +14369,9 @@ msgid "Freeze start"
 msgstr ""
 
 msgid "Frequency"
+msgstr ""
+
+msgid "Frequently searched"
 msgstr ""
 
 msgid "Friday"
@@ -16186,12 +16192,6 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-msgid "Help page"
-msgstr ""
-
-msgid "Help page text and support page url."
-msgstr ""
-
 msgid "Helps prevent bots from brute-force attacks."
 msgstr ""
 
@@ -16251,7 +16251,7 @@ msgstr ""
 msgid "Hide list"
 msgstr ""
 
-msgid "Hide marketing-related entries from help"
+msgid "Hide marketing-related entries from the Help page."
 msgstr ""
 
 msgid "Hide payload"
@@ -16481,7 +16481,7 @@ msgstr ""
 msgid "If disabled, a diverged local branch will not be automatically updated with commits from its remote counterpart, to prevent local data loss. If the default branch (%{default_branch}) has diverged and cannot be updated, mirroring will fail. Other diverged branches are silently ignored."
 msgstr ""
 
-msgid "If disabled, only admins will be able to configure repository mirroring."
+msgid "If disabled, only administrators can configure repository mirroring."
 msgstr ""
 
 msgid "If enabled, GitLab will handle Object Storage replication using Geo. %{linkStart}More information%{linkEnd}"
@@ -16758,6 +16758,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Importing..."
+msgstr ""
+
+msgid "Import|A repository URL usually ends in a .git suffix, although this is not required. Double check to make sure your repository URL is correct."
 msgstr ""
 
 msgid "Improve customer support with Service Desk"
@@ -17493,6 +17496,12 @@ msgid "Input host keys manually"
 msgstr ""
 
 msgid "Input the remote repository URL"
+msgstr ""
+
+msgid "Insert"
+msgstr ""
+
+msgid "Insert a %{rows}x%{cols} table."
 msgstr ""
 
 msgid "Insert a code block"
@@ -19176,6 +19185,9 @@ msgstr ""
 msgid "Last item before this page loaded in your browser:"
 msgstr ""
 
+msgid "Last modified"
+msgstr ""
+
 msgid "Last month"
 msgstr ""
 
@@ -19290,13 +19302,7 @@ msgstr ""
 msgid "Learn more about Auto DevOps"
 msgstr ""
 
-msgid "Learn more about License-Check"
-msgstr ""
-
 msgid "Learn more about Needs relationships"
-msgstr ""
-
-msgid "Learn more about Vulnerability-Check"
 msgstr ""
 
 msgid "Learn more about Web Terminal"
@@ -19492,9 +19498,6 @@ msgid "License file"
 msgstr ""
 
 msgid "License overview"
-msgstr ""
-
-msgid "License-Check"
 msgstr ""
 
 msgid "LicenseCompliance|%{docLinkStart}License Approvals%{docLinkEnd} are active"
@@ -21761,13 +21764,7 @@ msgstr ""
 msgid "NetworkPolicies|Kubernetes error: %{error}"
 msgstr ""
 
-msgid "NetworkPolicies|Last modified"
-msgstr ""
-
 msgid "NetworkPolicies|Name"
-msgstr ""
-
-msgid "NetworkPolicies|Namespace"
 msgstr ""
 
 msgid "NetworkPolicies|Network"
@@ -22917,12 +22914,6 @@ msgstr ""
 msgid "OnCallSchedules|The schedule could not be updated. Please try again."
 msgstr ""
 
-msgid "OnCallSchedules|To create an escalation policy that defines which schedule is used when, visit the %{linkStart}escalation policy%{linkEnd} page."
-msgstr ""
-
-msgid "OnCallSchedules|To create an escalation policy using this schedule, visit the %{linkStart}escalation policy%{linkEnd} page."
-msgstr ""
-
 msgid "OnCallSchedules|Try adding a rotation"
 msgstr ""
 
@@ -22938,7 +22929,7 @@ msgstr ""
 msgid "OnCallSchedules|You are currently a part of:"
 msgstr ""
 
-msgid "OnCallSchedules|Your schedule has been successfully created. To add individual users to this schedule, use the add a rotation button."
+msgid "OnCallSchedules|Your schedule has been successfully created. To add individual users to this schedule, use the add a rotation button. To create an escalation policy that defines which schedule is used when, visit the %{linkStart}escalation policy%{linkEnd} page."
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."
@@ -24239,6 +24230,9 @@ msgstr ""
 msgid "Pipelines|Merged YAML is view only"
 msgstr ""
 
+msgid "Pipelines|Merged YAML unavailable"
+msgstr ""
+
 msgid "Pipelines|More Information"
 msgstr ""
 
@@ -24273,6 +24267,9 @@ msgid "Pipelines|The CI configuration was not loaded, please try again."
 msgstr ""
 
 msgid "Pipelines|The GitLab CI configuration could not be updated."
+msgstr ""
+
+msgid "Pipelines|The merged YAML view is only available for the default branch. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "Pipelines|There are currently no finished pipelines."
@@ -26408,7 +26405,7 @@ msgstr ""
 msgid "PrometheusService|Waiting for your first deployment to an environment to find common metrics"
 msgstr ""
 
-msgid "PrometheusService|You can now manage your Prometheus settings on the %{operations_link_start}Operations%{operations_link_end} page. Fields on this page has been deprecated."
+msgid "PrometheusService|You can now manage your Prometheus settings on the %{operations_link_start}Operations%{operations_link_end} page. Fields on this page have been deprecated."
 msgstr ""
 
 msgid "PrometheusService|You have a cluster with the Prometheus integration enabled."
@@ -27791,6 +27788,9 @@ msgstr ""
 msgid "Repository mirroring"
 msgstr ""
 
+msgid "Repository mirroring configuration"
+msgstr ""
+
 msgid "Repository must contain at least 1 file."
 msgstr ""
 
@@ -28720,9 +28720,6 @@ msgstr ""
 msgid "Search for a user"
 msgstr ""
 
-msgid "Search for project"
-msgstr ""
-
 msgid "Search for projects, issues, etc."
 msgstr ""
 
@@ -28934,16 +28931,49 @@ msgstr ""
 msgid "Security report is out of date. Run %{newPipelineLinkStart}a new pipeline%{newPipelineLinkEnd} for the target branch (%{targetBranchName})"
 msgstr ""
 
+msgid "SecurityApprovals|A merge request approval is required when a security report contains a new vulnerability of high, critical, or unknown severity."
+msgstr ""
+
+msgid "SecurityApprovals|A merge request approval is required when test coverage declines."
+msgstr ""
+
+msgid "SecurityApprovals|A merge request approval is required when the license compliance report contains a denied license."
+msgstr ""
+
 msgid "SecurityApprovals|Configurable if security scanners are enabled. %{linkStart}Learn more.%{linkEnd}"
+msgstr ""
+
+msgid "SecurityApprovals|Coverage-Check"
+msgstr ""
+
+msgid "SecurityApprovals|Learn more about Coverage-Check"
+msgstr ""
+
+msgid "SecurityApprovals|Learn more about License-Check"
+msgstr ""
+
+msgid "SecurityApprovals|Learn more about Vulnerability-Check"
 msgstr ""
 
 msgid "SecurityApprovals|License Scanning must be enabled. %{linkStart}Learn more%{linkEnd}."
 msgstr ""
 
+msgid "SecurityApprovals|License-Check"
+msgstr ""
+
 msgid "SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
+msgid "SecurityApprovals|Requires approval for decreases in test coverage. %{linkStart}More information%{linkEnd}"
+msgstr ""
+
 msgid "SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}"
+msgstr ""
+
+msgid "SecurityApprovals|Test coverage must be enabled. %{linkStart}Learn more%{linkEnd}."
+msgstr ""
+
+msgid "SecurityApprovals|Vulnerability-Check"
 msgstr ""
 
 msgid "SecurityConfiguration|%{featureName} merge request creation mutation failed"
@@ -29093,6 +29123,9 @@ msgstr ""
 msgid "SecurityOrchestration|Security policy project"
 msgstr ""
 
+msgid "SecurityPolicies|+%{count} more"
+msgstr ""
+
 msgid "SecurityPolicies|All policies"
 msgstr ""
 
@@ -29100,6 +29133,9 @@ msgid "SecurityPolicies|Description"
 msgstr ""
 
 msgid "SecurityPolicies|Enforcement status"
+msgstr ""
+
+msgid "SecurityPolicies|Environment(s)"
 msgstr ""
 
 msgid "SecurityPolicies|Latest scan"
@@ -29375,7 +29411,7 @@ msgstr ""
 msgid "See metrics"
 msgstr ""
 
-msgid "See our website for getting help"
+msgid "See our website for help"
 msgstr ""
 
 msgid "See the affected projects in the GitLab admin panel"
@@ -29768,7 +29804,7 @@ msgstr ""
 msgid "Service URL"
 msgstr ""
 
-msgid "Service ping is disabled, and cannot be configured through this form."
+msgid "Service ping is disabled in your configuration file, and cannot be enabled through this form."
 msgstr ""
 
 msgid "ServiceDesk|Enable Service Desk"
@@ -30297,6 +30333,9 @@ msgstr ""
 msgid "Sign up was successful! Please confirm your email to sign in."
 msgstr ""
 
+msgid "Sign-in and Help page"
+msgstr ""
+
 msgid "Sign-in count:"
 msgstr ""
 
@@ -30595,6 +30634,9 @@ msgid "Something went wrong while fetching requirements count."
 msgstr ""
 
 msgid "Something went wrong while fetching requirements list."
+msgstr ""
+
+msgid "Something went wrong while fetching source branches."
 msgstr ""
 
 msgid "Something went wrong while fetching the environments for this merge request. Please try again."
@@ -32554,6 +32596,9 @@ msgstr ""
 msgid "The default CI/CD configuration file and path for new projects."
 msgstr ""
 
+msgid "The default branch for this project has been changed. Please update your bookmarks."
+msgstr ""
+
 msgid "The dependency list details information about the components used within your project."
 msgstr ""
 
@@ -32652,7 +32697,7 @@ msgstr ""
 msgid "The group settings for %{group_links} require you to enable Two-Factor Authentication for your account. You can %{leave_group_links}."
 msgstr ""
 
-msgid "The group will be placed in 'pending removal' state"
+msgid "The group will be placed in 'pending deletion' state"
 msgstr ""
 
 msgid "The group_project_ids parameter is only allowed for a group"
@@ -33480,6 +33525,9 @@ msgstr ""
 msgid "This group can't be removed because it is linked to a subscription. To remove this group, %{linkStart}link the subscription%{linkEnd} with a different group."
 msgstr ""
 
+msgid "This group can't be transfered because it is linked to a subscription. To transfer this group, %{linkStart}link the subscription%{linkEnd} with a different group."
+msgstr ""
+
 msgid "This group cannot be invited to a project inside a group with enforced SSO"
 msgstr ""
 
@@ -33729,10 +33777,10 @@ msgstr ""
 msgid "This project path either does not exist or you do not have access."
 msgstr ""
 
-msgid "This project will be removed on %{date}"
+msgid "This project will be deleted on %{date}"
 msgstr ""
 
-msgid "This project will be removed on %{date} since its parent group '%{parent_group_name}' has been scheduled for removal."
+msgid "This project will be deleted on %{date} since its parent group '%{parent_group_name}' has been scheduled for deletion."
 msgstr ""
 
 msgid "This project will live in your group %{strong_open}%{namespace}%{strong_close}. A project is where you house your files (repository), plan your work (issues), publish your documentation (wiki), and so much more."
@@ -35307,6 +35355,9 @@ msgstr ""
 msgid "Upload file"
 msgstr ""
 
+msgid "Upload image"
+msgstr ""
+
 msgid "Upload license"
 msgstr ""
 
@@ -35328,7 +35379,7 @@ msgstr ""
 msgid "Uploads"
 msgstr ""
 
-msgid "Upon performing this action, the contents of this group, its subgroup and projects will be permanently removed after %{deletion_adjourned_period} days on %{date}. Until that time:"
+msgid "Upon performing this action, the contents of this group, its subgroup and projects will be permanently deleted after %{deletion_adjourned_period} days on %{date}. Until that time:"
 msgstr ""
 
 msgid "Upstream"
@@ -36395,9 +36446,6 @@ msgid "Vulnerability resolved in %{branch}"
 msgstr ""
 
 msgid "Vulnerability resolved in the default branch"
-msgstr ""
-
-msgid "Vulnerability-Check"
 msgstr ""
 
 msgid "VulnerabilityChart|%{formattedStartDate} to today"
@@ -37920,7 +37968,7 @@ msgstr ""
 msgid "Your CSV import for project"
 msgstr ""
 
-msgid "Your DevOps Report gives an overview of how you are using GitLab from a feature perspective. View how you compare with other organizations, discover features you are not using, and learn best practices through blog posts and white papers."
+msgid "Your DevOps Report gives an overview of how you are using GitLab from a feature perspective. Use it to view how you compare with other organizations."
 msgstr ""
 
 msgid "Your GPG keys (%{count})"
@@ -39369,9 +39417,6 @@ msgstr ""
 msgid "mrWidget|You are not allowed to edit this project directly. Please fork to make changes."
 msgstr ""
 
-msgid "mrWidget|You can delete the source branch now"
-msgstr ""
-
 msgid "mrWidget|You can merge after removing denied licenses"
 msgstr ""
 
@@ -39511,7 +39556,7 @@ msgstr ""
 msgid "pending comment"
 msgstr ""
 
-msgid "pending removal"
+msgid "pending deletion"
 msgstr ""
 
 msgid "per day"

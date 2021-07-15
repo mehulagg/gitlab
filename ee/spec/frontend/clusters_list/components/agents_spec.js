@@ -14,12 +14,14 @@ describe('Agents', () => {
   let wrapper;
 
   const propsData = {
-    emptyStateImage: '/path/to/image',
     defaultBranchName: 'default',
+  };
+  const provideData = {
     projectPath: 'path/to/project',
   };
 
   const createWrapper = ({ agents = [], pageInfo = null, trees = [] }) => {
+    const provide = provideData;
     const apolloQueryResponse = {
       data: {
         project: {
@@ -30,13 +32,14 @@ describe('Agents', () => {
     };
 
     const apolloProvider = createMockApollo([
-      [getAgentsQuery, jest.fn().mockResolvedValue(apolloQueryResponse)],
+      [getAgentsQuery, jest.fn().mockResolvedValue(apolloQueryResponse, provide)],
     ]);
 
     wrapper = shallowMount(Agents, {
       localVue,
       apolloProvider,
       propsData,
+      provide: provideData,
     });
 
     return wrapper.vm.$nextTick();
@@ -138,10 +141,6 @@ describe('Agents', () => {
       expect(findAgentTable().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(true);
     });
-
-    it('should pass the correct project path to empty state component', () => {
-      expect(findEmptyState().props('projectPath')).toEqual('path/to/project');
-    });
   });
 
   describe('when the agent configurations are present', () => {
@@ -184,7 +183,7 @@ describe('Agents', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMount(Agents, { mocks, propsData });
+      wrapper = shallowMount(Agents, { mocks, propsData, provide: provideData });
 
       return wrapper.vm.$nextTick();
     });

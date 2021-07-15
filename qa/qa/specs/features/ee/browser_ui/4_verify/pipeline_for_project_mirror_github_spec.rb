@@ -53,15 +53,6 @@ module QA
       end
 
       it 'user commits to GitHub triggers CI pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/144' do
-        Page::Project::Menu.perform(&:go_to_repository_settings)
-        Page::Project::Settings::Repository.perform do |settings|
-          settings.expand_mirroring_repositories do |mirror_settings|
-            mirror_settings.repository_url = 'https://github.com/gitlab-qa-github/test-project.git'
-            mirror_settings.select_mirror_trigger_option
-            mirror_settings.mirror_repository
-          end
-        end
-
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform do |index|
           expect(index).to have_no_pipeline, 'Expect to have NO pipeline before mirroring.'

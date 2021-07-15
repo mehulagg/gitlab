@@ -4,6 +4,8 @@ module EE
   module Key
     extend ActiveSupport::Concern
 
+    include Auditable
+
     prepended do
       include UsageStatistics
 
@@ -40,6 +42,10 @@ module EE
       def enforce_ssh_key_expiration_feature_available?
         License.feature_available?(:enforce_ssh_key_expiration)
       end
+    end
+
+    def audit_details
+      title
     end
   end
 end
