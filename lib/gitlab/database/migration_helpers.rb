@@ -154,6 +154,18 @@ module Gitlab
         end
       end
 
+      def add_concurrent_covering_index(table_name, column_name, included_column_name, options = {})
+        return if index_exists_by_name?(table_name, column_name)
+
+        disable_statement_timeout do
+          execute <<~SQL
+            CREATE INDEX CONCURRENTLY #{options[:index_name}
+            ON #{table_name} (#{column_name}) INCLUDE (#{included_column_name})
+            #{options[:condition]}
+          SQL
+        end
+      end
+
       # Removes an existed index, concurrently
       #
       # Example:
