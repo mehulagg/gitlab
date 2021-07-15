@@ -67,13 +67,13 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
 
-| Service                                                      | Ref Arch Raw (Full Scaled)                       | AWS BOM                                                  | Example Full Scaled Cost<br />(On Demand, US East) |
-| ------------------------------------------------------------ | ------------------------------------------------ | -------------------------------------------------------- | -------------------------------------------------- |
-| Webservice                                                   | 4 pods x 5 vCPU & 6.25 GB = <br />20 vCPU, 25 GB |                                                          |                                                    |
-| Sidekiq                                                      | 8 pods x 1 vCPU & 2 GB<br />8 vCPU, 16 GB        |                                                          |                                                    |
-| Supporting services such as NGINX, Prometheus, etc           | 2 x 2 vCPU and 7.5 GB =<br />4 vCPU, 15 GB       |                                                          |                                                    |
-| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                               | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB | $1.36/hr                                           |
-| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                | 8 vCPU, 16GB                                             | $0.34/hr                                           |
+| Service                                                      | Ref Arch Raw (Full Scaled)                         | AWS BOM                                                  | Example Full Scaled Cost<br />(On Demand, US East) |
+| ------------------------------------------------------------ | -------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| Webservice                                                   | 4 pods x (5 vCPU & 6.25 GB) = <br />20 vCPU, 25 GB |                                                          |                                                    |
+| Sidekiq                                                      | 8 pods x (1 vCPU & 2 GB)<br />8 vCPU, 16 GB        |                                                          |                                                    |
+| Supporting services such as NGINX, Prometheus, etc           | 2 x (2 vCPU and 7.5 GB) =<br />4 vCPU, 15 GB       |                                                          |                                                    |
+| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                                 | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB | $1.36/hr                                           |
+| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                  | 8 vCPU, 16GB                                             | $0.34/hr                                           |
 
 NOTE:
 IMPORTANT: If EKS node autoscaling is employed, it is likely that your average loading will run lower than this - especially during non-working hours and weekends.
@@ -324,13 +324,13 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
 
-| Service                                                      | Ref Arch Raw (Full Scaled)                          | AWS BOM<br />(Directly Usable in AWS Quick Start)            | Example Full Scaled Cost<br />(On Demand, US East) |
-| ------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------- |
-| Webservice                                                   | 20 pods x 5 vCPU & 6.25 GB = <br />100 vCPU, 125 GB |                                                              |                                                    |
-| Sidekiq                                                      | 14 pods x 1 vCPU & 2 GB<br />14 vCPU, 28 GB         |                                                              |                                                    |
-| Supporting services such as NGINX, Prometheus, etc           | 2 pods x 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB       |                                                              |                                                    |
-| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **128 vCPU, 158 GB**                                | **c5.4xlarge** (16vcpu/32GB) x **8 nodes**<br />128 vCPU, 256GB | $5.44/hr                                           |
-| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                   | **c5.4xlarge** (16 vCPU/32GB) x **1 nodes**<br />16 vCPU, 32GB | $0.68/hr                                           |
+| Service                                                      | Ref Arch Raw (Full Scaled)                            | AWS BOM<br />(Directly Usable in AWS Quick Start)            | Example Full Scaled Cost<br />(On Demand, US East) |
+| ------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------- |
+| Webservice                                                   | 20 pods x (5 vCPU & 6.25 GB) = <br />100 vCPU, 125 GB |                                                              |                                                    |
+| Sidekiq                                                      | 14 pods x (1 vCPU & 2 GB)<br />14 vCPU, 28 GB         |                                                              |                                                    |
+| Supporting services such as NGINX, Prometheus, etc           | 2 pods x (2 vCPU and 7.5 GB)<br />4 vCPU, 15 GB       |                                                              |                                                    |
+| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **128 vCPU, 158 GB**                                  | **c5.4xlarge** (16vcpu/32GB) x **8 nodes**<br />128 vCPU, 256GB | $5.44/hr                                           |
+| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                     | **c5.4xlarge** (16 vCPU/32GB) x **1 nodes**<br />16 vCPU, 32GB | $0.68/hr                                           |
 
 NOTE:
 
