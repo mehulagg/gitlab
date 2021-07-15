@@ -43,5 +43,26 @@ RSpec.describe Security::StoreScansService do
       expect(Security::StoreGroupedScansService).to have_received(:execute).with([sast_artifact])
       expect(Security::StoreGroupedScansService).not_to have_received(:execute).with([dast_artifact])
     end
+
+    context 'when the pipeline is for the default branch' do
+      before do
+        allow(pipeline).to receive(:default_branch?).and_return(true)
+      end
+
+      it 'schedules the `StoreSecurityReportsWorker`' do
+        expect { store_group_of_artifacts }.to change { StoreSecurityReportsWorker.jobs.size }.by(1)
+                                           .and change { StoreSecurityReportsWorker.jobs.last&.fetch('args') }.to([pipeline.id])
+      end
+    end
+
+    context 'when the pipeline is not for the default branch' do
+      before do
+        allow(pipeline).to receive(:default_branch?).and_return(false)
+      end
+
+      it 'does not schedule the `StoreSecurityReportsWorker`' do
+        expect { store_group_of_artifacts }.not_to change { StoreSecurityReportsWorker.jobs.size }
+      end
+    end
   end
 end
