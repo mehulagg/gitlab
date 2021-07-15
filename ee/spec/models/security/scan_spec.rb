@@ -100,6 +100,8 @@ RSpec.describe Security::Scan do
     subject { described_class.has_dismissal_feedback }
 
     before do
+      skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/333414"
+
       create(:vulnerability_feedback, :dismissal, project: scan_1.project, category: scan_1.scan_type)
       create(:vulnerability_feedback, :issue, project: scan_2.project, category: scan_2.scan_type)
     end
