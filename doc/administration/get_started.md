@@ -192,7 +192,7 @@ Learn more about [replication limitations](../administration/geo/replication/dat
 GitLab provides support for self-managed GitLab through different channels.
 
 - Priority support: Premium and Ultimate self-managed customers receive priority support with tiered response times.
-  Learn more about [upgrading to priority support](https://about.gitlab.com/support/#upgrading-to-priority-support).
+  Learn more about [priority support](https://about.gitlab.com/support/#priority-support).
 - Live upgrade assistance: Get one-on-one expert guidance during a production upgrade. With your **priority support plan**,
   you're eligible for a live, scheduled screen-sharing session with a member of our support team.
 
@@ -207,8 +207,8 @@ To get assistance for self-managed GitLab:
 
 If you use GitLab SaaS, you have several channels with which to get support and find answers.
 
-- Priority support: Gold and Silver GitLab SaaS customers receive priority support with tiered response times.
-  Learn more about [upgrading to priority support](https://about.gitlab.com/support/#upgrading-to-priority-support).
+- Priority support: Premium and Ultimate GitLab SaaS customers receive priority support with tiered response times.
+  Learn more about [priority support](https://about.gitlab.com/support/#priority-support).
 - GitLab SaaS 24/7 monitoring: Our full team of site reliability and production engineers is always on.
   Often, by the time you notice an issue, someone's already looking into it.
 
