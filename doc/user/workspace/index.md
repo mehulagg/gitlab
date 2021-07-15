@@ -29,4 +29,4 @@ Workspaces are currently in development.
 
 ![Admin Overview](img/1.3-Admin.png)
 
-![Admin Overview](Admin_Settings.png)
+![Admin Overview](img/Admin_Settings.png)
