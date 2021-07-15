@@ -11,7 +11,7 @@ and shouldn't be used for production workloads.
 
 ## CI minute quota and pricing
 
-While in beta, the [shared runner pipeline quota](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
+While in beta, the [shared runner pipeline quota](../../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
 applies for groups and projects in the same manner as Linux runners. This will change when the offer transitions to general availability (GA).
 
 ## Virtual machine configuration

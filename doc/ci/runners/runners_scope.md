@@ -39,7 +39,7 @@ If you are using GitLab.com:
 
 ### Enable shared runners
 
-On GitLab.com, [shared runners](#shared-runners) are enabled in all projects by
+On GitLab.com, [shared runners](index.md) are enabled in all projects by
 default.
 
 On self-managed instances of GitLab, an administrator must [install](https://docs.gitlab.com/runner/install/index.html)
