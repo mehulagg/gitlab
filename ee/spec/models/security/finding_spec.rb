@@ -86,6 +86,10 @@ RSpec.describe Security::Finding do
     subject { described_class.undismissed }
 
     before do
+      skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/333414"
+    end
+
+    before do
       finding_2.update! scan: scan_1
 
       create(:vulnerability_feedback,
