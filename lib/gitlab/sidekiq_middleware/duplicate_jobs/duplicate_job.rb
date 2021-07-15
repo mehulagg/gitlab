@@ -57,10 +57,36 @@ module Gitlab
           self.existing_jid = read_jid.value
         end
 
+        def update_wal_location
+          return unless utilizes_load_balancing_capabilities?
+
+          Sidekiq.redis do |redis|
+              redis.set(wal_location_key, database_write_location, ex: DUPLICATE_KEY_TTL) if wal_location != database_write_location
+          end
+        end
+
+        def wal_location
+          read_val_location = nil
+          Sidekiq.redis do |redis|
+            read_val_location = redis.get(wal_location_key)
+          end
+          read_val_location ? JSON.parse(read_val_location) : {}
+        end
+
         def delete!
           Sidekiq.redis do |redis|
-            redis.del(idempotency_key)
+            redis.multi do |multi|
+              redis.del(idempotency_key)
+              redis.del(wal_location_key)
+            end
           end
+        end
+
+        def utilizes_load_balancing_capabilities?
+          return false unless worker_klass
+          return false unless worker_klass.respond_to?(:utilizes_load_balancing_capabilities?)
+
+          worker_klass.utilizes_load_balancing_capabilities?
         end
 
         def scheduled?
@@ -96,6 +122,13 @@ module Gitlab
         attr_reader :queue_name, :job
         attr_writer :existing_jid
 
+        def database_write_location
+          {
+            'database_write_location' => job['database_write_location'],
+            'database_replica_location' => job['database_replica_location']
+          }
+        end
+
         def worker_klass
           @worker_klass ||= worker_class_name.to_s.safe_constantize
         end
@@ -118,6 +151,10 @@ module Gitlab
 
         def jid
           job['jid']
+        end
+
+        def wal_location_key
+          "#{idempotency_key}:wal_location"
         end
 
         def idempotency_key

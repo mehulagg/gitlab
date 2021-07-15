@@ -26,12 +26,12 @@ module Gitlab
         chain.add ::Gitlab::SidekiqMiddleware::BatchLoader
         chain.add ::Labkit::Middleware::Sidekiq::Server
         chain.add ::Gitlab::SidekiqMiddleware::InstrumentationLogger
-        chain.add ::Gitlab::Database::LoadBalancing::SidekiqServerMiddleware if load_balancing_enabled?
         chain.add ::Gitlab::SidekiqMiddleware::AdminMode::Server
         chain.add ::Gitlab::SidekiqVersioning::Middleware
         chain.add ::Gitlab::SidekiqStatus::ServerMiddleware
         chain.add ::Gitlab::SidekiqMiddleware::WorkerContext::Server
         chain.add ::Gitlab::SidekiqMiddleware::DuplicateJobs::Server
+        chain.add ::Gitlab::Database::LoadBalancing::SidekiqServerMiddleware if load_balancing_enabled?
       end
     end
 
@@ -42,13 +42,13 @@ module Gitlab
       lambda do |chain|
         chain.add ::Gitlab::SidekiqMiddleware::WorkerContext::Client # needs to be before the Labkit middleware
         chain.add ::Labkit::Middleware::Sidekiq::Client
+        chain.add ::Gitlab::Database::LoadBalancing::SidekiqClientMiddleware if load_balancing_enabled?
         chain.add ::Gitlab::SidekiqMiddleware::DuplicateJobs::Client
         chain.add ::Gitlab::SidekiqStatus::ClientMiddleware
         chain.add ::Gitlab::SidekiqMiddleware::AdminMode::Client
         # Size limiter should be placed at the bottom, but before the metrics midleware
         chain.add ::Gitlab::SidekiqMiddleware::SizeLimiter::Client
         chain.add ::Gitlab::SidekiqMiddleware::ClientMetrics
-        chain.add ::Gitlab::Database::LoadBalancing::SidekiqClientMiddleware if load_balancing_enabled?
       end
     end
 

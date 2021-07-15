@@ -10,7 +10,9 @@ module Gitlab
         class UntilExecuted < Base
           include DeduplicatesWhenScheduling
 
-          def perform(_job)
+          def perform(job)
+            job.merge!(duplicate_job.wal_location) if duplicate_job.utilizes_load_balancing_capabilities?
+
             yield
 
             duplicate_job.delete!
