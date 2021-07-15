@@ -9,7 +9,7 @@ export const fetchBillableMembersList = ({ commit, dispatch, state }) => {
   const { page, search, sort } = state;
 
   return GroupsApi.fetchBillableGroupMembersList(state.namespaceId, { page, search, sort })
-    .then((data) => dispatch('receiveBillableMembersListSuccess', data))
+    .then(({ data, headers }) => dispatch('receiveBillableMembersListSuccess', { data, headers }))
     .catch(() => dispatch('receiveBillableMembersListError'));
 };
 

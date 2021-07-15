@@ -114,7 +114,7 @@ export default {
   cannotRemoveModalId: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
   cannotRemoveModalTitle: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
   cannotRemoveModalText: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
-  SORT_OPTIONS,
+  sortOptions: SORT_OPTIONS,
 };
 </script>
 
