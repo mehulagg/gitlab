@@ -115,8 +115,9 @@ export default function initDiffsApp(store) {
         });
       }
 
-      if (getParameterValues('virtual_scrolling')[0] === 'false') {
-        Cookies.set('diffs_virtual_scrolling', 'false');
+      let vScrollingCookie = getParameterValues('virtual_scrolling')[0];
+      if (vScrollingCookie === 'false' || vScrollingCookie === 'true') {
+        Cookies.set('diffs_virtual_scrolling', vScrollingCookie);
       }
     },
     methods: {
