@@ -9,7 +9,8 @@ import {
 } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapGetters } from 'vuex';
-import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
+import searchGroupUsers from '~/graphql_shared/queries/group_users_search.query.graphql';
+import searchProjectUsers from '~/graphql_shared/queries/users_search.query.graphql';
 import { __ } from '~/locale';
 import SidebarParticipant from '~/sidebar/components/assignees/sidebar_participant.vue';
 import { ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
@@ -91,14 +92,14 @@ export default {
   },
   apollo: {
     users: {
-      query: searchUsers,
+      query() {
+        return this.isProjectBoard ? searchProjectUsers : searchGroupUsers;
+      },
       variables() {
         return {
           fullPath: this.fullPath,
           search: this.search,
           first: 20,
-          isGroup: this.isGroupBoard,
-          isProject: this.isProjectBoard,
         };
       },
       skip() {
@@ -118,7 +119,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['isGroupBoard', 'isProjectBoard']),
+    ...mapGetters(['isProjectBoard']),
     hasValue() {
       return this.selected && this.selected.id > 0;
     },
@@ -147,6 +148,8 @@ export default {
   methods: {
     selectAssignee(user) {
       this.selected = user;
+      this.toggleEdit();
+      this.$emit('set-assignee', user?.id || null);
     },
     toggleEdit() {
       this.isEditing = !this.isEditing;
@@ -172,10 +175,10 @@ export default {
         {{ __('Edit') }}
       </button>
     </div>
-    <div class="value">
-      <div v-if="hasValue" class="media gl-display-flex gl-align-items-center">
+    <div>
+      <div v-if="!selectedIsEmpty" class="media gl-display-flex gl-align-items-center">
         <div class="align-center">
-          <user-avatar-image :img-src="selected.avatar_url" :size="32" />
+          <user-avatar-image :img-src="selected.avatarUrl || selected.avatar_url" :size="32" />
         </div>
         <div class="media-body">
           <div class="bold author">{{ selected.name }}</div>
@@ -185,12 +188,7 @@ export default {
       <div v-else class="text-secondary">{{ anyUserText }}</div>
     </div>
 
-    <gl-dropdown
-      v-if="isEditing"
-      class="show"
-      :text="$options.i18n.selectAssignee"
-      @toggle="$emit('toggle')"
-    >
+    <gl-dropdown v-if="isEditing" class="show" :text="$options.i18n.selectAssignee">
       <template #header>
         <gl-search-box-by-type ref="search" v-model.trim="search" class="js-dropdown-input-field" />
       </template>
@@ -207,7 +205,7 @@ export default {
             :is-checked="selectedIsEmpty"
             :is-check-centered="true"
             data-testid="unassign"
-            @click="$emit('input', [])"
+            @click="selectAssignee(null)"
           >
             <span :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'" class="gl-font-weight-bold">
               {{ $options.i18n.anyAssignee }}
