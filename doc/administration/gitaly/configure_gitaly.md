@@ -1156,7 +1156,6 @@ The following cache metrics are available.
 
 |Metric|Type|Labels|Description|
 |:---|:---|:---|:---|
-|`gitaly_pack_objects_cache_enabled`|gauge|`dir`,`max_age`|Set to `1` when the cache is enabled via the Gitaly configuration file|
 |`gitaly_pack_objects_cache_lookups_total`|counter|`result`|Hit/miss counter for cache lookups|
 |`gitaly_pack_objects_generated_bytes_total`|counter||Number of bytes written into the cache|
 |`gitaly_pack_objects_served_bytes_total`|counter||Number of bytes read from the cache|
@@ -1170,7 +1169,6 @@ package in Gitaly.
 Example:
 
 ```plaintext
-gitaly_pack_objects_cache_enabled{dir="/var/opt/gitlab/git-data/repositories/+gitaly/PackObjectsCache",max_age="300"} 1
 gitaly_pack_objects_cache_lookups_total{result="hit"} 2
 gitaly_pack_objects_cache_lookups_total{result="miss"} 1
 gitaly_pack_objects_generated_bytes_total 2.618649e+07
