@@ -31,6 +31,8 @@ build-qa-image:
     - .base-image-build-buildkit
     - .build-images:rules:build-qa-image
   stage: build-images
+  tags:
+    - docker
   needs: []
   variables:
     QA_IMAGE: "${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
