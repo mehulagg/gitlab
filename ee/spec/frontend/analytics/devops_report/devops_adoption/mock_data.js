@@ -40,7 +40,6 @@ export const devopsAdoptionNamespaceData = {
         runnerConfigured: true,
         pipelineSucceeded: false,
         deploySucceeded: false,
-        securityScanSucceeded: false,
         codeOwnersUsedCount: 0,
         sastEnabledCount: 0,
         dastEnabledCount: 0,

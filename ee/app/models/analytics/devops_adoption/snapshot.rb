@@ -9,8 +9,7 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
     :merge_request_approved,
     :runner_configured,
     :pipeline_succeeded,
-    :deploy_succeeded,
-    :security_scan_succeeded
+    :deploy_succeeded
   ].freeze
 
   NUMERIC_METRICS = [

@@ -127,13 +127,7 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         label: s__('DevopsAdoption|SAST'),
         tooltip: s__('DevopsAdoption|SAST enabled for at least one project'),
         testId: 'sastCol',
-      },
-      {
-        key: 'securityScanSucceeded',
-        label: s__('DevopsAdoption|Scanning'),
-        tooltip: s__('DevopsAdoption|At least one security scan of any type run in pipeline'),
-        testId: 'scanningCol',
-      },
+      }
     ],
   },
   {
