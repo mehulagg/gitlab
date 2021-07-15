@@ -24,6 +24,7 @@ RSpec.describe Users::UnbanService do
 
       it 'removes the BannedUser' do
         expect { operation }.to change { Users::BannedUser.count }.by(-1)
+        expect(user.reload.banned_user).to be_nil
       end
 
       it 'logs unban in application logs' do

@@ -24,12 +24,6 @@ module Users
       can?(current_user, :admin_all_resources)
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def destroy_banned_user(user)
-      Users::BannedUser.find_by(user: user).destroy
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
     def log_event(user)
       Gitlab::AppLogger.info(message: "User unbanned", user: "#{user.username}", email: "#{user.email}", banned_by: "#{current_user.username}", ip_address: "#{current_user.current_sign_in_ip}")
     end

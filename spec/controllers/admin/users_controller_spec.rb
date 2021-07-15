@@ -364,8 +364,7 @@ RSpec.describe Admin::UsersController do
       it 'bans user' do
         put :ban, params: { id: user.username }
 
-        user.reload
-        expect(user.banned?).to be_truthy
+        expect(user.reload.banned?).to be_truthy
         expect(flash[:notice]).to eq _('Successfully banned')
       end
 
@@ -390,8 +389,7 @@ RSpec.describe Admin::UsersController do
       it 'does not ban user, renders 404', :aggregate_failures do
         put :ban, params: { id: user.username }
 
-        user.reload
-        expect(user.banned?).to be_falsey
+        expect(user.reload.banned?).to be_falsey
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
@@ -403,8 +401,7 @@ RSpec.describe Admin::UsersController do
     it 'unbans user', :aggregate_failures do
       put :unban, params: { id: banned_user.username }
 
-      banned_user.reload
-      expect(banned_user.banned?).to be_falsey
+      expect(banned_user.reload.banned?).to be_falsey
       expect(flash[:notice]).to eq _('Successfully unbanned')
     end
   end
