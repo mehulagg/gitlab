@@ -1,9 +1,9 @@
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
 import PackageTitle from '~/packages_and_registries/package_registry/components/details/package_title.vue';
-import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import { PackageType } from '~/packages_and_registries/package_registry/constants';
+import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 
 import { packageData, packageFiles, packageTags, packagePipelines } from '../../mock_data';
 
@@ -17,7 +17,7 @@ describe('PackageTitle', () => {
   let wrapper;
 
   function createComponent(packageEntity = packageWithTags) {
-    wrapper = shallowMount(PackageTitle, {
+    wrapper = shallowMountExtended(PackageTitle, {
       propsData: { packageEntity },
       stubs: {
         TitleArea,
@@ -26,13 +26,13 @@ describe('PackageTitle', () => {
     return wrapper.vm.$nextTick();
   }
 
-  const findTitleArea = () => wrapper.find(TitleArea);
-  const findPackageType = () => wrapper.find('[data-testid="package-type"]');
-  const findPackageSize = () => wrapper.find('[data-testid="package-size"]');
-  const findPipelineProject = () => wrapper.find('[data-testid="pipeline-project"]');
-  const findPackageRef = () => wrapper.find('[data-testid="package-ref"]');
-  const findPackageTags = () => wrapper.find(PackageTags);
-  const findPackageBadges = () => wrapper.findAll('[data-testid="tag-badge"]');
+  const findTitleArea = () => wrapper.findComponent(TitleArea);
+  const findPackageType = () => wrapper.findByTestId('package-type');
+  const findPackageSize = () => wrapper.findByTestId('package-size');
+  const findPipelineProject = () => wrapper.findByTestId('pipeline-project');
+  const findPackageRef = () => wrapper.findByTestId('package-ref');
+  const findPackageTags = () => wrapper.findComponent(PackageTags);
+  const findPackageBadges = () => wrapper.findAllByTestId('tag-badge');
 
   afterEach(() => {
     wrapper.destroy();

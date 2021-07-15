@@ -90,7 +90,7 @@ export default {
       update(data) {
         return data.package;
       },
-      error(e) {
+      error() {
         createFlash({ message: FETCH_PACKAGE_DETAILS_ERROR_MESSAGE });
       },
     },

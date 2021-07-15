@@ -57,7 +57,7 @@ export default {
     totalSize() {
       return this.packageEntity.packageFiles
         ? numberToHumanSize(
-            this.packageEntity.packageFiles.nodes.reduce((acc, p) => acc + +p.size, 0),
+            this.packageEntity.packageFiles.nodes.reduce((acc, p) => acc + Number(p.size), 0),
           )
         : '0';
     },
