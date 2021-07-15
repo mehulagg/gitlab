@@ -50,6 +50,22 @@ module Gitlab
               self.usage == 'inclusion'
             end
           end
+
+          def match?(filtering_options)
+            filtering_options.slice(*ALLOWED_KEYS).all? do |attribute, keywords|
+              keywords.all? do |keyword|
+                included_in_attribute?(attribute, keyword)
+              end
+            end
+          end
+
+          private
+
+          def included_in_attribute?(attribute, keyword)
+            Array.wrap(public_send(attribute)).any? do |attr| # rubocop:disable GitlabSecurity/PublicSend
+              attr.include?(keyword)
+            end
+          end
         end
       end
     end

@@ -45,7 +45,7 @@ class TemplateFinder
     if params[:name]
       vendored_templates.find(params[:name], project)
     else
-      vendored_templates.all(project)
+      vendored_templates.all(project, params)
     end
   end
 

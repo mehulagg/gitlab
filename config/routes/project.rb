@@ -93,7 +93,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         namespace :ci do
           resource :lint, only: [:show, :create]
-          resource :pipeline_editor, only: [:show], controller: :pipeline_editor, path: 'editor'
+          resource :pipeline_editor, only: [:show], controller: :pipeline_editor, path: 'editor' do
+            collection do
+              get :templates, constraints: { format: :json }
+            end
+          end
           resources :daily_build_group_report_results, only: [:index], constraints: { format: /(csv|json)/ }
           namespace :prometheus_metrics do
             resources :histograms, only: [:create], constraints: { format: 'json' }

@@ -14,6 +14,19 @@ class Projects::Ci::PipelineEditorController < Projects::ApplicationController
   def show
   end
 
+  def templates
+    permitted_params = params.permit(Gitlab::Ci::Config::Entry::TemplateMetadata::ALLOWED_KEYS.map { |k| { k => [] } }).to_h
+    templates = TemplateFinder.new(:gitlab_ci_ymls, @project, { metadata: permitted_params }).execute
+
+    respond_to do |format|
+      format.json do
+        render json: Ci::TemplateSerializer
+                        .new(project: project, current_user: current_user)
+                        .represent(templates)
+      end
+    end
+  end
+
   private
 
   def check_can_collaborate!

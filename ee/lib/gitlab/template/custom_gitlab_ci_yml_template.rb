@@ -3,6 +3,14 @@
 module Gitlab
   module Template
     class CustomGitlabCiYmlTemplate < CustomTemplate
+      def metadata
+        # To be supported
+      end
+
+      def has_metadata?
+        # To be supported
+      end
+
       class << self
         def extension
           '.yml'
