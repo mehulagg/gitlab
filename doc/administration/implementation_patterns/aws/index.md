@@ -3,8 +3,9 @@ type: reference, concepts
 stage: Enablement
 group: Alliances
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
-
 ---
+
+{::options parse_block_html="true" /}
 
 # AWS Specific Implementation patterns **(FREE SELF)**
 
@@ -47,11 +48,49 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 
 | Size | GitLab Ref Arch                                              | GitLab Ref Arch Baseline Perf Test Results                   | AWS Bill of Materials (BOM)                                  | AWS Build Performance Testing Results                        | AWS Build Compute Cost Estimate                              | Existing Infrastructure as Code                              |
 | ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 3K   | [3K Omnibus](../../reference_architectures/3k_users.md)      | [3k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/3k) | [3K Cloud Native on EKS](#3k-cloud-native-on-eks-bill-of-materials-bom) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | GitLab Cloud Native 3K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
-| 5K   | [5K Omnibus](../../reference_architectures/5k_users.md)      | [5k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/5k) | 5K Cloud Native on EKS                                       | GPT Test Results                                             | GitLab Cloud Native 5K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
-| 10K  | [10K Cloud Native](../../reference_architectures/10k_users.md#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) | [10k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/10k) | [10K Cloud Native on EKS](#10k-cloud-native-on-eks-bill-of-materials-bom) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
+| 2K   | [2K Omnibus](../../reference_architectures/2k_users.md)      | [2K Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/2k) | [2K Cloud Native Hybrid on EKS](#2k-cloud-native-hybrid-on-eks-bill-of-materials-bom) | GPT Test Results                                             | GitLab Cloud Native 2K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
+| 3K   | [3K Omnibus](../../reference_architectures/3k_users.md)      | [3k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/3k) | [3K Cloud Native Hybrid on EKS](#3k-cloud-native-hybrid-on-eks-bill-of-materials-bom) | [GPT Test Results](#3k-cloud-native-hybrid-on-eks-test-results) | GitLab Cloud Native 3K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
+| 5K   | [5K Omnibus](../../reference_architectures/5k_users.md)      | [5k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/5k) | 5K Cloud Native Hybrid on EKS                                | GPT Test Results                                             | GitLab Cloud Native 5K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
+| 10K  | [10K Cloud Native](../../reference_architectures/10k_users.md#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) | [10k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/10k) | [10K Cloud Native Hybrid on EKS](#10k-cloud-native-hybrid-on-eks-bill-of-materials-bom) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 
-### 3K Cloud Native on EKS Bill of Materials (BOM)
+### 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+
+NOTE:
+On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
+
+**BOM Total:** = Bill of Materials Total - this is what you use when building this configuration
+
+**Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
+
+NOTE:
+For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
+
+| Service                                                      | Ref Arch Raw (Full Scaled)                       | AWS BOM                                                  | Example Full Scaled Cost<br />(On Demand, US East) |
+| ------------------------------------------------------------ | ------------------------------------------------ | -------------------------------------------------------- | -------------------------------------------------- |
+| Webservice                                                   | 4 pods x 5 vCPU & 6.25 GB = <br />20 vCPU, 25 GB |                                                          |                                                    |
+| Sidekiq                                                      | 8 pods x 1 vCPU & 2 GB<br />8 vCPU, 16 GB        |                                                          |                                                    |
+| Supporting services such as NGINX, Prometheus, etc           | 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB             |                                                          |                                                    |
+| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                               | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB | $1.36/hr                                           |
+| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                | 8 vCPU, 16GB                                             | $0.34/hr                                           |
+
+NOTE:
+
+IMPORTANT: If EKS node autoscaling is employed, it is likely that your average loading will run lower than this - especially during non-working hours and weekends.
+
+| Non-Kubernetes Compute                                       | Ref Arch Raw Total                                           | AWS BOM<br />(Directly Usable in AWS Quick Start)       | Example Cost<br />US East  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------- | -------------------------- |
+| **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                            |
+| **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 18vCPU, 33 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul)<br />Tested with Graviton ARM | **db.r6g.xlarge** x 3 nodes <br />(12vCPU, 96 GB)       | 3 nodes x $0.52 = $1.56/hr |
+| **Redis**                                                    | 9vCPU, 24GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m6g.xlarge** x 3 nodes<br />(12vCPU, 39GB)      | 3 nodes x $0.30 = $0.90/hr |
+| **<u>Gitaly Cluster</u>**                                    |                                                              |                                                         |                            |
+| Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr      |
+| Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr       |
+| Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                         |
+| Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                   |
+
+### 2K Cloud Native Hybrid on EKS Test Results 
+
+### 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -67,15 +106,16 @@ For EKS Nodes, picking more of a smaller size instance allows scaling costs to b
 | ------------------------------------------------------------ | ------------------------------------------------ | ---------------------------------------------------------- | -------------------------------------------------- |
 | Webservice                                                   | 4 pods x 5 vCPU & 6.25 GB = <br />20 vCPU, 25 GB |                                                            |                                                    |
 | Sidekiq                                                      | 8 pods x 1 vCPU & 2 GB<br />8 vCPU, 16 GB        |                                                            |                                                    |
-| Supporting services such as NGINX, Prometheus, etc           | 2 pods x 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB    |                                                            |                                                    |
-| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                               | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB | $1.36/hr                                           |
+| Supporting services such as NGINX, Prometheus, etc           | 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB             |                                                            |                                                    |
+| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                               | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB   | $1.36/hr                                           |
 | One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                | 8 vCPU, 16GB                                               | $0.34/hr                                           |
+| Total                                                        |                                                  | **c5.2xlarge** (8vcpu/16GB) x 5 nodes<<br />40 vCPU, 80 GB | $1.70/hr                                           |
 
 NOTE:
 
 IMPORTANT: If EKS node autoscaling is employed, it is likely that your average loading will run lower than this - especially during non-working hours and weekends.
 
-| Non-Kubernetes Compute                                       | Ref Arch Raw Total                                           | AWS BOM                                                 | Example Cost<br />US East  |
+| Non-Kubernetes Compute                                       | Ref Arch Raw Total                                           | AWS BOM<br />(Directly Usable in AWS Quick Start)       | Example Cost<br />US East  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------- | -------------------------- |
 | **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                            |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 18vCPU, 33 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul)<br />Tested with Graviton ARM | **db.r6g.xlarge** x 3 nodes <br />(12vCPU, 96 GB)       | 3 nodes x $0.52 = $1.56/hr |
@@ -89,7 +129,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 ### 3K Cloud Native Hybrid on EKS Test Results 
 
 <details>
-<summary>Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
 
 | Attribute            | Value                                                 |
 | -------------------- | ----------------------------------------------------- |
@@ -171,7 +211,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 </details>
 
 <details>
-<summary>Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
 
 This test:
 
@@ -259,7 +299,7 @@ This test:
 
 </details>
 
-### 10K Cloud Native on EKS Bill of Materials (BOM)
+### 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -271,7 +311,7 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
 
-| Service                                                      | Ref Arch Raw (Full Scaled)                          | AWS BOM                                                      | Example Full Scaled Cost<br />(On Demand, US East) |
+| Service                                                      | Ref Arch Raw (Full Scaled)                          | AWS BOM<br />(Directly Usable in AWS Quick Start)            | Example Full Scaled Cost<br />(On Demand, US East) |
 | ------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------- |
 | Webservice                                                   | 20 pods x 5 vCPU & 6.25 GB = <br />100 vCPU, 125 GB |                                                              |                                                    |
 | Sidekiq                                                      | 14 pods x 1 vCPU & 2 GB<br />14 vCPU, 28 GB         |                                                              |                                                    |
@@ -297,7 +337,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 ### 10K Cloud Native Hybrid on EKS Test Results 
 
 <details>
-<summary>Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
 
 Attribute                  | Value                                                   
 ---------------------------|---------------------------------------------------------
@@ -379,7 +419,8 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 </details>
 
 <details>
-<summary>Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
+<summary markdown="span">Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
+
 
 This test:
 
