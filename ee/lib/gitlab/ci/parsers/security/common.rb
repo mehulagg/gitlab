@@ -11,9 +11,10 @@ module Gitlab
             new(json_data, report, vulnerability_finding_signatures_enabled, validate: validate).parse!
           end
 
-          def initialize(json_data, report, vulnerability_finding_signatures_enabled = false, validate: false)
+          def initialize(json_data, report, vulnerability_finding_signatures_enabled = false, validate: false, job: nil)
             @json_data = json_data
             @report = report
+            @job = job
             @validate = validate
             @vulnerability_finding_signatures_enabled = vulnerability_finding_signatures_enabled
           end

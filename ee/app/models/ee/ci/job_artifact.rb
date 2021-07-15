@@ -94,7 +94,7 @@ module EE
 
         report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
-            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report, validate: (validate && validate_schema?)).parse!
+            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report, validate: (validate && validate_schema?), job: job).parse!
           end
         rescue StandardError
           report.add_error('ParsingError')

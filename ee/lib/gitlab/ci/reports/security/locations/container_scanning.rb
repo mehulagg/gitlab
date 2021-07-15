@@ -7,12 +7,14 @@ module Gitlab
         module Locations
           class ContainerScanning < Base
             attr_reader :image
+            attr_reader :base_image
             attr_reader :operating_system
             attr_reader :package_name
             attr_reader :package_version
 
-            def initialize(image:, operating_system:, package_name: nil, package_version: nil)
+            def initialize(image:, operating_system:, package_name: nil, package_version: nil, base_image: nil)
               @image = image
+              @base_image = base_image
               @operating_system = operating_system
               @package_name = package_name
               @package_version = package_version
@@ -25,9 +27,10 @@ module Gitlab
             private
 
             def docker_image_name_without_tag
-              base_name, version = image.split(':')
+              image_name = base_image.presence || image
+              base_name, version = image_name.split(':')
 
-              return image if version_semver_like?(version)
+              return image_name if version_semver_like?(version)
 
               base_name
             end

@@ -85,6 +85,7 @@ module Vulnerabilities
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
     scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }
+    scope :by_image, -> (image) { where("report_type=:report_type AND location -> 'image' ? :image", report_type: report_types['container_scanning'], image: image) }
 
     scope :all_preloaded, -> do
       preload(:scanner, :identifiers, project: [:namespace, :project_feature])
