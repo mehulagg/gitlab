@@ -142,6 +142,24 @@ RSpec.describe License do
           end
         end
       end
+
+      context 'when skip_true_up is false' do
+        context 'when the restricted_user_count is less than active_user_count' do
+          before do
+            set_restrictions(restricted_user_count: 2, skip_true_up: false)
+            create_list(:user, 6)
+            create(:historical_data, recorded_at: described_class.current.starts_at, active_user_count: 100)
+          end
+
+          it 'add limit error' do
+            expect(license.valid?).to be_falsey
+
+            expect(license.errors.full_messages.to_sentence).to include(
+              'During the year before this license started'
+            )
+          end
+        end
+      end
     end
 
     describe '#check_users_limit' do

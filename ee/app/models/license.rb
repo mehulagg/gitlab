@@ -706,9 +706,9 @@ class License < ApplicationRecord
   end
 
   def check_restricted_user_count
-    if restricted_user_count && restricted_user_count < daily_billable_users_count
-      add_limit_error(user_count: daily_billable_users_count)
-    end
+    return unless restricted_user_count && restricted_user_count < daily_billable_users_count
+
+    add_limit_error(user_count: daily_billable_users_count)
   end
 
   def add_limit_error(current_period: true, user_count:)
