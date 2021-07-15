@@ -52,38 +52,43 @@ Use the following guidelines to ensure your template submission follows standard
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/335279) in GitLab 14.1.
 
-You **must** define the template metadata in a GitLab managed CI/CD template.
+You **must** define the template metadata in GitLab-managed CI/CD templates.
 
 For fabricating the template information, we extended the capability of the CI/CD templates
 to [have a structured metadata](https://gitlab.com/gitlab-org/gitlab/-/issues/334663)
 that can be [populated on UI/API](https://gitlab.com/gitlab-org/gitlab/-/issues/334772).
 Specifically, we've introduced `template_metadata` keyword to `.gitlab-ci.yml` that consists of the following attributes:
 
-| Attribute          | Description                                                                                                                       | Required |
-| ----               | --------------                                                                                                                    | ----     |
-| `name`             | The name of the template.                                                                                                         | Yes      |
-| `desc`             | The description of the template.                                                                                                  | Yes      |
-| `stages`           | The [GitLab DevOps Stages](https://about.gitlab.com/stages-devops-lifecycle/) that the template is involved.                      | Yes      |
-| `categories`       | The [GitLab Feature Categories](https://about.gitlab.com/handbook/product/categories/features/) that the template is involved.    | Yes      |
-| `maintainers`      | The [GitLab Groups](https://about.gitlab.com/handbook/product/categories/features/) which are responsible to maintain the template.   | Yes      |
-| `usage`            | How to use the template. See below for more details.                                                                              | Yes      |
-| `inclusion_type`   | How to use the template when `usage` is `inclusion`. See below for more details.                                                  | Yes      |
+| Attribute        | Required | Description |
+|------------------|----------|-------------|
+| `name`           | Yes      | The name of the template. |
+| `desc`           | Yes      | The description of the template. |
+| `stages`         | Yes      | The [GitLab DevOps Stages](https://about.gitlab.com/stages-devops-lifecycle/) related to the template. |
+| `categories`     | Yes      | The [GitLab Feature Categories](https://about.gitlab.com/handbook/product/categories/features/) related to the template. |
+| `maintainers`    | Yes      | The [GitLab Groups](https://about.gitlab.com/handbook/product/categories/features/) responsible for maintaining the template. |
+| `usage`          | Yes      | How to use the template. Can be `copy-paste` or `inclusion`. See table below for more details. |
+| `inclusion_type` | Yes      | How to use the template when the `usage` is `inclusion`. Can be `shared-workflow`, `workflow-extension`, `composable-job`. See table below for more details. |
 
-The details of `usage` attributes:
+`usage` attribute details:
 
-| Value                | Workflow management | Description                                           |
-| ----                 | --------------      | ----------------------------------------------------- |
-| `copy-paste`         | Decentralized       | The template is copy-pasted into a project workflow file and maintained/versioned in each repository. This is the tradional behavior of GitLab templates that provide a starter content to be a _new_ instance, like Issue/MR templates. |
-| `inclusion`          | Centralized         | The template is `include`d into a project workflow file and maintained/versioned in [the GitLab canonical repository](https://gitlab.com/gitlab-org/gitlab). This is the unique concept in GitLab CI/CD that _directly_ consumes a template. |
+| Value        | Workflow management | Description |
+|--------------|---------------------|-------------|
+| `copy-paste` | Decentralized       | Users copy-paste the contents of the template into a configuration file in their repository. This is the tradional behavior of GitLab templates that provide starter content to _new_ instance, like Issue/MR templates. |
+| `inclusion`  | Centralized         | Users add the template into their configuration by using the `include` keyword. The template is maintained and versioned in [the GitLab canonical repository](https://gitlab.com/gitlab-org/gitlab). In this case, GitLab CI/CD is _directly_ consuming a template. |
 
-The details of `inclusion_type` attributes:
+The `inclusion_type` attribute indicates how the template should be used.
+Depending on the type, the template may or may not:
 
-| Value                | Jobs defined? | Global keyword exists? | YAML anchors only?    | Description                         |
-| ----                 | ------------- | ---------------------  | --------------------- | -----------                         |
-| `shared-workflow`    | Yes           | Yes/No                 | No                    | The end-to-end CI/CD workflow to be shared with the other projects. |
-| `workflow-extension` | No            | Yes                    | No                    | The extension of the workflow-level configs (i.e. [global keywords](../../ci/yaml/index.md#global-keywords)) to be shared with the other projects.     |
-| `composable-job`     | No            | No                     | Yes                   | The [YAML anchors](../../ci/yaml/index.md#anchors) to be included into the project workflow for composing a job with [`extends`](../../ci/yaml/index.md#extends) or [`!reference`](../../ci/yaml/index.md#reference-tags). |
-| `other`              | Yes/No                   | Yes/No                    | Yes/No           |                                     |
+- Have jobs defined.
+- Have the global keyword defined.
+- Have only YAML anchors defined.
+
+| Value                | Jobs defined? | Global keyword used? | YAML anchors only? | Description |
+|----------------------|---------------|----------------------|--------------------|-------------|
+| `shared-workflow`    | Yes           | Yes/No               | No                 | An end-to-end CI/CD workflow. |
+| `workflow-extension` | No            | Yes                  | No                 | A template that extends the workflow-level configuration, but does not add any jobs. For example, a collection of [global keywords](../../ci/yaml/index.md#global-keywords). |
+| `composable-job`     | No            | No                   | Yes                | A template tht contains only [YAML anchors](../../ci/yaml/index.md#anchors) that can be used to compose jobs by using [`extends`](../../ci/yaml/index.md#extends) or [`!reference`](../../ci/yaml/index.md#reference-tags). |
+| `other`              | Yes/No        | Yes/No               | Yes/No             |             |
 
 #### Usage Examples per `inclusion_type`
 
