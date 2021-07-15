@@ -69,7 +69,7 @@ For EKS Nodes, picking more of a smaller size instance allows scaling costs to b
 | ------------------------------------------------------------ | ------------------------------------------------ | -------------------------------------------------------- | -------------------------------------------------- |
 | Webservice                                                   | 4 pods x 5 vCPU & 6.25 GB = <br />20 vCPU, 25 GB |                                                          |                                                    |
 | Sidekiq                                                      | 8 pods x 1 vCPU & 2 GB<br />8 vCPU, 16 GB        |                                                          |                                                    |
-| Supporting services such as NGINX, Prometheus, etc           | 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB             |                                                          |                                                    |
+| Supporting services such as NGINX, Prometheus, etc           | 2 x 2 vCPU and 7.5 GB =<br />4 vCPU, 15 GB       |                                                          |                                                    |
 | **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                               | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB | $1.36/hr                                           |
 | One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                | 8 vCPU, 16GB                                             | $0.34/hr                                           |
 
@@ -102,14 +102,16 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
 
-| Service                                                      | Ref Arch Raw (Full Scaled)                       | AWS BOM                                                    | Example Full Scaled Cost<br />(On Demand, US East) |
-| ------------------------------------------------------------ | ------------------------------------------------ | ---------------------------------------------------------- | -------------------------------------------------- |
-| Webservice                                                   | 4 pods x 5 vCPU & 6.25 GB = <br />20 vCPU, 25 GB |                                                            |                                                    |
-| Sidekiq                                                      | 8 pods x 1 vCPU & 2 GB<br />8 vCPU, 16 GB        |                                                            |                                                    |
-| Supporting services such as NGINX, Prometheus, etc           | 2 vCPU and 7.5 GB<br />4 vCPU, 15 GB             |                                                            |                                                    |
-| **GitLab Ref Arch Raw Total K8s Node Capacity**              | **32 vCPU, 56 GB**                               | **c5.2xlarge** (8vcpu/16GB) x 4 nodes<br />32 vCPU, 64GB   | $1.36/hr                                           |
-| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | **16 vCPU, 32GB**                                | 8 vCPU, 16GB                                               | $0.34/hr                                           |
-| Total                                                        |                                                  | **c5.2xlarge** (8vcpu/16GB) x 5 nodes<<br />40 vCPU, 80 GB | $1.70/hr                                           |
+| Service                                                      | Ref Arch Raw (Full Scaled)                         | AWS BOM                                                    | Example Full Scaled Cost<br />(On Demand, US East) |
+| ------------------------------------------------------------ | -------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| Webservice                                                   | 4 pods x (5 vCPU & 6.25 GB) = <br />20 vCPU, 25 GB |                                                            |                                                    |
+| Sidekiq                                                      | 8 pods x (1 vCPU & 2 GB) = <br />8 vCPU, 16 GB     |                                                            |                                                    |
+| Supporting services such as NGINX, Prometheus, etc           | 2 x (2 vCPU and 7.5 GB) = <br />4 vCPU, 15 GB      |                                                            |                                                    |
+| **GitLab Ref Arch Raw Total K8s Node Capacity**              | 32 vCPU, 56 GB                                     |                                                            |                                                    |
+| One Node for Overhead and Miscellaneous (EKS Cluster AutoScaler, Grafana, Prometheus, etc) | + 16 vCPU, 32GB                                    |                                                            |                                                    |
+| **Grand Total w/ Overheads**                                 | 48 vCPU, 88 GB                                     | **c5.2xlarge** (8vcpu/16GB) x 5 nodes<<br />40 vCPU, 80 GB | $1.70/hr                                           |
+
+Other combinations of node type and quantity can be used to meet the Grand Total. Due to the properties of pods, hosts that are overly small may have significant unused capacity.
 
 NOTE:
 
@@ -420,7 +422,6 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 
 <details>
 <summary markdown="span">Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
-
 
 This test:
 
