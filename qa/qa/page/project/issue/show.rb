@@ -32,7 +32,7 @@ module QA
           end
 
           view 'app/assets/javascripts/related_issues/components/related_issues_list.vue' do
-            element :related_issuable_content
+            element :related_issuable_content, required: true
             element :related_issues_loading_placeholder
           end
 
@@ -58,11 +58,25 @@ module QA
           end
 
           def click_close_issue_button
-            click_element :close_issue_button
+            if QA::Runtime::Env.mobile_layout?
+              click_button 'Issue actions'
+              within('.dropdown-menu') { click_button('Close issue') }
+            else
+              click_element :close_issue_button
+            end
           end
 
           def has_metrics_unfurled?
             has_element?(:prometheus_graph_widgets, wait: 30)
+          end
+
+          def has_reopen_issue_button?
+            if QA::Runtime::Env.mobile_layout?
+              click_button('Issue actions')
+              has_css?('button', text: 'Reopen issue')
+            else
+              has_element?(:reopen_issue_button)
+            end
           end
         end
       end

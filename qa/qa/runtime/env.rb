@@ -150,6 +150,14 @@ module QA
         ENV['QA_REMOTE_MOBILE_DEVICE_NAME']
       end
 
+      def mobile_layout?
+        !(ENV['QA_REMOTE_MOBILE_DEVICE_NAME'].downcase.include?('ipad') || ENV['QA_REMOTE_MOBILE_DEVICE_NAME'].downcase.include?('tablet'))
+      end
+
+      def remote_tunnel_id
+        ENV['REMOTE_TUNNEL_ID'] || 'gitlab-sl_tunnel_id'
+      end
+
       def user_username
         ENV['GITLAB_USERNAME']
       end

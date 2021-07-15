@@ -11,12 +11,17 @@ module QA
 
         view 'app/views/layouts/header/_default.html.haml' do
           element :navbar, required: true
-          element :user_avatar, required: true
-          element :user_menu, required: true
+          element :user_avatar, required: !QA::Runtime::Env.mobile_layout?
+          element :user_menu, required: !QA::Runtime::Env.mobile_layout?
           element :stop_impersonation_link
-          element :issues_shortcut_button, required: true
-          element :merge_requests_shortcut_button, required: true
-          element :todos_shortcut_button, required: true
+          element :issues_shortcut_button, required: !QA::Runtime::Env.mobile_layout?
+          element :merge_requests_shortcut_button, required: !QA::Runtime::Env.mobile_layout?
+          element :mobile_navbar_button
+          element :todos_shortcut_button, required: !QA::Runtime::Env.mobile_layout?
+        end
+
+        view 'app/assets/javascripts/nav/components/responsive_home.vue' do
+          element :mobile_new_dropdown
         end
 
         view 'app/assets/javascripts/nav/components/top_nav_app.vue' do
@@ -96,6 +101,17 @@ module QA
           end
         end
 
+        def open_mobile_menu
+          if has_element?(:mobile_navbar_button)
+            click_element(:mobile_navbar_button) unless has_css?('.menu-expanded', wait: 0)
+          end
+        end
+
+        def open_mobile_new_dropdown
+          open_mobile_menu
+          click_element(:mobile_new_dropdown)
+        end
+
         def signed_in?
           has_personal_area?(wait: 0)
         end
@@ -143,10 +159,12 @@ module QA
         end
 
         def has_personal_area?(wait: Capybara.default_max_wait_time)
+          open_mobile_menu if QA::Runtime::Env.mobile_layout?
           has_element?(:user_avatar, wait: wait)
         end
 
         def has_no_personal_area?(wait: Capybara.default_max_wait_time)
+          open_mobile_menu if QA::Runtime::Env.mobile_layout?
           has_no_element?(:user_avatar, wait: wait)
         end
 
@@ -175,6 +193,7 @@ module QA
         end
 
         def within_user_menu(&block)
+          open_mobile_menu if QA::Runtime::Env.mobile_layout?
           within_top_menu do
             click_element :user_avatar
 

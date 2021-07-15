@@ -108,11 +108,13 @@ module QA
               capabilities['platformName'] = 'Android'
               capabilities['appium:deviceName'] = QA::Runtime::Env.remote_mobile_device_name
               capabilities['appium:platformVersion'] = 'latest'
+              capabilities['sauce:options'] = { tunnelIdentifier: QA::Runtime::Env.remote_tunnel_id }
             else
               capabilities['goog:chromeOptions'][:args] << 'window-size=1480,2200'
             end
 
           when :safari
+            capabilities['sauce:options'] = { tunnelIdentifier: QA::Runtime::Env.remote_tunnel_id }
             if QA::Runtime::Env.remote_mobile_device_name
               capabilities['platformName'] = 'iOS'
               capabilities['appium:deviceName'] = QA::Runtime::Env.remote_mobile_device_name
@@ -120,6 +122,7 @@ module QA
             end
 
           when :firefox
+            capabilities['sauce:options'] = { tunnelIdentifier: QA::Runtime::Env.remote_tunnel_id }
             if QA::Runtime::Env.accept_insecure_certs?
               capabilities['acceptInsecureCerts'] = true
             end

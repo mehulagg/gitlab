@@ -13,6 +13,9 @@ module QA
 
         def within_sidebar
           wait_for_requests
+          # We need to check remote_mobile_device_name instead of mobile_layout? here
+          # since tablets have the regular top navigation bar but still close the left nav
+          open_mobile_nav_sidebar if QA::Runtime::Env.remote_mobile_device_name
 
           within_element(sidebar_element) do
             yield
@@ -45,6 +48,10 @@ module QA
 
         def sidebar_element
           raise NotImplementedError
+        end
+
+        def open_mobile_nav_sidebar
+          find('.toggle-mobile-nav').click unless has_css?('.sidebar-expanded-mobile', wait: 1)
         end
       end
     end

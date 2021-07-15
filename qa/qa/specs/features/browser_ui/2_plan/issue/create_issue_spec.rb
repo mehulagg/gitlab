@@ -25,7 +25,7 @@ module QA
         Page::Project::Issue::Show.perform do |issue_page|
           issue_page.click_close_issue_button
 
-          expect(issue_page).to have_element(:reopen_issue_button)
+          expect(issue_page).to have_reopen_issue_button
         end
 
         Page::Project::Menu.perform(&:click_issues)

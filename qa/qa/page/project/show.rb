@@ -117,8 +117,13 @@ module QA
         end
 
         def go_to_new_issue
-          click_element :new_menu_toggle
-          click_element(:new_issue_link)
+          if QA::Runtime::Env.mobile_layout?
+            Page::Main::Menu.perform(&:open_mobile_new_dropdown)
+            find('[data-testid="item"]', text: 'New issue').click
+          else
+            click_element(:new_menu_toggle)
+            click_element(:new_issue_link)
+          end
         end
 
         def has_file?(name)
