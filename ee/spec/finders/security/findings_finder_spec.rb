@@ -11,6 +11,10 @@ RSpec.describe Security::FindingsFinder do
   let_it_be(:report_ds) { create(:ci_reports_security_report, pipeline: pipeline, type: :dependency_scanning) }
   let_it_be(:report_sast) { create(:ci_reports_security_report, pipeline: pipeline, type: :sast) }
 
+  before do
+    skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/336198"
+  end
+
   let(:severity_levels) { nil }
   let(:confidence_levels) { nil }
   let(:report_types) { nil }
