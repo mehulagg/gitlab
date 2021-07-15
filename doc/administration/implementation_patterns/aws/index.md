@@ -57,6 +57,9 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 <details>
 <summary markdown="span">Click to Expand 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
+---
+---
+
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
 
@@ -89,6 +92,10 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
+---
+**2K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+---
+
 </details>
 
 Test results content to be completed.
@@ -97,6 +104,9 @@ Test results content to be completed.
 
 <details>
 <summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
+
+---
+---
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -134,10 +144,17 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              |                                                              |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
+---
+**End of Expand 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+---
+
 </details>
 
 <details>
 <summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
+
+---
+---
 
 | Attribute            | Value                                                 |
 | -------------------- | ----------------------------------------------------- |
@@ -216,10 +233,17 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | web_project_tags                                         | 20/s  | 19.02/s (>12.80/s)   | 514.64ms  | 576.85ms (<1505ms)   | 100.00% (>99%) | Passed |
 | web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed |
 
+---
+**End of Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
+---
+
 </details>
 
 <details>
 <summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
+
+---
+---
 
 This test:
 
@@ -305,6 +329,10 @@ This test:
 
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
 
+---
+**End of 3K Cloud Native Hybrid on EKS AutoScaling Test Results**
+---
+
 </details>
 
 ### 10K Cloud Native Hybrid on EKS
@@ -313,7 +341,6 @@ This test:
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
 ---
-
 ---
 
 NOTE:
@@ -350,9 +377,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $0.10/hr | $0.10/hr |
 
 ---
-
 **End of 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
-
 ---
 
 </details>
@@ -362,7 +387,6 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
 
 ---
-
 ---
 
 Attribute                  | Value                                                   
@@ -443,9 +467,7 @@ web_project_tags                                         | 20/s  | 19.02/s (>12.
 web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed
 
 ---
-
 **End of 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
-
 ---
 
 </details>
@@ -453,12 +475,6 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
 
-<div class="panel panel-info">
-
-10K Cloud Native Hybrid on EKS **AutoScaling** Test Results
-{: .panel-heading}
-
-<div class="panel-body">
 This test:
 
 - Started with 5 webservice pods (out of 20 for 10k test) and 5 hosts instead of 10. 
@@ -543,8 +559,9 @@ web_user                                                 | 20/s  | 19.82/s (>9.6
 
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
 
-</div>
-</div>
+---
+**End of 10K Cloud Native Hybrid on EKS AutoScaling Test Results**
+---
 
 </details>
 
