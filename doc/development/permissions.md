@@ -60,7 +60,7 @@ Users can be members of multiple groups and projects. The following access
 levels are available (defined in the `Gitlab::Access` module):
 
 - No access (`0`)
-- Mimimal access (`5`)
+- Minimal access (`5`)
 - Guest (`10`)
 - Reporter (`20`)
 - Developer (`30`)
