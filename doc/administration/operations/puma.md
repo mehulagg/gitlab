@@ -36,6 +36,14 @@ For more details about the Puma configuration, see the
 
 ## Puma Worker Killer
 
+Puma forks worker processes as part of a strategy to reduce memory use.
+
+Each time a worker is created, it shares memory with the primary process and
+only uses additional memory when it makes changes or additions to its memory pages.
+
+Memory use by workers therefore increases over time, and Puma Worker Killer is the
+mechanism that recovers this memory.
+
 By default:
 
 - The [Puma Worker Killer](https://github.com/schneems/puma_worker_killer) restarts a worker if it
@@ -55,6 +63,46 @@ To change the memory limit setting:
    ```shell
    sudo gitlab-ctl reconfigure
    ```
+
+There is a CPU cost associated with killing and replacing workers, so
+`per_worker_max_memory_mb` should be set to a higher value if the
+Worker Killer is replacing workers too often. One or more worker
+being killed every minute is definitely too often, and on a server
+sized for less than ten workers, performance issues are likely to
+be observed.
+
+GitLab servers with plenty of free memory may benefit from a higher
+value of `1200` or more. GitLab.com runs
+`puma['per_worker_max_memory_mb'] = 1342`.
+
+The Worker Killer checks every 20 seconds, and can be monitored using
+[the puma log](../logs.md#puma_stdoutlog) `/var/log/gitlab/puma/puma_stdout.log`:
+
+```plaintext
+PumaWorkerKiller: Out of memory. 4 workers consuming total: 4871.23828125 mb
+out of max: 4798.08 mb. Sending TERM to pid 26668 consuming 1001.00390625 mb.
+```
+
+- A formula is used to calculate the maximum memory value, and will result in workers
+  being killed before they reach the `per_worker_max_memory_mb` value.
+- The default values for that formula prior to GitLab 13.5 were 550mb for the primary
+  and `per_worker_max_memory_mb` specified 850mb for each worker.
+- From GitLab 13.5 the values are primary: 800mb, worker: 1024mb.
+
+```plaintext
+0.98 * ( 800 + ( worker_processes * 1024mb ) )
+```
+
+- In the log output above, `0.98 * ( 800 + ( 4 * 1024 ) )` returns the
+  `max: 4798.08 mb` value.
+
+Increasing the maximum to `1200`, for example, would set a higher maximum of `5488 mb`.
+
+The limit is theoretical, and doesn't necessarily translate to Puma using 5gb RAM.
+Each worker shares memory with the primary from when it was forked, reducing actual
+memory used. Workers need to dirty around 400mb of additional memory pages to reach
+the suggested maximum of 1200mb, and this will be freed twice a day by Puma worker
+rolling restarts.
 
 ## Worker timeout
 
