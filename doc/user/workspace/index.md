@@ -6,18 +6,22 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Workspaces
 
-Workspace is the top level namespace for you to manage your GitLab instance.
+Workspaces will be the top-level [namespace](../group/index.md#namespaces) for you to manage
+everything GitLab, including:
 
-Features from the admin panel will move into a new object called a Workspace that covers behavior for the entire instance.
+- Defining and applying settings to all of your groups, subgroups, and projects.
+- Aggregating data from all your groups, subgroups, and projects.
 
-A workplace includes settings, data, and features from all groups, subgroups, and projects in an instance (including personal namespaces).
-A workplace allows settings to be defined and applied to all groups, subgroups, and projects in an instance
-Data from all groups, subgroups and projects in a workspace can be aggregated.
-There is a single workspace per instance that is accessible to instance administrators.
+Workspaces will take many of the features from the
+[Admin Area](../admin_area/index.md), and there will be one workspace per:
 
-This functionality is coming soon.
+- Instance, for self-managed instances.
+- Namespace, for GitLab.com.
 
-## Preview to what's coming
+NOTE:
+Workspaces are currently in development.
+
+## Concept previews
 
 ![Workspace Overview](img/1.1-Instance_overview.png)
 
