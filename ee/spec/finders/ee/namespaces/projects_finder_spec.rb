@@ -59,6 +59,10 @@ RSpec.describe Namespaces::ProjectsFinder do
     end
 
     context 'has_code_coverage' do
+      before do
+        skip "CI Vertical: not yet supported (Verify) https://gitlab.com/gitlab-org/gitlab/-/issues/336199"
+      end
+
       let_it_be(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
 
       context 'when has_code_coverage is provided' do
