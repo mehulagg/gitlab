@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # AWS Specific Implementation patterns **(FREE SELF)**
 
-## GitLab Services and additional Services Handled by AWS PaaS
+## GitLab and Supplementary Services Handled by AWS PaaS
 
 For both Omnibus GitLab or Cloud Native Hybrid implementations, the following GitLab Service roles can be performed by AWS Services (PaaS).
 
@@ -25,7 +25,7 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 | **Gitaly Cluster (Git Repository Storage)**<br />(Including Praefect and PostgreSQL) | ASG and Instances              | Yes - ASG and Instances<br />**Note: Gitaly cannot be put into a Kubernetes Cluster.** |
 | **All GitLab storages besides Git Repository Storage**<br />(Includes Git-LFS which is S3 Compatible) | AWS S3                         | Yes                                                          |
 |                                                              |                                |                                                              |
-| <u>Tested PaaS Not Referenced in Ref Archs</u>               |                                |                                                              |
+| <u>Tested PaaS for Supplemental Services</u>                 |                                |                                                              |
 | **Front End Load Balancing**                                 | AWS ELB                        | Yes                                                          |
 | **Internal Load Balancing**                                  | AWS ELB                        | Yes                                                          |
 | **Outbound Email Services**                                  | AWS Simple Email Service (SES) | Yes                                                          |
@@ -53,7 +53,10 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 | 5K   | [5K Omnibus](../../reference_architectures/5k_users.md)      | [5k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/5k) | 5K Cloud Native Hybrid on EKS                                | GPT Test Results                                             | GitLab Cloud Native 5K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 | 10K  | [10K Cloud Native](../../reference_architectures/10k_users.md#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) | [10k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/10k) | [10K Cloud Native Hybrid on EKS](#10k-cloud-native-hybrid-on-eks-bill-of-materials-bom) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks-test-results) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://gitlab.com/gitlab-com/alliances/aws/sandbox-projects/eks-quickstart/eks-quickstart-docs-and-collab/-/wikis/GitLab-Team-Member-EKS-QuickStart-Testing-Instructions)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 
-### 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+### 2K Cloud Native Hybrid on EKS
+
+<details>
+<summary markdown="span">Click to Expand 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -87,9 +90,16 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                         |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                   |
 
-### 2K Cloud Native Hybrid on EKS Test Results 
+</details>
 
-### 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+### 2K Cloud Native Hybrid on EKS Test Results
+
+Content to be completed.
+
+### 3K Cloud Native Hybrid on EKS
+
+<details>
+<summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -127,12 +137,12 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                         |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                   |
 
-### 3K Cloud Native Hybrid on EKS Test Results 
+</details>
+
+#### 3K Cloud Native Hybrid on EKS Test Results 
 
 <details>
 <summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
-
-#### 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results
 
 | Attribute            | Value                                                 |
 | -------------------- | ----------------------------------------------------- |
@@ -215,8 +225,6 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 <details>
 <summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
-
-#### 3K Cloud Native Hybrid on EKS **AutoScaling** Test Results
 
 This test:
 
@@ -309,8 +317,6 @@ This test:
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
-#### 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)
-
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
 
@@ -350,8 +356,6 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
-
-#### 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results
 
 Attribute                  | Value                                                   
 ---------------------------|---------------------------------------------------------
