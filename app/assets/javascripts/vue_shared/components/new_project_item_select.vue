@@ -46,7 +46,7 @@ export default {
     filteredProjectNames() {
       return this.frequentProjects
         .filter((project) =>
-          project.namespace.toLowerCase().includes(this.searchTerm.toLowerCase()),
+          project.namespace.toLowerCase().includes(this.searchTerm.toLowerCase()) && `${project.with_feature_enabled}_enabled`,
         )
         .sort((a, b) => b.lastAccessedOn - a.lastAccessedOn);
     },

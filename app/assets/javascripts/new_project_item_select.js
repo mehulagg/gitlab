@@ -11,7 +11,7 @@ export default () => {
     projects.forEach(project => {
       axios.get(`${endpoint}${project.id}`).then((res) => {
         project.issues_enabled = res.data.issues_enabled;
-        project.merge_requests_enabled = res.data.merge_requests_enabled;
+        project.merge_requests_enabled = false;
       });
     })
   }
