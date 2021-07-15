@@ -12,7 +12,7 @@ The description of the deprecation should state what actions the user should tak
 
 ### Breaking Change
 
-<-- Is this a breaking change or not? If so, please add instructions for the user to remediate their workflow -->
+<!-- Is this a breaking change or not? If so, please add instructions for how users can update their workflow. -->
 ### Affected Topology 
 
 <!--  Who is affected by this deprecation, Self-managed users, SaaS users or both? This is especially important while nearing the annual major release where breaking changes and removals are typically introduced. These changes may be reflected on GitLab.com before the official release date. -->
