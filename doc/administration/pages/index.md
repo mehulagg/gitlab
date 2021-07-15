@@ -1035,7 +1035,7 @@ If you use [object storage](#using-object-storage), you can disable local storag
 
 Starting from GitLab 13.12, this setting also disables the [legacy storage](#migrate-legacy-storage-to-zip-storage), so if you were using NFS to serve Pages, you can completely disconnect from it.
 
-## Migrate GitLab Pages to 14.0
+## Prepare GitLab Pages for 14.0
 
 In GitLab 14.0 a number of breaking changes were introduced which may require some user intervention.
 The steps below describe the best way to migrate without causing any downtime for your GitLab instance.
