@@ -3357,6 +3357,26 @@ Input type: `PipelineRetryInput`
 | <a id="mutationpipelineretryerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationpipelineretrypipeline"></a>`pipeline` | [`Pipeline`](#pipeline) | The pipeline after mutation. |
 
+### `Mutation.projectSetComplianceFramework`
+
+Input type: `ProjectSetComplianceFrameworkInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationprojectsetcomplianceframeworkclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationprojectsetcomplianceframeworkcomplianceframeworkid"></a>`complianceFrameworkId` | [`ComplianceManagementFrameworkID`](#compliancemanagementframeworkid) | ID of the compliance framework to assign to the project. |
+| <a id="mutationprojectsetcomplianceframeworkprojectid"></a>`projectId` | [`ProjectID!`](#projectid) | ID of the project to change compliance framework. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationprojectsetcomplianceframeworkclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationprojectsetcomplianceframeworkerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationprojectsetcomplianceframeworkproject"></a>`project` | [`Project!`](#project) | The project after mutation. |
+
 ### `Mutation.prometheusIntegrationCreate`
 
 Input type: `PrometheusIntegrationCreateInput`
