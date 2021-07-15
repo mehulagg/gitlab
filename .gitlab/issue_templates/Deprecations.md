@@ -13,13 +13,16 @@ The description of the deprecation should state what actions the user should tak
 ### Breaking Change
 
 <!-- Is this a breaking change or not? If so, please add instructions for how users can update their workflow. -->
-### Affected Topology 
+### Affected Topology
 
-<!--  Who is affected by this deprecation, Self-managed users, SaaS users or both? This is especially important while nearing the annual major release where breaking changes and removals are typically introduced. These changes may be reflected on GitLab.com before the official release date. -->
+<!--
+Who is affected by this deprecation, Self-managed users, SaaS users, or both? This is especially important when nearing the annual major release where breaking changes and removals are typically introduced. These changes might be seen on GitLab.com before the official release date.
+-->
 
 ### Affected Tier
 
-<!-- Which tier is this feature available in?
+<!--
+Which tier is this feature available in?
 
 * Free
 * Premium
@@ -32,9 +35,12 @@ The description of the deprecation should state what actions the user should tak
   - To find the stable counterparts for a product team, see the [product categories](https://about.gitlab.com/handbook/product/categories/) page.
 - [ ] @mention your GPM so that they are aware of planned deprecations. The goal is to have reviews happen at least two releases before the final removal of the feature or introduction of a breaking change.
 
+### Deprecation Milestone
+
+<!-- In which milestone will this deprecation happen? -->
+
 ### Links
 
-### Deprecation Milestone
-<!-- In which milestone will this deprecation happen -->
-
-<!-- Add links to any relevant documentation or code that will provide additional details or clarity regarding the planned change. Also, include a link to the removal issue (if relevant). -->
+<!--
+Add links to any relevant documentation or code that will provide additional details or clarity regarding the planned change. Also, include a link to the removal issue if relevant.
+-->
