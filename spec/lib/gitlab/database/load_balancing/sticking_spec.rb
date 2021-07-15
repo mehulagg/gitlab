@@ -174,6 +174,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
       end
 
       it 'sticks an entity to the primary', :aggregate_failures do
+        skip "CI Vertical: not yet supported"
+
         ids.each do |id|
           expect(described_class).to receive(:set_write_location_for)
                                        .with(:user, id, 'foo')
