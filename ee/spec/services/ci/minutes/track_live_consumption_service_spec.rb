@@ -72,9 +72,9 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
       it_behaves_like 'returns early', 'CI minutes limit not enabled for build'
     end
 
-    context 'when shared runners limit is not enabled for build' do
+    context 'when a cost factor is not enabled for build' do
       before do
-        allow(build).to receive(:shared_runners_minutes_limit_enabled?).and_return(false)
+        allow(build).to receive(:cost_factor_enabled?).and_return(false)
       end
 
       it_behaves_like 'returns early', 'CI minutes limit not enabled for build'
