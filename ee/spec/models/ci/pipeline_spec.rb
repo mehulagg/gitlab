@@ -37,6 +37,8 @@ RSpec.describe Ci::Pipeline do
     let!(:pipeline_3) { create(:ci_pipeline, project: project) }
 
     before do
+      skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/336200"
+
       create(:vulnerabilities_finding, pipelines: [pipeline_1], project: pipeline.project)
       create(:vulnerabilities_finding, pipelines: [pipeline_2], project: pipeline.project)
     end
