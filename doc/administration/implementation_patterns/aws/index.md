@@ -346,7 +346,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 </details>
 
-### 10K Cloud Native Hybrid on EKS
+### 10K Cloud Native Hybrid on EKS Test Results
 
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
