@@ -21,20 +21,8 @@ module DynamicDatabaseConfig
 
       configs.each do |config_name, config|
         if config_name == 'main'
-          # TODO: CI vertical
-          # Set to public to see what features break if CI tables were "moved"
-          # Set to public,gitlab_ci to restore CI tables again
-          #
-          config["schema_search_path"] ||=
-            if multiple_dbs # limit schema visibility if multiple DBs
-              "public,gitlab_shared"
-            else
-              "public,gitlab_ci,gitlab_shared"
-            end
-
           config["migrations_paths"] ||= db_migration_paths.compact
         elsif config_name == 'ci'
-          config["schema_search_path"] ||= "gitlab_ci,gitlab_shared"
           config["migrations_paths"] ||= db_migration_paths("ci_").compact
         end
         config["use_metadata_table"] = false

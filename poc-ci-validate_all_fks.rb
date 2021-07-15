@@ -3,15 +3,24 @@
 connection = ApplicationRecord.connection
 invalid_foreign_keys = nil
 
-invalid_foreign_keys = [:gitlab_ci, :public, :gitlab_shared].flat_map do |schema_name|
-  connection.transaction(requires_new: true) do
-    connection.schema_search_path = schema_name
-    all_tables = connection.tables.sort
-    connection.schema_search_path = :undefined
+Dir.glob('app/models/ci/**/*.rb').each { |f| require_relative(f) rescue nil }
+Dir.glob('ee/app/models/ci/**/*.rb').each { |f| require_relative(f) rescue nil }
+gitlab_ci_tables = Ci::ApplicationRecord.descendants.map(&:table_name).uniq.sort
+gitlab_ci_tables += %w[tags taggings ci_test_cases ci_test_case_failures]
 
-    all_tables.flat_map do |table_name|
-      connection.foreign_keys("#{schema_name}.#{table_name}")
-        .reject { |fk| fk.to_table.start_with?("#{schema_name}.") }
+gitlab_shared_tables = [
+  "schema_migrations",
+  "background_migration_jobs",
+  "batched_background_migration_jobs",
+  "batched_background_migrations"
+].sort
+
+public_tables = (ApplicationRecord.connection.tables - gitlab_ci_tables - gitlab_shared_tables).sort
+
+invalid_foreign_keys = [gitlab_ci_tables, public_tables, gitlab_shared_tables].flat_map do |tables|
+  connection.transaction(requires_new: true) do
+    tables.flat_map do |table_name|
+      connection.foreign_keys(table_name).reject { |fk| tables.include?(fk.to_table) }
     end
   end
 end

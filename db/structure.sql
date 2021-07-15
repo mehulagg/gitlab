@@ -1,7 +1,3 @@
-CREATE SCHEMA gitlab_ci;
-
-COMMENT ON SCHEMA gitlab_ci IS 'Schema to hold all tables owned by GitLab CI feature';
-
 CREATE SCHEMA gitlab_partitions_dynamic;
 
 COMMENT ON SCHEMA gitlab_partitions_dynamic IS 'Schema to hold partitions managed dynamically from the application, e.g. for time space partitioning.';
@@ -9,10 +5,6 @@ COMMENT ON SCHEMA gitlab_partitions_dynamic IS 'Schema to hold partitions manage
 CREATE SCHEMA gitlab_partitions_static;
 
 COMMENT ON SCHEMA gitlab_partitions_static IS 'Schema to hold static partitions, e.g. for hash partitioning';
-
-CREATE SCHEMA gitlab_shared;
-
-COMMENT ON SCHEMA gitlab_shared IS 'Schema to hold all tables shared across all databases';
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
@@ -186,1029 +178,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
-CREATE TABLE gitlab_ci.ci_build_needs (
-    id integer NOT NULL,
-    build_id integer NOT NULL,
-    name text NOT NULL,
-    artifacts boolean DEFAULT true NOT NULL,
-    optional boolean DEFAULT false NOT NULL,
-    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_build_needs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_build_needs_id_seq OWNED BY gitlab_ci.ci_build_needs.id;
-
-CREATE TABLE gitlab_ci.ci_build_pending_states (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    build_id bigint NOT NULL,
-    state smallint,
-    failure_reason smallint,
-    trace_checksum bytea,
-    trace_bytesize bigint
-);
-
-CREATE SEQUENCE gitlab_ci.ci_build_pending_states_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_build_pending_states_id_seq OWNED BY gitlab_ci.ci_build_pending_states.id;
-
-CREATE TABLE gitlab_ci.ci_build_report_results (
-    build_id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    data jsonb DEFAULT '{}'::jsonb NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_build_report_results_build_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_build_report_results_build_id_seq OWNED BY gitlab_ci.ci_build_report_results.build_id;
-
-CREATE TABLE gitlab_ci.ci_build_trace_chunks (
-    id bigint NOT NULL,
-    build_id integer NOT NULL,
-    chunk_index integer NOT NULL,
-    data_store integer NOT NULL,
-    raw_data bytea,
-    checksum bytea,
-    lock_version integer DEFAULT 0 NOT NULL,
-    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_build_trace_chunks_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_build_trace_chunks_id_seq OWNED BY gitlab_ci.ci_build_trace_chunks.id;
-
-CREATE TABLE gitlab_ci.ci_build_trace_section_names (
-    id integer NOT NULL,
-    project_id integer NOT NULL,
-    name character varying NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_build_trace_section_names_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_build_trace_section_names_id_seq OWNED BY gitlab_ci.ci_build_trace_section_names.id;
-
-CREATE TABLE gitlab_ci.ci_build_trace_sections (
-    project_id integer NOT NULL,
-    date_start timestamp without time zone NOT NULL,
-    date_end timestamp without time zone NOT NULL,
-    byte_start bigint NOT NULL,
-    byte_end bigint NOT NULL,
-    build_id integer NOT NULL,
-    section_name_id integer NOT NULL,
-    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
-);
-
-CREATE TABLE gitlab_ci.ci_builds (
-    id integer NOT NULL,
-    status character varying,
-    finished_at timestamp without time zone,
-    trace text,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    started_at timestamp without time zone,
-    runner_id integer,
-    coverage double precision,
-    commit_id integer,
-    name character varying,
-    options text,
-    allow_failure boolean DEFAULT false NOT NULL,
-    stage character varying,
-    trigger_request_id integer,
-    stage_idx integer,
-    tag boolean,
-    ref character varying,
-    user_id integer,
-    type character varying,
-    target_url character varying,
-    description character varying,
-    project_id integer,
-    erased_by_id integer,
-    erased_at timestamp without time zone,
-    artifacts_expire_at timestamp without time zone,
-    environment character varying,
-    "when" character varying,
-    yaml_variables text,
-    queued_at timestamp without time zone,
-    token character varying,
-    lock_version integer DEFAULT 0,
-    coverage_regex character varying,
-    auto_canceled_by_id integer,
-    retried boolean,
-    stage_id integer,
-    protected boolean,
-    failure_reason integer,
-    scheduled_at timestamp with time zone,
-    token_encrypted character varying,
-    upstream_pipeline_id integer,
-    resource_group_id bigint,
-    waiting_for_resource_at timestamp with time zone,
-    processed boolean,
-    scheduling_type smallint,
-    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
-    stage_id_convert_to_bigint bigint,
-    CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_builds_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_builds_id_seq OWNED BY gitlab_ci.ci_builds.id;
-
-CREATE TABLE gitlab_ci.ci_builds_metadata (
-    id integer NOT NULL,
-    build_id integer NOT NULL,
-    project_id integer NOT NULL,
-    timeout integer,
-    timeout_source integer DEFAULT 1 NOT NULL,
-    interruptible boolean,
-    config_options jsonb,
-    config_variables jsonb,
-    has_exposed_artifacts boolean,
-    environment_auto_stop_in character varying(255),
-    expanded_environment_name character varying(255),
-    secrets jsonb DEFAULT '{}'::jsonb NOT NULL,
-    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
-    id_convert_to_bigint bigint DEFAULT 0 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_builds_metadata_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_builds_metadata_id_seq OWNED BY gitlab_ci.ci_builds_metadata.id;
-
-CREATE TABLE gitlab_ci.ci_builds_runner_session (
-    id bigint NOT NULL,
-    build_id integer NOT NULL,
-    url character varying NOT NULL,
-    certificate character varying,
-    "authorization" character varying,
-    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_builds_runner_session_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_builds_runner_session_id_seq OWNED BY gitlab_ci.ci_builds_runner_session.id;
-
-CREATE TABLE gitlab_ci.ci_daily_build_group_report_results (
-    id bigint NOT NULL,
-    date date NOT NULL,
-    project_id bigint NOT NULL,
-    last_pipeline_id bigint NOT NULL,
-    ref_path text NOT NULL,
-    group_name text NOT NULL,
-    data jsonb NOT NULL,
-    default_branch boolean DEFAULT false NOT NULL,
-    group_id bigint
-);
-
-CREATE SEQUENCE gitlab_ci.ci_daily_build_group_report_results_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_daily_build_group_report_results_id_seq OWNED BY gitlab_ci.ci_daily_build_group_report_results.id;
-
-CREATE TABLE gitlab_ci.ci_deleted_objects (
-    id bigint NOT NULL,
-    file_store smallint DEFAULT 1 NOT NULL,
-    pick_up_at timestamp with time zone DEFAULT now() NOT NULL,
-    store_dir text NOT NULL,
-    file text NOT NULL,
-    CONSTRAINT check_5e151d6912 CHECK ((char_length(store_dir) <= 1024))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_deleted_objects_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_deleted_objects_id_seq OWNED BY gitlab_ci.ci_deleted_objects.id;
-
-CREATE TABLE gitlab_ci.ci_freeze_periods (
-    id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    freeze_start character varying(998) NOT NULL,
-    freeze_end character varying(998) NOT NULL,
-    cron_timezone character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_freeze_periods_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_freeze_periods_id_seq OWNED BY gitlab_ci.ci_freeze_periods.id;
-
-CREATE TABLE gitlab_ci.ci_group_variables (
-    id integer NOT NULL,
-    key character varying NOT NULL,
-    value text,
-    encrypted_value text,
-    encrypted_value_salt character varying,
-    encrypted_value_iv character varying,
-    group_id integer NOT NULL,
-    protected boolean DEFAULT false NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    masked boolean DEFAULT false NOT NULL,
-    variable_type smallint DEFAULT 1 NOT NULL,
-    environment_scope text DEFAULT '*'::text NOT NULL,
-    CONSTRAINT check_dfe009485a CHECK ((char_length(environment_scope) <= 255))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_group_variables_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_group_variables_id_seq OWNED BY gitlab_ci.ci_group_variables.id;
-
-CREATE TABLE gitlab_ci.ci_instance_variables (
-    id bigint NOT NULL,
-    variable_type smallint DEFAULT 1 NOT NULL,
-    masked boolean DEFAULT false,
-    protected boolean DEFAULT false,
-    key text NOT NULL,
-    encrypted_value text,
-    encrypted_value_iv text,
-    CONSTRAINT check_07a45a5bcb CHECK ((char_length(encrypted_value_iv) <= 255)),
-    CONSTRAINT check_5aede12208 CHECK ((char_length(key) <= 255)),
-    CONSTRAINT check_956afd70f1 CHECK ((char_length(encrypted_value) <= 13579))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_instance_variables_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_instance_variables_id_seq OWNED BY gitlab_ci.ci_instance_variables.id;
-
-CREATE TABLE gitlab_ci.ci_job_artifacts (
-    id integer NOT NULL,
-    project_id integer NOT NULL,
-    job_id integer NOT NULL,
-    file_type integer NOT NULL,
-    size bigint,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    expire_at timestamp with time zone,
-    file character varying,
-    file_store integer DEFAULT 1,
-    file_sha256 bytea,
-    file_format smallint,
-    file_location smallint,
-    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
-    job_id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
-    CONSTRAINT check_27f0f6dbab CHECK ((file_store IS NOT NULL))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_job_artifacts_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_job_artifacts_id_seq OWNED BY gitlab_ci.ci_job_artifacts.id;
-
-CREATE TABLE gitlab_ci.ci_job_token_project_scope_links (
-    id bigint NOT NULL,
-    source_project_id bigint NOT NULL,
-    target_project_id bigint NOT NULL,
-    added_by_id bigint,
-    created_at timestamp with time zone NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_job_token_project_scope_links_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_job_token_project_scope_links_id_seq OWNED BY gitlab_ci.ci_job_token_project_scope_links.id;
-
-CREATE TABLE gitlab_ci.ci_job_variables (
-    id bigint NOT NULL,
-    key character varying NOT NULL,
-    encrypted_value text,
-    encrypted_value_iv character varying,
-    job_id bigint NOT NULL,
-    variable_type smallint DEFAULT 1 NOT NULL,
-    source smallint DEFAULT 0 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_job_variables_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_job_variables_id_seq OWNED BY gitlab_ci.ci_job_variables.id;
-
-CREATE TABLE gitlab_ci.ci_minutes_additional_packs (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    namespace_id bigint NOT NULL,
-    expires_at date,
-    number_of_minutes integer NOT NULL,
-    purchase_xid text,
-    CONSTRAINT check_d7ef254af0 CHECK ((char_length(purchase_xid) <= 32))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_minutes_additional_packs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_minutes_additional_packs_id_seq OWNED BY gitlab_ci.ci_minutes_additional_packs.id;
-
-CREATE TABLE gitlab_ci.ci_namespace_monthly_usages (
-    id bigint NOT NULL,
-    namespace_id bigint NOT NULL,
-    date date NOT NULL,
-    additional_amount_available integer DEFAULT 0 NOT NULL,
-    amount_used numeric(18,2) DEFAULT 0.0 NOT NULL,
-    CONSTRAINT ci_namespace_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_namespace_monthly_usages_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_namespace_monthly_usages_id_seq OWNED BY gitlab_ci.ci_namespace_monthly_usages.id;
-
-CREATE TABLE gitlab_ci.ci_pending_builds (
-    id bigint NOT NULL,
-    build_id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    protected boolean DEFAULT false NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pending_builds_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pending_builds_id_seq OWNED BY gitlab_ci.ci_pending_builds.id;
-
-CREATE TABLE gitlab_ci.ci_pipeline_artifacts (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    pipeline_id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    size integer NOT NULL,
-    file_store smallint DEFAULT 1 NOT NULL,
-    file_type smallint NOT NULL,
-    file_format smallint NOT NULL,
-    file text,
-    expire_at timestamp with time zone,
-    verification_started_at timestamp with time zone,
-    verification_retry_at timestamp with time zone,
-    verified_at timestamp with time zone,
-    verification_state smallint DEFAULT 0 NOT NULL,
-    verification_retry_count smallint,
-    verification_checksum bytea,
-    verification_failure text,
-    CONSTRAINT check_191b5850ec CHECK ((char_length(file) <= 255)),
-    CONSTRAINT check_abeeb71caf CHECK ((file IS NOT NULL)),
-    CONSTRAINT ci_pipeline_artifacts_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipeline_artifacts_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipeline_artifacts_id_seq OWNED BY gitlab_ci.ci_pipeline_artifacts.id;
-
-CREATE TABLE gitlab_ci.ci_pipeline_chat_data (
-    id bigint NOT NULL,
-    pipeline_id integer NOT NULL,
-    chat_name_id integer NOT NULL,
-    response_url text NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipeline_chat_data_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipeline_chat_data_id_seq OWNED BY gitlab_ci.ci_pipeline_chat_data.id;
-
-CREATE TABLE gitlab_ci.ci_pipeline_messages (
-    id bigint NOT NULL,
-    severity smallint DEFAULT 0 NOT NULL,
-    pipeline_id integer NOT NULL,
-    content text NOT NULL,
-    CONSTRAINT check_58ca2981b2 CHECK ((char_length(content) <= 10000))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipeline_messages_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipeline_messages_id_seq OWNED BY gitlab_ci.ci_pipeline_messages.id;
-
-CREATE TABLE gitlab_ci.ci_pipeline_schedule_variables (
-    id integer NOT NULL,
-    key character varying NOT NULL,
-    value text,
-    encrypted_value text,
-    encrypted_value_salt character varying,
-    encrypted_value_iv character varying,
-    pipeline_schedule_id integer NOT NULL,
-    created_at timestamp with time zone,
-    updated_at timestamp with time zone,
-    variable_type smallint DEFAULT 1 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipeline_schedule_variables_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipeline_schedule_variables_id_seq OWNED BY gitlab_ci.ci_pipeline_schedule_variables.id;
-
-CREATE TABLE gitlab_ci.ci_pipeline_schedules (
-    id integer NOT NULL,
-    description character varying,
-    ref character varying,
-    cron character varying,
-    cron_timezone character varying,
-    next_run_at timestamp without time zone,
-    project_id integer,
-    owner_id integer,
-    active boolean DEFAULT true,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipeline_schedules_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipeline_schedules_id_seq OWNED BY gitlab_ci.ci_pipeline_schedules.id;
-
-CREATE TABLE gitlab_ci.ci_pipeline_variables (
-    id integer NOT NULL,
-    key character varying NOT NULL,
-    value text,
-    encrypted_value text,
-    encrypted_value_salt character varying,
-    encrypted_value_iv character varying,
-    pipeline_id integer NOT NULL,
-    variable_type smallint DEFAULT 1 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipeline_variables_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipeline_variables_id_seq OWNED BY gitlab_ci.ci_pipeline_variables.id;
-
-CREATE TABLE gitlab_ci.ci_pipelines (
-    id integer NOT NULL,
-    ref character varying,
-    sha character varying,
-    before_sha character varying,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    tag boolean DEFAULT false,
-    yaml_errors text,
-    committed_at timestamp without time zone,
-    project_id integer,
-    status character varying,
-    started_at timestamp without time zone,
-    finished_at timestamp without time zone,
-    duration integer,
-    user_id integer,
-    lock_version integer DEFAULT 0,
-    auto_canceled_by_id integer,
-    pipeline_schedule_id integer,
-    source integer,
-    config_source integer,
-    protected boolean,
-    failure_reason integer,
-    iid integer,
-    merge_request_id integer,
-    source_sha bytea,
-    target_sha bytea,
-    external_pull_request_id bigint,
-    ci_ref_id bigint,
-    locked smallint DEFAULT 1 NOT NULL,
-    CONSTRAINT check_d7e99a025e CHECK ((lock_version IS NOT NULL))
-);
-
-CREATE TABLE gitlab_ci.ci_pipelines_config (
-    pipeline_id bigint NOT NULL,
-    content text NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_pipelines_config_pipeline_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipelines_config_pipeline_id_seq OWNED BY gitlab_ci.ci_pipelines_config.pipeline_id;
-
-CREATE SEQUENCE gitlab_ci.ci_pipelines_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_pipelines_id_seq OWNED BY gitlab_ci.ci_pipelines.id;
-
-CREATE TABLE gitlab_ci.ci_platform_metrics (
-    id bigint NOT NULL,
-    recorded_at timestamp with time zone NOT NULL,
-    platform_target text NOT NULL,
-    count integer NOT NULL,
-    CONSTRAINT check_f922abc32b CHECK ((char_length(platform_target) <= 255)),
-    CONSTRAINT ci_platform_metrics_check_count_positive CHECK ((count > 0))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_platform_metrics_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_platform_metrics_id_seq OWNED BY gitlab_ci.ci_platform_metrics.id;
-
-CREATE TABLE gitlab_ci.ci_project_monthly_usages (
-    id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    date date NOT NULL,
-    amount_used numeric(18,2) DEFAULT 0.0 NOT NULL,
-    CONSTRAINT ci_project_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_project_monthly_usages_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_project_monthly_usages_id_seq OWNED BY gitlab_ci.ci_project_monthly_usages.id;
-
-CREATE TABLE gitlab_ci.ci_refs (
-    id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    lock_version integer DEFAULT 0 NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    ref_path text NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_refs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_refs_id_seq OWNED BY gitlab_ci.ci_refs.id;
-
-CREATE TABLE gitlab_ci.ci_resource_groups (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    project_id bigint NOT NULL,
-    key character varying(255) NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_resource_groups_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_resource_groups_id_seq OWNED BY gitlab_ci.ci_resource_groups.id;
-
-CREATE TABLE gitlab_ci.ci_resources (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    resource_group_id bigint NOT NULL,
-    build_id bigint
-);
-
-CREATE SEQUENCE gitlab_ci.ci_resources_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_resources_id_seq OWNED BY gitlab_ci.ci_resources.id;
-
-CREATE TABLE gitlab_ci.ci_runner_namespaces (
-    id integer NOT NULL,
-    runner_id integer,
-    namespace_id integer
-);
-
-CREATE SEQUENCE gitlab_ci.ci_runner_namespaces_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_runner_namespaces_id_seq OWNED BY gitlab_ci.ci_runner_namespaces.id;
-
-CREATE TABLE gitlab_ci.ci_runner_projects (
-    id integer NOT NULL,
-    runner_id integer NOT NULL,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    project_id integer
-);
-
-CREATE SEQUENCE gitlab_ci.ci_runner_projects_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_runner_projects_id_seq OWNED BY gitlab_ci.ci_runner_projects.id;
-
-CREATE TABLE gitlab_ci.ci_runners (
-    id integer NOT NULL,
-    token character varying,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    description character varying,
-    contacted_at timestamp without time zone,
-    active boolean DEFAULT true NOT NULL,
-    name character varying,
-    version character varying,
-    revision character varying,
-    platform character varying,
-    architecture character varying,
-    run_untagged boolean DEFAULT true NOT NULL,
-    locked boolean DEFAULT false NOT NULL,
-    access_level integer DEFAULT 0 NOT NULL,
-    ip_address character varying,
-    maximum_timeout integer,
-    runner_type smallint NOT NULL,
-    token_encrypted character varying,
-    public_projects_minutes_cost_factor double precision DEFAULT 0.0 NOT NULL,
-    private_projects_minutes_cost_factor double precision DEFAULT 1.0 NOT NULL,
-    config jsonb DEFAULT '{}'::jsonb NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_runners_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_runners_id_seq OWNED BY gitlab_ci.ci_runners.id;
-
-CREATE TABLE gitlab_ci.ci_running_builds (
-    id bigint NOT NULL,
-    build_id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    runner_id bigint NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    runner_type smallint NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_running_builds_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_running_builds_id_seq OWNED BY gitlab_ci.ci_running_builds.id;
-
-CREATE TABLE gitlab_ci.ci_sources_pipelines (
-    id integer NOT NULL,
-    project_id integer,
-    pipeline_id integer,
-    source_project_id integer,
-    source_job_id integer,
-    source_pipeline_id integer,
-    source_job_id_convert_to_bigint bigint
-);
-
-CREATE SEQUENCE gitlab_ci.ci_sources_pipelines_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_sources_pipelines_id_seq OWNED BY gitlab_ci.ci_sources_pipelines.id;
-
-CREATE TABLE gitlab_ci.ci_sources_projects (
-    id bigint NOT NULL,
-    pipeline_id bigint NOT NULL,
-    source_project_id bigint NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_sources_projects_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_sources_projects_id_seq OWNED BY gitlab_ci.ci_sources_projects.id;
-
-CREATE TABLE gitlab_ci.ci_stages (
-    id integer NOT NULL,
-    project_id integer,
-    pipeline_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    name character varying,
-    status integer,
-    lock_version integer DEFAULT 0,
-    "position" integer,
-    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
-    CONSTRAINT check_81b431e49b CHECK ((lock_version IS NOT NULL))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_stages_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_stages_id_seq OWNED BY gitlab_ci.ci_stages.id;
-
-CREATE TABLE gitlab_ci.ci_subscriptions_projects (
-    id bigint NOT NULL,
-    downstream_project_id bigint NOT NULL,
-    upstream_project_id bigint NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_subscriptions_projects_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_subscriptions_projects_id_seq OWNED BY gitlab_ci.ci_subscriptions_projects.id;
-
-CREATE TABLE gitlab_ci.ci_test_case_failures (
-    id bigint NOT NULL,
-    failed_at timestamp with time zone,
-    test_case_id bigint NOT NULL,
-    build_id bigint NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_test_case_failures_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_test_case_failures_id_seq OWNED BY gitlab_ci.ci_test_case_failures.id;
-
-CREATE TABLE gitlab_ci.ci_test_cases (
-    id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    key_hash text NOT NULL,
-    CONSTRAINT check_dd3c5d1c15 CHECK ((char_length(key_hash) <= 64))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_test_cases_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_test_cases_id_seq OWNED BY gitlab_ci.ci_test_cases.id;
-
-CREATE TABLE gitlab_ci.ci_trigger_requests (
-    id integer NOT NULL,
-    trigger_id integer NOT NULL,
-    variables text,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    commit_id integer
-);
-
-CREATE SEQUENCE gitlab_ci.ci_trigger_requests_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_trigger_requests_id_seq OWNED BY gitlab_ci.ci_trigger_requests.id;
-
-CREATE TABLE gitlab_ci.ci_triggers (
-    id integer NOT NULL,
-    token character varying,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    project_id integer,
-    owner_id integer NOT NULL,
-    description character varying,
-    ref character varying
-);
-
-CREATE SEQUENCE gitlab_ci.ci_triggers_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_triggers_id_seq OWNED BY gitlab_ci.ci_triggers.id;
-
-CREATE TABLE gitlab_ci.ci_unit_test_failures (
-    id bigint NOT NULL,
-    failed_at timestamp with time zone NOT NULL,
-    unit_test_id bigint NOT NULL,
-    build_id bigint NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_unit_test_failures_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_unit_test_failures_id_seq OWNED BY gitlab_ci.ci_unit_test_failures.id;
-
-CREATE TABLE gitlab_ci.ci_unit_tests (
-    id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    key_hash text NOT NULL,
-    name text NOT NULL,
-    suite_name text NOT NULL,
-    CONSTRAINT check_248fae1a3b CHECK ((char_length(name) <= 255)),
-    CONSTRAINT check_b288215ffe CHECK ((char_length(key_hash) <= 64)),
-    CONSTRAINT check_c2d57b3c49 CHECK ((char_length(suite_name) <= 255))
-);
-
-CREATE SEQUENCE gitlab_ci.ci_unit_tests_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_unit_tests_id_seq OWNED BY gitlab_ci.ci_unit_tests.id;
-
-CREATE TABLE gitlab_ci.ci_variables (
-    id integer NOT NULL,
-    key character varying NOT NULL,
-    value text,
-    encrypted_value text,
-    encrypted_value_salt character varying,
-    encrypted_value_iv character varying,
-    project_id integer NOT NULL,
-    protected boolean DEFAULT false NOT NULL,
-    environment_scope character varying DEFAULT '*'::character varying NOT NULL,
-    masked boolean DEFAULT false NOT NULL,
-    variable_type smallint DEFAULT 1 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_ci.ci_variables_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.ci_variables_id_seq OWNED BY gitlab_ci.ci_variables.id;
-
-CREATE TABLE gitlab_ci.taggings (
-    id integer NOT NULL,
-    tag_id integer,
-    taggable_id integer,
-    taggable_type character varying,
-    tagger_id integer,
-    tagger_type character varying,
-    context character varying,
-    created_at timestamp without time zone,
-    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
-    taggable_id_convert_to_bigint bigint
-);
-
-CREATE SEQUENCE gitlab_ci.taggings_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.taggings_id_seq OWNED BY gitlab_ci.taggings.id;
-
-CREATE TABLE gitlab_ci.tags (
-    id integer NOT NULL,
-    name character varying,
-    taggings_count integer DEFAULT 0
-);
-
-CREATE SEQUENCE gitlab_ci.tags_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_ci.tags_id_seq OWNED BY gitlab_ci.tags.id;
 
 CREATE TABLE product_analytics_events_experimental (
     id bigint NOT NULL,
@@ -9864,92 +8833,6 @@ CREATE TABLE gitlab_partitions_static.product_analytics_events_experimental_63 (
 );
 ALTER TABLE ONLY product_analytics_events_experimental ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63 FOR VALUES WITH (modulus 64, remainder 63);
 
-CREATE TABLE gitlab_shared.background_migration_jobs (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    class_name text NOT NULL,
-    arguments jsonb NOT NULL,
-    CONSTRAINT check_b0de0a5852 CHECK ((char_length(class_name) <= 200))
-);
-
-CREATE SEQUENCE gitlab_shared.background_migration_jobs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_shared.background_migration_jobs_id_seq OWNED BY gitlab_shared.background_migration_jobs.id;
-
-CREATE TABLE gitlab_shared.batched_background_migration_jobs (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    started_at timestamp with time zone,
-    finished_at timestamp with time zone,
-    batched_background_migration_id bigint NOT NULL,
-    min_value bigint NOT NULL,
-    max_value bigint NOT NULL,
-    batch_size integer NOT NULL,
-    sub_batch_size integer NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    attempts smallint DEFAULT 0 NOT NULL,
-    metrics jsonb DEFAULT '{}'::jsonb NOT NULL,
-    pause_ms integer DEFAULT 100 NOT NULL
-);
-
-CREATE SEQUENCE gitlab_shared.batched_background_migration_jobs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_shared.batched_background_migration_jobs_id_seq OWNED BY gitlab_shared.batched_background_migration_jobs.id;
-
-CREATE TABLE gitlab_shared.batched_background_migrations (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    min_value bigint DEFAULT 1 NOT NULL,
-    max_value bigint NOT NULL,
-    batch_size integer NOT NULL,
-    sub_batch_size integer NOT NULL,
-    "interval" smallint NOT NULL,
-    status smallint DEFAULT 0 NOT NULL,
-    job_class_name text NOT NULL,
-    batch_class_name text DEFAULT 'PrimaryKeyBatchingStrategy'::text NOT NULL,
-    table_name text NOT NULL,
-    column_name text NOT NULL,
-    job_arguments jsonb DEFAULT '"[]"'::jsonb NOT NULL,
-    total_tuple_count bigint,
-    pause_ms integer DEFAULT 100 NOT NULL,
-    CONSTRAINT check_5bb0382d6f CHECK ((char_length(column_name) <= 63)),
-    CONSTRAINT check_6b6a06254a CHECK ((char_length(table_name) <= 63)),
-    CONSTRAINT check_batch_size_in_range CHECK ((batch_size >= sub_batch_size)),
-    CONSTRAINT check_e6c75b1e29 CHECK ((char_length(job_class_name) <= 100)),
-    CONSTRAINT check_fe10674721 CHECK ((char_length(batch_class_name) <= 100)),
-    CONSTRAINT check_max_value_in_range CHECK ((max_value >= min_value)),
-    CONSTRAINT check_positive_min_value CHECK ((min_value > 0)),
-    CONSTRAINT check_positive_sub_batch_size CHECK ((sub_batch_size > 0))
-);
-
-CREATE SEQUENCE gitlab_shared.batched_background_migrations_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE gitlab_shared.batched_background_migrations_id_seq OWNED BY gitlab_shared.batched_background_migrations.id;
-
-CREATE TABLE gitlab_shared.schema_migrations (
-    version character varying NOT NULL,
-    finished_at timestamp with time zone DEFAULT now()
-);
-
 CREATE TABLE abuse_reports (
     id integer NOT NULL,
     reporter_id integer,
@@ -10948,6 +9831,25 @@ CREATE TABLE aws_roles (
     CONSTRAINT check_57adedab55 CHECK ((char_length(region) <= 255))
 );
 
+CREATE TABLE background_migration_jobs (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    class_name text NOT NULL,
+    arguments jsonb NOT NULL,
+    CONSTRAINT check_b0de0a5852 CHECK ((char_length(class_name) <= 200))
+);
+
+CREATE SEQUENCE background_migration_jobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE background_migration_jobs_id_seq OWNED BY background_migration_jobs.id;
+
 CREATE TABLE badges (
     id integer NOT NULL,
     link_url character varying NOT NULL,
@@ -10968,6 +9870,68 @@ CREATE SEQUENCE badges_id_seq
     CACHE 1;
 
 ALTER SEQUENCE badges_id_seq OWNED BY badges.id;
+
+CREATE TABLE batched_background_migration_jobs (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    started_at timestamp with time zone,
+    finished_at timestamp with time zone,
+    batched_background_migration_id bigint NOT NULL,
+    min_value bigint NOT NULL,
+    max_value bigint NOT NULL,
+    batch_size integer NOT NULL,
+    sub_batch_size integer NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    attempts smallint DEFAULT 0 NOT NULL,
+    metrics jsonb DEFAULT '{}'::jsonb NOT NULL,
+    pause_ms integer DEFAULT 100 NOT NULL
+);
+
+CREATE SEQUENCE batched_background_migration_jobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE batched_background_migration_jobs_id_seq OWNED BY batched_background_migration_jobs.id;
+
+CREATE TABLE batched_background_migrations (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    min_value bigint DEFAULT 1 NOT NULL,
+    max_value bigint NOT NULL,
+    batch_size integer NOT NULL,
+    sub_batch_size integer NOT NULL,
+    "interval" smallint NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    job_class_name text NOT NULL,
+    batch_class_name text DEFAULT 'PrimaryKeyBatchingStrategy'::text NOT NULL,
+    table_name text NOT NULL,
+    column_name text NOT NULL,
+    job_arguments jsonb DEFAULT '"[]"'::jsonb NOT NULL,
+    total_tuple_count bigint,
+    pause_ms integer DEFAULT 100 NOT NULL,
+    CONSTRAINT check_5bb0382d6f CHECK ((char_length(column_name) <= 63)),
+    CONSTRAINT check_6b6a06254a CHECK ((char_length(table_name) <= 63)),
+    CONSTRAINT check_batch_size_in_range CHECK ((batch_size >= sub_batch_size)),
+    CONSTRAINT check_e6c75b1e29 CHECK ((char_length(job_class_name) <= 100)),
+    CONSTRAINT check_fe10674721 CHECK ((char_length(batch_class_name) <= 100)),
+    CONSTRAINT check_max_value_in_range CHECK ((max_value >= min_value)),
+    CONSTRAINT check_positive_min_value CHECK ((min_value > 0)),
+    CONSTRAINT check_positive_sub_batch_size CHECK ((sub_batch_size > 0))
+);
+
+CREATE SEQUENCE batched_background_migrations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE batched_background_migrations_id_seq OWNED BY batched_background_migrations.id;
 
 CREATE TABLE board_assignees (
     id integer NOT NULL,
@@ -11423,6 +10387,992 @@ CREATE SEQUENCE chat_teams_id_seq
     CACHE 1;
 
 ALTER SEQUENCE chat_teams_id_seq OWNED BY chat_teams.id;
+
+CREATE TABLE ci_build_needs (
+    id integer NOT NULL,
+    build_id integer NOT NULL,
+    name text NOT NULL,
+    artifacts boolean DEFAULT true NOT NULL,
+    optional boolean DEFAULT false NOT NULL,
+    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
+);
+
+CREATE SEQUENCE ci_build_needs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_build_needs_id_seq OWNED BY ci_build_needs.id;
+
+CREATE TABLE ci_build_pending_states (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    build_id bigint NOT NULL,
+    state smallint,
+    failure_reason smallint,
+    trace_checksum bytea,
+    trace_bytesize bigint
+);
+
+CREATE SEQUENCE ci_build_pending_states_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_build_pending_states_id_seq OWNED BY ci_build_pending_states.id;
+
+CREATE TABLE ci_build_report_results (
+    build_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    data jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+CREATE SEQUENCE ci_build_report_results_build_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_build_report_results_build_id_seq OWNED BY ci_build_report_results.build_id;
+
+CREATE TABLE ci_build_trace_chunks (
+    id bigint NOT NULL,
+    build_id integer NOT NULL,
+    chunk_index integer NOT NULL,
+    data_store integer NOT NULL,
+    raw_data bytea,
+    checksum bytea,
+    lock_version integer DEFAULT 0 NOT NULL,
+    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
+);
+
+CREATE SEQUENCE ci_build_trace_chunks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_build_trace_chunks_id_seq OWNED BY ci_build_trace_chunks.id;
+
+CREATE TABLE ci_build_trace_section_names (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    name character varying NOT NULL
+);
+
+CREATE SEQUENCE ci_build_trace_section_names_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_build_trace_section_names_id_seq OWNED BY ci_build_trace_section_names.id;
+
+CREATE TABLE ci_build_trace_sections (
+    project_id integer NOT NULL,
+    date_start timestamp without time zone NOT NULL,
+    date_end timestamp without time zone NOT NULL,
+    byte_start bigint NOT NULL,
+    byte_end bigint NOT NULL,
+    build_id integer NOT NULL,
+    section_name_id integer NOT NULL,
+    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE ci_builds (
+    id integer NOT NULL,
+    status character varying,
+    finished_at timestamp without time zone,
+    trace text,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    started_at timestamp without time zone,
+    runner_id integer,
+    coverage double precision,
+    commit_id integer,
+    name character varying,
+    options text,
+    allow_failure boolean DEFAULT false NOT NULL,
+    stage character varying,
+    trigger_request_id integer,
+    stage_idx integer,
+    tag boolean,
+    ref character varying,
+    user_id integer,
+    type character varying,
+    target_url character varying,
+    description character varying,
+    project_id integer,
+    erased_by_id integer,
+    erased_at timestamp without time zone,
+    artifacts_expire_at timestamp without time zone,
+    environment character varying,
+    "when" character varying,
+    yaml_variables text,
+    queued_at timestamp without time zone,
+    token character varying,
+    lock_version integer DEFAULT 0,
+    coverage_regex character varying,
+    auto_canceled_by_id integer,
+    retried boolean,
+    stage_id integer,
+    protected boolean,
+    failure_reason integer,
+    scheduled_at timestamp with time zone,
+    token_encrypted character varying,
+    upstream_pipeline_id integer,
+    resource_group_id bigint,
+    waiting_for_resource_at timestamp with time zone,
+    processed boolean,
+    scheduling_type smallint,
+    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    stage_id_convert_to_bigint bigint,
+    CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
+);
+
+CREATE SEQUENCE ci_builds_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_builds_id_seq OWNED BY ci_builds.id;
+
+CREATE TABLE ci_builds_metadata (
+    id integer NOT NULL,
+    build_id integer NOT NULL,
+    project_id integer NOT NULL,
+    timeout integer,
+    timeout_source integer DEFAULT 1 NOT NULL,
+    interruptible boolean,
+    config_options jsonb,
+    config_variables jsonb,
+    has_exposed_artifacts boolean,
+    environment_auto_stop_in character varying(255),
+    expanded_environment_name character varying(255),
+    secrets jsonb DEFAULT '{}'::jsonb NOT NULL,
+    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    id_convert_to_bigint bigint DEFAULT 0 NOT NULL
+);
+
+CREATE SEQUENCE ci_builds_metadata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_builds_metadata_id_seq OWNED BY ci_builds_metadata.id;
+
+CREATE TABLE ci_builds_runner_session (
+    id bigint NOT NULL,
+    build_id integer NOT NULL,
+    url character varying NOT NULL,
+    certificate character varying,
+    "authorization" character varying,
+    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
+);
+
+CREATE SEQUENCE ci_builds_runner_session_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_builds_runner_session_id_seq OWNED BY ci_builds_runner_session.id;
+
+CREATE TABLE ci_daily_build_group_report_results (
+    id bigint NOT NULL,
+    date date NOT NULL,
+    project_id bigint NOT NULL,
+    last_pipeline_id bigint NOT NULL,
+    ref_path text NOT NULL,
+    group_name text NOT NULL,
+    data jsonb NOT NULL,
+    default_branch boolean DEFAULT false NOT NULL,
+    group_id bigint
+);
+
+CREATE SEQUENCE ci_daily_build_group_report_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_daily_build_group_report_results_id_seq OWNED BY ci_daily_build_group_report_results.id;
+
+CREATE TABLE ci_deleted_objects (
+    id bigint NOT NULL,
+    file_store smallint DEFAULT 1 NOT NULL,
+    pick_up_at timestamp with time zone DEFAULT now() NOT NULL,
+    store_dir text NOT NULL,
+    file text NOT NULL,
+    CONSTRAINT check_5e151d6912 CHECK ((char_length(store_dir) <= 1024))
+);
+
+CREATE SEQUENCE ci_deleted_objects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_deleted_objects_id_seq OWNED BY ci_deleted_objects.id;
+
+CREATE TABLE ci_freeze_periods (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    freeze_start character varying(998) NOT NULL,
+    freeze_end character varying(998) NOT NULL,
+    cron_timezone character varying(255) NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE ci_freeze_periods_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_freeze_periods_id_seq OWNED BY ci_freeze_periods.id;
+
+CREATE TABLE ci_group_variables (
+    id integer NOT NULL,
+    key character varying NOT NULL,
+    value text,
+    encrypted_value text,
+    encrypted_value_salt character varying,
+    encrypted_value_iv character varying,
+    group_id integer NOT NULL,
+    protected boolean DEFAULT false NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    masked boolean DEFAULT false NOT NULL,
+    variable_type smallint DEFAULT 1 NOT NULL,
+    environment_scope text DEFAULT '*'::text NOT NULL,
+    CONSTRAINT check_dfe009485a CHECK ((char_length(environment_scope) <= 255))
+);
+
+CREATE SEQUENCE ci_group_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_group_variables_id_seq OWNED BY ci_group_variables.id;
+
+CREATE TABLE ci_instance_variables (
+    id bigint NOT NULL,
+    variable_type smallint DEFAULT 1 NOT NULL,
+    masked boolean DEFAULT false,
+    protected boolean DEFAULT false,
+    key text NOT NULL,
+    encrypted_value text,
+    encrypted_value_iv text,
+    CONSTRAINT check_07a45a5bcb CHECK ((char_length(encrypted_value_iv) <= 255)),
+    CONSTRAINT check_5aede12208 CHECK ((char_length(key) <= 255)),
+    CONSTRAINT check_956afd70f1 CHECK ((char_length(encrypted_value) <= 13579))
+);
+
+CREATE SEQUENCE ci_instance_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_instance_variables_id_seq OWNED BY ci_instance_variables.id;
+
+CREATE TABLE ci_job_artifacts (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    job_id integer NOT NULL,
+    file_type integer NOT NULL,
+    size bigint,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    expire_at timestamp with time zone,
+    file character varying,
+    file_store integer DEFAULT 1,
+    file_sha256 bytea,
+    file_format smallint,
+    file_location smallint,
+    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    job_id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    CONSTRAINT check_27f0f6dbab CHECK ((file_store IS NOT NULL))
+);
+
+CREATE SEQUENCE ci_job_artifacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_job_artifacts_id_seq OWNED BY ci_job_artifacts.id;
+
+CREATE TABLE ci_job_token_project_scope_links (
+    id bigint NOT NULL,
+    source_project_id bigint NOT NULL,
+    target_project_id bigint NOT NULL,
+    added_by_id bigint,
+    created_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE ci_job_token_project_scope_links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_job_token_project_scope_links_id_seq OWNED BY ci_job_token_project_scope_links.id;
+
+CREATE TABLE ci_job_variables (
+    id bigint NOT NULL,
+    key character varying NOT NULL,
+    encrypted_value text,
+    encrypted_value_iv character varying,
+    job_id bigint NOT NULL,
+    variable_type smallint DEFAULT 1 NOT NULL,
+    source smallint DEFAULT 0 NOT NULL
+);
+
+CREATE SEQUENCE ci_job_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_job_variables_id_seq OWNED BY ci_job_variables.id;
+
+CREATE TABLE ci_minutes_additional_packs (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    namespace_id bigint NOT NULL,
+    expires_at date,
+    number_of_minutes integer NOT NULL,
+    purchase_xid text,
+    CONSTRAINT check_d7ef254af0 CHECK ((char_length(purchase_xid) <= 32))
+);
+
+CREATE SEQUENCE ci_minutes_additional_packs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_minutes_additional_packs_id_seq OWNED BY ci_minutes_additional_packs.id;
+
+CREATE TABLE ci_namespace_monthly_usages (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    date date NOT NULL,
+    additional_amount_available integer DEFAULT 0 NOT NULL,
+    amount_used numeric(18,2) DEFAULT 0.0 NOT NULL,
+    CONSTRAINT ci_namespace_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
+);
+
+CREATE SEQUENCE ci_namespace_monthly_usages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_namespace_monthly_usages_id_seq OWNED BY ci_namespace_monthly_usages.id;
+
+CREATE TABLE ci_pending_builds (
+    id bigint NOT NULL,
+    build_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    protected boolean DEFAULT false NOT NULL
+);
+
+CREATE SEQUENCE ci_pending_builds_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pending_builds_id_seq OWNED BY ci_pending_builds.id;
+
+CREATE TABLE ci_pipeline_artifacts (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    pipeline_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    size integer NOT NULL,
+    file_store smallint DEFAULT 1 NOT NULL,
+    file_type smallint NOT NULL,
+    file_format smallint NOT NULL,
+    file text,
+    expire_at timestamp with time zone,
+    verification_started_at timestamp with time zone,
+    verification_retry_at timestamp with time zone,
+    verified_at timestamp with time zone,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_retry_count smallint,
+    verification_checksum bytea,
+    verification_failure text,
+    CONSTRAINT check_191b5850ec CHECK ((char_length(file) <= 255)),
+    CONSTRAINT check_abeeb71caf CHECK ((file IS NOT NULL)),
+    CONSTRAINT ci_pipeline_artifacts_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
+);
+
+CREATE SEQUENCE ci_pipeline_artifacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipeline_artifacts_id_seq OWNED BY ci_pipeline_artifacts.id;
+
+CREATE TABLE ci_pipeline_chat_data (
+    id bigint NOT NULL,
+    pipeline_id integer NOT NULL,
+    chat_name_id integer NOT NULL,
+    response_url text NOT NULL
+);
+
+CREATE SEQUENCE ci_pipeline_chat_data_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipeline_chat_data_id_seq OWNED BY ci_pipeline_chat_data.id;
+
+CREATE TABLE ci_pipeline_messages (
+    id bigint NOT NULL,
+    severity smallint DEFAULT 0 NOT NULL,
+    pipeline_id integer NOT NULL,
+    content text NOT NULL,
+    CONSTRAINT check_58ca2981b2 CHECK ((char_length(content) <= 10000))
+);
+
+CREATE SEQUENCE ci_pipeline_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipeline_messages_id_seq OWNED BY ci_pipeline_messages.id;
+
+CREATE TABLE ci_pipeline_schedule_variables (
+    id integer NOT NULL,
+    key character varying NOT NULL,
+    value text,
+    encrypted_value text,
+    encrypted_value_salt character varying,
+    encrypted_value_iv character varying,
+    pipeline_schedule_id integer NOT NULL,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    variable_type smallint DEFAULT 1 NOT NULL
+);
+
+CREATE SEQUENCE ci_pipeline_schedule_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipeline_schedule_variables_id_seq OWNED BY ci_pipeline_schedule_variables.id;
+
+CREATE TABLE ci_pipeline_schedules (
+    id integer NOT NULL,
+    description character varying,
+    ref character varying,
+    cron character varying,
+    cron_timezone character varying,
+    next_run_at timestamp without time zone,
+    project_id integer,
+    owner_id integer,
+    active boolean DEFAULT true,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+CREATE SEQUENCE ci_pipeline_schedules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipeline_schedules_id_seq OWNED BY ci_pipeline_schedules.id;
+
+CREATE TABLE ci_pipeline_variables (
+    id integer NOT NULL,
+    key character varying NOT NULL,
+    value text,
+    encrypted_value text,
+    encrypted_value_salt character varying,
+    encrypted_value_iv character varying,
+    pipeline_id integer NOT NULL,
+    variable_type smallint DEFAULT 1 NOT NULL
+);
+
+CREATE SEQUENCE ci_pipeline_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipeline_variables_id_seq OWNED BY ci_pipeline_variables.id;
+
+CREATE TABLE ci_pipelines (
+    id integer NOT NULL,
+    ref character varying,
+    sha character varying,
+    before_sha character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    tag boolean DEFAULT false,
+    yaml_errors text,
+    committed_at timestamp without time zone,
+    project_id integer,
+    status character varying,
+    started_at timestamp without time zone,
+    finished_at timestamp without time zone,
+    duration integer,
+    user_id integer,
+    lock_version integer DEFAULT 0,
+    auto_canceled_by_id integer,
+    pipeline_schedule_id integer,
+    source integer,
+    config_source integer,
+    protected boolean,
+    failure_reason integer,
+    iid integer,
+    merge_request_id integer,
+    source_sha bytea,
+    target_sha bytea,
+    external_pull_request_id bigint,
+    ci_ref_id bigint,
+    locked smallint DEFAULT 1 NOT NULL,
+    CONSTRAINT check_d7e99a025e CHECK ((lock_version IS NOT NULL))
+);
+
+CREATE TABLE ci_pipelines_config (
+    pipeline_id bigint NOT NULL,
+    content text NOT NULL
+);
+
+CREATE SEQUENCE ci_pipelines_config_pipeline_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipelines_config_pipeline_id_seq OWNED BY ci_pipelines_config.pipeline_id;
+
+CREATE SEQUENCE ci_pipelines_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipelines_id_seq OWNED BY ci_pipelines.id;
+
+CREATE TABLE ci_platform_metrics (
+    id bigint NOT NULL,
+    recorded_at timestamp with time zone NOT NULL,
+    platform_target text NOT NULL,
+    count integer NOT NULL,
+    CONSTRAINT check_f922abc32b CHECK ((char_length(platform_target) <= 255)),
+    CONSTRAINT ci_platform_metrics_check_count_positive CHECK ((count > 0))
+);
+
+CREATE SEQUENCE ci_platform_metrics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_platform_metrics_id_seq OWNED BY ci_platform_metrics.id;
+
+CREATE TABLE ci_project_monthly_usages (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    date date NOT NULL,
+    amount_used numeric(18,2) DEFAULT 0.0 NOT NULL,
+    CONSTRAINT ci_project_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
+);
+
+CREATE SEQUENCE ci_project_monthly_usages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_project_monthly_usages_id_seq OWNED BY ci_project_monthly_usages.id;
+
+CREATE TABLE ci_refs (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    lock_version integer DEFAULT 0 NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    ref_path text NOT NULL
+);
+
+CREATE SEQUENCE ci_refs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_refs_id_seq OWNED BY ci_refs.id;
+
+CREATE TABLE ci_resource_groups (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    project_id bigint NOT NULL,
+    key character varying(255) NOT NULL
+);
+
+CREATE SEQUENCE ci_resource_groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_resource_groups_id_seq OWNED BY ci_resource_groups.id;
+
+CREATE TABLE ci_resources (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    resource_group_id bigint NOT NULL,
+    build_id bigint
+);
+
+CREATE SEQUENCE ci_resources_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_resources_id_seq OWNED BY ci_resources.id;
+
+CREATE TABLE ci_runner_namespaces (
+    id integer NOT NULL,
+    runner_id integer,
+    namespace_id integer
+);
+
+CREATE SEQUENCE ci_runner_namespaces_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_runner_namespaces_id_seq OWNED BY ci_runner_namespaces.id;
+
+CREATE TABLE ci_runner_projects (
+    id integer NOT NULL,
+    runner_id integer NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    project_id integer
+);
+
+CREATE SEQUENCE ci_runner_projects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_runner_projects_id_seq OWNED BY ci_runner_projects.id;
+
+CREATE TABLE ci_runners (
+    id integer NOT NULL,
+    token character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    description character varying,
+    contacted_at timestamp without time zone,
+    active boolean DEFAULT true NOT NULL,
+    name character varying,
+    version character varying,
+    revision character varying,
+    platform character varying,
+    architecture character varying,
+    run_untagged boolean DEFAULT true NOT NULL,
+    locked boolean DEFAULT false NOT NULL,
+    access_level integer DEFAULT 0 NOT NULL,
+    ip_address character varying,
+    maximum_timeout integer,
+    runner_type smallint NOT NULL,
+    token_encrypted character varying,
+    public_projects_minutes_cost_factor double precision DEFAULT 0.0 NOT NULL,
+    private_projects_minutes_cost_factor double precision DEFAULT 1.0 NOT NULL,
+    config jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+CREATE SEQUENCE ci_runners_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_runners_id_seq OWNED BY ci_runners.id;
+
+CREATE TABLE ci_running_builds (
+    id bigint NOT NULL,
+    build_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    runner_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    runner_type smallint NOT NULL
+);
+
+CREATE SEQUENCE ci_running_builds_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_running_builds_id_seq OWNED BY ci_running_builds.id;
+
+CREATE TABLE ci_sources_pipelines (
+    id integer NOT NULL,
+    project_id integer,
+    pipeline_id integer,
+    source_project_id integer,
+    source_job_id integer,
+    source_pipeline_id integer,
+    source_job_id_convert_to_bigint bigint
+);
+
+CREATE SEQUENCE ci_sources_pipelines_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_sources_pipelines_id_seq OWNED BY ci_sources_pipelines.id;
+
+CREATE TABLE ci_sources_projects (
+    id bigint NOT NULL,
+    pipeline_id bigint NOT NULL,
+    source_project_id bigint NOT NULL
+);
+
+CREATE SEQUENCE ci_sources_projects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_sources_projects_id_seq OWNED BY ci_sources_projects.id;
+
+CREATE TABLE ci_stages (
+    id integer NOT NULL,
+    project_id integer,
+    pipeline_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    name character varying,
+    status integer,
+    lock_version integer DEFAULT 0,
+    "position" integer,
+    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    CONSTRAINT check_81b431e49b CHECK ((lock_version IS NOT NULL))
+);
+
+CREATE SEQUENCE ci_stages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_stages_id_seq OWNED BY ci_stages.id;
+
+CREATE TABLE ci_subscriptions_projects (
+    id bigint NOT NULL,
+    downstream_project_id bigint NOT NULL,
+    upstream_project_id bigint NOT NULL
+);
+
+CREATE SEQUENCE ci_subscriptions_projects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_subscriptions_projects_id_seq OWNED BY ci_subscriptions_projects.id;
+
+CREATE TABLE ci_test_case_failures (
+    id bigint NOT NULL,
+    failed_at timestamp with time zone,
+    test_case_id bigint NOT NULL,
+    build_id bigint NOT NULL
+);
+
+CREATE SEQUENCE ci_test_case_failures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_test_case_failures_id_seq OWNED BY ci_test_case_failures.id;
+
+CREATE TABLE ci_test_cases (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    key_hash text NOT NULL,
+    CONSTRAINT check_dd3c5d1c15 CHECK ((char_length(key_hash) <= 64))
+);
+
+CREATE SEQUENCE ci_test_cases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_test_cases_id_seq OWNED BY ci_test_cases.id;
+
+CREATE TABLE ci_trigger_requests (
+    id integer NOT NULL,
+    trigger_id integer NOT NULL,
+    variables text,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    commit_id integer
+);
+
+CREATE SEQUENCE ci_trigger_requests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_trigger_requests_id_seq OWNED BY ci_trigger_requests.id;
+
+CREATE TABLE ci_triggers (
+    id integer NOT NULL,
+    token character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    project_id integer,
+    owner_id integer NOT NULL,
+    description character varying,
+    ref character varying
+);
+
+CREATE SEQUENCE ci_triggers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_triggers_id_seq OWNED BY ci_triggers.id;
+
+CREATE TABLE ci_unit_test_failures (
+    id bigint NOT NULL,
+    failed_at timestamp with time zone NOT NULL,
+    unit_test_id bigint NOT NULL,
+    build_id bigint NOT NULL
+);
+
+CREATE SEQUENCE ci_unit_test_failures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_unit_test_failures_id_seq OWNED BY ci_unit_test_failures.id;
+
+CREATE TABLE ci_unit_tests (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    key_hash text NOT NULL,
+    name text NOT NULL,
+    suite_name text NOT NULL,
+    CONSTRAINT check_248fae1a3b CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_b288215ffe CHECK ((char_length(key_hash) <= 64)),
+    CONSTRAINT check_c2d57b3c49 CHECK ((char_length(suite_name) <= 255))
+);
+
+CREATE SEQUENCE ci_unit_tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_unit_tests_id_seq OWNED BY ci_unit_tests.id;
+
+CREATE TABLE ci_variables (
+    id integer NOT NULL,
+    key character varying NOT NULL,
+    value text,
+    encrypted_value text,
+    encrypted_value_salt character varying,
+    encrypted_value_iv character varying,
+    project_id integer NOT NULL,
+    protected boolean DEFAULT false NOT NULL,
+    environment_scope character varying DEFAULT '*'::character varying NOT NULL,
+    masked boolean DEFAULT false NOT NULL,
+    variable_type smallint DEFAULT 1 NOT NULL
+);
+
+CREATE SEQUENCE ci_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_variables_id_seq OWNED BY ci_variables.id;
 
 CREATE TABLE cluster_agent_tokens (
     id bigint NOT NULL,
@@ -17873,6 +17823,11 @@ CREATE SEQUENCE saml_providers_id_seq
 
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
 
+CREATE TABLE schema_migrations (
+    version character varying NOT NULL,
+    finished_at timestamp with time zone DEFAULT now()
+);
+
 CREATE TABLE scim_identities (
     id bigint NOT NULL,
     group_id bigint NOT NULL,
@@ -18413,6 +18368,43 @@ CREATE SEQUENCE system_note_metadata_id_seq
     CACHE 1;
 
 ALTER SEQUENCE system_note_metadata_id_seq OWNED BY system_note_metadata.id;
+
+CREATE TABLE taggings (
+    id integer NOT NULL,
+    tag_id integer,
+    taggable_id integer,
+    taggable_type character varying,
+    tagger_id integer,
+    tagger_type character varying,
+    context character varying,
+    created_at timestamp without time zone,
+    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    taggable_id_convert_to_bigint bigint
+);
+
+CREATE SEQUENCE taggings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taggings_id_seq OWNED BY taggings.id;
+
+CREATE TABLE tags (
+    id integer NOT NULL,
+    name character varying,
+    taggings_count integer DEFAULT 0
+);
+
+CREATE SEQUENCE tags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE tags_id_seq OWNED BY tags.id;
 
 CREATE TABLE term_agreements (
     id integer NOT NULL,
@@ -19699,110 +19691,6 @@ CREATE SEQUENCE zoom_meetings_id_seq
 
 ALTER SEQUENCE zoom_meetings_id_seq OWNED BY zoom_meetings.id;
 
-ALTER TABLE ONLY gitlab_ci.ci_build_needs ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_build_needs_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_pending_states ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_build_pending_states_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_report_results ALTER COLUMN build_id SET DEFAULT nextval('gitlab_ci.ci_build_report_results_build_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_chunks ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_build_trace_chunks_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_section_names ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_build_trace_section_names_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_builds ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_builds_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_builds_metadata ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_builds_metadata_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_builds_runner_session ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_builds_runner_session_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_daily_build_group_report_results_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_deleted_objects ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_deleted_objects_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_freeze_periods ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_freeze_periods_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_group_variables ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_group_variables_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_instance_variables ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_instance_variables_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_job_artifacts ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_job_artifacts_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_job_token_project_scope_links ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_job_token_project_scope_links_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_job_variables ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_job_variables_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_minutes_additional_packs ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_minutes_additional_packs_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_namespace_monthly_usages ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_namespace_monthly_usages_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pending_builds ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pending_builds_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_artifacts ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipeline_artifacts_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_chat_data ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipeline_chat_data_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_messages ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipeline_messages_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedule_variables ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipeline_schedule_variables_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedules ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipeline_schedules_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_variables ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipeline_variables_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_pipelines_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines_config ALTER COLUMN pipeline_id SET DEFAULT nextval('gitlab_ci.ci_pipelines_config_pipeline_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_platform_metrics ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_platform_metrics_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_project_monthly_usages ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_project_monthly_usages_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_refs ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_refs_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_resource_groups ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_resource_groups_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_resources ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_resources_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_runner_namespaces ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_runner_namespaces_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_runner_projects ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_runner_projects_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_runners ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_runners_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_running_builds ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_running_builds_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_sources_pipelines_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_projects ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_sources_projects_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_stages ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_stages_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_subscriptions_projects ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_subscriptions_projects_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_test_case_failures ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_test_case_failures_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_test_cases ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_test_cases_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_trigger_requests_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_triggers ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_triggers_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_unit_test_failures ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_unit_test_failures_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_unit_tests ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_unit_tests_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_variables ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.ci_variables_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.taggings ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.taggings_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.tags ALTER COLUMN id SET DEFAULT nextval('gitlab_ci.tags_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_shared.background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('gitlab_shared.background_migration_jobs_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_shared.batched_background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('gitlab_shared.batched_background_migration_jobs_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_shared.batched_background_migrations ALTER COLUMN id SET DEFAULT nextval('gitlab_shared.batched_background_migrations_id_seq'::regclass);
-
 ALTER TABLE ONLY abuse_reports ALTER COLUMN id SET DEFAULT nextval('abuse_reports_id_seq'::regclass);
 
 ALTER TABLE ONLY alert_management_alert_assignees ALTER COLUMN id SET DEFAULT nextval('alert_management_alert_assignees_id_seq'::regclass);
@@ -19865,7 +19753,13 @@ ALTER TABLE ONLY authentication_events ALTER COLUMN id SET DEFAULT nextval('auth
 
 ALTER TABLE ONLY award_emoji ALTER COLUMN id SET DEFAULT nextval('award_emoji_id_seq'::regclass);
 
+ALTER TABLE ONLY background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('background_migration_jobs_id_seq'::regclass);
+
 ALTER TABLE ONLY badges ALTER COLUMN id SET DEFAULT nextval('badges_id_seq'::regclass);
+
+ALTER TABLE ONLY batched_background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('batched_background_migration_jobs_id_seq'::regclass);
+
+ALTER TABLE ONLY batched_background_migrations ALTER COLUMN id SET DEFAULT nextval('batched_background_migrations_id_seq'::regclass);
 
 ALTER TABLE ONLY board_assignees ALTER COLUMN id SET DEFAULT nextval('board_assignees_id_seq'::regclass);
 
@@ -19912,6 +19806,100 @@ ALTER TABLE ONLY bulk_imports ALTER COLUMN id SET DEFAULT nextval('bulk_imports_
 ALTER TABLE ONLY chat_names ALTER COLUMN id SET DEFAULT nextval('chat_names_id_seq'::regclass);
 
 ALTER TABLE ONLY chat_teams ALTER COLUMN id SET DEFAULT nextval('chat_teams_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_build_needs ALTER COLUMN id SET DEFAULT nextval('ci_build_needs_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_build_pending_states ALTER COLUMN id SET DEFAULT nextval('ci_build_pending_states_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_build_report_results ALTER COLUMN build_id SET DEFAULT nextval('ci_build_report_results_build_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_build_trace_chunks ALTER COLUMN id SET DEFAULT nextval('ci_build_trace_chunks_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_build_trace_section_names ALTER COLUMN id SET DEFAULT nextval('ci_build_trace_section_names_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_builds ALTER COLUMN id SET DEFAULT nextval('ci_builds_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_builds_metadata ALTER COLUMN id SET DEFAULT nextval('ci_builds_metadata_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_builds_runner_session ALTER COLUMN id SET DEFAULT nextval('ci_builds_runner_session_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_daily_build_group_report_results ALTER COLUMN id SET DEFAULT nextval('ci_daily_build_group_report_results_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_deleted_objects ALTER COLUMN id SET DEFAULT nextval('ci_deleted_objects_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_freeze_periods ALTER COLUMN id SET DEFAULT nextval('ci_freeze_periods_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_group_variables ALTER COLUMN id SET DEFAULT nextval('ci_group_variables_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_instance_variables ALTER COLUMN id SET DEFAULT nextval('ci_instance_variables_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_job_artifacts ALTER COLUMN id SET DEFAULT nextval('ci_job_artifacts_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_job_token_project_scope_links ALTER COLUMN id SET DEFAULT nextval('ci_job_token_project_scope_links_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_job_variables ALTER COLUMN id SET DEFAULT nextval('ci_job_variables_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_minutes_additional_packs ALTER COLUMN id SET DEFAULT nextval('ci_minutes_additional_packs_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_namespace_monthly_usages ALTER COLUMN id SET DEFAULT nextval('ci_namespace_monthly_usages_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pending_builds ALTER COLUMN id SET DEFAULT nextval('ci_pending_builds_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipeline_artifacts ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_artifacts_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipeline_chat_data ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_chat_data_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipeline_messages ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_messages_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipeline_schedule_variables ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_schedule_variables_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipeline_schedules ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_schedules_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipeline_variables ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_variables_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipelines ALTER COLUMN id SET DEFAULT nextval('ci_pipelines_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_pipelines_config ALTER COLUMN pipeline_id SET DEFAULT nextval('ci_pipelines_config_pipeline_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_platform_metrics ALTER COLUMN id SET DEFAULT nextval('ci_platform_metrics_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_project_monthly_usages ALTER COLUMN id SET DEFAULT nextval('ci_project_monthly_usages_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_refs ALTER COLUMN id SET DEFAULT nextval('ci_refs_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_resource_groups ALTER COLUMN id SET DEFAULT nextval('ci_resource_groups_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_resources ALTER COLUMN id SET DEFAULT nextval('ci_resources_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_runner_namespaces ALTER COLUMN id SET DEFAULT nextval('ci_runner_namespaces_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_runner_projects ALTER COLUMN id SET DEFAULT nextval('ci_runner_projects_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_runners ALTER COLUMN id SET DEFAULT nextval('ci_runners_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_running_builds ALTER COLUMN id SET DEFAULT nextval('ci_running_builds_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_sources_pipelines ALTER COLUMN id SET DEFAULT nextval('ci_sources_pipelines_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_sources_projects ALTER COLUMN id SET DEFAULT nextval('ci_sources_projects_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_stages ALTER COLUMN id SET DEFAULT nextval('ci_stages_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_subscriptions_projects ALTER COLUMN id SET DEFAULT nextval('ci_subscriptions_projects_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_test_case_failures ALTER COLUMN id SET DEFAULT nextval('ci_test_case_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_test_cases ALTER COLUMN id SET DEFAULT nextval('ci_test_cases_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('ci_trigger_requests_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_triggers ALTER COLUMN id SET DEFAULT nextval('ci_triggers_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_unit_test_failures ALTER COLUMN id SET DEFAULT nextval('ci_unit_test_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_unit_tests ALTER COLUMN id SET DEFAULT nextval('ci_unit_tests_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_variables ALTER COLUMN id SET DEFAULT nextval('ci_variables_id_seq'::regclass);
 
 ALTER TABLE ONLY cluster_agent_tokens ALTER COLUMN id SET DEFAULT nextval('cluster_agent_tokens_id_seq'::regclass);
 
@@ -20495,6 +20483,10 @@ ALTER TABLE ONLY suggestions ALTER COLUMN id SET DEFAULT nextval('suggestions_id
 
 ALTER TABLE ONLY system_note_metadata ALTER COLUMN id SET DEFAULT nextval('system_note_metadata_id_seq'::regclass);
 
+ALTER TABLE ONLY taggings ALTER COLUMN id SET DEFAULT nextval('taggings_id_seq'::regclass);
+
+ALTER TABLE ONLY tags ALTER COLUMN id SET DEFAULT nextval('tags_id_seq'::regclass);
+
 ALTER TABLE ONLY term_agreements ALTER COLUMN id SET DEFAULT nextval('term_agreements_id_seq'::regclass);
 
 ALTER TABLE ONLY terraform_state_versions ALTER COLUMN id SET DEFAULT nextval('terraform_state_versions_id_seq'::regclass);
@@ -20602,156 +20594,6 @@ ALTER TABLE ONLY x509_commit_signatures ALTER COLUMN id SET DEFAULT nextval('x50
 ALTER TABLE ONLY x509_issuers ALTER COLUMN id SET DEFAULT nextval('x509_issuers_id_seq'::regclass);
 
 ALTER TABLE ONLY zoom_meetings ALTER COLUMN id SET DEFAULT nextval('zoom_meetings_id_seq'::regclass);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_needs
-    ADD CONSTRAINT ci_build_needs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_pending_states
-    ADD CONSTRAINT ci_build_pending_states_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_report_results
-    ADD CONSTRAINT ci_build_report_results_pkey PRIMARY KEY (build_id);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_chunks
-    ADD CONSTRAINT ci_build_trace_chunks_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_section_names
-    ADD CONSTRAINT ci_build_trace_section_names_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_sections
-    ADD CONSTRAINT ci_build_trace_sections_pkey PRIMARY KEY (build_id, section_name_id);
-
-ALTER TABLE ONLY gitlab_ci.ci_builds_metadata
-    ADD CONSTRAINT ci_builds_metadata_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT ci_builds_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_builds_runner_session
-    ADD CONSTRAINT ci_builds_runner_session_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results
-    ADD CONSTRAINT ci_daily_build_group_report_results_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_deleted_objects
-    ADD CONSTRAINT ci_deleted_objects_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_freeze_periods
-    ADD CONSTRAINT ci_freeze_periods_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_group_variables
-    ADD CONSTRAINT ci_group_variables_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_instance_variables
-    ADD CONSTRAINT ci_instance_variables_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_job_artifacts
-    ADD CONSTRAINT ci_job_artifacts_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_job_token_project_scope_links
-    ADD CONSTRAINT ci_job_token_project_scope_links_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_job_variables
-    ADD CONSTRAINT ci_job_variables_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_minutes_additional_packs
-    ADD CONSTRAINT ci_minutes_additional_packs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_namespace_monthly_usages
-    ADD CONSTRAINT ci_namespace_monthly_usages_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pending_builds
-    ADD CONSTRAINT ci_pending_builds_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_artifacts
-    ADD CONSTRAINT ci_pipeline_artifacts_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_chat_data
-    ADD CONSTRAINT ci_pipeline_chat_data_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_messages
-    ADD CONSTRAINT ci_pipeline_messages_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedule_variables
-    ADD CONSTRAINT ci_pipeline_schedule_variables_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedules
-    ADD CONSTRAINT ci_pipeline_schedules_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_variables
-    ADD CONSTRAINT ci_pipeline_variables_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines_config
-    ADD CONSTRAINT ci_pipelines_config_pkey PRIMARY KEY (pipeline_id);
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT ci_pipelines_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_platform_metrics
-    ADD CONSTRAINT ci_platform_metrics_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_project_monthly_usages
-    ADD CONSTRAINT ci_project_monthly_usages_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_refs
-    ADD CONSTRAINT ci_refs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_resource_groups
-    ADD CONSTRAINT ci_resource_groups_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_resources
-    ADD CONSTRAINT ci_resources_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_runner_namespaces
-    ADD CONSTRAINT ci_runner_namespaces_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_runner_projects
-    ADD CONSTRAINT ci_runner_projects_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_runners
-    ADD CONSTRAINT ci_runners_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_running_builds
-    ADD CONSTRAINT ci_running_builds_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
-    ADD CONSTRAINT ci_sources_pipelines_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_projects
-    ADD CONSTRAINT ci_sources_projects_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_stages
-    ADD CONSTRAINT ci_stages_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_subscriptions_projects
-    ADD CONSTRAINT ci_subscriptions_projects_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_test_case_failures
-    ADD CONSTRAINT ci_test_case_failures_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_test_cases
-    ADD CONSTRAINT ci_test_cases_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_trigger_requests
-    ADD CONSTRAINT ci_trigger_requests_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_triggers
-    ADD CONSTRAINT ci_triggers_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_unit_test_failures
-    ADD CONSTRAINT ci_unit_test_failures_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_unit_tests
-    ADD CONSTRAINT ci_unit_tests_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.ci_variables
-    ADD CONSTRAINT ci_variables_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.taggings
-    ADD CONSTRAINT taggings_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_ci.tags
-    ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY product_analytics_events_experimental
     ADD CONSTRAINT product_analytics_events_experimental_pkey PRIMARY KEY (id, project_id);
@@ -20948,18 +20790,6 @@ ALTER TABLE ONLY gitlab_partitions_static.product_analytics_events_experimental_
 ALTER TABLE ONLY gitlab_partitions_static.product_analytics_events_experimental_63
     ADD CONSTRAINT product_analytics_events_experimental_63_pkey PRIMARY KEY (id, project_id);
 
-ALTER TABLE ONLY gitlab_shared.background_migration_jobs
-    ADD CONSTRAINT background_migration_jobs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_shared.batched_background_migration_jobs
-    ADD CONSTRAINT batched_background_migration_jobs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_shared.batched_background_migrations
-    ADD CONSTRAINT batched_background_migrations_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY gitlab_shared.schema_migrations
-    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
-
 ALTER TABLE ONLY abuse_reports
     ADD CONSTRAINT abuse_reports_pkey PRIMARY KEY (id);
 
@@ -21065,8 +20895,17 @@ ALTER TABLE ONLY award_emoji
 ALTER TABLE ONLY aws_roles
     ADD CONSTRAINT aws_roles_pkey PRIMARY KEY (user_id);
 
+ALTER TABLE ONLY background_migration_jobs
+    ADD CONSTRAINT background_migration_jobs_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY badges
     ADD CONSTRAINT badges_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY batched_background_migration_jobs
+    ADD CONSTRAINT batched_background_migration_jobs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY batched_background_migrations
+    ADD CONSTRAINT batched_background_migrations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY board_assignees
     ADD CONSTRAINT board_assignees_pkey PRIMARY KEY (id);
@@ -21148,6 +20987,150 @@ ALTER TABLE group_import_states
 
 ALTER TABLE sprints
     ADD CONSTRAINT check_df3816aed7 CHECK ((due_date IS NOT NULL)) NOT VALID;
+
+ALTER TABLE ONLY ci_build_needs
+    ADD CONSTRAINT ci_build_needs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_build_pending_states
+    ADD CONSTRAINT ci_build_pending_states_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_build_report_results
+    ADD CONSTRAINT ci_build_report_results_pkey PRIMARY KEY (build_id);
+
+ALTER TABLE ONLY ci_build_trace_chunks
+    ADD CONSTRAINT ci_build_trace_chunks_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_build_trace_section_names
+    ADD CONSTRAINT ci_build_trace_section_names_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_build_trace_sections
+    ADD CONSTRAINT ci_build_trace_sections_pkey PRIMARY KEY (build_id, section_name_id);
+
+ALTER TABLE ONLY ci_builds_metadata
+    ADD CONSTRAINT ci_builds_metadata_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT ci_builds_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_builds_runner_session
+    ADD CONSTRAINT ci_builds_runner_session_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_daily_build_group_report_results
+    ADD CONSTRAINT ci_daily_build_group_report_results_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_deleted_objects
+    ADD CONSTRAINT ci_deleted_objects_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_freeze_periods
+    ADD CONSTRAINT ci_freeze_periods_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_group_variables
+    ADD CONSTRAINT ci_group_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_instance_variables
+    ADD CONSTRAINT ci_instance_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_job_artifacts
+    ADD CONSTRAINT ci_job_artifacts_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_job_token_project_scope_links
+    ADD CONSTRAINT ci_job_token_project_scope_links_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_job_variables
+    ADD CONSTRAINT ci_job_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_minutes_additional_packs
+    ADD CONSTRAINT ci_minutes_additional_packs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_namespace_monthly_usages
+    ADD CONSTRAINT ci_namespace_monthly_usages_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pending_builds
+    ADD CONSTRAINT ci_pending_builds_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipeline_artifacts
+    ADD CONSTRAINT ci_pipeline_artifacts_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipeline_chat_data
+    ADD CONSTRAINT ci_pipeline_chat_data_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipeline_messages
+    ADD CONSTRAINT ci_pipeline_messages_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipeline_schedule_variables
+    ADD CONSTRAINT ci_pipeline_schedule_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipeline_schedules
+    ADD CONSTRAINT ci_pipeline_schedules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipeline_variables
+    ADD CONSTRAINT ci_pipeline_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_pipelines_config
+    ADD CONSTRAINT ci_pipelines_config_pkey PRIMARY KEY (pipeline_id);
+
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT ci_pipelines_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_platform_metrics
+    ADD CONSTRAINT ci_platform_metrics_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_project_monthly_usages
+    ADD CONSTRAINT ci_project_monthly_usages_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_refs
+    ADD CONSTRAINT ci_refs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_resource_groups
+    ADD CONSTRAINT ci_resource_groups_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_resources
+    ADD CONSTRAINT ci_resources_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_runner_namespaces
+    ADD CONSTRAINT ci_runner_namespaces_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_runner_projects
+    ADD CONSTRAINT ci_runner_projects_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_runners
+    ADD CONSTRAINT ci_runners_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_running_builds
+    ADD CONSTRAINT ci_running_builds_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT ci_sources_pipelines_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_sources_projects
+    ADD CONSTRAINT ci_sources_projects_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_stages
+    ADD CONSTRAINT ci_stages_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_subscriptions_projects
+    ADD CONSTRAINT ci_subscriptions_projects_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_test_case_failures
+    ADD CONSTRAINT ci_test_case_failures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_test_cases
+    ADD CONSTRAINT ci_test_cases_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_trigger_requests
+    ADD CONSTRAINT ci_trigger_requests_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_triggers
+    ADD CONSTRAINT ci_triggers_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_unit_test_failures
+    ADD CONSTRAINT ci_unit_test_failures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_unit_tests
+    ADD CONSTRAINT ci_unit_tests_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_variables
+    ADD CONSTRAINT ci_variables_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY cluster_agent_tokens
     ADD CONSTRAINT cluster_agent_tokens_pkey PRIMARY KEY (id);
@@ -22082,6 +22065,9 @@ ALTER TABLE ONLY saml_group_links
 ALTER TABLE ONLY saml_providers
     ADD CONSTRAINT saml_providers_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY schema_migrations
+    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
 ALTER TABLE ONLY scim_identities
     ADD CONSTRAINT scim_identities_pkey PRIMARY KEY (id);
 
@@ -22168,6 +22154,12 @@ ALTER TABLE ONLY suggestions
 
 ALTER TABLE ONLY system_note_metadata
     ADD CONSTRAINT system_note_metadata_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY taggings
+    ADD CONSTRAINT taggings_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY tags
+    ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY term_agreements
     ADD CONSTRAINT term_agreements_pkey PRIMARY KEY (id);
@@ -22346,328 +22338,6 @@ ALTER TABLE ONLY x509_issuers
 ALTER TABLE ONLY zoom_meetings
     ADD CONSTRAINT zoom_meetings_pkey PRIMARY KEY (id);
 
-CREATE INDEX ci_builds_gitlab_monitor_metrics ON gitlab_ci.ci_builds USING btree (status, created_at, project_id) WHERE ((type)::text = 'Ci::Build'::text);
-
-CREATE UNIQUE INDEX i_ci_job_token_project_scope_links_on_source_and_target_project ON gitlab_ci.ci_job_token_project_scope_links USING btree (source_project_id, target_project_id);
-
-CREATE INDEX idx_ci_pipelines_artifacts_locked ON gitlab_ci.ci_pipelines USING btree (ci_ref_id, id) WHERE (locked = 1);
-
-CREATE UNIQUE INDEX index_ci_build_needs_on_build_id_and_name ON gitlab_ci.ci_build_needs USING btree (build_id, name);
-
-CREATE UNIQUE INDEX index_ci_build_pending_states_on_build_id ON gitlab_ci.ci_build_pending_states USING btree (build_id);
-
-CREATE INDEX index_ci_build_report_results_on_project_id ON gitlab_ci.ci_build_report_results USING btree (project_id);
-
-CREATE UNIQUE INDEX index_ci_build_trace_chunks_on_build_id_and_chunk_index ON gitlab_ci.ci_build_trace_chunks USING btree (build_id, chunk_index);
-
-CREATE UNIQUE INDEX index_ci_build_trace_section_names_on_project_id_and_name ON gitlab_ci.ci_build_trace_section_names USING btree (project_id, name);
-
-CREATE INDEX index_ci_build_trace_sections_on_project_id ON gitlab_ci.ci_build_trace_sections USING btree (project_id);
-
-CREATE INDEX index_ci_build_trace_sections_on_section_name_id ON gitlab_ci.ci_build_trace_sections USING btree (section_name_id);
-
-CREATE UNIQUE INDEX index_ci_builds_metadata_on_build_id ON gitlab_ci.ci_builds_metadata USING btree (build_id);
-
-CREATE INDEX index_ci_builds_metadata_on_build_id_and_has_exposed_artifacts ON gitlab_ci.ci_builds_metadata USING btree (build_id) WHERE (has_exposed_artifacts IS TRUE);
-
-CREATE INDEX index_ci_builds_metadata_on_build_id_and_id_and_interruptible ON gitlab_ci.ci_builds_metadata USING btree (build_id) INCLUDE (id) WHERE (interruptible = true);
-
-CREATE INDEX index_ci_builds_metadata_on_project_id ON gitlab_ci.ci_builds_metadata USING btree (project_id);
-
-CREATE INDEX index_ci_builds_on_auto_canceled_by_id ON gitlab_ci.ci_builds USING btree (auto_canceled_by_id);
-
-CREATE INDEX index_ci_builds_on_commit_id_and_stage_idx_and_created_at ON gitlab_ci.ci_builds USING btree (commit_id, stage_idx, created_at);
-
-CREATE INDEX index_ci_builds_on_commit_id_and_status_and_type ON gitlab_ci.ci_builds USING btree (commit_id, status, type);
-
-CREATE INDEX index_ci_builds_on_commit_id_and_type_and_name_and_ref ON gitlab_ci.ci_builds USING btree (commit_id, type, name, ref);
-
-CREATE INDEX index_ci_builds_on_commit_id_and_type_and_ref ON gitlab_ci.ci_builds USING btree (commit_id, type, ref);
-
-CREATE INDEX index_ci_builds_on_commit_id_artifacts_expired_at_and_id ON gitlab_ci.ci_builds USING btree (commit_id, artifacts_expire_at, id) WHERE (((type)::text = 'Ci::Build'::text) AND ((retried = false) OR (retried IS NULL)) AND ((name)::text = ANY (ARRAY[('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('dependency_scanning'::character varying)::text, ('container_scanning'::character varying)::text, ('dast'::character varying)::text])));
-
-CREATE INDEX index_ci_builds_on_project_id_and_id ON gitlab_ci.ci_builds USING btree (project_id, id);
-
-CREATE INDEX index_ci_builds_on_project_id_and_name_and_ref ON gitlab_ci.ci_builds USING btree (project_id, name, ref) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = 'success'::text) AND ((retried = false) OR (retried IS NULL)));
-
-CREATE INDEX index_ci_builds_on_project_id_for_successfull_pages_deploy ON gitlab_ci.ci_builds USING btree (project_id) WHERE (((type)::text = 'GenericCommitStatus'::text) AND ((stage)::text = 'deploy'::text) AND ((name)::text = 'pages:deploy'::text) AND ((status)::text = 'success'::text));
-
-CREATE INDEX index_ci_builds_on_queued_at ON gitlab_ci.ci_builds USING btree (queued_at);
-
-CREATE INDEX index_ci_builds_on_runner_id_and_id_desc ON gitlab_ci.ci_builds USING btree (runner_id, id DESC);
-
-CREATE INDEX index_ci_builds_on_stage_id ON gitlab_ci.ci_builds USING btree (stage_id);
-
-CREATE INDEX index_ci_builds_on_status_and_type_and_runner_id ON gitlab_ci.ci_builds USING btree (status, type, runner_id);
-
-CREATE UNIQUE INDEX index_ci_builds_on_token_encrypted ON gitlab_ci.ci_builds USING btree (token_encrypted) WHERE (token_encrypted IS NOT NULL);
-
-CREATE UNIQUE INDEX index_ci_builds_on_token_partial ON gitlab_ci.ci_builds USING btree (token) WHERE (token IS NOT NULL);
-
-CREATE INDEX index_ci_builds_on_updated_at ON gitlab_ci.ci_builds USING btree (updated_at);
-
-CREATE INDEX index_ci_builds_on_upstream_pipeline_id ON gitlab_ci.ci_builds USING btree (upstream_pipeline_id) WHERE (upstream_pipeline_id IS NOT NULL);
-
-CREATE INDEX index_ci_builds_on_user_id ON gitlab_ci.ci_builds USING btree (user_id);
-
-CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON gitlab_ci.ci_builds USING btree (user_id, created_at) WHERE ((type)::text = 'Ci::Build'::text);
-
-CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON gitlab_ci.ci_builds USING btree (project_id, status) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
-
-CREATE INDEX index_ci_builds_runner_id_pending_covering ON gitlab_ci.ci_builds USING btree (runner_id, id) INCLUDE (project_id) WHERE (((status)::text = 'pending'::text) AND ((type)::text = 'Ci::Build'::text));
-
-CREATE INDEX index_ci_builds_runner_id_running ON gitlab_ci.ci_builds USING btree (runner_id) WHERE (((status)::text = 'running'::text) AND ((type)::text = 'Ci::Build'::text));
-
-CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON gitlab_ci.ci_builds_runner_session USING btree (build_id);
-
-CREATE INDEX index_ci_daily_build_group_report_results_on_group_id ON gitlab_ci.ci_daily_build_group_report_results USING btree (group_id);
-
-CREATE INDEX index_ci_daily_build_group_report_results_on_last_pipeline_id ON gitlab_ci.ci_daily_build_group_report_results USING btree (last_pipeline_id);
-
-CREATE INDEX index_ci_daily_build_group_report_results_on_project_and_date ON gitlab_ci.ci_daily_build_group_report_results USING btree (project_id, date DESC) WHERE ((default_branch = true) AND ((data -> 'coverage'::text) IS NOT NULL));
-
-CREATE INDEX index_ci_deleted_objects_on_pick_up_at ON gitlab_ci.ci_deleted_objects USING btree (pick_up_at);
-
-CREATE INDEX index_ci_freeze_periods_on_project_id ON gitlab_ci.ci_freeze_periods USING btree (project_id);
-
-CREATE UNIQUE INDEX index_ci_group_variables_on_group_id_and_key_and_environment ON gitlab_ci.ci_group_variables USING btree (group_id, key, environment_scope);
-
-CREATE UNIQUE INDEX index_ci_instance_variables_on_key ON gitlab_ci.ci_instance_variables USING btree (key);
-
-CREATE INDEX index_ci_job_artifacts_dast_for_devops_adoption ON gitlab_ci.ci_job_artifacts USING btree (project_id, created_at) WHERE (file_type = 8);
-
-CREATE INDEX index_ci_job_artifacts_for_terraform_reports ON gitlab_ci.ci_job_artifacts USING btree (project_id, id) WHERE (file_type = 18);
-
-CREATE INDEX index_ci_job_artifacts_id_for_terraform_reports ON gitlab_ci.ci_job_artifacts USING btree (id) WHERE (file_type = 18);
-
-CREATE INDEX index_ci_job_artifacts_on_expire_at_and_job_id ON gitlab_ci.ci_job_artifacts USING btree (expire_at, job_id);
-
-CREATE INDEX index_ci_job_artifacts_on_file_store ON gitlab_ci.ci_job_artifacts USING btree (file_store);
-
-CREATE INDEX index_ci_job_artifacts_on_file_type_for_devops_adoption ON gitlab_ci.ci_job_artifacts USING btree (file_type, project_id, created_at) WHERE (file_type = ANY (ARRAY[5, 6, 8, 23]));
-
-CREATE UNIQUE INDEX index_ci_job_artifacts_on_job_id_and_file_type ON gitlab_ci.ci_job_artifacts USING btree (job_id, file_type);
-
-CREATE INDEX index_ci_job_artifacts_on_project_id ON gitlab_ci.ci_job_artifacts USING btree (project_id);
-
-CREATE INDEX index_ci_job_artifacts_on_project_id_for_security_reports ON gitlab_ci.ci_job_artifacts USING btree (project_id) WHERE (file_type = ANY (ARRAY[5, 6, 7, 8]));
-
-CREATE INDEX index_ci_job_artifacts_sast_for_devops_adoption ON gitlab_ci.ci_job_artifacts USING btree (project_id, created_at) WHERE (file_type = 5);
-
-CREATE INDEX index_ci_job_token_project_scope_links_on_added_by_id ON gitlab_ci.ci_job_token_project_scope_links USING btree (added_by_id);
-
-CREATE INDEX index_ci_job_token_project_scope_links_on_target_project_id ON gitlab_ci.ci_job_token_project_scope_links USING btree (target_project_id);
-
-CREATE INDEX index_ci_job_variables_on_job_id ON gitlab_ci.ci_job_variables USING btree (job_id);
-
-CREATE UNIQUE INDEX index_ci_job_variables_on_key_and_job_id ON gitlab_ci.ci_job_variables USING btree (key, job_id);
-
-CREATE INDEX index_ci_minutes_additional_packs_on_namespace_id_purchase_xid ON gitlab_ci.ci_minutes_additional_packs USING btree (namespace_id, purchase_xid);
-
-CREATE UNIQUE INDEX index_ci_namespace_monthly_usages_on_namespace_id_and_date ON gitlab_ci.ci_namespace_monthly_usages USING btree (namespace_id, date);
-
-CREATE INDEX index_ci_pending_builds_id_on_protected_partial ON gitlab_ci.ci_pending_builds USING btree (id) WHERE (protected = true);
-
-CREATE UNIQUE INDEX index_ci_pending_builds_on_build_id ON gitlab_ci.ci_pending_builds USING btree (build_id);
-
-CREATE INDEX index_ci_pending_builds_on_project_id ON gitlab_ci.ci_pending_builds USING btree (project_id);
-
-CREATE INDEX index_ci_pipeline_artifacts_failed_verification ON gitlab_ci.ci_pipeline_artifacts USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
-
-CREATE INDEX index_ci_pipeline_artifacts_needs_verification ON gitlab_ci.ci_pipeline_artifacts USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
-
-CREATE INDEX index_ci_pipeline_artifacts_on_expire_at ON gitlab_ci.ci_pipeline_artifacts USING btree (expire_at);
-
-CREATE INDEX index_ci_pipeline_artifacts_on_pipeline_id ON gitlab_ci.ci_pipeline_artifacts USING btree (pipeline_id);
-
-CREATE UNIQUE INDEX index_ci_pipeline_artifacts_on_pipeline_id_and_file_type ON gitlab_ci.ci_pipeline_artifacts USING btree (pipeline_id, file_type);
-
-CREATE INDEX index_ci_pipeline_artifacts_on_project_id ON gitlab_ci.ci_pipeline_artifacts USING btree (project_id);
-
-CREATE INDEX index_ci_pipeline_artifacts_pending_verification ON gitlab_ci.ci_pipeline_artifacts USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
-
-CREATE INDEX index_ci_pipeline_artifacts_verification_state ON gitlab_ci.ci_pipeline_artifacts USING btree (verification_state);
-
-CREATE INDEX index_ci_pipeline_chat_data_on_chat_name_id ON gitlab_ci.ci_pipeline_chat_data USING btree (chat_name_id);
-
-CREATE UNIQUE INDEX index_ci_pipeline_chat_data_on_pipeline_id ON gitlab_ci.ci_pipeline_chat_data USING btree (pipeline_id);
-
-CREATE INDEX index_ci_pipeline_messages_on_pipeline_id ON gitlab_ci.ci_pipeline_messages USING btree (pipeline_id);
-
-CREATE UNIQUE INDEX index_ci_pipeline_schedule_variables_on_schedule_id_and_key ON gitlab_ci.ci_pipeline_schedule_variables USING btree (pipeline_schedule_id, key);
-
-CREATE INDEX index_ci_pipeline_schedules_on_next_run_at_and_active ON gitlab_ci.ci_pipeline_schedules USING btree (next_run_at, active);
-
-CREATE INDEX index_ci_pipeline_schedules_on_owner_id ON gitlab_ci.ci_pipeline_schedules USING btree (owner_id);
-
-CREATE INDEX index_ci_pipeline_schedules_on_owner_id_and_id_and_active ON gitlab_ci.ci_pipeline_schedules USING btree (owner_id, id) WHERE (active = true);
-
-CREATE INDEX index_ci_pipeline_schedules_on_project_id ON gitlab_ci.ci_pipeline_schedules USING btree (project_id);
-
-CREATE UNIQUE INDEX index_ci_pipeline_variables_on_pipeline_id_and_key ON gitlab_ci.ci_pipeline_variables USING btree (pipeline_id, key);
-
-CREATE INDEX index_ci_pipelines_config_on_pipeline_id ON gitlab_ci.ci_pipelines_config USING btree (pipeline_id);
-
-CREATE INDEX index_ci_pipelines_for_ondemand_dast_scans ON gitlab_ci.ci_pipelines USING btree (id) WHERE (source = 13);
-
-CREATE INDEX index_ci_pipelines_on_auto_canceled_by_id ON gitlab_ci.ci_pipelines USING btree (auto_canceled_by_id);
-
-CREATE INDEX index_ci_pipelines_on_ci_ref_id_and_more ON gitlab_ci.ci_pipelines USING btree (ci_ref_id, id DESC, source, status) WHERE (ci_ref_id IS NOT NULL);
-
-CREATE INDEX index_ci_pipelines_on_external_pull_request_id ON gitlab_ci.ci_pipelines USING btree (external_pull_request_id) WHERE (external_pull_request_id IS NOT NULL);
-
-CREATE INDEX index_ci_pipelines_on_merge_request_id ON gitlab_ci.ci_pipelines USING btree (merge_request_id) WHERE (merge_request_id IS NOT NULL);
-
-CREATE INDEX index_ci_pipelines_on_pipeline_schedule_id_and_id ON gitlab_ci.ci_pipelines USING btree (pipeline_schedule_id, id);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_id_desc ON gitlab_ci.ci_pipelines USING btree (project_id, id DESC);
-
-CREATE UNIQUE INDEX index_ci_pipelines_on_project_id_and_iid ON gitlab_ci.ci_pipelines USING btree (project_id, iid) WHERE (iid IS NOT NULL);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_ref_and_status_and_id ON gitlab_ci.ci_pipelines USING btree (project_id, ref, status, id);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_sha ON gitlab_ci.ci_pipelines USING btree (project_id, sha);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_source ON gitlab_ci.ci_pipelines USING btree (project_id, source);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_config_source ON gitlab_ci.ci_pipelines USING btree (project_id, status, config_source);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_created_at ON gitlab_ci.ci_pipelines USING btree (project_id, status, created_at);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_updated_at ON gitlab_ci.ci_pipelines USING btree (project_id, status, updated_at);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_user_id_and_status_and_ref ON gitlab_ci.ci_pipelines USING btree (project_id, user_id, status, ref) WHERE (source <> 12);
-
-CREATE INDEX index_ci_pipelines_on_project_idandrefandiddesc ON gitlab_ci.ci_pipelines USING btree (project_id, ref, id DESC);
-
-CREATE INDEX index_ci_pipelines_on_status_and_id ON gitlab_ci.ci_pipelines USING btree (status, id);
-
-CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_config_source ON gitlab_ci.ci_pipelines USING btree (user_id, created_at, config_source);
-
-CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_source ON gitlab_ci.ci_pipelines USING btree (user_id, created_at, source);
-
-CREATE INDEX index_ci_pipelines_on_user_id_and_id_and_cancelable_status ON gitlab_ci.ci_pipelines USING btree (user_id, id) WHERE ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('waiting_for_resource'::character varying)::text, ('preparing'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text, ('scheduled'::character varying)::text]));
-
-CREATE UNIQUE INDEX index_ci_project_monthly_usages_on_project_id_and_date ON gitlab_ci.ci_project_monthly_usages USING btree (project_id, date);
-
-CREATE UNIQUE INDEX index_ci_refs_on_project_id_and_ref_path ON gitlab_ci.ci_refs USING btree (project_id, ref_path);
-
-CREATE UNIQUE INDEX index_ci_resource_groups_on_project_id_and_key ON gitlab_ci.ci_resource_groups USING btree (project_id, key);
-
-CREATE INDEX index_ci_resources_on_build_id ON gitlab_ci.ci_resources USING btree (build_id);
-
-CREATE UNIQUE INDEX index_ci_resources_on_resource_group_id_and_build_id ON gitlab_ci.ci_resources USING btree (resource_group_id, build_id);
-
-CREATE INDEX index_ci_runner_namespaces_on_namespace_id ON gitlab_ci.ci_runner_namespaces USING btree (namespace_id);
-
-CREATE UNIQUE INDEX index_ci_runner_namespaces_on_runner_id_and_namespace_id ON gitlab_ci.ci_runner_namespaces USING btree (runner_id, namespace_id);
-
-CREATE INDEX index_ci_runner_projects_on_project_id ON gitlab_ci.ci_runner_projects USING btree (project_id);
-
-CREATE INDEX index_ci_runner_projects_on_runner_id ON gitlab_ci.ci_runner_projects USING btree (runner_id);
-
-CREATE INDEX index_ci_runners_on_contacted_at_and_id_desc ON gitlab_ci.ci_runners USING btree (contacted_at, id DESC);
-
-CREATE INDEX index_ci_runners_on_contacted_at_desc_and_id_desc ON gitlab_ci.ci_runners USING btree (contacted_at DESC, id DESC);
-
-CREATE INDEX index_ci_runners_on_created_at_and_id_desc ON gitlab_ci.ci_runners USING btree (created_at, id DESC);
-
-CREATE INDEX index_ci_runners_on_created_at_desc_and_id_desc ON gitlab_ci.ci_runners USING btree (created_at DESC, id DESC);
-
-CREATE INDEX index_ci_runners_on_description_trigram ON gitlab_ci.ci_runners USING gin (description gin_trgm_ops);
-
-CREATE INDEX index_ci_runners_on_locked ON gitlab_ci.ci_runners USING btree (locked);
-
-CREATE INDEX index_ci_runners_on_runner_type ON gitlab_ci.ci_runners USING btree (runner_type);
-
-CREATE INDEX index_ci_runners_on_token ON gitlab_ci.ci_runners USING btree (token);
-
-CREATE INDEX index_ci_runners_on_token_encrypted ON gitlab_ci.ci_runners USING btree (token_encrypted);
-
-CREATE UNIQUE INDEX index_ci_running_builds_on_build_id ON gitlab_ci.ci_running_builds USING btree (build_id);
-
-CREATE INDEX index_ci_running_builds_on_project_id ON gitlab_ci.ci_running_builds USING btree (project_id);
-
-CREATE INDEX index_ci_running_builds_on_runner_id ON gitlab_ci.ci_running_builds USING btree (runner_id);
-
-CREATE INDEX index_ci_sources_pipelines_on_pipeline_id ON gitlab_ci.ci_sources_pipelines USING btree (pipeline_id);
-
-CREATE INDEX index_ci_sources_pipelines_on_project_id ON gitlab_ci.ci_sources_pipelines USING btree (project_id);
-
-CREATE INDEX index_ci_sources_pipelines_on_source_job_id ON gitlab_ci.ci_sources_pipelines USING btree (source_job_id);
-
-CREATE INDEX index_ci_sources_pipelines_on_source_pipeline_id ON gitlab_ci.ci_sources_pipelines USING btree (source_pipeline_id);
-
-CREATE INDEX index_ci_sources_pipelines_on_source_project_id ON gitlab_ci.ci_sources_pipelines USING btree (source_project_id);
-
-CREATE INDEX index_ci_sources_projects_on_pipeline_id ON gitlab_ci.ci_sources_projects USING btree (pipeline_id);
-
-CREATE UNIQUE INDEX index_ci_sources_projects_on_source_project_id_and_pipeline_id ON gitlab_ci.ci_sources_projects USING btree (source_project_id, pipeline_id);
-
-CREATE INDEX index_ci_stages_on_pipeline_id ON gitlab_ci.ci_stages USING btree (pipeline_id);
-
-CREATE INDEX index_ci_stages_on_pipeline_id_and_id ON gitlab_ci.ci_stages USING btree (pipeline_id, id) WHERE (status = ANY (ARRAY[0, 1, 2, 8, 9, 10]));
-
-CREATE UNIQUE INDEX index_ci_stages_on_pipeline_id_and_name ON gitlab_ci.ci_stages USING btree (pipeline_id, name);
-
-CREATE INDEX index_ci_stages_on_pipeline_id_and_position ON gitlab_ci.ci_stages USING btree (pipeline_id, "position");
-
-CREATE INDEX index_ci_stages_on_project_id ON gitlab_ci.ci_stages USING btree (project_id);
-
-CREATE INDEX index_ci_subscriptions_projects_on_upstream_project_id ON gitlab_ci.ci_subscriptions_projects USING btree (upstream_project_id);
-
-CREATE UNIQUE INDEX index_ci_subscriptions_projects_unique_subscription ON gitlab_ci.ci_subscriptions_projects USING btree (downstream_project_id, upstream_project_id);
-
-CREATE INDEX index_ci_test_case_failures_on_build_id ON gitlab_ci.ci_test_case_failures USING btree (build_id);
-
-CREATE UNIQUE INDEX index_ci_test_cases_on_project_id_and_key_hash ON gitlab_ci.ci_test_cases USING btree (project_id, key_hash);
-
-CREATE INDEX index_ci_trigger_requests_on_commit_id ON gitlab_ci.ci_trigger_requests USING btree (commit_id);
-
-CREATE INDEX index_ci_trigger_requests_on_trigger_id_and_id ON gitlab_ci.ci_trigger_requests USING btree (trigger_id, id DESC);
-
-CREATE INDEX index_ci_triggers_on_owner_id ON gitlab_ci.ci_triggers USING btree (owner_id);
-
-CREATE INDEX index_ci_triggers_on_project_id ON gitlab_ci.ci_triggers USING btree (project_id);
-
-CREATE INDEX index_ci_unit_test_failures_on_build_id ON gitlab_ci.ci_unit_test_failures USING btree (build_id);
-
-CREATE UNIQUE INDEX index_ci_unit_tests_on_project_id_and_key_hash ON gitlab_ci.ci_unit_tests USING btree (project_id, key_hash);
-
-CREATE INDEX index_ci_variables_on_key ON gitlab_ci.ci_variables USING btree (key);
-
-CREATE UNIQUE INDEX index_ci_variables_on_project_id_and_key_and_environment_scope ON gitlab_ci.ci_variables USING btree (project_id, key, environment_scope);
-
-CREATE UNIQUE INDEX index_daily_build_group_report_results_unique_columns ON gitlab_ci.ci_daily_build_group_report_results USING btree (project_id, ref_path, date, group_name);
-
-CREATE INDEX index_for_resource_group ON gitlab_ci.ci_builds USING btree (resource_group_id, id) WHERE (resource_group_id IS NOT NULL);
-
-CREATE INDEX index_partial_ci_builds_on_user_id_name_parser_features ON gitlab_ci.ci_builds USING btree (user_id, name) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
-
-CREATE INDEX index_secure_ci_builds_on_user_id_name_created_at ON gitlab_ci.ci_builds USING btree (user_id, name, created_at) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('apifuzzer_fuzz'::character varying)::text, ('apifuzzer_fuzz_dnd'::character varying)::text, ('secret_detection'::character varying)::text])));
-
-CREATE INDEX index_security_ci_builds_on_name_and_id_parser_features ON gitlab_ci.ci_builds USING btree (name, id) WHERE (((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('license_scanning'::character varying)::text])) AND ((type)::text = 'Ci::Build'::text));
-
-CREATE INDEX index_taggings_on_tag_id ON gitlab_ci.taggings USING btree (tag_id);
-
-CREATE INDEX index_taggings_on_taggable_id_and_taggable_type ON gitlab_ci.taggings USING btree (taggable_id, taggable_type);
-
-CREATE INDEX index_taggings_on_taggable_id_and_taggable_type_and_context ON gitlab_ci.taggings USING btree (taggable_id, taggable_type, context);
-
-CREATE UNIQUE INDEX index_tags_on_name ON gitlab_ci.tags USING btree (name);
-
-CREATE INDEX index_tags_on_name_trigram ON gitlab_ci.tags USING gin (name gin_trgm_ops);
-
-CREATE UNIQUE INDEX index_test_case_failures_unique_columns ON gitlab_ci.ci_test_case_failures USING btree (test_case_id, failed_at DESC, build_id);
-
-CREATE INDEX index_unit_test_failures_failed_at ON gitlab_ci.ci_unit_test_failures USING btree (failed_at DESC);
-
-CREATE UNIQUE INDEX index_unit_test_failures_unique_columns ON gitlab_ci.ci_unit_test_failures USING btree (unit_test_id, failed_at DESC, build_id);
-
-CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON gitlab_ci.ci_builds USING btree (scheduled_at) WHERE ((scheduled_at IS NOT NULL) AND ((type)::text = 'Ci::Build'::text) AND ((status)::text = 'scheduled'::text));
-
-CREATE UNIQUE INDEX taggings_idx ON gitlab_ci.taggings USING btree (tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type);
-
 CREATE INDEX index_product_analytics_events_experimental_project_and_time ON ONLY product_analytics_events_experimental USING btree (project_id, collector_tstamp);
 
 CREATE INDEX product_analytics_events_expe_project_id_collector_tstamp_idx10 ON gitlab_partitions_static.product_analytics_events_experimental_10 USING btree (project_id, collector_tstamp);
@@ -22798,20 +22468,6 @@ CREATE INDEX product_analytics_events_exper_project_id_collector_tstamp_idx9 ON 
 
 CREATE INDEX product_analytics_events_experi_project_id_collector_tstamp_idx ON gitlab_partitions_static.product_analytics_events_experimental_00 USING btree (project_id, collector_tstamp);
 
-CREATE INDEX index_background_migration_jobs_for_partitioning_migrations ON gitlab_shared.background_migration_jobs USING btree (((arguments ->> 2))) WHERE (class_name = 'Gitlab::Database::PartitioningMigrationHelpers::BackfillPartitionedTable'::text);
-
-CREATE INDEX index_background_migration_jobs_on_class_name_and_arguments ON gitlab_shared.background_migration_jobs USING btree (class_name, arguments);
-
-CREATE INDEX index_background_migration_jobs_on_class_name_and_status_and_id ON gitlab_shared.background_migration_jobs USING btree (class_name, status, id);
-
-CREATE UNIQUE INDEX index_batched_background_migrations_on_unique_configuration ON gitlab_shared.batched_background_migrations USING btree (job_class_name, table_name, column_name, job_arguments);
-
-CREATE INDEX index_batched_jobs_by_batched_migration_id_and_id ON gitlab_shared.batched_background_migration_jobs USING btree (batched_background_migration_id, id);
-
-CREATE INDEX index_batched_jobs_on_batched_migration_id_and_status ON gitlab_shared.batched_background_migration_jobs USING btree (batched_background_migration_id, status);
-
-CREATE INDEX index_migration_jobs_on_migration_id_and_finished_at ON gitlab_shared.batched_background_migration_jobs USING btree (batched_background_migration_id, finished_at);
-
 CREATE INDEX active_billable_users ON users USING btree (id) WHERE (((state)::text = 'active'::text) AND ((user_type IS NULL) OR (user_type = ANY (ARRAY[NULL::integer, 6, 4]))) AND ((user_type IS NULL) OR (user_type <> ALL ('{2,6,1,3,7,8}'::smallint[]))));
 
 CREATE INDEX analytics_index_audit_events_part_on_created_at_and_author_id ON ONLY audit_events USING btree (created_at, author_id);
@@ -22829,6 +22485,8 @@ CREATE INDEX approval_mr_rule_index_merge_request_id ON approval_merge_request_r
 CREATE UNIQUE INDEX bulk_import_trackers_uniq_relation_by_entity ON bulk_import_trackers USING btree (bulk_import_entity_id, relation);
 
 CREATE INDEX cadence_create_iterations_automation ON iterations_cadences USING btree (automatic, duration_in_weeks, date((COALESCE(last_run_date, '1970-01-01'::date) + ((duration_in_weeks)::double precision * '7 days'::interval)))) WHERE (duration_in_weeks IS NOT NULL);
+
+CREATE INDEX ci_builds_gitlab_monitor_metrics ON ci_builds USING btree (status, created_at, project_id) WHERE ((type)::text = 'Ci::Build'::text);
 
 CREATE INDEX code_owner_approval_required ON protected_branches USING btree (project_id, code_owner_approval_required) WHERE (code_owner_approval_required = true);
 
@@ -22862,6 +22520,8 @@ CREATE INDEX finding_evidences_on_vulnerability_occurrence_id ON vulnerability_f
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
+CREATE UNIQUE INDEX i_ci_job_token_project_scope_links_on_source_and_target_project ON ci_job_token_project_scope_links USING btree (source_project_id, target_project_id);
+
 CREATE INDEX idx_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
 
 CREATE INDEX idx_analytics_devops_adoption_snapshots_finalized ON analytics_devops_adoption_snapshots USING btree (namespace_id, end_time) WHERE (recorded_at >= end_time);
@@ -22869,6 +22529,8 @@ CREATE INDEX idx_analytics_devops_adoption_snapshots_finalized ON analytics_devo
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_award_emoji_on_user_emoji_name_awardable_type_awardable_id ON award_emoji USING btree (user_id, name, awardable_type, awardable_id);
+
+CREATE INDEX idx_ci_pipelines_artifacts_locked ON ci_pipelines USING btree (ci_ref_id, id) WHERE (locked = 1);
 
 CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at ON container_expiration_policies USING btree (project_id, next_run_at) WHERE (enabled = true);
 
@@ -23134,9 +22796,21 @@ CREATE UNIQUE INDEX index_aws_roles_on_role_external_id ON aws_roles USING btree
 
 CREATE UNIQUE INDEX index_aws_roles_on_user_id ON aws_roles USING btree (user_id);
 
+CREATE INDEX index_background_migration_jobs_for_partitioning_migrations ON background_migration_jobs USING btree (((arguments ->> 2))) WHERE (class_name = 'Gitlab::Database::PartitioningMigrationHelpers::BackfillPartitionedTable'::text);
+
+CREATE INDEX index_background_migration_jobs_on_class_name_and_arguments ON background_migration_jobs USING btree (class_name, arguments);
+
+CREATE INDEX index_background_migration_jobs_on_class_name_and_status_and_id ON background_migration_jobs USING btree (class_name, status, id);
+
 CREATE INDEX index_badges_on_group_id ON badges USING btree (group_id);
 
 CREATE INDEX index_badges_on_project_id ON badges USING btree (project_id);
+
+CREATE UNIQUE INDEX index_batched_background_migrations_on_unique_configuration ON batched_background_migrations USING btree (job_class_name, table_name, column_name, job_arguments);
+
+CREATE INDEX index_batched_jobs_by_batched_migration_id_and_id ON batched_background_migration_jobs USING btree (batched_background_migration_id, id);
+
+CREATE INDEX index_batched_jobs_on_batched_migration_id_and_status ON batched_background_migration_jobs USING btree (batched_background_migration_id, status);
 
 CREATE INDEX index_board_assignees_on_assignee_id ON board_assignees USING btree (assignee_id);
 
@@ -23236,6 +22910,292 @@ CREATE UNIQUE INDEX index_chat_names_on_user_id_and_service_id ON chat_names USI
 
 CREATE UNIQUE INDEX index_chat_teams_on_namespace_id ON chat_teams USING btree (namespace_id);
 
+CREATE UNIQUE INDEX index_ci_build_needs_on_build_id_and_name ON ci_build_needs USING btree (build_id, name);
+
+CREATE UNIQUE INDEX index_ci_build_pending_states_on_build_id ON ci_build_pending_states USING btree (build_id);
+
+CREATE INDEX index_ci_build_report_results_on_project_id ON ci_build_report_results USING btree (project_id);
+
+CREATE UNIQUE INDEX index_ci_build_trace_chunks_on_build_id_and_chunk_index ON ci_build_trace_chunks USING btree (build_id, chunk_index);
+
+CREATE UNIQUE INDEX index_ci_build_trace_section_names_on_project_id_and_name ON ci_build_trace_section_names USING btree (project_id, name);
+
+CREATE INDEX index_ci_build_trace_sections_on_project_id ON ci_build_trace_sections USING btree (project_id);
+
+CREATE INDEX index_ci_build_trace_sections_on_section_name_id ON ci_build_trace_sections USING btree (section_name_id);
+
+CREATE UNIQUE INDEX index_ci_builds_metadata_on_build_id ON ci_builds_metadata USING btree (build_id);
+
+CREATE INDEX index_ci_builds_metadata_on_build_id_and_has_exposed_artifacts ON ci_builds_metadata USING btree (build_id) WHERE (has_exposed_artifacts IS TRUE);
+
+CREATE INDEX index_ci_builds_metadata_on_build_id_and_id_and_interruptible ON ci_builds_metadata USING btree (build_id) INCLUDE (id) WHERE (interruptible = true);
+
+CREATE INDEX index_ci_builds_metadata_on_project_id ON ci_builds_metadata USING btree (project_id);
+
+CREATE INDEX index_ci_builds_on_auto_canceled_by_id ON ci_builds USING btree (auto_canceled_by_id);
+
+CREATE INDEX index_ci_builds_on_commit_id_and_stage_idx_and_created_at ON ci_builds USING btree (commit_id, stage_idx, created_at);
+
+CREATE INDEX index_ci_builds_on_commit_id_and_status_and_type ON ci_builds USING btree (commit_id, status, type);
+
+CREATE INDEX index_ci_builds_on_commit_id_and_type_and_name_and_ref ON ci_builds USING btree (commit_id, type, name, ref);
+
+CREATE INDEX index_ci_builds_on_commit_id_and_type_and_ref ON ci_builds USING btree (commit_id, type, ref);
+
+CREATE INDEX index_ci_builds_on_commit_id_artifacts_expired_at_and_id ON ci_builds USING btree (commit_id, artifacts_expire_at, id) WHERE (((type)::text = 'Ci::Build'::text) AND ((retried = false) OR (retried IS NULL)) AND ((name)::text = ANY (ARRAY[('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('dependency_scanning'::character varying)::text, ('container_scanning'::character varying)::text, ('dast'::character varying)::text])));
+
+CREATE INDEX index_ci_builds_on_project_id_and_id ON ci_builds USING btree (project_id, id);
+
+CREATE INDEX index_ci_builds_on_project_id_and_name_and_ref ON ci_builds USING btree (project_id, name, ref) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = 'success'::text) AND ((retried = false) OR (retried IS NULL)));
+
+CREATE INDEX index_ci_builds_on_project_id_for_successfull_pages_deploy ON ci_builds USING btree (project_id) WHERE (((type)::text = 'GenericCommitStatus'::text) AND ((stage)::text = 'deploy'::text) AND ((name)::text = 'pages:deploy'::text) AND ((status)::text = 'success'::text));
+
+CREATE INDEX index_ci_builds_on_queued_at ON ci_builds USING btree (queued_at);
+
+CREATE INDEX index_ci_builds_on_runner_id_and_id_desc ON ci_builds USING btree (runner_id, id DESC);
+
+CREATE INDEX index_ci_builds_on_stage_id ON ci_builds USING btree (stage_id);
+
+CREATE INDEX index_ci_builds_on_status_and_type_and_runner_id ON ci_builds USING btree (status, type, runner_id);
+
+CREATE UNIQUE INDEX index_ci_builds_on_token_encrypted ON ci_builds USING btree (token_encrypted) WHERE (token_encrypted IS NOT NULL);
+
+CREATE UNIQUE INDEX index_ci_builds_on_token_partial ON ci_builds USING btree (token) WHERE (token IS NOT NULL);
+
+CREATE INDEX index_ci_builds_on_updated_at ON ci_builds USING btree (updated_at);
+
+CREATE INDEX index_ci_builds_on_upstream_pipeline_id ON ci_builds USING btree (upstream_pipeline_id) WHERE (upstream_pipeline_id IS NOT NULL);
+
+CREATE INDEX index_ci_builds_on_user_id ON ci_builds USING btree (user_id);
+
+CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON ci_builds USING btree (user_id, created_at) WHERE ((type)::text = 'Ci::Build'::text);
+
+CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON ci_builds USING btree (project_id, status) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
+
+CREATE INDEX index_ci_builds_runner_id_pending_covering ON ci_builds USING btree (runner_id, id) INCLUDE (project_id) WHERE (((status)::text = 'pending'::text) AND ((type)::text = 'Ci::Build'::text));
+
+CREATE INDEX index_ci_builds_runner_id_running ON ci_builds USING btree (runner_id) WHERE (((status)::text = 'running'::text) AND ((type)::text = 'Ci::Build'::text));
+
+CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON ci_builds_runner_session USING btree (build_id);
+
+CREATE INDEX index_ci_daily_build_group_report_results_on_group_id ON ci_daily_build_group_report_results USING btree (group_id);
+
+CREATE INDEX index_ci_daily_build_group_report_results_on_last_pipeline_id ON ci_daily_build_group_report_results USING btree (last_pipeline_id);
+
+CREATE INDEX index_ci_daily_build_group_report_results_on_project_and_date ON ci_daily_build_group_report_results USING btree (project_id, date DESC) WHERE ((default_branch = true) AND ((data -> 'coverage'::text) IS NOT NULL));
+
+CREATE INDEX index_ci_deleted_objects_on_pick_up_at ON ci_deleted_objects USING btree (pick_up_at);
+
+CREATE INDEX index_ci_freeze_periods_on_project_id ON ci_freeze_periods USING btree (project_id);
+
+CREATE UNIQUE INDEX index_ci_group_variables_on_group_id_and_key_and_environment ON ci_group_variables USING btree (group_id, key, environment_scope);
+
+CREATE UNIQUE INDEX index_ci_instance_variables_on_key ON ci_instance_variables USING btree (key);
+
+CREATE INDEX index_ci_job_artifacts_dast_for_devops_adoption ON ci_job_artifacts USING btree (project_id, created_at) WHERE (file_type = 8);
+
+CREATE INDEX index_ci_job_artifacts_for_terraform_reports ON ci_job_artifacts USING btree (project_id, id) WHERE (file_type = 18);
+
+CREATE INDEX index_ci_job_artifacts_id_for_terraform_reports ON ci_job_artifacts USING btree (id) WHERE (file_type = 18);
+
+CREATE INDEX index_ci_job_artifacts_on_expire_at_and_job_id ON ci_job_artifacts USING btree (expire_at, job_id);
+
+CREATE INDEX index_ci_job_artifacts_on_file_store ON ci_job_artifacts USING btree (file_store);
+
+CREATE INDEX index_ci_job_artifacts_on_file_type_for_devops_adoption ON ci_job_artifacts USING btree (file_type, project_id, created_at) WHERE (file_type = ANY (ARRAY[5, 6, 8, 23]));
+
+CREATE UNIQUE INDEX index_ci_job_artifacts_on_job_id_and_file_type ON ci_job_artifacts USING btree (job_id, file_type);
+
+CREATE INDEX index_ci_job_artifacts_on_project_id ON ci_job_artifacts USING btree (project_id);
+
+CREATE INDEX index_ci_job_artifacts_on_project_id_for_security_reports ON ci_job_artifacts USING btree (project_id) WHERE (file_type = ANY (ARRAY[5, 6, 7, 8]));
+
+CREATE INDEX index_ci_job_artifacts_sast_for_devops_adoption ON ci_job_artifacts USING btree (project_id, created_at) WHERE (file_type = 5);
+
+CREATE INDEX index_ci_job_token_project_scope_links_on_added_by_id ON ci_job_token_project_scope_links USING btree (added_by_id);
+
+CREATE INDEX index_ci_job_token_project_scope_links_on_target_project_id ON ci_job_token_project_scope_links USING btree (target_project_id);
+
+CREATE INDEX index_ci_job_variables_on_job_id ON ci_job_variables USING btree (job_id);
+
+CREATE UNIQUE INDEX index_ci_job_variables_on_key_and_job_id ON ci_job_variables USING btree (key, job_id);
+
+CREATE INDEX index_ci_minutes_additional_packs_on_namespace_id_purchase_xid ON ci_minutes_additional_packs USING btree (namespace_id, purchase_xid);
+
+CREATE UNIQUE INDEX index_ci_namespace_monthly_usages_on_namespace_id_and_date ON ci_namespace_monthly_usages USING btree (namespace_id, date);
+
+CREATE INDEX index_ci_pending_builds_id_on_protected_partial ON ci_pending_builds USING btree (id) WHERE (protected = true);
+
+CREATE UNIQUE INDEX index_ci_pending_builds_on_build_id ON ci_pending_builds USING btree (build_id);
+
+CREATE INDEX index_ci_pending_builds_on_project_id ON ci_pending_builds USING btree (project_id);
+
+CREATE INDEX index_ci_pipeline_artifacts_failed_verification ON ci_pipeline_artifacts USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX index_ci_pipeline_artifacts_needs_verification ON ci_pipeline_artifacts USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
+CREATE INDEX index_ci_pipeline_artifacts_on_expire_at ON ci_pipeline_artifacts USING btree (expire_at);
+
+CREATE INDEX index_ci_pipeline_artifacts_on_pipeline_id ON ci_pipeline_artifacts USING btree (pipeline_id);
+
+CREATE UNIQUE INDEX index_ci_pipeline_artifacts_on_pipeline_id_and_file_type ON ci_pipeline_artifacts USING btree (pipeline_id, file_type);
+
+CREATE INDEX index_ci_pipeline_artifacts_on_project_id ON ci_pipeline_artifacts USING btree (project_id);
+
+CREATE INDEX index_ci_pipeline_artifacts_pending_verification ON ci_pipeline_artifacts USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
+
+CREATE INDEX index_ci_pipeline_artifacts_verification_state ON ci_pipeline_artifacts USING btree (verification_state);
+
+CREATE INDEX index_ci_pipeline_chat_data_on_chat_name_id ON ci_pipeline_chat_data USING btree (chat_name_id);
+
+CREATE UNIQUE INDEX index_ci_pipeline_chat_data_on_pipeline_id ON ci_pipeline_chat_data USING btree (pipeline_id);
+
+CREATE INDEX index_ci_pipeline_messages_on_pipeline_id ON ci_pipeline_messages USING btree (pipeline_id);
+
+CREATE UNIQUE INDEX index_ci_pipeline_schedule_variables_on_schedule_id_and_key ON ci_pipeline_schedule_variables USING btree (pipeline_schedule_id, key);
+
+CREATE INDEX index_ci_pipeline_schedules_on_next_run_at_and_active ON ci_pipeline_schedules USING btree (next_run_at, active);
+
+CREATE INDEX index_ci_pipeline_schedules_on_owner_id ON ci_pipeline_schedules USING btree (owner_id);
+
+CREATE INDEX index_ci_pipeline_schedules_on_owner_id_and_id_and_active ON ci_pipeline_schedules USING btree (owner_id, id) WHERE (active = true);
+
+CREATE INDEX index_ci_pipeline_schedules_on_project_id ON ci_pipeline_schedules USING btree (project_id);
+
+CREATE UNIQUE INDEX index_ci_pipeline_variables_on_pipeline_id_and_key ON ci_pipeline_variables USING btree (pipeline_id, key);
+
+CREATE INDEX index_ci_pipelines_config_on_pipeline_id ON ci_pipelines_config USING btree (pipeline_id);
+
+CREATE INDEX index_ci_pipelines_for_ondemand_dast_scans ON ci_pipelines USING btree (id) WHERE (source = 13);
+
+CREATE INDEX index_ci_pipelines_on_auto_canceled_by_id ON ci_pipelines USING btree (auto_canceled_by_id);
+
+CREATE INDEX index_ci_pipelines_on_ci_ref_id_and_more ON ci_pipelines USING btree (ci_ref_id, id DESC, source, status) WHERE (ci_ref_id IS NOT NULL);
+
+CREATE INDEX index_ci_pipelines_on_external_pull_request_id ON ci_pipelines USING btree (external_pull_request_id) WHERE (external_pull_request_id IS NOT NULL);
+
+CREATE INDEX index_ci_pipelines_on_merge_request_id ON ci_pipelines USING btree (merge_request_id) WHERE (merge_request_id IS NOT NULL);
+
+CREATE INDEX index_ci_pipelines_on_pipeline_schedule_id_and_id ON ci_pipelines USING btree (pipeline_schedule_id, id);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_id_desc ON ci_pipelines USING btree (project_id, id DESC);
+
+CREATE UNIQUE INDEX index_ci_pipelines_on_project_id_and_iid ON ci_pipelines USING btree (project_id, iid) WHERE (iid IS NOT NULL);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_ref_and_status_and_id ON ci_pipelines USING btree (project_id, ref, status, id);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_sha ON ci_pipelines USING btree (project_id, sha);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_source ON ci_pipelines USING btree (project_id, source);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_config_source ON ci_pipelines USING btree (project_id, status, config_source);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_created_at ON ci_pipelines USING btree (project_id, status, created_at);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_updated_at ON ci_pipelines USING btree (project_id, status, updated_at);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_user_id_and_status_and_ref ON ci_pipelines USING btree (project_id, user_id, status, ref) WHERE (source <> 12);
+
+CREATE INDEX index_ci_pipelines_on_project_idandrefandiddesc ON ci_pipelines USING btree (project_id, ref, id DESC);
+
+CREATE INDEX index_ci_pipelines_on_status_and_id ON ci_pipelines USING btree (status, id);
+
+CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_config_source ON ci_pipelines USING btree (user_id, created_at, config_source);
+
+CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_source ON ci_pipelines USING btree (user_id, created_at, source);
+
+CREATE INDEX index_ci_pipelines_on_user_id_and_id_and_cancelable_status ON ci_pipelines USING btree (user_id, id) WHERE ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('waiting_for_resource'::character varying)::text, ('preparing'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text, ('scheduled'::character varying)::text]));
+
+CREATE UNIQUE INDEX index_ci_project_monthly_usages_on_project_id_and_date ON ci_project_monthly_usages USING btree (project_id, date);
+
+CREATE UNIQUE INDEX index_ci_refs_on_project_id_and_ref_path ON ci_refs USING btree (project_id, ref_path);
+
+CREATE UNIQUE INDEX index_ci_resource_groups_on_project_id_and_key ON ci_resource_groups USING btree (project_id, key);
+
+CREATE INDEX index_ci_resources_on_build_id ON ci_resources USING btree (build_id);
+
+CREATE UNIQUE INDEX index_ci_resources_on_resource_group_id_and_build_id ON ci_resources USING btree (resource_group_id, build_id);
+
+CREATE INDEX index_ci_runner_namespaces_on_namespace_id ON ci_runner_namespaces USING btree (namespace_id);
+
+CREATE UNIQUE INDEX index_ci_runner_namespaces_on_runner_id_and_namespace_id ON ci_runner_namespaces USING btree (runner_id, namespace_id);
+
+CREATE INDEX index_ci_runner_projects_on_project_id ON ci_runner_projects USING btree (project_id);
+
+CREATE INDEX index_ci_runner_projects_on_runner_id ON ci_runner_projects USING btree (runner_id);
+
+CREATE INDEX index_ci_runners_on_contacted_at_and_id_desc ON ci_runners USING btree (contacted_at, id DESC);
+
+CREATE INDEX index_ci_runners_on_contacted_at_desc_and_id_desc ON ci_runners USING btree (contacted_at DESC, id DESC);
+
+CREATE INDEX index_ci_runners_on_created_at_and_id_desc ON ci_runners USING btree (created_at, id DESC);
+
+CREATE INDEX index_ci_runners_on_created_at_desc_and_id_desc ON ci_runners USING btree (created_at DESC, id DESC);
+
+CREATE INDEX index_ci_runners_on_description_trigram ON ci_runners USING gin (description gin_trgm_ops);
+
+CREATE INDEX index_ci_runners_on_locked ON ci_runners USING btree (locked);
+
+CREATE INDEX index_ci_runners_on_runner_type ON ci_runners USING btree (runner_type);
+
+CREATE INDEX index_ci_runners_on_token ON ci_runners USING btree (token);
+
+CREATE INDEX index_ci_runners_on_token_encrypted ON ci_runners USING btree (token_encrypted);
+
+CREATE UNIQUE INDEX index_ci_running_builds_on_build_id ON ci_running_builds USING btree (build_id);
+
+CREATE INDEX index_ci_running_builds_on_project_id ON ci_running_builds USING btree (project_id);
+
+CREATE INDEX index_ci_running_builds_on_runner_id ON ci_running_builds USING btree (runner_id);
+
+CREATE INDEX index_ci_sources_pipelines_on_pipeline_id ON ci_sources_pipelines USING btree (pipeline_id);
+
+CREATE INDEX index_ci_sources_pipelines_on_project_id ON ci_sources_pipelines USING btree (project_id);
+
+CREATE INDEX index_ci_sources_pipelines_on_source_job_id ON ci_sources_pipelines USING btree (source_job_id);
+
+CREATE INDEX index_ci_sources_pipelines_on_source_pipeline_id ON ci_sources_pipelines USING btree (source_pipeline_id);
+
+CREATE INDEX index_ci_sources_pipelines_on_source_project_id ON ci_sources_pipelines USING btree (source_project_id);
+
+CREATE INDEX index_ci_sources_projects_on_pipeline_id ON ci_sources_projects USING btree (pipeline_id);
+
+CREATE UNIQUE INDEX index_ci_sources_projects_on_source_project_id_and_pipeline_id ON ci_sources_projects USING btree (source_project_id, pipeline_id);
+
+CREATE INDEX index_ci_stages_on_pipeline_id ON ci_stages USING btree (pipeline_id);
+
+CREATE INDEX index_ci_stages_on_pipeline_id_and_id ON ci_stages USING btree (pipeline_id, id) WHERE (status = ANY (ARRAY[0, 1, 2, 8, 9, 10]));
+
+CREATE UNIQUE INDEX index_ci_stages_on_pipeline_id_and_name ON ci_stages USING btree (pipeline_id, name);
+
+CREATE INDEX index_ci_stages_on_pipeline_id_and_position ON ci_stages USING btree (pipeline_id, "position");
+
+CREATE INDEX index_ci_stages_on_project_id ON ci_stages USING btree (project_id);
+
+CREATE INDEX index_ci_subscriptions_projects_on_upstream_project_id ON ci_subscriptions_projects USING btree (upstream_project_id);
+
+CREATE UNIQUE INDEX index_ci_subscriptions_projects_unique_subscription ON ci_subscriptions_projects USING btree (downstream_project_id, upstream_project_id);
+
+CREATE INDEX index_ci_test_case_failures_on_build_id ON ci_test_case_failures USING btree (build_id);
+
+CREATE UNIQUE INDEX index_ci_test_cases_on_project_id_and_key_hash ON ci_test_cases USING btree (project_id, key_hash);
+
+CREATE INDEX index_ci_trigger_requests_on_commit_id ON ci_trigger_requests USING btree (commit_id);
+
+CREATE INDEX index_ci_trigger_requests_on_trigger_id_and_id ON ci_trigger_requests USING btree (trigger_id, id DESC);
+
+CREATE INDEX index_ci_triggers_on_owner_id ON ci_triggers USING btree (owner_id);
+
+CREATE INDEX index_ci_triggers_on_project_id ON ci_triggers USING btree (project_id);
+
+CREATE INDEX index_ci_unit_test_failures_on_build_id ON ci_unit_test_failures USING btree (build_id);
+
+CREATE UNIQUE INDEX index_ci_unit_tests_on_project_id_and_key_hash ON ci_unit_tests USING btree (project_id, key_hash);
+
+CREATE INDEX index_ci_variables_on_key ON ci_variables USING btree (key);
+
+CREATE UNIQUE INDEX index_ci_variables_on_project_id_and_key_and_environment_scope ON ci_variables USING btree (project_id, key, environment_scope);
+
 CREATE INDEX index_cluster_agent_tokens_on_agent_id_and_last_used_at ON cluster_agent_tokens USING btree (agent_id, last_used_at DESC NULLS LAST);
 
 CREATE INDEX index_cluster_agent_tokens_on_created_by_user_id ON cluster_agent_tokens USING btree (created_by_user_id);
@@ -23329,6 +23289,8 @@ CREATE INDEX index_csv_issue_imports_on_user_id ON csv_issue_imports USING btree
 CREATE INDEX index_custom_emoji_on_creator_id ON custom_emoji USING btree (creator_id);
 
 CREATE UNIQUE INDEX index_custom_emoji_on_namespace_id_and_name ON custom_emoji USING btree (namespace_id, name);
+
+CREATE UNIQUE INDEX index_daily_build_group_report_results_unique_columns ON ci_daily_build_group_report_results USING btree (project_id, ref_path, date, group_name);
 
 CREATE INDEX index_dast_profiles_on_dast_scanner_profile_id ON dast_profiles USING btree (dast_scanner_profile_id);
 
@@ -23589,6 +23551,8 @@ CREATE UNIQUE INDEX index_feature_flags_clients_on_project_id_and_token_encrypte
 CREATE UNIQUE INDEX index_feature_gates_on_feature_key_and_key_and_value ON feature_gates USING btree (feature_key, key, value);
 
 CREATE UNIQUE INDEX index_features_on_key ON features USING btree (key);
+
+CREATE INDEX index_for_resource_group ON ci_builds USING btree (resource_group_id, id) WHERE (resource_group_id IS NOT NULL);
 
 CREATE INDEX index_for_status_per_branch_per_project ON merge_trains USING btree (target_project_id, target_branch, status);
 
@@ -24104,6 +24068,8 @@ CREATE INDEX index_metrics_dashboard_annotations_on_timespan_end ON metrics_dash
 
 CREATE INDEX index_metrics_users_starred_dashboards_on_project_id ON metrics_users_starred_dashboards USING btree (project_id);
 
+CREATE INDEX index_migration_jobs_on_migration_id_and_finished_at ON batched_background_migration_jobs USING btree (batched_background_migration_id, finished_at);
+
 CREATE INDEX index_milestone_releases_on_release_id ON milestone_releases USING btree (release_id);
 
 CREATE INDEX index_milestones_on_description_trigram ON milestones USING gin (description gin_trgm_ops);
@@ -24409,6 +24375,8 @@ CREATE INDEX index_pages_domains_on_verified_at_and_enabled_until ON pages_domai
 CREATE INDEX index_pages_domains_on_wildcard ON pages_domains USING btree (wildcard);
 
 CREATE UNIQUE INDEX index_partial_am_alerts_on_project_id_and_fingerprint ON alert_management_alerts USING btree (project_id, fingerprint) WHERE (status <> 2);
+
+CREATE INDEX index_partial_ci_builds_on_user_id_name_parser_features ON ci_builds USING btree (user_id, name) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
 
 CREATE UNIQUE INDEX index_partitioned_foreign_keys_unique_index ON partitioned_foreign_keys USING btree (to_table, from_table, from_column);
 
@@ -24812,6 +24780,10 @@ CREATE UNIQUE INDEX index_scim_identities_on_user_id_and_group_id ON scim_identi
 
 CREATE UNIQUE INDEX index_scim_oauth_access_tokens_on_group_id_and_token_encrypted ON scim_oauth_access_tokens USING btree (group_id, token_encrypted);
 
+CREATE INDEX index_secure_ci_builds_on_user_id_name_created_at ON ci_builds USING btree (user_id, name, created_at) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('apifuzzer_fuzz'::character varying)::text, ('apifuzzer_fuzz_dnd'::character varying)::text, ('secret_detection'::character varying)::text])));
+
+CREATE INDEX index_security_ci_builds_on_name_and_id_parser_features ON ci_builds USING btree (name, id) WHERE (((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('license_scanning'::character varying)::text])) AND ((type)::text = 'Ci::Build'::text));
+
 CREATE INDEX index_security_findings_on_confidence ON security_findings USING btree (confidence);
 
 CREATE INDEX index_security_findings_on_project_fingerprint ON security_findings USING btree (project_fingerprint);
@@ -24954,6 +24926,16 @@ CREATE UNIQUE INDEX index_system_note_metadata_on_description_version_id ON syst
 
 CREATE UNIQUE INDEX index_system_note_metadata_on_note_id ON system_note_metadata USING btree (note_id);
 
+CREATE INDEX index_taggings_on_tag_id ON taggings USING btree (tag_id);
+
+CREATE INDEX index_taggings_on_taggable_id_and_taggable_type ON taggings USING btree (taggable_id, taggable_type);
+
+CREATE INDEX index_taggings_on_taggable_id_and_taggable_type_and_context ON taggings USING btree (taggable_id, taggable_type, context);
+
+CREATE UNIQUE INDEX index_tags_on_name ON tags USING btree (name);
+
+CREATE INDEX index_tags_on_name_trigram ON tags USING gin (name gin_trgm_ops);
+
 CREATE INDEX index_term_agreements_on_term_id ON term_agreements USING btree (term_id);
 
 CREATE INDEX index_term_agreements_on_user_id ON term_agreements USING btree (user_id);
@@ -24979,6 +24961,8 @@ CREATE INDEX index_terraform_states_on_locked_by_user_id ON terraform_states USI
 CREATE UNIQUE INDEX index_terraform_states_on_project_id_and_name ON terraform_states USING btree (project_id, name);
 
 CREATE UNIQUE INDEX index_terraform_states_on_uuid ON terraform_states USING btree (uuid);
+
+CREATE UNIQUE INDEX index_test_case_failures_unique_columns ON ci_test_case_failures USING btree (test_case_id, failed_at DESC, build_id);
 
 CREATE INDEX index_timelogs_on_issue_id ON timelogs USING btree (issue_id);
 
@@ -25023,6 +25007,10 @@ CREATE INDEX index_u2f_registrations_on_key_handle ON u2f_registrations USING bt
 CREATE INDEX index_u2f_registrations_on_user_id ON u2f_registrations USING btree (user_id);
 
 CREATE UNIQUE INDEX index_unique_issue_metrics_issue_id ON issue_metrics USING btree (issue_id);
+
+CREATE INDEX index_unit_test_failures_failed_at ON ci_unit_test_failures USING btree (failed_at DESC);
+
+CREATE UNIQUE INDEX index_unit_test_failures_unique_columns ON ci_unit_test_failures USING btree (unit_test_id, failed_at DESC, build_id);
 
 CREATE UNIQUE INDEX index_upcoming_reconciliations_on_namespace_id ON upcoming_reconciliations USING btree (namespace_id);
 
@@ -25312,6 +25300,8 @@ CREATE UNIQUE INDEX partial_index_bulk_import_exports_on_group_id_and_relation O
 
 CREATE UNIQUE INDEX partial_index_bulk_import_exports_on_project_id_and_relation ON bulk_import_exports USING btree (project_id, relation) WHERE (project_id IS NOT NULL);
 
+CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_builds USING btree (scheduled_at) WHERE ((scheduled_at IS NOT NULL) AND ((type)::text = 'Ci::Build'::text) AND ((status)::text = 'scheduled'::text));
+
 CREATE INDEX partial_index_deployments_for_legacy_successful_deployments ON deployments USING btree (id) WHERE ((finished_at IS NULL) AND (status = 2));
 
 CREATE INDEX partial_index_deployments_for_project_id_and_tag ON deployments USING btree (project_id) WHERE (tag IS TRUE);
@@ -25319,6 +25309,8 @@ CREATE INDEX partial_index_deployments_for_project_id_and_tag ON deployments USI
 CREATE UNIQUE INDEX snippet_user_mentions_on_snippet_id_and_note_id_index ON snippet_user_mentions USING btree (snippet_id, note_id);
 
 CREATE UNIQUE INDEX snippet_user_mentions_on_snippet_id_index ON snippet_user_mentions USING btree (snippet_id) WHERE (note_id IS NULL);
+
+CREATE UNIQUE INDEX taggings_idx ON taggings USING btree (tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type);
 
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
 
@@ -25614,33 +25606,33 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
-CREATE TRIGGER trigger_21e7a2602957 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_build_needs FOR EACH ROW EXECUTE FUNCTION trigger_21e7a2602957();
-
-CREATE TRIGGER trigger_3f6129be01d2 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_builds FOR EACH ROW EXECUTE FUNCTION trigger_3f6129be01d2();
-
-CREATE TRIGGER trigger_490d204c00b3 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_stages FOR EACH ROW EXECUTE FUNCTION trigger_490d204c00b3();
-
-CREATE TRIGGER trigger_51ab7cef8934 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_builds_runner_session FOR EACH ROW EXECUTE FUNCTION trigger_51ab7cef8934();
-
-CREATE TRIGGER trigger_542d6c2ad72e BEFORE INSERT OR UPDATE ON gitlab_ci.ci_builds_metadata FOR EACH ROW EXECUTE FUNCTION trigger_542d6c2ad72e();
-
-CREATE TRIGGER trigger_8485e97c00e3 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_sources_pipelines FOR EACH ROW EXECUTE FUNCTION trigger_8485e97c00e3();
-
-CREATE TRIGGER trigger_8487d4de3e7b BEFORE INSERT OR UPDATE ON gitlab_ci.ci_builds_metadata FOR EACH ROW EXECUTE FUNCTION trigger_8487d4de3e7b();
-
-CREATE TRIGGER trigger_91dc388a5fe6 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_build_trace_sections FOR EACH ROW EXECUTE FUNCTION trigger_91dc388a5fe6();
-
-CREATE TRIGGER trigger_aebe8b822ad3 BEFORE INSERT OR UPDATE ON gitlab_ci.taggings FOR EACH ROW EXECUTE FUNCTION trigger_aebe8b822ad3();
-
-CREATE TRIGGER trigger_be1804f21693 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_job_artifacts FOR EACH ROW EXECUTE FUNCTION trigger_be1804f21693();
-
-CREATE TRIGGER trigger_cf2f9e35f002 BEFORE INSERT OR UPDATE ON gitlab_ci.ci_build_trace_chunks FOR EACH ROW EXECUTE FUNCTION trigger_cf2f9e35f002();
-
 CREATE TRIGGER trigger_07c94931164e BEFORE INSERT OR UPDATE ON push_event_payloads FOR EACH ROW EXECUTE FUNCTION trigger_07c94931164e();
+
+CREATE TRIGGER trigger_21e7a2602957 BEFORE INSERT OR UPDATE ON ci_build_needs FOR EACH ROW EXECUTE FUNCTION trigger_21e7a2602957();
+
+CREATE TRIGGER trigger_3f6129be01d2 BEFORE INSERT OR UPDATE ON ci_builds FOR EACH ROW EXECUTE FUNCTION trigger_3f6129be01d2();
+
+CREATE TRIGGER trigger_490d204c00b3 BEFORE INSERT OR UPDATE ON ci_stages FOR EACH ROW EXECUTE FUNCTION trigger_490d204c00b3();
+
+CREATE TRIGGER trigger_51ab7cef8934 BEFORE INSERT OR UPDATE ON ci_builds_runner_session FOR EACH ROW EXECUTE FUNCTION trigger_51ab7cef8934();
+
+CREATE TRIGGER trigger_542d6c2ad72e BEFORE INSERT OR UPDATE ON ci_builds_metadata FOR EACH ROW EXECUTE FUNCTION trigger_542d6c2ad72e();
 
 CREATE TRIGGER trigger_69523443cc10 BEFORE INSERT OR UPDATE ON events FOR EACH ROW EXECUTE FUNCTION trigger_69523443cc10();
 
 CREATE TRIGGER trigger_77f5e1d20482 BEFORE INSERT OR UPDATE ON deployments FOR EACH ROW EXECUTE FUNCTION trigger_77f5e1d20482();
+
+CREATE TRIGGER trigger_8485e97c00e3 BEFORE INSERT OR UPDATE ON ci_sources_pipelines FOR EACH ROW EXECUTE FUNCTION trigger_8485e97c00e3();
+
+CREATE TRIGGER trigger_8487d4de3e7b BEFORE INSERT OR UPDATE ON ci_builds_metadata FOR EACH ROW EXECUTE FUNCTION trigger_8487d4de3e7b();
+
+CREATE TRIGGER trigger_91dc388a5fe6 BEFORE INSERT OR UPDATE ON ci_build_trace_sections FOR EACH ROW EXECUTE FUNCTION trigger_91dc388a5fe6();
+
+CREATE TRIGGER trigger_aebe8b822ad3 BEFORE INSERT OR UPDATE ON taggings FOR EACH ROW EXECUTE FUNCTION trigger_aebe8b822ad3();
+
+CREATE TRIGGER trigger_be1804f21693 BEFORE INSERT OR UPDATE ON ci_job_artifacts FOR EACH ROW EXECUTE FUNCTION trigger_be1804f21693();
+
+CREATE TRIGGER trigger_cf2f9e35f002 BEFORE INSERT OR UPDATE ON ci_build_trace_chunks FOR EACH ROW EXECUTE FUNCTION trigger_cf2f9e35f002();
 
 CREATE TRIGGER trigger_f1ca8ec18d78 BEFORE INSERT OR UPDATE ON geo_job_artifact_deleted_events FOR EACH ROW EXECUTE FUNCTION trigger_f1ca8ec18d78();
 
@@ -25656,132 +25648,6 @@ CREATE TRIGGER trigger_has_external_wiki_on_insert AFTER INSERT ON integrations 
 
 CREATE TRIGGER trigger_has_external_wiki_on_update AFTER UPDATE ON integrations FOR EACH ROW WHEN ((((new.type)::text = 'ExternalWikiService'::text) AND (old.active <> new.active) AND (new.project_id IS NOT NULL))) EXECUTE FUNCTION set_has_external_wiki();
 
-ALTER TABLE ONLY gitlab_ci.ci_unit_test_failures
-    ADD CONSTRAINT fk_0f09856e1f FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT fk_262d4c2d19 FOREIGN KEY (auto_canceled_by_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_sections
-    ADD CONSTRAINT fk_264e112c66 FOREIGN KEY (section_name_id) REFERENCES gitlab_ci.ci_build_trace_section_names(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT fk_3a9eaa254d FOREIGN KEY (stage_id) REFERENCES gitlab_ci.ci_stages(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT fk_3d34ab2e06 FOREIGN KEY (pipeline_schedule_id) REFERENCES gitlab_ci.ci_pipeline_schedules(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_schedule_variables
-    ADD CONSTRAINT fk_41c35fda51 FOREIGN KEY (pipeline_schedule_id) REFERENCES gitlab_ci.ci_pipeline_schedules(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_sections
-    ADD CONSTRAINT fk_4ebe41f502 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT fk_6661f4f0e8 FOREIGN KEY (resource_group_id) REFERENCES gitlab_ci.ci_resource_groups(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT fk_87f4cefcda FOREIGN KEY (upstream_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT fk_a2141b1522 FOREIGN KEY (auto_canceled_by_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_trigger_requests
-    ADD CONSTRAINT fk_b8ec8b7245 FOREIGN KEY (trigger_id) REFERENCES gitlab_ci.ci_triggers(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
-    ADD CONSTRAINT fk_be5624bf37 FOREIGN KEY (source_job_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds
-    ADD CONSTRAINT fk_d3130c9a7f FOREIGN KEY (commit_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
-    ADD CONSTRAINT fk_d4e29af7d7 FOREIGN KEY (source_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_test_case_failures
-    ADD CONSTRAINT fk_d69404d827 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines
-    ADD CONSTRAINT fk_d80e161c54 FOREIGN KEY (ci_ref_id) REFERENCES gitlab_ci.ci_refs(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_resources
-    ADD CONSTRAINT fk_e169a8e3d5 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_pipelines
-    ADD CONSTRAINT fk_e1bad85861 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_variables
-    ADD CONSTRAINT fk_f29c5f4380 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_stages
-    ADD CONSTRAINT fk_fb57e6cc56 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_pending_states
-    ADD CONSTRAINT fk_rails_0bbbfeaf9d FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_trace_chunks
-    ADD CONSTRAINT fk_rails_1013b761f2 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_sources_projects
-    ADD CONSTRAINT fk_rails_10a1eb379a FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_report_results
-    ADD CONSTRAINT fk_rails_16cb1ff064 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_unit_test_failures
-    ADD CONSTRAINT fk_rails_259da3e79c FOREIGN KEY (unit_test_id) REFERENCES gitlab_ci.ci_unit_tests(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_build_needs
-    ADD CONSTRAINT fk_rails_3cf221d4ed FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_resources
-    ADD CONSTRAINT fk_rails_430336af2d FOREIGN KEY (resource_group_id) REFERENCES gitlab_ci.ci_resource_groups(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_running_builds
-    ADD CONSTRAINT fk_rails_5ca491d360 FOREIGN KEY (runner_id) REFERENCES gitlab_ci.ci_runners(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_chat_data
-    ADD CONSTRAINT fk_rails_64ebfab6b3 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds_runner_session
-    ADD CONSTRAINT fk_rails_70707857d3 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pending_builds
-    ADD CONSTRAINT fk_rails_725a2644a3 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_runner_namespaces
-    ADD CONSTRAINT fk_rails_8767676b7a FOREIGN KEY (runner_id) REFERENCES gitlab_ci.ci_runners(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_messages
-    ADD CONSTRAINT fk_rails_8d3b04e3e1 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipelines_config
-    ADD CONSTRAINT fk_rails_906c9a2533 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_pipeline_artifacts
-    ADD CONSTRAINT fk_rails_a9e811a466 FOREIGN KEY (pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_job_artifacts
-    ADD CONSTRAINT fk_rails_c5137cb2c1 FOREIGN KEY (job_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_running_builds
-    ADD CONSTRAINT fk_rails_da45cfa165 FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_builds_metadata
-    ADD CONSTRAINT fk_rails_e20479742e FOREIGN KEY (build_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_test_case_failures
-    ADD CONSTRAINT fk_rails_eab6349715 FOREIGN KEY (test_case_id) REFERENCES gitlab_ci.ci_test_cases(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_daily_build_group_report_results
-    ADD CONSTRAINT fk_rails_ee072d13b3 FOREIGN KEY (last_pipeline_id) REFERENCES gitlab_ci.ci_pipelines(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_ci.ci_job_variables
-    ADD CONSTRAINT fk_rails_fbf3b34792 FOREIGN KEY (job_id) REFERENCES gitlab_ci.ci_builds(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY gitlab_shared.batched_background_migration_jobs
-    ADD CONSTRAINT fk_rails_432153b86d FOREIGN KEY (batched_background_migration_id) REFERENCES gitlab_shared.batched_background_migrations(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES integrations(id) ON DELETE CASCADE;
 
@@ -25791,8 +25657,17 @@ ALTER TABLE ONLY deployments
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_013c9f36ca FOREIGN KEY (due_date_sourcing_epic_id) REFERENCES epics(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY clusters_applications_runners
+    ADD CONSTRAINT fk_02de2ded36 FOREIGN KEY (runner_id) REFERENCES ci_runners(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_03c671965c FOREIGN KEY (design_id) REFERENCES design_management_designs(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY terraform_state_versions
+    ADD CONSTRAINT fk_04b91e4a9f FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_test_cases
+    ADD CONSTRAINT fk_0526c30ded FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_05f1e72feb FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -25814,6 +25689,9 @@ ALTER TABLE ONLY notification_settings
 
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_0d3f677137 FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_unit_test_failures
+    ADD CONSTRAINT fk_0f09856e1f FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_pages_metadata
     ADD CONSTRAINT fk_0fd5b22688 FOREIGN KEY (pages_deployment_id) REFERENCES pages_deployments(id) ON DELETE SET NULL;
@@ -25842,6 +25720,9 @@ ALTER TABLE ONLY geo_event_log
 ALTER TABLE ONLY project_features
     ADD CONSTRAINT fk_18513d9b92 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_190998ef09 FOREIGN KEY (external_pull_request_id) REFERENCES external_pull_requests(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY analytics_devops_adoption_segments
     ADD CONSTRAINT fk_190a24754d FOREIGN KEY (display_namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -25850,6 +25731,9 @@ ALTER TABLE ONLY user_details
 
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT fk_1d37cddf91 FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_1e53c97c0a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY boards
     ADD CONSTRAINT fk_1e9a074a35 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -25866,6 +25750,9 @@ ALTER TABLE ONLY users_star_projects
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT fk_2358b75436 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_stages
+    ADD CONSTRAINT fk_2360681d1d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY import_failures
     ADD CONSTRAINT fk_24b824da43 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -25878,11 +25765,20 @@ ALTER TABLE ONLY epics
 ALTER TABLE ONLY projects
     ADD CONSTRAINT fk_25d8780d11 FOREIGN KEY (marked_for_deletion_by_user_id) REFERENCES users(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_262d4c2d19 FOREIGN KEY (auto_canceled_by_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_build_trace_sections
+    ADD CONSTRAINT fk_264e112c66 FOREIGN KEY (section_name_id) REFERENCES ci_build_trace_section_names(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_27548c6db3 FOREIGN KEY (hashed_storage_migrated_event_id) REFERENCES geo_hashed_storage_migrated_events(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY deployments
     ADD CONSTRAINT fk_289bba3222 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_freeze_periods
+    ADD CONSTRAINT fk_2e02bbd1a6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY notes
     ADD CONSTRAINT fk_2e82291620 FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE SET NULL;
@@ -25902,6 +25798,9 @@ ALTER TABLE ONLY approvals
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_319256d87a FOREIGN KEY (file_template_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_group_variables
+    ADD CONSTRAINT fk_33ae4d58d8 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_3448c97865 FOREIGN KEY (push_rule_id) REFERENCES push_rules(id) ON DELETE SET NULL;
 
@@ -25920,17 +25819,29 @@ ALTER TABLE ONLY push_event_payloads
 ALTER TABLE ONLY bulk_import_exports
     ADD CONSTRAINT fk_39c726d3b5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_3a9eaa254d FOREIGN KEY (stage_id) REFERENCES ci_stages(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_3b8c72ea56 FOREIGN KEY (sprint_id) REFERENCES sprints(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_3c1fd1cccc FOREIGN KEY (due_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_3d34ab2e06 FOREIGN KEY (pipeline_schedule_id) REFERENCES ci_pipeline_schedules(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_pipeline_schedule_variables
+    ADD CONSTRAINT fk_41c35fda51 FOREIGN KEY (pipeline_schedule_id) REFERENCES ci_pipeline_schedules(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_42c3b54bed FOREIGN KEY (cache_invalidation_event_id) REFERENCES geo_cache_invalidation_events(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY remote_mirrors
     ADD CONSTRAINT fk_43a9aa4ca8 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_runner_projects
+    ADD CONSTRAINT fk_4478a6f1e4 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY todos
     ADD CONSTRAINT fk_45054f9c45 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -25941,11 +25852,17 @@ ALTER TABLE ONLY releases
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_4a99ebfd60 FOREIGN KEY (repositories_changed_event_id) REFERENCES geo_repositories_changed_events(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_build_trace_sections
+    ADD CONSTRAINT fk_4ebe41f502 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT fk_51ab4b6089 FOREIGN KEY (prometheus_alert_id) REFERENCES prometheus_alerts(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY path_locks
     ADD CONSTRAINT fk_5265c98f24 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_site_profiles_pipelines
+    ADD CONSTRAINT fk_53849b0ad5 FOREIGN KEY (ci_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY clusters_applications_prometheus
     ADD CONSTRAINT fk_557e773639 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
@@ -25986,6 +25903,12 @@ ALTER TABLE ONLY events
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_641731faff FOREIGN KEY (updated_by_id) REFERENCES users(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_6661f4f0e8 FOREIGN KEY (resource_group_id) REFERENCES ci_resource_groups(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY project_pages_metadata
+    ADD CONSTRAINT fk_69366a119e FOREIGN KEY (artifacts_archive_id) REFERENCES ci_job_artifacts(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY application_settings
     ADD CONSTRAINT fk_693b8795e4 FOREIGN KEY (push_rule_id) REFERENCES push_rules(id) ON DELETE SET NULL;
 
@@ -26025,6 +25948,9 @@ ALTER TABLE ONLY vulnerabilities
 ALTER TABLE ONLY oauth_openid_requests
     ADD CONSTRAINT fk_77114b3b09 FOREIGN KEY (access_grant_id) REFERENCES oauth_access_grants(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_resource_groups
+    ADD CONSTRAINT fk_774722d144 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY users
     ADD CONSTRAINT fk_789cd90b35 FOREIGN KEY (accepted_term_id) REFERENCES application_setting_terms(id) ON DELETE CASCADE;
 
@@ -26036,6 +25962,9 @@ ALTER TABLE ONLY analytics_devops_adoption_snapshots
 
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_7a5553d60f FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_unit_tests
+    ADD CONSTRAINT fk_7a8fabf0a8 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_branches
     ADD CONSTRAINT fk_7a9c6d93e7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26076,11 +26005,17 @@ ALTER TABLE ONLY merge_request_diffs
 ALTER TABLE ONLY requirements
     ADD CONSTRAINT fk_85044baef0 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_86635dbd80 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_86c84214ec FOREIGN KEY (repository_renamed_event_id) REFERENCES geo_repository_renamed_events(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_package_files
     ADD CONSTRAINT fk_86f0f182f8 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_87f4cefcda FOREIGN KEY (upstream_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT fk_88b4d546ef FOREIGN KEY (start_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
@@ -26105,6 +26040,9 @@ ALTER TABLE ONLY releases
 
 ALTER TABLE ONLY protected_tags
     ADD CONSTRAINT fk_8e4af87648 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_schedules
+    ADD CONSTRAINT fk_8ead60fcc4 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY todos
     ADD CONSTRAINT fk_91d1f47b13 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
@@ -26157,6 +26095,9 @@ ALTER TABLE ONLY protected_environments
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT fk_9e49e5c2b7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipeline_schedules
+    ADD CONSTRAINT fk_9ea99f58d2 FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY protected_branch_push_access_levels
     ADD CONSTRAINT fk_9ffc86a3d9 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
 
@@ -26166,6 +26107,15 @@ ALTER TABLE ONLY deployment_merge_requests
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_a194299be1 FOREIGN KEY (moved_to_id) REFERENCES issues(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_a2141b1522 FOREIGN KEY (auto_canceled_by_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_a23be95014 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_site_profiles_builds
+    ADD CONSTRAINT fk_a325505e99 FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT fk_a44ff95be5 FOREIGN KEY (parent_id) REFERENCES bulk_import_entities(id) ON DELETE CASCADE;
 
@@ -26174,6 +26124,9 @@ ALTER TABLE ONLY users
 
 ALTER TABLE ONLY lfs_objects_projects
     ADD CONSTRAINT fk_a56e02279c FOREIGN KEY (lfs_object_id) REFERENCES lfs_objects(id) ON DELETE RESTRICT NOT VALID;
+
+ALTER TABLE ONLY dast_profiles_pipelines
+    ADD CONSTRAINT fk_a60cad829d FOREIGN KEY (ci_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_a6963e8447 FOREIGN KEY (target_project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26190,8 +26143,14 @@ ALTER TABLE ONLY alert_management_alerts
 ALTER TABLE ONLY identities
     ADD CONSTRAINT fk_aade90f0fc FOREIGN KEY (saml_provider_id) REFERENCES saml_providers(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_acd9737679 FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_ad525e1f87 FOREIGN KEY (merge_user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_variables
+    ADD CONSTRAINT fk_ada5eb64b3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_ae440388cc FOREIGN KEY (latest_closed_by_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -26223,6 +26182,9 @@ ALTER TABLE ONLY external_status_checks_protected_branches
 ALTER TABLE ONLY issue_assignees
     ADD CONSTRAINT fk_b7d881734a FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_trigger_requests
+    ADD CONSTRAINT fk_b8ec8b7245 FOREIGN KEY (trigger_id) REFERENCES ci_triggers(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY deployments
     ADD CONSTRAINT fk_b9a3851b82 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -26238,8 +26200,14 @@ ALTER TABLE ONLY project_compliance_framework_settings
 ALTER TABLE ONLY snippets
     ADD CONSTRAINT fk_be41fd4bb7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_be5624bf37 FOREIGN KEY (source_job_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY packages_maven_metadata
     ADD CONSTRAINT fk_be88aed360 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_befce0568a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY design_management_versions
     ADD CONSTRAINT fk_c1440b4896 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -26301,17 +26269,29 @@ ALTER TABLE ONLY project_mirror_data
 ALTER TABLE ONLY environments
     ADD CONSTRAINT fk_d1c8c1da6a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_d3130c9a7f FOREIGN KEY (commit_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY web_hooks
     ADD CONSTRAINT fk_d47999a98a FOREIGN KEY (service_id) REFERENCES integrations(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_d4e29af7d7 FOREIGN KEY (source_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_d5af95fcd9 FOREIGN KEY (lfs_object_deleted_event_id) REFERENCES geo_lfs_object_deleted_events(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_test_case_failures
+    ADD CONSTRAINT fk_d69404d827 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_d6cf4279f7 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY metrics_users_starred_dashboards
     ADD CONSTRAINT fk_d76a2b9a8c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_d80e161c54 FOREIGN KEY (ci_ref_id) REFERENCES ci_refs(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY system_note_metadata
     ADD CONSTRAINT fk_d83a918cb1 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
@@ -26334,8 +26314,20 @@ ALTER TABLE ONLY issues
 ALTER TABLE ONLY experiment_subjects
     ADD CONSTRAINT fk_dfc3e211d4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_resources
+    ADD CONSTRAINT fk_e169a8e3d5 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_e1bad85861 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY gitlab_subscriptions
     ADD CONSTRAINT fk_e2595d00a1 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_triggers
+    ADD CONSTRAINT fk_e3e63f966e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_scanner_profiles_builds
+    ADD CONSTRAINT fk_e4c49200f8 FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_e719a85f8a FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -26357,6 +26349,12 @@ ALTER TABLE ONLY sprints
 
 ALTER TABLE ONLY application_settings
     ADD CONSTRAINT fk_e8a145f3a7 FOREIGN KEY (instance_administrators_group_id) REFERENCES namespaces(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY vulnerability_statistics
+    ADD CONSTRAINT fk_e8b13c928f FOREIGN KEY (latest_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_triggers
+    ADD CONSTRAINT fk_e8e10d1964 FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY integrations
     ADD CONSTRAINT fk_e8fe908a34 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -26388,6 +26386,9 @@ ALTER TABLE ONLY epics
 ALTER TABLE ONLY boards
     ADD CONSTRAINT fk_f15266b5f9 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipeline_variables
+    ADD CONSTRAINT fk_f29c5f4380 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY status_check_responses
     ADD CONSTRAINT fk_f3953d86c6 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
@@ -26406,11 +26407,20 @@ ALTER TABLE ONLY cluster_agents
 ALTER TABLE ONLY protected_tag_create_access_levels
     ADD CONSTRAINT fk_f7dfda8c51 FOREIGN KEY (protected_tag_id) REFERENCES protected_tags(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_stages
+    ADD CONSTRAINT fk_fb57e6cc56 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY system_note_metadata
     ADD CONSTRAINT fk_fbd87415c9 FOREIGN KEY (description_version_id) REFERENCES description_versions(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY vulnerability_remediations
     ADD CONSTRAINT fk_fc61a535a0 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_daily_build_group_report_results
+    ADD CONSTRAINT fk_fd1858fefd FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY merge_requests
+    ADD CONSTRAINT fk_fd82eae0b9 FOREIGN KEY (head_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY project_import_data
     ADD CONSTRAINT fk_ffb9ee3a10 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26463,8 +26473,17 @@ ALTER TABLE ONLY ip_restrictions
 ALTER TABLE ONLY terraform_state_versions
     ADD CONSTRAINT fk_rails_04f176e239 FOREIGN KEY (terraform_state_id) REFERENCES terraform_states(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_build_report_results
+    ADD CONSTRAINT fk_rails_056d298d48 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE incident_management_pending_alert_escalations
     ADD CONSTRAINT fk_rails_057c1e3d87 FOREIGN KEY (rule_id) REFERENCES incident_management_escalation_rules(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_daily_build_group_report_results
+    ADD CONSTRAINT fk_rails_0667f7608c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_subscriptions_projects
+    ADD CONSTRAINT fk_rails_0818751483 FOREIGN KEY (downstream_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY trending_projects
     ADD CONSTRAINT fk_rails_09feecd872 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26480,6 +26499,9 @@ ALTER TABLE ONLY packages_debian_group_distributions
 
 ALTER TABLE ONLY packages_conan_file_metadata
     ADD CONSTRAINT fk_rails_0afabd9328 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_build_pending_states
+    ADD CONSTRAINT fk_rails_0bbbfeaf9d FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY operations_user_lists
     ADD CONSTRAINT fk_rails_0c716e079b FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26505,11 +26527,17 @@ ALTER TABLE ONLY issue_email_participants
 ALTER TABLE ONLY merge_request_context_commits
     ADD CONSTRAINT fk_rails_0fe0039f60 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_build_trace_chunks
+    ADD CONSTRAINT fk_rails_1013b761f2 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY vulnerability_exports
     ADD CONSTRAINT fk_rails_1019162882 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY prometheus_alert_events
     ADD CONSTRAINT fk_rails_106f901176 FOREIGN KEY (prometheus_alert_id) REFERENCES prometheus_alerts(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_sources_projects
+    ADD CONSTRAINT fk_rails_10a1eb379a FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY zoom_meetings
     ADD CONSTRAINT fk_rails_1190f0e0fa FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26538,11 +26566,17 @@ ALTER TABLE ONLY diff_note_positions
 ALTER TABLE ONLY users_security_dashboard_projects
     ADD CONSTRAINT fk_rails_150cd5682c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_build_report_results
+    ADD CONSTRAINT fk_rails_16cb1ff064 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY project_deploy_tokens
     ADD CONSTRAINT fk_rails_170e03cbaf FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY analytics_cycle_analytics_project_stages
     ADD CONSTRAINT fk_rails_1722574860 FOREIGN KEY (start_event_label_id) REFERENCES labels(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_build_infos
+    ADD CONSTRAINT fk_rails_17a9a0dffc FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY security_orchestration_policy_rule_schedules
     ADD CONSTRAINT fk_rails_17ade83f17 FOREIGN KEY (security_orchestration_policy_configuration_id) REFERENCES security_orchestration_policy_configurations(id) ON DELETE CASCADE;
@@ -26613,6 +26647,9 @@ ALTER TABLE ONLY boards_epic_lists
 ALTER TABLE ONLY approval_merge_request_rules_groups
     ADD CONSTRAINT fk_rails_2020a7124a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY vulnerability_feedback
+    ADD CONSTRAINT fk_rails_20976e6fd9 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY user_statuses
     ADD CONSTRAINT fk_rails_2178592333 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
@@ -26639,6 +26676,9 @@ ALTER TABLE ONLY group_custom_attributes
 
 ALTER TABLE ONLY incident_management_oncall_rotations
     ADD CONSTRAINT fk_rails_256e0bc604 FOREIGN KEY (oncall_schedule_id) REFERENCES incident_management_oncall_schedules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_unit_test_failures
+    ADD CONSTRAINT fk_rails_259da3e79c FOREIGN KEY (unit_test_id) REFERENCES ci_unit_tests(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY analytics_devops_adoption_snapshots
     ADD CONSTRAINT fk_rails_25da9a92c0 FOREIGN KEY (segment_id) REFERENCES analytics_devops_adoption_segments(id) ON DELETE CASCADE;
@@ -26721,6 +26761,9 @@ ALTER TABLE ONLY container_repositories
 ALTER TABLE ONLY clusters_applications_jupyter
     ADD CONSTRAINT fk_rails_331f0aff78 FOREIGN KEY (oauth_application_id) REFERENCES oauth_applications(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY merge_request_metrics
+    ADD CONSTRAINT fk_rails_33ae169d48 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY suggestions
     ADD CONSTRAINT fk_rails_33b03a535c FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
 
@@ -26732,6 +26775,9 @@ ALTER TABLE ONLY metrics_dashboard_annotations
 
 ALTER TABLE ONLY wiki_page_slugs
     ADD CONSTRAINT fk_rails_358b46be14 FOREIGN KEY (wiki_page_meta_id) REFERENCES wiki_page_meta(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_job_token_project_scope_links
+    ADD CONSTRAINT fk_rails_35f7f506ce FOREIGN KEY (added_by_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY board_labels
     ADD CONSTRAINT fk_rails_362b0600a3 FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;
@@ -26769,6 +26815,9 @@ ALTER TABLE ONLY self_managed_prometheus_alert_events
 ALTER TABLE ONLY chat_teams
     ADD CONSTRAINT fk_rails_3b543909cb FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_build_needs
+    ADD CONSTRAINT fk_rails_3cf221d4ed FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY cluster_groups
     ADD CONSTRAINT fk_rails_3d28377556 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -26780,6 +26829,9 @@ ALTER TABLE ONLY snippet_user_mentions
 
 ALTER TABLE ONLY clusters_applications_helm
     ADD CONSTRAINT fk_rails_3e2b1c06bc FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_package_file_build_infos
+    ADD CONSTRAINT fk_rails_3e3f630188 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY epic_user_mentions
     ADD CONSTRAINT fk_rails_3eaf4d88cc FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;
@@ -26802,8 +26854,17 @@ ALTER TABLE ONLY geo_node_namespace_links
 ALTER TABLE ONLY epic_issues
     ADD CONSTRAINT fk_rails_4209981af6 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_refs
+    ADD CONSTRAINT fk_rails_4249db8cc3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY security_orchestration_policy_configurations
     ADD CONSTRAINT fk_rails_42ed6c25ec FOREIGN KEY (security_policy_management_project_id) REFERENCES projects(id) ON DELETE RESTRICT;
+
+ALTER TABLE ONLY ci_resources
+    ADD CONSTRAINT fk_rails_430336af2d FOREIGN KEY (resource_group_id) REFERENCES ci_resource_groups(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY batched_background_migration_jobs
+    ADD CONSTRAINT fk_rails_432153b86d FOREIGN KEY (batched_background_migration_id) REFERENCES batched_background_migrations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY operations_strategies_user_lists
     ADD CONSTRAINT fk_rails_43241e8d29 FOREIGN KEY (strategy_id) REFERENCES operations_strategies(id) ON DELETE CASCADE;
@@ -26841,8 +26902,17 @@ ALTER TABLE ONLY vulnerability_feedback
 ALTER TABLE ONLY user_custom_attributes
     ADD CONSTRAINT fk_rails_47b91868a8 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pending_builds
+    ADD CONSTRAINT fk_rails_480669c3b3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY upcoming_reconciliations
     ADD CONSTRAINT fk_rails_497b4938ac FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_artifacts
+    ADD CONSTRAINT fk_rails_4a70390ca6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_job_token_project_scope_links
+    ADD CONSTRAINT fk_rails_4b2ee3290b FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_deletion_schedules
     ADD CONSTRAINT fk_rails_4b8c694a6c FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -26877,6 +26947,9 @@ ALTER TABLE ONLY geo_repository_renamed_events
 ALTER TABLE ONLY aws_roles
     ADD CONSTRAINT fk_rails_4ed56f4720 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY security_scans
+    ADD CONSTRAINT fk_rails_4ef1e6b4c6 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY packages_debian_publications
     ADD CONSTRAINT fk_rails_4fc8ebd03e FOREIGN KEY (distribution_id) REFERENCES packages_debian_project_distributions(id) ON DELETE CASCADE;
 
@@ -26888,6 +26961,9 @@ ALTER TABLE ONLY resource_iteration_events
 
 ALTER TABLE ONLY status_page_settings
     ADD CONSTRAINT fk_rails_506e5ba391 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_project_monthly_usages
+    ADD CONSTRAINT fk_rails_508bcd4aa6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_repository_storage_moves
     ADD CONSTRAINT fk_rails_5106dbd44a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26961,6 +27037,9 @@ ALTER TABLE ONLY vulnerability_scanners
 ALTER TABLE ONLY reviews
     ADD CONSTRAINT fk_rails_5ca11d8c31 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_running_builds
+    ADD CONSTRAINT fk_rails_5ca491d360 FOREIGN KEY (runner_id) REFERENCES ci_runners(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY epic_issues
     ADD CONSTRAINT fk_rails_5d942936b4 FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;
 
@@ -26994,6 +27073,9 @@ ALTER TABLE ONLY evidences
 ALTER TABLE ONLY jira_imports
     ADD CONSTRAINT fk_rails_63cbe52ada FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY vulnerability_occurrence_pipelines
+    ADD CONSTRAINT fk_rails_6421e35d7d FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY group_deploy_tokens
     ADD CONSTRAINT fk_rails_6477b01f6b FOREIGN KEY (deploy_token_id) REFERENCES deploy_tokens(id) ON DELETE CASCADE;
 
@@ -27003,11 +27085,17 @@ ALTER TABLE ONLY reviews
 ALTER TABLE ONLY operations_feature_flags
     ADD CONSTRAINT fk_rails_648e241be7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_sources_projects
+    ADD CONSTRAINT fk_rails_64b6855cbc FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY board_group_recent_visits
     ADD CONSTRAINT fk_rails_64bfc19bc5 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY approval_merge_request_rule_sources
     ADD CONSTRAINT fk_rails_64e8ed3c7e FOREIGN KEY (approval_project_rule_id) REFERENCES approval_project_rules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_chat_data
+    ADD CONSTRAINT fk_rails_64ebfab6b3 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY approval_project_rules_protected_branches
     ADD CONSTRAINT fk_rails_65203aa786 FOREIGN KEY (approval_project_rule_id) REFERENCES approval_project_rules(id) ON DELETE CASCADE;
@@ -27042,6 +27130,9 @@ ALTER TABLE ONLY vulnerability_finding_evidence_headers
 ALTER TABLE ONLY geo_hashed_storage_migrated_events
     ADD CONSTRAINT fk_rails_687ed7d7c5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_job_token_project_scope_links
+    ADD CONSTRAINT fk_rails_6904b38465 FOREIGN KEY (target_project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY plan_limits
     ADD CONSTRAINT fk_rails_69f8b6184f FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE;
 
@@ -27066,11 +27157,17 @@ ALTER TABLE ONLY users_security_dashboard_projects
 ALTER TABLE ONLY dast_sites
     ADD CONSTRAINT fk_rails_6febb6ea9c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_builds_runner_session
+    ADD CONSTRAINT fk_rails_70707857d3 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY list_user_preferences
     ADD CONSTRAINT fk_rails_70b2ef5ce2 FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_custom_attributes
     ADD CONSTRAINT fk_rails_719c3dccc5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pending_builds
+    ADD CONSTRAINT fk_rails_725a2644a3 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY security_findings
     ADD CONSTRAINT fk_rails_729b763a54 FOREIGN KEY (scanner_id) REFERENCES vulnerability_scanners(id) ON DELETE CASCADE;
@@ -27128,6 +27225,9 @@ ALTER TABLE ONLY boards_epic_user_preferences
 
 ALTER TABLE ONLY packages_debian_group_distribution_keys
     ADD CONSTRAINT fk_rails_779438f163 FOREIGN KEY (distribution_id) REFERENCES packages_debian_group_distributions(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_subscriptions_projects
+    ADD CONSTRAINT fk_rails_7871f9a97b FOREIGN KEY (upstream_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY terraform_states
     ADD CONSTRAINT fk_rails_78f54ca485 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -27189,6 +27289,9 @@ ALTER TABLE ONLY packages_package_file_build_infos
 ALTER TABLE ONLY boards_epic_boards
     ADD CONSTRAINT fk_rails_874c573878 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_runner_namespaces
+    ADD CONSTRAINT fk_rails_8767676b7a FOREIGN KEY (runner_id) REFERENCES ci_runners(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY software_license_policies
     ADD CONSTRAINT fk_rails_87b2247ce5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -27219,6 +27322,9 @@ ALTER TABLE ONLY packages_conan_metadata
 ALTER TABLE ONLY vulnerability_feedback
     ADD CONSTRAINT fk_rails_8c77e5891a FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY ci_pipeline_messages
+    ADD CONSTRAINT fk_rails_8d3b04e3e1 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE incident_management_pending_alert_escalations
     ADD CONSTRAINT fk_rails_8d8de95da9 FOREIGN KEY (alert_id) REFERENCES alert_management_alerts(id) ON DELETE CASCADE;
 
@@ -27236,6 +27342,9 @@ ALTER TABLE ONLY alert_management_alert_user_mentions
 
 ALTER TABLE ONLY project_daily_statistics
     ADD CONSTRAINT fk_rails_8e549b272d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipelines_config
+    ADD CONSTRAINT fk_rails_906c9a2533 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY approval_project_rules_groups
     ADD CONSTRAINT fk_rails_9071e863d1 FOREIGN KEY (approval_project_rule_id) REFERENCES approval_project_rules(id) ON DELETE CASCADE;
@@ -27284,6 +27393,9 @@ ALTER TABLE ONLY group_repository_storage_moves
 
 ALTER TABLE ONLY resource_label_events
     ADD CONSTRAINT fk_rails_9851a00031 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_job_artifacts
+    ADD CONSTRAINT fk_rails_9862d392f9 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY board_project_recent_visits
     ADD CONSTRAINT fk_rails_98f8843922 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -27387,11 +27499,17 @@ ALTER TABLE ONLY resource_milestone_events
 ALTER TABLE ONLY term_agreements
     ADD CONSTRAINT fk_rails_a88721bcdf FOREIGN KEY (term_id) REFERENCES application_setting_terms(id);
 
+ALTER TABLE ONLY ci_pipeline_artifacts
+    ADD CONSTRAINT fk_rails_a9e811a466 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY merge_request_user_mentions
     ADD CONSTRAINT fk_rails_aa1b2961b1 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY x509_commit_signatures
     ADD CONSTRAINT fk_rails_ab07452314 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_build_trace_sections
+    ADD CONSTRAINT fk_rails_ab7c104e26 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_iteration_events
     ADD CONSTRAINT fk_rails_abf5d4affa FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
@@ -27528,11 +27646,17 @@ ALTER TABLE ONLY packages_nuget_dependency_link_metadata
 ALTER TABLE ONLY group_deploy_keys_groups
     ADD CONSTRAINT fk_rails_c3854f19f5 FOREIGN KEY (group_deploy_key_id) REFERENCES group_deploy_keys(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY pages_deployments
+    ADD CONSTRAINT fk_rails_c3a90cf29b FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY merge_request_user_mentions
     ADD CONSTRAINT fk_rails_c440b9ea31 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY boards_epic_board_recent_visits
     ADD CONSTRAINT fk_rails_c4dcba4a3e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_job_artifacts
+    ADD CONSTRAINT fk_rails_c5137cb2c1 FOREIGN KEY (job_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_events
     ADD CONSTRAINT fk_rails_c6c20d0094 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE SET NULL;
@@ -27630,6 +27754,9 @@ ALTER TABLE ONLY geo_hashed_storage_attachments_events
 ALTER TABLE ONLY merge_request_reviewers
     ADD CONSTRAINT fk_rails_d9fec24b9d FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_running_builds
+    ADD CONSTRAINT fk_rails_da45cfa165 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY jira_imports
     ADD CONSTRAINT fk_rails_da617096ce FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
@@ -27641,6 +27768,9 @@ ALTER TABLE ONLY issues_prometheus_alert_events
 
 ALTER TABLE ONLY board_user_preferences
     ADD CONSTRAINT fk_rails_dbebdaa8fe FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_running_builds
+    ADD CONSTRAINT fk_rails_dc1d0801e8 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerability_occurrence_pipelines
     ADD CONSTRAINT fk_rails_dc3ae04693 FOREIGN KEY (occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
@@ -27669,6 +27799,9 @@ ALTER TABLE ONLY analytics_cycle_analytics_group_stages
 ALTER TABLE ONLY bulk_import_export_uploads
     ADD CONSTRAINT fk_rails_dfbfb45eca FOREIGN KEY (export_id) REFERENCES bulk_import_exports(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_minutes_additional_packs
+    ADD CONSTRAINT fk_rails_e0e0c4e4b1 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY label_priorities
     ADD CONSTRAINT fk_rails_e161058b0f FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;
 
@@ -27677,6 +27810,9 @@ ALTER TABLE ONLY packages_packages
 
 ALTER TABLE ONLY cluster_platforms_kubernetes
     ADD CONSTRAINT fk_rails_e1e2cf841a FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_builds_metadata
+    ADD CONSTRAINT fk_rails_e20479742e FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerability_finding_evidences
     ADD CONSTRAINT fk_rails_e3205a0c65 FOREIGN KEY (vulnerability_occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
@@ -27701,6 +27837,9 @@ ALTER TABLE ONLY approval_merge_request_rule_sources
 
 ALTER TABLE ONLY prometheus_alerts
     ADD CONSTRAINT fk_rails_e6351447ec FOREIGN KEY (prometheus_metric_id) REFERENCES prometheus_metrics(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY requirements_management_test_reports
+    ADD CONSTRAINT fk_rails_e67d085910 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_rails_e6d7c24d1b FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
@@ -27732,6 +27871,9 @@ ALTER TABLE ONLY merge_request_blocks
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_e9eb8dc025 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_test_case_failures
+    ADD CONSTRAINT fk_rails_eab6349715 FOREIGN KEY (test_case_id) REFERENCES ci_test_cases(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY alert_management_alert_user_mentions
     ADD CONSTRAINT fk_rails_eb2de0cdef FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
 
@@ -27752,6 +27894,9 @@ ALTER TABLE ONLY packages_debian_group_distributions
 
 ALTER TABLE ONLY experiment_subjects
     ADD CONSTRAINT fk_rails_ede5754774 FOREIGN KEY (experiment_id) REFERENCES experiments(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_daily_build_group_report_results
+    ADD CONSTRAINT fk_rails_ee072d13b3 FOREIGN KEY (last_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_debian_group_architectures
     ADD CONSTRAINT fk_rails_ef667d1b03 FOREIGN KEY (distribution_id) REFERENCES packages_debian_group_distributions(id) ON DELETE CASCADE;
@@ -27783,6 +27928,9 @@ ALTER TABLE ONLY snippet_repositories
 ALTER TABLE ONLY elastic_reindexing_subtasks
     ADD CONSTRAINT fk_rails_f2cc190164 FOREIGN KEY (elastic_reindexing_task_id) REFERENCES elastic_reindexing_tasks(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipeline_chat_data
+    ADD CONSTRAINT fk_rails_f300456b63 FOREIGN KEY (chat_name_id) REFERENCES chat_names(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY approval_project_rules_users
     ADD CONSTRAINT fk_rails_f365da8250 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
@@ -27813,6 +27961,15 @@ ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
 ALTER TABLE ONLY merge_requests_closing_issues
     ADD CONSTRAINT fk_rails_f8540692be FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_build_trace_section_names
+    ADD CONSTRAINT fk_rails_f8cd72cd26 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY merge_trains
+    ADD CONSTRAINT fk_rails_f90820cb08 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_runner_namespaces
+    ADD CONSTRAINT fk_rails_f9d9ed3308 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT fk_rails_fb3308ad55 FOREIGN KEY (requirement_id) REFERENCES requirements(id) ON DELETE CASCADE;
 
@@ -27824,6 +27981,9 @@ ALTER TABLE ONLY board_project_recent_visits
 
 ALTER TABLE ONLY serverless_domain_cluster
     ADD CONSTRAINT fk_rails_fbdba67eb1 FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_job_variables
+    ADD CONSTRAINT fk_rails_fbf3b34792 FOREIGN KEY (job_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_nuget_metadata
     ADD CONSTRAINT fk_rails_fc0c19f5b4 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
@@ -27845,6 +28005,9 @@ ALTER TABLE ONLY project_tracing_settings
 
 ALTER TABLE ONLY resource_label_events
     ADD CONSTRAINT fk_rails_fe91ece594 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_builds_metadata
+    ADD CONSTRAINT fk_rails_ffcf702a02 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY integrations
     ADD CONSTRAINT fk_services_inherit_from_id FOREIGN KEY (inherit_from_id) REFERENCES integrations(id) ON DELETE CASCADE;
