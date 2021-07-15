@@ -251,9 +251,9 @@ class License < ApplicationRecord
   LICENSEE_ATTRIBUTES = %w[Name Email Company].freeze
 
   validate :valid_license
-  validate :check_users_limit, if: :new_record?, unless: [:validate_with_trueup?, :skip_trueup?]
-  validate :check_trueup, unless: [:persisted?, :skip_trueup?], if: :validate_with_trueup?
-  validate :check_restricted_user_count, if: :skip_trueup?
+  validate :check_users_limit, if: :new_record?, unless: [:validate_with_trueup?, :reconciliation_completed?]
+  validate :check_trueup, unless: [:persisted?, :reconciliation_completed?], if: :validate_with_trueup?
+  validate :check_restricted_user_count, if: :reconciliation_completed?
   validate :not_expired, unless: :persisted?
 
   before_validation :reset_license, if: :data_changed?
@@ -445,8 +445,8 @@ class License < ApplicationRecord
     restricted_attr(:subscription_id)
   end
 
-  def skip_trueup?
-    restricted_attr(:skip_trueup)
+  def reconciliation_completed?
+    restricted_attr(:reconciliation_completed)
   end
 
   def features_from_add_ons
