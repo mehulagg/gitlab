@@ -52,6 +52,8 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 | **Configuration Data for Provisioning**                      | AWS Parameter Store            | Yes                                                          |
 | **AutoScaling Kubernetes**                                   | EKS AutoScaling Agent          | Yes                                                          |
 
+### 2K Cloud Native Hybrid on EKS
+
 <details>
 <summary markdown="span">Click to Expand 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
@@ -305,7 +307,7 @@ This test:
 
 </details>
 
-### 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+### 10K Cloud Native Hybrid on EKS
 
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
