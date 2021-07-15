@@ -422,7 +422,7 @@ export default {
         <gl-form-textarea id="cadence-description" v-model="description" class="w-100" />
       </gl-form-group>
 
-      <div class="form-actions gl-display-flex">
+      <div class="form-actions gl-display-flex gl-flex-wrap">
         <gl-button
           :loading="loading"
           data-testid="save-cadence"
