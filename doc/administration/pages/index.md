@@ -935,22 +935,22 @@ In installations from source:
 
 1. [Migrate existing Pages deployments to object storage.](#migrate-pages-deployments-to-object-storage)
 
-## ZIP storage
+## Zip storage
 
 In GitLab 14.0 the underlying storage format of GitLab Pages is changing from
-files stored directly in disk to a single ZIP archive per project.
+files stored directly in disk to a single zip archive per project.
 
-These ZIP archives can be stored either locally on disk storage or on [object storage](#using-object-storage) if it is configured.
+These zip archives can be stored either locally on disk storage or on [object storage](#using-object-storage) if it is configured.
 
-[Starting from GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/245308) ZIP archives are stored every time pages site is updated.
+[Starting from GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/245308) zip archives are stored every time pages site is updated.
 
-### Migrate legacy storage to ZIP storage
+### Migrate legacy storage to zip storage
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59003) in GitLab 13.11.
 
 GitLab tries to
 [automatically migrate](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54578)
-the old storage format to the new ZIP-based one when you upgrade to GitLab 13.11 or further.
+the old storage format to the new zip-based one when you upgrade to GitLab 13.11 or further.
 However, some projects may fail to be migrated for different reasons.
 To verify that all projects have been migrated successfully, you can manually run the migration:
 
@@ -987,7 +987,7 @@ There are two most common problems this task can report:
   sudo PAGES_MIGRATION_IGNORE_INVALID_ENTRIES=true gitlab-rake gitlab:pages:migrate_legacy_storage
   ```
 
-### Rolling back ZIP migration
+### Rolling back zip migration
 
 If you find that migrated data is invalid, you can remove all migrated data by running:
 
@@ -1002,7 +1002,7 @@ to using that.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/325285) in GitLab 13.11.
 
-Existing Pages deployment objects (which store [ZIP archives](#zip-storage)) can similarly be
+Existing Pages deployment objects (which store [zip archives](#zip-storage)) can similarly be
 migrated to [object storage](#using-object-storage).
 
 Migrate your existing Pages deployments from local storage to object storage:
@@ -1054,7 +1054,7 @@ migrate GitLab Pages to prepare them for GitLab 14.0:
 is the default starting from GitLab 14.0. Skip this step if you're already running GitLab 14.0 or above.
 1. If you want to store your pages content in [object storage](#using-object-storage), make sure to configure it.
 If you want to store the pages content locally or continue using an NFS server, skip this step.
-1. [Migrate legacy storage to ZIP storage.](#migrate-legacy-storage-to-zip-storage)
+1. [Migrate legacy storage to zip storage.](#migrate-legacy-storage-to-zip-storage)
 1. Upgrade GitLab to 14.0.
 
 ## Backup
