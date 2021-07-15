@@ -191,7 +191,7 @@ describe('Value stream analytics component', () => {
     });
 
     it('does not render the stage table events', () => {
-      expect(findStageEvents()).toEqual([]);
+      expect(findStageEvents()).toHaveLength(0);
     });
 
     it('does not render the loading icon', () => {

@@ -17,27 +17,35 @@ export default {
       const {
         time: { days = null, mins = null, hours = null, seconds = null },
       } = this;
+
       if (days) {
         return {
           duration: days,
           units: n__('day', 'days', days),
         };
-      } else if (hours) {
+      }
+
+      if (hours) {
         return {
           duration: hours,
           units: n__('Time|hr', 'Time|hrs', hours),
         };
-      } else if (mins && !days) {
+      }
+
+      if (mins && !days) {
         return {
           duration: mins,
           units: n__('Time|min', 'Time|mins', mins),
         };
-      } else if ((seconds && this.hasData === 1) || seconds === 0) {
+      }
+
+      if ((seconds && this.hasData === 1) || seconds === 0) {
         return {
           duration: seconds,
           units: s__('Time|s'),
         };
       }
+
       return { duration: null, units: null };
     },
   },
