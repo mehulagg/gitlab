@@ -87,6 +87,10 @@ RSpec.describe Security::Scan do
     let!(:second_successful_scan) { create(:security_scan, build: create(:ci_build, :success)) }
     let!(:failed_scan) { create(:security_scan, build: create(:ci_build, :failed)) }
 
+    before do
+      skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/336170"
+    end
+
     subject { described_class.latest_successful_by_build }
 
     it { is_expected.to match_array([second_successful_scan]) }
