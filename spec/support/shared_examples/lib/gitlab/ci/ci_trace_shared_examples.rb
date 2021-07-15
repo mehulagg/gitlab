@@ -811,6 +811,14 @@ RSpec.shared_examples 'trace with enabled live trace feature' do
       it { is_expected.to be_truthy }
     end
 
+    context 'when archived trace record exists but file is not stored' do
+      before do
+        ::Ci::JobArtifact.create!(job: build, project: build.project, file_type: :trace)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
     context 'when live trace exists' do
       before do
         Gitlab::Ci::Trace::ChunkedIO.new(build) do |stream|
