@@ -65,7 +65,7 @@ Prerequisites:
 
 To configure code owners to approve an MR:
 
-- Set up [code owners as eligible approvers](../merge_requests/approvals/rules.md#code-owners-as-eligible-approvers).
+- Set up [code owners as eligible approvers](merge_requests/approvals/rules.md#code-owners-as-eligible-approvers).
 
 The code owners are displayed in the UI by the files or directory they apply to.
 
@@ -90,7 +90,7 @@ To configure code owners to approve merge requests in protected branches:
 
 - Set up [code owner approval on a protected branch](protected_branches.md#require-code-owner-approval-on-a-protected-branch).
 
-[Starting](https://gitlab.com/gitlab-org/gitlab/-/issues/35097) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5, users and groups who are allowed to push to protected branches do not require a merge request to merge their feature branches. Thus, they can skip merge request approval rules, code owners included.
+In [GitLab Premium 13.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/35097), users and groups who are allowed to push to protected branches do not need a merge request to merge their feature branches. Thus, they can skip merge request approval rules, code owners included.
 
 ## When a file matches multiple `CODEOWNERS` entries
 
