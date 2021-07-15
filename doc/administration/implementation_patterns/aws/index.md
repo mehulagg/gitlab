@@ -454,10 +454,12 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
 
----
+<div class="panel panel-info">
 
----
+10K Cloud Native Hybrid on EKS **AutoScaling** Test Results
+{: .panel-heading}
 
+<div class="panel-body">
 This test:
 
 - Started with 5 webservice pods (out of 20 for 10k test) and 5 hosts instead of 10. 
@@ -542,11 +544,8 @@ web_user                                                 | 20/s  | 19.82/s (>9.6
 
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
 
----
-
-**End of 10K Cloud Native Hybrid on EKS AutoScaling Test Results**
-
----
+</div>
+</div>
 
 </details>
 
