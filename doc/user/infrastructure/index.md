@@ -135,5 +135,5 @@ details of `subgroup-B` in the `shared_with_groups` array. This leads to the err
 To workaround this issue, make sure to apply one of the following conditions:
 
 1. The `terraform-user` creates all subgroup resources.
-1. Grant Maintainer or Owner permissions to the `terraform-user` user on `subgroup-B`.
+1. Grant Maintainer or Owner access to the `terraform-user` user on `subgroup-B`.
 1. The `terraform-user` inherited access to `subgroup-B` and `subgroup-B` contains at least one project.
