@@ -1,16 +1,23 @@
+.base-script: &base-script
+  # With .git/hooks/post-checkout in place, Git tries to pull LFS objects, but the image doesn't have Git LFS, and we actually don't care about it for this specific so we just remove the file.
+  # Without removing the file, the error is as follows: "This repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting .git/hooks/post-checkout."
+  - rm -f .git/hooks/post-checkout
+  - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
+      echo "Checking out \$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA ($CI_MERGE_REQUEST_SOURCE_BRANCH_SHA) instead of \$CI_COMMIT_SHA (merge result commit $CI_COMMIT_SHA) so that GitLab image built in omnibus-gitlab-mirror and QA image are in sync.";
+      git checkout -f ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA};
+    else
+      echo "Building the image from \$CI_COMMIT_SHA ($CI_COMMIT_SHA) for this non-merge result pipeline.";
+    fi;
+  - echo "See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#with-pipeline-for-merged-results for more details.";
+
 .base-image-build:
   extends: .use-kaniko
   script:
-    # With .git/hooks/post-checkout in place, Git tries to pull LFS objects, but the image doesn't have Git LFS, and we actually don't care about it for this specific so we just remove the file.
-    # Without removing the file, the error is as follows: "This repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting .git/hooks/post-checkout."
-    - rm -f .git/hooks/post-checkout
-    - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
-        echo "Checking out \$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA ($CI_MERGE_REQUEST_SOURCE_BRANCH_SHA) instead of \$CI_COMMIT_SHA (merge result commit $CI_COMMIT_SHA) so that GitLab image built in omnibus-gitlab-mirror and QA image are in sync.";
-        git checkout -f ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA};
-      else
-        echo "Building the image from \$CI_COMMIT_SHA ($CI_COMMIT_SHA) for this non-merge result pipeline.";
-      fi;
-    - echo "See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#with-pipeline-for-merged-results for more details.";
+    - *base-script
+  retry: 2
+
+.base-image-build-buildkit:
+  extends: .use-buildkit
   retry: 2
 
 # This image is used by:
@@ -21,15 +28,24 @@
 # See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#testing-code-in-merge-requests for more details.
 build-qa-image:
   extends:
-    - .base-image-build
+    - .base-image-build-buildkit
     - .build-images:rules:build-qa-image
   stage: build-images
   needs: []
   variables:
     QA_IMAGE: "${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
   script:
-    - !reference [.base-image-build, script]
-    - /kaniko/executor --context=${CI_PROJECT_DIR} --dockerfile=${CI_PROJECT_DIR}/qa/Dockerfile --destination=${QA_IMAGE} --cache=true
+    - *base-script
+    - |
+      buildctl-daemonless.sh build \
+        --frontend=dockerfile.v0 \
+        --local context="." \
+        --local dockerfile="qa" \
+        --export-cache type=inline \
+        --import-cache type=registry,ref=${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:master \
+        --import-cache type=registry,ref=${QA_IMAGE} \
+        --output type=image,name=${QA_IMAGE},push=true
+
 
 # This image is used by:
 # - The `CNG` pipelines (via the `review-build-cng` job): https://gitlab.com/gitlab-org/build/CNG/-/blob/cfc67136d711e1c8c409bf8e57427a644393da2f/.gitlab-ci.yml#L335
