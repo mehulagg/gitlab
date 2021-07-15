@@ -220,7 +220,7 @@ RSpec.configure do |config|
 
     # TODO: CI Vertical
     # Ensure that all partitions are created
-    Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+    Gitlab::Database::Partitioning::PartitionManager.new.sync_partitions
 
     # Enable all features by default for testing
     # Reset any changes in after hook.
