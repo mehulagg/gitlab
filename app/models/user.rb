@@ -1623,7 +1623,7 @@ class User < ApplicationRecord
         .select('ci_runners.*')
 
       group_runners = Ci::RunnerNamespace
-        .where(namespace_id: Gitlab::ObjectHierarchy.new(owned_groups).base_and_descendants.select(:id))
+        .where(namespace_id: owned_groups.self_and_descendant_ids)
         .joins(:runner)
         .select('ci_runners.*')
 

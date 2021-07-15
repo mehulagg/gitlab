@@ -3600,7 +3600,7 @@ RSpec.describe User do
     end
   end
 
-  describe '#ci_owned_runners' do
+  shared_examples '#ci_owned_runners' do
     let(:user) { create(:user) }
 
     shared_examples :nested_groups_owner do
@@ -3855,6 +3855,20 @@ RSpec.describe User do
       end
 
       it_behaves_like :group_member
+    end
+  end
+
+  describe '#ci_owned_runners' do
+    context 'recursive' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
+
+      it_behaves_like '#ci_owned_runners'
+    end
+
+    context 'linear' do
+      it_behaves_like '#ci_owned_runners'
     end
   end
 
