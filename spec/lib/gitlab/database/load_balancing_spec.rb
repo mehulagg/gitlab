@@ -132,6 +132,8 @@ RSpec.describe Gitlab::Database::LoadBalancing do
 
   describe '.enable?' do
     before do
+      skip "CI Vertical: not yet supported"
+
       clear_load_balancing_configuration
       allow(described_class).to receive(:hosts).and_return(%w(foo))
     end
@@ -379,6 +381,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   # instrumentation) while triggering real queries from the defined model.
   # - We assert the desinations (replica/primary) of the queries in order.
   describe 'LoadBalancing integration tests', :delete do
+    before do
+      skip "CI Vertical: not yet supported"
+    end
+
     before(:all) do
       ActiveRecord::Schema.define do
         create_table :load_balancing_test, force: true do |t|
