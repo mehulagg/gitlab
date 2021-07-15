@@ -1,7 +1,11 @@
 import { GlBanner } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { setCookie, getCookie, removeCookie } from '~/lib/utils/common_utils';
+import { setCookie, parseBoolean } from '~/lib/utils/common_utils';
 import TerraformNotification from '~/projects/terraform_notification/components/terraform_notification.vue';
+
+jest.mock('~/lib/utils/common_utils');
+
+const bannerDissmisedKey = 'terraform_notification_dismissed_for_project_1';
 
 describe('TerraformNotificationBanner', () => {
   let wrapper;
@@ -9,7 +13,6 @@ describe('TerraformNotificationBanner', () => {
   const propsData = {
     projectId: 1,
   };
-  const getCookieName = () => wrapper.vm.bannerDissmisedKey;
   const findBanner = () => wrapper.findComponent(GlBanner);
 
   beforeEach(() => {
@@ -21,19 +24,15 @@ describe('TerraformNotificationBanner', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    removeCookie(getCookieName());
+    parseBoolean.mockReturnValue(false);
   });
 
   describe('when the dismiss cookie is set', () => {
     beforeEach(() => {
-      setCookie(getCookieName(), true);
+      parseBoolean.mockReturnValue(true);
       wrapper = shallowMount(TerraformNotification, {
         propsData,
       });
-    });
-
-    it('should set isVisible property to false', () => {
-      expect(wrapper.vm.isVisible).toBe(false);
     });
 
     it('should not render the banner', () => {
@@ -52,9 +51,12 @@ describe('TerraformNotificationBanner', () => {
       await findBanner().vm.$emit('close');
     });
 
-    it('should remove the banner and set the dismiss cookie', () => {
+    it('should set the cookie with the bannerDissmisedKey', () => {
+      expect(setCookie).toHaveBeenCalledWith(bannerDissmisedKey, true);
+    });
+
+    it('should remove the banner', () => {
       expect(findBanner().exists()).toBe(false);
-      expect(getCookie(getCookieName())).toBe('true');
     });
   });
 });
