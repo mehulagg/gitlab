@@ -37,7 +37,7 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
         before do
           allow(Gitlab::Geo).to receive(:secondary?) { true }
           allow(Gitlab::Geo).to receive(:geo_database_configured?) { geo_database_configured }
-          allow(Gitlab::Database).to receive(:db_read_only?) { db_read_only }
+          allow(Gitlab::Database.main).to receive(:db_read_only?) { db_read_only }
         end
 
         context 'when the Geo tracking DB is not configured' do

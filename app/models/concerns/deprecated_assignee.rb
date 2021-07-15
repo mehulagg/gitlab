@@ -34,7 +34,7 @@ module DeprecatedAssignee
   end
 
   def assignee_ids
-    if Gitlab::Database.read_only? && pending_assignees_population?
+    if Gitlab::Database.main.read_only? && pending_assignees_population?
       return Array(deprecated_assignee_id)
     end
 

@@ -80,62 +80,6 @@ module Gitlab
       name.to_s == CI_DATABASE_NAME
     end
 
-    def self.default_pool_size
-      main.default_pool_size
-    end
-
-    def self.config
-      main.config
-    end
-
-    def self.username
-      main.username
-    end
-
-    def self.database_name
-      main.database_name
-    end
-
-    def self.adapter_name
-      main.adapter_name
-    end
-
-    def self.human_adapter_name
-      main.human_adapter_name
-    end
-
-    def self.disable_prepared_statements
-      main.disable_prepared_statements
-    end
-
-    def self.postgresql?
-      main.postgresql?
-    end
-
-    def self.read_only?
-      main.read_only?
-    end
-
-    def self.read_write?
-      main.read_write?
-    end
-
-    def self.db_read_only?
-      main.db_read_only?
-    end
-
-    def self.db_read_write?
-      main.db_read_write?
-    end
-
-    def self.version
-      main.version
-    end
-
-    def self.postgresql_minimum_supported_version?
-      main.postgresql_minimum_supported_version?
-    end
-
     def self.check_postgres_version_and_print_warning
       return if Gitlab::Runtime.rails_runner?
 
@@ -151,7 +95,7 @@ module Gitlab
                      ███ ███  ██   ██ ██   ██ ██   ████ ██ ██   ████  ██████  
 
           ******************************************************************************
-            You are using PostgreSQL <%= Gitlab::Database.version %> for the #{name} database, but PostgreSQL >= <%= Gitlab::Database::MINIMUM_POSTGRES_VERSION %>
+            You are using PostgreSQL <%= Gitlab::Database.main.version %> for the #{name} database, but PostgreSQL >= <%= Gitlab::Database::MINIMUM_POSTGRES_VERSION %>
             is required for this version of GitLab.
             <% if Rails.env.development? || Rails.env.test? %>
             If using gitlab-development-kit, please find the relevant steps here:

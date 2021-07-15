@@ -328,8 +328,8 @@ module Gitlab
             version: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.container_registry_version }
           },
           database: {
-            adapter: alt_usage_data { Gitlab::Database.adapter_name },
-            version: alt_usage_data { Gitlab::Database.version },
+            adapter: alt_usage_data { Gitlab::Database.main.adapter_name },
+            version: alt_usage_data { Gitlab::Database.main.version },
             pg_system_id: alt_usage_data { Gitlab::Database.system_id }
           },
           mail: {

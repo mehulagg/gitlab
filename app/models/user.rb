@@ -80,7 +80,7 @@ class User < ApplicationRecord
   # to limit database writes to at most once every hour
   # rubocop: disable CodeReuse/ServiceClass
   def update_tracked_fields!(request)
-    return if Gitlab::Database.read_only?
+    return if Gitlab::Database.main.read_only?
 
     update_tracked_fields(request)
 
@@ -848,7 +848,7 @@ class User < ApplicationRecord
   end
 
   def remember_me!
-    super if ::Gitlab::Database.read_write?
+    super if ::Gitlab::Database.main.read_write?
   end
 
   def forget_me!

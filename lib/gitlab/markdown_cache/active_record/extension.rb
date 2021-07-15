@@ -36,7 +36,7 @@ module Gitlab
         end
 
         def save_markdown(updates)
-          return unless persisted? && Gitlab::Database.read_write?
+          return unless persisted? && Gitlab::Database.main.read_write?
 
           update_columns(updates)
         end

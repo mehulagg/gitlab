@@ -11,7 +11,7 @@ if Gitlab::Runtime.console?
   puts " GitLab Shell:".ljust(justify) + "#{Gitlab::VersionInfo.parse(Gitlab::Shell.version)}"
 
   if Gitlab::Database.exists?
-    puts " #{Gitlab::Database.human_adapter_name}:".ljust(justify) + Gitlab::Database.version
+    puts " #{Gitlab::Database.main.human_adapter_name}:".ljust(justify) + Gitlab::Database.main.version
 
     Gitlab.ee do
       if Gitlab::Geo.connected? && Gitlab::Geo.enabled?

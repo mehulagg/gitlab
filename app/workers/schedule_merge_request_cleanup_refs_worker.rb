@@ -18,7 +18,7 @@ class ScheduleMergeRequestCleanupRefsWorker
   BATCH_SIZE = 30
 
   def perform
-    return if Gitlab::Database.read_only?
+    return if Gitlab::Database.main.read_only?
     return unless Feature.enabled?(:merge_request_refs_cleanup, default_enabled: false)
 
     ids = MergeRequest::CleanupSchedule.scheduled_merge_request_ids(LIMIT).map { |id| [id] }
