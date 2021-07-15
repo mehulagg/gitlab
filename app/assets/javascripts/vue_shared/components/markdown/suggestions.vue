@@ -127,8 +127,8 @@ export default {
         this.$emit('apply', { suggestionId, callback, flashContainer: this.$el, message });
       });
 
-      suggestionDiff.$on('applyBatch', () => {
-        this.$emit('applyBatch', { flashContainer: this.$el });
+      suggestionDiff.$on('applyBatch', (message) => {
+        this.$emit('applyBatch', { message, flashContainer: this.$el });
       });
 
       suggestionDiff.$on('addToBatch', (suggestionId) => {

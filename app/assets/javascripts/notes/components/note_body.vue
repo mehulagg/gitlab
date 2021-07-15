@@ -132,8 +132,8 @@ export default {
         message,
       }).then(callback);
     },
-    applySuggestionBatch({ flashContainer }) {
-      return this.submitSuggestionBatch({ flashContainer });
+    applySuggestionBatch({ message, flashContainer }) {
+      return this.submitSuggestionBatch({ message, flashContainer });
     },
     addSuggestionToBatch(suggestionId) {
       const { discussion_id: discussionId, id: noteId } = this.note;
