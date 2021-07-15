@@ -622,6 +622,10 @@ RSpec.describe Ci::Pipeline do
   describe '#has_security_findings?' do
     subject { pipeline.has_security_findings? }
 
+    before do
+      skip "CI Vertical: not yet supported (Secure) https://gitlab.com/gitlab-org/gitlab/-/issues/336198"
+    end
+
     context 'when the pipeline has security_findings' do
       before do
         scan = create(:security_scan, pipeline: pipeline)
