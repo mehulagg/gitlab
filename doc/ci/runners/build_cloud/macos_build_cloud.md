@@ -6,17 +6,12 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Build Cloud runners for macOS (beta)
 
+Build Cloud for macOS Beta provides on-demand GitLab Runners integrated with GitLab SaaS CI/CD for building macOS and IOS apps.
+
 GitLab Build Cloud runners for macOS are in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta)
 and shouldn't be used for production workloads. 
 
-## CI minute quota and pricing
-
-While in beta, the [shared runner pipeline quota](../../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
-applies for groups and projects in the same manner as Linux runners. This will change when the offer transitions to general availability (GA).
-
 ## Virtual machine configuration
-
-GitLab Build Cloud runners for macOS are powered by Mac Server infrastructure hosted by Mac Stadium, a leading provider of enterprise-class cloud solutions for Mac.
 
 The available machine type is `gbc-macos-large`.
 
@@ -26,7 +21,7 @@ The available machine type is `gbc-macos-large`.
 
 ## Quickstart
 
-To start using the runners for macOS:
+To start using the service you need to submit an access request. Once your access request has been granted and your build environment configured, you will need to configure your .gitlab-ci.yml pipeline file as follows:
 
 1. Add a `.gitlab-ci.yml` file to your project repository.
 1. Commit a change to your repository.
@@ -63,3 +58,5 @@ test:
   script:
     - echo "running scripts in the test job"
 ```
+
+**Note** during the beta period we plan to complete the enable to the GitLab macOS Autoscaler and activate the instance-wide macOS Runner Managers on GitLab SaaS. We will notify all beta participants of any planned maintenance in order to complete this work.
