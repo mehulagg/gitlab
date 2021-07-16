@@ -12,9 +12,12 @@ class Member < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include FromUnion
   include UpdateHighestRole
+  include IgnorableColumns
 
   AVATAR_SIZE = 40
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
+
+  ignore_column :invite_email_success, remove_with: '14.2', remove_after: '2021-07-22'
 
   attr_accessor :raw_invite_token
 
