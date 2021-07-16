@@ -467,12 +467,8 @@ class Group < Namespace
 
     group_hierarchy_members = GroupMember.where(source_id: source_ids)
 
-    result = GroupMember.from_union([group_hierarchy_members,
-                                     members_from_self_and_ancestor_group_shares]).authorizable
-
-    Member.revert_build_select_to_initializer # remove_with: '14.2', remove_after: '2021-07-22'
-
-    result
+    GroupMember.from_union([group_hierarchy_members,
+                            members_from_self_and_ancestor_group_shares]).authorizable
   end
 
   def members_with_parents
@@ -490,12 +486,8 @@ class Group < Namespace
                                          .non_minimal_access
                                          .where(source_id: source_ids)
 
-    result = GroupMember.from_union([group_hierarchy_members,
-                                     members_from_self_and_ancestor_group_shares])
-
-    Member.revert_build_select_to_initializer # remove_with: '14.2', remove_after: '2021-07-22'
-
-    result
+    GroupMember.from_union([group_hierarchy_members,
+                            members_from_self_and_ancestor_group_shares])
   end
 
   def members_from_self_and_ancestors_with_effective_access_level

@@ -5,6 +5,8 @@ class ApplicationRecord < ActiveRecord::Base
 
   alias_method :reset, :reload
 
+  class_attribute :enumerate_columns_in_select_statements
+
   def self.without_order
     reorder(nil)
   end
