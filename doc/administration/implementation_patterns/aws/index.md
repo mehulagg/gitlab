@@ -93,7 +93,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
 ---
+
 **2K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+
 ---
 
 </details>
