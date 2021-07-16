@@ -28,6 +28,7 @@ Below is a sample `.gitlab-ci.yml` file that shows how to start using the runner
 .macos_buildcloud_runners:
   tags:
     - shared-macos-amd64
+  image: macos-11-xcode-12
 
 stages:
   - build
