@@ -163,7 +163,8 @@ RSpec.describe Groups::SecurityFeaturesHelper do
         survey_request_svg_path: '/images/illustrations/security-dashboard_empty.svg',
         dashboard_documentation: '/help/user/application_security/security_dashboard/index',
         vulnerabilities_export_endpoint: "/api/v4/security/groups/#{group.id}/vulnerability_exports",
-        scanners: '[]'
+        scanners: '[]',
+        can_admin_vulnerability: 'true'
       }
     end
 

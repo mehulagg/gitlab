@@ -285,6 +285,7 @@ module EE
 
       rule { can?(:read_group_security_dashboard) }.policy do
         enable :create_vulnerability_export
+        enable :admin_vulnerability
         enable :read_security_resource
       end
 
