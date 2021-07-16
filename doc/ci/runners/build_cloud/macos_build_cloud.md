@@ -11,14 +11,6 @@ Build Cloud for macOS Beta provides on-demand GitLab Runners integrated with Git
 GitLab Build Cloud runners for macOS are in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta)
 and shouldn't be used for production workloads. 
 
-## Virtual machine configuration
-
-The available machine type is `gbc-macos-large`.
-
-| Instance type | vCPUS | Memory (GB) | Notes |
-| --------- | --- | ------- | ------- |
-|  `gbc-macos-large` | 4 | 10 | default, beta |
-
 ## Quickstart
 
 To start using the service you need to submit an access request. Once your access request has been granted and your build environment configured, you will need to configure your .gitlab-ci.yml pipeline file as follows:
