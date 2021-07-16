@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 {::options parse_block_html="true" /}
 
-# AWS Specific Implementation patterns **(FREE SELF)**
+# AWS Specific Implementation Patterns **(FREE SELF)**
 
 ## GitLab Cloud Native Hybrid on AWS EKS
 
@@ -232,6 +232,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed |
 
 **End of 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
+
 ---
 
 </details>
