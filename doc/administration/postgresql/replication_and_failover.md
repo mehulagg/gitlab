@@ -258,7 +258,10 @@ patroni['postgresql']['max_replication_slots'] = X
 patroni['postgresql']['max_wal_senders'] = X+1
 
 # Replace XXX.XXX.XXX.XXX/YY with Network Address
-postgresql['trust_auth_cidr_addresses'] = %w(XXX.XXX.XXX.XXX/YY 127.0.0.1/32)
+# trust_ should be limited to loopback,
+# see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 XXX.XXX.XXX.XXX/YY)
+postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 
 # Replace placeholders:
 #
@@ -452,7 +455,7 @@ gitlab-rake gitlab:db:configure
 
 > **Note**: If you encounter a `rake aborted!` error stating that PgBouncer is failing to connect to
 PostgreSQL it may be that your PgBouncer node's IP address is missing from
-PostgreSQL's `trust_auth_cidr_addresses` in `gitlab.rb` on your database nodes. See
+PostgreSQL's `md5_auth_cidr_addresses` or `trust_auth_cidr_addresses` in `gitlab.rb` on your database nodes. See
 [PgBouncer error `ERROR:  pgbouncer cannot connect to server`](#pgbouncer-error-error-pgbouncer-cannot-connect-to-server)
 in the Troubleshooting section before proceeding.
 
@@ -572,7 +575,10 @@ patroni['password'] = 'PATRONI_API_PASSWORD'
 patroni['postgresql']['max_replication_slots'] = 6
 patroni['postgresql']['max_wal_senders'] = 7
 
-postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/16 127.0.0.1/32)
+# trust_ should be limited to loopback,
+# see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/16)
+postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 
 # Configure the Consul agent
 consul['services'] = %w(postgresql)
@@ -664,7 +670,10 @@ patroni['password'] = 'PATRONI_API_PASSWORD'
 # available database connections.
 patroni['postgresql']['max_wal_senders'] = 7
 
-postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/16 127.0.0.1/32)
+# trust_ should be limited to loopback,
+# see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/16)
+postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 
 consul['configuration'] = {
   server: true,
@@ -1107,11 +1116,12 @@ PG::ConnectionBad: ERROR:  pgbouncer cannot connect to server
 ```
 
 The problem may be that your PgBouncer node's IP address is not included in the
-`trust_auth_cidr_addresses` setting in `/etc/gitlab/gitlab.rb` on the database nodes.
+`md5_auth_cidr_addresses` or `trust_auth_cidr_addresses` settings in
+`/etc/gitlab/gitlab.rb` on the database nodes.
 
 You can confirm that this is the issue by checking the PostgreSQL log on the master
-database node. If you see the following error then `trust_auth_cidr_addresses`
-is the problem.
+database node. If you see the following error then these settings are
+the problem.
 
 ```plaintext
 2018-03-29_13:59:12.11776 FATAL:  no pg_hba.conf entry for host "123.123.123.123", user "pgbouncer", database "gitlabhq_production", SSL off
@@ -1120,7 +1130,10 @@ is the problem.
 To fix the problem, add the IP address to `/etc/gitlab/gitlab.rb`.
 
 ```ruby
-postgresql['trust_auth_cidr_addresses'] = %w(123.123.123.123/32 <other_cidrs>)
+# trust_ should be limited to loopback,
+# see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 <other_cidrs>)
+postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 ```
 
 [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
@@ -1203,7 +1216,10 @@ To fix the problem, ensure the loopback interface is included in the CIDR addres
 1. Edit `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   postgresql['trust_auth_cidr_addresses'] = %w(<other_cidrs> 127.0.0.1/32)
+   # trust_ should be limited to loopback,
+   # see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+   postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 <other_cidrs>)
+   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.

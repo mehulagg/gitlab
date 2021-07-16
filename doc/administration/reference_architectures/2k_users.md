@@ -291,7 +291,10 @@ further configuration steps.
    postgresql['sql_user_password'] = 'POSTGRESQL_PASSWORD_HASH'
 
    # Replace APPLICATION_SERVER_IP_BLOCK with the CIDR address of the application node
-   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 APPLICATION_SERVER_IP_BLOCK)
+   # trust_ should be limited to loopback,
+   # see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+   postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 APPLICATION_SERVER_IP_BLOCK)
+   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
@@ -763,7 +766,7 @@ the [NGINX documentation](https://docs.gitlab.com/omnibus/settings/nginx.html#en
 
    If you encounter a `rake aborted!` error message stating that PgBouncer is
    failing to connect to PostgreSQL, it may be that your PgBouncer node's IP
-   address is missing from PostgreSQL's `trust_auth_cidr_addresses` in `gitlab.rb`
+   address is missing from PostgreSQL's `md5_auth_cidr_addresses` or `trust_auth_cidr_addresses` in `gitlab.rb`
    on your database nodes. Before proceeding, see
    [PgBouncer error `ERROR:  pgbouncer cannot connect to server`](troubleshooting.md#pgbouncer-error-error-pgbouncer-cannot-connect-to-server).
 

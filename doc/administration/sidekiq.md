@@ -71,7 +71,10 @@ you want using steps 1 and 2 from the GitLab downloads page.
    Remember to add the Sidekiq nodes to PostgreSQL's trusted addresses:
 
    ```ruby
-   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.10.1.30/32 10.10.1.31/32 10.10.1.32/32 10.10.1.33/32 10.10.1.38/32)
+   # trust_ should be limited to loopback,
+   # see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+   postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 10.10.1.30/32 10.10.1.31/32 10.10.1.32/32 10.10.1.33/32 10.10.1.38/32)
+   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
    ```
 
 1. Disable other services:

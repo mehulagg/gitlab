@@ -334,11 +334,11 @@ PG::ConnectionBad: ERROR:  pgbouncer cannot connect to server
 ```
 
 The problem may be that your PgBouncer node's IP address is not included in the
-`trust_auth_cidr_addresses` setting in `/etc/gitlab/gitlab.rb` on the database nodes.
+`md5_auth_cidr_addresses` or `trust_auth_cidr_addresses` settings in `/etc/gitlab/gitlab.rb` on the database nodes.
 
 You can confirm that this is the issue by checking the PostgreSQL log on the master
-database node. If you see the following error then `trust_auth_cidr_addresses`
-is the problem.
+database node. If you see the following error then these settings are
+the problem.
 
 ```plaintext
 2018-03-29_13:59:12.11776 FATAL:  no pg_hba.conf entry for host "123.123.123.123", user "pgbouncer", database "gitlabhq_production", SSL off
@@ -347,7 +347,10 @@ is the problem.
 To fix the problem, add the IP address to `/etc/gitlab/gitlab.rb`.
 
 ```ruby
-postgresql['trust_auth_cidr_addresses'] = %w(123.123.123.123/32 <other_cidrs>)
+   # trust_ should be limited to loopback,
+   # see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+   postgresql['md5_auth_cidr_addresses'] = %w(127.0.0.1/32 <other_cidrs>)
+   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 ```
 
 [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.

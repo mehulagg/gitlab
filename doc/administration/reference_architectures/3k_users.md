@@ -886,7 +886,10 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    patroni['password'] = '<patroni_api_password>'
 
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
-   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24 127.0.0.1/32)
+   # trust_ should be limited to loopback,
+   # see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+   postgresql['md5_auth_cidr_addresses'] = %w(10.6.0.0/24 127.0.0.1/32)
+   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 
    # Set the network addresses that the exporters will listen on for monitoring
    node_exporter['listen_address'] = '0.0.0.0:9100'
@@ -1130,7 +1133,10 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    postgresql['sql_user_password'] = "<praefect_postgresql_password_hash>"
 
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
-   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24 127.0.0.1/32)
+   # trust_ should be limited to loopback,
+   # see https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block
+   postgresql['md5_auth_cidr_addresses'] = %w(10.6.0.0/24 127.0.0.1/32)
+   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32)
 
    # Set the network addresses that the exporters will listen on for monitoring
    node_exporter['listen_address'] = '0.0.0.0:9100'
@@ -1911,7 +1917,7 @@ the [NGINX documentation](https://docs.gitlab.com/omnibus/settings/nginx.html#en
 
    If you encounter a `rake aborted!` error message stating that PgBouncer is
    failing to connect to PostgreSQL, it may be that your PgBouncer node's IP
-   address is missing from PostgreSQL's `trust_auth_cidr_addresses` in `gitlab.rb`
+   address is missing from PostgreSQL's `md5_auth_cidr_addresses` or `trust_auth_cidr_addresses` in `gitlab.rb`
    on your database nodes. Before proceeding, see
    [PgBouncer error `ERROR:  pgbouncer cannot connect to server`](troubleshooting.md#pgbouncer-error-error-pgbouncer-cannot-connect-to-server).
 
