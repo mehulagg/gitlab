@@ -1,4 +1,5 @@
 ---
+layout: handbook-page-toc
 type: reference, concepts
 stage: Enablement
 group: Alliances
@@ -8,6 +9,28 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 {::options parse_block_html="true" /}
 
 # AWS Specific Implementation patterns **(FREE SELF)**
+
+```md
+## Heading h2
+
+### Heading h3
+
+#### Heading h4
+```
+
+{::options parse_block_html="true" /}
+
+<div class="panel panel-info">
+
+**Output**
+{: .panel-heading}
+
+<div class="panel-body">
+## Heading h2
+{:.no_toc style="margin-top:0"}
+
+</div>
+</div>
 
 ## GitLab Cloud Native Hybrid on AWS EKS
 
@@ -58,7 +81,9 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 <summary markdown="span">Click to Expand 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
 ---
----
+
+#### 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+{:.no_toc}
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -92,11 +117,8 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
----
-
-**End of 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
-
----
+#### End of 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+{:.no_toc}
 
 </details>
 
@@ -146,9 +168,8 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              |                                                              |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
----
-
-**End of 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+#### End of 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+{:.no_toc}
 
 ---
 
@@ -157,8 +178,11 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 <details>
 <summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
 
----
----
+<div class="panel panel-info">
+
+**3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
+{: .panel-heading}
+
 
 | Attribute            | Value                                                 |
 | -------------------- | ----------------------------------------------------- |
@@ -237,11 +261,8 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | web_project_tags                                         | 20/s  | 19.02/s (>12.80/s)   | 514.64ms  | 576.85ms (<1505ms)   | 100.00% (>99%) | Passed |
 | web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed |
 
----
-
-**End of 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
-
----
+</div>
+</div>
 
 </details>
 
