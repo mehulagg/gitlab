@@ -6418,10 +6418,16 @@ msgstr ""
 msgid "Checkout"
 msgstr ""
 
+msgid "Checkout|$%{selectedPlanPrice} per pack per year"
+msgstr ""
+
 msgid "Checkout|$%{selectedPlanPrice} per user per year"
 msgstr ""
 
 msgid "Checkout|%{cardType} ending in %{lastFourDigits}"
+msgstr ""
+
+msgid "Checkout|%{name}'s CI minutes"
 msgstr ""
 
 msgid "Checkout|%{name}'s GitLab subscription"
@@ -6440,6 +6446,9 @@ msgid "Checkout|%{totalCiMinutes} CI minutes"
 msgstr ""
 
 msgid "Checkout|(x%{numberOfUsers})"
+msgstr ""
+
+msgid "Checkout|(x%{quantity})"
 msgstr ""
 
 msgid "Checkout|Billing address"
@@ -7018,13 +7027,22 @@ msgstr ""
 msgid "ClusterAgents|Access tokens"
 msgstr ""
 
+msgid "ClusterAgents|Alternative installation methods"
+msgstr ""
+
 msgid "ClusterAgents|An error occurred while loading your GitLab Agents"
 msgstr ""
 
 msgid "ClusterAgents|An error occurred while loading your agent"
 msgstr ""
 
+msgid "ClusterAgents|An unknown error occurred. Please try again."
+msgstr ""
+
 msgid "ClusterAgents|Configuration"
+msgstr ""
+
+msgid "ClusterAgents|Copy token"
 msgstr ""
 
 msgid "ClusterAgents|Created by"
@@ -7039,7 +7057,13 @@ msgstr ""
 msgid "ClusterAgents|Description"
 msgstr ""
 
+msgid "ClusterAgents|For alternative installation methods %{linkStart}go to the documentation%{linkEnd}."
+msgstr ""
+
 msgid "ClusterAgents|Go to the repository"
+msgstr ""
+
+msgid "ClusterAgents|Install new Agent"
 msgstr ""
 
 msgid "ClusterAgents|Integrate Kubernetes with a GitLab Agent"
@@ -7066,16 +7090,37 @@ msgstr ""
 msgid "ClusterAgents|Read more about getting started"
 msgstr ""
 
+msgid "ClusterAgents|Recommended installation method"
+msgstr ""
+
 msgid "ClusterAgents|Registering Agent"
 msgstr ""
 
+msgid "ClusterAgents|Registration token"
+msgstr ""
+
 msgid "ClusterAgents|Select an Agent"
+msgstr ""
+
+msgid "ClusterAgents|Select the Agent you want to register with GitLab and install on your cluster. To learn more about the Kubernetes Agent registration process %{linkStart}go to the documentation%{linkEnd}."
+msgstr ""
+
+msgid "ClusterAgents|Select which Agent you want to install"
 msgstr ""
 
 msgid "ClusterAgents|The GitLab Agent also requires %{linkStart}enabling the Agent Server%{linkEnd}"
 msgstr ""
 
 msgid "ClusterAgents|The GitLab Kubernetes Agent allows an Infrastructure as Code, GitOps approach to integrating Kubernetes clusters with GitLab. %{linkStart}Learn more.%{linkEnd}"
+msgstr ""
+
+msgid "ClusterAgents|The recommended installation method provided below includes the token. If you want to follow the alternative installation method provided in the docs make sure you save the token value before you close the window."
+msgstr ""
+
+msgid "ClusterAgents|The registration token will be used to connect the Agent on your cluster to GitLab. To learn more about the registration tokens and how they are used %{linkStart}go to the documentation%{linkEnd}."
+msgstr ""
+
+msgid "ClusterAgents|The token value will not be shown again after you close this window."
 msgstr ""
 
 msgid "ClusterAgents|This agent has no tokens"
@@ -13617,6 +13662,9 @@ msgstr ""
 msgid "Failed to publish issue on status page."
 msgstr ""
 
+msgid "Failed to register Agent"
+msgstr ""
+
 msgid "Failed to remove a Zoom meeting"
 msgstr ""
 
@@ -17914,6 +17962,9 @@ msgstr ""
 msgid "Invite a group"
 msgstr ""
 
+msgid "Invite email has already been taken"
+msgstr ""
+
 msgid "Invite group"
 msgstr ""
 
@@ -17965,7 +18016,7 @@ msgstr ""
 msgid "InviteMembersBanner|We noticed that you haven't invited anyone to this group. Invite your colleagues so you can discuss issues, collaborate on merge requests, and share your knowledge."
 msgstr ""
 
-msgid "InviteMembersModal|%{linkStart}Learn more%{linkEnd} about roles."
+msgid "InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions"
 msgstr ""
 
 msgid "InviteMembersModal|Access expiration date (optional)"
@@ -18004,7 +18055,7 @@ msgstr ""
 msgid "InviteMembersModal|Select members or type email addresses"
 msgstr ""
 
-msgid "InviteMembersModal|Some of the members could not be added"
+msgid "InviteMembersModal|Something went wrong"
 msgstr ""
 
 msgid "InviteMembersModal|You're inviting a group to the %{strongStart}%{name}%{strongEnd} group."
@@ -23111,6 +23162,9 @@ msgstr ""
 msgid "Open Selection"
 msgstr ""
 
+msgid "Open a CLI and connect to the cluster you want to install the Agent in. Use this installation method to minimise any manual steps.The token is already included in the command."
+msgstr ""
+
 msgid "Open comment type dropdown"
 msgstr ""
 
@@ -24230,9 +24284,6 @@ msgstr ""
 msgid "Pipelines|Merged YAML is view only"
 msgstr ""
 
-msgid "Pipelines|Merged YAML unavailable"
-msgstr ""
-
 msgid "Pipelines|More Information"
 msgstr ""
 
@@ -24267,9 +24318,6 @@ msgid "Pipelines|The CI configuration was not loaded, please try again."
 msgstr ""
 
 msgid "Pipelines|The GitLab CI configuration could not be updated."
-msgstr ""
-
-msgid "Pipelines|The merged YAML view is only available for the default branch. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "Pipelines|There are currently no finished pipelines."
@@ -25841,6 +25889,9 @@ msgstr ""
 msgid "ProjectSettings|Fast-forward merges only."
 msgstr ""
 
+msgid "ProjectSettings|Flexible tool to collaboratively develop ideas and plan work in this project."
+msgstr ""
+
 msgid "ProjectSettings|Forks"
 msgstr ""
 
@@ -25860,9 +25911,6 @@ msgid "ProjectSettings|Issues"
 msgstr ""
 
 msgid "ProjectSettings|LFS objects from this repository are available to forks. %{linkStart}How do I remove them?%{linkEnd}"
-msgstr ""
-
-msgid "ProjectSettings|Lightweight issue tracking system."
 msgstr ""
 
 msgid "ProjectSettings|Manages large files such as audio, video, and graphics files."
@@ -29036,6 +29084,9 @@ msgstr ""
 msgid "SecurityConfiguration|Enable %{feature}"
 msgstr ""
 
+msgid "SecurityConfiguration|Enable Auto DevOps"
+msgstr ""
+
 msgid "SecurityConfiguration|Enabled"
 msgstr ""
 
@@ -29067,6 +29118,9 @@ msgid "SecurityConfiguration|Not enabled"
 msgstr ""
 
 msgid "SecurityConfiguration|Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
+msgstr ""
+
+msgid "SecurityConfiguration|Quickly enable all continuous testing and compliance tools by enabling %{linkStart}Auto DevOps%{linkEnd}"
 msgstr ""
 
 msgid "SecurityConfiguration|Runtime security metrics for application environments."
@@ -32191,6 +32245,15 @@ msgid "Terms of Service and Privacy Policy"
 msgstr ""
 
 msgid "Terraform"
+msgstr ""
+
+msgid "TerraformBanner|Learn more about GitLab's Backend State"
+msgstr ""
+
+msgid "TerraformBanner|The GitLab managed Terraform state backend can store your Terraform state easily and securely, and spares you from setting up additional remote resources. Its features include: versioning, encryption of the state file both in transit and at rest, locking, and remote Terraform plan/apply execution."
+msgstr ""
+
+msgid "TerraformBanner|Using Terraform? Try the GitLab Managed Terraform State"
 msgstr ""
 
 msgid "Terraform|%{name} successfully removed"
