@@ -99,6 +99,10 @@ module Gitlab
           return job_args unless compress_mode?
           return job_args if job_args.bytesize < @compression_threshold
 
+          # When a job was scheduled in the future, it runs through the middleware
+          # twice. Once on scheduling and once on queueing. No need to compress twice.
+          return job_args if Gitlab::Utils.to_boolean(@job[Compressor::COMPRESSED_KEY])
+
           ::Gitlab::SidekiqMiddleware::SizeLimiter::Compressor.compress(@job, job_args)
         end
 
