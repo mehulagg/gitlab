@@ -456,6 +456,8 @@ class Group < Namespace
   end
 
   def authorizable_members_with_parents
+    Member.expand_columns_in_build_select # remove_with: '14.2', remove_after: '2021-07-22'
+
     source_ids =
       if has_parent?
         self_and_ancestors.reorder(nil).select(:id)
@@ -465,11 +467,17 @@ class Group < Namespace
 
     group_hierarchy_members = GroupMember.where(source_id: source_ids)
 
-    GroupMember.from_union([group_hierarchy_members,
-                            members_from_self_and_ancestor_group_shares]).authorizable
+    result = GroupMember.from_union([group_hierarchy_members,
+                                     members_from_self_and_ancestor_group_shares]).authorizable
+
+    Member.revert_build_select_to_initializer # remove_with: '14.2', remove_after: '2021-07-22'
+
+    result
   end
 
   def members_with_parents
+    Member.expand_columns_in_build_select # remove_with: '14.2', remove_after: '2021-07-22'
+
     # Avoids an unnecessary SELECT when the group has no parents
     source_ids =
       if has_parent?
@@ -482,8 +490,12 @@ class Group < Namespace
                                          .non_minimal_access
                                          .where(source_id: source_ids)
 
-    GroupMember.from_union([group_hierarchy_members,
-                            members_from_self_and_ancestor_group_shares])
+    result = GroupMember.from_union([group_hierarchy_members,
+                                     members_from_self_and_ancestor_group_shares])
+
+    Member.revert_build_select_to_initializer # remove_with: '14.2', remove_after: '2021-07-22'
+
+    result
   end
 
   def members_from_self_and_ancestors_with_effective_access_level

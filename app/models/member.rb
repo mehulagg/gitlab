@@ -12,12 +12,9 @@ class Member < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include FromUnion
   include UpdateHighestRole
-  include IgnorableColumns
 
   AVATAR_SIZE = 40
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
-
-  ignore_column :invite_email_success, remove_with: '14.2', remove_after: '2021-07-22'
 
   attr_accessor :raw_invite_token
 
@@ -183,6 +180,34 @@ class Member < ApplicationRecord
   default_value_for :notification_level, NotificationSetting.levels[:global]
 
   class << self
+    def expand_columns_in_build_select
+      ActiveRecord::QueryMethods.module_eval do
+        private
+
+        def build_select(arel)
+          if select_values.any?
+            arel.project(*arel_columns(select_values))
+          else
+            arel.project(*klass.column_names.map { |field| table[field] })
+          end
+        end
+      end
+    end
+
+    def revert_build_select_to_initializer
+      ActiveRecord::QueryMethods.module_eval do
+        private
+
+        def build_select(arel)
+          if select_values.any?
+            arel.project(*arel_columns(select_values.uniq))
+          else
+            arel.project(@klass.arel_table[Arel.star])
+          end
+        end
+      end
+    end
+
     def search(query)
       joins(:user).merge(User.search(query))
     end
