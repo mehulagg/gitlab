@@ -1558,6 +1558,18 @@ RSpec.describe API::Groups do
         expect(json_response.first).to include('statistics')
       end
     end
+
+    context 'with search' do
+      it 'does not search in parents path' do
+        get api("/groups/#{group1.id}/descendant_groups"), params: { search: child_group1.path }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(1)
+        expect(response_groups).to contain_exactly(child_group1.name)
+      end
+    end
   end
 
   describe "POST /groups" do
