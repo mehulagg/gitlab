@@ -94,7 +94,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 ---
 
-**2K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+**End of 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
 
 ---
 
@@ -148,7 +148,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 ---
 
-**End of Expand 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+**End of 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
 
 ---
 
@@ -239,7 +239,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 ---
 
-**End of Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
+**End of 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
 
 ---
 
@@ -391,7 +391,6 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 ---
 
 </details>
-### 10K Cloud Native Hybrid on EKS Test Results
 
 <details>
 <summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
