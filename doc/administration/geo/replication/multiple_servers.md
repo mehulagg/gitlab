@@ -17,7 +17,7 @@ described, it is possible to adapt these instructions to your needs.
 
 _[diagram source - GitLab employees only](https://docs.google.com/drawings/d/1z0VlizKiLNXVVVaERFwgsIOuEgjcUqDTWPdQYsE7Z4c/edit)_
 
-The topology above assumes the **primary** and **secondary** Geo clusters
+The topology above assumes the **primary** and **secondary** Geo sites
 are located in two separate locations, on their own virtual network
 with private IP addresses. The network is configured such that all machines in
 one geographic location can communicate with each other using their private IP addresses.
@@ -32,35 +32,27 @@ The **primary** and **secondary** Geo sites must be able to communicate to each 
 
 ## Redis and PostgreSQL for multiple servers
 
-Geo supports:
-
-- Redis and PostgreSQL on the Geo **primary** site configured for multiple servers.
-- Redis on Geo **secondary** sites configured for multiple servers.
-
-NOTE:
-Support for PostgreSQL on Geo **secondary** sites in multi-server configuration
-[is planned](https://gitlab.com/groups/gitlab-org/-/epics/2536).
-
 Because of the additional complexity involved in setting up this configuration
 for PostgreSQL and Redis, it is not covered by this Geo multi-server documentation.
 
 For more information on setting up a multi-server PostgreSQL cluster and Redis cluster using the Omnibus GitLab package, see:
 
-- [PostgreSQL multi-server documentation](../../postgresql/replication_and_failover.md)
+- [Geo multi-server database replication](../setup/database.md#multi-node-database-replication)
 - [Redis multi-server documentation](../../redis/replication_and_failover.md)
 
 NOTE:
 It is possible to use cloud hosted services for PostgreSQL and Redis, but this is beyond the scope of this document.
 
-## Prerequisites: Two working GitLab multi-server clusters
+## Prerequisites: Two working GitLab sites
 
 One GitLab instance serves as the Geo **primary** site. Use the
-[GitLab multi-server documentation](../../reference_architectures/index.md) to set this up. If
+[GitLab reference architectures documentation](../../reference_architectures/index.md)
+to set this up. You can use different reference architecture sizes for each Geo site. If
 you already have a working GitLab instance that is in-use, it can be used as a
 **primary** site.
 
 The second GitLab instance serves as the Geo **secondary** site. Again, use the
-[GitLab multi-server documentation](../../reference_architectures/index.md) to set this up.
+[GitLab reference architectures documentation](../../reference_architectures/index.md) to set this up.
 It's a good idea to log in and test it. However, be aware that its data is
 wiped out as part of the process of replicating from the **primary** site.
 
@@ -99,7 +91,7 @@ and [Redis](../../redis/replication_and_failover.md#example-configuration-for-th
 
 ## Configure a GitLab instance to be a Geo **secondary** site
 
-A **secondary** site is similar to any other GitLab multi-server instance, with two
+A **secondary** site is similar to any other GitLab multi-server instance, with three
 major differences:
 
 - The main PostgreSQL database is a read-only replica of the Geo **primary** site's
@@ -107,6 +99,7 @@ major differences:
 - There is an additional PostgreSQL database for each Geo **secondary** site,
   called the "Geo tracking database", which tracks the replication and verification
   state of various resources.
+- There is an additional GitLab service [`geo-logcursor`](../index.md#geo-log-cursor)
 
 Therefore, we set up the multi-server components one by one and include deviations
 from the normal multi-server setup. However, we highly recommend configuring a
@@ -178,27 +171,6 @@ the instructions below.
 
    # Prevent reconfigure from attempting to run migrations on the replica database
    gitlab_rails['auto_migrate'] = false
-
-   ##
-   ## Ensure unnecessary services are disabled
-   ##
-   alertmanager['enable'] = false
-   consul['enable'] = false
-   geo_logcursor['enable'] = false
-   gitaly['enable'] = false
-   gitlab_exporter['enable'] = false
-   gitlab_workhorse['enable'] = false
-   nginx['enable'] = false
-   node_exporter['enable'] = false
-   pgbouncer_exporter['enable'] = false
-   postgresql['enable'] = false
-   prometheus['enable'] = false
-   redis['enable'] = false
-   redis_exporter['enable'] = false
-   patroni['enable'] = false
-   sidekiq['enable'] = false
-   sidekiq_cluster['enable'] = false
-   puma['enable'] = false
    ```
 
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
@@ -208,9 +180,9 @@ If using an external PostgreSQL instance, refer also to
 
 ### Step 4: Configure the frontend application servers on the Geo **secondary** site
 
-In the architecture overview, there are two machines running the GitLab
-application services. These services are enabled selectively in the
-configuration.
+The minimal [architecture diagram](#architecture-overview) above, there are two
+machines running the GitLab application services. These services are enabled
+selectively in the configuration.
 
 Configure the GitLab Rails application servers following the relevant steps
 outlined in the [reference architectures](../../reference_architectures/index.md),
@@ -226,6 +198,16 @@ then make the following modifications:
    ## different servers to aid in horizontal scaling and separation of concerns.
    ##
    roles ['application_role']
+
+   ## `application_role` already enables this. You only need this line if
+   ## you selectively enable individual services that depend on Rails, like
+   ## `puma`, `sidekiq`, `geo-logcursor`, etc.
+   gitlab_rails['enable'] = true
+
+   ##
+   ## Enable Geo Log Cursor service
+   ##
+   geo_logcursor['enable'] = true
 
    ##
    ## The unique identifier for the Geo site. It's recommended to use a
@@ -243,6 +225,7 @@ then make the following modifications:
    ##
    ## Configure the connection to the tracking database
    ##
+   geo_secondary['enable'] = true
    geo_secondary['db_host'] = '<geo_tracking_db_host>'
    geo_secondary['db_password'] = '<geo_tracking_db_password>'
 
@@ -286,7 +269,8 @@ allow Rails on this server to connect to Postgres.
 
 After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
-On the secondary the following GitLab frontend services are enabled:
+In the [architecture overview](#architecture-overview) topology, the following GitLab
+services are enabled on the "frontend" servers:
 
 - `geo-logcursor`
 - `gitlab-pages`
@@ -298,20 +282,20 @@ On the secondary the following GitLab frontend services are enabled:
 - `sidekiq`
 - `puma`
 
-Verify these services by running `sudo gitlab-ctl status` on the frontend
+Verify these services exist by running `sudo gitlab-ctl status` on the frontend
 application servers.
 
 ### Step 5: Set up the LoadBalancer for the Geo **secondary** site
 
-In this topology, a load balancer is required at each geographic location to
-route traffic to the application servers.
+The minimal [architecture diagram](#architecture-overview) above shows a load
+balancer at each geographic location to route traffic to the application servers.
 
 See [Load Balancer for GitLab with multiple servers](../../load_balancer.md) for
 more information.
 
 ### Step 6: Configure the backend application servers on the Geo **secondary** site
 
-The minimal reference architecture diagram above shows all application services
+The minimal [architecture diagram](#architecture-overview) above shows all application services
 running together on the same machines. However, for multiple servers we
 [strongly recommend running all services separately](../../reference_architectures/index.md).
 
@@ -326,6 +310,7 @@ application servers above, with some changes to run only the `sidekiq` service:
    ## Enable the Sidekiq service
    ##
    sidekiq['enable'] = true
+   gitlab_rails['enable'] = true
 
    ##
    ## The unique identifier for the Geo site. It's recommended to use a
@@ -343,6 +328,7 @@ application servers above, with some changes to run only the `sidekiq` service:
    ##
    ## Configure the connection to the tracking database
    ##
+   geo_secondary['enable'] = true
    geo_secondary['db_host'] = '<geo_tracking_db_host>'
    geo_secondary['db_password'] = '<geo_tracking_db_password>'
 
