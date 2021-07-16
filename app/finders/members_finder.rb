@@ -80,8 +80,6 @@ class MembersFinder
   end
 
   def distinct_union_of_members(union_members)
-    Member.expand_columns_in_build_select # remove_with: '14.2', remove_after: '2021-07-22'
-
     union = Gitlab::SQL::Union.new(union_members, remove_duplicates: false) # rubocop: disable Gitlab/Union
     sql = distinct_on(union)
 

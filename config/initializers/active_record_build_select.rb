@@ -16,6 +16,8 @@ module ActiveRecord
     def build_select(arel)
       if select_values.any?
         arel.project(*arel_columns(select_values.uniq))
+      elsif klass.enumerate_columns_in_select_statements
+        arel.project(*klass.column_names.map { |field| table[field] })
       else
         arel.project(@klass.arel_table[Arel.star])
       end

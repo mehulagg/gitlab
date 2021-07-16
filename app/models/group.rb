@@ -456,8 +456,6 @@ class Group < Namespace
   end
 
   def authorizable_members_with_parents
-    Member.expand_columns_in_build_select # remove_with: '14.2', remove_after: '2021-07-22'
-
     source_ids =
       if has_parent?
         self_and_ancestors.reorder(nil).select(:id)
@@ -472,8 +470,6 @@ class Group < Namespace
   end
 
   def members_with_parents
-    Member.expand_columns_in_build_select # remove_with: '14.2', remove_after: '2021-07-22'
-
     # Avoids an unnecessary SELECT when the group has no parents
     source_ids =
       if has_parent?

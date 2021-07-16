@@ -182,22 +182,6 @@ class Member < ApplicationRecord
   self.enumerate_columns_in_select_statements = true
 
   class << self
-    def expand_columns_in_build_select
-      ActiveRecord::QueryMethods.module_eval do
-        private
-
-        def build_select(arel)
-          if select_values.any?
-            arel.project(*arel_columns(select_values.uniq))
-          elsif klass.enumerate_columns_in_select_statements
-            arel.project(*klass.column_names.map { |field| table[field] })
-          else
-            arel.project(@klass.arel_table[Arel.star])
-          end
-        end
-      end
-    end
-
     def search(query)
       joins(:user).merge(User.search(query))
     end
