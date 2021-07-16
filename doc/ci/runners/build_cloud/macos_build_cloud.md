@@ -13,7 +13,7 @@ and shouldn't be used for production workloads.
 
 ## Quickstart
 
-To start using the service you need to submit an access request. Once your access request has been granted and your build environment configured, you will need to configure your `.gitlab-ci.yml` pipeline file as follows:
+To start using Build Cloud for macOS beta, you will need to submit an access request issue. Once your access request has been granted and your build environment configured, you will need to configure your `.gitlab-ci.yml` pipeline file as follows:
 
 1. Add a `.gitlab-ci.yml` file to your project repository.
 1. Commit a change to your repository.
