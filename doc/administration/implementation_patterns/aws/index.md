@@ -145,7 +145,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
 ---
+
 **End of Expand 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+
 ---
 
 </details>
@@ -234,7 +236,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed |
 
 ---
+
 **End of Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
+
 ---
 
 </details>
@@ -330,7 +334,9 @@ This test:
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
 
 ---
+
 **End of 3K Cloud Native Hybrid on EKS AutoScaling Test Results**
+
 ---
 
 </details>
@@ -377,7 +383,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $0.10/hr | $0.10/hr |
 
 ---
+
 **End of 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
+
 ---
 
 </details>
@@ -467,7 +475,9 @@ web_project_tags                                         | 20/s  | 19.02/s (>12.
 web_user                                                 | 20/s  | 19.85/s (>9.60/s)    | 148.58ms  | 230.68ms (<4005ms)   | 100.00% (>99%) | Passed
 
 ---
+
 **End of 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
+
 ---
 
 </details>
@@ -560,7 +570,9 @@ web_user                                                 | 20/s  | 19.82/s (>9.6
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
 
 ---
+
 **End of 10K Cloud Native Hybrid on EKS AutoScaling Test Results**
+
 ---
 
 </details>
