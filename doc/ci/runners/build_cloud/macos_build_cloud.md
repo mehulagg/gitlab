@@ -51,4 +51,4 @@ test:
     - echo "running scripts in the test job"
 ```
 
-**Note** during the beta period we plan to complete the enable to the GitLab macOS Autoscaler and activate the instance-wide macOS Runner Managers on GitLab SaaS. We will notify all beta participants of any planned maintenance in order to complete this work.
+**Note** during the beta period we plan to complete the enablement of the GitLab macOS Autoscaler and activate the instance-wide macOS Runner Managers on GitLab SaaS. We will notify all beta participants of any planned maintenance in order to complete this work.
