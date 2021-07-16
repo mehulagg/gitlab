@@ -76,7 +76,7 @@ a self-managed instance from an old server to a new server.
 
 The backups produced are not dependent on the operating system used to run GitLab
 so the restore method can also be used to switch between different operating system distributions/versions
-as long as the same GitLab version [is available for installation](../../../omnibus/package-information/deprecated_os.md).
+as long as the same GitLab version [is available for installation](https://docs.gitlab.com/omnibus/package-information/deprecated_os.md).
 
 To instead merge two self-managed GitLab instances together, use the instructions in
 [Migrate from self-managed GitLab to GitLab.com](#migrate-from-self-managed-gitlab-to-gitlabcom).
