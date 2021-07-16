@@ -431,6 +431,10 @@ RSpec.configure do |config|
   end
 
   config.disable_monkey_patching!
+
+  config.after(:all, type: :migration) do
+    ApplicationRecord.reset_column_information
+  end
 end
 
 ActiveRecord::Migration.maintain_test_schema!
