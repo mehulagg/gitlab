@@ -1,5 +1,4 @@
 ---
-layout: handbook-page-toc
 type: reference, concepts
 stage: Enablement
 group: Alliances
@@ -9,18 +8,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 {::options parse_block_html="true" /}
 
 # AWS Specific Implementation patterns **(FREE SELF)**
-
-<div class="panel panel-info">
-
-**Output**
-{: .panel-heading}
-
-<div class="panel-body">
-## Heading h2
-{:.no_toc style="margin-top:0"}
-
-</div>
-</div>
 
 ## GitLab Cloud Native Hybrid on AWS EKS
 
@@ -70,11 +57,14 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 <details>
 <summary markdown="span">Click to Expand 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
 
+<div class="panel panel-info">
+2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+{: .panel-heading}
+<div class="panel-body">
+
 ---
 
-#### 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
-
-{:.no_toc}
+#### 2K Cloud Native Hybrid on EKS Bill of Materials (BOM){:.no_toc}
 
 NOTE:
 On Demand pricing is used in this table for comparisons, but should not be used for budgeting nor purchasing AWS resources for a GitLab production instance. It's equivalent to paying Manufacturer's Recommended Retail Price on personal purchases. Do not use these tables to calculate actual monthly or yearly price estimates, instead use the AWS Calculator links in the "GitLab on AWS Compute" table above and customize it with your desired savings plan.
@@ -108,9 +98,8 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Praefect PostgreSQL(1) (AWS RDS)                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
-#### End of 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
-
-{:.no_toc}
+</div>
+</div>
 
 </details>
 
@@ -267,7 +256,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 This test:
 
 - Started with 5 webservice pods (out of 20 for 10k test) and 5 hosts instead of 10. 
-- It has scaled both pods (to 20) and hosts (to 7) smoothly over 11 minutes.
+- It scales both pods (to 20) and hosts (to 7) smoothly over the first 11 minutes (when only webservice test are being done).
 
 | Attribute            | Value                                                  |
 | -------------------- | ------------------------------------------------------ |
@@ -502,7 +491,7 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 This test:
 
 - Started with 5 webservice pods (out of 20 for 10k test) and 5 hosts instead of 10. 
-- It has scaled both pods (to 20) and hosts (to 7) smoothly over 11 minutes.
+- It scales both pods (to 20) and hosts (to 7) smoothly over the first 11 minutes (when only webservice test are being done).
 
 Attribute                  | Value                                                   
 ---------------------------|---------------------------------------------------------
