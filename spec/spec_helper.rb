@@ -433,7 +433,10 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
 
   config.after(:all, type: :migration) do
-    ApplicationRecord.reset_column_information
+    ActiveRecord::Base.descendants.each do |klass|
+      klass.reset_column_information
+    rescue Geo::TrackingBase::SecondaryNotConfigured
+    end
   end
 end
 
