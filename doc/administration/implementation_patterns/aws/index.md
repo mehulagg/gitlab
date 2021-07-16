@@ -41,7 +41,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 | 5K   | [5K Omnibus](../../reference_architectures/5k_users.md)      | [5k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/5k) | 5K Cloud Native Hybrid on EKS                                | GPT Test Results                                             | GitLab Cloud Native 5K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs | [AWS Quick Start](https://aws-quickstart.github.io/quickstart-eks-gitlab/)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 | 10K  | [10K Cloud Native](../../reference_architectures/10k_users.md#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) | [10k Baseline (Instances)](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Benchmarks/Latest/10k) | [10K Cloud Native Hybrid on EKS](#10k-cloud-native-hybrid-on-eks) | [GPT Test Results](#10k-cloud-native-hybrid-on-eks) | [GitLab Cloud Native 10K - 1 YR Ec2 Compute Savings + 1 YR RDS & Elasticache RIs](https://calculator.aws/#/estimate?id=5ac2e07a22e01c36ee76b5477c5a046cd1bea792) | [AWS Quick Start](https://aws-quickstart.github.io/quickstart-eks-gitlab/)<br /><br />[GitLab GET (No AWS PaaS Yet)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) |
 
-## GitLab and Supplementary Services Handled by AWS PaaS for All Scenarios
+## AWS PaaS Qualified for All GitLab Implementations
 
 For both Omnibus GitLab or Cloud Native Hybrid implementations, the following GitLab Service roles can be performed by AWS Services (PaaS).
 
@@ -83,6 +83,7 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 ---
 
 #### 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+
 {:.no_toc}
 
 NOTE:
@@ -118,6 +119,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
 #### End of 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+
 {:.no_toc}
 
 </details>
@@ -169,6 +171,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
 #### End of 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)
+
 {:.no_toc}
 
 ---
@@ -182,7 +185,6 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 
 **3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
 {: .panel-heading}
-
 
 | Attribute            | Value                                                 |
 | -------------------- | ----------------------------------------------------- |
