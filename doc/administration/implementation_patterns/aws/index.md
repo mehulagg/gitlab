@@ -10,16 +10,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # AWS Specific Implementation patterns **(FREE SELF)**
 
-```md
-## Heading h2
-
-### Heading h3
-
-#### Heading h4
-```
-
-{::options parse_block_html="true" /}
-
 <div class="panel panel-info">
 
 **Output**
@@ -115,7 +105,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |                                                              |                                                         |                                 |                                                              |
 | Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr           | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
-| Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
+| Praefect PostgreSQL(1) (AWS RDS)                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
 #### End of 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)
@@ -167,7 +157,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |                                                              |                                                         |                                 |                                                              |
 | Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr           | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
-| Praefect PostgreSQL(1) [AWS RDS]                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              |                                                              |
+| Praefect PostgreSQL(1) (AWS RDS)                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              |                                                              |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
 #### End of 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)
@@ -404,7 +394,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |  |  |  |  |
 | Gitaly Instances (in ASG) | 48 vCPU, 180GB<br />(across 3 nodes) | **m5.4xlarge** x 3 nodes<br />(48 vCPU, 180 GB) | $0.77 x 3 = $2.31/hr | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
 | Praefect (Instances in ASG with load balancer) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB) | $0.09 x 3 = $0.21/hr | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
-| Praefect PostgreSQL(1) [AWS RDS] | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |  |
+| Praefect PostgreSQL(1) (AWS RDS) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |  |
 | Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $0.10/hr | $0.10/hr |
 
 ---
