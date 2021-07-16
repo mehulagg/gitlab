@@ -4,13 +4,9 @@ group: Runner
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-## Virtual machine configuration
+## Overview
 
-The available machine type is `gbc-macos-large`.
-
-| Instance type | vCPUS | Memory (GB) | Notes |
-| --------- | --- | ------- | ------- |
-|  `gbc-macos-large` | 4 | 10 | default, beta |
+{placeholder for quick intro} 
 
 ## Virtual machine configuration
 
@@ -19,8 +15,6 @@ The available machine type is `gbc-macos-large`.
 | Instance type | vCPUS | Memory (GB) | Notes |
 | --------- | --- | ------- | ------- |
 |  `gbc-macos-large` | 4 | 10 | default, beta |
-
-
 
 ## Software
 
