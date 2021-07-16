@@ -10,7 +10,7 @@ RSpec.describe Groups::SecurityFeaturesHelper do
 
   before do
     allow(helper).to receive(:current_user).and_return(user)
-    allow(helper).to receive(:can?).and_return(false)
+    allow(helper).to receive(:can?).and_return(true)
   end
 
   describe '#group_level_security_dashboard_available?' do
@@ -163,7 +163,8 @@ RSpec.describe Groups::SecurityFeaturesHelper do
         survey_request_svg_path: '/images/illustrations/security-dashboard_empty.svg',
         dashboard_documentation: '/help/user/application_security/security_dashboard/index',
         vulnerabilities_export_endpoint: "/api/v4/security/groups/#{group.id}/vulnerability_exports",
-        scanners: '[]'
+        scanners: '[]',
+        can_admin_vulnerability: 'true'
       }
     end
 
