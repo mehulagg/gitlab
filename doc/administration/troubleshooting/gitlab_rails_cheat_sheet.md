@@ -1147,7 +1147,7 @@ registry.replicator.send(:download)
 This will iterate over all package files on the secondary, looking at the
 `verification_checksum` stored in the database (which came from the primary)
 and then calculate this value on the secondary to check if they match. This
-won't actually change anything in the UI.
+won't change anything in the UI:
 
 ```ruby
 # Run on secondary
