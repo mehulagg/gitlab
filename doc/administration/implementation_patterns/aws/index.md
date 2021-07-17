@@ -55,7 +55,7 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 ### 2K Cloud Native Hybrid on EKS
 
 <details>
-<summary markdown="span">Click to Expand 2K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
+<summary markdown="span">Click to Show / Hide: **2K Cloud Native Hybrid on EKS Bill of Materials (BOM)**</summary>
 
 ---
 
@@ -100,7 +100,7 @@ Test results content to be completed.
 ### 3K Cloud Native Hybrid on EKS
 
 <details>
-<summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
+<summary markdown="span">Click to Show / Hide: **3K Cloud Native Hybrid on EKS Bill of Materials (BOM)**</summary>
 
 ---
 
@@ -149,7 +149,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 </details>
 
 <details>
-<summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
+<summary markdown="span">Click to Show / Hide: **3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**</summary>
 
 ---
 **3K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
@@ -238,7 +238,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 </details>
 
 <details>
-<summary markdown="span">Click to Expand 3K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
+<summary markdown="span">Click to Show / Hide: **3K Cloud Native Hybrid on EKS AutoScaling Test Results**</summary>
 
 ---
 **3K Cloud Native Hybrid on EKS AutoScaling Test Results**
@@ -336,7 +336,7 @@ This test:
 ### 10K Cloud Native Hybrid on EKS
 
 <details>
-<summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Bill of Materials (BOM)</summary>
+<summary markdown="span">Click to Show / Hide: **10K Cloud Native Hybrid on EKS Bill of Materials (BOM)**</summary>
 
 ---
 **10K Cloud Native Hybrid on EKS Bill of Materials (BOM)**
@@ -381,7 +381,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 </details>
 
 <details>
-<summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results</summary>
+<summary markdown="span">Click to Show / Hide: **10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**</summary>
 
 ---
 **10K Cloud Native Hybrid on EKS Fixed Scale Perf. Test Results**
@@ -470,7 +470,7 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 </details>
 
 <details>
-<summary markdown="span">Click to Expand 10K Cloud Native Hybrid on EKS **AutoScaling** Test Results</summary>
+<summary markdown="span">Click to Show / Hide: **10K Cloud Native Hybrid on EKS AutoScaling Test Results**</summary>
 
 ---
 **10K Cloud Native Hybrid on EKS AutoScaling Test Results**
