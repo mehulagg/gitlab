@@ -311,6 +311,78 @@ union = Gitlab::SQL::Union.new([projects, more_projects, ...])
 Project.from("(#{union.to_sql}) projects")
 ```
 
+### Uneven columns in the UNION sub-queries
+
+When the UNION query has uneven columns in the SELECT clauses, the database will return an error.
+Consider the following UNION query:
+
+```sql
+SELECT id FROM users
+UNION
+SELECT id, name FROM users
+end
+
+The query will result in the following error.
+
+```sql
+each UNION query must have the same number of columns
+```
+
+This problem can be easily fixed during development time most of the time. Unfortunately, when
+relying on the column cache in Rails, UNION queries can cause significant problems, even downtime.
+
+Example:
+
+```ruby
+scope1 = User.select(User.column_names).where(id: [1, 2, 3]) # selects the columns explicitly
+scope2 = User.where(id: [10, 11, 12]) # uses SELECT users.*
+
+User.connection.execute(Gitlab::SQL::Union.new([scope1, scope2]).to_sql)
+```
+
+When this code is deployed, it will not going to cause problems immediately. When another
+developer adds a new database column to the `users` table, this query will going to break in
+production. The second query (`SELECT users.*`) will include the newly added column however,
+the first query will not. The `column_names` methods returns stale values (the new column is
+missing) since the values are cached within `ActiveRecord's` schema cache. These values are
+usually populated when the application boots up.
+
+The only fix at this point would be a full application restart so the schema cache gets updated.
+
+The problem can be avoided if we always use `SELECT users.*` or we always explicitly define the
+columns.
+
+Using `SELECT users.*`:
+
+```ruby
+scope1 = User.where(id: [1, 2, 3])
+scope2 = User.where(id: [10, 11, 12])
+
+User.connection.execute(Gitlab::SQL::Union.new([scope1, scope2]).to_sql)
+```
+
+Explicit column list definition:
+
+```ruby
+columns = User.column_names
+scope1 = User.select(columns).where(id: [1, 2, 3]) # selects the columns explicitly
+scope2 = User.select(columns).where(id: [10, 11, 12]) # uses SELECT users.*
+
+User.connection.execute(Gitlab::SQL::Union.new([scope1, scope2]).to_sql)
+```
+
+Alternatively, the `enumerate_columns_in_select_statements` can be turned on in the model:
+
+```ruby
+class MyModel < ApplicationRecord
+  self.enumerate_columns_in_select_statements = true
+end
+
+This configuration will always list the columns from the column cache instead of using `SELECT users.*`.
+
+NOTE
+This change can make the database queries significantly longer and more difficult to read.
+
 ## Ordering by Creation Date
 
 When ordering records based on the time they were created, you can order
