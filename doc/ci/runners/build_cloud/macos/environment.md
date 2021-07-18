@@ -10,12 +10,12 @@ The section below describes the available virtual machine configurations.
 
 ## Virtual machines
 
-For the beta, jobs will run in a dedicated virtual machine (VM) per project. 
+For the beta, each GitLab project that has been granted access will have its own virtual machine (VM) instance. All jobs for that project will run on that instance.
 
-After the transition to the GitLab macOS autoscaler and the instance-wide macOS Runner Managers on GitLab SaaS activation is complete, the behavior will change. 
+After general availability, when runners are autoscaled, the behavior will be as follows:
 
 - Each job will run in a newly provisioned VM dedicated to the specific job. 
-- The VM is active only for the duration of the job and immediately deleted.
+- The VM is active only for the duration of the job and immediately deleted. 
 
 ### Virtual machine configurations
 
