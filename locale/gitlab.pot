@@ -676,7 +676,7 @@ msgstr ""
 msgid "%{label_for_message} unavailable"
 msgstr ""
 
-msgid "%{lets_encrypt_link_start}Let's Encrypt%{lets_encrypt_link_end} is a free, automated, and open certificate authority (CA), that give digital certificates in order to enable HTTPS (SSL/TLS) for websites."
+msgid "%{lets_encrypt_link_start}Let's Encrypt%{lets_encrypt_link_end} is a free, automated, and open certificate authority (CA), that issues digital certificates in order to enable HTTPS (SSL/TLS) for websites."
 msgstr ""
 
 msgid "%{level_name} is not allowed in a %{group_level_name} group."
@@ -1191,9 +1191,6 @@ msgstr ""
 msgid "0 bytes"
 msgstr ""
 
-msgid "0 for unlimited"
-msgstr ""
-
 msgid "0 for unlimited, only effective with remote storage enabled."
 msgstr ""
 
@@ -1400,9 +1397,6 @@ msgid "A Jekyll site that uses Netlify for CI/CD instead of GitLab, but still wi
 msgstr ""
 
 msgid "A Let's Encrypt SSL certificate can not be obtained until your domain is verified."
-msgstr ""
-
-msgid "A Let's Encrypt account will be configured for this GitLab installation using your email address. You will receive emails to warn of expiring certificates."
 msgstr ""
 
 msgid "A banned user cannot:"
@@ -1736,9 +1730,6 @@ msgid "Access requests"
 msgstr ""
 
 msgid "Access to '%{classification_label}' not allowed"
-msgstr ""
-
-msgid "Access to Pages websites are controlled based on the user's membership to a given project. By checking this box, users will be required to be logged in to have access to all Pages websites in your instance."
 msgstr ""
 
 msgid "AccessDropdown|Deploy Keys"
@@ -2375,6 +2366,30 @@ msgid "AdminProjects|Delete"
 msgstr ""
 
 msgid "AdminProjects|Delete Project %{projectName}?"
+msgstr ""
+
+msgid "AdminSettingsPages|A Let's Encrypt account will be configured for this GitLab instance using this email address. You will receive emails to warn of expiring certificates. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
+msgid "AdminSettingsPages|Access to Pages websites can be controlled based on the user's membership to a given project. By disabling public access to Pages websites, users will be required to be logged in to have access to all Pages websites in your instance. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
+msgid "AdminSettingsPages|Configure Let's Encrypt"
+msgstr ""
+
+msgid "AdminSettingsPages|Disable public access to Pages websites"
+msgstr ""
+
+msgid "AdminSettingsPages|Domain verification is an essential security measure for public GitLab sites. Users are required to demonstrate they control a domain before it is enabled. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
+msgid "AdminSettingsPages|I have read and agree to the Let's Encrypt %{link_start}Terms of Service%{link_end} (PDF)"
+msgstr ""
+
+msgid "AdminSettingsPages|Require users to prove ownership of custom domains"
+msgstr ""
+
+msgid "AdminSettingsPages|Set the maximum size of GitLab Pages per project. 0 for unlimited. %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "AdminSettings|Auto DevOps domain"
@@ -8352,9 +8367,6 @@ msgstr ""
 msgid "Configure Integrations"
 msgstr ""
 
-msgid "Configure Let's Encrypt"
-msgstr ""
-
 msgid "Configure Prometheus"
 msgstr ""
 
@@ -11498,9 +11510,6 @@ msgstr ""
 msgid "Disable group runners"
 msgstr ""
 
-msgid "Disable public access to Pages sites"
-msgstr ""
-
 msgid "Disable two-factor authentication"
 msgstr ""
 
@@ -11669,9 +11678,6 @@ msgid "Domain Name"
 msgstr ""
 
 msgid "Domain cannot be deleted while associated to one or more clusters."
-msgstr ""
-
-msgid "Domain verification is an essential security measure for public GitLab sites. Users are required to demonstrate they control a domain before it is enabled"
 msgstr ""
 
 msgid "Domain was successfully created."
@@ -16391,9 +16397,6 @@ msgstr ""
 msgid "I forgot my password"
 msgstr ""
 
-msgid "I have read and agree to the Let's Encrypt %{link_start}Terms of Service%{link_end} (PDF)"
-msgstr ""
-
 msgid "I want to explore GitLab to see if it’s worth switching to"
 msgstr ""
 
@@ -19489,6 +19492,9 @@ msgid "Legacy burndown chart"
 msgstr ""
 
 msgid "Let's Encrypt does not accept emails on example.com"
+msgstr ""
+
+msgid "Let's Encrypt email"
 msgstr ""
 
 msgid "Let's Encrypt is a free, automated, and open certificate authority (CA) that gives digital certificates in order to enable HTTPS (SSL/TLS) for websites. Learn more about Let's Encrypt configuration by following the %{docs_link_start}documentation on GitLab Pages%{docs_link_end}."
@@ -27863,9 +27869,6 @@ msgstr ""
 msgid "Require user password for approvals."
 msgstr ""
 
-msgid "Require users to prove ownership of custom domains"
-msgstr ""
-
 msgid "Required approvals (%{approvals_given} given)"
 msgstr ""
 
@@ -30387,7 +30390,7 @@ msgstr ""
 msgid "Size"
 msgstr ""
 
-msgid "Size and domain settings for static websites"
+msgid "Size and domain settings for Pages static websites."
 msgstr ""
 
 msgid "Size limit per repository (MB)"
