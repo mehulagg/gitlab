@@ -35,7 +35,7 @@ RSpec.describe Projects::LfsPointers::LfsObjectDownloadListService do
       end
 
       it 'retrieves the download links of non existent objects' do
-        expect_any_instance_of(Projects::LfsPointers::LfsDownloadLinkListService).to receive(:execute).with(all_oids)
+        expect_any_instance_of(Projects::LfsPointers::LfsDownloadLinkListService).to receive(:execute).with(oids)
 
         subject.execute
       end
