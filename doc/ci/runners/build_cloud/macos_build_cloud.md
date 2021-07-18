@@ -13,7 +13,7 @@ and shouldn't be relied upon for mission-critical production jobs.
 
 ## Quickstart
 
-To start using Build Cloud for macOS beta, you will need to submit an access request issue. Once your access request has been granted and your build environment configured, you will need to configure your `.gitlab-ci.yml` pipeline file as follows:
+To start using Build Cloud for macOS beta, you must submit an access request issue. After your access has been granted and your build environment configured, you will configure your `.gitlab-ci.yml` pipeline file:
 
 1. Add a `.gitlab-ci.yml` file to your project repository.
 1. Commit a change to your repository.
@@ -22,7 +22,7 @@ The runners automatically run your build.
 
 ## Example `.gitlab-ci.yml` file
 
-Below is a sample `.gitlab-ci.yml` file that shows how to start using the runners for macOS:
+The following sample `.gitlab-ci.yml` file shows how to start using the runners for macOS:
 
 ```yaml
 .macos_buildcloud_runners:
@@ -52,4 +52,5 @@ test:
     - echo "running scripts in the test job"
 ```
 
-**Note** during the beta period we plan to complete the enablement of the GitLab macOS Autoscaler and activate the instance-wide macOS Runner Managers on GitLab SaaS. We will notify all beta participants of any planned maintenance in order to complete this work.
+NOTE:
+During the beta period, the architecture of this solution will change. Rather than the jobs running on a specific VM instance, they will run on an ephemeral VM instance that is created by an autoscaling instance, known as the Runner Manager. We will notify all beta participants of any downtime required to do this work.
