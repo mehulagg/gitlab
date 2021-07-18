@@ -22,14 +22,14 @@ After general availability, when runners are autoscaled, the behavior will be as
 - The virtual machines are created with password-less sudo access.
 - For the beta, there is only one available machine type, `gbc-macos-large`.
 
-| Instance type | vCPUS | Memory (GB) | Notes |
-| --------- | --- | ------- | ------- |
-|  `gbc-macos-large` | 4 | 10 | default, beta |
+| Instance type | vCPUS | Memory (GB) |
+| --------- | --- | ------- |
+|  `gbc-macos-large` | 4 | 10 |
 
 
-## Software
+## Choose a VM image to run your job on
 
-The GiLab Build Cloud macOS Runners offers various virtual machine images to choose from to execute your build.
+The GitLab Build Cloud runners for macOS include virtual machine images you can use to execute your build. You specify this image in your `.gitlab-ci.yml` file.
 
 | VM Image                     | Included Software               |
 |---------------------------|-----------------------|
