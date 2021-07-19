@@ -1903,9 +1903,6 @@ msgstr ""
 msgid "Add a GPG key"
 msgstr ""
 
-msgid "Add a Grafana button in the admin sidebar, monitoring section, to access a variety of statistics on the health and performance of GitLab."
-msgstr ""
-
 msgid "Add a Jaeger URL to replace this page with a link to your Jaeger server. You first need to %{link_start_tag}install Jaeger%{link_end_tag}."
 msgstr ""
 
@@ -12122,6 +12119,9 @@ msgid "Enable a Prometheus metrics endpoint at %{metrics_path} to expose a varie
 msgstr ""
 
 msgid "Enable access to Grafana"
+msgstr ""
+
+msgid "Enable access to statistics on the health and performance of GitLab. Grafana must have been installed."
 msgstr ""
 
 msgid "Enable access to the Performance Bar"
