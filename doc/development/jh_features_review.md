@@ -32,8 +32,11 @@ This page is the single source of truth for JiHu-related processes.
 ## Act as EE when `jh/` does not exist
 
 - In the case of EE repository, `jh/` does not exist so it should just act like EE (or CE when the license is absent)
+
+## Act as EE when `EE_ONLY=1` or FOSS when `FOSS_ONLY=1`
+
 - In the case of JH repository, `jh/` does exist but `EE_ONLY` environment variable can be set to force it run under EE mode.
-- In the case of JH repository, `jh/` does exist but `FOSS_ONLY` environment variable can be set to force it run under CE mode.
+- In the case of JH repository, `jh/` does exist but `FOSS_ONLY` environment variable can be set to force it run under FOSS (CE) mode.
 
 ## CI pipelines in a JH context
 
