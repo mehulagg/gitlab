@@ -23,12 +23,12 @@ RSpec.describe Vulnerabilities::Finding::Evidence::Asset do
     end
 
     it 'validates if there is only a name' do
-      asset.type = 'asset-name'
+      asset.name = 'asset-name'
       expect(asset).to be_valid
     end
 
     it 'validates if there is only a url' do
-      asset.type = 'asset-url.example'
+      asset.url = 'asset-url.example'
       expect(asset).to be_valid
     end
   end

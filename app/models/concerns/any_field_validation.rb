@@ -13,6 +13,8 @@ module AnyFieldValidation
   private
 
   def any_field_present
+    raise NotImplementedError if one_of_required_fields.empty?
+
     return unless one_of_required_fields.all? { |field| self[field].blank? }
 
     errors.add(:base, _("At least one field of %{one_of_required_fields} must be present") %

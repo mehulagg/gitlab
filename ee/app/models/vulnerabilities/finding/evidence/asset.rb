@@ -8,6 +8,8 @@ module Vulnerabilities
 
         self.table_name = 'vulnerability_finding_evidence_assets'
 
+        DATA_FIELDS = %w[type name url].freeze
+
         belongs_to :evidence,
                    class_name: 'Vulnerabilities::Finding::Evidence',
                    inverse_of: :assets,
@@ -23,7 +25,7 @@ module Vulnerabilities
         private
 
         def one_of_required_fields
-          [:type, :name, :url]
+          DATA_FIELDS
         end
       end
     end

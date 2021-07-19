@@ -8,7 +8,7 @@ module Vulnerabilities
 
         belongs_to :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :supporting_message, foreign_key: 'vulnerability_finding_evidence_id', optional: false
 
-        validates :name, length: { maximum: 2048 }
+        validates :name, length: { maximum: 2048 }, presence: true
       end
     end
   end
