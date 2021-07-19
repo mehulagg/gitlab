@@ -18,7 +18,7 @@ RSpec.describe 'Group navbar' do
     stub_group_wikis(false)
     sign_in(user)
 
-    insert_package_nav(_('Kubernetes'))
+    insert_package_nav(s_('Runners|Runners'))
   end
 
   context 'when devops adoption analytics is available' do

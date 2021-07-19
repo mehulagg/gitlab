@@ -9,6 +9,12 @@ class Groups::RunnersController < Groups::ApplicationController
 
   feature_category :runner
 
+  def index
+    unless Feature.enabled?(:runner_list_group_view_vue_ui, @group, default_enabled: :yaml)
+      render_404
+    end
+  end
+
   def show
   end
 

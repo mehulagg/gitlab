@@ -12,7 +12,7 @@ RSpec.describe 'Group navbar' do
   let_it_be(:group) { create(:group) }
 
   before do
-    insert_package_nav(_('Kubernetes'))
+    insert_package_nav(s_('Runners|Runners'))
 
     stub_feature_flags(group_iterations: false)
     stub_config(dependency_proxy: { enabled: false })

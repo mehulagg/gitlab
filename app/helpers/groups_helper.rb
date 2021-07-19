@@ -250,6 +250,12 @@ module GroupsHelper
       can?(current_user, "read_group_#{resource}".to_sym, @group)
     end
 
+    # Replace with correct permissions `read_group_runners`
+    # if Feature.enabled?(:runner_list_group_view_vue_ui, @group, default_enabled: :yaml) && can?(current_user, :read_group_runners, @group)
+    if Feature.enabled?(:runner_list_group_view_vue_ui, @group, default_enabled: :yaml)
+      links << :runners
+    end
+
     if can?(current_user, :read_cluster, @group)
       links << :kubernetes
     end

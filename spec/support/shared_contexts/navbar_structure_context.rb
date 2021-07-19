@@ -212,6 +212,10 @@ RSpec.shared_context 'group navbar structure' do
         nav_item: _('Kubernetes'),
         nav_sub_items: []
       },
+      {
+        nav_item: s_('Runners|Runners'),
+        nav_sub_items: []
+      },
       (analytics_nav_item if Gitlab.ee?)
     ]
   end
