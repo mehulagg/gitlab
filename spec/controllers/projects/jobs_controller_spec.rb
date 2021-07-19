@@ -291,6 +291,21 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
         end
       end
 
+      context 'when job passed has trace artifact record with no file' do
+        let(:job) { create(:ci_build, :success, :artifacts, pipeline: pipeline) }
+        let(:trace) { ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace) }
+
+        it 'exposes empty state illustrations' do
+          get_show_json
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to match_response_schema('job/job_details')
+          expect(json_response['status']['illustration']).to have_key('image')
+          expect(json_response['status']['illustration']).to have_key('size')
+          expect(json_response['status']['illustration']).to have_key('title')
+        end
+      end
+
       context 'with no deployment' do
         let(:job) { create(:ci_build, :success, pipeline: pipeline) }
 
@@ -463,10 +478,21 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
         end
       end
 
+      context 'when has trace artifact record with no file' do
+        let(:artifact) { ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace) }
+
+        it 'has_trace is false' do
+          get_show_json
+
+          expect(response).to match_response_schema('job/job_details')
+          expect(json_response['has_trace']).to be false
+        end
+      end
+
       context 'when job has trace' do
         let(:job) { create(:ci_build, :running, :trace_live, pipeline: pipeline) }
 
-        it "has_trace is true" do
+        it 'has_trace is true' do
           get_show_json
 
           expect(response).to match_response_schema('job/job_details')
@@ -584,6 +610,15 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       get_trace
     end
 
+    context 'when job has trace artifact record with no file' do
+      let(:job) { create(:ci_build) }
+      let(:artifact) { ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace) }
+
+      it 'returns not found' do
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
     context 'when job has a trace artifact' do
       let(:job) { create(:ci_build, :trace_artifact, pipeline: pipeline) }
 
@@ -658,6 +693,15 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
 
           expect(job.trace.being_watched?).to be(false)
         end
+      end
+    end
+
+    context 'when job has trace artifact record with no file' do
+      let(:job) { create(:ci_build, pipeline: pipeline) }
+      let(:artifact) { ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace) }
+
+      it 'returns no traces' do
+        expect(response).to have_gitlab_http_status(:no_content)
       end
     end
 
@@ -1006,6 +1050,25 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       end
     end
 
+    context 'when job has trace artifact record with no file' do
+      let(:job) { create(:ci_build, :erasable, pipeline: pipeline) }
+      let(:artifact) { ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace) }
+
+      it 'redirects to the erased job page' do
+        expect(response).to have_gitlab_http_status(:found)
+        expect(response).to redirect_to(namespace_project_job_path(id: job.id))
+      end
+
+      it 'erases artifacts' do
+        expect(job.artifacts_file.present?).to be_falsey
+        expect(job.artifacts_metadata.present?).to be_falsey
+      end
+
+      it 'erases trace' do
+        expect(job.trace.exist?).to be_falsey
+      end
+    end
+
     context 'when job is not erasable' do
       let(:job) { create(:ci_build, :erased, pipeline: pipeline) }
 
@@ -1051,6 +1114,17 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
                    project_id: project,
                    id: job.id
                  }
+    end
+
+    context 'when job has trace artifact record with no file' do
+      let(:job) { create(:ci_build) }
+      let(:artifact) { ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace) }
+
+      it "returns not found" do
+        response = subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
     end
 
     context 'when job has a trace artifact' do
