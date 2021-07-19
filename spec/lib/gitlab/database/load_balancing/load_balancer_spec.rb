@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
-  let(:pool) { Gitlab::Database.create_connection_pool(2) }
+  let(:pool) { Gitlab::Database.main.create_connection_pool(2) }
   let(:conflict_error) { Class.new(RuntimeError) }
 
   let(:lb) { described_class.new(%w(localhost localhost)) }
