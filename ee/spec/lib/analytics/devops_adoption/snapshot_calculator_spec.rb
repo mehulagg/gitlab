@@ -12,6 +12,11 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
 
   subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end).calculate }
 
+  before do
+    # TODO: CI Vertical
+    skip "CI Vertical: the code joins CI tables, group::optimize will look into this: https://gitlab.com/gitlab-org/manage/general-discussion/-/issues/17360"
+  end
+
   describe 'end_time' do
     it 'equals to range_end' do
       expect(data[:end_time]).to be_like_time range_end
