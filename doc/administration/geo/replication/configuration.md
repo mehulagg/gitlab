@@ -55,7 +55,7 @@ they must be manually replicated to **all nodes of the secondary site**.
    mv /etc/gitlab/gitlab-secrets.json /etc/gitlab/gitlab-secrets.json.`date +%F`
    ```
 
-1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails node on your primary** site to the **each node on your secondary** site, or
+1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails node on your primary** site to **each node on your secondary** site, or
    copy-and-paste the file contents between nodes:
 
    ```shell
