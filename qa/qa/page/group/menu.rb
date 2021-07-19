@@ -20,6 +20,12 @@ module QA
           element :group_package_settings_link
         end
 
+        view 'app/views/groups/sidebar/_packages.html.haml' do
+          element :group_packages_item
+          element :group_packages_link
+          element :group_packages_submenu
+        end
+
         view 'app/views/layouts/nav/sidebar/_analytics_links.html.haml' do
           element :analytics_link
           element :analytics_sidebar_submenu
@@ -68,6 +74,14 @@ module QA
           hover_element(:group_settings) do
             within_submenu(:group_sidebar_submenu) do
               click_element(:group_package_settings_link)
+            end
+          end
+        end
+
+        def go_to_dependency_proxy
+          hover_element(:group_packages_item) do
+            within_submenu(:group_packages_submenu) do
+              click_element(:dependency_proxy_link)
             end
           end
         end

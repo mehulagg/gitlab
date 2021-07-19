@@ -23,5 +23,5 @@
             %span= _('Container Registry')
       - if group_dependency_proxy_nav?
         = nav_link(controller: 'groups/dependency_proxies') do
-          = link_to group_dependency_proxy_path(@group), title: _('Dependency Proxy') do
+          = link_to group_dependency_proxy_path(@group), title: _('Dependency Proxy'), data: { qa_selector: 'dependency_proxy_link' } do
             %span= _('Dependency Proxy')
