@@ -31,11 +31,11 @@ Any change that requires access to the **Admin Area** needs to be done in the
 ### Step 1. Manually replicate secret GitLab values
 
 GitLab stores a number of secret values in the `/etc/gitlab/gitlab-secrets.json`
-file which *must* be the same on all of a site's servers. Until there is
+file which *must* be the same on all of a site's nodes. Until there is
 a means of automatically replicating these between sites (see [issue #3789](https://gitlab.com/gitlab-org/gitlab/-/issues/3789)),
-they must be manually replicated to **all servers of the secondary site**.
+they must be manually replicated to **all nodes of the secondary site**.
 
-1. SSH into a **Rails server on your primary** site, and execute the command below:
+1. SSH into a **Rails nodes on your primary** site, and execute the command below:
 
    ```shell
    sudo cat /etc/gitlab/gitlab-secrets.json
@@ -43,7 +43,7 @@ they must be manually replicated to **all servers of the secondary site**.
 
    This displays the secrets that need to be replicated, in JSON format.
 
-1. SSH **into each server on your secondary Geo site** and login as the `root` user:
+1. SSH **into each node on your secondary Geo site** and login as the `root` user:
 
    ```shell
    sudo -i
@@ -55,8 +55,8 @@ they must be manually replicated to **all servers of the secondary site**.
    mv /etc/gitlab/gitlab-secrets.json /etc/gitlab/gitlab-secrets.json.`date +%F`
    ```
 
-1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails server on your primary** site to the **each server on your secondary** site, or
-   copy-and-paste the file contents between servers:
+1. Copy `/etc/gitlab/gitlab-secrets.json` from the **Rails node on your primary** site to the **each node on your secondary** site, or
+   copy-and-paste the file contents between nodes:
 
    ```shell
    sudo editor /etc/gitlab/gitlab-secrets.json
@@ -72,7 +72,7 @@ they must be manually replicated to **all servers of the secondary site**.
    chmod 0600 /etc/gitlab/gitlab-secrets.json
    ```
 
-1. Reconfigure **each Rails, Sidekiq and Gitaly servers on your secondary** site for the change to take effect:
+1. Reconfigure **each Rails, Sidekiq and Gitaly nodes on your secondary** site for the change to take effect:
 
    ```shell
    gitlab-ctl reconfigure
@@ -93,7 +93,7 @@ This causes all SSH requests to the newly promoted **primary** site to
 fail due to SSH host key mismatch. To prevent this, the primary SSH host
 keys must be manually replicated to the **secondary** site.
 
-1. SSH into the **each OpenSSH server on your secondary** site and login as the `root` user:
+1. SSH into the **each OpenSSH node on your secondary** site and login as the `root` user:
 
    ```shell
    sudo -i
@@ -107,38 +107,38 @@ keys must be manually replicated to the **secondary** site.
 
 1. Copy OpenSSH host keys from the **primary** site:
 
-   If you can access your **the OpenSSH server on your primary** site using the **root** user:
+   If you can access your **the OpenSSH node on your primary** site using the **root** user:
 
    ```shell
    # Run this from the secondary site, change `<primary_site_fqdn>` for the IP or FQDN of the server
-   scp root@<primary_openssh_server_fqdn>:/etc/ssh/ssh_host_*_key* /etc/ssh
+   scp root@<primary_openssh_node_fqdn>:/etc/ssh/ssh_host_*_key* /etc/ssh
    ```
 
    If you only have access through a user with `sudo` privileges:
 
    ```shell
-   # Run this from the a OpenSSH server on your primary site:
+   # Run this from the a OpenSSH node on your primary site:
    sudo tar --transform 's/.*\///g' -zcvf ~/geo-host-key.tar.gz /etc/ssh/ssh_host_*_key*
 
-   # Run this on each OpenSSH server on your secondary site:
+   # Run this on each OpenSSH node on your secondary site:
    scp <user_with_sudo>@<primary_site_fqdn>:geo-host-key.tar.gz .
    tar zxvf ~/geo-host-key.tar.gz -C /etc/ssh
    ```
 
-1. On **each OpenSSH server on your secondary** site, ensure the file permissions are correct:
+1. On **each OpenSSH node on your secondary** site, ensure the file permissions are correct:
 
    ```shell
    chown root:root /etc/ssh/ssh_host_*_key*
    chmod 0600 /etc/ssh/ssh_host_*_key*
    ```
 
-1. To verify key fingerprint matches, execute the following command on both primary and secondary OpenSSH servers on each site:
+1. To verify key fingerprint matches, execute the following command on both primary and secondary OpenSSH nodes on each site:
 
    ```shell
    for file in /etc/ssh/ssh_host_*_key; do ssh-keygen -lf $file; done
    ```
 
-   You should get an output similar to this one and they should be identical on both servers:
+   You should get an output similar to this one and they should be identical on both nodes:
 
    ```shell
    1024 SHA256:FEZX2jQa2bcsd/fn/uxBzxhKdx4Imc4raXrHwsbtP0M root@serverhostname (DSA)
@@ -160,7 +160,7 @@ keys must be manually replicated to the **secondary** site.
    NOTE:
    The output for private keys and public keys command should generate the same fingerprint.
 
-1. Restart `sshd` on **each OpenSSH server on your secondary** site:
+1. Restart `sshd` on **each OpenSSH node on your secondary** site:
 
    ```shell
    # Debian or Ubuntu installations
@@ -177,7 +177,7 @@ keys must be manually replicated to the **secondary** site.
 
 ### Step 3. Add the **secondary** site
 
-1. SSH into **each Rails and Sidekiq server on your secondary** site and login as root:
+1. SSH into **each Rails and Sidekiq node on your secondary** site and login as root:
 
    ```shell
    sudo -i
@@ -190,7 +190,7 @@ keys must be manually replicated to the **secondary** site.
    gitlab_rails['geo_node_name'] = '<site_name_here>'
    ```
 
-1. Reconfigure **each Rails and Sidekiq server on your secondary** site for the change to take effect:
+1. Reconfigure **each Rails and Sidekiq node on your secondary** site for the change to take effect:
 
    ```shell
    gitlab-ctl reconfigure
@@ -210,7 +210,7 @@ keys must be manually replicated to the **secondary** site.
    **secondary** site. Leave blank to replicate all. Read more in
    [selective synchronization](#selective-synchronization).
 1. Select **Add site** to add the **secondary** site.
-1. SSH into **each Rails, and Sidekiq server on your secondary** site and restart the services:
+1. SSH into **each Rails, and Sidekiq node on your secondary** site and restart the services:
 
    ```shell
    gitlab-ctl restart
