@@ -150,6 +150,7 @@ The following table lists project permissions available for each role:
 | Add deploy keys to project                        |         |            |             | ✓        | ✓      |
 | Add new team members                              |         |            |             | ✓        | ✓      |
 | Configure project hooks                           |         |            |             | ✓        | ✓      |
+| Change project features visibility level          |         |            |             | ✓        | ✓      |
 | Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
@@ -181,6 +182,7 @@ The following table lists project permissions available for each role:
 | View 2FA status of members                        |         |            |             | ✓        | ✓      |
 | Administer project compliance frameworks          |         |            |             |          | ✓      |
 | Archive project                                   |         |            |             |          | ✓      |
+| Change project visibility level                   |         |            |             |          | ✓      |
 | Create or assign security policy project **(ULTIMATE)** |   |            |             |          | ✓      |
 | Delete issues                                     |         |            |             |          | ✓      |
 | Delete merge request                              |         |            |             |          | ✓      |
@@ -189,7 +191,6 @@ The following table lists project permissions available for each role:
 | Disable notification emails                       |         |            |             |          | ✓      |
 | Remove fork relationship                          |         |            |             |          | ✓      |
 | Rename project                                    |         |            |             |          | ✓      |
-| Switch visibility level                           |         |            |             |          | ✓      |
 | Transfer project to another namespace             |         |            |             |          | ✓      |
 | Force push to protected branches (*4*)            |         |            |             |          |        |
 | Remove protected branches (*4*)                   |         |            |             |          |        |
