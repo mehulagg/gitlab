@@ -26,7 +26,6 @@ After general availability, when runners are autoscaled, the behavior will be as
 | --------- | --- | ------- |
 |  `gbc-macos-large` | 4 | 10 |
 
-
 ## Choose a VM image to run your job on
 
 The GitLab Build Cloud runners for macOS include virtual machine images you can use to execute your build. You specify this image in your `.gitlab-ci.yml` file.
@@ -45,4 +44,4 @@ The GitLab Build Cloud runners for macOS include virtual machine images you can 
 ### Image update policy
 
 - We intend to support a new macOS version as soon as possible after Apple releases it.
-- Additional details on the support policy and image update release process are documented [here.](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/macstadium/orka/-/blob/55bf59c8fa88712960afff2bf6ecc5daa879a8f5/docs/overview.md#os-images) 
+- Additional details on the support policy and image update release process are documented [here.](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/macstadium/orka/-/blob/55bf59c8fa88712960afff2bf6ecc5daa879a8f5/docs/overview.md#os-images)
