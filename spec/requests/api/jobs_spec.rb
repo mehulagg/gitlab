@@ -223,6 +223,24 @@ RSpec.describe API::Jobs do
         expect(json_job['pipeline']['status']).to eq job.pipeline.status
       end
 
+      context 'when trace artifact record exists with no file', :skip_before_request do
+        before do
+          ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace)
+        end
+
+        it 'returns no artifacts nor trace data' do
+          go
+
+          json_job = json_response.first
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_job['artifacts_file']).to be_nil
+          expect(json_job['artifacts']).to be_an Array
+          expect(json_job['artifacts']).to be_empty
+          # TODO: currently returns [{"file_format"=>nil, "file_type"=>"trace", "filename"=>nil, "size"=>nil}]. should filter out traces like this?
+        end
+      end
+
       it 'avoids N+1 queries', :skip_before_request do
         first_build = create(:ci_build, :trace_artifact, :artifacts, :test_reports, pipeline: pipeline)
         first_build.runner = create(:ci_runner)
