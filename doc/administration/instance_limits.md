@@ -486,7 +486,7 @@ A runner's registration fails if it exceeds the limit for the scope determined b
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276192) in GitLab 14.1.
 > - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - Disabled on GitLab.com.
+> - Enabled on GitLab.com.
 > - Not recommended for production use.
 > - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-job-log-limits). **(FREE SELF)**
 
