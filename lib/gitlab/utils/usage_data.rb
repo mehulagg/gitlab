@@ -198,7 +198,7 @@ module Gitlab
       end
 
       def with_finished_at(key, &block)
-        yield.merge(key => Time.current)
+        yield.merge(key => alt_usage_data(fallback: Time.current) { Gitlab::Usage::Metrics::Instrumentations::TimeStampMetric.new.value })
       end
 
       # @param event_name [String] the event name
