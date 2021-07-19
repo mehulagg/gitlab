@@ -33,8 +33,7 @@ usernames. A GitLab administrator can configure the GitLab instance to
 
 ## Project members permissions
 
-NOTE:
-In GitLab 11.0, the Master role was renamed to Maintainer.
+> The Master role was renamed to Maintainer in GitLab 11.0.
 
 The Owner role is only available at the group or personal namespace level (and for instance administrators) and is inherited by its projects.
 While Maintainer is the highest project-level role, some actions can only be performed by a personal namespace or group owner, or an instance administrator, who receives all permissions.
