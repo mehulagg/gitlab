@@ -176,7 +176,7 @@ module Groups
       current_user.refresh_authorized_projects
 
       # schedule refreshing projects for all the members of the group
-      @group.refresh_members_authorized_projects
+      @group.refresh_members_authorized_projects(blocking: false)
     end
 
     def raise_transfer_error(message)
