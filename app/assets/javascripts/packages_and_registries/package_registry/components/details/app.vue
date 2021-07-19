@@ -28,8 +28,15 @@ import { s__, __ } from '~/locale';
 import PackagesListLoader from '~/packages/shared/components/packages_list_loader.vue';
 import { packageTypeToTrackCategory } from '~/packages/shared/utils';
 import {
-  PackageType,
-  TrackingActions,
+  PACKAGE_TYPE_NUGET,
+  PACKAGE_TYPE_COMPOSER,
+  DELETE_PACKAGE_TRACKING_ACTION,
+  REQUEST_DELETE_PACKAGE_TRACKING_ACTION,
+  CANCEL_DELETE_PACKAGE_TRACKING_ACTION,
+  PULL_PACKAGE_TRACKING_ACTION,
+  DELETE_PACKAGE_FILE_TRACKING_ACTION,
+  REQUEST_DELETE_PACKAGE_FILE_TRACKING_ACTION,
+  CANCEL_DELETE_PACKAGE_FILE_TRACKING_ACTION,
   SHOW_DELETE_SUCCESS_ALERT,
   FETCH_PACKAGE_DETAILS_ERROR_MESSAGE,
 } from '~/packages_and_registries/package_registry/constants';
@@ -74,7 +81,15 @@ export default {
     'projectListUrl',
     'groupListUrl',
   ],
-  trackingActions: { ...TrackingActions },
+  trackingActions: {
+    DELETE_PACKAGE_TRACKING_ACTION,
+    REQUEST_DELETE_PACKAGE_TRACKING_ACTION,
+    CANCEL_DELETE_PACKAGE_TRACKING_ACTION,
+    PULL_PACKAGE_TRACKING_ACTION,
+    DELETE_PACKAGE_FILE_TRACKING_ACTION,
+    REQUEST_DELETE_PACKAGE_FILE_TRACKING_ACTION,
+    CANCEL_DELETE_PACKAGE_FILE_TRACKING_ACTION,
+  },
   data() {
     return {
       fileToDelete: null,
@@ -126,10 +141,10 @@ export default {
       return this.packageEntity.dependency_links || [];
     },
     showDependencies() {
-      return this.packageEntity.package_type === PackageType.NUGET;
+      return this.packageEntity.package_type === PACKAGE_TYPE_NUGET;
     },
     showFiles() {
-      return this.packageEntity?.package_type !== PackageType.COMPOSER;
+      return this.packageEntity?.package_type !== PACKAGE_TYPE_COMPOSER;
     },
   },
   methods: {
@@ -142,7 +157,7 @@ export default {
       }
     },
     async confirmPackageDeletion() {
-      this.track(TrackingActions.DELETE_PACKAGE);
+      this.track(DELETE_PACKAGE_TRACKING_ACTION);
 
       await this.deletePackage();
 
@@ -156,12 +171,12 @@ export default {
       window.location.replace(`${returnTo}?${modalQuery}`);
     },
     handleFileDelete(file) {
-      this.track(TrackingActions.REQUEST_DELETE_PACKAGE_FILE);
+      this.track(REQUEST_DELETE_PACKAGE_FILE_TRACKING_ACTION);
       this.fileToDelete = { ...file };
       this.$refs.deleteFileModal.show();
     },
     confirmFileDelete() {
-      this.track(TrackingActions.DELETE_PACKAGE_FILE);
+      this.track(DELETE_PACKAGE_FILE_TRACKING_ACTION);
       // this.deletePackageFile(this.fileToDelete.id);
       this.fileToDelete = null;
     },

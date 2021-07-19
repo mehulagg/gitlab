@@ -1,20 +1,24 @@
 import { __, s__ } from '~/locale';
 
-export const PackageType = {
-  CONAN: 'CONAN',
-  MAVEN: 'MAVEN',
-  NPM: 'NPM',
-  NUGET: 'NUGET',
-  PYPI: 'PYPI',
-  COMPOSER: 'COMPOSER',
-  RUBYGEMS: 'RUBYGEMS',
-  GENERIC: 'GENERIC',
-  DEBIAN: 'DEBIAN',
-  HELM: 'HELM',
-};
+export const PACKAGE_TYPE_CONAN = 'CONAN';
+export const PACKAGE_TYPE_MAVEN = 'MAVEN';
+export const PACKAGE_TYPE_NPM = 'NPM';
+export const PACKAGE_TYPE_NUGET = 'NUGET';
+export const PACKAGE_TYPE_PYPI = 'PYPI';
+export const PACKAGE_TYPE_COMPOSER = 'COMPOSER';
+export const PACKAGE_TYPE_RUBYGEMS = 'RUBYGEMS';
+export const PACKAGE_TYPE_GENERIC = 'GENERIC';
+export const PACKAGE_TYPE_DEBIAN = 'DEBIAN';
+export const PACKAGE_TYPE_HELM = 'HELM';
+export const PACKAGE_TYPE_TERRAFORM = 'terraform_module';
 
-// we want this separated from the main dictionary to avoid it being pulled in the search of package
-export const TERRAFORM_PACKAGE_TYPE = 'terraform_module';
+export const DELETE_PACKAGE_TRACKING_ACTION = 'delete_package';
+export const REQUEST_DELETE_PACKAGE_TRACKING_ACTION = 'request_delete_package';
+export const CANCEL_DELETE_PACKAGE_TRACKING_ACTION = 'cancel_delete_package';
+export const PULL_PACKAGE_TRACKING_ACTION = 'pull_package';
+export const DELETE_PACKAGE_FILE_TRACKING_ACTION = 'delete_package_file';
+export const REQUEST_DELETE_PACKAGE_FILE_TRACKING_ACTION = 'request_delete_package_file';
+export const CANCEL_DELETE_PACKAGE_FILE_TRACKING_ACTION = 'cancel_delete_package_file';
 
 export const TrackingActions = {
   DELETE_PACKAGE: 'delete_package',
@@ -27,9 +31,9 @@ export const TrackingActions = {
 };
 
 export const TrackingCategories = {
-  [PackageType.MAVEN]: 'MavenPackages',
-  [PackageType.NPM]: 'NpmPackages',
-  [PackageType.CONAN]: 'ConanPackages',
+  [PACKAGE_TYPE_MAVEN]: 'MavenPackages',
+  [PACKAGE_TYPE_NPM]: 'NpmPackages',
+  [PACKAGE_TYPE_CONAN]: 'ConanPackages',
 };
 
 export const SHOW_DELETE_SUCCESS_ALERT = 'showSuccessDeleteAlert';

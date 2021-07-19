@@ -4,7 +4,7 @@ import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __ } from '~/locale';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
-import { PackageType } from '~/packages_and_registries/package_registry/constants';
+import { PACKAGE_TYPE_NUGET } from '~/packages_and_registries/package_registry/constants';
 import { getPackageTypeLabel } from '~/packages_and_registries/package_registry/utils';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
@@ -46,7 +46,7 @@ export default {
       return this.packageEntity.pipelines?.nodes[0];
     },
     packageIcon() {
-      if (this.packageEntity.packageType === PackageType.NUGET) {
+      if (this.packageEntity.packageType === PACKAGE_TYPE_NUGET) {
         return this.packageEntity.metadata?.iconUrl || null;
       }
       return null;

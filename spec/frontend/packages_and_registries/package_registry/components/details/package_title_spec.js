@@ -2,7 +2,12 @@ import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
 import PackageTitle from '~/packages_and_registries/package_registry/components/details/package_title.vue';
-import { PackageType } from '~/packages_and_registries/package_registry/constants';
+import {
+  PACKAGE_TYPE_CONAN,
+  PACKAGE_TYPE_MAVEN,
+  PACKAGE_TYPE_NPM,
+  PACKAGE_TYPE_NUGET,
+} from '~/packages_and_registries/package_registry/constants';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 
 import { packageData, packageFiles, packageTags, packagePipelines } from '../../mock_data';
@@ -74,7 +79,7 @@ describe('PackageTitle', () => {
     it('shows an icon when present and package type is NUGET', async () => {
       await createComponent({
         ...packageData(),
-        packageType: PackageType.NUGET,
+        packageType: PACKAGE_TYPE_NUGET,
         metadata: { iconUrl },
       });
 
@@ -89,11 +94,11 @@ describe('PackageTitle', () => {
   });
 
   describe.each`
-    packageType          | text
-    ${PackageType.CONAN} | ${'Conan'}
-    ${PackageType.MAVEN} | ${'Maven'}
-    ${PackageType.NPM}   | ${'npm'}
-    ${PackageType.NUGET} | ${'NuGet'}
+    packageType           | text
+    ${PACKAGE_TYPE_CONAN} | ${'Conan'}
+    ${PACKAGE_TYPE_MAVEN} | ${'Maven'}
+    ${PACKAGE_TYPE_NPM}   | ${'npm'}
+    ${PACKAGE_TYPE_NUGET} | ${'NuGet'}
   `(`package type`, ({ packageType, text }) => {
     beforeEach(() => createComponent({ ...packageData, packageType }));
 
