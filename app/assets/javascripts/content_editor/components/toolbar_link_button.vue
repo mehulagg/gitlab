@@ -8,7 +8,6 @@ import {
   GlDropdownItem,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
-import { Editor as TiptapEditor } from '@tiptap/vue-2';
 import { hasSelection } from '../services/utils';
 
 export const linkContentType = 'link';
@@ -25,12 +24,7 @@ export default {
   directives: {
     GlTooltip,
   },
-  props: {
-    tiptapEditor: {
-      type: TiptapEditor,
-      required: true,
-    },
-  },
+  inject: ['tiptapEditor'],
   data() {
     return {
       linkHref: '',

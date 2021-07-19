@@ -13,7 +13,7 @@ describe('content_editor/components/toolbar_link_button', () => {
 
   const buildWrapper = () => {
     wrapper = mountExtended(ToolbarLinkButton, {
-      propsData: {
+      provide: {
         tiptapEditor: editor,
       },
     });

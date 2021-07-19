@@ -5,7 +5,7 @@ import { TEXT_STYLE_DROPDOWN_ITEMS } from '~/content_editor/constants';
 import { tiptapExtension as Heading } from '~/content_editor/extensions/heading';
 import { createTestEditor, mockChainedCommands } from '../test_utils';
 
-describe('content_editor/components/toolbar_headings_dropdown', () => {
+describe('content_editor/components/toolbar_text_style_dropdown', () => {
   let wrapper;
   let tiptapEditor;
 
@@ -23,8 +23,10 @@ describe('content_editor/components/toolbar_headings_dropdown', () => {
         GlDropdown,
         GlDropdownItem,
       },
-      propsData: {
+      provide: {
         tiptapEditor,
+      },
+      propsData: {
         ...propsData,
       },
     });

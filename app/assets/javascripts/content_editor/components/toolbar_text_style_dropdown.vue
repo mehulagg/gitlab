@@ -1,6 +1,5 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTooltipDirective as GlTooltip } from '@gitlab/ui';
-import { Editor as TiptapEditor } from '@tiptap/vue-2';
 import { __ } from '~/locale';
 import { TEXT_STYLE_DROPDOWN_ITEMS } from '../constants';
 
@@ -12,12 +11,7 @@ export default {
   directives: {
     GlTooltip,
   },
-  props: {
-    tiptapEditor: {
-      type: TiptapEditor,
-      required: true,
-    },
-  },
+  inject: ['tiptapEditor'],
   computed: {
     activeItem() {
       return TEXT_STYLE_DROPDOWN_ITEMS.find((item) =>

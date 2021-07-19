@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlTooltipDirective as GlTooltip } from '@gitlab/ui';
-import { Editor as TiptapEditor } from '@tiptap/vue-2';
 
 export default {
   components: {
@@ -9,13 +8,10 @@ export default {
   directives: {
     GlTooltip,
   },
+  inject: ['tiptapEditor'],
   props: {
     iconName: {
       type: String,
-      required: true,
-    },
-    tiptapEditor: {
-      type: TiptapEditor,
       required: true,
     },
     contentType: {

@@ -21,8 +21,10 @@ describe('content_editor/components/toolbar_button', () => {
       stubs: {
         GlButton,
       },
-      propsData: {
+      provide: {
         tiptapEditor,
+      },
+      propsData: {
         contentType: CONTENT_TYPE,
         iconName: ICON_NAME,
         label: LABEL,
