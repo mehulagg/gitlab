@@ -885,18 +885,18 @@ RSpec.shared_examples 'a container registry auth service' do
     end
 
     context 'when deploy token does not have read_registry scope' do
-      let(:current_user) { create(:deploy_token, projects: [project], read_registry: false) }
+      let(:deploy_token) { create(:deploy_token, projects: [project], read_registry: false) }
+
+      let(:current_params) { { deploy_token: deploy_token } }
 
       shared_examples 'unable to login' do
         context 'registry provides no container authentication_abilities' do
-          let(:current_params) { {} }
           let(:authentication_abilities) { [] }
 
           it_behaves_like 'a forbidden'
         end
 
         context 'registry provides inapplicable container authentication_abilities' do
-          let(:current_params) { {} }
           let(:authentication_abilities) { [:download_code] }
 
           it_behaves_like 'a forbidden'
@@ -942,7 +942,9 @@ RSpec.shared_examples 'a container registry auth service' do
     end
 
     context 'when deploy token is not related to the project' do
-      let_it_be(:current_user) { create(:deploy_token, read_registry: false) }
+      let_it_be(:deploy_token) { create(:deploy_token, read_registry: false) }
+
+      let(:current_params) { { deploy_token: deploy_token } }
 
       context 'for public project' do
         let_it_be(:project) { create(:project, :public) }
@@ -970,7 +972,9 @@ RSpec.shared_examples 'a container registry auth service' do
     end
 
     context 'when deploy token has been revoked' do
-      let(:current_user) { create(:deploy_token, :revoked, projects: [project]) }
+      let(:deploy_token) { create(:deploy_token, :revoked, projects: [project]) }
+
+      let(:current_params) { { deploy_token: deploy_token } }
 
       context 'for public project' do
         let_it_be(:project) { create(:project, :public) }

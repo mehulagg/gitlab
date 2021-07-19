@@ -21,7 +21,7 @@ module Auth
 
       return error('DENIED', status: 403, message: 'access forbidden') unless has_registry_ability?
 
-      unless scopes.any? || current_user || project
+      unless scopes.any? || current_user || deploy_token || project
         return error('DENIED', status: 403, message: 'access forbidden')
       end
 
