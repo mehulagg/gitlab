@@ -107,5 +107,14 @@ RSpec.describe Security::Scan do
     it { is_expected.to match_array(expected_scans) }
   end
 
+  describe '.without_errors' do
+    let(:scan_1) { create(:security_scan, :with_error) }
+    let(:scan_2) { create(:security_scan) }
+
+    subject { described_class.without_errors }
+
+    it { is_expected.to contain_exactly(scan_2) }
+  end
+
   it_behaves_like 'having unique enum values'
 end

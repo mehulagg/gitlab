@@ -38,7 +38,9 @@ module Security
         .merge(Vulnerabilities::Feedback.for_dismissal)
     end
 
-    scope :latest_successful_by_build, -> { joins(:build).where(ci_builds: { status: 'success', retried: [nil, false] }) }
+    scope :latest, -> { joins(:build).where(ci_builds: { retried: [nil, false] }) }
+    scope :latest_successful_by_build, -> { latest.where(ci_builds: { status: 'success' }) }
+    scope :without_errors, -> { where("jsonb_array_length(COALESCE(info->'error', '[]'::jsonb)) = 0") }
 
     delegate :project, :name, to: :build
 
