@@ -59,7 +59,7 @@ provided architecture.
 
 ## Reference Architecture Development
 
-GitLab reference architectures are intended to be as implementation independent as possible so that they are relevant to as many implementations as possible.  As such, they have a specific emphasis on language and concepts that enable this independence.  These include:
+GitLab reference architectures are intended to be as implementation independent as possible so that they are relevant to as many implementations as possible. As such, they have a specific emphasis on language and concepts that enable this independence. These include:
 
 - Stating and testing performance in Requests Per Second (RPS).
 - Stating compute requirements in generic vCPUs and Memory.
