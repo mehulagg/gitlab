@@ -57,6 +57,14 @@ provided by [GCP machine types](https://cloud.google.com/compute/docs/machine-ty
 For different cloud vendors, attempt to select options that best match the
 provided architecture.
 
+## Reference Architecture Development
+
+GitLab reference architectures are intended to be as implementation independent as possible so that they are relevant to as many implementations as possible.  As such, they have a specific emphasis on language and concepts that enable this independence.  These include:
+
+- Stating and testing performance in Requests Per Second (RPS).
+- Stating compute requirements in generic vCPUs and Memory.
+- Performance testing at full, fixed scale sizing to prevent scaling affects on test measurements.
+
 ## Available reference architectures
 
 The following reference architectures are available:
