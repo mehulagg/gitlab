@@ -47,11 +47,13 @@ module Integrations
     end
 
     def description
-      'Trace your GitLab pipelines with Datadog'
+      'Trace your GitLab pipelines with Datadog.'
     end
 
     def help
       nil
+      # docs_link = link_to _('How do I set up this service?'), Rails.application.routes.url_helpers.help_page_url('integration/datadog'), target: '_blank', rel: 'noopener noreferrer'
+      # s_('Send CI/CD pipeline information to Datadog to monitor for job failures and troubleshoot performance issues. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
     end
 
     def self.to_param
@@ -64,14 +66,15 @@ module Integrations
           type: 'text',
           name: 'datadog_site',
           placeholder: DEFAULT_DOMAIN,
-          help: 'Choose the Datadog site to send data to. Set to "datadoghq.eu" to send data to the EU site',
+          help: 'The Datadog site to send data to. To send data to the EU site, use <code>datadoghq.eu</code>.',
           required: false
         },
         {
           type: 'text',
           name: 'api_url',
           title: 'API URL',
-          help: '(Advanced) Define the full URL for your Datadog site directly',
+          placeholder: 'gitlab.example.com',
+          help: '(Advanced) The full URL for your Datadog site.',
           required: false
         },
         {
@@ -80,7 +83,7 @@ module Integrations
           title: _('API key'),
           non_empty_password_title: s_('ProjectService|Enter new API key'),
           non_empty_password_help: s_('ProjectService|Leave blank to use your current API key'),
-          help: "<a href=\"#{api_keys_url}\" target=\"_blank\">API key</a> used for authentication with Datadog",
+          help: "<a href=\"#{api_keys_url}\" target=\"_blank\">API key</a> used for authentication with Datadog.",
           required: true
         },
         {
@@ -88,13 +91,14 @@ module Integrations
           name: 'datadog_service',
           title: 'Service',
           placeholder: 'gitlab-ci',
-          help: 'Name of this GitLab instance that all data will be tagged with'
+          help: 'Include this string with all data sent from this GitLab instance.'
         },
         {
           type: 'text',
           name: 'datadog_env',
-          title: 'Env',
-          help: 'The environment tag that traces will be tagged with'
+          title: 'Environment',
+          placeholder: 'production',
+          help: 'Include this environment tag with all traces sent from this environment.'
         }
       ]
     end
