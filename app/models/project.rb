@@ -47,6 +47,7 @@ class Project < ApplicationRecord
 
   STATISTICS_ATTRIBUTE = 'repositories_count'
   UNKNOWN_IMPORT_URL = 'http://unknown.git'
+  GITHUB_COM_HOST = 'github.com'
   # Hashed Storage versions handle rolling out new storage to project and dependents models:
   # nil: legacy
   # 1: repository
@@ -1153,7 +1154,12 @@ class Project < ApplicationRecord
   end
 
   def import?
-    external_import? || forked? || gitlab_project_import? || jira_import? || bare_repository_import?
+    external_import? ||
+      forked? ||
+      gitlab_project_import? ||
+      jira_import? ||
+      github_import? ||
+      bare_repository_import?
   end
 
   def external_import?
@@ -1178,6 +1184,14 @@ class Project < ApplicationRecord
 
   def gitea_import?
     import_type == 'gitea'
+  end
+
+  def github_import?
+    import_type == 'github'
+  end
+
+  def github_enterprise_import?
+    github_import? && URI.parse(import_url).host != GITHUB_COM_HOST
   end
 
   def has_remote_mirror?

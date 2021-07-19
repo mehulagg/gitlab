@@ -167,6 +167,9 @@ perform:
    tries to find the user based on the GitHub user ID, while the second query
    is used to find the user using their GitHub Email address.
 
+To avoid miss-matching users, the search byt GitHub user ID is not done when
+importing from GitHub enterprise.
+
 Because this process is quite expensive we cache the result of these lookups in
 Redis. For every user looked up we store three keys:
 

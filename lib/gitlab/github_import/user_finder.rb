@@ -120,10 +120,18 @@ module Gitlab
         read_id_from_cache(ID_FOR_EMAIL_CACHE_KEY % email)
       end
 
-      # Queries and caches the GitLab user ID for a GitHub user ID, if one was
-      # found.
+      # If importing from github.com, queries and caches the GitLab user ID for
+      # a GitHub user ID, if one was found.
+      #
+      # It doesn't look for Github user ID when importing from github enterprise
+      # to avoid wrong user mapping.
       def id_for_github_id(id)
-        gitlab_id = query_id_for_github_id(id) || nil
+        gitlab_id =
+          if project.github_enterprise_import?
+            nil
+          else
+            query_id_for_github_id(id)
+          end
 
         Gitlab::Cache::Import::Caching.write(ID_CACHE_KEY % id, gitlab_id)
       end
