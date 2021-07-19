@@ -1654,6 +1654,17 @@ When creating the storage, see some
 
 ### Move Repositories
 
+DANGER:
+GitLab v13.12 and above currently require the `gitaly_replicate_repository_direct_fetch`
+feature flag to be enabled for migrations into a Gitaly Cluster to work.
+This can be done from an application node with the following command:
+
+```ruby
+sudo gitlab-rails console
+Feature.enable(:gitaly_reference_transactions)
+Feature.disable(:gitaly_reference_transactions_primary_wins)
+```
+
 To migrate to Gitaly Cluster, existing repositories stored outside Gitaly Cluster must be
 moved. There is no automatic migration but the moves can be scheduled with the GitLab API.
 
