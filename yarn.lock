@@ -908,10 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@31.5.0":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1435353479/artifacts/raw/gitlab-ui.next-major.tgz":
   version "31.5.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-31.5.0.tgz#45b7866b790e7d5a1b67b39000c047991036b437"
-  integrity sha512-pIJXbO0zfpgD0CmZTjKMMCu6l1AMLWiGPdPqDhqgGskuKGOU1UxX7ApDLesgRsSCievMTD/zsVvRHrG6AH7LiQ==
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1435353479/artifacts/raw/gitlab-ui.next-major.tgz#d6297a485a386f629bcdf533e88d6d12c00e9597"
   dependencies:
     "@babel/standalone" "^7.0.0"
     bootstrap-vue "2.18.1"
@@ -922,7 +921,6 @@
     js-beautify "^1.8.8"
     lodash "^4.17.20"
     portal-vue "^2.1.6"
-    resize-observer-polyfill "^1.5.1"
     url-search-params-polyfill "^5.0.0"
     vue-runtime-helpers "^1.1.2"
 
@@ -10314,11 +10312,6 @@ requizzle@~0.2.1:
   integrity sha1-aUPDUwxNmn5G8c3dUcFY/GcM294=
   dependencies:
     underscore "~1.6.0"
-
-resize-observer-polyfill@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
-  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 resolve-cwd@^2.0.0:
   version "2.0.0"
