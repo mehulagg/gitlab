@@ -2221,6 +2221,9 @@ msgstr ""
 msgid "Adds email participant(s)"
 msgstr ""
 
+msgid "Adjust how frequently the GitLab UI polls for updates."
+msgstr ""
+
 msgid "Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
 msgstr ""
 
@@ -6221,12 +6224,6 @@ msgid "Change subscription"
 msgstr ""
 
 msgid "Change template"
-msgstr ""
-
-msgid "Change this value to influence how frequently the GitLab UI polls for updates."
-msgstr ""
-
-msgid "Change this value to influence how frequently the GitLab UI polls for updates. If you set the value to 2 all polling intervals are multiplied by 2, which means that polling happens half as frequently. The multiplier can also have a decimal value. The default value (1) is a reasonable choice for the majority of GitLab installations. Set to 0 to completely disable polling."
 msgstr ""
 
 msgid "Change title"
@@ -21600,6 +21597,9 @@ msgstr ""
 msgid "Multiple uploaders found: %{uploader_types}"
 msgstr ""
 
+msgid "Multipler to apply to polling intervals. Decimal values are supported. Defaults to 1."
+msgstr ""
+
 msgid "Must match with the %{codeStart}external_url%{codeEnd} in %{codeStart}/etc/gitlab/gitlab.rb%{codeEnd}."
 msgstr ""
 
@@ -27009,9 +27009,6 @@ msgid "Read more about related issues"
 msgstr ""
 
 msgid "Ready to get started with GitLab? Follow these steps to set up your workspace, plan and commit changes, and deploy your project."
-msgstr ""
-
-msgid "Real-time features"
 msgstr ""
 
 msgid "Reauthenticating with SAML provider."
