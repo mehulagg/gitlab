@@ -16,6 +16,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
   end
 
   describe 'PATCH /api/v4/jobs/:id/trace' do
+    # TODO(322142)?
     let(:job) do
       create(:ci_build, :running, :trace_live,
         project: project,

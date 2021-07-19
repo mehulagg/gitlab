@@ -223,6 +223,24 @@ RSpec.describe API::Jobs do
         expect(json_job['pipeline']['status']).to eq job.pipeline.status
       end
 
+      context 'when trace artifact record exists with no file', :skip_before_request do
+        before do
+          ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace)
+        end
+
+        it 'returns no artifacts nor trace data' do
+          go
+
+          json_job = json_response.first
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_job['artifacts_file']).to be_nil
+          expect(json_job['artifacts']).to be_an Array
+          expect(json_job['artifacts']).to be_empty
+          # TODO(66203): currently returns [{"file_format"=>nil, "file_type"=>"trace", "filename"=>nil, "size"=>nil}]. should filter out traces like this?
+        end
+      end
+
       it 'avoids N+1 queries', :skip_before_request do
         first_build = create(:ci_build, :trace_artifact, :artifacts, :test_reports, pipeline: pipeline)
         first_build.runner = create(:ci_runner)
@@ -319,6 +337,23 @@ RSpec.describe API::Jobs do
 
       it 'does not return specific job data' do
         expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when trace artifact record exists with no file', :skip_before_request do
+      before do
+        # TODO(66203): ensure this record includes all fields but doesn't respond to retrieve_from_store with non-empty file?
+        ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace)
+      end
+
+      it 'returns no artifacts nor trace data' do
+        get api("/projects/#{project.id}/jobs/#{job.id}", api_user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['artifacts_file']).to be_nil
+        expect(json_response['artifacts']).to be_an Array
+        expect(json_response['artifacts']).to be_empty
+        # # TODO(66203): currently returns [{"file_format"=>nil, "file_type"=>"trace", "filename"=>nil, "size"=>nil}]. should filter out traces like this?
       end
     end
   end
@@ -933,6 +968,28 @@ RSpec.describe API::Jobs do
           expect(response.body).to eq(job.trace.raw)
         end
       end
+
+      context 'when no trace' do
+        let(:job) { create(:ci_build, pipeline: pipeline) }
+
+        it 'returns empty trace' do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to be_empty
+        end
+      end
+
+      context 'when trace artifact record exists with no stored file' do
+        let(:job) { create(:ci_build, pipeline: pipeline) }
+
+        before do
+          ::Ci::JobArtifact.create!(job: job, project: job.project, file_type: :trace)
+        end
+
+        it 'returns empty trace' do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to be_empty
+        end
+      end
     end
 
     context 'unauthorized user' do
@@ -1045,6 +1102,7 @@ RSpec.describe API::Jobs do
     end
 
     context 'job is erasable' do
+      # TODO(66203)
       let(:job) { create(:ci_build, :trace_artifact, :artifacts, :test_reports, :success, project: project, pipeline: pipeline) }
 
       it 'erases job content' do
