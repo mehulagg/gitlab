@@ -17,6 +17,7 @@
     WEBPACK_VENDOR_DLL: "true"
   stage: prepare
   script:
+    - exit 1
     - *yarn-install
     - run_timed_command "bin/rake gitlab:assets:compile"
     - run_timed_command "scripts/clean-old-cached-assets"

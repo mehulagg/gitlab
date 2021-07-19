@@ -168,6 +168,7 @@ setup-test-env:
     GITLAB_TEST_EAGER_LOAD: "0"
     SETUP_DB: "false"
   script:
+    - exit 1
     - run_timed_command "scripts/setup-test-env"
     - echo -e "\e[0Ksection_start:`date +%s`:gitaly-test-build[collapsed=true]\r\e[0KCompiling Gitaly binaries"
     - run_timed_command "scripts/gitaly-test-build"  # Do not use 'bundle exec' here
