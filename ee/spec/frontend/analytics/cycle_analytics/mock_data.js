@@ -113,19 +113,16 @@ const stageFixtures = defaultStages.reduce((acc, stage) => {
   };
 }, {});
 
-export const stageMedians = rawStageMedians.reduce(
-  (acc, { id, value }) => ({
-    ...acc,
-    [id]: value,
-  }),
-  {},
-);
+const getStageId = (name) => {
+  const { id } = getStageByTitle(dummyState.stages, name);
+  return id;
+};
 
-export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id, value }) => {
-  const { id: stageId } = getStageByTitle(dummyState.stages, id);
+export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id: name, value }) => {
+  const id = getStageId(name);
   return {
     ...acc,
-    [stageId]: value,
+    [id]: value,
   };
 }, {});
 
@@ -134,22 +131,12 @@ export const rawStageCounts = defaultStages.map((id) => ({
   ...getJSONFixture(fixtureEndpoints.stageCount(id)),
 }));
 
-// Once https://gitlab.com/gitlab-org/gitlab/-/issues/328422 is fixed
-// we should be able to use the rawStageCounts for building
-// the stage counts mock data
-/*
-export const stageCounts = rawStageCounts.reduce(
-  (acc, { id, value }) => ({
+export const stageCounts = rawStageCounts.reduce((acc, { id: name, count }) => {
+  const id = getStageId(name);
+  return {
     ...acc,
-    [id]: value,
-  }),
-  {},
-);
-*/
-
-export const stageCounts = rawStageMedians.reduce((acc, { id, value }) => {
-  const { id: stageId } = getStageByTitle(dummyState.stages, id);
-  return { ...acc, [stageId]: value };
+    [id]: count,
+  };
 }, {});
 
 export const issueEvents = deepCamelCase(stageFixtures.issue);
@@ -170,7 +157,7 @@ export const rawCustomStage = {
   end_event_identifier: 'issue_first_added_to_board',
 };
 
-export const medians = stageMedians;
+export const medians = stageMediansWithNumericIds;
 
 export const rawCustomStageEvents = customizableStagesAndEvents.events;
 export const camelCasedStageEvents = rawCustomStageEvents.map(deepCamelCase);
