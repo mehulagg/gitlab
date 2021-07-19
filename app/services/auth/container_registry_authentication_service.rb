@@ -201,16 +201,16 @@ module Auth
 
     def deploy_token_can_pull?(requested_project)
       has_authentication_ability?(:read_container_image) &&
-        current_user.is_a?(DeployToken) &&
-        current_user.has_access_to?(requested_project) &&
-        current_user.read_registry?
+        deploy_token.present? &&
+        deploy_token.has_access_to?(requested_project) &&
+        deploy_token.read_registry?
     end
 
     def deploy_token_can_push?(requested_project)
       has_authentication_ability?(:create_container_image) &&
-        current_user.is_a?(DeployToken) &&
-        current_user.has_access_to?(requested_project) &&
-        current_user.write_registry?
+        deploy_token.present? &&
+        deploy_token.has_access_to?(requested_project) &&
+        deploy_token.write_registry?
     end
 
     ##
@@ -247,6 +247,10 @@ module Auth
     # Overridden in EE
     def extra_info
       {}
+    end
+
+    def deploy_token
+      params[:deploy_token] || (current_user if current_user.is_a?(DeployToken))
     end
 
     def log_if_actions_denied(type, requested_project, requested_actions, authorized_actions)
