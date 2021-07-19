@@ -327,7 +327,6 @@ class User < ApplicationRecord
       transition deactivated: :blocked
       transition ldap_blocked: :blocked
       transition blocked_pending_approval: :blocked
-      transition banned: :blocked
     end
 
     event :ldap_block do
