@@ -90,8 +90,12 @@ export default {
       update(data) {
         return data.package;
       },
-      error() {
-        createFlash({ message: FETCH_PACKAGE_DETAILS_ERROR_MESSAGE });
+      error(error) {
+        createFlash({
+          message: FETCH_PACKAGE_DETAILS_ERROR_MESSAGE,
+          captureError: true,
+          error,
+        });
       },
     },
   },
