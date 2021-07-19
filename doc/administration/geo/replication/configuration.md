@@ -35,7 +35,7 @@ file which *must* be the same on all of a site's nodes. Until there is
 a means of automatically replicating these between sites (see [issue #3789](https://gitlab.com/gitlab-org/gitlab/-/issues/3789)),
 they must be manually replicated to **all nodes of the secondary site**.
 
-1. SSH into a **Rails nodes on your primary** site, and execute the command below:
+1. SSH into a **Rails node on your primary** site, and execute the command below:
 
    ```shell
    sudo cat /etc/gitlab/gitlab-secrets.json
