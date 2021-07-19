@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class BuildTraceSectionName < ApplicationRecord
-    extend Gitlab::Ci::Model
-
+  class BuildTraceSectionName < Ci::ApplicationRecord
     belongs_to :project
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection', foreign_key: :section_name_id
 
