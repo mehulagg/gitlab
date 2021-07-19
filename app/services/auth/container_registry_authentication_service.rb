@@ -178,8 +178,7 @@ module Auth
     end
 
     def can_user?(ability, project)
-      user = current_user.is_a?(User) ? current_user : nil
-      can?(user, ability, project)
+      can?(current_user, ability, project)
     end
 
     def build_can_pull?(requested_project)
