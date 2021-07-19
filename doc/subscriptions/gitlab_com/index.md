@@ -274,13 +274,28 @@ If you add a member to a group by using the [share a group with another group](.
 
 CI pipeline minutes are the execution time for your [pipelines](../../ci/pipelines/index.md)
 on GitLab shared runners. Each [GitLab SaaS tier](https://about.gitlab.com/pricing/)
-includes a monthly quota of CI pipeline minutes for private and public projects:
+includes a monthly quota of CI pipeline minutes for private and public projects in
+the namespace:
 
-| Plan     | Private projects | Public projects |
-|----------|------------------|-----------------|
-| Free     | 400              | 50,000          |
-| Premium  | 10,000           | 1,250,000       |
-| Ultimate | 50,000           | 6,250,000       |
+| Plan     | CI pipeline minutes |
+|----------|---------------------|
+| Free     | 400                 |
+| Premium  | 10,000              |
+| Ultimate | 50,000              |
+
+The consumption rate for CI pipeline minutes per project is based on the visibility of the projects:
+
+- Private projects in the namespace consume pipeline minutes at a rate of 1 CI pipeline minute
+  per 1 minute of execution time on GitLab shared runners.
+- Public projects in the namespace consume pipeline minutes at a slower rate, 1 CI pipeline minute
+  per 150 minutes of execution time on GitLab shared runners. The per-minute rate for public projects
+  is 0.008 CI pipeline minutes per 1 minute of execution time on GitLab shared runners.
+
+| Plan     | CI pipeline minutes | Maximum **private** project execution time | Maximum **public** project execution time |
+|----------|---------------------|--------------------------------------------|-------------------------------------------|
+| Free     | 400                 | 400 minutes                                | 50,000 minutes                            |
+| Premium  | 10,000              | 10,000 minutes                             | 1,250,000 minutes                         |
+| Ultimate | 50,000              | 50,000 minutes                             | 6,250,000 minutes                         |
 
 Quotas apply to:
 
