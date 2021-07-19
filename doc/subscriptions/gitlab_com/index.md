@@ -283,19 +283,22 @@ the namespace:
 | Premium  | 10,000              |
 | Ultimate | 50,000              |
 
-The consumption rate for CI pipeline minutes per project is based on the visibility of the projects:
+The consumption rate for CI pipeline minutes is based on the visibility of the projects:
 
 - Private projects in the namespace consume pipeline minutes at a rate of 1 CI pipeline minute
   per 1 minute of execution time on GitLab shared runners.
-- Public projects in the namespace consume pipeline minutes at a slower rate, 1 CI pipeline minute
-  per 150 minutes of execution time on GitLab shared runners. The per-minute rate for public projects
-  is 0.008 CI pipeline minutes per 1 minute of execution time on GitLab shared runners.
+- Public projects in:
+  - Namespaces [created on or after 2021-07-17](https://gitlab.com/gitlab-org/gitlab/-/issues/332708)
+    consume pipeline minutes at a slower rate, 1 CI pipeline minute per 125 minutes
+    of execution time on GitLab shared runners. The per-minute rate for public projects
+    is 0.008 CI pipeline minutes per 1 minute of execution time on GitLab shared runners.
+  - Namespaces created before 2021-07-17 do not consume CI pipeline minutes.
 
-| Plan     | CI pipeline minutes | Maximum **private** project execution time | Maximum **public** project execution time |
-|----------|---------------------|--------------------------------------------|-------------------------------------------|
-| Free     | 400                 | 400 minutes                                | 50,000 minutes                            |
-| Premium  | 10,000              | 10,000 minutes                             | 1,250,000 minutes                         |
-| Ultimate | 50,000              | 50,000 minutes                             | 6,250,000 minutes                         |
+| Plan     | CI pipeline minutes | Maximum **private** project execution time (all namespaces) | Maximum **public** project execution time (namespaces created 2021-07-17 and later) |
+|----------|---------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| Free     | 400                 | 400 minutes                                                 | 50,000 minutes                                                                      |
+| Premium  | 10,000              | 10,000 minutes                                              | 1,250,000 minutes                                                                   |
+| Ultimate | 50,000              | 50,000 minutes                                              | 6,250,000 minutes                                                                   |
 
 Quotas apply to:
 
