@@ -3,12 +3,26 @@
 module Gitlab
   module Template
     class CustomGitlabCiYmlTemplate < CustomTemplate
-      def metadata
-        # To be supported
-      end
+      include Gitlab::Utils::StrongMemoize
 
       def has_metadata?
-        # To be supported
+        parsed_yaml.has_key?(:template_metadata)
+      end
+
+      def metadata
+        return unless has_metadata?
+
+        @metadata ||= Gitlab::Ci::Config::Entry::TemplateMetadata.new(parsed_yaml[:template_metadata])
+      end
+
+      private
+
+      def parsed_yaml
+        strong_memoize(:parsed_yaml) do
+          Gitlab::Ci::Config::Yaml.load!(content)
+        rescue Gitlab::Config::Loader::FormatError
+          {}
+        end
       end
 
       class << self

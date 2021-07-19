@@ -8,9 +8,12 @@ module Gitlab
         # Raised when file is not found
         FileNotFoundError = Class.new(StandardError)
 
+        attr_reader :project
+
         def initialize(project, base_dir, extension, categories = {})
           @categories     = categories
           @extension      = extension
+          @project        = project
           @repository     = project&.repository
           @commit         = @repository.head_commit if @repository&.exists?
 
