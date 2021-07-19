@@ -182,19 +182,21 @@ RSpec.describe Projects::SnippetsController do
         end
       end
 
-      context 'when attempting to access from a different project route' do
-        let_it_be(:project_snippet) { create(:project_snippet, :public, :repository, project: project, author: user) }
+      context 'when the project snippet is public' do
+        let_it_be(:project_snippet_public) { create(:project_snippet_public, :public, :repository, project: project, author: user) }
 
-        subject { get action, params: { namespace_id: project.namespace, project_id: 42, id: project_snippet.to_param } }
+        context 'when attempting to access from a different project route' do
+          subject { get action, params: { namespace_id: project.namespace, project_id: 42, id: project_snippet_public.to_param } }
 
-        before do
-          sign_in(user)
-        end
+          before do
+            sign_in(user)
+          end
 
-        it 'responds with status 404' do
-          subject
+          it 'responds with status 404' do
+            subject
 
-          expect(response).to have_gitlab_http_status(:not_found)
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
         end
       end
     end
