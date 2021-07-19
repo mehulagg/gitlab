@@ -5,6 +5,8 @@ module Projects
     def execute(source_project)
       return unless source_project && source_project.namespace == @project.namespace
 
+      start_time = ::Gitlab::Metrics::System.monotonic_time
+
       Project.transaction do
         move_before_destroy_relationships(source_project)
         # Reset is required in order to get the proper
@@ -25,9 +27,25 @@ module Projects
       else
         raise
       end
+
+    ensure
+      log_exception(exception, source_project, start_time)
     end
 
     private
+
+    def log_exception(exception, source_project, start_time)
+      return if ::Feature.disabled?(:project_overwrite_service_tracking, source_project, default_enabled: :yaml)
+
+      duration = ::Gitlab::Metrics::System.monotonic_time - start_time
+      attributes = { project_id: source_project.id, duration: duration.to_f, error: exception.present? }
+
+      # If the feature flag is enabled, we always want to log even if there is
+      # no exception passed to `ensure`. In that case we use `StandardError`.
+      #
+      Gitlab::ErrorTracking
+        .track_exception(exception || StandardError.new, **attributes)
+    end
 
     def move_before_destroy_relationships(source_project)
       options = { remove_remaining_elements: false }
