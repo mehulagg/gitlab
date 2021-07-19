@@ -24,6 +24,7 @@ RSpec.describe Gitlab::ContributionAnalytics::DataCollector do
         merge_requests_created: { user.id => 1 },
         merge_requests_merged: {},
         merge_requests_approved: { user.id => 1 },
+        merge_requests_closed: {},
         push: {},
         total_events: { user.id => 3 }
       })
