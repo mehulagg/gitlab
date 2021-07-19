@@ -71,8 +71,10 @@ describe('PackagesApp', () => {
 
     await waitForPromises();
 
-    expect(createFlash).toHaveBeenCalledWith({
-      message: FETCH_PACKAGE_DETAILS_ERROR_MESSAGE,
-    });
+    expect(createFlash).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: FETCH_PACKAGE_DETAILS_ERROR_MESSAGE,
+      }),
+    );
   });
 });
