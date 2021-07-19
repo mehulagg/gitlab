@@ -435,7 +435,7 @@ Use this if your distribution uses systemd as init.
 ```shell
 # Configure Redis to not daemonize, but be supervised by systemd instead and disable the pidfile
 sed -e 's/^daemonize yes$/daemonize no/' \
-    -e 's/^supervised no$/supervided systemd/' \
+    -e 's/^supervised no$/supervised systemd/' \
     -e 's/^pidfile/# pidfile/' /etc/redis/redis.conf | sudo tee /etc/redis/redis.conf
 
 # Make the same changes to the systemd unit file
