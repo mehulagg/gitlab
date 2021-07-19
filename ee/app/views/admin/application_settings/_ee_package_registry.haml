@@ -9,6 +9,6 @@
           = f.label :npm_package_requests_forwarding, class: 'form-check-label' do
             Enable forwarding of npm package requests to npmjs.org
             .form-text.text-muted
-              = _("When enabled, if an npm package isn't found in the GitLab Registry, we will attempt to pull from the global npm registry.")
+              = _("When enabled, GitLab attempts to pull from the global npm registry if it doesn't find an npm package in the GitLab registry.")
 
     = f.submit _('Save changes'), class: 'btn gl-button btn-confirm'
