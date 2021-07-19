@@ -46,6 +46,9 @@ applyGitLabUIConfig();
 window.jQuery = jQuery;
 window.$ = jQuery;
 
+// ensure that window.gl is set up
+window.gl = window.gl || {};
+
 // inject test utilities if necessary
 if (process.env.NODE_ENV !== 'production' && gon?.test_env) {
   import(/* webpackMode: "eager" */ './test_utils/');
@@ -183,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   });
 
-  localTimeAgo($('abbr.timeago, .js-timeago'), true);
+  localTimeAgo(document.querySelectorAll('abbr.timeago, .js-timeago'), true);
 
   /**
    * This disables form buttons while a form is submitting

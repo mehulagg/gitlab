@@ -4,8 +4,10 @@ import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceListItem from 'ee/iterations/components/iteration_cadence_list_item.vue';
 import IterationCadencesList from 'ee/iterations/components/iteration_cadences_list.vue';
+import { Namespace } from 'ee/iterations/constants';
 import destroyIterationCadence from 'ee/iterations/queries/destroy_cadence.mutation.graphql';
-import cadencesListQuery from 'ee/iterations/queries/iteration_cadences_list.query.graphql';
+import cadencesListQuery from 'ee/iterations/queries/group_iteration_cadences_list.query.graphql';
+import projectCadencesListQuery from 'ee/iterations/queries/project_iteration_cadences_list.query.graphql';
 import createRouter from 'ee/iterations/router';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
@@ -28,7 +30,7 @@ describe('Iteration cadences list', () => {
   let apolloProvider;
 
   const cadencesListPath = TEST_HOST;
-  const groupPath = 'gitlab-org';
+  const fullPath = 'gitlab-org';
   const cadences = [
     {
       id: 'gid://gitlab/Iterations::Cadence/561',
@@ -54,7 +56,8 @@ describe('Iteration cadences list', () => {
   const endCursor = 'MjA';
   const querySuccessResponse = {
     data: {
-      group: {
+      workspace: {
+        id: 'id',
         iterationCadences: {
           nodes: cadences,
           pageInfo: {
@@ -70,7 +73,8 @@ describe('Iteration cadences list', () => {
 
   const queryEmptyResponse = {
     data: {
-      group: {
+      workspace: {
+        id: '234',
         iterationCadences: {
           nodes: [],
           pageInfo: {
@@ -87,13 +91,15 @@ describe('Iteration cadences list', () => {
   function createComponent({
     canCreateCadence,
     canEditCadence,
+    namespaceType = Namespace.Group,
+    query = cadencesListQuery,
     resolverMock = jest.fn().mockResolvedValue(querySuccessResponse),
     destroyMutationMock = jest
       .fn()
       .mockResolvedValue({ data: { iterationCadenceDestroy: { errors: [] } } }),
   } = {}) {
     apolloProvider = createMockApolloProvider([
-      [cadencesListQuery, resolverMock],
+      [query, resolverMock],
       [destroyIterationCadence, destroyMutationMock],
     ]);
 
@@ -102,7 +108,8 @@ describe('Iteration cadences list', () => {
       apolloProvider,
       router,
       provide: {
-        groupPath,
+        fullPath,
+        namespaceType,
         cadencesListPath,
         canCreateCadence,
         canEditCadence,
@@ -161,6 +168,19 @@ describe('Iteration cadences list', () => {
 
     it('shows cadences after loading', async () => {
       await createComponent();
+
+      await waitForPromises();
+
+      cadences.forEach(({ title }) => {
+        expect(wrapper.text()).toContain(title);
+      });
+    });
+
+    it('loads project iterations for Project namespaceType', async () => {
+      await createComponent({
+        namespaceType: Namespace.Project,
+        query: projectCadencesListQuery,
+      });
 
       await waitForPromises();
 

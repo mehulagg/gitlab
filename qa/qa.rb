@@ -79,6 +79,7 @@ module QA
     autoload :GroupLabel, 'qa/resource/group_label'
     autoload :MergeRequest, 'qa/resource/merge_request'
     autoload :ProjectImportedFromGithub, 'qa/resource/project_imported_from_github'
+    autoload :ProjectImportedFromURL, 'qa/resource/project_imported_from_url'
     autoload :MergeRequestFromFork, 'qa/resource/merge_request_from_fork'
     autoload :DeployKey, 'qa/resource/deploy_key'
     autoload :DeployToken, 'qa/resource/deploy_token'
@@ -171,6 +172,7 @@ module QA
         autoload :ObjectStorage, 'qa/scenario/test/integration/object_storage'
         autoload :SMTP, 'qa/scenario/test/integration/smtp'
         autoload :SSHTunnel, 'qa/scenario/test/integration/ssh_tunnel'
+        autoload :Registry, 'qa/scenario/test/integration/registry'
       end
 
       module Sanity
@@ -289,12 +291,17 @@ module QA
 
       module Import
         autoload :Github, 'qa/page/project/import/github'
+        autoload :RepoByURL, 'qa/page/project/import/repo_by_url'
       end
 
       module Pipeline
         autoload :Index, 'qa/page/project/pipeline/index'
         autoload :Show, 'qa/page/project/pipeline/show'
         autoload :New, 'qa/page/project/pipeline/new'
+      end
+
+      module PipelineEditor
+        autoload :Show, 'qa/page/project/pipeline_editor/show'
       end
 
       module Tag
@@ -332,6 +339,7 @@ module QA
         autoload :MergeRequest, 'qa/page/project/settings/merge_request'
         autoload :MirroringRepositories, 'qa/page/project/settings/mirroring_repositories'
         autoload :ProtectedTags, 'qa/page/project/settings/protected_tags'
+        autoload :DefaultBranch, 'qa/page/project/settings/default_branch'
         autoload :VisibilityFeaturesPermissions, 'qa/page/project/settings/visibility_features_permissions'
         autoload :AccessTokens, 'qa/page/project/settings/access_tokens'
 

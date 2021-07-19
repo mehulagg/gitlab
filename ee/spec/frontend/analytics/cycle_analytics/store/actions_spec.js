@@ -5,7 +5,12 @@ import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
-import { createdAfter, createdBefore, currentGroup } from 'jest/cycle_analytics/mock_data';
+import {
+  createdAfter,
+  createdBefore,
+  currentGroup,
+  selectedProjects,
+} from 'jest/cycle_analytics/mock_data';
 import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
@@ -47,6 +52,7 @@ jest.mock('~/flash');
 
 describe('Value Stream Analytics actions', () => {
   let state;
+  let stateWithOverview = null;
   let mock;
 
   beforeEach(() => {
@@ -68,9 +74,8 @@ describe('Value Stream Analytics actions', () => {
   });
 
   it.each`
-    action                   | type                       | stateKey                | payload
-    ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ someFeatureFlag: true }}
-    ${'setSelectedProjects'} | ${'SET_SELECTED_PROJECTS'} | ${'selectedProjectIds'} | ${[10, 20, 30, 40]}
+    action               | type                   | stateKey          | payload
+    ${'setFeatureFlags'} | ${'SET_FEATURE_FLAGS'} | ${'featureFlags'} | ${{ someFeatureFlag: true }}
   `('$action should set $stateKey with $payload and type $type', ({ action, type, payload }) => {
     return testAction(
       actions[action],
@@ -84,6 +89,43 @@ describe('Value Stream Analytics actions', () => {
       ],
       [],
     );
+  });
+
+  describe('setSelectedProjects', () => {
+    describe('with `overview` stage selected', () => {
+      beforeEach(() => {
+        stateWithOverview = { ...state, isOverviewStageSelected: () => true };
+      });
+
+      it('will dispatch the "fetchCycleAnalyticsData" action', () => {
+        return testAction(
+          actions.setSelectedProjects,
+          selectedProjects,
+          stateWithOverview,
+          [{ type: types.SET_SELECTED_PROJECTS, payload: selectedProjects }],
+          [{ type: 'fetchCycleAnalyticsData' }],
+        );
+      });
+    });
+
+    describe('with non overview stage selected', () => {
+      beforeEach(() => {
+        state = { ...state, selectedStage };
+      });
+
+      it('will dispatch the "fetchStageData" and "fetchCycleAnalyticsData" actions', () => {
+        return testAction(
+          actions.setSelectedProjects,
+          selectedProjects,
+          state,
+          [{ type: types.SET_SELECTED_PROJECTS, payload: selectedProjects }],
+          [
+            { type: 'fetchStageData', payload: selectedStage.id },
+            { type: 'fetchCycleAnalyticsData' },
+          ],
+        );
+      });
+    });
   });
 
   describe('setSelectedStage', () => {
@@ -961,8 +1003,6 @@ describe('Value Stream Analytics actions', () => {
     ${actions.setDateRange} | ${{ createdAfter, createdBefore }} | ${[{ type: 'SET_DATE_RANGE', payload: { createdAfter, createdBefore } }]}
     ${actions.setFilters}   | ${''}                              | ${[]}
   `('$action', ({ targetAction, payload, mutations }) => {
-    let stateWithOverview = null;
-
     beforeEach(() => {
       stateWithOverview = { ...state, isOverviewStageSelected: () => true };
     });

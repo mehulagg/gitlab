@@ -294,7 +294,7 @@ Returns [`QueryComplexity`](#querycomplexity).
 
 ### `Query.runner`
 
-Find a runner. Available only when feature flag `runner_graphql_query` is enabled.
+Find a runner. Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Returns [`CiRunner`](#cirunner).
 
@@ -331,7 +331,7 @@ Returns [`RunnerSetup`](#runnersetup).
 
 ### `Query.runners`
 
-Find runners visible to the current user. Available only when feature flag `runner_graphql_query` is enabled.
+Find runners visible to the current user. Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Returns [`CiRunnerConnection`](#cirunnerconnection).
 
@@ -1121,7 +1121,7 @@ Input type: `CreateComplianceFrameworkInput`
 
 ### `Mutation.createCustomEmoji`
 
-Available only when feature flag `custom_emoji` is enabled.
+Available only when feature flag `custom_emoji` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice.
 
 Input type: `CreateCustomEmojiInput`
 
@@ -3618,7 +3618,7 @@ Input type: `RepositionImageDiffNoteInput`
 
 ### `Mutation.runnerDelete`
 
-Available only when feature flag `runner_graphql_query` is enabled.
+Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Input type: `RunnerDeleteInput`
 
@@ -3638,7 +3638,7 @@ Input type: `RunnerDeleteInput`
 
 ### `Mutation.runnerUpdate`
 
-Available only when feature flag `runner_graphql_query` is enabled.
+Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Input type: `RunnerUpdateInput`
 
@@ -3668,7 +3668,7 @@ Input type: `RunnerUpdateInput`
 
 ### `Mutation.runnersRegistrationTokenReset`
 
-Available only when feature flag `runner_graphql_query` is enabled.
+Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Input type: `RunnersRegistrationTokenResetInput`
 
@@ -7658,6 +7658,7 @@ Represents the total number of issues and their weights for a particular day.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="cibuildneedid"></a>`id` | [`ID!`](#id) | ID of the job we need to complete. |
 | <a id="cibuildneedname"></a>`name` | [`String`](#string) | Name of the job we need to complete. |
 
 ### `CiConfig`
@@ -7733,6 +7734,7 @@ Represents the total number of issues and their weights for a particular day.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="cigroupdetailedstatus"></a>`detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the group. |
+| <a id="cigroupid"></a>`id` | [`String!`](#string) | ID for a group. |
 | <a id="cigroupjobs"></a>`jobs` | [`CiJobConnection`](#cijobconnection) | Jobs in group. (see [Connections](#connections)) |
 | <a id="cigroupname"></a>`name` | [`String`](#string) | Name of the job group. |
 | <a id="cigroupsize"></a>`size` | [`Int`](#int) | Size of the group. |
@@ -7827,6 +7829,7 @@ Represents the total number of issues and their weights for a particular day.
 | ---- | ---- | ----------- |
 | <a id="cistagedetailedstatus"></a>`detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the stage. |
 | <a id="cistagegroups"></a>`groups` | [`CiGroupConnection`](#cigroupconnection) | Group of jobs for the stage. (see [Connections](#connections)) |
+| <a id="cistageid"></a>`id` | [`ID!`](#id) | ID of the stage. |
 | <a id="cistagejobs"></a>`jobs` | [`CiJobConnection`](#cijobconnection) | Jobs for the stage. (see [Connections](#connections)) |
 | <a id="cistagename"></a>`name` | [`String`](#string) | Name of the stage. |
 | <a id="cistagestatus"></a>`status` | [`String`](#string) | Status of the pipeline stage. |
@@ -8491,6 +8494,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="detailedstatusgroup"></a>`group` | [`String`](#string) | Group of the status. |
 | <a id="detailedstatushasdetails"></a>`hasDetails` | [`Boolean`](#boolean) | Indicates if the status has further details. |
 | <a id="detailedstatusicon"></a>`icon` | [`String`](#string) | Icon of the status. |
+| <a id="detailedstatusid"></a>`id` | [`String!`](#string) | ID for a detailed status. |
 | <a id="detailedstatuslabel"></a>`label` | [`String`](#string) | Label of the status. |
 | <a id="detailedstatustext"></a>`text` | [`String`](#string) | Text of the status. |
 | <a id="detailedstatustooltip"></a>`tooltip` | [`String`](#string) | Tooltip associated with the status. |
@@ -8548,9 +8552,10 @@ Snapshot.
 | <a id="devopsadoptionsnapshotrecordedat"></a>`recordedAt` | [`Time!`](#time) | The time the snapshot was recorded. |
 | <a id="devopsadoptionsnapshotrunnerconfigured"></a>`runnerConfigured` | [`Boolean!`](#boolean) | At least one runner was used. |
 | <a id="devopsadoptionsnapshotsastenabledcount"></a>`sastEnabledCount` | [`Int`](#int) | Total number of projects with enabled SAST. |
-| <a id="devopsadoptionsnapshotsecurityscansucceeded"></a>`securityScanSucceeded` | [`Boolean!`](#boolean) | At least one security scan succeeded. |
+| <a id="devopsadoptionsnapshotsecurityscansucceeded"></a>`securityScanSucceeded` **{warning-solid}** | [`Boolean!`](#boolean) | **Deprecated** in 14.1. Substituted with specific security metrics. Always false. |
 | <a id="devopsadoptionsnapshotstarttime"></a>`startTime` | [`Time!`](#time) | The start time for the snapshot where the data points were collected. |
 | <a id="devopsadoptionsnapshottotalprojectscount"></a>`totalProjectsCount` | [`Int`](#int) | Total number of projects. |
+| <a id="devopsadoptionsnapshotvulnerabilitymanagementusedcount"></a>`vulnerabilityManagementUsedCount` | [`Int`](#int) | Total number of projects with vulnerability management used at least once. |
 
 ### `DiffPosition`
 
@@ -9266,7 +9271,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupbillablememberscount"></a>`billableMembersCount` | [`Int`](#int) | The number of billable users in the group. |
 | <a id="groupcontainerrepositoriescount"></a>`containerRepositoriesCount` | [`Int!`](#int) | Number of container repositories in the group. |
 | <a id="groupcontainslockedprojects"></a>`containsLockedProjects` | [`Boolean!`](#boolean) | Includes at least one project where the repository size exceeds the limit. |
-| <a id="groupcustomemoji"></a>`customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. (see [Connections](#connections)) |
+| <a id="groupcustomemoji"></a>`customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice. (see [Connections](#connections)) |
 | <a id="groupdescription"></a>`description` | [`String`](#string) | Description of the namespace. |
 | <a id="groupdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
 | <a id="groupdora"></a>`dora` | [`Dora`](#dora) | The group's DORA metrics. |
@@ -11232,6 +11237,7 @@ Represents a file or directory in the project repository that has been locked.
 | <a id="pipelinepath"></a>`path` | [`String`](#string) | Relative path to the pipeline's page. |
 | <a id="pipelineproject"></a>`project` | [`Project`](#project) | Project the pipeline belongs to. |
 | <a id="pipelinequeuedduration"></a>`queuedDuration` | [`Duration`](#duration) | How long the pipeline was queued before starting. |
+| <a id="pipelineref"></a>`ref` | [`String`](#string) | Reference to the branch from which the pipeline was triggered. |
 | <a id="pipelineretryable"></a>`retryable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be retried. |
 | <a id="pipelinesecurityreportsummary"></a>`securityReportSummary` | [`SecurityReportSummary`](#securityreportsummary) | Vulnerability and scanned resource counts for each security scanner of the pipeline. |
 | <a id="pipelinesha"></a>`sha` | [`String!`](#string) | SHA of the pipeline's commit. |
@@ -13102,6 +13108,7 @@ Represents the Geo sync and verification state of a snippet repository.
 | ---- | ---- | ----------- |
 | <a id="statusactionbuttontitle"></a>`buttonTitle` | [`String`](#string) | Title for the button, for example: Retry this job. |
 | <a id="statusactionicon"></a>`icon` | [`String`](#string) | Icon used in the action button. |
+| <a id="statusactionid"></a>`id` | [`String!`](#string) | ID for a status action. |
 | <a id="statusactionmethod"></a>`method` | [`String`](#string) | Method for the action, for example: :post. |
 | <a id="statusactionpath"></a>`path` | [`String`](#string) | Path for the action. |
 | <a id="statusactiontitle"></a>`title` | [`String`](#string) | Title for the action, for example: Retry. |
@@ -13383,7 +13390,7 @@ Represents a recorded measurement (object count) for the Admins.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="usercalloutdismissedat"></a>`dismissedAt` | [`Time`](#time) | Date when the callout was dismissed. |
-| <a id="usercalloutfeaturename"></a>`featureName` | [`UserCalloutFeatureNameEnum!`](#usercalloutfeaturenameenum) | Name of the feature that the callout is for. |
+| <a id="usercalloutfeaturename"></a>`featureName` | [`UserCalloutFeatureNameEnum`](#usercalloutfeaturenameenum) | Name of the feature that the callout is for. |
 
 ### `UserCore`
 
@@ -14595,9 +14602,9 @@ Health status of an issue or epic.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="healthstatusatrisk"></a>`atRisk` |  |
-| <a id="healthstatusneedsattention"></a>`needsAttention` |  |
-| <a id="healthstatusontrack"></a>`onTrack` |  |
+| <a id="healthstatusatrisk"></a>`atRisk` | At risk. |
+| <a id="healthstatusneedsattention"></a>`needsAttention` | Needs attention. |
+| <a id="healthstatusontrack"></a>`onTrack` | On track. |
 
 ### `IssuableSearchableField`
 
@@ -15284,12 +15291,15 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumpipeline_needs_banner"></a>`PIPELINE_NEEDS_BANNER` | Callout feature name for pipeline_needs_banner. |
 | <a id="usercalloutfeaturenameenumpipeline_needs_hover_tip"></a>`PIPELINE_NEEDS_HOVER_TIP` | Callout feature name for pipeline_needs_hover_tip. |
 | <a id="usercalloutfeaturenameenumregistration_enabled_callout"></a>`REGISTRATION_ENABLED_CALLOUT` | Callout feature name for registration_enabled_callout. |
+| <a id="usercalloutfeaturenameenumsecurity_configuration_devops_alert"></a>`SECURITY_CONFIGURATION_DEVOPS_ALERT` | Callout feature name for security_configuration_devops_alert. |
 | <a id="usercalloutfeaturenameenumsecurity_configuration_upgrade_banner"></a>`SECURITY_CONFIGURATION_UPGRADE_BANNER` | Callout feature name for security_configuration_upgrade_banner. |
 | <a id="usercalloutfeaturenameenumservice_templates_deprecated_callout"></a>`SERVICE_TEMPLATES_DEPRECATED_CALLOUT` | Callout feature name for service_templates_deprecated_callout. |
 | <a id="usercalloutfeaturenameenumsuggest_pipeline"></a>`SUGGEST_PIPELINE` | Callout feature name for suggest_pipeline. |
 | <a id="usercalloutfeaturenameenumsuggest_popover_dismissed"></a>`SUGGEST_POPOVER_DISMISSED` | Callout feature name for suggest_popover_dismissed. |
 | <a id="usercalloutfeaturenameenumtabs_position_highlight"></a>`TABS_POSITION_HIGHLIGHT` | Callout feature name for tabs_position_highlight. |
 | <a id="usercalloutfeaturenameenumthreat_monitoring_info"></a>`THREAT_MONITORING_INFO` | Callout feature name for threat_monitoring_info. |
+| <a id="usercalloutfeaturenameenumtrial_status_reminder_d14"></a>`TRIAL_STATUS_REMINDER_D14` | Callout feature name for trial_status_reminder_d14. |
+| <a id="usercalloutfeaturenameenumtrial_status_reminder_d3"></a>`TRIAL_STATUS_REMINDER_D3` | Callout feature name for trial_status_reminder_d3. |
 | <a id="usercalloutfeaturenameenumultimate_trial"></a>`ULTIMATE_TRIAL` | Callout feature name for ultimate_trial. |
 | <a id="usercalloutfeaturenameenumunfinished_tag_cleanup_callout"></a>`UNFINISHED_TAG_CLEANUP_CALLOUT` | Callout feature name for unfinished_tag_cleanup_callout. |
 | <a id="usercalloutfeaturenameenumweb_ide_alert_dismissed"></a>`WEB_IDE_ALERT_DISMISSED` | Callout feature name for web_ide_alert_dismissed. |

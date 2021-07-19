@@ -20,7 +20,7 @@ describe('On-call schedule wrapper', () => {
   const emptyOncallSchedulesSvgPath = 'illustration/path.svg';
   const projectPath = 'group/project';
 
-  function mountComponent({ loading, schedules, multipleOncallSchedules = false } = {}) {
+  function mountComponent({ loading, schedules } = {}) {
     const $apollo = {
       queries: {
         schedules: {
@@ -39,7 +39,6 @@ describe('On-call schedule wrapper', () => {
         provide: {
           emptyOncallSchedulesSvgPath,
           projectPath,
-          glFeatures: { multipleOncallSchedules },
         },
         directives: {
           GlTooltip: createMockDirective(),
@@ -85,7 +84,6 @@ describe('On-call schedule wrapper', () => {
   const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findSchedules = () => wrapper.findAllComponents(OnCallSchedule);
   const findAlert = () => wrapper.findComponent(GlAlert);
-  const findAlertDescription = () => wrapper.findComponent(GlSprintf);
   const findAlertLink = () => wrapper.findComponent(GlLink);
   const findModal = () => wrapper.findComponent(AddScheduleModal);
   const findAddAdditionalButton = () => wrapper.findByTestId('add-additional-schedules-button');
@@ -107,33 +105,34 @@ describe('On-call schedule wrapper', () => {
     });
   });
 
-  describe('Schedule created', () => {
+  describe('Schedules created', () => {
     beforeEach(() => {
-      mountComponent({ loading: false, schedules: [{ name: 'monitor rotation' }] });
+      mountComponent({
+        loading: false,
+        schedules: [{ name: 'monitor rotation' }, { name: 'monitor rotation 2' }],
+      });
     });
 
-    it('renders the schedule when data received ', () => {
-      const schedule = findSchedules().at(0);
+    it('renders the schedules when data received', () => {
       expect(findLoader().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(false);
-      expect(schedule.exists()).toBe(true);
+      expect(findSchedules()).toHaveLength(2);
     });
 
-    it('shows success alert with distinct description for single schedule', async () => {
+    it('renders an add button with a tooltip for additional schedules', () => {
+      const button = findAddAdditionalButton();
+      expect(button.exists()).toBe(true);
+      const tooltip = getBinding(button.element, 'gl-tooltip');
+      expect(tooltip).toBeDefined();
+      expect(button.attributes('title')).toBe(i18n.add.tooltip);
+    });
+
+    it('shows success alert on new schedule creation', async () => {
       await findModal().vm.$emit('scheduleCreated');
       const alert = findAlert();
       expect(alert.exists()).toBe(true);
       expect(alert.props('title')).toBe(i18n.successNotification.title);
       expect(findAlertLink().attributes('href')).toBe(escalationPolicyUrl);
-      expect(findAlertDescription().text()).toContain(
-        'To create an escalation policy using this schedule',
-      );
-    });
-
-    it('renders a newly created schedule', async () => {
-      const schedule = findSchedules().at(0);
-      await findModal().vm.$emit('scheduleCreated');
-      expect(schedule.exists()).toBe(true);
     });
   });
 
@@ -154,38 +153,8 @@ describe('On-call schedule wrapper', () => {
       mountComponentWithApollo();
       jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
-      const schedule = findSchedules().at(0);
+      const schedule = findSchedules().at(1);
       expect(schedule.props('schedule')).toEqual(newlyCreatedSchedule);
-    });
-  });
-
-  describe('when multiple schedules are allowed to be shown', () => {
-    beforeEach(() => {
-      mountComponent({
-        loading: false,
-        schedules: [{ name: 'monitor rotation' }, { name: 'monitor rotation 2' }],
-        multipleOncallSchedules: true,
-      });
-    });
-
-    it('renders the schedules when data received ', () => {
-      expect(findLoader().exists()).toBe(false);
-      expect(findEmptyState().exists()).toBe(false);
-      expect(findSchedules()).toHaveLength(2);
-    });
-
-    it('renders an add button with a tooltip for additional schedules ', () => {
-      const button = findAddAdditionalButton();
-      expect(button.exists()).toBe(true);
-      const tooltip = getBinding(button.element, 'gl-tooltip');
-      expect(tooltip).toBeDefined();
-    });
-
-    it('shows success alert with distinct description for multiple schedules', async () => {
-      await findModal().vm.$emit('scheduleCreated');
-      expect(findAlertDescription().text()).toContain(
-        'To create an escalation policy that defines which schedule is used when',
-      );
     });
   });
 });

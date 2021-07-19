@@ -230,40 +230,61 @@ RSpec.describe 'epics list', :js do
       let!(:epic3) { create(:epic, group: group, end_date: '2021-1-15') }
       let!(:award_emoji_star) { create(:award_emoji, name: 'star', user: user, awardable: epic1) }
 
-      before do
-        group.add_developer(user)
-        group.add_developer(user_dev)
-        visit group_epics_path(group)
-        wait_for_requests
-      end
+      shared_examples 'epic list' do
+        it 'renders epics list', :aggregate_failures do
+          page.within('.issuable-list-container') do
+            expect(page).to have_selector('.gl-tabs')
+            expect(page).to have_selector('.vue-filtered-search-bar-container')
+            expect(page.find('.issuable-list')).to have_selector('li.issue', count: 3)
+          end
+        end
 
-      it 'renders epics list', :aggregate_failures do
-        page.within('.issuable-list-container') do
-          expect(page).to have_selector('.gl-tabs')
-          expect(page).to have_link('New epic')
-          expect(page).to have_selector('.vue-filtered-search-bar-container')
-          expect(page.find('.issuable-list')).to have_selector('li.issue', count: 3)
+        it 'renders epics item with metadata', :aggregate_failures do
+          page.within('.issuable-list-container .issuable-list') do
+            expect(page.all('.issuable-info-container')[0].find('.issue-title')).to have_content(epic2.title)
+            expect(page.all('.issuable-info-container')[0].find('.issuable-reference')).to have_content("&#{epic2.iid}")
+            expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content('created')
+            expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content("by #{epic2.author.name}")
+          end
+        end
+
+        it 'renders epic item timeframe', :aggregate_failures do
+          page.within('.issuable-list-container .issuable-list') do
+            expect(page.all('.issuable-info-container')[0].find('.issuable-info')).to have_content('Dec 15, 2020 – No due date')
+            expect(page.all('.issuable-info-container')[1].find('.issuable-info')).to have_content('Dec 15, 2020 – Jan 15, 2021')
+            expect(page.all('.issuable-info-container')[2].find('.issuable-info')).to have_content('No start date – Jan 15, 2021')
+          end
         end
       end
 
-      it 'renders epics item with metadata', :aggregate_failures do
-        page.within('.issuable-list-container .issuable-list') do
-          expect(page.all('.issuable-info-container')[0].find('.issue-title')).to have_content(epic2.title)
-          expect(page.all('.issuable-info-container')[0].find('.issuable-reference')).to have_content("&#{epic2.iid}")
-          expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content('created')
-          expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content("by #{epic2.author.name}")
+      context 'when signed in' do
+        before do
+          group.add_developer(user)
+          group.add_developer(user_dev)
+          visit group_epics_path(group)
+          wait_for_requests
         end
+
+        it 'renders New Epic Link' do
+          page.within('.issuable-list-container') do
+            expect(page).to have_link('New epic')
+          end
+        end
+
+        it_behaves_like 'epic list'
+
+        it_behaves_like 'filtered search bar', available_tokens
       end
 
-      it 'renders epic item timeframe', :aggregate_failures do
-        page.within('.issuable-list-container .issuable-list') do
-          expect(page.all('.issuable-info-container')[0].find('.issuable-info')).to have_content('Dec 15, 2020 – No due date')
-          expect(page.all('.issuable-info-container')[1].find('.issuable-info')).to have_content('Dec 15, 2020 – Jan 15, 2021')
-          expect(page.all('.issuable-info-container')[2].find('.issuable-info')).to have_content('No start date – Jan 15, 2021')
+      context 'when signed out' do
+        before do
+          sign_out user
+          visit group_epics_path(group)
+          wait_for_requests
         end
-      end
 
-      it_behaves_like 'filtered search bar', available_tokens
+        it_behaves_like 'epic list'
+      end
     end
 
     describe 'within a sub-group group' do

@@ -58,7 +58,6 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
     context 'project has feature' do
       before do
         stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-        stub_feature_flags(escalation_policies_mvc: project)
       end
 
       context 'user has access to project' do

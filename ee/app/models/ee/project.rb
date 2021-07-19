@@ -13,6 +13,7 @@ module EE
     include IgnorableColumns
 
     GIT_LFS_DOWNLOAD_OPERATION = 'download'
+    PUBLIC_COST_FACTOR_RELEASE_DAY = Date.new(2021, 7, 17).freeze
 
     prepended do
       include Elastic::ProjectsSearch
@@ -112,14 +113,6 @@ module EE
       elastic_index_dependant_association :issues, on_change: :visibility_level
       elastic_index_dependant_association :merge_requests, on_change: :visibility_level
       elastic_index_dependant_association :notes, on_change: :visibility_level
-
-      scope :with_shared_runners_limit_enabled, -> do
-        if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
-          with_shared_runners
-        else
-          with_shared_runners.non_public_only
-        end
-      end
 
       scope :mirror, -> { where(mirror: true) }
 
@@ -691,15 +684,6 @@ module EE
         ::Gitlab::CurrentSettings.custom_project_templates_enabled?
     end
 
-    # Update the default branch querying the remote to determine its HEAD
-    def update_root_ref(remote, remote_url, authorization)
-      root_ref = repository.find_remote_root_ref(remote, remote_url, authorization)
-      change_head(root_ref) if root_ref.present?
-    rescue ::Gitlab::Git::Repository::NoRepository => e
-      ::Gitlab::AppLogger.error("Error updating root ref for project #{full_path} (#{id}): #{e.message}.")
-      nil
-    end
-
     override :lfs_http_url_to_repo
     def lfs_http_url_to_repo(operation = nil)
       return super unless ::Gitlab::Geo.secondary_with_primary?
@@ -825,6 +809,12 @@ module EE
       return false unless ci_cd_settings
 
       ci_cd_settings.auto_rollback_enabled?
+    end
+
+    def force_cost_factor?
+      ::Gitlab.com? && public? &&
+        ::Feature.enabled?(:ci_minutes_public_project_cost_factor, self, default_enabled: :yaml) &&
+        namespace.created_at >= PUBLIC_COST_FACTOR_RELEASE_DAY
     end
 
     private

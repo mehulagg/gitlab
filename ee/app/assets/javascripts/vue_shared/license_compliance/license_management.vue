@@ -93,7 +93,7 @@ export default {
           <gl-button
             class="js-open-form"
             :disabled="formIsOpen"
-            variant="success"
+            variant="confirm"
             data-qa-selector="license_add_button"
             @click="openAddLicenseForm"
           >

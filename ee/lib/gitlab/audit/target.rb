@@ -14,7 +14,7 @@ module Gitlab
       end
 
       def details
-        @object.try(:name) || @object.try(:title) || 'unknown'
+        @object.try(:name) || @object.try(:audit_details) || 'unknown'
       end
     end
   end

@@ -6,4 +6,8 @@ module Auditable
 
     ::Gitlab::Audit::EventQueue.push(event)
   end
+
+  def audit_details
+    raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+  end
 end

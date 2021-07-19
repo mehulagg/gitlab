@@ -1,5 +1,5 @@
 import { GlButton, GlCard, GlIcon, GlCollapse } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import OnCallSchedule, { i18n } from 'ee/oncall_schedules/components/oncall_schedule.vue';
@@ -10,7 +10,7 @@ import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import getShiftsForRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import * as dateTimeUtility from '~/lib/utils/datetime/date_calculation_utility';
 import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
@@ -55,30 +55,28 @@ describe('On-call schedule', () => {
       [getShiftsForRotationsQuery, getShiftsForRotationsQueryHandler],
     ]);
 
-    wrapper = extendedWrapper(
-      shallowMount(OnCallSchedule, {
-        localVue,
-        apolloProvider: fakeApollo,
-        propsData: {
-          schedule,
-          scheduleIndex,
-          ...props,
-        },
-        data() {
-          return {
-            rotations: schedule.rotations.nodes,
-          };
-        },
-        provide: {
-          timezones: mockTimezones,
-          projectPath,
-          ...provide,
-        },
-        stubs: {
-          GlCard,
-        },
-      }),
-    );
+    wrapper = shallowMountExtended(OnCallSchedule, {
+      localVue,
+      apolloProvider: fakeApollo,
+      propsData: {
+        schedule,
+        scheduleIndex,
+        ...props,
+      },
+      data() {
+        return {
+          rotations: schedule.rotations.nodes,
+        };
+      },
+      provide: {
+        timezones: mockTimezones,
+        projectPath,
+        ...provide,
+      },
+      stubs: {
+        GlCard,
+      },
+    });
   };
 
   beforeEach(() => {

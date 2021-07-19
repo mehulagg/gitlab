@@ -39,6 +39,7 @@ export default function initEpicsList({ mountPointSelector }) {
     groupLabelsPath,
     groupMilestonesPath,
     emptyStatePath,
+    isSignedIn,
   } = mountPointEl.dataset;
 
   // eslint-disable-next-line import/no-deprecated
@@ -76,6 +77,7 @@ export default function initEpicsList({ mountPointSelector }) {
       groupLabelsPath,
       groupMilestonesPath,
       emptyStatePath,
+      isSignedIn: parseBoolean(isSignedIn),
     },
     render: (createElement) =>
       createElement(EpicsListApp, {

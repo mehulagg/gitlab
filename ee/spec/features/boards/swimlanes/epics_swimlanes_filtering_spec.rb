@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'epics swimlanes filtering', :js do
+  include BoardHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:user2)   { create(:user) }
   let_it_be(:group) { create(:group, :public) }
@@ -44,10 +46,9 @@ RSpec.describe 'epics swimlanes filtering', :js do
       sign_in(user)
       visit_board_page
 
-      page.within('.board-swimlanes-toggle-wrapper') do
-        page.find('.dropdown-toggle').click
-        page.find('.dropdown-item', text: 'Epic').click
-      end
+      load_epic_swimlanes
+
+      load_unassigned_issues
 
       wait_for_all_issues
     end

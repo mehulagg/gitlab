@@ -22,7 +22,9 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
   end
 
   describe '#enabled?' do
-    subject { described_class.new(runner.runner_matcher).enabled?(visibility_level) }
+    let(:project) { build_stubbed(:project, visibility_level: visibility_level) }
+
+    subject { described_class.new(runner.runner_matcher).enabled?(project) }
 
     where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
       :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | false
@@ -45,7 +47,9 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
   end
 
   describe '#disabled?' do
-    subject { described_class.new(runner.runner_matcher).disabled?(visibility_level) }
+    let(:project) { build_stubbed(:project, visibility_level: visibility_level) }
+
+    subject { described_class.new(runner.runner_matcher).disabled?(project) }
 
     where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
       :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | true
@@ -64,6 +68,72 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
 
     with_them do
       it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#for_project' do
+    let(:project) { build_stubbed(:project, namespace: namespace, visibility_level: visibility_level) }
+
+    subject { described_class.new(runner.runner_matcher).for_project(project) }
+
+    context 'before the public project cost factor release date' do
+      let_it_be(:namespace) do
+        create(:group, created_at: Date.new(2021, 7, 16))
+      end
+
+      where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
+        :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :instance | Gitlab::VisibilityLevel::PUBLIC   | 0 | 5 | 0
+        :instance | Gitlab::VisibilityLevel::INTERNAL | 0 | 5 | 5
+        :instance | Gitlab::VisibilityLevel::PRIVATE  | 0 | 5 | 5
+      end
+
+      with_them do
+        it { is_expected.to eq(result) }
+      end
+    end
+
+    context 'after the public project cost factor release date' do
+      let_it_be(:namespace) do
+        create(:group, created_at: Date.new(2021, 7, 17))
+      end
+
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+      end
+
+      where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
+        :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :instance | Gitlab::VisibilityLevel::PUBLIC   | 0 | 5 | 0.008
+        :instance | Gitlab::VisibilityLevel::INTERNAL | 0 | 5 | 5
+        :instance | Gitlab::VisibilityLevel::PRIVATE  | 0 | 5 | 5
+      end
+
+      with_them do
+        it { is_expected.to eq(result) }
+      end
+    end
+
+    context 'when the project has an invalid visibility level' do
+      let(:namespace) { nil }
+      let(:private_cost_factor) { 1 }
+      let(:public_cost_factor) { 1 }
+      let(:runner_type) { :instance }
+      let(:visibility_level) { 123 }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(ArgumentError)
+      end
     end
   end
 

@@ -118,16 +118,25 @@ module EE
 
     override :search_sort_options
     def search_sort_options
+      original_options = super
+
       options = []
+
       if search_service.use_elasticsearch?
         options << {
           title: _('Most relevant'),
           sortable: false,
           sortParam: 'relevant'
         }
+
+        unless Elastic::DataMigrationService.migration_has_finished?(:add_upvotes_to_issues)
+          original_options.delete_if do |option|
+            option[:title] == _('Popularity')
+          end
+        end
       end
 
-      options + super
+      options + original_options
     end
 
     private

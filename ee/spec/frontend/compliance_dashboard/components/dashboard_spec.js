@@ -21,7 +21,7 @@ describe('ComplianceDashboard component', () => {
   const findMergeCommitsExportButton = () => wrapper.findComponent(MergeCommitsExportButton);
   const findDashboardTabs = () => wrapper.findComponent(GlTabs);
 
-  const createComponent = (props = {}, glFeatures = {}) => {
+  const createComponent = (props = {}) => {
     return shallowMount(ComplianceDashboard, {
       propsData: {
         mergeRequests,
@@ -29,9 +29,6 @@ describe('ComplianceDashboard component', () => {
         mergeCommitsCsvExportPath,
         emptyStateSvgPath: 'empty.svg',
         ...props,
-      },
-      provide: {
-        glFeatures,
       },
       stubs: {
         GlTab,
@@ -113,55 +110,38 @@ describe('ComplianceDashboard component', () => {
   });
 
   describe('with the merge requests drawer', () => {
-    describe('when the feature is enabled', () => {
-      beforeEach(() => {
-        wrapper = createComponent({}, { complianceDashboardDrawer: true });
-      });
-
-      it('opens the drawer', async () => {
-        await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
-
-        expect(findMergeRequestsGrid().props('drawerEnabled')).toBe(true);
-        expect(findMergeRequestsDrawer().props('showDrawer')).toBe(true);
-        expect(findMergeRequestsDrawer().props('mergeRequest')).toStrictEqual(mergeRequests[0]);
-      });
-
-      it('closes the drawer via the drawer close event', async () => {
-        await findMergeRequestsDrawer().vm.$emit('close');
-
-        expect(findMergeRequestsGrid().props('drawerEnabled')).toBe(true);
-        expect(findMergeRequestsDrawer().props('showDrawer')).toBe(false);
-        expect(findMergeRequestsDrawer().props('mergeRequest')).toEqual({});
-      });
-
-      it('closes the drawer via the grid toggle event', async () => {
-        await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
-        await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
-
-        expect(findMergeRequestsGrid().props('drawerEnabled')).toBe(true);
-        expect(findMergeRequestsDrawer().props('showDrawer')).toBe(false);
-        expect(findMergeRequestsDrawer().props('mergeRequest')).toEqual({});
-      });
-
-      it('swaps the drawer when a new merge request is selected', async () => {
-        await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
-        await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[1]);
-
-        expect(findMergeRequestsGrid().props('drawerEnabled')).toBe(true);
-        expect(findMergeRequestsDrawer().props('showDrawer')).toBe(true);
-        expect(findMergeRequestsDrawer().props('mergeRequest')).toStrictEqual(mergeRequests[1]);
-      });
+    beforeEach(() => {
+      wrapper = createComponent();
     });
 
-    describe('when the feature is disabled', () => {
-      beforeEach(() => {
-        wrapper = createComponent({}, { complianceDashboardDrawer: false });
-      });
+    it('opens the drawer', async () => {
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
 
-      it('does not show the drawer', () => {
-        expect(findMergeRequestsGrid().props('drawerEnabled')).toBe(false);
-        expect(findMergeRequestsDrawer().exists()).toBe(false);
-      });
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(true);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toStrictEqual(mergeRequests[0]);
+    });
+
+    it('closes the drawer via the drawer close event', async () => {
+      await findMergeRequestsDrawer().vm.$emit('close');
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(false);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toEqual({});
+    });
+
+    it('closes the drawer via the grid toggle event', async () => {
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(false);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toEqual({});
+    });
+
+    it('swaps the drawer when a new merge request is selected', async () => {
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[1]);
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(true);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toStrictEqual(mergeRequests[1]);
     });
   });
 });

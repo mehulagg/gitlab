@@ -7,11 +7,11 @@ import API from '~/api';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import {
-  DEVOPS_ADOPTION_STRINGS,
-  DEVOPS_ADOPTION_ERROR_KEYS,
+  I18N_GROUPS_QUERY_ERROR,
+  I18N_ENABLED_NAMESPACE_QUERY_ERROR,
+  I18N_ENABLE_NAMESPACE_MUTATION_ERROR,
   DATE_TIME_FORMAT,
   DEFAULT_POLLING_INTERVAL,
-  DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   TRACK_ADOPTION_TAB_CLICK_EVENT,
   TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
@@ -56,10 +56,6 @@ export default {
       default: '',
     },
   },
-  i18n: {
-    groupLevelLabel: DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
-    ...DEVOPS_ADOPTION_STRINGS.app,
-  },
   trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
   trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
   devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
@@ -70,11 +66,7 @@ export default {
       isLoadingEnableGroup: false,
       requestCount: 0,
       openModal: false,
-      errors: {
-        [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
-        [DEVOPS_ADOPTION_ERROR_KEYS.enabledNamespaces]: false,
-        [DEVOPS_ADOPTION_ERROR_KEYS.addEnabledNamespaces]: false,
-      },
+      errors: [],
       groups: {
         nodes: [],
         pageInfo: null,
@@ -109,7 +101,7 @@ export default {
         }
       },
       error(error) {
-        this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.enabledNamespaces, error);
+        this.handleError(I18N_ENABLED_NAMESPACE_QUERY_ERROR, error);
       },
     },
   },
@@ -124,7 +116,7 @@ export default {
       return Boolean(this.devopsAdoptionEnabledNamespaces?.nodes?.length);
     },
     hasLoadingError() {
-      return Object.values(this.errors).some((error) => error === true);
+      return this.errors.length;
     },
     timestamp() {
       return dateformat(
@@ -194,14 +186,14 @@ export default {
             } = data;
 
             if (errors.length) {
-              this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.addEnabledNamespaces, errors);
+              this.handleError(I18N_ENABLE_NAMESPACE_MUTATION_ERROR, errors);
             } else {
               this.addEnabledNamespacesToCache(enabledNamespaces);
             }
           },
         })
         .catch((error) => {
-          this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.addEnabledNamespaces, error);
+          this.handleError(I18N_ENABLE_NAMESPACE_MUTATION_ERROR, error);
         })
         .finally(() => {
           this.isLoadingEnableGroup = false;
@@ -224,8 +216,8 @@ export default {
     startPollingTableData() {
       this.pollingTableData = setInterval(this.pollTableData, DEFAULT_POLLING_INTERVAL);
     },
-    handleError(key, error) {
-      this.errors[key] = true;
+    handleError(message, error) {
+      this.errors.push(message);
       Sentry.captureException(error);
     },
     fetchGroups(searchTerm = '') {
@@ -251,7 +243,7 @@ export default {
 
           this.isLoadingGroups = false;
         })
-        .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
+        .catch((error) => this.handleError(I18N_GROUPS_QUERY_ERROR, error));
     },
     addEnabledNamespacesToCache(enabledNamespaces) {
       const { cache } = this.$apollo.getClient();
@@ -322,7 +314,7 @@ export default {
         <div v-if="hasLoadingError">
           <template v-for="(error, key) in errors">
             <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
-              {{ $options.i18n[key] }}
+              {{ error }}
             </gl-alert>
           </template>
         </div>

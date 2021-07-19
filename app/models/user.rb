@@ -1305,6 +1305,10 @@ class User < ApplicationRecord
     save if notification_email_changed? || public_email_changed? || commit_email_changed?
   end
 
+  def admin_unsubscribe!
+    update_column :admin_email_unsubscribed_at, Time.current
+  end
+
   def set_projects_limit
     # `User.select(:id)` raises
     # `ActiveModel::MissingAttributeError: missing attribute: projects_limit`
@@ -2102,7 +2106,7 @@ class User < ApplicationRecord
   end
 
   def check_username_format
-    return if username.blank? || Mime::EXTENSION_LOOKUP.keys.none? { |type| username.end_with?(type) }
+    return if username.blank? || Mime::EXTENSION_LOOKUP.keys.none? { |type| username.end_with?(".#{type}") }
 
     errors.add(:username, _('ending with MIME type format is not allowed.'))
   end

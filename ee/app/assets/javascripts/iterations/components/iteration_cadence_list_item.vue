@@ -12,7 +12,9 @@ import {
 } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, s__ } from '~/locale';
-import query from '../queries/iterations_in_cadence.query.graphql';
+import { Namespace } from '../constants';
+import groupQuery from '../queries/group_iterations_in_cadence.query.graphql';
+import projectQuery from '../queries/project_iterations_in_cadence.query.graphql';
 
 const pageSize = 20;
 
@@ -43,11 +45,13 @@ export default {
     GlSkeletonLoader,
   },
   apollo: {
-    group: {
+    workspace: {
       skip() {
         return !this.expanded;
       },
-      query,
+      query() {
+        return this.query;
+      },
       variables() {
         return this.queryVariables;
       },
@@ -56,7 +60,7 @@ export default {
       },
     },
   },
-  inject: ['groupPath', 'canEditCadence'],
+  inject: ['fullPath', 'canEditCadence', 'namespaceType'],
   props: {
     title: {
       type: String,
@@ -86,7 +90,7 @@ export default {
       i18n,
       expanded: false,
       // query response
-      group: {
+      workspace: {
         iterations: {
           nodes: [],
           pageInfo: {
@@ -100,25 +104,34 @@ export default {
     };
   },
   computed: {
+    query() {
+      if (this.namespaceType === Namespace.Group) {
+        return groupQuery;
+      }
+      if (this.namespaceType === Namespace.Project) {
+        return projectQuery;
+      }
+      throw new Error('Must provide a namespaceType');
+    },
     queryVariables() {
       return {
-        fullPath: this.groupPath,
+        fullPath: this.fullPath,
         iterationCadenceId: this.cadenceId,
         firstPageSize: pageSize,
         state: this.iterationState,
       };
     },
     pageInfo() {
-      return this.group.iterations?.pageInfo || {};
+      return this.workspace.iterations?.pageInfo || {};
     },
     hasNextPage() {
       return this.pageInfo.hasNextPage;
     },
     iterations() {
-      return this.group?.iterations?.nodes || [];
+      return this.workspace?.iterations?.nodes || [];
     },
     loading() {
-      return this.$apollo.queries.group.loading;
+      return this.$apollo.queries.workspace.loading;
     },
     editCadence() {
       return {
@@ -144,24 +157,24 @@ export default {
       }
 
       // Fetch more data and transform the original result
-      this.$apollo.queries.group.fetchMore({
+      this.$apollo.queries.workspace.fetchMore({
         variables: {
           ...this.queryVariables,
           afterCursor: this.pageInfo.endCursor,
         },
         // Transform the previous result with new data
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          const newIterations = fetchMoreResult.group?.iterations.nodes || [];
+          const newIterations = fetchMoreResult.workspace?.iterations.nodes || [];
 
           return {
-            group: {
-              // eslint-disable-next-line @gitlab/require-i18n-strings
-              __typename: 'Group',
+            workspace: {
+              id: fetchMoreResult.workspace.id,
+              __typename: this.namespaceType,
               iterations: {
                 __typename: 'IterationConnection',
                 // Merging the list
-                nodes: [...previousResult.group.iterations.nodes, ...newIterations],
-                pageInfo: fetchMoreResult.group?.iterations.pageInfo || {},
+                nodes: [...previousResult.workspace.iterations.nodes, ...newIterations],
+                pageInfo: fetchMoreResult.workspace?.iterations.pageInfo || {},
               },
             },
           };

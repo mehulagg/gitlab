@@ -80,7 +80,8 @@ module EE
           'security_approvals_help_page_path': help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
           'security_configuration_path': project_security_configuration_path(project),
           'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
-          'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project')
+          'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project'),
+          'coverage_check_help_page_path': help_page_path('ci/pipelines/settings', anchor: 'coverage-check-approval-rule')
         }
       }
     end
@@ -99,13 +100,13 @@ module EE
     end
 
     def permanent_delete_message(project)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all related resources, including issues and merge requests.')
       html_escape(message) % remove_message_data(project)
     end
 
     def marked_for_removal_message(project)
       date = permanent_deletion_date(Time.now.utc)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all related resources, including issues and merge requests.')
       html_escape(message) % remove_message_data(project).merge(date: date)
     end
 

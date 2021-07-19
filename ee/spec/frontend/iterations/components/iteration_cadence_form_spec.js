@@ -67,7 +67,7 @@ describe('Iteration cadence form', () => {
           $router,
         },
         provide: {
-          groupPath,
+          fullPath: groupPath,
           cadencesListPath: TEST_HOST,
         },
       }),

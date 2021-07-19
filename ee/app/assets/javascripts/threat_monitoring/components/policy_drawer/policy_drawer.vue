@@ -71,7 +71,7 @@ export default {
       >
     </template>
     <div v-if="policy">
-      <component :is="policyComponent" v-if="policyComponent" :value="policy.yaml" />
+      <component :is="policyComponent" v-if="policyComponent" :policy="policy" />
       <div v-else>
         <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
         <p>

@@ -666,7 +666,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners`
 
-Total configured Runners in project
+Total configured Runners of all types
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175520_ci_runners.yml)
 
@@ -680,7 +680,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_group_type_active`
 
-Total active instance Runners
+Total active Group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
 
@@ -694,7 +694,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_group_type_active_online`
 
-Total active and online group Runners
+Total active and online Group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051922_ci_runners_group_type_active_online.yml)
 
@@ -708,7 +708,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_instance_type_active`
 
-Total active group Runners
+Total active Shared (Instance) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
 
@@ -722,7 +722,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_instance_type_active_online`
 
-Total active and online instance Runners
+Total active and online Shared (Instance) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051651_ci_runners_instance_type_active_online.yml)
 
@@ -736,7 +736,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_online`
 
-Total online Runners
+Total online Runners of all types
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
 
@@ -750,7 +750,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_project_type_active`
 
-Total active project Runners
+Total active Specific (Project) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050834_ci_runners_project_type_active.yml)
 
@@ -764,7 +764,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_project_type_active_online`
 
-Total active and online project Runners
+Total active and online Specific (Project) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
 
@@ -4354,6 +4354,8 @@ The total count of Helm packages that have been published.
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4470,6 +4472,20 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `counts.package_events_i_package_nuget_pull_symbol_package`
+
+A count of NuGet symbol packages that have been downloaded from the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709191135_package_events_i_package_nuget_pull_symbol_package.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `counts.package_events_i_package_nuget_push_package`
 
 A count of NuGet packages that have been published
@@ -4481,6 +4497,20 @@ Group: `group::package`
 Data Category: `Optional`
 
 Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_nuget_push_symbol_package`
+
+A count of NuGet symbol packages that have been uploaded to the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709191829_package_events_i_package_nuget_push_symbol_package.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -4540,6 +4570,62 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `counts.package_events_i_package_pull_symbol_package`
+
+A count of symbol packages that have been pulled from the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709210941_package_events_i_package_pull_symbol_package.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_pull_symbol_package_by_deploy_token`
+
+A count of symbol packages that have been pulled with a deploy token from the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211058_package_events_i_package_pull_symbol_package_by_deploy_token.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_pull_symbol_package_by_guest`
+
+A count of symbol packages that have been pulled with by a guest from the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211248_package_events_i_package_pull_symbol_package_by_guest.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_pull_symbol_package_by_user`
+
+A count of symbol packages that have been pulled with by an authenticated user from the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211341_package_events_i_package_pull_symbol_package_by_user.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `counts.package_events_i_package_push_package`
 
 A count of packages that have been published to the package registry
@@ -4593,6 +4679,62 @@ Group: `group::package`
 Data Category: `Optional`
 
 Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_push_symbol_package`
+
+A count of symbol packages that have been pushed to the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211439_package_events_i_package_push_symbol_package.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_push_symbol_package_by_deploy_token`
+
+A count of symbol packages that have been pushed with a deploy token to the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211636_package_events_i_package_push_symbol_package_by_deploy_token.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_push_symbol_package_by_guest`
+
+A count of symbol packages that have been pushed by a guest to the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211731_package_events_i_package_push_symbol_package_by_guest.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_push_symbol_package_by_user`
+
+A count of symbol packages that have been pushed by an authenticated user to the package registry
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210709211831_package_events_i_package_push_symbol_package_by_user.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -18316,6 +18458,22 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `settings.collected_data_categories`
+
+List of collected data categories corresponding to instance settings
+
+[Object JSON schema](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/objects_schemas/collected_data_categories_schema.json)
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210702140138_collected_data_categories.yml)
+
+Group: `group::product intelligence`
+
+Data Category: `Standard`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `settings.gitaly_apdex`
 
 Gitaly application performance
@@ -20344,6 +20502,8 @@ Number of users who have run a API Fuzzing scan
 
 Group: `category::fuzz testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -20369,6 +20529,8 @@ Number of users who have run a Container Scanning scan
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043902_user_container_scanning_scans.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -20396,6 +20558,8 @@ Number of users who have run a Coverage Fuzzing scan
 
 Group: `category::fuzz testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -20422,6 +20586,8 @@ Number of users who have run a DAST scan
 
 Group: `group::dynamic analysis`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -20447,6 +20613,8 @@ Number of users who have run a Dependency Scanning scan
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043819_user_dependency_scanning_scans.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -20502,6 +20670,8 @@ Number of users who have run a SAST scan
 
 Group: `group::static analysis`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -20527,6 +20697,8 @@ Number of users who have run a Secret Detection scan
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043957_user_secret_detection_scans.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22264,7 +22436,7 @@ Group: `group::monitor`
 
 Data Category: `Optional`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `premium`, `ultimate`
 

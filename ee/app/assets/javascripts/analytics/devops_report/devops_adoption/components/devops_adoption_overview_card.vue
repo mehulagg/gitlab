@@ -1,15 +1,12 @@
 <script>
 import { GlIcon, GlProgressBar } from '@gitlab/ui';
 import { sprintf } from '~/locale';
-import {
-  DEVOPS_ADOPTION_FEATURES_ADOPTED_TEXT,
-  DEVOPS_ADOPTION_PROGRESS_BAR_HEIGHT,
-} from '../constants';
+import { I18N_FEATURES_ADOPTED_TEXT, PROGRESS_BAR_HEIGHT } from '../constants';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 
 export default {
   name: 'DevopsAdoptionOverviewCard',
-  progressBarHeight: DEVOPS_ADOPTION_PROGRESS_BAR_HEIGHT,
+  progressBarHeight: PROGRESS_BAR_HEIGHT,
   components: {
     GlIcon,
     GlProgressBar,
@@ -48,7 +45,7 @@ export default {
       return this.featureMeta.filter((feature) => feature.adopted).length;
     },
     description() {
-      return sprintf(DEVOPS_ADOPTION_FEATURES_ADOPTED_TEXT, {
+      return sprintf(I18N_FEATURES_ADOPTED_TEXT, {
         adoptedCount: this.adoptedCount,
         featuresCount: this.featuresCount,
         title: this.displayMeta ? this.title : '',

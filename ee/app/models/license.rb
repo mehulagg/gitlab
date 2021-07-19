@@ -251,8 +251,9 @@ class License < ApplicationRecord
   LICENSEE_ATTRIBUTES = %w[Name Email Company].freeze
 
   validate :valid_license
-  validate :check_users_limit, if: :new_record?, unless: :validate_with_trueup?
-  validate :check_trueup, unless: :persisted?, if: :validate_with_trueup?
+  validate :check_users_limit, if: :new_record?, unless: [:validate_with_trueup?, :reconciliation_completed?]
+  validate :check_trueup, unless: [:persisted?, :reconciliation_completed?], if: :validate_with_trueup?
+  validate :check_restricted_user_count, if: :reconciliation_completed?
   validate :not_expired, unless: :persisted?
 
   before_validation :reset_license, if: :data_changed?
@@ -322,12 +323,6 @@ class License < ApplicationRecord
 
     def reset_future_dated
       Gitlab::SafeRequestStore.delete(:future_dated_license)
-    end
-
-    def future_dated_only?
-      return false if current.present?
-
-      future_dated.present?
     end
 
     def previous
@@ -442,6 +437,10 @@ class License < ApplicationRecord
   # License zuora_subscription_id
   def subscription_id
     restricted_attr(:subscription_id)
+  end
+
+  def reconciliation_completed?
+    restricted_attr(:reconciliation_completed)
   end
 
   def features_from_add_ons
@@ -576,8 +575,8 @@ class License < ApplicationRecord
     !!license&.cloud_licensing?
   end
 
-  def usage_ping?
-    !!license&.usage_ping_required_metrics?
+  def customer_service_enabled?
+    !!license&.operational_metrics?
   end
 
   def license_type
@@ -690,9 +689,7 @@ class License < ApplicationRecord
                           end
 
     if trueup_qty >= expected_trueup_qty
-      if restricted_user_count < daily_billable_users_count
-        add_limit_error(user_count: daily_billable_users_count)
-      end
+      check_restricted_user_count
     else
       message = ["You have applied a True-up for #{trueup_qty} #{"user".pluralize(trueup_qty)}"]
       message << "but you need one for #{expected_trueup_qty} #{"user".pluralize(expected_trueup_qty)}."
@@ -700,6 +697,12 @@ class License < ApplicationRecord
 
       self.errors.add(:base, message.join(' '))
     end
+  end
+
+  def check_restricted_user_count
+    return unless restricted_user_count && restricted_user_count < daily_billable_users_count
+
+    add_limit_error(user_count: daily_billable_users_count)
   end
 
   def add_limit_error(current_period: true, user_count:)

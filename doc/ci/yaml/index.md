@@ -26,39 +26,40 @@ A job is defined as a list of keywords that define the job's behavior.
 
 The keywords available for jobs are:
 
-| Keyword                             | Description |
-| :-----------------------------------|:------------|
-| [`after_script`](#after_script)     | Override a set of commands that are executed after job. |
-| [`allow_failure`](#allow_failure)   | Allow job to fail. A failed job does not cause the pipeline to fail. |
-| [`artifacts`](#artifacts)           | List of files and directories to attach to a job on success. |
-| [`before_script`](#before_script)   | Override a set of commands that are executed before job. |
-| [`cache`](#cache)                   | List of files that should be cached between subsequent runs. |
-| [`coverage`](#coverage)             | Code coverage settings for a given job. |
-| [`dependencies`](#dependencies)     | Restrict which artifacts are passed to a specific job by providing a list of jobs to fetch artifacts from. |
-| [`environment`](#environment)       | Name of an environment to which the job deploys. |
-| [`except`](#only--except)           | Control when jobs are not created. |
-| [`extends`](#extends)               | Configuration entries that this job inherits from. |
-| [`image`](#image)                   | Use Docker images. |
-| [`include`](#include)               | Include external YAML files. |
-| [`inherit`](#inherit)               | Select which global defaults all jobs inherit. |
-| [`interruptible`](#interruptible)   | Defines if a job can be canceled when made redundant by a newer run. |
-| [`needs`](#needs)                   | Execute jobs earlier than the stage ordering. |
-| [`only`](#only--except)             | Control when jobs are created. |
-| [`pages`](#pages)                   | Upload the result of a job to use with GitLab Pages. |
-| [`parallel`](#parallel)             | How many instances of a job should be run in parallel. |
-| [`release`](#release)               | Instructs the runner to generate a [release](../../user/project/releases/index.md) object. |
-| [`resource_group`](#resource_group) | Limit job concurrency. |
-| [`retry`](#retry)                   | When and how many times a job can be auto-retried in case of a failure. |
-| [`rules`](#rules)                   | List of conditions to evaluate and determine selected attributes of a job, and whether or not it's created. |
-| [`script`](#script)                 | Shell script that is executed by a runner. |
-| [`secrets`](#secrets)               | The CI/CD secrets the job needs. |
-| [`services`](#services)             | Use Docker services images. |
-| [`stage`](#stage)                   | Defines a job stage. |
-| [`tags`](#tags)                     | List of tags that are used to select a runner. |
-| [`timeout`](#timeout)               | Define a custom job-level timeout that takes precedence over the project-wide setting. |
-| [`trigger`](#trigger)               | Defines a downstream pipeline trigger. |
-| [`variables`](#variables)           | Define job variables on a job level. |
-| [`when`](#when)                     | When to run job. |
+| Keyword                                     | Description |
+| :-------------------------------------------|:------------|
+| [`after_script`](#after_script)             | Override a set of commands that are executed after job. |
+| [`allow_failure`](#allow_failure)           | Allow job to fail. A failed job does not cause the pipeline to fail. |
+| [`artifacts`](#artifacts)                   | List of files and directories to attach to a job on success. |
+| [`before_script`](#before_script)           | Override a set of commands that are executed before job. |
+| [`cache`](#cache)                           | List of files that should be cached between subsequent runs. |
+| [`coverage`](#coverage)                     | Code coverage settings for a given job. |
+| [`dast_configuration`](#dast_configuration) | Use configuration from DAST profiles on a job level. |
+| [`dependencies`](#dependencies)             | Restrict which artifacts are passed to a specific job by providing a list of jobs to fetch artifacts from. |
+| [`environment`](#environment)               | Name of an environment to which the job deploys. |
+| [`except`](#only--except)                   | Control when jobs are not created. |
+| [`extends`](#extends)                       | Configuration entries that this job inherits from. |
+| [`image`](#image)                           | Use Docker images. |
+| [`include`](#include)                       | Include external YAML files. |
+| [`inherit`](#inherit)                       | Select which global defaults all jobs inherit. |
+| [`interruptible`](#interruptible)           | Defines if a job can be canceled when made redundant by a newer run. |
+| [`needs`](#needs)                           | Execute jobs earlier than the stage ordering. |
+| [`only`](#only--except)                     | Control when jobs are created. |
+| [`pages`](#pages)                           | Upload the result of a job to use with GitLab Pages. |
+| [`parallel`](#parallel)                     | How many instances of a job should be run in parallel. |
+| [`release`](#release)                       | Instructs the runner to generate a [release](../../user/project/releases/index.md) object. |
+| [`resource_group`](#resource_group)         | Limit job concurrency. |
+| [`retry`](#retry)                           | When and how many times a job can be auto-retried in case of a failure. |
+| [`rules`](#rules)                           | List of conditions to evaluate and determine selected attributes of a job, and whether or not it's created. |
+| [`script`](#script)                         | Shell script that is executed by a runner. |
+| [`secrets`](#secrets)                       | The CI/CD secrets the job needs. |
+| [`services`](#services)                     | Use Docker services images. |
+| [`stage`](#stage)                           | Defines a job stage. |
+| [`tags`](#tags)                             | List of tags that are used to select a runner. |
+| [`timeout`](#timeout)                       | Define a custom job-level timeout that takes precedence over the project-wide setting. |
+| [`trigger`](#trigger)                       | Defines a downstream pipeline trigger. |
+| [`variables`](#variables)                   | Define job variables on a job level. |
+| [`when`](#when)                             | When to run job. |
 
 ### Unavailable names for jobs
 
@@ -1562,6 +1563,14 @@ production:
 
 #### Requirements and limitations
 
+- In [GitLab 14.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/30632)
+  you can refer to jobs in the same stage as the job you are configuring. This feature
+  is [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+- Disabled on GitLab.com.
+- Not recommended for production use.
+- For GitLab self-managed instances, GitLab adminsitrators
+  can choose to [disable it](#enable-or-disable-needs-for-jobs-in-the-same-stage)
+- In GitLab 14.0 and older, you can only refer to jobs in earlier stages.
 - In GitLab 13.9 and older, if `needs:` refers to a job that might not be added to
   a pipeline because of `only`, `except`, or `rules`, the pipeline might fail to create.
 - The maximum number of jobs that a single job can need in the `needs:` array is limited:
@@ -1577,6 +1586,22 @@ production:
   current stage is not possible either, but support [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/30632).
 - Stages must be explicitly defined for all jobs
   that have the keyword `needs:` or are referred to by one.
+
+##### Enable or disable `needs` for jobs in the same stage **(FREE SELF)**
+
+`needs` for jobs in the same stage is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails
+console](../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+`Feature.enable(:ci_same_stage_job_needs)`
+
+To disable it:
+
+`Feature.disable(:ci_same_stage_job_needs)`
 
 ##### Changing the `needs:` job limit **(FREE SELF)**
 
@@ -2540,7 +2565,7 @@ Use `cache:when` to define when to save the cache, based on the status of the jo
 - `on_failure`: Save the cache only when the job fails.
 - `always`: Always save the cache.
 
-**Example of `cache:untracked`**:
+**Example of `cache:when`**:
 
 ```yaml
 rspec:
@@ -3418,7 +3443,7 @@ test:
 ```
 
 The job-level timeout can exceed the
-[project-level timeout](../pipelines/settings.md#timeout) but can't
+[project-level timeout](../pipelines/settings.md#set-a-limit-for-how-long-jobs-can-run) but can't
 exceed the runner-specific timeout.
 
 ### `parallel`
@@ -4501,6 +4526,50 @@ You can use [CI/CD variables](../variables/index.md) to configure how the runner
 
 You can also use variables to configure how many times a runner
 [attempts certain stages of job execution](../runners/configure_runners.md#job-stages-attempts).
+
+## `dast_configuration` **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5981) in GitLab 14.1.
+
+Use the `dast_configuration` keyword to specify a site profile and scanner profile to be used in a
+CI/CD configuration. Both profiles must first have been created in the project. The job's stage must
+be `dast`.
+
+**Keyword type**: Job keyword. You can use only as part of a job.
+
+**Possible inputs**: One each of `site_profile` and `scanner_profile`.
+
+- Use `site_profile` to specify the site profile to be used in the job.
+- Use `scanner_profile` to specify the scanner profile to be used in the job.
+
+**Example of `dast_configuration`**:
+
+```yaml
+stages:
+  - build
+  - dast
+
+include:
+  - template: DAST.gitlab-ci.yml
+
+dast:
+  dast_configuration:
+    site_profile: "Example Co"
+    scanner_profile: "Quick Passive Test"
+```
+
+In this example, the `dast` job extends the `dast` configuration added with the `include:` keyword
+to select a specific site profile and scanner profile.
+
+**Additional details**:
+
+- Settings contained in either a site profile or scanner profile take precedence over those
+  contained in the DAST template.
+
+**Related topics**:
+
+- [Site profile](../../user/application_security/dast/index.md#site-profile).
+- [Scanner profile](../../user/application_security/dast/index.md#scanner-profile).
 
 ## YAML-specific features
 

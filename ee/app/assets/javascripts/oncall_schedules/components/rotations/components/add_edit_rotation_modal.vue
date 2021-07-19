@@ -23,6 +23,7 @@ export const i18n = {
   editedRotation: s__('OnCallSchedules|Successfully edited your rotation'),
   addRotation: s__('OnCallSchedules|Add rotation'),
   editRotation: s__('OnCallSchedules|Edit rotation'),
+  saveChanges: __('Save changes'),
   cancel: __('Cancel'),
 };
 
@@ -115,7 +116,7 @@ export default {
     actionsProps() {
       return {
         primary: {
-          text: this.title,
+          text: this.primaryBtnText,
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
@@ -179,7 +180,10 @@ export default {
       return variables;
     },
     title() {
-      return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
+      return this.isEditMode ? i18n.editRotation : i18n.addRotation;
+    },
+    primaryBtnText() {
+      return this.isEditMode ? i18n.saveChanges : i18n.addRotation;
     },
     isEndDateValid() {
       const startsAt = new Date(this.form.startsAt.date).getTime();

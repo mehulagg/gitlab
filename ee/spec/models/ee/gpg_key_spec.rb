@@ -12,4 +12,10 @@ RSpec.describe GpgKey do
 
     it { is_expected.to contain_exactly(gpg_key) }
   end
+
+  describe '#audit_details' do
+    it "equals to the user's name" do
+      expect(gpg_key.audit_details).to eq(user.name)
+    end
+  end
 end

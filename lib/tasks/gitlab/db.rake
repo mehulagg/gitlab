@@ -118,7 +118,7 @@ namespace :gitlab do
 
     desc 'Create missing dynamic database partitions'
     task create_dynamic_partitions: :environment do
-      Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+      Gitlab::Database::Partitioning::PartitionManager.new.sync_partitions
     end
 
     # This is targeted towards deploys and upgrades of GitLab.
@@ -154,7 +154,7 @@ namespace :gitlab do
       Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
     end
 
-    desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
+    desc 'reindex a regular index without downtime to eliminate bloat'
     task :reindex, [:index_name] => :environment do |_, args|
       unless Feature.enabled?(:database_reindexing, type: :ops)
         puts "This feature (database_reindexing) is currently disabled.".color(:yellow)

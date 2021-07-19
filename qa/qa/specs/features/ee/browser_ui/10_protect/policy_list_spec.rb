@@ -35,7 +35,7 @@ module QA
         end
       end
 
-      context 'with k8s cluster', :require_admin, :kubernetes, :orchestrated, :runner do
+      context 'with k8s cluster', :require_admin, :kubernetes, :orchestrated, :runner, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/335202', type: :broken } do
         let(:policy_name) { 'l3-rule' }
         let!(:cluster) { Service::KubernetesCluster.new(provider_class: Service::ClusterProvider::K3sCilium).create! }
         let!(:runner) do

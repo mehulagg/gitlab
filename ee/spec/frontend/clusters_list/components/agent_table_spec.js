@@ -17,12 +17,13 @@ const propsData = {
     },
   ],
 };
+const provideData = { integrationDocsUrl: 'path/to/integrationDocs' };
 
 describe('AgentTable', () => {
   let wrapper;
 
   beforeEach(() => {
-    wrapper = mount(AgentTable, { propsData });
+    wrapper = mount(AgentTable, { propsData, provide: provideData });
   });
 
   afterEach(() => {
@@ -32,8 +33,9 @@ describe('AgentTable', () => {
     }
   });
 
-  it('displays header link', () => {
+  it('displays header link with the correct href', () => {
     expect(wrapper.find(GlLink).text()).toBe('Learn more about installing the GitLab Agent');
+    expect(wrapper.find(GlLink).attributes('href')).toBe('path/to/integrationDocs');
   });
 
   describe('agent table', () => {

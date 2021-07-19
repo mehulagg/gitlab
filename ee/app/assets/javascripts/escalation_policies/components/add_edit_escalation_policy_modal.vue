@@ -16,6 +16,7 @@ export const i18n = {
   cancel: __('Cancel'),
   addEscalationPolicy: s__('EscalationPolicies|Add escalation policy'),
   editEscalationPolicy: s__('EscalationPolicies|Edit escalation policy'),
+  saveChanges: __('Save changes'),
 };
 
 export default {
@@ -58,10 +59,13 @@ export default {
     title() {
       return this.isEditMode ? i18n.editEscalationPolicy : i18n.addEscalationPolicy;
     },
+    primaryBtnText() {
+      return this.isEditMode ? i18n.saveChanges : i18n.addEscalationPolicy;
+    },
     actionsProps() {
       return {
         primary: {
-          text: this.title,
+          text: this.primaryBtnText,
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
@@ -238,6 +242,7 @@ export default {
     :title="title"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
+    scrollable
     @primary.prevent="isEditMode ? updateEscalationPolicy() : createEscalationPolicy()"
     @canceled="resetForm"
     @close="resetForm"

@@ -1,0 +1,31 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+#import "./iteration_list_item.fragment.graphql"
+
+query Iterations(
+  $fullPath: ID!
+  $iterationCadenceId: ID!
+  $state: IterationState!
+  $beforeCursor: String
+  $afterCursor: String
+  $firstPageSize: Int
+  $lastPageSize: Int
+) {
+  workspace: project(fullPath: $fullPath) {
+    id
+    iterations(
+      iterationCadenceIds: [$iterationCadenceId]
+      state: $state
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+    ) {
+      nodes {
+        ...IterationListItem
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}

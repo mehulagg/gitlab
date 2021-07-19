@@ -134,8 +134,12 @@ export default {
     }
   },
 
-  fetchEpicsSwimlanes({ state, commit, dispatch }, { endCursor = null } = {}) {
-    const { fullPath, boardId, boardType, filterParams } = state;
+  fetchEpicsSwimlanes({ state, commit }, { fetchNext = false } = {}) {
+    const { fullPath, boardId, boardType, filterParams, epicsEndCursor } = state;
+
+    if (fetchNext) {
+      commit(types.REQUEST_MORE_EPICS);
+    }
 
     const variables = {
       fullPath,
@@ -143,7 +147,7 @@ export default {
       issueFilters: filterParams,
       isGroup: boardType === BoardType.group,
       isProject: boardType === BoardType.project,
-      after: endCursor,
+      after: fetchNext ? epicsEndCursor : undefined,
     };
 
     return gqlClient
@@ -161,16 +165,28 @@ export default {
           commit(types.RECEIVE_EPICS_SUCCESS, {
             epics: epicsFormatted,
             canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
-          });
-        }
-
-        if (epics.pageInfo?.hasNextPage) {
-          dispatch('fetchEpicsSwimlanes', {
-            endCursor: epics.pageInfo.endCursor,
+            hasMoreEpics: epics.pageInfo?.hasNextPage,
+            epicsEndCursor: epics.pageInfo?.endCursor,
           });
         }
       })
       .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
+  },
+
+  fetchIssuesForEpic: ({ state, commit }, epicId) => {
+    commit(types.REQUEST_ISSUES_FOR_EPIC, epicId);
+
+    const { filterParams } = state;
+
+    const variables = {
+      filters: { ...filterParams, epicId },
+    };
+
+    return fetchAndFormatListIssues(state, variables)
+      .then(({ listItems }) => {
+        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listItems, epicId });
+      })
+      .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
   },
 
   updateBoardEpicUserPreferences({ commit, state }, { epicId, collapsed }) {
@@ -244,7 +260,7 @@ export default {
 
   fetchItemsForList: (
     { state, commit, getters },
-    { listId, fetchNext = false, noEpicIssues = false, forSwimlanes = false },
+    { listId, fetchNext = false, noEpicIssues = false },
   ) => {
     if (!fetchNext && !state.isShowingEpicsSwimlanes) {
       commit(types.RESET_ITEMS_FOR_LIST, listId);
@@ -255,9 +271,6 @@ export default {
     if (noEpicIssues && epicId !== undefined) {
       return null;
     }
-    if (forSwimlanes && epicId === undefined && filterParams.epicWildcardId === undefined) {
-      filterParams.epicWildcardId = EpicFilterType.any.toUpperCase();
-    }
 
     const variables = {
       id: listId,
@@ -265,7 +278,7 @@ export default {
         ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
         : { ...filterParams, epicId },
       after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
-      first: forSwimlanes ? undefined : 10,
+      first: 10,
     };
 
     if (getters.isEpicBoard) {

@@ -1,4 +1,5 @@
 import Api from 'ee/api';
+import { getValueStreamStageMedian } from '~/api/analytics_api';
 import createFlash from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
@@ -27,8 +28,18 @@ export const setPaths = ({ dispatch }, options) => {
 export const setFeatureFlags = ({ commit }, featureFlags) =>
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
-export const setSelectedProjects = ({ commit }, projects) =>
+const refreshData = ({ selectedStage, isOverviewStageSelected, dispatch }) => {
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
+  return dispatch('fetchCycleAnalyticsData');
+};
+
+export const setSelectedProjects = (
+  { commit, dispatch, getters: { isOverviewStageSelected }, state: { selectedStage } },
+  projects,
+) => {
   commit(types.SET_SELECTED_PROJECTS, projects);
+  return refreshData({ dispatch, selectedStage, isOverviewStageSelected });
+};
 
 export const setSelectedStage = ({ commit }, stage) => commit(types.SET_SELECTED_STAGE, stage);
 
@@ -89,7 +100,7 @@ export const receiveStageMedianValuesError = ({ commit }, error) => {
 };
 
 const fetchStageMedian = ({ groupId, valueStreamId, stageId, params }) =>
-  Api.cycleAnalyticsStageMedian({ groupId, valueStreamId, stageId, params }).then(({ data }) => {
+  getValueStreamStageMedian({ groupId, valueStreamId, stageId }, params).then(({ data }) => {
     return {
       id: stageId,
       ...(data?.error
@@ -383,8 +394,7 @@ export const setFilters = ({
   getters: { isOverviewStageSelected },
   state: { selectedStage },
 }) => {
-  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
-  return dispatch('fetchCycleAnalyticsData');
+  return refreshData({ dispatch, isOverviewStageSelected, selectedStage });
 };
 
 export const updateStageTablePagination = (

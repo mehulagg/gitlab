@@ -16,6 +16,7 @@ query groupEpics(
   $lastPageSize: Int
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
+  $isSignedIn: Boolean = false
 ) {
   group(fullPath: $groupPath) {
     epics(
@@ -41,7 +42,7 @@ query groupEpics(
         startDate
         dueDate
         webUrl
-        userDiscussionsCount
+        userDiscussionsCount @include(if: $isSignedIn)
         confidential
         group {
           fullPath

@@ -109,7 +109,16 @@ RSpec.describe 'Updating an Iteration' do
           let_it_be(:another_iteration) { create(:iteration, group: group, start_date: start_date.strftime('%F'), due_date: end_date.strftime('%F') ) }
 
           it_behaves_like 'a mutation that returns errors in the response',
-                          errors: ["Dates cannot overlap with other existing Iterations within this group"]
+                          errors: ["Dates cannot overlap with other existing Iterations within this iterations cadence"]
+
+          context 'with iterations_cadences FF disabled' do
+            before do
+              stub_feature_flags(iteration_cadences: false)
+            end
+
+            it_behaves_like 'a mutation that returns errors in the response',
+              errors: ["Dates cannot overlap with other existing Iterations within this group"]
+          end
         end
       end
 

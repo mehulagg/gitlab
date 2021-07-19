@@ -4,14 +4,21 @@ import { groupBy, isEqual, isNumber } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { sprintf, __, s__ } from '~/locale';
-import { ANY_BRANCH, TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
+import {
+  ANY_BRANCH,
+  TYPE_USER,
+  TYPE_GROUP,
+  TYPE_HIDDEN_GROUPS,
+  LICENSE_CHECK_NAME,
+  VULNERABILITY_CHECK_NAME,
+  COVERAGE_CHECK_NAME,
+} from '../constants';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
 
 const DEFAULT_NAME = 'Default';
-const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
-const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
-const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
+
+export const READONLY_NAMES = [LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME, COVERAGE_CHECK_NAME];
 
 function mapServerResponseToValidationErrors(messages) {
   return Object.entries(messages).flatMap(([key, msgs]) => msgs.map((msg) => `${key} ${msg}`));

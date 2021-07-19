@@ -9,13 +9,17 @@ import {
 } from '@gitlab/ui';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import {
-  DEVOPS_ADOPTION_TABLE_TEST_IDS,
-  DEVOPS_ADOPTION_STRINGS,
-  DEVOPS_ADOPTION_DELETE_MODAL_ID,
-  DEVOPS_ADOPTION_TABLE_SORT_BY_STORAGE_KEY,
-  DEVOPS_ADOPTION_TABLE_SORT_DESC_STORAGE_KEY,
-  DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED,
-  DEVOPS_ADOPTION_GROUP_COL_LABEL,
+  TABLE_TEST_IDS_HEADERS,
+  TABLE_TEST_IDS_NAMESPACE,
+  TABLE_TEST_IDS_ACTIONS,
+  TABLE_TEST_IDS_LOCAL_STORAGE_SORT_BY,
+  TABLE_TEST_IDS_LOCAL_STORAGE_SORT_DESC,
+  DELETE_MODAL_ID,
+  TABLE_SORT_BY_STORAGE_KEY,
+  TABLE_SORT_DESC_STORAGE_KEY,
+  I18N_TABLE_REMOVE_BUTTON,
+  I18N_TABLE_REMOVE_BUTTON_DISABLED,
+  I18N_GROUP_COL_LABEL,
 } from '../constants';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
@@ -38,13 +42,11 @@ const formatter = (value, key, item) => {
 
 const fieldOptions = {
   thClass: 'gl-bg-white! gl-text-gray-400',
-  thAttr: { 'data-testid': DEVOPS_ADOPTION_TABLE_TEST_IDS.TABLE_HEADERS },
+  thAttr: { 'data-testid': TABLE_TEST_IDS_HEADERS },
   formatter,
   sortable: true,
   sortByFormatted: true,
 };
-
-const { table: i18n } = DEVOPS_ADOPTION_STRINGS;
 
 export default {
   name: 'DevopsAdoptionTable',
@@ -67,13 +69,18 @@ export default {
     },
   },
   i18n: {
-    ...i18n,
-    removeButtonDisabled: DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED,
+    removeButtonDisabled: I18N_TABLE_REMOVE_BUTTON_DISABLED,
+    removeButton: I18N_TABLE_REMOVE_BUTTON,
   },
-  deleteModalId: DEVOPS_ADOPTION_DELETE_MODAL_ID,
-  testids: DEVOPS_ADOPTION_TABLE_TEST_IDS,
-  sortByStorageKey: DEVOPS_ADOPTION_TABLE_SORT_BY_STORAGE_KEY,
-  sortDescStorageKey: DEVOPS_ADOPTION_TABLE_SORT_DESC_STORAGE_KEY,
+  deleteModalId: DELETE_MODAL_ID,
+  testids: {
+    NAMESPACE: TABLE_TEST_IDS_NAMESPACE,
+    ACTIONS: TABLE_TEST_IDS_ACTIONS,
+    LOCAL_STORAGE_SORT_BY: TABLE_TEST_IDS_LOCAL_STORAGE_SORT_BY,
+    LOCAL_STORAGE_SORT_DESC: TABLE_TEST_IDS_LOCAL_STORAGE_SORT_DESC,
+  },
+  sortByStorageKey: TABLE_SORT_BY_STORAGE_KEY,
+  sortDescStorageKey: TABLE_SORT_DESC_STORAGE_KEY,
   props: {
     enabledNamespaces: {
       type: Array,
@@ -96,7 +103,7 @@ export default {
       return [
         {
           key: 'name',
-          label: DEVOPS_ADOPTION_GROUP_COL_LABEL,
+          label: I18N_GROUP_COL_LABEL,
           ...fieldOptions,
         },
         ...this.cols.map((item) => ({

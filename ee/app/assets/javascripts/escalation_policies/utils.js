@@ -16,8 +16,9 @@ export const isNameFieldValid = (name) => {
  */
 export const getRulesValidationState = (rules) => {
   return rules.map((rule) => {
+    const minutes = parseInt(rule.elapsedTimeMinutes, 10);
     return {
-      isTimeValid: parseInt(rule.elapsedTimeMinutes, 10) >= 0,
+      isTimeValid: minutes >= 0 && minutes <= 1440,
       isScheduleValid: Boolean(rule.oncallScheduleIid),
     };
   });

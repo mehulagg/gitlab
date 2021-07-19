@@ -157,6 +157,10 @@ end
 RSpec.shared_examples 'a container registry auth service' do
   include_context 'container registry auth service context'
 
+  before do
+    stub_feature_flags(container_registry_migration_phase1: false)
+  end
+
   describe '#full_access_token' do
     let_it_be(:project) { create(:project) }
 
@@ -623,6 +627,22 @@ RSpec.shared_examples 'a container registry auth service' do
               it_behaves_like 'a pullable'
               it_behaves_like 'not a container repository factory'
             end
+          end
+        end
+
+        context 'for project with private container registry' do
+          let_it_be(:project, reload: true) { create(:project, :public) }
+
+          before do
+            project.project_feature.update!(container_registry_access_level: ProjectFeature::PRIVATE)
+          end
+
+          it_behaves_like 'pullable for being team member'
+
+          context 'when you are admin' do
+            let_it_be(:current_user) { create(:admin) }
+
+            it_behaves_like 'pullable for being team member'
           end
         end
       end

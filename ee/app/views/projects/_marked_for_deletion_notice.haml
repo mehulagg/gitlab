@@ -2,4 +2,4 @@
   .text-warning.center.prepend-top-20
     %p
       = sprite_icon('warning-solid')
-      = _("Deletion pending. This project will be removed on %{date}. Repository and other project resources are read-only.") % { date: permanent_deletion_date(project.marked_for_deletion_at) }
+      = _("Deletion pending. This project will be deleted on %{date}. Repository and other project resources are read-only.") % { date: permanent_deletion_date(project.marked_for_deletion_at) }

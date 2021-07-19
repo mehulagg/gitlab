@@ -8,6 +8,8 @@
 module TrialStatusWidgetHelper
   D14_CALLOUT_RANGE = (7..14).freeze # between 14 & 7 days remaining
   D3_CALLOUT_RANGE = (0..3).freeze # between 3 & 0 days remaining
+  D14_CALLOUT_ID = 'trial_status_reminder_d14'
+  D3_CALLOUT_ID = 'trial_status_reminder_d3'
 
   # NOTE: We are okay hard-coding the production value for the Ulitmate 1-year
   # SaaS plan ID while this is all part of an active experiment. If & when the
@@ -21,9 +23,11 @@ module TrialStatusWidgetHelper
     base_attrs.merge(
       group_name: group.name,
       purchase_href: ultimate_subscription_path_for_group(group),
-      start_initially_shown: in_forced_popover_experiment?(group) && force_popover_to_be_shown?(group.trial_days_remaining),
+      start_initially_shown: force_popover_to_be_shown?(group),
       target_id: base_attrs[:container_id],
-      trial_end_date: group.trial_ends_on
+      trial_end_date: group.trial_ends_on,
+      user_callouts_path: user_callouts_path,
+      user_callouts_feature_id: current_user_callout_feature_id(group.trial_days_remaining)
     )
   end
 
@@ -49,8 +53,23 @@ module TrialStatusWidgetHelper
     group.trial_active? && can?(current_user, :admin_namespace, group)
   end
 
-  def force_popover_to_be_shown?(days_remaining)
-    D14_CALLOUT_RANGE.cover?(days_remaining) || D3_CALLOUT_RANGE.cover?(days_remaining)
+  def force_popover_to_be_shown?(group)
+    experiment(:forcibly_show_trial_status_popover, group: group) do |e|
+      e.use { false }
+      e.try { !dismissed_feature_callout?(current_user_callout_feature_id(group.trial_days_remaining)) }
+      e.run
+    end
+  end
+
+  def current_user_callout_feature_id(days_remaining)
+    return D14_CALLOUT_ID if D14_CALLOUT_RANGE.cover?(days_remaining)
+    return D3_CALLOUT_ID if D3_CALLOUT_RANGE.cover?(days_remaining)
+  end
+
+  def dismissed_feature_callout?(feature_name)
+    return true if feature_name.blank?
+
+    current_user.dismissed_callout?(feature_name: feature_name)
   end
 
   def trial_status_common_data_attrs(group)
@@ -63,9 +82,5 @@ module TrialStatusWidgetHelper
 
   def ultimate_subscription_path_for_group(group)
     new_subscriptions_path(namespace_id: group.id, plan_id: ZUORA_ULTIMATE_PLAN_ID)
-  end
-
-  def in_forced_popover_experiment?(group)
-    experiment(:forcibly_show_trial_status_popover, group: group).variant.group == :experiment
   end
 end

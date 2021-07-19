@@ -1,36 +1,46 @@
-import { GlIcon } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlButton, GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import getters from 'ee/boards/stores/getters';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { mockEpic, mockLists, mockIssuesByListId, issues } from '../mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('EpicLane', () => {
   let wrapper;
 
-  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
-
   const updateBoardEpicUserPreferencesSpy = jest.fn();
 
-  const createStore = ({ boardItemsByListId = mockIssuesByListId }) => {
+  const findChevronButton = () => wrapper.findComponent(GlButton);
+
+  const createStore = ({ boardItemsByListId = mockIssuesByListId, isLoading = false }) => {
     return new Vuex.Store({
       actions: {
         updateBoardEpicUserPreferences: updateBoardEpicUserPreferencesSpy,
+        fetchIssuesForEpic: jest.fn(),
       },
       state: {
         boardItemsByListId,
         boardItems: issues,
+        epicsFlags: {
+          [mockEpic.id]: {
+            isLoading,
+          },
+        },
       },
       getters,
     });
   };
 
-  const createComponent = ({ props = {}, boardItemsByListId = mockIssuesByListId } = {}) => {
-    const store = createStore({ boardItemsByListId });
+  const createComponent = ({
+    props = {},
+    boardItemsByListId = mockIssuesByListId,
+    isLoading = false,
+  } = {}) => {
+    const store = createStore({ boardItemsByListId, isLoading });
 
     const defaultProps = {
       epic: mockEpic,
@@ -38,8 +48,7 @@ describe('EpicLane', () => {
       disabled: false,
     };
 
-    wrapper = shallowMount(EpicLane, {
-      localVue,
+    wrapper = shallowMountExtended(EpicLane, {
       propsData: {
         ...defaultProps,
         ...props,
@@ -58,7 +67,7 @@ describe('EpicLane', () => {
     });
 
     it('displays count of issues in epic which belong to board', () => {
-      expect(findByTestId('epic-lane-issue-count').text()).toContain(2);
+      expect(wrapper.findByTestId('epic-lane-issue-count').text()).toContain(2);
     });
 
     it('displays 1 icon', () => {
@@ -77,7 +86,7 @@ describe('EpicLane', () => {
       expect(wrapper.findAll(IssuesLaneList)).toHaveLength(wrapper.props('lists').length);
       expect(wrapper.vm.isCollapsed).toBe(false);
 
-      findByTestId('epic-lane-chevron').vm.$emit('click');
+      findChevronButton().vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.findAll(IssuesLaneList)).toHaveLength(0);
@@ -85,12 +94,22 @@ describe('EpicLane', () => {
       });
     });
 
+    it('does not display loading icon when issues are not loading', () => {
+      expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
+    });
+
+    it('displays loading icon and hides issues count when issues are loading', () => {
+      createComponent({ isLoading: true });
+      expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
+      expect(wrapper.findByTestId('epic-lane-issue-count').exists()).toBe(false);
+    });
+
     it('invokes `updateBoardEpicUserPreferences` method on collapse', () => {
       const collapsedValue = false;
 
       expect(wrapper.vm.isCollapsed).toBe(collapsedValue);
 
-      findByTestId('epic-lane-chevron').vm.$emit('click');
+      findChevronButton().vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(updateBoardEpicUserPreferencesSpy).toHaveBeenCalled();
@@ -108,7 +127,7 @@ describe('EpicLane', () => {
 
     it('does not render when issuesCount is 0', () => {
       createComponent({ boardItemsByListId: {} });
-      expect(findByTestId('board-epic-lane').exists()).toBe(false);
+      expect(wrapper.findByTestId('board-epic-lane').exists()).toBe(false);
     });
   });
 });

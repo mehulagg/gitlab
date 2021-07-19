@@ -193,8 +193,7 @@ module Ci
 
     acts_as_taggable
 
-    add_authentication_token_field :token,
-      encrypted: -> { Gitlab::Ci::Features.require_builds_token_encryption? ? :required : :optional }
+    add_authentication_token_field :token, encrypted: :required
 
     before_save :ensure_token
     before_destroy { unscoped_project }
@@ -326,7 +325,11 @@ module Ci
         build.run_after_commit do
           build.run_status_commit_hooks!
 
-          BuildFinishedWorker.perform_async(id)
+          if Feature.enabled?(:ci_build_finished_worker_namespace_changed, build.project, default_enabled: :yaml)
+            Ci::BuildFinishedWorker.perform_async(id)
+          else
+            ::BuildFinishedWorker.perform_async(id)
+          end
         end
       end
 

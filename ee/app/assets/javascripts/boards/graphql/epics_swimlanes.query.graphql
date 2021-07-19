@@ -10,7 +10,7 @@ query BoardEE(
 ) {
   group(fullPath: $fullPath) @include(if: $isGroup) {
     board(id: $boardId) {
-      epics(first: 20, issueFilters: $issueFilters, after: $after) {
+      epics(first: 10, issueFilters: $issueFilters, after: $after) {
         edges {
           node {
             ...BoardEpicNode
@@ -28,7 +28,7 @@ query BoardEE(
   }
   project(fullPath: $fullPath) @include(if: $isProject) {
     board(id: $boardId) {
-      epics(first: 20, issueFilters: $issueFilters, after: $after) {
+      epics(first: 10, issueFilters: $issueFilters, after: $after) {
         edges {
           node {
             ...BoardEpicNode

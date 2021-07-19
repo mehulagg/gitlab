@@ -146,7 +146,7 @@ RSpec.describe Ci::RunDastScanService do
             public: true
           }, {
             key: 'DAST_VERSION',
-            value: '1',
+            value: '2',
             public: true
           }, {
             key: 'DAST_WEBSITE',

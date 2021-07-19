@@ -23,7 +23,6 @@ RSpec.describe IncidentManagement::PendingEscalations::CreateService do
   context 'feature available' do
     before do
       stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-      stub_feature_flags(escalation_policies_mvc: project)
     end
 
     context 'target is resolved' do

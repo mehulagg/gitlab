@@ -84,6 +84,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       select_search_scope('Code')
 
       expect(page).to have_selector('.results', text: 'def username_regex')
+      expect(page).to have_button('Copy file path')
     end
   end
 

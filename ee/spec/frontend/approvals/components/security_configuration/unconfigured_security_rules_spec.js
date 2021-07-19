@@ -54,7 +54,7 @@ describe('UnconfiguredSecurityRules component', () => {
     });
 
     it('should render a unconfigured-security-rule component for every security rule ', () => {
-      expect(wrapper.findAll(UnconfiguredSecurityRule).length).toBe(2);
+      expect(wrapper.findAll(UnconfiguredSecurityRule).length).toBe(3);
     });
 
     describe('when license_scanning is set to true', () => {

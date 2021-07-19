@@ -61,29 +61,15 @@ describe('EE DiffView', () => {
     wrapper.destroy();
   });
 
-  describe('when there is diff data for the file and the feature flag is enabled', () => {
+  describe('when there is diff data for the file', () => {
     beforeEach(() => {
       ({ wrapper } = createComponent({
         withCodequality: true,
-        provide: { glFeatures: { codequalityMrDiffAnnotations: true } },
       }));
     });
 
     it('has the with-codequality class', () => {
       expect(wrapper.classes('with-codequality')).toBe(true);
-    });
-  });
-
-  describe('when there is diff data for the file and the feature flag is disabled', () => {
-    beforeEach(() => {
-      ({ wrapper } = createComponent({
-        withCodequality: true,
-        provide: { glFeatures: { codequalityMrDiffAnnotations: false } },
-      }));
-    });
-
-    it('does not have the with-codequality class', () => {
-      expect(wrapper.classes('with-codequality')).toBe(false);
     });
   });
 

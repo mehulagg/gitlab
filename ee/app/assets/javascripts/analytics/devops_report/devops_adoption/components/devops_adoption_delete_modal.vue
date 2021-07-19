@@ -1,14 +1,27 @@
 <script>
 import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_DELETE_MODAL_ID } from '../constants';
+import {
+  I18N_DELETE_MODAL_TITLE,
+  I18N_DELETE_MODAL_CONFIRMATION_MESSAGE,
+  I18N_DELETE_MODAL_CANCEL,
+  I18N_DELETE_MODAL_CONFIRM,
+  I18N_DELETE_MODAL_ERROR,
+  DELETE_MODAL_ID,
+} from '../constants';
 import disableDevopsAdoptionNamespaceMutation from '../graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 
 export default {
   name: 'DevopsAdoptionDeleteModal',
   components: { GlModal, GlSprintf, GlAlert },
-  i18n: DEVOPS_ADOPTION_STRINGS.deleteModal,
-  deleteModalId: DEVOPS_ADOPTION_DELETE_MODAL_ID,
+  i18n: {
+    title: I18N_DELETE_MODAL_TITLE,
+    confirmationMessage: I18N_DELETE_MODAL_CONFIRMATION_MESSAGE,
+    cancel: I18N_DELETE_MODAL_CANCEL,
+    confirm: I18N_DELETE_MODAL_CONFIRM,
+    error: I18N_DELETE_MODAL_ERROR,
+  },
+  deleteModalId: DELETE_MODAL_ID,
   props: {
     namespace: {
       type: Object,

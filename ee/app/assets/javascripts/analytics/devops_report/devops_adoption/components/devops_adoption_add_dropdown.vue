@@ -11,19 +11,19 @@ import { TYPE_GROUP } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import {
   DEBOUNCE_DELAY,
-  DEVOPS_ADOPTION_GROUP_DROPDOWN_TEXT,
-  DEVOPS_ADOPTION_GROUP_DROPDOWN_HEADER,
-  DEVOPS_ADOPTION_ADMIN_DROPDOWN_TEXT,
-  DEVOPS_ADOPTION_ADMIN_DROPDOWN_HEADER,
-  DEVOPS_ADOPTION_NO_RESULTS,
-  DEVOPS_ADOPTION_NO_SUB_GROUPS,
+  I18N_GROUP_DROPDOWN_TEXT,
+  I18N_GROUP_DROPDOWN_HEADER,
+  I18N_ADMIN_DROPDOWN_TEXT,
+  I18N_ADMIN_DROPDOWN_HEADER,
+  I18N_NO_RESULTS,
+  I18N_NO_SUB_GROUPS,
 } from '../constants';
 import bulkEnableDevopsAdoptionNamespacesMutation from '../graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
 
 export default {
   name: 'DevopsAdoptionAddDropdown',
   i18n: {
-    noResults: DEVOPS_ADOPTION_NO_RESULTS,
+    noResults: I18N_NO_RESULTS,
   },
   debounceDelay: DEBOUNCE_DELAY,
   components: {
@@ -69,17 +69,13 @@ export default {
       return this.groups?.length;
     },
     dropdownTitle() {
-      return this.isGroup
-        ? DEVOPS_ADOPTION_GROUP_DROPDOWN_TEXT
-        : DEVOPS_ADOPTION_ADMIN_DROPDOWN_TEXT;
+      return this.isGroup ? I18N_GROUP_DROPDOWN_TEXT : I18N_ADMIN_DROPDOWN_TEXT;
     },
     dropdownHeader() {
-      return this.isGroup
-        ? DEVOPS_ADOPTION_GROUP_DROPDOWN_HEADER
-        : DEVOPS_ADOPTION_ADMIN_DROPDOWN_HEADER;
+      return this.isGroup ? I18N_GROUP_DROPDOWN_HEADER : I18N_ADMIN_DROPDOWN_HEADER;
     },
     tooltipText() {
-      return this.isLoadingGroups || this.hasSubgroups ? false : DEVOPS_ADOPTION_NO_SUB_GROUPS;
+      return this.isLoadingGroups || this.hasSubgroups ? false : I18N_NO_SUB_GROUPS;
     },
   },
   beforeDestroy() {

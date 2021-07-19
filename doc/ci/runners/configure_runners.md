@@ -19,14 +19,14 @@ Read [clearing the cache](../caching/index.md#clearing-the-cache).
 ## Set maximum job timeout for a runner
 
 For each runner, you can specify a *maximum job timeout*. This timeout,
-if smaller than the [project defined timeout](../pipelines/settings.md#timeout), takes precedence.
+if smaller than the [project defined timeout](../pipelines/settings.md#set-a-limit-for-how-long-jobs-can-run), takes precedence.
 
 This feature can be used to prevent your shared runner from being overwhelmed
 by a project that has jobs with a long timeout (for example, one week).
 
 When not configured, runners do not override the project timeout.
 
-On GitLab.com, you cannot override the job timeout for shared runners and must use the [project defined timeout](../pipelines/settings.md#timeout).
+On GitLab.com, you cannot override the job timeout for shared runners and must use the [project defined timeout](../pipelines/settings.md#set-a-limit-for-how-long-jobs-can-run).
 
 To set the maximum job timeout:
 
@@ -90,7 +90,7 @@ To protect or unprotect a runner:
 1. Check the **Protected** option.
 1. Click **Save changes**.
 
-![specific runners edit icon](img/protected_runners_check_box.png)
+![specific runners edit icon](img/protected_runners_check_box_v14_1.png)
 
 ### Forks
 
@@ -146,7 +146,7 @@ the GitLab instance. To determine this:
 1. On the left sidebar, select **Overview > Runners**.
 1. Find the runner in the table and view the **IP Address** column.
 
-![shared runner IP address](img/shared_runner_ip_address.png)
+![shared runner IP address](img/shared_runner_ip_address_14_1.png)
 
 ### Determine the IP address of a specific runner
 

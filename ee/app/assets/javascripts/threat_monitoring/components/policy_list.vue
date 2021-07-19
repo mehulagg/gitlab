@@ -21,6 +21,7 @@ import scanExecutionPoliciesQuery from '../graphql/queries/scan_execution_polici
 import { POLICY_TYPE_OPTIONS } from './constants';
 import EnvironmentPicker from './environment_picker.vue';
 import PolicyDrawer from './policy_drawer/policy_drawer.vue';
+import PolicyEnvironments from './policy_environments.vue';
 import PolicyTypeFilter from './policy_type_filter.vue';
 
 const createPolicyFetchError = ({ gqlError, networkError }) => {
@@ -51,6 +52,7 @@ export default {
     EnvironmentPicker,
     PolicyTypeFilter,
     PolicyDrawer,
+    PolicyEnvironments,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -165,9 +167,9 @@ export default {
         : '';
     },
     fields() {
-      const namespace = {
-        key: 'namespace',
-        label: s__('NetworkPolicies|Namespace'),
+      const environments = {
+        key: 'environments',
+        label: s__('SecurityPolicies|Environment(s)'),
       };
       const fields = [
         {
@@ -180,7 +182,7 @@ export default {
         },
         {
           key: 'name',
-          label: s__('NetworkPolicies|Name'),
+          label: __('Name'),
           thClass: 'gl-w-half',
         },
         {
@@ -190,12 +192,12 @@ export default {
         },
         {
           key: 'updatedAt',
-          label: s__('NetworkPolicies|Last modified'),
+          label: __('Last modified'),
           sortable: true,
         },
       ];
-      // Adds column 'namespace' only while 'all environments' option is selected
-      if (this.allEnvironments) fields.splice(2, 0, namespace);
+      // Adds column 'environments' only while 'all environments' option is selected
+      if (this.allEnvironments) fields.splice(2, 0, environments);
 
       return fields;
     },
@@ -300,6 +302,10 @@ export default {
           class="gl-text-green-700"
         />
         <span v-else class="gl-sr-only">{{ $options.i18n.statusDisabled }}</span>
+      </template>
+
+      <template #cell(environments)="value">
+        <policy-environments :environments="value.item.environments" />
       </template>
 
       <template #cell(updatedAt)="value">

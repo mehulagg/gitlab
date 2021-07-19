@@ -42,6 +42,7 @@ export default {
     'groupLabelsPath',
     'groupMilestonesPath',
     'emptyStatePath',
+    'isSignedIn',
   ],
   apollo: {
     epics: {
@@ -50,6 +51,7 @@ export default {
         const queryVariables = {
           groupPath: this.groupFullPath,
           state: this.currentState,
+          isSignedIn: this.isSignedIn,
         };
 
         if (this.prevPageCursor) {

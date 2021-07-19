@@ -3,6 +3,7 @@ import { GlLink, GlPopover, GlIcon } from '@gitlab/ui';
 import {
   LICENSE_CHECK_NAME,
   VULNERABILITY_CHECK_NAME,
+  COVERAGE_CHECK_NAME,
   APPROVAL_RULE_CONFIGS,
 } from 'ee/approvals/constants';
 
@@ -14,11 +15,12 @@ export default {
   },
   inject: {
     vulnerabilityCheckHelpPagePath: {
-      from: 'vulnerabilityCheckHelpPagePath',
       default: '',
     },
     licenseCheckHelpPagePath: {
-      from: 'licenseCheckHelpPagePath',
+      default: '',
+    },
+    coverageCheckHelpPagePath: {
       default: '',
     },
   },
@@ -38,6 +40,10 @@ export default {
         [LICENSE_CHECK_NAME]: {
           description: APPROVAL_RULE_CONFIGS[LICENSE_CHECK_NAME].popoverText,
           linkPath: this.licenseCheckHelpPagePath,
+        },
+        [COVERAGE_CHECK_NAME]: {
+          description: APPROVAL_RULE_CONFIGS[COVERAGE_CHECK_NAME].popoverText,
+          linkPath: this.coverageCheckHelpPagePath,
         },
       };
     },

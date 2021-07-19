@@ -18,24 +18,6 @@ packages whenever you need to use them as a dependency.
 For documentation of the specific API endpoints that Helm package manager
 clients use, see the [Helm API documentation](../../../api/packages/helm.md).
 
-## Enable the Helm repository feature
-
-Helm repository support is still a work in progress. It's gated behind a feature flag that's
-**disabled by default**. [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:helm_packages)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:helm_packages)
-```
-
 ## Build a Helm package
 
 Creating a Helm package is documented [in the Helm documentation](https://helm.sh/docs/intro/using_helm/#creating-your-own-charts).
@@ -56,7 +38,7 @@ Once built, a chart can be uploaded to the `stable` channel with `curl` or `helm
 
   ```shell
   curl --request POST \
-       --form 'chart=@mychart.tgz' \
+       --form 'chart=@mychart-0.1.0.tgz' \
        --user <username>:<personal_access_token> \
        https://gitlab.example.com/api/v4/projects/1/packages/helm/api/stable/charts
   ```
@@ -68,13 +50,40 @@ Once built, a chart can be uploaded to the `stable` channel with `curl` or `helm
   helm push mychart-0.1.0.tgz project-1
   ```
 
+## Use CI/CD to publish a Helm package
+
+To publish a Helm package automated through [GitLab CI/CD](../../../ci/index.md), you can use
+`CI_JOB_TOKEN` in place of the personal access token in your commands.
+
+For example:
+
+```yaml
+image: curlimages/curl:latest
+ 
+stages:
+  - upload
+ 
+upload:
+  stage: upload
+  script:
+    - 'curl --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@mychart-0.1.0.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"'
+```
+
 ## Install a package
 
 To install the latest version of a chart, use the following command:
 
 ```shell
-helm repo add project-1 https://gitlab.example.com/api/v4/projects/1/packages/helm/stable
+helm repo add --username <username> --password <personal_access_token> project-1 https://gitlab.example.com/api/v4/projects/1/packages/helm/stable
 helm install my-release project-1/mychart
 ```
+
+If the repo has previously been added, you may need to run:
+
+```shell
+helm repo update
+```
+
+To update the Helm client with the most currently available charts.
 
 See [Using Helm](https://helm.sh/docs/intro/using_helm/) for more information.

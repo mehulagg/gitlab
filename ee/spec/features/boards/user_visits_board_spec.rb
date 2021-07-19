@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'User visits issue boards', :js do
+  include BoardHelpers
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:group) { create_default(:group, :public) }
@@ -34,6 +35,10 @@ RSpec.describe 'User visits issue boards', :js do
       visit board_path
 
       wait_for_requests
+
+      if board_path.include?('group_by')
+        load_unassigned_issues
+      end
     end
 
     it 'displays all issues satisfiying filter params and correctly sets url params' do

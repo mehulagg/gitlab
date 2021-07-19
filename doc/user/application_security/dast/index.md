@@ -145,6 +145,7 @@ To enable DAST to run automatically, either:
   by [Auto DevOps](../../../topics/autodevops/index.md)).
 - [Include the DAST template](#include-the-dast-template) in your existing
   `.gitlab-ci.yml` file.
+- [Configure DAST using the UI](#configure-dast-using-the-ui).
 
 ### DAST job order
 
@@ -250,7 +251,7 @@ The results are saved as a
 [DAST report artifact](../../../ci/yaml/index.md#artifactsreportsdast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest DAST artifact available. Behind the scenes, the
-[GitLab DAST Docker image](https://gitlab.com/gitlab-org/security-products/dast)
+[GitLab DAST Docker image](https://gitlab.com/security-products/dast)
 is used to run the tests on the specified URL and scan it for possible
 vulnerabilities.
 
@@ -262,8 +263,30 @@ image. Using the `DAST_VERSION` variable, you can choose how DAST updates:
 - Only update fixes by pinning to a minor version (such as `1.6`).
 - Prevent all updates by pinning to a specific version (such as `1.6.4`).
 
-Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/security-products/dast/-/releases)
+Find the latest DAST versions on the [Releases](https://gitlab.com/security-products/dast/-/releases)
 page.
+
+#### Configure DAST using the UI
+
+You can enable or configure DAST settings using the UI. The generated settings are formatted so they
+can be conveniently pasted into the `.gitlab-ci.yml` file.
+
+1. From the project's home page, go to **Security & Compliance > Configuration**.
+1. In the **Dynamic Application Security Testing (DAST)** section, select **Enable DAST** or
+   **Configure DAST**.
+1. Select the desired **Scanner profile**, or select **Create scanner profile** and save a
+   scanner profile. For more details, see [scanner profiles](#scanner-profile).
+1. Select the desired **Site profile**, or select **Create site profile** and save a site
+   profile. For more details, see [site profiles](#site-profile).
+1. Select **Generate code snippet**. A modal opens with the YAML snippet corresponding to the
+   options you selected.
+1. Do one of the following:
+   1. Select **Copy code only** to copy the snippet to your clipboard.
+   1. Select **Copy code and open `.gitlab-ci.yml` file** to copy the snippet to your clipboard. The
+   CI/CD Editor then opens.
+      1. Paste the snippet into the `.gitlab-ci.yml` file.
+      1. Select the **Lint** tab to confirm the edited `.gitlab-ci.yml` file is valid.
+      1. Select **Commit changes**.
 
 #### Crawling web applications dependent on JavaScript
 
@@ -523,7 +546,7 @@ DAST scan with both configured exits with an error.
 
 By default, several rules are disabled because they either take a long time to
 run or frequently generate false positives. The complete list of disabled rules
-can be found in [exclude_rules.yml](https://gitlab.com/gitlab-org/security-products/dast/-/blob/master/src/config/exclude_rules.yml).
+can be found in [exclude_rules.yml](https://gitlab.com/gitlab-org/security-products/dast/-/blob/main/src/config/exclude_rules.yml).
 
 ### Hide sensitive information
 
@@ -941,8 +964,8 @@ To use DAST in an offline environment, you need:
 
 - GitLab Runner with the [`docker` or `kubernetes` executor](#prerequisites).
 - Docker Container Registry with a locally available copy of the DAST
-  [container image](https://gitlab.com/gitlab-org/security-products/dast), found in the
-  [DAST container registry](https://gitlab.com/gitlab-org/security-products/dast/container_registry).
+  [container image](https://gitlab.com/security-products/dast), found in the
+  [DAST container registry](https://gitlab.com/security-products/dast/container_registry).
 
 Note that GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
@@ -955,7 +978,7 @@ enables the use of updated scanners in your CI/CD pipelines.
 
 For DAST, import the following default DAST analyzer image from `registry.gitlab.com` to your [local Docker container registry](../../packages/container_registry/index.md):
 
-- `registry.gitlab.com/gitlab-org/security-products/dast:latest`
+- `registry.gitlab.com/security-products/dast:latest`
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved

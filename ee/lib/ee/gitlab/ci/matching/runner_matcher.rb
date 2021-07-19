@@ -14,7 +14,7 @@ module EE
           private
 
           def cost_factor_disabled?(build_matcher)
-            cost_factor.disabled?(build_matcher.project.visibility_level)
+            cost_factor.disabled?(build_matcher.project)
           end
 
           def cost_factor

@@ -377,6 +377,8 @@ class Project < ApplicationRecord
   has_one :operations_feature_flags_client, class_name: 'Operations::FeatureFlagsClient'
   has_many :operations_feature_flags_user_lists, class_name: 'Operations::FeatureFlags::UserList'
 
+  has_many :error_tracking_errors, inverse_of: :project, class_name: 'ErrorTracking::Error'
+
   has_many :timelogs
 
   accepts_nested_attributes_for :variables, allow_destroy: true
@@ -416,6 +418,7 @@ class Project < ApplicationRecord
     prefix: :import, to: :import_state, allow_nil: true
   delegate :squash_always?, :squash_never?, :squash_enabled_by_default?, :squash_readonly?, to: :project_setting
   delegate :squash_option, to: :project_setting
+  delegate :previous_default_branch, :previous_default_branch=, to: :project_setting
   delegate :no_import?, to: :import_state, allow_nil: true
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :members, to: :team, prefix: true
@@ -1646,18 +1649,11 @@ class Project < ApplicationRecord
     :visibility_level
   end
 
-  def change_head(branch)
-    if repository.branch_exists?(branch)
-      repository.before_change_head
-      repository.raw_repository.write_ref('HEAD', "refs/heads/#{branch}")
-      repository.copy_gitattributes(branch)
-      repository.after_change_head
-      ProjectCacheWorker.perform_async(self.id, [], [:commit_count])
-      reload_default_branch
-    else
-      errors.add(:base, _("Could not change HEAD: branch '%{branch}' does not exist") % { branch: branch })
-      false
-    end
+  override :after_repository_change_head
+  def after_repository_change_head
+    ProjectCacheWorker.perform_async(self.id, [], [:commit_count])
+
+    super
   end
 
   def forked_from?(other_project)

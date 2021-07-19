@@ -188,7 +188,7 @@ Use the switches to enable or disable the following features:
 | **Issues**                        | ✓                         | Activates the GitLab issues tracker                                                                                                                                                            |
 | **Repository**                    | ✓                         | Enables [repository](../repository/) functionality                                                                                                                                             |
 | **Merge Requests**                | ✓                         | Enables [merge request](../merge_requests/) functionality; also see [Merge request settings](#merge-request-settings)                                                                          |
-| **Forks**                         | ✓                         | Enables [forking](../working_with_projects.md#fork-a-project) functionality                                                                                                                                    |
+| **Forks**                         | ✓                         | Enables [forking](../repository/forking_workflow.md) functionality                                                                                                                             |
 | **Pipelines**                     | ✓                         | Enables [CI/CD](../../../ci/index.md) functionality                                                                                                                                           |
 | **Container Registry**            |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                                                                              |
 | **Git Large File Storage**        |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                                                    |
@@ -267,7 +267,8 @@ Learn how to [export a project](import_export.md#importing-the-project) in GitLa
 
 ### Advanced settings
 
-Here you can run housekeeping, archive, rename, transfer, [remove a fork relationship](#removing-a-fork-relationship), or remove a project.
+Here you can run housekeeping, archive, rename, transfer,
+[remove a fork relationship](#removing-a-fork-relationship), or delete a project.
 
 #### Archiving a project
 
@@ -363,27 +364,53 @@ namespace if needed.
 
 #### Delete a project
 
-NOTE:
-Only project Owners and administrators have [permissions](../../permissions.md#project-members-permissions) to delete a project.
+You can mark a project to be deleted.
+
+Prerequisite:
+
+- You must have at least the Owner role for a project.
 
 To delete a project:
 
-1. Navigate to your project, and select **Settings > General > Advanced**.
-1. In the "Delete project" section, click the **Delete project** button.
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Advanced**.
+1. In the "Delete project" section, select **Delete project**.
 1. Confirm the action when asked to.
 
-This action:
+This action deletes a project including all associated resources (issues, merge requests, and so on).
 
-- Deletes a project including all associated resources (issues, merge requests etc).
-- From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
-  group Owners can [configure](../../group/index.md#enable-delayed-project-removal) projects within a group
-  to be deleted after a delayed period.
-  When enabled, actual deletion happens after number of days
-  specified in [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) and later, on Premium or higher tiers,
+group Owners can [configure](../../group/index.md#enable-delayed-project-removal) projects in a group
+to be deleted after a delayed period.
+When enabled, actual deletion happens after number of days
+specified in [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
 WARNING:
-The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
+The default behavior of [delayed project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
+
+#### Delete a project immediately **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/191367) in GitLab 14.1.
+
+If you don't want to wait, you can delete a project immediately.
+
+Prerequisites:
+
+- You must have at least the Owner role for a project.
+- You have [marked the project for deletion](#delete-a-project).
+
+To immediately delete a project marked for deletion:
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Advanced**.
+1. In the "Permanently delete project" section, select **Delete project**.
+1. Confirm the action when asked to.
+
+Your project, its repository, and all related resources, including issues and merge requests,
+are deleted.
 
 #### Restore a project **(PREMIUM)**
 

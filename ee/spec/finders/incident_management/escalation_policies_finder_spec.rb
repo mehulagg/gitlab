@@ -16,7 +16,6 @@ RSpec.describe IncidentManagement::EscalationPoliciesFinder do
     context 'when feature is available' do
       before do
         stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-        stub_feature_flags(escalation_policies_mvc: project)
       end
 
       context 'when user has permissions' do
@@ -43,7 +42,6 @@ RSpec.describe IncidentManagement::EscalationPoliciesFinder do
     context 'when feature is not avaiable' do
       before do
         stub_licensed_features(oncall_schedules: true, escalation_policies: false)
-        stub_feature_flags(escalation_policies_mvc: project)
       end
 
       it { is_expected.to eq(IncidentManagement::EscalationPolicy.none) }

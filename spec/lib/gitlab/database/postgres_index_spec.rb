@@ -22,30 +22,6 @@ RSpec.describe Gitlab::Database::PostgresIndex do
 
   it_behaves_like 'a postgres model'
 
-  describe '.regular' do
-    it 'only non-unique indexes' do
-      expect(described_class.regular).to all(have_attributes(unique: false))
-    end
-
-    it 'only non partitioned indexes' do
-      expect(described_class.regular).to all(have_attributes(partitioned: false))
-    end
-
-    it 'only indexes that dont serve an exclusion constraint' do
-      expect(described_class.regular).to all(have_attributes(exclusion: false))
-    end
-
-    it 'only non-expression indexes' do
-      expect(described_class.regular).to all(have_attributes(expression: false))
-    end
-
-    it 'only btree and gist indexes' do
-      types = described_class.regular.map(&:type).uniq
-
-      expect(types & %w(btree gist)).to eq(types)
-    end
-  end
-
   describe '.reindexing_support' do
     it 'only non partitioned indexes' do
       expect(described_class.reindexing_support).to all(have_attributes(partitioned: false))
@@ -104,6 +80,24 @@ RSpec.describe Gitlab::Database::PostgresIndex do
 
     it 'calculates the relative bloat level' do
       expect(subject.relative_bloat_level).to eq(0.25)
+    end
+  end
+
+  describe '#reset' do
+    subject { index.reset }
+
+    let(:index) { described_class.by_identifier(identifier) }
+
+    it 'calls #reload' do
+      expect(index).to receive(:reload).once.and_call_original
+
+      subject
+    end
+
+    it 'resets the bloat estimation' do
+      expect(index).to receive(:clear_memoization).with(:bloat_size).and_call_original
+
+      subject
     end
   end
 

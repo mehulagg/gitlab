@@ -1,6 +1,7 @@
 <script>
 import { GlButton, GlForm, GlFormGroup } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
+import { mapComputed } from '~/vuex_shared/bindings';
 import { APPROVAL_SETTINGS_I18N } from '../constants';
 import ApprovalSettingsCheckbox from './approval_settings_checkbox.vue';
 
@@ -17,14 +18,30 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      hasFormLoaded: false,
+    };
+  },
   computed: {
     ...mapState({
-      settings: (state) => state.approvals.settings,
       isLoading: (state) => state.approvals.isLoading,
     }),
+    ...mapComputed(
+      [
+        { key: 'preventAuthorApproval', updateFn: 'setPreventAuthorApproval' },
+        { key: 'preventCommittersApproval', updateFn: 'setPreventCommittersApproval' },
+        { key: 'preventMrApprovalRuleEdit', updateFn: 'setPreventMrApprovalRuleEdit' },
+        { key: 'removeApprovalsOnPush', updateFn: 'setRemoveApprovalsOnPush' },
+        { key: 'requireUserPassword', updateFn: 'setRequireUserPassword' },
+      ],
+      undefined,
+      (state) => state.approvals.settings,
+    ),
   },
-  created() {
-    this.fetchSettings(this.approvalSettingsPath);
+  async created() {
+    await this.fetchSettings(this.approvalSettingsPath);
+    this.hasFormLoaded = true;
   },
   methods: {
     ...mapActions(['fetchSettings', 'updateSettings']),
@@ -45,34 +62,34 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit">
+  <gl-form v-if="hasFormLoaded" @submit.prevent="onSubmit">
     <gl-form-group>
       <approval-settings-checkbox
-        v-model="settings.preventAuthorApproval"
+        v-model="preventAuthorApproval"
         :label="$options.i18n.authorApprovalLabel"
         :anchor="$options.links.preventAuthorApprovalDocsAnchor"
         data-testid="prevent-author-approval"
       />
       <approval-settings-checkbox
-        v-model="settings.preventMrApprovalRuleEdit"
+        v-model="preventMrApprovalRuleEdit"
         :label="$options.i18n.preventMrApprovalRuleEditLabel"
         :anchor="$options.links.preventMrApprovalRuleEditDocsAnchor"
         data-testid="prevent-mr-approval-rule-edit"
       />
       <approval-settings-checkbox
-        v-model="settings.requireUserPassword"
+        v-model="requireUserPassword"
         :label="$options.i18n.requireUserPasswordLabel"
         :anchor="$options.links.requireUserPasswordDocsAnchor"
         data-testid="require-user-password"
       />
       <approval-settings-checkbox
-        v-model="settings.removeApprovalsOnPush"
+        v-model="removeApprovalsOnPush"
         :label="$options.i18n.removeApprovalsOnPushLabel"
         :anchor="$options.links.removeApprovalsOnPushDocsAnchor"
         data-testid="remove-approvals-on-push"
       />
       <approval-settings-checkbox
-        v-model="settings.preventCommittersApproval"
+        v-model="preventCommittersApproval"
         :label="$options.i18n.preventCommittersApprovalLabel"
         :anchor="$options.links.preventCommittersApprovalAnchor"
         data-testid="prevent-committers-approval"

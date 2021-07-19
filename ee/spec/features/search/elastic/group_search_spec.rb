@@ -58,6 +58,7 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
       select_search_scope('Code')
 
       expect(page).to have_selector('.file-content .code')
+      expect(page).to have_button('Copy file path')
     end
   end
 

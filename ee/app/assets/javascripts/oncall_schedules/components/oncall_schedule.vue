@@ -175,8 +175,8 @@ export default {
     },
     scheduleVisibleAriaLabel() {
       return this.scheduleVisible
-        ? this.$options.i18n.scheduleOpen
-        : this.$options.i18n.scheduleClose;
+        ? this.$options.i18n.scheduleClose
+        : this.$options.i18n.scheduleOpen;
     },
     scheduleVisibleAngleIcon() {
       return this.scheduleVisible ? 'angle-down' : 'angle-right';
@@ -240,22 +240,19 @@ export default {
       :header-class="{ 'gl-py-3': true, 'gl-rounded-small': !scheduleVisible }"
     >
       <template #header>
-        <div
-          class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-m-0"
-          data-testid="scheduleHeader"
-        >
-          <div class="gl-font-weight-bold gl-font-lg">
-            <gl-icon
-              v-gl-tooltip
-              class="gl-hover-cursor-pointer"
-              :aria-label="scheduleVisibleAriaLabel"
-              :size="12"
-              :name="scheduleVisibleAngleIcon"
-              @click="scheduleVisible = !scheduleVisible"
-            />
-            <span class="gl-pl-2">{{ schedule.name }}</span>
-          </div>
-          <gl-button-group>
+        <div class="gl-display-flex gl-align-items-center" data-testid="scheduleHeader">
+          <gl-button
+            v-gl-tooltip
+            class="gl-mr-2 gl-p-0!"
+            :title="scheduleVisibleAriaLabel"
+            :aria-label="scheduleVisibleAriaLabel"
+            category="tertiary"
+            @click="scheduleVisible = !scheduleVisible"
+          >
+            <gl-icon :size="12" :name="scheduleVisibleAngleIcon" />
+          </gl-button>
+          <h3 class="gl-font-weight-bold gl-font-lg gl-m-0">{{ schedule.name }}</h3>
+          <gl-button-group class="gl-ml-auto">
             <gl-button
               v-gl-modal="editScheduleModalId"
               v-gl-tooltip

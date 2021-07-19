@@ -21,7 +21,6 @@ RSpec.describe IncidentManagement::PendingEscalations::ProcessService do
 
   before do
     stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-    stub_feature_flags(escalation_policies_mvc: project)
   end
 
   describe '#execute' do
@@ -55,14 +54,6 @@ RSpec.describe IncidentManagement::PendingEscalations::ProcessService do
           .and_call_original
 
         expect { execute }.to change(Note, :count).by(1)
-      end
-
-      context 'feature flag is off' do
-        before do
-          stub_feature_flags(escalation_policies_mvc: false)
-        end
-
-        it_behaves_like 'it does not escalate'
       end
     end
 

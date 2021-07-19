@@ -30,11 +30,31 @@ module Elastic
 
       # rubocop: disable CodeReuse/ActiveRecord
       def preload_indexing_data(relation)
-        relation.includes(:issue_assignees, :award_emoji, project: [:project_feature])
+        relation.includes(:issue_assignees, project: [:project_feature])
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       private
+
+      # override
+      def apply_sort(query_hash, options)
+        case ::Gitlab::Search::SortOptions.sort_and_direction(options[:order_by], options[:sort])
+        when :popularity_asc
+          query_hash.merge(sort: {
+            upvotes: {
+              order: 'asc'
+            }
+          })
+        when :popularity_desc
+          query_hash.merge(sort: {
+            upvotes: {
+              order: 'desc'
+            }
+          })
+        else
+          super
+        end
+      end
 
       # Builds an elasticsearch query that will select documents from a
       # set of projects for Group and Project searches, taking user access

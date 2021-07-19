@@ -28,18 +28,9 @@ RSpec.describe Gitlab::IncidentManagement do
 
     before do
       stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-      stub_feature_flags(escalation_policies_mvc: project)
     end
 
     it { is_expected.to be_truthy }
-
-    context 'when feature flag disabled' do
-      before do
-        stub_feature_flags(escalation_policies_mvc: false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
 
     context 'when escalation policies not avaialble' do
       before do

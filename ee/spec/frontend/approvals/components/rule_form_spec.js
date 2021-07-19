@@ -4,7 +4,7 @@ import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import ApproversList from 'ee/approvals/components/approvers_list.vue';
 import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
-import RuleForm from 'ee/approvals/components/rule_form.vue';
+import RuleForm, { READONLY_NAMES } from 'ee/approvals/components/rule_form.vue';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from 'ee/approvals/constants';
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
@@ -515,6 +515,7 @@ describe('EE Approvals RuleForm', () => {
         defaultRuleName          | expectedDisabledAttribute
         ${'Vulnerability-Check'} | ${true}
         ${'License-Check'}       | ${true}
+        ${'Coverage-Check'}      | ${true}
         ${'Foo Bar Baz'}         | ${false}
       `(
         'with defaultRuleName set to $defaultRuleName',
@@ -536,51 +537,29 @@ describe('EE Approvals RuleForm', () => {
       );
     });
 
-    describe('with new License-Check rule', () => {
-      beforeEach(() => {
-        createComponent({
-          initRule: { ...TEST_RULE, id: null, name: 'License-Check' },
+    describe('with read-only rule name', () => {
+      describe.each(READONLY_NAMES)('with new %s rule', (ruleName) => {
+        beforeEach(() => {
+          createComponent({
+            initRule: { ...TEST_RULE, id: null, name: ruleName },
+          });
+        });
+
+        it(`it does not disable the name text field`, () => {
+          expect(findNameInput().props('disabled')).toBe(false);
         });
       });
 
-      it('does not disable the name text field', () => {
-        expect(findNameInput().props('disabled')).toBe(false);
-      });
-    });
-
-    describe('with new Vulnerability-Check rule', () => {
-      beforeEach(() => {
-        createComponent({
-          initRule: { ...TEST_RULE, id: null, name: 'Vulnerability-Check' },
+      describe.each(READONLY_NAMES)('with editing the %s rule', (ruleName) => {
+        beforeEach(() => {
+          createComponent({
+            initRule: { ...TEST_RULE, name: ruleName },
+          });
         });
-      });
 
-      it('does not disable the name text field', () => {
-        expect(findNameInput().props('disabled')).toBe(false);
-      });
-    });
-
-    describe('with editing the License-Check rule', () => {
-      beforeEach(() => {
-        createComponent({
-          initRule: { ...TEST_RULE, name: 'License-Check' },
+        it(`it disables the name text field`, () => {
+          expect(findNameInput().props('disabled')).toBe(true);
         });
-      });
-
-      it('disables the name text field', () => {
-        expect(findNameInput().props('disabled')).toBe(true);
-      });
-    });
-
-    describe('with editing the Vulnerability-Check rule', () => {
-      beforeEach(() => {
-        createComponent({
-          initRule: { ...TEST_RULE, name: 'Vulnerability-Check' },
-        });
-      });
-
-      it('disables the name text field', () => {
-        expect(findNameInput().props('disabled')).toBe(true);
       });
     });
   });

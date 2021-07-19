@@ -1,12 +1,11 @@
 <script>
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
+import issueBoardFilter from '~/boards/issue_board_filters';
 import { TYPE_USER } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import groupLabelsQuery from '../graphql/group_labels.query.graphql';
-import groupUsersQuery from '../graphql/group_members.query.graphql';
 
 export default {
   i18n: {
@@ -17,9 +16,24 @@ export default {
     isNot: __('is not'),
   },
   components: { BoardFilteredSearch },
-  inject: ['fullPath'],
+  props: {
+    fullPath: {
+      type: String,
+      required: true,
+    },
+    boardType: {
+      type: String,
+      required: true,
+    },
+  },
   computed: {
     tokens() {
+      const { fetchLabels, fetchAuthors } = issueBoardFilter(
+        this.$apollo,
+        this.fullPath,
+        this.boardType,
+      );
+
       const { label, is, isNot, author } = this.$options.i18n;
       return [
         {
@@ -32,9 +46,9 @@ export default {
           ],
           token: LabelToken,
           unique: false,
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          defaultLabels: [{ value: 'No label', text: __('No label') }],
-          fetchLabels: this.fetchLabels,
+          symbol: '~',
+          defaultLabels: [{ value: __('No label'), text: __('No label') }],
+          fetchLabels,
         },
         {
           icon: 'pencil',
@@ -47,37 +61,13 @@ export default {
           symbol: '@',
           token: AuthorToken,
           unique: true,
-          fetchAuthors: this.fetchAuthors,
+          fetchAuthors,
           preloadedAuthors: this.preloadedAuthors(),
         },
       ];
     },
   },
   methods: {
-    fetchAuthors(authorsSearchTerm) {
-      return this.$apollo
-        .query({
-          query: groupUsersQuery,
-          variables: {
-            fullPath: this.fullPath,
-            search: authorsSearchTerm,
-          },
-        })
-        .then(({ data }) =>
-          data.group?.groupMembers.nodes.filter((x) => x?.user).map(({ user }) => user),
-        );
-    },
-    fetchLabels(labelSearchTerm) {
-      return this.$apollo
-        .query({
-          query: groupLabelsQuery,
-          variables: {
-            fullPath: this.fullPath,
-            search: labelSearchTerm,
-          },
-        })
-        .then(({ data }) => data.group?.labels.nodes || []);
-    },
     preloadedAuthors() {
       return gon?.current_user_id
         ? [
