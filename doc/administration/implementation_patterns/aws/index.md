@@ -68,7 +68,7 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 
 **Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
 
- **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
+ **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby Geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
@@ -118,7 +118,7 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 
 **Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
 
- **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
+ **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby Geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
@@ -357,7 +357,7 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 
 **Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
 
- **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
+ **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby Geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
@@ -595,7 +595,7 @@ On Demand pricing is used in this table for comparisons, but should not be used 
 
 **Ref Arch Raw Total:** = The totals if the configuration was built on regular VMs with no PaaS services. Configuring on pure VMs generally requires additional VMs for cluster management activities.
 
- **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
+ **Idle Configuration (Scaled-In)** = can be used to scale-in during time of low demand and/or for warm standby Geo instances. Requires configuration, testing and management of EKS autoscaling to meet your internal requirements.
 
 NOTE:
 For EKS Nodes, picking more of a smaller size instance allows scaling costs to be more granular.
@@ -856,4 +856,4 @@ The AWS EKS Quick Start for GitLab Cloud Native implements Gitaly as a multi-zon
 
 ### Gitaly Long Term Management
 
-Gitaly node disk sizes will need to be monitored and increased to accomodate Git repository growth and Gitaly temporary and caching storage needs. The storage configuration on all nodes should be kept identical.	
+Gitaly node disk sizes will need to be monitored and increased to accommodate Git repository growth and Gitaly temporary and caching storage needs. The storage configuration on all nodes should be kept identical.
