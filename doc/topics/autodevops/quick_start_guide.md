@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Tutorial: Use Auto DevOps to deploy a project to Google Kubernetes Engine**(FREE)**
+# Tutorial: Use Auto DevOps to deploy a project to Google Kubernetes Engine **(FREE)**
 
 This step-by-step guide helps you use [Auto DevOps](index.md) to
 deploy a project hosted on GitLab.com to Google Kubernetes Engine.
