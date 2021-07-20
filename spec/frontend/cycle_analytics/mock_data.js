@@ -1,3 +1,4 @@
+import { getJSONFixture } from 'helpers/fixtures';
 import { TEST_HOST } from 'helpers/test_constants';
 import { DEFAULT_VALUE_STREAM, DEFAULT_DAYS_IN_PAST } from '~/cycle_analytics/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -8,6 +9,15 @@ export const createdAfter = getDateInPast(createdBefore, DEFAULT_DAYS_IN_PAST);
 
 export const getStageByTitle = (stages, title) =>
   stages.find((stage) => stage.title && stage.title.toLowerCase().trim() === title) || {};
+
+const fixtureEndpoints = {
+  customizableCycleAnalyticsStagesAndEvents: 'project/analytics/value_stream_analytics/stages',
+  stageEvents: (stage) => `project/analytics/value_stream_analytics/events/${stage}`,
+};
+
+export const customizableStagesAndEvents = getJSONFixture(
+  fixtureEndpoints.customizableCycleAnalyticsStagesAndEvents,
+);
 
 export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging'];
 
@@ -251,44 +261,7 @@ export const selectedProjects = [
   },
 ];
 
-export const rawValueStreamStages = [
-  {
-    title: 'Issue',
-    hidden: false,
-    legend: '',
-    description: 'Time before an issue gets scheduled',
-    id: 'issue',
-    custom: false,
-    start_event_html_description:
-      '\u003cp data-sourcepos="1:1-1:13" dir="auto"\u003eIssue created\u003c/p\u003e',
-    end_event_html_description:
-      '\u003cp data-sourcepos="1:1-1:71" dir="auto"\u003eIssue first associated with a milestone or issue first added to a board\u003c/p\u003e',
-  },
-  {
-    title: 'Plan',
-    hidden: false,
-    legend: '',
-    description: 'Time before an issue starts implementation',
-    id: 'plan',
-    custom: false,
-    start_event_html_description:
-      '\u003cp data-sourcepos="1:1-1:71" dir="auto"\u003eIssue first associated with a milestone or issue first added to a board\u003c/p\u003e',
-    end_event_html_description:
-      '\u003cp data-sourcepos="1:1-1:33" dir="auto"\u003eIssue first mentioned in a commit\u003c/p\u003e',
-  },
-  {
-    title: 'Code',
-    hidden: false,
-    legend: '',
-    description: 'Time until first merge request',
-    id: 'code',
-    custom: false,
-    start_event_html_description:
-      '\u003cp data-sourcepos="1:1-1:33" dir="auto"\u003eIssue first mentioned in a commit\u003c/p\u003e',
-    end_event_html_description:
-      '\u003cp data-sourcepos="1:1-1:21" dir="auto"\u003eMerge request created\u003c/p\u003e',
-  },
-];
+export const rawValueStreamStages = customizableStagesAndEvents.stages;
 
 export const valueStreamStages = rawValueStreamStages.map((s) => ({
   ...convertObjectPropsToCamelCase(s, { deep: true }),

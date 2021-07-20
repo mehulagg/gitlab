@@ -125,26 +125,26 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   #   end
 
   before(:all) do
-    clean_frontend_fixtures('Projects/analytics/')
+    clean_frontend_fixtures('project/analytics/value_stream_analytics/')
   end
 
-  describe Projects::CycleAnalyticsController, type: :controller do
-    render_views
+  # describe Projects::CycleAnalyticsController, type: :controller do
+  #   render_views
 
-    let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
+  #   let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
 
-    before do
-      project.add_developer(user)
+  #   before do
+  #     project.add_developer(user)
 
-      sign_in(user)
-    end
+  #     sign_in(user)
+  #   end
 
-    it 'project/analytics/lol.json' do
-      get(:show, params: params, format: :json)
+  #   it 'project/analytics/lol.json' do
+  #     get(:show, params: params, format: :json)
 
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-  end
+  #     expect(response).to have_gitlab_http_status(:not_found)
+  #   end
+  # end
 
   describe Projects::Analytics::CycleAnalytics::StagesController, type: :controller do
     render_views
@@ -169,14 +169,13 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
 
     before do
-      print(project)
       project.add_developer(user)
 
       sign_in(user)
     end
 
     Gitlab::Analytics::CycleAnalytics::DefaultStages.all.each do |stage|
-      it "analytics/ value_stream_analytics/events/#{stage[:name]}" do
+      it "project/analytics/value_stream_analytics/events/#{stage[:name]}" do
         get(stage[:name], params: params, format: :json)
 
         expect(response).to be_successful
