@@ -43,7 +43,7 @@ but not for GitLab SaaS instances.
 
 When first using Auto DevOps, review the [requirements](requirements.md) to
 ensure all the necessary components to make full use of Auto DevOps are
-available. First-time users should follow the [quick start guide](quick_start_guide.md).
+available. First-time users should follow the [tutorial](quick_start_guide.md).
 
 Depending on your instance type, you can enable or disable Auto DevOps at the
 following levels:
@@ -136,14 +136,14 @@ to minimize downtime and risk.
 
 ## Quick start
 
-For GitLab.com users, see the [quick start guide](quick_start_guide.md)
+For GitLab.com users, see the [tutorial](quick_start_guide.md)
 for setting up Auto DevOps deploying to a Kubernetes cluster on Google Kubernetes
 Engine (GKE).
 
 If you use a self-managed instance of GitLab, you must configure the
 [Google OAuth 2.0 OmniAuth Provider](../../integration/google.md) before
 configuring a cluster on GKE. After configuring the provider, you can follow
-the steps in the [quick start guide](quick_start_guide.md) to get started.
+the steps in the [tutorial](quick_start_guide.md) to get started.
 
 In [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/208132) and later, it is
 possible to leverage Auto DevOps to deploy to [AWS ECS](requirements.md#auto-devops-requirements-for-amazon-ecs).
