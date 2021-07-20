@@ -11,21 +11,6 @@ import { initMembersApp } from '~/members';
 import { MEMBER_TYPES } from '~/members/constants';
 import { groupLinkRequestFormatter } from '~/members/utils';
 import UsersSelect from '~/users_select';
-import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
-
-function mountRemoveMemberModal() {
-  const el = document.querySelector('.js-remove-member-modal');
-  if (!el) {
-    return false;
-  }
-
-  return new Vue({
-    el,
-    render(createComponent) {
-      return createComponent(RemoveMemberModal);
-    },
-  });
-}
 
 const SHARED_FIELDS = ['account', 'expires', 'maxRole', 'expiration', 'actions'];
 
@@ -71,7 +56,6 @@ initMembersApp(document.querySelector('.js-group-members-list-app'), {
 groupsSelect();
 memberExpirationDate();
 memberExpirationDate('.js-access-expiration-date-groups');
-mountRemoveMemberModal();
 initInviteMembersModal();
 initInviteMembersTrigger();
 initInviteGroupTrigger();
