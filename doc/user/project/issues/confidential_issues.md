@@ -67,6 +67,12 @@ There is also an indicator on the sidebar denoting confidentiality.
 | :-----------: | :----------: |
 | ![Sidebar confidential issue](img/sidebar_confidential_issue.png) | ![Sidebar not confidential issue](img/sidebar_not_confidential_issue.png) |
 
+## Merge requests for confidential issues
+
+While issues can be made confidential in public projects, merge requests cannot.
+Learn how to create [merge requests for confidential issues](../merge_requests/confidential.md)
+that prevent leaks of private data.
+
 ## Permissions and access to confidential issues
 
 There are two kinds of level access for confidential issues. The general rule
@@ -81,3 +87,7 @@ sees in the project's search results respectively.
 | Maintainer role                                                                        | Guest access                                                                     |
 |:---------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------|
 | ![Confidential issues search by maintainer](img/confidential_issues_search_master.png) | ![Confidential issues search by guest](img/confidential_issues_search_guest.png) |
+
+## Related links
+
+- [Merge requests for confidential issues](../merge_requests/confidential.md)
