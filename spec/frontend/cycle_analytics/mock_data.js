@@ -7,6 +7,8 @@ import { getDateInPast } from '~/lib/utils/datetime_utility';
 export const createdBefore = new Date(2019, 0, 14);
 export const createdAfter = getDateInPast(createdBefore, DEFAULT_DAYS_IN_PAST);
 
+export const deepCamelCase = (obj) => convertObjectPropsToCamelCase(obj, { deep: true });
+
 export const getStageByTitle = (stages, title) =>
   stages.find((stage) => stage.title && stage.title.toLowerCase().trim() === title) || {};
 
@@ -20,6 +22,14 @@ export const customizableStagesAndEvents = getJSONFixture(
 );
 
 export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging'];
+
+const stageFixtures = defaultStages.reduce((acc, stage) => {
+  const events = getJSONFixture(fixtureEndpoints.stageEvents(stage));
+  return {
+    ...acc,
+    [stage]: events,
+  };
+}, {});
 
 export const summary = [
   { value: '20', title: 'New Issues' },
@@ -119,50 +129,13 @@ export const convertedData = {
   ],
 };
 
-export const rawEvents = [
-  {
-    title: 'Brockfunc-1617160796',
-    author: {
-      id: 275,
-      name: 'VSM User4',
-      username: 'vsm-user-4-1617160796',
-      state: 'active',
-      avatar_url:
-        'https://www.gravatar.com/avatar/6a6f5480ae582ba68982a34169420747?s=80&d=identicon',
-      web_url: 'http://gdk.test:3001/vsm-user-4-1617160796',
-      show_status: false,
-      path: '/vsm-user-4-1617160796',
-    },
-    iid: '16',
-    total_time: { days: 1, hours: 9 },
-    created_at: 'about 1 month ago',
-    url: 'http://gdk.test:3001/vsa-life/ror-project-vsa/-/issues/16',
-    short_sha: 'some_sha',
-    commit_url: 'some_commit_url',
-  },
-  {
-    title: 'Subpod-1617160796',
-    author: {
-      id: 274,
-      name: 'VSM User3',
-      username: 'vsm-user-3-1617160796',
-      state: 'active',
-      avatar_url:
-        'https://www.gravatar.com/avatar/fde853fc3ab7dc552e649dcb4fcf5f7f?s=80&d=identicon',
-      web_url: 'http://gdk.test:3001/vsm-user-3-1617160796',
-      show_status: false,
-      path: '/vsm-user-3-1617160796',
-    },
-    iid: '20',
-    total_time: { days: 2, hours: 18 },
-    created_at: 'about 1 month ago',
-    url: 'http://gdk.test:3001/vsa-life/ror-project-vsa/-/issues/20',
-  },
-];
-
-export const convertedEvents = rawEvents.map((ev) =>
-  convertObjectPropsToCamelCase(ev, { deep: true }),
-);
+export const rawIssueEvents = stageFixtures.issue;
+export const issueEvents = deepCamelCase(rawIssueEvents);
+export const planEvents = deepCamelCase(stageFixtures.plan);
+export const reviewEvents = deepCamelCase(stageFixtures.review);
+export const codeEvents = deepCamelCase(stageFixtures.code);
+export const testEvents = deepCamelCase(stageFixtures.test);
+export const stagingEvents = deepCamelCase(stageFixtures.staging);
 
 export const pathNavIssueMetric = 172800;
 

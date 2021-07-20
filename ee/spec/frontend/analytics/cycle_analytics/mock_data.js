@@ -20,6 +20,7 @@ import {
   rawStageMedians,
   createdBefore,
   createdAfter,
+  deepCamelCase,
 } from 'jest/cycle_analytics/mock_data';
 import { transformStagesForPathNavigation } from '~/cycle_analytics/utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -102,8 +103,6 @@ export const testStage = getStageByTitle(dummyState.stages, 'test');
 export const stagingStage = getStageByTitle(dummyState.stages, 'staging');
 
 export const allowedStages = [issueStage, planStage, codeStage];
-
-const deepCamelCase = (obj) => convertObjectPropsToCamelCase(obj, { deep: true });
 
 const stageFixtures = defaultStages.reduce((acc, stage) => {
   const events = getJSONFixture(fixtureEndpoints.stageEvents(stage));

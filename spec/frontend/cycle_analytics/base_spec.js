@@ -6,8 +6,9 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BaseComponent from '~/cycle_analytics/components/base.vue';
 import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
 import initState from '~/cycle_analytics/store/state';
-import { selectedStage, convertedEvents as selectedStageEvents } from './mock_data';
+import { selectedStage, issueEvents } from './mock_data';
 
+const selectedStageEvents = issueEvents.events;
 const noDataSvgPath = 'path/to/no/data';
 const noAccessSvgPath = 'path/to/no/access';
 

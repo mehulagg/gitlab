@@ -13,14 +13,19 @@ import {
   selectedStage,
   rawData,
   convertedData,
-  rawEvents,
+  rawIssueEvents,
   allowedStages,
   stageMedians,
   pathNavIssueMetric,
   rawStageMedians,
 } from './mock_data';
 
+let rawEvents;
+
+// TODO: test for code / staging stages?
 describe('Value stream analytics utils', () => {
+  rawEvents = rawIssueEvents.events;
+
   describe('decorateEvents', () => {
     const [result] = decorateEvents(rawEvents, selectedStage);
     const eventKeys = Object.keys(result);
