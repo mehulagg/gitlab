@@ -110,7 +110,6 @@ module Trigger
         'TOP_UPSTREAM_SOURCE_JOB' => ENV['CI_JOB_URL'],
         'TOP_UPSTREAM_SOURCE_SHA' => Trigger.non_empty_variable_value('CI_MERGE_REQUEST_SOURCE_BRANCH_SHA') || ENV['CI_COMMIT_SHA'],
         'TOP_UPSTREAM_SOURCE_REF' => ENV['CI_COMMIT_REF_NAME'],
-        'TOP_UPSTREAM_SOURCE_PIPELINE_REF' => "refs/pipelines/#{ENV['CI_PIPELINE_ID']}",
         'TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID' => ENV['CI_MERGE_REQUEST_PROJECT_ID'],
         'TOP_UPSTREAM_MERGE_REQUEST_IID' => ENV['CI_MERGE_REQUEST_IID']
       }
@@ -136,14 +135,9 @@ module Trigger
     end
 
     def extra_variables
-      # Use CI_MERGE_REQUEST_SOURCE_BRANCH_SHA (MR HEAD commit) so that the image is in sync with the assets and QA images.
-      # See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#with-pipeline-for-merged-results.
-      # We also set IMAGE_TAG so the GitLab Docker image is tagged with that SHA.
-      source_sha = Trigger.non_empty_variable_value('CI_MERGE_REQUEST_SOURCE_BRANCH_SHA') || ENV['CI_COMMIT_SHA']
-
       {
-        'GITLAB_VERSION' => source_sha,
-        'IMAGE_TAG' => source_sha,
+        'GITLAB_VERSION' => "refs/pipelines/#{ENV['CI_PIPELINE_ID']}",
+        'IMAGE_TAG' => ENV['CI_COMMIT_SHA'],
         'QA_IMAGE' => "#{ENV['CI_REGISTRY']}/#{ENV['CI_PROJECT_PATH']}/gitlab-ee-qa:#{ENV['CI_COMMIT_REF_SLUG']}",
         'SKIP_QA_DOCKER' => 'true',
         'ALTERNATIVE_SOURCES' => 'true',
