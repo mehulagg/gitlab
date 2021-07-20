@@ -106,6 +106,24 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   #   end
   # end
 
+  #   before do
+  #     stub_licensed_features(cycle_analytics_for_groups: true)
+
+  #     # Persist the default stages
+  #     Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |params|
+  #       group.cycle_analytics_stages.build(params.merge(value_stream: value_stream)).save!
+  #     end
+
+  #     create_label_based_cycle_analytics_stage
+
+  #     prepare_cycle_analytics_data
+  #     create_deployment
+
+  #     additional_cycle_analytics_metrics
+
+  #     sign_in(user)
+  #   end
+
   before(:all) do
     clean_frontend_fixtures('Projects/analytics/')
   end
@@ -124,10 +142,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     it 'project/analytics/lol.json' do
       get(:show, params: params, format: :json)
 
-      print response
-      binding.pry
       expect(response).to have_gitlab_http_status(:not_found)
-      # expect(response).to be_successful
     end
   end
 
@@ -149,95 +164,23 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     end
   end
 
-
-  describe Projects::Analytics::CycleAnalytics::StagesController, type: :controller do
-    render_views    
-        let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
+  describe Projects::CycleAnalytics::EventsController, type: :controller do
+    render_views
+    let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
 
     before do
+      print(project)
       project.add_developer(user)
 
       sign_in(user)
     end
-    
+
     Gitlab::Analytics::CycleAnalytics::DefaultStages.all.each do |stage|
       it "analytics/ value_stream_analytics/events/#{stage[:name]}" do
-        stage_id = project.cycle_analytics_stages.find_by(name: stage[:name]).id
-        get(:records, params: params.merge({ id: stage_id }), format: :json)
+        get(stage[:name], params: params, format: :json)
 
         expect(response).to be_successful
       end
     end
   end
-
-  # describe Groups::Analytics::CycleAnalytics::StagesController, type: :controller do
-  #   render_views
-
-  #   let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
-
-  #   before do
-  #     stub_licensed_features(cycle_analytics_for_groups: true)
-
-  #     # Persist the default stages
-  #     Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |params|
-  #       group.cycle_analytics_stages.build(params.merge(value_stream: value_stream)).save!
-  #     end
-
-  #     create_label_based_cycle_analytics_stage
-
-  #     prepare_cycle_analytics_data
-  #     create_deployment
-
-  #     additional_cycle_analytics_metrics
-
-  #     sign_in(user)
-  #   end
-
-  #   it 'analytics/value_stream_analytics/stages.json' do
-  #     get(:index, params: { group_id: group.name }, format: :json)
-
-  #     expect(response).to be_successful
-  #   end
-
-  #   Gitlab::Analytics::CycleAnalytics::DefaultStages.all.each do |stage|
-  #     it "analytics/value_stream_analytics/stages/#{stage[:name]}/records.json" do
-  #       stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
-  #       get(:records, params: params.merge({ id: stage_id }), format: :json)
-
-  #       expect(response).to be_successful
-  #     end
-
-  #     it "analytics/value_stream_analytics/stages/#{stage[:name]}/median.json" do
-  #       stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
-  #       get(:median, params: params.merge({ id: stage_id }), format: :json)
-
-  #       expect(response).to be_successful
-  #     end
-
-  #     it "analytics/value_stream_analytics/stages/#{stage[:name]}/count.json" do
-  #       stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
-  #       get(:count, params: params.merge({ id: stage_id }), format: :json)
-
-  #       expect(response).to be_successful
-  #     end
-  #   end
-
-  #   it "analytics/value_stream_analytics/stages/label-based-stage/records.json" do
-  #     get(:records, params: params.merge({ id: label_based_stage.id }), format: :json)
-
-  #     expect(response).to be_successful
-  #   end
-
-  #   it "analytics/value_stream_analytics/stages/label-based-stage/median.json" do
-  #     get(:median, params: params.merge({ id: label_based_stage.id }), format: :json)
-
-  #     expect(response).to be_successful
-  #   end
-
-  #   it "analytics/value_stream_analytics/stages/label-based-stage/count.json" do
-  #     get(:count, params: params.merge({ id: label_based_stage.id }), format: :json)
-
-  #     expect(response).to be_successful
-  #   end
-  # end
 end
