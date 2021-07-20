@@ -37,6 +37,7 @@ module Gitlab
         @logger.formatter = ::Gitlab::SidekiqLogging::JSONFormatter.new
         @rails_path = Dir.pwd
         @dryrun = false
+        @list_queues = false
       end
 
       def run(argv = ARGV)
@@ -71,6 +72,12 @@ module Gitlab
         if queue_groups.all?(&:empty?)
           raise CommandError,
             'No queues found, you must select at least one queue'
+        end
+
+        if @list_queues
+          puts queue_groups.map(&:sort)
+
+          return
         end
 
         unless @dryrun
@@ -201,6 +208,10 @@ module Gitlab
 
           opt.on('-d', '--dryrun', 'Print commands that would be run without this flag, and quit') do |int|
             @dryrun = true
+          end
+
+          opt.on('--list-queues', 'List matching queues, and quit') do |int|
+            @list_queues = true
           end
         end
       end
