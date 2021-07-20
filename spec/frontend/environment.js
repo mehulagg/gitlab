@@ -88,13 +88,23 @@ class CustomEnvironment extends JSDOMEnvironment {
       }),
     });
 
-    this.global.PerformanceObserver = class {
+    /**
+     * JSDom doesn't have an own observer implementation, so this a Noop Observer.
+     * If you are testing functionality, related to observers, have a look at __helpers__/mock_dom_observer.js
+     */
+    class NoopObserver {
       /* eslint-disable no-useless-constructor, no-unused-vars, no-empty-function, class-methods-use-this */
       constructor(callback) {}
       disconnect() {}
       observe(element, initObject) {}
+      unobserve(element) {}
+      takeRecords() {}
       /* eslint-enable no-useless-constructor, no-unused-vars, no-empty-function, class-methods-use-this */
-    };
+    }
+    this.global.IntersectionObserver = NoopObserver;
+    this.global.MutationObserver = NoopObserver;
+    this.global.PerformanceObserver = NoopObserver;
+    this.global.ResizeObserver = NoopObserver;
   }
 
   async teardown() {
