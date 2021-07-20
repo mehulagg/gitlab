@@ -119,6 +119,14 @@ module EnvironmentsHelper
       'custom_dashboard_base_path'       => Gitlab::Metrics::Dashboard::RepoDashboardFinder::DASHBOARD_ROOT
     }
   end
+
+  def environment_data(environment)
+    Gitlab::Json.generate({
+      id: environment.id,
+      name: environment.name,
+      external_url: environment.external_url
+    })
+  end
 end
 
 EnvironmentsHelper.prepend_mod_with('EnvironmentsHelper')
