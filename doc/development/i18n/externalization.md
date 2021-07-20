@@ -131,38 +131,48 @@ You can mark that content for translation with:
 
 ### JavaScript files
 
-In JavaScript we added the `__()` (double underscore parenthesis) function that
-you can import from the `~/locale` file. For instance:
+The `~/locale` file defines 3 functions for externalisation:
+
+- `__()` (double underscore parenthesis)
+- `s__()` (namespaced double underscore parenthesis)
+- `n__()` (plural double underscore parenthesis)
 
 ```javascript
-import { __ } from '~/locale';
-const label = __('Subscribe');
+import { __, s__, n__ } from '~/locale';
+
+const defaultErrorMessage = s__('Branches|Create branch failed.');
+const label = s__('Subscribe');
+const message =  n__('Apple', 'Apples', 3)
 ```
 
-To test JavaScript translations you must:
+To visually test JavaScript translations:
 
-- Change the GitLab localization to a language other than English.
-- Generate JSON files by using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
+1. Change the GitLab localization to a language other than English.
+1. Generate JSON files by using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
 
 ### Vue files
 
-In Vue files, we make the following functions available:
+In Vue files, we make the following functions available to Vue templates via the [`translate` mixin](https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/vue_shared/translate.js):
 
 - `__()` (double underscore parenthesis)
 - `s__()` (namespaced double underscore parenthesis)
 
-You can therefore import from the `~/locale` file.
-For example:
+This means you can mark strings for translation in Vue templates without having to import these functions from the `~/locale` file:
 
-```javascript
-import { __, s__ } from '~/locale';
-const label = __('Subscribe');
-const nameSpacedlabel = __('Plan|Subscribe');
+```html
+<template>
+  <h1>{{ s__('Branches|Create a new branch') }}</h1>
+  <gl-button>{{ __('Create branch') }}</gl-button>
+</template>
 ```
+
+If you need to translate strings in the Vue component's JavaScript, you can import the necessary externalisation function from the `~/locale` file as described in the [JavaScript files](#javascript-files) section.
+
+#### Recommendations
 
 For the static text strings we suggest two patterns for using these translations in Vue files:
 
-- External constants file:
+1. External constants file:
 
   ```javascript
   javascripts
@@ -211,7 +221,7 @@ For the static text strings we suggest two patterns for using these translations
 
   When possible, you should opt for this pattern, as this allows you to import these strings directly into your component specs for re-use during testing.
 
-- Internal component `$options` object:
+1. Internal component `$options` object:
 
   ```javascript
   <script>
@@ -229,7 +239,7 @@ For the static text strings we suggest two patterns for using these translations
   </template>
   ```
 
-To visually test the Vue translations:
+To visually test Vue translations:
 
 1. Change the GitLab localization to another language than English.
 1. Generate JSON files using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
