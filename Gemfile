@@ -289,7 +289,7 @@ gem 'sassc-rails', '~> 2.1.0'
 gem 'autoprefixer-rails', '10.2.5.1'
 gem 'terser', '1.0.2'
 
-gem 'addressable', '~> 2.7'
+gem 'addressable', '~> 2.8'
 gem 'gemojione', '~> 3.3'
 gem 'gon', '~> 6.4.0'
 gem 'request_store', '~> 1.5'
@@ -472,7 +472,7 @@ end
 gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 14.1.0.pre.rc2'
+gem 'gitaly', '~> 14.1.0.pre.rc3'
 
 # KAS GRPC protocol definitions
 gem 'kas-grpc', '~> 0.0.2'

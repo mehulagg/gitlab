@@ -94,7 +94,6 @@ cloud "**Object Storage**" as object_storage #white
 elb -[#6a9be7]-> gitlab
 elb -[#6a9be7]--> monitor
 
-gitlab -[#32CD32]> sidekiq
 gitlab -[#32CD32]--> ilb
 gitlab -[#32CD32]-> object_storage
 gitlab -[#32CD32]---> redis
@@ -598,8 +597,12 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    # Replace POSTGRESQL_PASSWORD_HASH with a generated md5 value
    postgresql['sql_user_password'] = '<postgresql_password_hash>'
 
+   # Set up basic authentication for the Patroni API (use the same username/password in all nodes).
+   patroni['username'] = '<patroni_api_username>'
+   patroni['password'] = '<patroni_api_password>'
+
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
-   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24)
+   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24 127.0.0.1/32)
 
    # Set the network addresses that the exporters will listen on for monitoring
    node_exporter['listen_address'] = '0.0.0.0:9100'
@@ -1403,7 +1406,7 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    postgresql['sql_user_password'] = "<praefect_postgresql_password_hash>"
 
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
-   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24)
+   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24 127.0.0.1/32)
 
    # Set the network addresses that the exporters will listen on for monitoring
    node_exporter['listen_address'] = '0.0.0.0:9100'
@@ -1681,7 +1684,7 @@ On each node:
    # balancer.
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
 
-   # Gitaly 
+   # Gitaly
    gitaly['enable'] = true
 
    # Make Gitaly accept connections on all network interfaces. You must use
@@ -2368,9 +2371,9 @@ the following other supporting services are supported: NGINX, Task Runner, Migra
 Prometheus and Grafana.
 
 Hybrid installations leverage the benefits of both cloud native and traditional
-Kubernetes, you can reap certain cloud native workload management benefits while
-the others are deployed in compute VMs with Omnibus as described above in this
-page.
+compute deployments. With this, _stateless_ components can benefit from cloud native
+workload management benefits while _stateful_ components are deployed in compute VMs
+with Omnibus to benefit from increased permanence.
 
 NOTE:
 This is an **advanced** setup. Running services in Kubernetes is well known
@@ -2392,7 +2395,7 @@ future with further specific cloud provider details.
 |-------------------------------------------------------|----------|-------------------------|------------------|-----------------------------|
 | Webservice                                            | 4        | 32 vCPU, 28.8 GB memory | `n1-highcpu-32` | 127.5 vCPU, 118 GB memory   |
 | Sidekiq                                               | 4        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 15.5 vCPU, 50 GB memory     |
-| Supporting services such as NGINX, Prometheus, etc.   | 2        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
+| Supporting services such as NGINX or Prometheus   | 2        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
 
 <!-- Disable ordered list rule https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md029---ordered-list-item-prefix -->
 <!-- markdownlint-disable MD029 -->
@@ -2481,7 +2484,6 @@ elb -[#6a9be7]-> gitlab
 elb -[#6a9be7]-> monitor
 elb -[hidden]-> support
 
-gitlab -[#32CD32]> sidekiq
 gitlab -[#32CD32]--> ilb
 gitlab -[#32CD32]-> object_storage
 gitlab -[#32CD32]---> redis

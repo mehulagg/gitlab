@@ -10,7 +10,7 @@ RSpec.describe Ci::CreatePipelineService do
     let(:ref)      { 'refs/heads/master' }
     let(:source)   { :push }
     let(:service)  { described_class.new(project, user, { ref: ref }) }
-    let(:pipeline) { service.execute(source) }
+    let(:pipeline) { service.execute(source).payload }
 
     before do
       stub_ci_pipeline_yaml_file(config)
@@ -69,7 +69,7 @@ RSpec.describe Ci::CreatePipelineService do
         end
 
         it 'contains both errors and warnings' do
-          error_message = 'build job: need test is not defined in prior stages'
+          error_message = 'build job: need test is not defined in current or prior stages'
           warning_message = /jobs:test may allow multiple pipelines to run/
 
           expect(pipeline.yaml_errors).to eq(error_message)

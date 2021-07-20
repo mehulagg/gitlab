@@ -196,11 +196,23 @@ class Issue < ApplicationRecord
     end
   end
 
-  # Alias to state machine .with_state_id method
-  # This needs to be defined after the state machine block to avoid errors
   class << self
+    extend ::Gitlab::Utils::Override
+
+    # Alias to state machine .with_state_id method
+    # This needs to be defined after the state machine block to avoid errors
     alias_method :with_state, :with_state_id
     alias_method :with_states, :with_state_ids
+
+    override :order_upvotes_desc
+    def order_upvotes_desc
+      reorder(upvotes_count: :desc)
+    end
+
+    override :order_upvotes_asc
+    def order_upvotes_asc
+      reorder(upvotes_count: :asc)
+    end
   end
 
   def self.relative_positioning_query_base(issue)
@@ -425,10 +437,10 @@ class Issue < ApplicationRecord
         user, project.external_authorization_classification_label)
   end
 
-  def check_for_spam?
+  def check_for_spam?(user:)
     # content created via support bots is always checked for spam, EVEN if
     # the issue is not publicly visible and/or confidential
-    return true if author.support_bot? && spammable_attribute_changed?
+    return true if user.support_bot? && spammable_attribute_changed?
 
     # Only check for spam on issues which are publicly visible (and thus indexed in search engines)
     return false unless publicly_visible?

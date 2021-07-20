@@ -54,7 +54,7 @@ To access the default page for Admin Area settings:
 | [Repository mirror](visibility_and_access_controls.md#allow-mirrors-to-be-set-up-for-projects) | Configure repository mirroring. |
 | [Repository storage](../../../administration/repository_storage_types.md) | Configure storage path settings. |
 | Repository maintenance | ([Repository checks](../../../administration/repository_checks.md) and [Housekeeping](../../../administration/housekeeping.md)). Configure automatic Git checks and housekeeping on repositories. |
-| [Repository static objects](../../../administration/static_objects_external_storage.md) | Serve repository static objects (for example, archives, blobs, ...) from an external storage (for example, a CDN). |
+| [Repository static objects](../../../administration/static_objects_external_storage.md) | Serve repository static objects (for example, archives and blobs) from an external storage (for example, a CDN). |
 
 ## Templates **(PREMIUM SELF)**
 
@@ -115,7 +115,7 @@ To access the default page for Admin Area settings:
 | [What's new](../../../administration/whats-new.md) | Configure What's new drawer and content. |
 | [Help page](help_page.md) | Help page text and support page URL. |
 | [Pages](../../../administration/pages/index.md#custom-domain-verification) | Size and domain settings for static websites |
-| [Real-time features](../../../administration/polling.md) | Change this value to influence how frequently the GitLab UI polls for updates. |
+| [Polling interval multiplier](../../../administration/polling.md) | Configure how frequently the GitLab UI polls for updates. |
 | [Gitaly timeouts](gitaly_timeouts.md) | Configure Gitaly timeouts. |
 | Localization | [Default first day of the week](../../profile/preferences.md) and [Time tracking](../../project/time_tracking.md#limit-displayed-units-to-hours). |
 

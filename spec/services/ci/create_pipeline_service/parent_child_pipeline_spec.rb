@@ -252,7 +252,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         end
 
         it_behaves_like 'creation failure' do
-          let(:expected_error) { /test job: dependency generator is not defined in prior stages/ }
+          let(:expected_error) { /test job: dependency generator is not defined in current or prior stages/ }
         end
       end
 
@@ -369,6 +369,6 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   end
 
   def create_pipeline!
-    service.execute(:push)
+    service.execute(:push).payload
   end
 end

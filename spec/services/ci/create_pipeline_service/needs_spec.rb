@@ -10,7 +10,7 @@ RSpec.describe Ci::CreatePipelineService do
     let(:ref)      { 'refs/heads/master' }
     let(:source)   { :push }
     let(:service)  { described_class.new(project, user, { ref: ref }) }
-    let(:pipeline) { service.execute(source) }
+    let(:pipeline) { service.execute(source).payload }
 
     before do
       stub_ci_pipeline_yaml_file(config)
@@ -257,7 +257,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       it 'returns error' do
         expect(pipeline.yaml_errors)
-          .to eq("'test' job needs 'build' job, but it was not added to the pipeline")
+          .to eq("'test' job needs 'build' job, but 'build' is not in any previous stage")
       end
 
       context 'when need is optional' do

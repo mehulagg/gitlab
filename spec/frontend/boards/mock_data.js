@@ -182,6 +182,7 @@ export const mockIssue = {
 
 export const mockActiveIssue = {
   ...mockIssue,
+  fullId: 'gid://gitlab/Issue/436',
   id: 436,
   iid: '27',
   subscribed: false,
@@ -290,7 +291,7 @@ export const setMockEndpoints = (opts = {}) => {
 
 export const mockList = {
   id: 'gid://gitlab/List/1',
-  title: 'Backlog',
+  title: 'Open',
   position: -Infinity,
   listType: 'backlog',
   collapsed: false,

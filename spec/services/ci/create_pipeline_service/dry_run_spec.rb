@@ -9,7 +9,7 @@ RSpec.describe Ci::CreatePipelineService do
   let(:ref) { 'refs/heads/master' }
   let(:service) { described_class.new(project, user, { ref: ref }) }
 
-  subject { service.execute(:push, dry_run: true) }
+  subject { service.execute(:push, dry_run: true).payload }
 
   before do
     stub_ci_pipeline_yaml_file(config)
@@ -84,7 +84,7 @@ RSpec.describe Ci::CreatePipelineService do
         it_behaves_like 'returns a non persisted pipeline'
 
         it 'returns a pipeline with errors', :aggregate_failures do
-          error_message = 'build job: need test is not defined in prior stages'
+          error_message = 'build job: need test is not defined in current or prior stages'
 
           expect(subject.error_messages.map(&:content)).to eq([error_message])
           expect(subject.errors).not_to be_empty
@@ -109,7 +109,7 @@ RSpec.describe Ci::CreatePipelineService do
         it_behaves_like 'returns a non persisted pipeline'
 
         it 'returns a pipeline with errors', :aggregate_failures do
-          error_message = "'test' job needs 'build' job, but it was not added to the pipeline"
+          error_message = "'test' job needs 'build' job, but 'build' is not in any previous stage"
 
           expect(subject.error_messages.map(&:content)).to eq([error_message])
           expect(subject.errors).not_to be_empty

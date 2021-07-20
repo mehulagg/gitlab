@@ -367,7 +367,7 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
   # can_push_for_ref? tests if deploy_key can push to default branch, which is likely to be protected
   can_push = access_checker.can_do_action?(:push_code)
   can_push_to_default = access_checker.can_push_for_ref?(project.repository.root_ref)
-  
+
   next if access_checker.allowed? && can_push && can_push_to_default
 
   if user.nil? || user.id == ghost_user_id
@@ -1142,6 +1142,33 @@ registry = Geo::PackageFileRegistry.find(registry_id)
 registry.replicator.send(:download)
 ```
 
+#### Verify package files on the secondary manually
+
+This will iterate over all package files on the secondary, looking at the
+`verification_checksum` stored in the database (which came from the primary)
+and then calculate this value on the secondary to check if they match. This
+won't change anything in the UI:
+
+```ruby
+# Run on secondary
+status = {}
+
+Packages::PackageFile.find_each do |package_file|
+  primary_checksum = package_file.verification_checksum
+  secondary_checksum = Packages::PackageFile.hexdigest(package_file.file.path)
+  verification_status = (primary_checksum == secondary_checksum)
+
+  status[verification_status.to_s] ||= []
+  status[verification_status.to_s] << package_file.id
+end
+
+# Count how many of each value we get
+status.keys.each {|key| puts "#{key} count: #{status[key].count}"}
+
+# See the output in its entirety
+status
+```
+
 ### Repository types newer than project/wiki repositories
 
 - `SnippetRepository`
@@ -1172,15 +1199,15 @@ registry = Geo::SnippetRepositoryRegistry.find(registry_id)
 registry.replicator.send(:sync_repository)
 ```
 
-### Generate Service Ping
+## Generate Service Ping
 
-#### Generate or get the cached Service Ping
+### Generate or get the cached Service Ping
 
 ```ruby
 Gitlab::UsageData.to_json
 ```
 
-#### Generate a fresh new Service Ping
+### Generate a fresh new Service Ping
 
 This will also refresh the cached Service Ping displayed in the admin area
 
@@ -1188,7 +1215,7 @@ This will also refresh the cached Service Ping displayed in the admin area
 Gitlab::UsageData.to_json(force_refresh: true)
 ```
 
-#### Generate and print
+### Generate and print
 
 Generates Service Ping data in JSON format.
 
@@ -1196,7 +1223,7 @@ Generates Service Ping data in JSON format.
 rake gitlab:usage_data:generate
 ```
 
-#### Generate and send Service Ping
+### Generate and send Service Ping
 
 Prints the metrics saved in `conversational_development_index_metrics`.
 
@@ -1236,7 +1263,7 @@ Open the rails console (`gitlab rails c`) and run the following command to see a
 ApplicationSetting.last.attributes
 ```
 
-Among other attributes, in the output you will notice that all the settings available in the [Elasticsearch Integration page](../../integration/elasticsearch.md), like: `elasticsearch_indexing`, `elasticsearch_url`, `elasticsearch_replicas`, `elasticsearch_pause_indexing`, etc.
+Among other attributes, in the output you will notice that all the settings available in the [Elasticsearch Integration page](../../integration/elasticsearch.md), like: `elasticsearch_indexing`, `elasticsearch_url`, `elasticsearch_replicas`, `elasticsearch_pause_indexing`, and so on.
 
 #### Setting attributes
 

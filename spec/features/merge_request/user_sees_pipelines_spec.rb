@@ -137,7 +137,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
         check_head_pipeline(expected_project: parent_project)
       end
 
-      it 'does not create a pipeline in the parent project when user cancels the action' do
+      it 'does not create a pipeline in the parent project when user cancels the action', :clean_gitlab_redis_cache, :clean_gitlab_redis_shared_state do
         visit project_merge_request_path(parent_project, merge_request)
 
         create_merge_request_pipeline
@@ -245,7 +245,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
         threads << Thread.new do
           Sidekiq::Worker.skipping_transaction_check do
-            @pipeline = Ci::CreatePipelineService.new(project, user, build_push_data).execute(:push)
+            @pipeline = Ci::CreatePipelineService.new(project, user, build_push_data).execute(:push).payload
           end
         end
 
