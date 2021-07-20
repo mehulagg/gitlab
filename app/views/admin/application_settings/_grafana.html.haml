@@ -2,14 +2,14 @@
   = form_errors(@application_setting)
 
   %fieldset
-    %p
-      = _("Enable access to statistics on the health and performance of GitLab. Grafana must have been installed.")
-      = link_to s_('Learn more.'), help_page_path('administration/monitoring/performance/grafana_configuration.md'), target: '_blank', rel: 'noopener noreferrer'
     .form-group
       .form-check
         = f.check_box :grafana_enabled, class: 'form-check-input'
         = f.label :grafana_enabled, class: 'form-check-label' do
-          = _('Enable access to Grafana')
+          = _("Add a link to Grafana")
+        .form-text.text-muted
+          = _("In the Admin Area's Monitoring section add a Metrics Dashboard link which opens the Grafana home dashboard.")
+          = link_to s_('Learn more.'), help_page_path('administration/monitoring/performance/grafana_configuration.md'), target: '_blank', rel: 'noopener noreferrer'
     .form-group
       = f.label :grafana_url, _('Grafana URL'), class: 'label-bold'
       = f.text_field :grafana_url, class: 'form-control gl-form-input', placeholder: '/-/grafana'
