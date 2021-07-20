@@ -51,7 +51,7 @@ billable user, with the following exceptions:
 - [Deactivated users](../../user/admin_area/moderate_users.md#deactivate-a-user) and
   [blocked users](../../user/admin_area/moderate_users.md#block-a-user) don't count as billable users in the current subscription. When they are either deactivated or blocked they release a _billable user_ seat. However, they may
   count toward overages in the subscribed seat count.
-- Users who are [pending approval](../../user/admin_area/moderate_users.md).
+- Users who are [pending approval](../../user/admin_area/moderate_users.md#users-pending-approval).
 - Members with Guest permissions on an Ultimate subscription.
 - GitLab-created service accounts: `Ghost User` and bots
   ([`Support Bot`](../../user/project/service_desk.md#support-bot-user),
