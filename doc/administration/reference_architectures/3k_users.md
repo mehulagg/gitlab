@@ -2085,7 +2085,7 @@ but with smaller performance requirements, several modifications can be consider
 - Combining select nodes: Some nodes can be combined to reduce complexity at the cost of some performance:
   - GitLab Rails and Sidekiq: Sidekiq nodes can be removed and the component instead enabled on the GitLab Rails nodes.
   - PostgreSQL and PgBouncer: PgBouncer nodes can be removed and the component instead enabled on PostgreSQL with the Internal Load Balancer pointing to them instead.
-- Reducing the node counts: Some node types to not need consensus and can run with fewer nodes (but more than 1 for redundancy)
+- Reducing the node counts: Some node types do not need consensus and can run with fewer nodes (but more than 1 for redundancy). Note that this will also lead to reduced performance.
   - GitLab Rails and Sidekiq: Stateless services don't have a minimum node count, 2 can be enough for redundancy
   - Gitaly: "consensus" is needed in the Praefect nodes, however 2 Gitaly nodes can be enough for redundancy
 - Running select components in reputable Cloud PaaS solutions: Select components of the GitLab setup can instead be run on Cloud Provider PaaS solutions. By doing this, additional dependent components can also be removed:
