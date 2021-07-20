@@ -110,6 +110,7 @@ module Trigger
         'TOP_UPSTREAM_SOURCE_JOB' => ENV['CI_JOB_URL'],
         'TOP_UPSTREAM_SOURCE_SHA' => Trigger.non_empty_variable_value('CI_MERGE_REQUEST_SOURCE_BRANCH_SHA') || ENV['CI_COMMIT_SHA'],
         'TOP_UPSTREAM_SOURCE_REF' => ENV['CI_COMMIT_REF_NAME'],
+        'TOP_UPSTREAM_SOURCE_PIPELINE_REF' => "refs/pipelines/#{ENV['CI_PIPELINE_ID']}",
         'TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID' => ENV['CI_MERGE_REQUEST_PROJECT_ID'],
         'TOP_UPSTREAM_MERGE_REQUEST_IID' => ENV['CI_MERGE_REQUEST_IID']
       }
@@ -131,7 +132,7 @@ module Trigger
     end
 
     def ref
-      ENV['OMNIBUS_BRANCH'] || 'master'
+      'fetch-top-upstream-pipeline-ref-before-building-package' # ENV['OMNIBUS_BRANCH'] || 'master'
     end
 
     def extra_variables
