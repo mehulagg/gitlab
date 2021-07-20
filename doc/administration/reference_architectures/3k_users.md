@@ -2087,7 +2087,7 @@ but with smaller performance requirements, several modifications can be consider
   - PostgreSQL and PgBouncer: PgBouncer nodes can be removed and the component instead enabled on PostgreSQL with the Internal Load Balancer pointing to them instead.
 - Reducing the node counts: Some node types do not need consensus and can run with fewer nodes (but more than 1 for redundancy). Note that this will also lead to reduced performance.
   - GitLab Rails and Sidekiq: Stateless services don't have a minimum node count, 2 can be enough for redundancy
-  - Gitaly: "consensus" is needed in the Praefect nodes, however 2 Gitaly nodes can be enough for redundancy
+  - Gitaly and Praefect: quorum is not strictly necessary, 2 Gitaly nodes and 2 Praefect nodes can be enough for redundancy
 - Running select components in reputable Cloud PaaS solutions: Select components of the GitLab setup can instead be run on Cloud Provider PaaS solutions. By doing this, additional dependent components can also be removed:
   - PostgreSQL: Can be run on reputable Cloud PaaS solutions such as Google Cloud SQL or AWS RDS. In this setup, the PgBouncer and Consul nodes are no longer required:
     - Consul may still be desired if [Prometheus](../monitoring/prometheus/index.md) auto discovery is a requirement, otherwise you would need to [manually add scrape configurations](../monitoring/prometheus/index.md#adding-custom-scrape-configurations) for all nodes.
