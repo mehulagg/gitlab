@@ -1,8 +1,8 @@
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__, __ } from '~/locale';
 
-const qrtlyReconciliationHelpPageUrl = helpPagePath('subscriptions/self_managed/index', {
-  anchor: 'quarterly-subscription-reconciliation',
+const qrtlyReconciliationHelpPageUrl = helpPagePath('subscriptions/quarterly_reconciliation', {
+  anchor: 'the-quarterly-subscription-reconciliation-process',
 });
 
 export const i18n = {

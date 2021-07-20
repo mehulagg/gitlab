@@ -39,7 +39,7 @@ describe('Qrtly Reconciliation Alert', () => {
 
     it('has the correct link to the help page', () => {
       expect(findAlert().attributes('primarybuttonlink')).toBe(
-        '/help/subscriptions/self_managed/index#quarterly-subscription-reconciliation',
+        '/help/subscriptions/self_managed/quarterly_reconciliation#the-quarterly-subscription-reconciliation-process',
       );
     });
 
