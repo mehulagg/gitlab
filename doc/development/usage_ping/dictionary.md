@@ -22246,17 +22246,17 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.projects_with_compliance_framework`
 
-Missing description
+Number of projects labeled with a compliance framework label over a monthly basis
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180825_projects_with_compliance_framework.yml)
 
-Group: `group::manage`
+Group: `group::compliance`
 
 Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.unique_users_all_imports`
 
