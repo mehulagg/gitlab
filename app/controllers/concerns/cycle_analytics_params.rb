@@ -41,6 +41,29 @@ module CycleAnalyticsParams
     date = field.is_a?(Date) || field.is_a?(Time) ? field : Date.parse(field)
     date.to_time.utc
   end
+
+  private
+
+  def permitted_cycle_analytics_params
+    params.permit(*::Gitlab::Analytics::CycleAnalytics::RequestParams::STRONG_PARAMS_DEFINITION)
+  end
+
+  def all_cycle_analytics_params
+    permitted_cycle_analytics_params.merge(current_user: current_user)
+  end
+
+  def request_params
+    @request_params ||= ::Gitlab::Analytics::CycleAnalytics::RequestParams.new(all_cycle_analytics_params)
+  end
+
+  def validate_params
+    if request_params.invalid?
+      render(
+        json: { message: 'Invalid parameters', errors: request_params.errors },
+        status: :unprocessable_entity
+      )
+    end
+  end
 end
 
 CycleAnalyticsParams.prepend_mod_with('CycleAnalyticsParams')
