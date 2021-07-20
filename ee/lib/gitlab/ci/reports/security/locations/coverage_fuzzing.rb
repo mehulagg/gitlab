@@ -16,8 +16,6 @@ module Gitlab
               @crash_state = crash_state
             end
 
-            private
-
             def fingerprint_data
               "#{crash_type}:#{crash_state}"
             end

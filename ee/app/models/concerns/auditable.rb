@@ -4,6 +4,10 @@ module Auditable
   def push_audit_event(event)
     return unless ::Gitlab::Audit::EventQueue.active?
 
-    ::Gitlab::Audit::EventQueue.current << event
+    ::Gitlab::Audit::EventQueue.push(event)
+  end
+
+  def audit_details
+    raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end
 end

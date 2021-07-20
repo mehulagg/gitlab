@@ -6,7 +6,7 @@ import * as types from 'ee/geo_replicable/store/mutation_types';
 import createState from 'ee/geo_replicable/store/state';
 import { gqClient } from 'ee/geo_replicable/utils';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import toast from '~/vue_shared/plugins/global_toast';
 import {
@@ -70,7 +70,7 @@ describe('GeoReplicable Store Actions', () => {
         [{ type: types.RECEIVE_REPLICABLE_ITEMS_ERROR }],
         [],
         () => {
-          expect(flash).toHaveBeenCalledTimes(1);
+          expect(createFlash).toHaveBeenCalledTimes(1);
         },
       );
     });
@@ -396,7 +396,7 @@ describe('GeoReplicable Store Actions', () => {
         [{ type: types.RECEIVE_INITIATE_ALL_REPLICABLE_SYNCS_ERROR }],
         [],
         () => {
-          expect(flash).toHaveBeenCalledTimes(1);
+          expect(createFlash).toHaveBeenCalledTimes(1);
         },
       );
     });
@@ -493,7 +493,7 @@ describe('GeoReplicable Store Actions', () => {
         [{ type: types.RECEIVE_INITIATE_REPLICABLE_SYNC_ERROR }],
         [],
         () => {
-          expect(flash).toHaveBeenCalledTimes(1);
+          expect(createFlash).toHaveBeenCalledTimes(1);
         },
       );
     });

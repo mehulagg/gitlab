@@ -20,9 +20,12 @@ ActiveSupport::Inflector.inflections do |inflect|
     event_log
     file_registry
     group_view
+    group_wiki_repository_registry
     job_artifact_registry
     lfs_object_registry
+    merge_request_diff_registry
     package_file_registry
+    pipeline_artifact_registry
     project_auto_devops
     project_registry
     project_statistics
@@ -33,5 +36,6 @@ ActiveSupport::Inflector.inflections do |inflect|
     vulnerability_feedback
   )
   inflect.acronym 'EE'
+  inflect.acronym 'JH'
   inflect.acronym 'CSP'
 end

@@ -53,7 +53,7 @@ RSpec.describe Mutations::Dast::Profiles::Delete do
 
       context 'when deletion fails' do
         it 'returns an error' do
-          allow_next_instance_of(::Dast::Profiles::DestroyService) do |service|
+          allow_next_instance_of(::AppSec::Dast::Profiles::DestroyService) do |service|
             allow(service).to receive(:execute).and_return(
               ServiceResponse.error(message: 'Profile failed to delete')
             )

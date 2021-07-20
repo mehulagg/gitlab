@@ -1,7 +1,7 @@
-import * as actions from '../actions';
-import * as getters from '../getters';
-import mutations from '../mutations';
-import createState from './diff_state';
+import * as actions from 'ee_else_ce/diffs/store/actions';
+import * as getters from 'ee_else_ce/diffs/store/getters';
+import createState from 'ee_else_ce/diffs/store/modules/diff_state';
+import mutations from 'ee_else_ce/diffs/store/mutations';
 
 export default () => ({
   namespaced: true,

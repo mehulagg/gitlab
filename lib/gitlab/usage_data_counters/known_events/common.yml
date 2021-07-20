@@ -24,87 +24,6 @@
   category: compliance
   redis_slot: compliance
   aggregation: weekly
-  feature_flag: usage_data_a_compliance_audit_events_api
-# Analytics category
-- name: g_analytics_contribution
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: g_analytics_insights
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: g_analytics_issues
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: g_analytics_productivity
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: g_analytics_valuestream
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_pipelines
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_code_reviews
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_valuestream
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_insights
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_issues
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_repo
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: i_analytics_cohorts
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: i_analytics_dev_ops_score
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: g_analytics_merge_request
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: p_analytics_merge_request
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
-  feature_flag: track_unique_visits
-- name: i_analytics_instance_statistics
-  category: analytics
-  redis_slot: analytics
-  aggregation: weekly
   feature_flag: track_unique_visits
 - name: g_edit_by_web_ide
   category: ide_edit
@@ -134,17 +53,14 @@
   category: search
   redis_slot: search
   aggregation: weekly
-  feature_flag: search_track_unique_users
 - name: i_search_advanced
   category: search
   redis_slot: search
   aggregation: weekly
-  feature_flag: search_track_unique_users
 - name: i_search_paid
   category: search
   redis_slot: search
   aggregation: weekly
-  feature_flag: search_track_unique_users
 - name: wiki_action
   category: source_code
   aggregation: daily
@@ -170,52 +86,42 @@
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_alert_status_changed
 - name: incident_management_alert_assigned
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_alert_assigned
 - name: incident_management_alert_todo
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_alert_todo
 - name: incident_management_incident_created
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_created
 - name: incident_management_incident_reopened
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_reopened
 - name: incident_management_incident_closed
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_closed
 - name: incident_management_incident_assigned
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_assigned
 - name: incident_management_incident_todo
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_todo
 - name: incident_management_incident_comment
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_comment
 - name: incident_management_incident_zoom_meeting
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_zoom_meeting
 - name: incident_management_incident_published
   redis_slot: incident_management
   category: incident_management
@@ -225,23 +131,25 @@
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_relate
 - name: incident_management_incident_unrelate
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_unrelate
 - name: incident_management_incident_change_confidential
   redis_slot: incident_management
   category: incident_management
   aggregation: weekly
-  feature_flag: usage_data_incident_management_incident_change_confidential
 # Incident management alerts
 - name: incident_management_alert_create_incident
   redis_slot: incident_management
   category: incident_management_alerts
   aggregation: weekly
-  feature_flag: usage_data_incident_management_alert_create_incident
+# Incident management on-call
+- name: i_incident_management_oncall_notification_sent
+  redis_slot: incident_management
+  category: incident_management_oncall
+  aggregation: weekly
+  feature_flag: usage_data_i_incident_management_oncall_notification_sent
 # Testing category
 - name: i_testing_test_case_parsed
   category: testing
@@ -272,7 +180,6 @@
   category: testing
   redis_slot: testing
   aggregation: weekly
-  feature_flag: usage_data_i_testing_group_code_coverage_project_click_total
 - name: i_testing_load_performance_widget_total
   category: testing
   redis_slot: testing
@@ -283,172 +190,144 @@
   redis_slot: testing
   aggregation: weekly
   feature_flag: usage_data_i_testing_metrics_report_artifact_uploaders
+- name: i_testing_summary_widget_total
+  category: testing
+  redis_slot: testing
+  aggregation: weekly
+  feature_flag: usage_data_i_testing_summary_widget_total
 # Project Management group
 - name: g_project_management_issue_title_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_description_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_assignee_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_made_confidential
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_made_visible
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_created
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_closed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_reopened
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_label_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_milestone_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_iteration_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_weight_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_cross_referenced
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_moved
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_related
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_unrelated
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_marked_as_duplicate
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_locked
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_unlocked
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_added_to_epic
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_removed_from_epic
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_changed_epic
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_designs_added
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_designs_modified
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_designs_removed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_due_date_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_time_estimate_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_time_spent_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_comment_added
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_comment_edited
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_comment_removed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_health_status_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 - name: g_project_management_issue_cloned
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
-  feature_flag: track_issue_activity_actions
 # Secrets Management
 - name: i_ci_secrets_management_vault_build_created
   category: ci_secrets_management
@@ -465,10 +344,33 @@
   category: terraform
   redis_slot: terraform
   aggregation: weekly
-  feature_flag: usage_data_p_terraform_state_api_unique_users
 # Pipeline Authoring
 - name: o_pipeline_authoring_unique_users_committing_ciconfigfile
   category: pipeline_authoring
   redis_slot: pipeline_authoring
   aggregation: weekly
-  feature_flag: usage_data_unique_users_committing_ciconfigfile
+- name: o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile
+  category: pipeline_authoring
+  redis_slot: pipeline_authoring
+  aggregation: weekly
+# Merge request widgets
+- name: users_expanding_secure_security_report
+  redis_slot: secure
+  category: secure
+  aggregation: weekly
+  feature_flag: users_expanding_widgets_usage_data
+- name: users_expanding_testing_code_quality_report
+  redis_slot: testing
+  category: testing
+  aggregation: weekly
+  feature_flag: users_expanding_widgets_usage_data
+- name: users_expanding_testing_accessibility_report
+  redis_slot: testing
+  category: testing
+  aggregation: weekly
+  feature_flag: users_expanding_widgets_usage_data
+# Container Security - Network Policies
+- name: clusters_using_network_policies_ui
+  redis_slot: network_policies
+  category: network_policies
+  aggregation: weekly

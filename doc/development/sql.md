@@ -12,13 +12,13 @@ either using ActiveRecord/Arel or raw SQL queries.
 ## Using LIKE Statements
 
 The most common way to search for data is using the `LIKE` statement. For
-example, to get all issues with a title starting with "WIP:" you'd write the
+example, to get all issues with a title starting with "Draft:" you'd write the
 following query:
 
 ```sql
 SELECT *
 FROM issues
-WHERE title LIKE 'WIP:%';
+WHERE title LIKE 'Draft:%';
 ```
 
 On PostgreSQL the `LIKE` statement is case-sensitive. To perform a case-insensitive
@@ -28,13 +28,13 @@ To handle this automatically you should use `LIKE` queries using Arel instead
 of raw SQL fragments, as Arel automatically uses `ILIKE` on PostgreSQL.
 
 ```ruby
-Issue.where('title LIKE ?', 'WIP:%')
+Issue.where('title LIKE ?', 'Draft:%')
 ```
 
 You'd write this instead:
 
 ```ruby
-Issue.where(Issue.arel_table[:title].matches('WIP:%'))
+Issue.where(Issue.arel_table[:title].matches('Draft:%'))
 ```
 
 Here `matches` generates the correct `LIKE` / `ILIKE` statement depending on the
@@ -45,7 +45,7 @@ If you need to chain multiple `OR` conditions you can also do this using Arel:
 ```ruby
 table = Issue.arel_table
 
-Issue.where(table[:title].matches('WIP:%').or(table[:foo].matches('WIP:%')))
+Issue.where(table[:title].matches('Draft:%').or(table[:foo].matches('Draft:%')))
 ```
 
 On PostgreSQL, this produces:
@@ -53,7 +53,7 @@ On PostgreSQL, this produces:
 ```sql
 SELECT *
 FROM issues
-WHERE (title ILIKE 'WIP:%' OR foo ILIKE 'WIP:%')
+WHERE (title ILIKE 'Draft:%' OR foo ILIKE 'Draft:%')
 ```
 
 ## LIKE & Indexes
@@ -64,13 +64,13 @@ the start. For example, this will not use any indexes:
 ```sql
 SELECT *
 FROM issues
-WHERE title ILIKE '%WIP:%';
+WHERE title ILIKE '%Draft:%';
 ```
 
 Because the value for `ILIKE` starts with a wildcard the database is not able to
 use an index as it doesn't know where to start scanning the indexes.
 
-Luckily, PostgreSQL _does_ provide a solution: trigram GIN indexes. These
+Luckily, PostgreSQL _does_ provide a solution: trigram Generalized Inverted Index (GIN) indexes. These
 indexes can be created as follows:
 
 ```sql
@@ -261,9 +261,9 @@ from `ActiveRecord::Base`.
 
 ## Use UNIONs
 
-UNIONs aren't very commonly used in most Rails applications but they're very
-powerful and useful. In most applications queries tend to use a lot of JOINs to
-get related data or data based on certain criteria, but JOIN performance can
+`UNION`s aren't very commonly used in most Rails applications but they're very
+powerful and useful. Queries tend to use a lot of `JOIN`s to
+get related data or data based on certain criteria, but `JOIN` performance can
 quickly deteriorate as the data involved grows.
 
 For example, if you want to get a list of projects where the name contains a
@@ -279,7 +279,7 @@ OR namespaces.name ILIKE '%gitlab%';
 ```
 
 Using a large database this query can easily take around 800 milliseconds to
-run. Using a UNION we'd write the following instead:
+run. Using a `UNION` we'd write the following instead:
 
 ```sql
 SELECT projects.*
@@ -301,7 +301,7 @@ This doesn't mean you should start using UNIONs everywhere, but it's something
 to keep in mind when using lots of JOINs in a query and filtering out records
 based on the joined data.
 
-GitLab comes with a `Gitlab::SQL::Union` class that can be used to build a UNION
+GitLab comes with a `Gitlab::SQL::Union` class that can be used to build a `UNION`
 of multiple `ActiveRecord::Relation` objects. You can use this class as
 follows:
 
@@ -313,9 +313,9 @@ Project.from("(#{union.to_sql}) projects")
 
 ## Ordering by Creation Date
 
-When ordering records based on the time they were created you can simply order
+When ordering records based on the time they were created, you can order
 by the `id` column instead of ordering by `created_at`. Because IDs are always
-unique and incremented in the order that rows are created this will produce the
+unique and incremented in the order that rows are created, doing so will produce the
 exact same results. This also means there's no need to add an index on
 `created_at` to ensure consistent performance as `id` is already indexed by
 default.
@@ -367,3 +367,12 @@ retries if it were to fail because of an
 
 To be able to use this method, make sure the model you want to use
 this on inherits from `ApplicationRecord`.
+
+## Monitor SQL queries in production
+
+GitLab team members can monitor slow or canceled queries on GitLab.com
+using the PostgreSQL logs, which are indexed in Elasticsearch and
+searchable using Kibana.
+
+See [the runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/master/docs/patroni/pg_collect_query_data.md#searching-postgresql-logs-with-kibanaelasticsearch)
+for more details.

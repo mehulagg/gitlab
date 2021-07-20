@@ -3,9 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe 'DevOps Report page', :js do
-  tabs_selector = '.js-devops-tabs'
-  tab_item_selector = '.js-devops-tab-item'
+  tabs_selector = '.gl-tabs-nav'
+  tab_item_selector = '.nav-item'
   active_tab_selector = '.nav-link.active'
+  tabs = [
+      {
+        value: 'sec',
+        text: 'Sec'
+      },
+      {
+        value: 'ops',
+        text: 'Ops'
+      },
+      {
+        value: 'devops-score',
+        text: 'DevOps Score'
+      }
+    ]
 
   before do
     admin = create(:admin)
@@ -40,56 +54,70 @@ RSpec.describe 'DevOps Report page', :js do
       visit admin_dev_ops_report_path
 
       within tabs_selector do
-        expect(page.all(:css, tab_item_selector).length).to be(2)
-        expect(page).to have_text 'DevOps Score Adoption'
+        expect(page.all(:css, tab_item_selector).length).to be(6)
+        expect(page).to have_text 'Overview Dev Sec Ops DevOps Score'
       end
     end
 
-    it 'defaults to the DevOps Score tab' do
+    it 'defaults to the Overview tab' do
       visit admin_dev_ops_report_path
+
+      within tabs_selector do
+        expect(page).to have_selector active_tab_selector, text: 'Overview'
+      end
+    end
+
+    shared_examples 'displays tab content' do |tab|
+      it "displays the #{tab} tab content when selected" do
+        visit admin_dev_ops_report_path
+
+        click_link tab
+
+        within tabs_selector do
+          expect(page).to have_selector active_tab_selector, text: tab
+        end
+      end
+    end
+
+    tabs.each do |tab|
+      it_behaves_like 'displays tab content', tab[:text]
+    end
+
+    it 'does not add the tab param when the Overview tab is selected' do
+      visit admin_dev_ops_report_path
+
+      within tabs_selector do
+        click_link 'Overview'
+      end
+
+      expect(page).to have_current_path(admin_dev_ops_report_path)
+    end
+
+    shared_examples 'appends the tab param to the url' do |tab, text|
+      it "adds the ?tab=#{tab} param when the #{text} tab is selected" do
+        visit admin_dev_ops_report_path
+
+        click_link text
+
+        expect(page).to have_current_path(admin_dev_ops_report_path(tab: tab))
+      end
+    end
+
+    tabs.each do |tab|
+      it_behaves_like 'appends the tab param to the url', tab[:value], tab[:text]
+    end
+
+    it 'shows the devops core tab when the tab param is set' do
+      visit admin_dev_ops_report_path(tab: 'devops-score')
 
       within tabs_selector do
         expect(page).to have_selector active_tab_selector, text: 'DevOps Score'
       end
     end
 
-    it 'displays the Adoption tab content when selected' do
-      visit admin_dev_ops_report_path
-
-      click_link 'Adoption'
-
-      within tabs_selector do
-        expect(page).to have_selector active_tab_selector, text: 'Adoption'
-      end
-    end
-
-    it 'does not add the tab param when the DevOps Score tab is selected' do
-      visit admin_dev_ops_report_path
-
-      click_link 'DevOps Score'
-
-      expect(page).to have_current_path(admin_dev_ops_report_path)
-    end
-
-    it 'adds the ?tab=devops-adoption param when the Adoption tab is selected' do
-      visit admin_dev_ops_report_path
-
-      click_link 'Adoption'
-
-      expect(page).to have_current_path(admin_dev_ops_report_path(tab: 'devops-adoption'))
-    end
-
-    it 'shows the devops adoption tab when the tab param is set' do
-      visit admin_dev_ops_report_path(tab: 'devops-adoption')
-
-      within tabs_selector do
-        expect(page).to have_selector active_tab_selector, text: 'Adoption'
-      end
-    end
-
     context 'the devops score tab' do
       it 'has dismissable intro callout' do
-        visit admin_dev_ops_report_path
+        visit admin_dev_ops_report_path(tab: 'devops-score')
 
         expect(page).to have_content 'Introducing Your DevOps Report'
 
@@ -104,13 +132,13 @@ RSpec.describe 'DevOps Report page', :js do
         end
 
         it 'shows empty state' do
-          visit admin_dev_ops_report_path
+          visit admin_dev_ops_report_path(tab: 'devops-score')
 
-          expect(page).to have_selector(".js-empty-state")
+          expect(page).to have_text('Service ping is off')
         end
 
         it 'hides the intro callout' do
-          visit admin_dev_ops_report_path
+          visit admin_dev_ops_report_path(tab: 'devops-score')
 
           expect(page).not_to have_content 'Introducing Your DevOps Report'
         end
@@ -120,22 +148,20 @@ RSpec.describe 'DevOps Report page', :js do
         it 'shows empty state' do
           stub_application_setting(usage_ping_enabled: true)
 
-          visit admin_dev_ops_report_path
+          visit admin_dev_ops_report_path(tab: 'devops-score')
 
           expect(page).to have_content('Data is still calculating')
         end
       end
 
       context 'when there is data to display' do
-        it 'shows numbers for each metric' do
+        it 'shows the DevOps Score app' do
           stub_application_setting(usage_ping_enabled: true)
           create(:dev_ops_report_metric)
 
-          visit admin_dev_ops_report_path
+          visit admin_dev_ops_report_path(tab: 'devops-score')
 
-          expect(page).to have_content(
-            'Issues created per active user 1.2 You 9.3 Lead 13.3%'
-          )
+          expect(page).to have_selector('[data-testid="devops-score-app"]')
         end
       end
     end

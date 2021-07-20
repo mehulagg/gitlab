@@ -42,7 +42,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     end
 
     def update_merge_request(opts)
-      described_class.new(project, user, opts).execute(merge_request)
+      described_class.new(project: project, current_user: user, params: opts).execute(merge_request)
     end
 
     context 'when code owners changes' do
@@ -226,27 +226,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
     end
 
-    context 'when reassigned' do
-      it 'schedules for analytics metric update' do
-        expect(Analytics::CodeReviewMetricsWorker)
-          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id)
-
-        update_merge_request({ assignee_ids: [user2.id] })
-      end
-
-      context 'when code_review_analytics is not available' do
-        before do
-          stub_licensed_features(code_review_analytics: false)
-        end
-
-        it 'does not schedule for analytics metric update' do
-          expect(Analytics::CodeReviewMetricsWorker).not_to receive(:perform_async)
-
-          update_merge_request({ assignee_ids: [user2.id] })
-        end
-      end
-    end
-
     context 'reset_approval_rules_to_defaults param' do
       let!(:existing_any_rule) { create(:any_approver_rule, merge_request: merge_request) }
       let!(:existing_rule) { create(:approval_merge_request_rule, merge_request: merge_request) }
@@ -323,21 +302,12 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
     end
 
-    it 'updates code owner approval rules' do
-      expect_next_instance_of(::MergeRequests::SyncCodeOwnerApprovalRules) do |instance|
-        expect(instance).to receive(:execute)
-      end
+    context 'when called inside an ActiveRecord transaction' do
+      it 'does not attempt to update code owner approval rules' do
+        allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
+        expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).not_to receive(:perform_async)
 
-      update_merge_request(title: 'Title')
-    end
-
-    context 'updating assignee_ids' do
-      it 'updates the tracking when user ids are valid' do
-        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
-          .to receive(:track_users_assigned_to_mr)
-          .with(users: [user, user2])
-
-        update_merge_request(assignee_ids: [user.id, user2.id])
+        update_merge_request(title: 'Title')
       end
     end
 

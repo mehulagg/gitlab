@@ -17,6 +17,7 @@ module Packages
           name: name,
           package_files: @package.package_files.map { |pf| build_package_file_view(pf) },
           package_type: @package.package_type,
+          status: @package.status,
           project_id: @package.project_id,
           tags: @package.tags.as_json,
           updated_at: @package.updated_at,
@@ -42,7 +43,11 @@ module Packages
           created_at: package_file.created_at,
           download_path: package_file.download_path,
           file_name: package_file.file_name,
-          size: package_file.size
+          size: package_file.size,
+          file_md5: package_file.file_md5,
+          file_sha1: package_file.file_sha1,
+          file_sha256: package_file.file_sha256,
+          id: package_file.id
         }
 
         file_view[:pipelines] = build_pipeline_infos(package_file.pipelines) if package_file.pipelines.present?
@@ -60,7 +65,6 @@ module Packages
           id: pipeline_info.id,
           sha: pipeline_info.sha,
           ref: pipeline_info.ref,
-          git_commit_message: pipeline_info.git_commit_message,
           user: build_user_info(pipeline_info.user),
           project: {
             name: pipeline_info.project.name,

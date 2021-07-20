@@ -1,18 +1,18 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import BlobHeaderEdit from '~/blob/components/blob_edit_header.vue';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { getBaseURL, joinPaths } from '~/lib/utils/url_utility';
 import { sprintf } from '~/locale';
 import { SNIPPET_BLOB_CONTENT_FETCH_ERROR } from '~/snippets/constants';
-import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import SourceEditor from '~/vue_shared/components/source_editor.vue';
 
 export default {
   components: {
     BlobHeaderEdit,
     GlLoadingIcon,
-    EditorLite,
+    SourceEditor,
   },
   inheritAttrs: false,
   props: {
@@ -63,7 +63,7 @@ export default {
         .catch((e) => this.flashAPIFailure(e));
     },
     flashAPIFailure(err) {
-      Flash(sprintf(SNIPPET_BLOB_CONTENT_FETCH_ERROR, { err }));
+      createFlash({ message: sprintf(SNIPPET_BLOB_CONTENT_FETCH_ERROR, { err }) });
     },
   },
 };
@@ -85,7 +85,7 @@ export default {
       size="lg"
       class="loading-animation prepend-top-20 gl-mb-6"
     />
-    <editor-lite
+    <source-editor
       v-else
       :value="blob.content"
       :file-global-id="blob.id"

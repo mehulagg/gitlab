@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe Security::StoreGroupedScansService do
   let_it_be(:report_type) { :dast }
-  let_it_be(:build_1) { create(:ee_ci_build, name: 'Report 1') }
-  let_it_be(:build_2) { create(:ee_ci_build, name: 'Report 3') }
-  let_it_be(:build_3) { create(:ee_ci_build, name: 'Report 2') }
+  let_it_be(:build_1) { create(:ee_ci_build) }
+  let_it_be(:build_2) { create(:ee_ci_build) }
+  let_it_be(:build_3) { create(:ee_ci_build) }
   let_it_be(:artifact_1) { create(:ee_ci_job_artifact, report_type, job: build_1) }
   let_it_be(:artifact_2) { create(:ee_ci_job_artifact, report_type, job: build_2) }
   let_it_be(:artifact_3) { create(:ee_ci_job_artifact, report_type, job: build_3) }
@@ -60,40 +60,76 @@ RSpec.describe Security::StoreGroupedScansService do
         allow(Security::StoreScanService).to receive(:execute).and_return(true)
       end
 
+      context 'schema validation' do
+        let(:mock_report) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner_order_to: -1) }
+
+        before do
+          allow(artifact_1).to receive(:security_report).and_return(mock_report)
+          allow(artifact_2).to receive(:security_report).and_return(mock_report)
+          allow(artifact_3).to receive(:security_report).and_return(mock_report)
+        end
+
+        it 'accesses the validated security reports' do
+          store_scan_group
+
+          expect(artifact_1).to have_received(:security_report).with(validate: true).once
+          expect(artifact_2).to have_received(:security_report).with(validate: true).twice
+          expect(artifact_3).to have_received(:security_report).with(validate: true).once
+        end
+      end
+
       context 'when the artifacts are not dependency_scanning' do
         it 'calls the Security::StoreScanService with ordered artifacts' do
           store_scan_group
 
           expect(Security::StoreScanService).to have_received(:execute).with(artifact_1, empty_set, false).ordered
-          expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
           expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
         end
       end
 
-      context 'when the artifacts are dependency_scanning' do
-        let(:report_type) { :dependency_scanning }
-        let(:build_4) { create(:ee_ci_build, name: 'Report 0') }
-        let(:artifact_4) { create(:ee_ci_job_artifact, report_type, job: build_4) }
-        let(:scanner_1) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'this is an unknown id') }
-        let(:scanner_2) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'bundler_audit') }
-        let(:scanner_3) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'retire.js') }
-        let(:mock_report_1) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_1) }
-        let(:mock_report_2) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_2) }
-        let(:mock_report_3) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_3) }
-        let(:artifacts) { [artifact_1, artifact_2, artifact_3, artifact_4] }
+      context 'when the artifacts are sast' do
+        let_it_be(:sast_artifact_1) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+        let_it_be(:sast_artifact_2) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+        let_it_be(:sast_artifact_3) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+
+        let(:mock_report_1) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner_order_to: 1) }
+        let(:mock_report_2) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner_order_to: -1) }
+        let(:mock_report_3) { instance_double(::Gitlab::Ci::Reports::Security::Report) }
+        let(:artifacts) { [sast_artifact_1, sast_artifact_2, sast_artifact_3] }
 
         before do
-          allow(artifact_1).to receive(:security_report).and_return(mock_report_1)
-          allow(artifact_2).to receive(:security_report).and_return(mock_report_2)
-          allow(artifact_3).to receive(:security_report).and_return(mock_report_3)
-          allow(artifact_4).to receive(:security_report).and_return(mock_report_2)
+          allow(sast_artifact_1).to receive(:security_report).and_return(mock_report_1)
+          allow(sast_artifact_2).to receive(:security_report).and_return(mock_report_2)
+          allow(sast_artifact_3).to receive(:security_report).and_return(mock_report_3)
         end
 
         it 'calls the Security::StoreScanService with ordered artifacts' do
           store_scan_group
 
-          expect(Security::StoreScanService).to have_received(:execute).with(artifact_4, empty_set, false).ordered
-          expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(sast_artifact_2, empty_set, false).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(sast_artifact_3, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(sast_artifact_1, empty_set, true).ordered
+        end
+      end
+
+      context 'when the artifacts are dependency_scanning' do
+        let(:report_type) { :dependency_scanning }
+        let(:mock_report_1) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner_order_to: 1) }
+        let(:mock_report_2) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner_order_to: -1) }
+        let(:mock_report_3) { instance_double(::Gitlab::Ci::Reports::Security::Report) }
+        let(:artifacts) { [artifact_1, artifact_2, artifact_3] }
+
+        before do
+          allow(artifact_1).to receive(:security_report).and_return(mock_report_1)
+          allow(artifact_2).to receive(:security_report).and_return(mock_report_2)
+          allow(artifact_3).to receive(:security_report).and_return(mock_report_3)
+        end
+
+        it 'calls the Security::StoreScanService with ordered artifacts' do
+          store_scan_group
+
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, false).ordered
           expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
           expect(Security::StoreScanService).to have_received(:execute).with(artifact_1, empty_set, true).ordered
         end

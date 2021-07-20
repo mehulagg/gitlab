@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { pickBy } from 'lodash';
 import { createNodeDict } from './components/parsing_utils';
 import { SUPPORTED_FILTER_PARAMETERS } from './constants';
@@ -38,7 +39,13 @@ export const generateJobNeedsDict = (jobs = {}) => {
       }
 
       return jobs[jobName].needs
-        .map((job) => {
+        .reduce((needsAcc, job) => {
+          // It's possible that a needs refer to an optional job
+          // that is not defined in which case we don't add that entry
+          if (!jobs[job]) {
+            return needsAcc;
+          }
+
           // If we already have the needs of a job in the accumulator,
           // then we use the memoized data instead of the recursive call
           // to save some performance.
@@ -49,11 +56,11 @@ export const generateJobNeedsDict = (jobs = {}) => {
           // to the list of `needs` to ensure we can properly reference it.
           const group = jobs[job];
           if (group.size > 1) {
-            return [job, group.name, newNeeds];
+            return [...needsAcc, job, group.name, newNeeds];
           }
 
-          return [job, newNeeds];
-        })
+          return [...needsAcc, job, newNeeds];
+        }, [])
         .flat(Infinity);
     };
 
@@ -64,4 +71,20 @@ export const generateJobNeedsDict = (jobs = {}) => {
 
     return { ...acc, [value]: uniqueValues };
   }, {});
+};
+
+export const reportToSentry = (component, failureType) => {
+  Sentry.withScope((scope) => {
+    scope.setTag('component', component);
+    Sentry.captureException(failureType);
+  });
+};
+
+export const reportMessageToSentry = (component, message, context) => {
+  Sentry.withScope((scope) => {
+    // eslint-disable-next-line @gitlab/require-i18n-strings
+    scope.setContext('Vue data', context);
+    scope.setTag('component', component);
+    Sentry.captureMessage(message);
+  });
 };

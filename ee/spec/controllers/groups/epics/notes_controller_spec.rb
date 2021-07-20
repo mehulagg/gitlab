@@ -81,7 +81,7 @@ RSpec.describe Groups::Epics::NotesController do
       let(:issue) { create(:issue, project: project) }
       let!(:discussion) { create(:discussion_note_on_issue, noteable: issue, project: issue.project) }
 
-      let(:epic) { Epics::IssuePromoteService.new(project, user).execute(issue) }
+      let(:epic) { Epics::IssuePromoteService.new(project: project, current_user: user).execute(issue) }
       let(:request_params) do
         {
           note: { note: 'reply note', noteable_id: epic.id, noteable_type: 'Epic' },
@@ -98,6 +98,11 @@ RSpec.describe Groups::Epics::NotesController do
         expect(response).to have_gitlab_http_status(:ok)
         expect(parsed_response[:errors]).to be_nil
       end
+    end
+
+    it_behaves_like 'request exceeding rate limit', :clean_gitlab_redis_cache do
+      let(:params) { request_params.except(:format) }
+      let(:request_full_path) { group_epic_notes_path(group, epic) }
     end
   end
 

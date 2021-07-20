@@ -19,7 +19,7 @@ module Ci
         end
       end
 
-      BATCH_SIZE = 1000.freeze
+      BATCH_SIZE = 1000
 
       def initialize
         @failed_batches = []
@@ -32,7 +32,7 @@ module Ci
           reset_ci_minutes!(namespaces)
         end
 
-        raise BatchNotResetError.new(@failed_batches) if @failed_batches.any?
+        raise BatchNotResetError, @failed_batches if @failed_batches.any?
       end
 
       private
@@ -111,9 +111,10 @@ module Ci
       end
 
       def reset_ci_minutes_notifications!(namespaces)
-        namespaces.update_all(
+        namespaces.without_last_ci_minutes_notification.update_all(
           last_ci_minutes_notification_at: nil,
-          last_ci_minutes_usage_notification_level: nil)
+          last_ci_minutes_usage_notification_level: nil
+        )
       end
     end
   end

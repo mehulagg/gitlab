@@ -34,28 +34,38 @@ RSpec.describe Repositories::GitHttpController do
           end
         end
 
-        context 'when project_statistics_sync feature flag is disabled' do
-          before do
-            stub_feature_flags(project_statistics_sync: false)
-          end
-
-          it 'updates project statistics async for projects' do
-            expect(ProjectDailyStatisticsWorker).to receive(:perform_async)
-
-            send_request
-          end
-        end
-
         it 'updates project statistics sync for projects' do
+          stub_feature_flags(disable_git_http_fetch_writes: false)
+
           expect { send_request }.to change {
             Projects::DailyStatisticsFinder.new(container).total_fetch_count
           }.from(0).to(1)
         end
 
-        it_behaves_like 'records an onboarding progress action', :git_read do
-          let(:namespace) { project.namespace }
+        describe 'recording the onboarding progress', :sidekiq_inline do
+          let_it_be(:namespace) { project.namespace }
 
-          subject { send_request }
+          before do
+            OnboardingProgress.onboard(namespace)
+            send_request
+          end
+
+          subject { OnboardingProgress.completed?(namespace, :git_pull) }
+
+          it { is_expected.to be(true) }
+        end
+
+        context 'when disable_git_http_fetch_writes is enabled' do
+          before do
+            stub_feature_flags(disable_git_http_fetch_writes: true)
+          end
+
+          it 'does not increment statistics' do
+            expect(Projects::FetchStatisticsIncrementService).not_to receive(:new)
+            expect(ProjectDailyStatisticsWorker).not_to receive(:perform_async)
+
+            send_request
+          end
         end
       end
     end

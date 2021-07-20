@@ -49,7 +49,7 @@ describe('ReadyToMerge', () => {
     commitMessageWithDescription: 'This is the commit message description',
     shouldRemoveSourceBranch: true,
     canRemoveSourceBranch: false,
-    targetBranch: 'master',
+    targetBranch: 'main',
     preferredAutoMergeStrategy: MWPS_MERGE_STRATEGY,
     availableAutoMergeStrategies: [MWPS_MERGE_STRATEGY],
     mergeImmediatelyDocsPath: 'path/to/merge/immediately/docs',
@@ -78,7 +78,7 @@ describe('ReadyToMerge', () => {
   const findResolveItemsMessage = () => wrapper.find(GlSprintf);
   const findPipelineConflictMessage = () =>
     wrapper.find('[data-testid="pipeline-succeed-conflict"]');
-  const findMergeButton = () => wrapper.find('.qa-merge-button');
+  const findMergeButton = () => wrapper.find('[data-testid="merge-button"]');
   const findMergeButtonDropdown = () => wrapper.find('.js-merge-moment');
   const findMergeImmediatelyButton = () => wrapper.find('.js-merge-immediately-button');
   const findMergeTrainHelperText = () => wrapper.find(MergeTrainHelperText);
@@ -86,6 +86,8 @@ describe('ReadyToMerge', () => {
     findMergeTrainHelperText().find('[data-testid="pipeline-link"]');
   const findMergeTrainDocumentationLink = () =>
     findMergeTrainHelperText().find('[data-testid="documentation-link"]');
+  const findFailedPipelineMergeTrainText = () =>
+    wrapper.find('[data-testid="failed-pipeline-merge-train-text"]');
 
   afterEach(() => {
     if (wrapper?.destroy) {
@@ -421,6 +423,34 @@ describe('ReadyToMerge', () => {
 
     it('should show a custom message that explains the conflict', () => {
       expect(findPipelineConflictMessage().text()).toBe(PIPELINE_MUST_SUCCEED_CONFLICT_TEXT);
+    });
+  });
+
+  describe('Merge button variant', () => {
+    it('danger variant and failed text should show if pipeline failed', () => {
+      factory({
+        isPipelineFailed: true,
+        preferredAutoMergeStrategy: MT_MERGE_STRATEGY,
+        availableAutoMergeStrategies: [MT_MERGE_STRATEGY],
+        hasCI: true,
+        onlyAllowMergeIfPipelineSucceeds: false,
+      });
+
+      expect(findMergeButton().attributes('variant')).toBe('danger');
+      expect(findFailedPipelineMergeTrainText().exists()).toBe(true);
+    });
+
+    it('confirm variant and failed text should not show if pipeline passed', () => {
+      factory({
+        preferredAutoMergeStrategy: MT_MERGE_STRATEGY,
+        availableAutoMergeStrategies: [MT_MERGE_STRATEGY],
+        hasCI: true,
+        onlyAllowMergeIfPipelineSucceeds: false,
+        ciStatus: 'success',
+      });
+
+      expect(findMergeButton().attributes('variant')).toBe('confirm');
+      expect(findFailedPipelineMergeTrainText().exists()).toBe(false);
     });
   });
 });

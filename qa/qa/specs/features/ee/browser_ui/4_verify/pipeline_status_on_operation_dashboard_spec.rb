@@ -45,7 +45,7 @@ module QA
         Flow::Login.sign_in
         setup_projects
         Page::Main::Menu.perform do |menu|
-          menu.go_to_more_dropdown_option(:operations_link)
+          menu.go_to_menu_dropdown_option(:operations_link)
         end
       end
 

@@ -3,102 +3,108 @@
 require 'spec_helper'
 
 RSpec.describe Geo::ContainerRepositorySync, :geo do
-  let(:group) { create(:group, name: 'group') }
-  let(:project) { create(:project, path: 'test', group: group) }
+  let_it_be(:group) { create(:group, name: 'group') }
+  let_it_be(:project) { create(:project, path: 'test', group: group) }
+  let_it_be(:container_repository) { create(:container_repository, name: 'my_image', project: project) }
 
-  let(:container_repository) do
-    create(:container_repository, name: 'my_image', project: project)
+  let(:primary_api_url) { 'http://primary.registry.gitlab' }
+  let(:secondary_api_url) { 'http://registry.gitlab' }
+  let(:primary_repository_url) { "#{primary_api_url}/v2/#{container_repository.path}" }
+  let(:secondary_repository_url ) { "#{secondary_api_url}/v2/#{container_repository.path}" }
+
+  # Break symbol will be removed if JSON encode/decode operation happens so we use this
+  # to prove that it does not happen and we preserve original human readable JSON
+  let(:manifest) do
+    "{" \
+      "\n\"schemaVersion\":2," \
+      "\n\"layers\":[" \
+        "{\n\"mediaType\":\"application/vnd.docker.distribution.manifest.v2+json\",\n\"size\":3333,\n\"digest\":\"sha256:3333\"}," \
+        "{\n\"mediaType\":\"application/vnd.docker.distribution.manifest.v2+json\",\n\"size\":4444,\n\"digest\":\"sha256:4444\"}," \
+        "{\n\"mediaType\":\"application/vnd.docker.image.rootfs.foreign.diff.tar.gzip\",\n\"size\":5555,\n\"digest\":\"sha256:5555\",\n\"urls\":[\"https://foo.bar/v2/zoo/blobs/sha256:5555\"]}" \
+      "]" \
+    "}"
   end
 
-  # Break symbol will be removed if JSON encode/decode operation happens
-  # so we use this to prove that it does not happen and we preserve original
-  # human readable JSON
-  let(:manifest) { "{\"schemaVersion\":2,\n\"layers\":[]}" }
-
   before do
-    stub_container_registry_config(enabled: true,
-                                   api_url: 'http://registry.gitlab',
-                                   host_port: 'registry.gitlab')
+    stub_container_registry_config(enabled: true, api_url: secondary_api_url)
+    stub_registry_replication_config(enabled: true, primary_api_url: primary_api_url)
+  end
 
-    stub_registry_replication_config(enabled: true,
-                                     primary_api_url: 'http://primary.registry.gitlab')
-
-    stub_request(:get, "http://registry.gitlab/v2/group/test/my_image/tags/list")
-      .with(
-        headers: {
-          'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',
-          'Authorization' => 'bearer token'
-          })
+  def stub_primary_repository_tags_requests(repository_url, tags)
+    stub_request(:get, "#{repository_url}/tags/list")
       .to_return(
         status: 200,
-        body: Gitlab::Json.dump(tags: %w(obsolete)),
+        body: Gitlab::Json.dump(tags: tags.keys),
         headers: { 'Content-Type' => 'application/json' })
 
-    stub_request(:get, "http://primary.registry.gitlab/v2/group/test/my_image/tags/list")
-      .with(
-        headers: { 'Authorization' => 'bearer pull-token' })
+    tags.each do |tag, digest|
+      stub_request(:head, "#{repository_url}/manifests/#{tag}")
+        .to_return(status: 200, body: "", headers: { 'docker-content-digest' => digest })
+    end
+  end
+
+  def stub_secondary_repository_tags_requests(repository_url, tags)
+    stub_request(:get, "#{repository_url}/tags/list")
       .to_return(
         status: 200,
-        body: Gitlab::Json.dump(tags: %w(tag-to-sync)),
+        body: Gitlab::Json.dump(tags: tags.keys),
         headers: { 'Content-Type' => 'application/json' })
 
-    stub_request(:head, "http://primary.registry.gitlab/v2/group/test/my_image/manifests/tag-to-sync")
-      .with(
-        headers: {
-          'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',
-          'Authorization' => 'bearer pull-token'
-        })
-      .to_return(status: 200, body: "", headers: { 'docker-content-digest' => 'sha256:ccccc' })
+    tags.each do |tag, digest|
+      stub_request(:head, "#{repository_url}/manifests/#{tag}")
+        .to_return(status: 200, body: "", headers: { 'docker-content-digest' => digest })
+    end
+  end
 
-    stub_request(:head, "http://registry.gitlab/v2/group/test/my_image/manifests/obsolete")
-      .with(
-        headers: {
-          'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',
-          'Authorization' => 'bearer token'
-        })
-      .to_return(status: 200, body: "", headers: { 'docker-content-digest' => 'sha256:aaaaa' })
-
-    stub_request(:get, "http://primary.registry.gitlab/v2/group/test/my_image/manifests/tag-to-sync")
-      .with(
-        headers: {
-          'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',
-          'Authorization' => 'bearer pull-token'
-        })
+  def stub_primary_raw_manifest_request(repository_url, tag, manifest)
+    stub_request(:get, "#{repository_url}/manifests/#{tag}")
       .to_return(status: 200, body: manifest, headers: {})
+  end
 
-    stub_request(:put, "http://registry.gitlab/v2/group/test/my_image/manifests/tag-to-sync")
-      .with(
-        body: manifest,
-        headers: {
-          'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',
-          'Authorization' => 'bearer token',
-          'Content-Type' => 'application/json'
-        })
+  def stub_secondary_push_manifest_request(repository_url, tag, manifest)
+    stub_request(:put, "#{repository_url}/manifests/#{tag}")
+      .with(body: manifest)
       .to_return(status: 200, body: "", headers: {})
   end
 
-  describe 'execute' do
-    it 'determines list of tags to sync and to remove correctly' do
-      expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:aaaaa')
-      expect_next_instance_of(described_class) do |instance|
-        expect(instance).to receive(:sync_tag).with('tag-to-sync').and_call_original
-      end
+  def stub_missing_blobs_requests(primary_repository_url, secondary_repository_url, blobs)
+    blobs.each do |digest, missing|
+      stub_request(:head, "#{secondary_repository_url}/blobs/#{digest}")
+        .to_return(status: (missing ? 404 : 200), body: "", headers: {})
 
-      described_class.new(container_repository).execute
+      next unless missing
+
+      stub_request(:get, "#{primary_repository_url}/blobs/#{digest}")
+        .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/ee_sample_schema.json')), headers: {})
+    end
+  end
+
+  describe '#execute' do
+    subject { described_class.new(container_repository) }
+
+    it 'determines list of tags to sync and to remove correctly' do
+      stub_primary_repository_tags_requests(primary_repository_url, { 'tag-to-sync' => 'sha256:1111' })
+      stub_secondary_repository_tags_requests(secondary_repository_url, { 'tag-to-remove' => 'sha256:2222' })
+      stub_primary_raw_manifest_request(primary_repository_url, 'tag-to-sync', manifest)
+      stub_missing_blobs_requests(primary_repository_url, secondary_repository_url, { 'sha256:3333' => true, 'sha256:4444' => false })
+      stub_secondary_push_manifest_request(secondary_repository_url, 'tag-to-sync', manifest)
+
+      expect(container_repository).to receive(:push_blob).with('sha256:3333', anything)
+      expect(container_repository).not_to receive(:push_blob).with('sha256:4444', anything)
+      expect(container_repository).not_to receive(:push_blob).with('sha256:5555', anything)
+      expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:2222')
+
+      subject.execute
     end
 
     context 'when primary repository has no tags' do
-      it 'considers the primary repository empty and does not fail' do
-        stub_request(:get, "http://primary.registry.gitlab/v2/group/test/my_image/tags/list")
-          .with(
-            headers: { 'Authorization' => 'bearer pull-token' })
-          .to_return(
-            status: 200,
-            headers: { 'Content-Type' => 'application/json' })
+      it 'removes secondary tags and does not fail' do
+        stub_primary_repository_tags_requests(primary_repository_url, {})
+        stub_secondary_repository_tags_requests(secondary_repository_url, { 'tag-to-remove' => 'sha256:2222' })
 
-        expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:aaaaa')
+        expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:2222')
 
-        described_class.new(container_repository).execute
+        subject.execute
       end
     end
   end

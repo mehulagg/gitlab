@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 description: "How to secure GitLab Pages websites with Let's Encrypt (manual process, deprecated)."
 ---
 
-# Let's Encrypt for GitLab Pages (manual process, deprecated)
+# Let's Encrypt for GitLab Pages (manual process, deprecated) **(FREE)**
 
 WARNING:
 This method is still valid but was **deprecated** in favor of the
@@ -60,7 +60,7 @@ might be slightly different. Follow the
    sudo certbot certonly -a manual -d example.com --email your@email.com
    ```
 
-   Alternatively, you can register without adding an e-mail account,
+   Alternatively, you can register without adding an email account,
    but you aren't notified about the certificate expiration's date:
 
    ```shell

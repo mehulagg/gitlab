@@ -33,7 +33,7 @@ module Projects
       checksum_before = project.repository.checksum
 
       update_tags do
-        project.fetch_mirror(forced: true, check_tags_changed: Feature.enabled?(:fetch_mirror_check_tags_changed, project))
+        project.fetch_mirror(forced: true, check_tags_changed: true)
       end
 
       update_branches
@@ -73,7 +73,7 @@ module Projects
         local_branch = local_branches[name]
 
         if local_branch.nil?
-          result = ::Branches::CreateService.new(project, current_user).execute(name, upstream_branch.dereferenced_target.sha, create_master_if_empty: false)
+          result = ::Branches::CreateService.new(project, current_user).execute(name, upstream_branch.dereferenced_target.sha, create_default_branch_if_empty: false)
           if result[:status] == :error
             errors << result[:message]
           end
@@ -142,10 +142,10 @@ module Projects
         newrev = upstream.dereferenced_target.sha
         oldrev = local.dereferenced_target.sha
 
-        # Gitaly migration: https://gitlab.com/gitlab-org/gitaly/issues/1246
-        ::Gitlab::GitalyClient::StorageSettings.allow_disk_access do
-          repository.update_branch(branch_name, user: current_user, newrev: newrev, oldrev: oldrev)
-        end
+        # If the user doesn't have permission to update the diverged branch
+        # (e.g. it's protected and the user can't force-push to protected
+        # branches), this will fail.
+        repository.update_branch(branch_name, user: current_user, newrev: newrev, oldrev: oldrev)
       elsif branch_name == project.default_branch
         # Cannot be updated
         errors << "The default branch (#{project.default_branch}) has diverged from its upstream counterpart and could not be updated automatically."

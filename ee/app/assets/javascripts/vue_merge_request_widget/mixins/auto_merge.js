@@ -32,7 +32,7 @@ export default {
         return s__('mrWidget|Remove from merge train');
       }
 
-      return s__('mrWidget|Cancel automatic merge');
+      return s__('mrWidget|Cancel');
     },
   },
 };

@@ -54,9 +54,10 @@ RSpec.describe 'GitLab Markdown Benchmark', :aggregate_failures do
 
   context 'pipelines' do
     it 'benchmarks several pipelines' do
-      path = 'images/example.jpg'
-      gitaly_wiki_file = Gitlab::GitalyClient::WikiFile.new(path: path)
-      allow(wiki).to receive(:find_file).with(path).and_return(Gitlab::Git::WikiFile.new(gitaly_wiki_file))
+      name = 'example.jpg'
+      path = "images/#{name}"
+      blob = double(name: name, path: path, mime_type: 'image/jpeg', data: nil)
+      allow(wiki).to receive(:find_file).with(path, load_content: false).and_return(Gitlab::Git::WikiFile.new(blob))
       allow(wiki).to receive(:wiki_base_path) { '/namespace1/gitlabhq/wikis' }
 
       puts "\n--> Benchmarking Full, Wiki, and Plain pipelines\n"
@@ -87,12 +88,18 @@ RSpec.describe 'GitLab Markdown Benchmark', :aggregate_failures do
   def build_filter_text(pipeline, initial_text)
     filter_source = {}
     input_text    = initial_text
+    result        = nil
 
     pipeline.filters.each do |filter_klass|
-      filter_source[filter_klass] = input_text
+      # store inputs for current filter_klass
+      filter_source[filter_klass] = { input_text: input_text, input_result: result }
 
-      output = filter_klass.call(input_text, context)
+      filter = filter_klass.new(input_text, context, result)
+      output = filter.call
+
+      # save these for the next filter_klass
       input_text = output
+      result = filter.result
     end
 
     filter_source
@@ -110,7 +117,12 @@ RSpec.describe 'GitLab Markdown Benchmark', :aggregate_failures do
       pipeline.filters.each do |filter_klass|
         label = filter_klass.name.demodulize.delete_suffix('Filter').truncate(20)
 
-        x.report(label) { filter_klass.call(filter_source[filter_klass], context) }
+        x.report(label) do
+          filter = filter_klass.new(filter_source[filter_klass][:input_text],
+                                    context,
+                                    filter_source[filter_klass][:input_result])
+          filter.call
+        end
       end
 
       x.compare!

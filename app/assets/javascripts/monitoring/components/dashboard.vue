@@ -3,13 +3,15 @@ import { GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/
 import Mousetrap from 'mousetrap';
 import VueDraggable from 'vuedraggable';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import invalidUrl from '~/lib/utils/invalid_url';
 import { ESC_KEY } from '~/lib/utils/keys';
 import { mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import AlertsDeprecationWarning from '~/vue_shared/components/alerts_deprecation_warning.vue';
 import { defaultTimeRange } from '~/vue_shared/constants';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { metricStates, keyboardShortcutKeys } from '../constants';
 import {
   timeRangeFromUrl,
@@ -28,6 +30,7 @@ import VariablesSection from './variables_section.vue';
 
 export default {
   components: {
+    AlertsDeprecationWarning,
     VueDraggable,
     DashboardHeader,
     DashboardPanel,
@@ -44,6 +47,7 @@ export default {
     GlTooltip: GlTooltipDirective,
     TrackEvent: TrackEventDirective,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
     hasMetrics: {
       type: Boolean,
@@ -174,11 +178,11 @@ export default {
           this.setExpandedPanel(expandedPanel);
         }
       } catch {
-        createFlash(
-          s__(
+        createFlash({
+          message: s__(
             'Metrics|Link contains invalid chart information, please verify the link to see the expanded panel.',
           ),
-        );
+        });
       }
     },
     expandedPanel: {
@@ -199,12 +203,13 @@ export default {
        * This watcher is set for future SPA behaviour of the dashboard
        */
       if (hasWarnings) {
-        createFlash(
-          s__(
+        createFlash({
+          message: s__(
             'Metrics|Your dashboard schema is invalid. Edit the dashboard to correct the YAML schema.',
           ),
-          'warning',
-        );
+
+          type: 'warning',
+        });
       }
     },
   },
@@ -316,11 +321,11 @@ export default {
       this.isRearrangingPanels = isRearrangingPanels;
     },
     onDateTimePickerInvalid() {
-      createFlash(
-        s__(
+      createFlash({
+        message: s__(
           'Metrics|Link contains an invalid time window, please verify the link to see the requested time range.',
         ),
-      );
+      });
       // As a fallback, switch to default time range instead
       this.selectedTimeRange = defaultTimeRange;
     },
@@ -394,6 +399,8 @@ export default {
 
 <template>
   <div class="prometheus-graphs" data-qa-selector="prometheus_graphs">
+    <alerts-deprecation-warning v-if="!glFeatures.managedAlertsDeprecation" />
+
     <dashboard-header
       v-if="showHeader"
       ref="prometheusGraphsHeader"

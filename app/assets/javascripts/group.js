@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import fetchGroupPathAvailability from '~/pages/groups/new/fetch_group_path_availability';
 import { slugify } from './lib/utils/text_utility';
@@ -16,9 +16,7 @@ export default class Group {
       if (groupName.value === '') {
         groupName.addEventListener('keyup', this.updateHandler);
 
-        if (!this.parentId.value) {
-          groupName.addEventListener('blur', this.updateGroupPathSlugHandler);
-        }
+        groupName.addEventListener('keyup', this.updateGroupPathSlugHandler);
       }
     });
 
@@ -53,7 +51,7 @@ export default class Group {
     const slug = this.groupPaths[0]?.value || slugify(value);
     if (!slug) return;
 
-    fetchGroupPathAvailability(slug)
+    fetchGroupPathAvailability(slug, this.parentId?.value)
       .then(({ data }) => data)
       .then(({ exists, suggests }) => {
         if (exists && suggests.length) {
@@ -63,11 +61,15 @@ export default class Group {
             element.value = suggestedSlug;
           });
         } else if (exists && !suggests.length) {
-          flash(__('Unable to suggest a path. Please refresh and try again.'));
+          createFlash({
+            message: __('Unable to suggest a path. Please refresh and try again.'),
+          });
         }
       })
       .catch(() =>
-        flash(__('An error occurred while checking group path. Please refresh and try again.')),
+        createFlash({
+          message: __('An error occurred while checking group path. Please refresh and try again.'),
+        }),
       );
   }
 }

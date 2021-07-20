@@ -63,7 +63,7 @@ RSpec.describe Geo::PruneEventLogWorker, :geo do
 
       context 'no Geo secondary nodes' do
         before do
-          secondary.destroy
+          secondary.destroy!
         end
 
         it 'deletes everything from the Geo event log' do
@@ -76,7 +76,7 @@ RSpec.describe Geo::PruneEventLogWorker, :geo do
 
         context 'no Geo primary node' do
           before do
-            primary.destroy
+            primary.destroy!
           end
 
           it 'deletes everything from the Geo event log' do
@@ -91,6 +91,7 @@ RSpec.describe Geo::PruneEventLogWorker, :geo do
 
       context 'multiple secondary nodes' do
         let_it_be(:secondary2) { create(:geo_node) }
+
         let!(:events) { create_list(:geo_event_log, 5, :updated_event) }
 
         it 'aborts when there is a node without status' do

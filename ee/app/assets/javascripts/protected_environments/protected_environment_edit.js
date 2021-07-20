@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { find } from 'lodash';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import AccessDropdown from '~/projects/settings/access_dropdown';
@@ -70,7 +70,11 @@ export default class ProtectedEnvironmentEdit {
       })
       .catch(() => {
         this.$allowedToDeployDropdown.enable();
-        Flash(__('Failed to update environment!'), null, $('.js-protected-environments-list'));
+        createFlash({
+          message: __('Failed to update environment!'),
+          type: null,
+          parent: $('.js-protected-environments-list'),
+        });
       });
   }
 

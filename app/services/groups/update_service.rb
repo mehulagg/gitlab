@@ -46,18 +46,6 @@ module Groups
 
     private
 
-    def handle_namespace_settings
-      settings_params = params.slice(*::NamespaceSetting::NAMESPACE_SETTINGS_PARAMS)
-
-      return if settings_params.empty?
-
-      ::NamespaceSetting::NAMESPACE_SETTINGS_PARAMS.each do |nsp|
-        params.delete(nsp)
-      end
-
-      ::NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
-    end
-
     def valid_path_change_with_npm_packages?
       return true unless group.packages_feature_enabled?
       return true if params[:path].blank?
@@ -159,4 +147,4 @@ module Groups
   end
 end
 
-Groups::UpdateService.prepend_if_ee('EE::Groups::UpdateService')
+Groups::UpdateService.prepend_mod_with('Groups::UpdateService')

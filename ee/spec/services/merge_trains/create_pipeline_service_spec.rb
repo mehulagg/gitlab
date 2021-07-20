@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe MergeTrains::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository, :auto_devops, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user) }
+
   let(:service) { described_class.new(project, maintainer) }
   let(:previous_ref) { 'refs/heads/master' }
 
@@ -140,7 +141,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
           context 'when there is a conflict on merge ref creation' do
             before do
               allow(project.repository).to receive(:merge_to_ref) do
-                raise Gitlab::Git::CommandError.new('Failed to create merge commit')
+                raise Gitlab::Git::CommandError, 'Failed to create merge commit'
               end
             end
 

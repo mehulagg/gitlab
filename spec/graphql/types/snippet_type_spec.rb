@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Snippet'] do
+  include GraphqlHelpers
+
   let_it_be(:user) { create(:user) }
 
   it 'has the correct fields' do
@@ -11,7 +13,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
                        :visibility_level, :created_at, :updated_at,
                        :web_url, :raw_url, :ssh_url_to_repo, :http_url_to_repo,
                        :notes, :discussions, :user_permissions,
-                       :description_html, :blob, :blobs]
+                       :description_html, :blobs]
 
     expect(described_class).to have_graphql_fields(*expected_fields)
   end
@@ -22,6 +24,14 @@ RSpec.describe GitlabSchema.types['Snippet'] do
     it 'returns blobs' do
       is_expected.to have_graphql_type(Types::Snippets::BlobType.connection_type)
       is_expected.to have_graphql_resolver(Resolvers::Snippets::BlobsResolver)
+    end
+  end
+
+  describe '#user_permissions' do
+    let_it_be(:snippet) { create(:personal_snippet, :repository, :public, author: user) }
+
+    it 'can resolve the snippet permissions' do
+      expect(resolve_field(:user_permissions, snippet)).to eq(snippet)
     end
   end
 
@@ -123,34 +133,9 @@ RSpec.describe GitlabSchema.types['Snippet'] do
     end
   end
 
-  describe '#blob' do
-    let(:query_blob) { subject.dig('data', 'snippets', 'nodes')[0]['blob'] }
-
-    subject { GitlabSchema.execute(snippet_query_for(field: 'blob'), context: { current_user: user }).as_json }
-
-    context 'when snippet has repository' do
-      let!(:snippet) { create(:personal_snippet, :repository, :public, author: user) }
-      let(:blob) { snippet.blobs.first }
-
-      it 'returns the first blob from the repository' do
-        expect(query_blob['name']).to eq blob.name
-        expect(query_blob['path']).to eq blob.path
-      end
-    end
-
-    context 'when snippet does not have a repository' do
-      let!(:snippet) { create(:personal_snippet, :public, author: user) }
-      let(:blob) { snippet.blob }
-
-      it 'returns SnippetBlob type' do
-        expect(query_blob['name']).to eq blob.name
-        expect(query_blob['path']).to eq blob.path
-      end
-    end
-  end
-
   describe '#blobs' do
     let_it_be(:snippet) { create(:personal_snippet, :public, author: user) }
+
     let(:query_blobs) { subject.dig('data', 'snippets', 'nodes')[0].dig('blobs', 'nodes') }
     let(:paths) { [] }
     let(:query) do
@@ -191,6 +176,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
 
     context 'when snippet has repository' do
       let_it_be(:snippet) { create(:personal_snippet, :repository, :public, author: user) }
+
       let(:blobs) { snippet.blobs }
 
       it_behaves_like 'an array'

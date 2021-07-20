@@ -4,7 +4,7 @@ import $ from 'jquery';
 import Cookies from 'js-cookie';
 import initClonePanel from '~/clone_panel';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { serializeForm } from '~/lib/utils/forms';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
@@ -78,7 +78,11 @@ export default class Project {
               },
             })
             .then(({ data }) => callback(data))
-            .catch(() => flash(__('An error occurred while getting projects')));
+            .catch(() =>
+              createFlash({
+                message: __('An error occurred while getting projects'),
+              }),
+            );
         },
         selectable: true,
         filterable: true,
@@ -123,10 +127,19 @@ export default class Project {
             const loc = window.location.href;
 
             if (loc.includes('/-/')) {
-              const refs = this.fullData.Branches.concat(this.fullData.Tags);
-              const currentRef = refs.find((ref) => loc.indexOf(ref) > -1);
-              if (currentRef) {
-                const targetPath = loc.split(currentRef)[1].slice(1).split('#')[0];
+              // Since the current ref in renderRow is outdated on page changes
+              // (To be addressed in: https://gitlab.com/gitlab-org/gitlab/-/issues/327085)
+              // We are deciphering the current ref from the dropdown data instead
+              const currentRef = $dropdown.data('ref');
+              // The split and startWith is to ensure an exact word match
+              // and avoid partial match ie. currentRef is "dev" and loc is "development"
+              const splitPathAfterRefPortion = loc.split('/-/')[1].split(currentRef)[1];
+              const doesPathContainRef = splitPathAfterRefPortion?.startsWith('/');
+
+              if (doesPathContainRef) {
+                // We are ignoring the url containing the ref portion
+                // and plucking the thereafter portion to reconstructure the url that is correct
+                const targetPath = splitPathAfterRefPortion?.slice(1).split('#')[0];
                 selectedUrl.searchParams.set('path', targetPath);
                 selectedUrl.hash = window.location.hash;
               }

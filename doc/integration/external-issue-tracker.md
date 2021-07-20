@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# External issue tracker
+# External issue tracker **(FREE)**
 
 GitLab has a great [issue tracker](../user/project/issues/index.md) but you can also use an external
 one. External issue trackers are configurable per GitLab project.
@@ -31,13 +31,6 @@ Visit the links below for details:
 - [Bugzilla](../user/project/integrations/bugzilla.md)
 - [Custom Issue Tracker](../user/project/integrations/custom_issue_tracker.md)
 - [Engineering Workflow Management](../user/project/integrations/ewm.md)
-- [Jira](../user/project/integrations/jira.md)
+- [Jira](../integration/jira/index.md)
 - [Redmine](../user/project/integrations/redmine.md)
 - [YouTrack](../user/project/integrations/youtrack.md)
-
-### Service Template
-
-To avoid configuring each project's service individually, GitLab provides the ability to set
-Service Templates. These can then be overridden in each project's settings.
-
-Read more on [Services Templates](../user/project/integrations/services_templates.md).

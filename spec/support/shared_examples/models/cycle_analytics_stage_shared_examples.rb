@@ -58,6 +58,19 @@ RSpec.shared_examples 'value stream analytics stage' do
 
       it { expect(stage).not_to be_valid }
     end
+
+    # rubocop: disable Rails/SaveBang
+    describe '.by_value_stream' do
+      it 'finds stages by value stream' do
+        stage1 = create(factory)
+        create(factory) # other stage with different value stream
+
+        result = described_class.by_value_stream(stage1.value_stream)
+
+        expect(result).to eq([stage1])
+      end
+    end
+    # rubocop: enable Rails/SaveBang
   end
 
   describe '#subject_class' do
@@ -107,6 +120,22 @@ RSpec.shared_examples 'value stream analytics stage' do
       stage = described_class.new(parent: parent)
 
       expect(stage.parent_id).to eq(parent.id)
+    end
+  end
+
+  describe '#hash_code' do
+    it 'does not differ when the same object is built with the same params' do
+      stage_1 = build(factory)
+      stage_2 = build(factory)
+
+      expect(stage_1.events_hash_code).to eq(stage_2.events_hash_code)
+    end
+
+    it 'differs when the stage events are different' do
+      stage_1 = build(factory, start_event_identifier: :merge_request_created, end_event_identifier: :merge_request_merged)
+      stage_2 = build(factory, start_event_identifier: :issue_created, end_event_identifier: :issue_first_mentioned_in_commit)
+
+      expect(stage_1.events_hash_code).not_to eq(stage_2.events_hash_code)
     end
   end
 end

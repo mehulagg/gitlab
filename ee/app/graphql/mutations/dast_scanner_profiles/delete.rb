@@ -26,7 +26,7 @@ module Mutations
 
         project = authorized_find!(full_path)
 
-        service = ::DastScannerProfiles::DestroyService.new(project, current_user)
+        service = ::AppSec::Dast::ScannerProfiles::DestroyService.new(project, current_user)
         result = service.execute(id: id.model_id)
 
         if result.success?

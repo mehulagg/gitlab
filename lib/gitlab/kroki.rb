@@ -13,11 +13,8 @@ module Gitlab
         packetdiag
         rackdiag
       ].freeze
-    # Diagrams that require a companion container are disabled for now
-    DIAGRAMS_FORMATS = ::AsciidoctorExtensions::Kroki::SUPPORTED_DIAGRAM_NAMES
-                           .reject { |diagram_type| diagram_type == 'mermaid' || diagram_type == 'bpmn' || BLOCKDIAG_FORMATS.include?(diagram_type) }
-    DIAGRAMS_FORMATS_WO_PLANTUML = DIAGRAMS_FORMATS
-                                        .reject { |diagram_type| diagram_type == 'plantuml' }
+    DIAGRAMS_FORMATS = (::AsciidoctorExtensions::Kroki::SUPPORTED_DIAGRAM_NAMES - %w(mermaid)).freeze
+    DIAGRAMS_FORMATS_WO_PLANTUML = (DIAGRAMS_FORMATS - %w(plantuml)).freeze
 
     # Get the list of diagram formats that are currently enabled
     #
@@ -28,10 +25,15 @@ module Gitlab
 
       # If PlantUML is enabled, PlantUML diagrams will be processed by the PlantUML server.
       # In other words, the PlantUML server has precedence over Kroki since both can process PlantUML diagrams.
-      if current_settings.plantuml_enabled
-        DIAGRAMS_FORMATS_WO_PLANTUML
-      else
-        DIAGRAMS_FORMATS
+      diagram_formats = if current_settings.plantuml_enabled
+                          DIAGRAMS_FORMATS_WO_PLANTUML
+                        else
+                          DIAGRAMS_FORMATS
+                        end
+
+      # Diagrams that require a companion container must be explicitly enabled from the settings
+      diagram_formats.select do |diagram_type|
+        current_settings.kroki_format_supported?(diagram_type)
       end
     end
   end

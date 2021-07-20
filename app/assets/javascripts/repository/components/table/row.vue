@@ -7,12 +7,17 @@ import {
   GlTooltipDirective,
   GlLoadingIcon,
   GlIcon,
+  GlHoverLoadDirective,
 } from '@gitlab/ui';
 import { escapeRegExp } from 'lodash';
+import filesQuery from 'shared_queries/repository/files.query.graphql';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
+import { TREE_PAGE_SIZE } from '~/repository/constants';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getRefMixin from '../../mixins/get_ref';
+import blobInfoQuery from '../../queries/blob_info.query.graphql';
 import commitQuery from '../../queries/commit.query.graphql';
 
 export default {
@@ -27,6 +32,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlHoverLoad: GlHoverLoadDirective,
   },
   apollo: {
     commit: {
@@ -37,12 +43,17 @@ export default {
           type: this.type,
           path: this.currentPath,
           projectPath: this.projectPath,
+          maxOffset: this.totalEntries,
         };
       },
     },
   },
-  mixins: [getRefMixin],
+  mixins: [getRefMixin, glFeatureFlagMixin()],
   props: {
+    totalEntries: {
+      type: Number,
+      required: true,
+    },
     id: {
       type: String,
       required: true,
@@ -103,10 +114,21 @@ export default {
     };
   },
   computed: {
+    refactorBlobViewerEnabled() {
+      return this.glFeatures.refactorBlobViewer;
+    },
     routerLinkTo() {
-      return this.isFolder
-        ? { path: `/-/tree/${this.escapedRef}/${escapeFileUrl(this.path)}` }
-        : null;
+      const blobRouteConfig = { path: `/-/blob/${this.escapedRef}/${escapeFileUrl(this.path)}` };
+      const treeRouteConfig = { path: `/-/tree/${this.escapedRef}/${escapeFileUrl(this.path)}` };
+
+      if (this.refactorBlobViewerEnabled && this.isBlob) {
+        return blobRouteConfig;
+      }
+
+      return this.isFolder ? treeRouteConfig : null;
+    },
+    isBlob() {
+      return this.type === 'blob';
     },
     isFolder() {
       return this.type === 'tree';
@@ -115,7 +137,7 @@ export default {
       return this.type === 'commit';
     },
     linkComponent() {
-      return this.isFolder ? 'router-link' : 'a';
+      return this.isFolder || (this.refactorBlobViewerEnabled && this.isBlob) ? 'router-link' : 'a';
     },
     fullPath() {
       return this.path.replace(new RegExp(`^${escapeRegExp(this.currentPath)}/`), '');
@@ -127,6 +149,33 @@ export default {
       return this.commit && this.commit.lockLabel;
     },
   },
+  methods: {
+    handlePreload() {
+      return this.isFolder ? this.loadFolder() : this.loadBlob();
+    },
+    loadFolder() {
+      this.apolloQuery(filesQuery, {
+        projectPath: this.projectPath,
+        ref: this.ref,
+        path: this.path,
+        nextPageCursor: '',
+        pageSize: TREE_PAGE_SIZE,
+      });
+    },
+    loadBlob() {
+      if (!this.refactorBlobViewerEnabled) {
+        return;
+      }
+
+      this.apolloQuery(blobInfoQuery, {
+        projectPath: this.projectPath,
+        filePath: this.path,
+      });
+    },
+    apolloQuery(query, variables) {
+      this.$apollo.query({ query, variables });
+    },
+  },
 };
 </script>
 
@@ -136,6 +185,9 @@ export default {
       <component
         :is="linkComponent"
         ref="link"
+        v-gl-hover-load="handlePreload"
+        v-gl-tooltip:tooltip-container
+        :title="fullPath"
         :to="routerLinkTo"
         :href="url"
         :class="{

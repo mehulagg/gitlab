@@ -5,9 +5,18 @@ require 'spec_helper'
 RSpec.describe Ci::BuildDependencies do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, refind: true) { create(:project, :repository) }
+
   let(:dependencies) { }
 
   let(:pipeline) do
+    create(:ci_pipeline,
+      project: project,
+      sha: project.commit.id,
+      ref: project.default_branch,
+      status: 'success')
+  end
+
+  let(:pipeline2) do
     create(:ci_pipeline,
       project: project,
       sha: project.commit.id,
@@ -31,8 +40,8 @@ RSpec.describe Ci::BuildDependencies do
     stub_licensed_features(cross_project_pipelines: true)
   end
 
-  describe '#cross_project' do
-    subject { described_class.new(job).cross_project }
+  context 'for cross_project dependencies' do
+    subject { described_class.new(job).all }
 
     context 'when cross_dependencies are not defined' do
       it { is_expected.to be_empty }
@@ -56,7 +65,7 @@ RSpec.describe Ci::BuildDependencies do
     context 'with cross_dependencies to the same project' do
       let!(:dependency) do
         create(:ci_build, :success,
-          pipeline: pipeline,
+          pipeline: pipeline2,
           name: 'dependency',
           stage_idx: 1,
           stage: 'build',
@@ -69,7 +78,7 @@ RSpec.describe Ci::BuildDependencies do
           {
             project: project.full_path,
             job: 'dependency',
-            ref: pipeline.ref,
+            ref: pipeline2.ref,
             artifacts: artifacts
           }
         ]
@@ -230,7 +239,7 @@ RSpec.describe Ci::BuildDependencies do
       before do
         cross_dependencies_limit.next.times do |index|
           create(:ci_build, :success,
-            pipeline: pipeline, name: "dependency-#{index}",
+            pipeline: pipeline2, name: "dependency-#{index}",
             stage_idx: 1, stage: 'build', user: user
           )
         end
@@ -241,7 +250,7 @@ RSpec.describe Ci::BuildDependencies do
           {
             project: project.full_path,
             job: "dependency-#{index}",
-            ref: pipeline.ref,
+            ref: pipeline2.ref,
             artifacts: true
           }
         end
@@ -325,15 +334,6 @@ RSpec.describe Ci::BuildDependencies do
 
       it 'returns both dependencies' do
         is_expected.to contain_exactly(cross_project_dependency, upstream_pipeline_dependency)
-      end
-
-      context 'when feature flag `ci_cross_pipeline_artifacts_download` is disabled' do
-        before do
-          stub_feature_flags(ci_cross_pipeline_artifacts_download: false)
-        end
-
-        it { is_expected.to contain_exactly(cross_project_dependency) }
-        it { expect(build_dependencies).to be_valid }
       end
     end
   end

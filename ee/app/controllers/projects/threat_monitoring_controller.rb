@@ -7,15 +7,16 @@ module Projects
     before_action :authorize_read_threat_monitoring!
 
     before_action do
-      push_frontend_feature_flag(:threat_monitoring_alerts, project)
+      push_frontend_feature_flag(:scan_execution_policy_ui, @project)
     end
 
-    feature_category :web_firewall
+    feature_category :not_owned
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def alert_details
-      render_404 unless Feature.enabled?(:threat_monitoring_alerts, project)
-      @alert_id = params[:id]
+      @alert_iid = AlertManagement::AlertsFinder.new(current_user, project, params.merge(domain: 'threat_monitoring')).execute.first!.iid
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def edit
       @environment = project.environments.find(params[:environment_id])
@@ -23,7 +24,7 @@ module Projects
       response = NetworkPolicies::FindResourceService.new(
         resource_name: @policy_name,
         environment: @environment,
-        kind: Gitlab::Kubernetes::CiliumNetworkPolicy::KIND
+        kind: params[:kind].presence || Gitlab::Kubernetes::CiliumNetworkPolicy::KIND
       ).execute
 
       if response.success?

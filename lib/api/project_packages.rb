@@ -32,14 +32,16 @@ module API
                                 desc: 'Return packages with this name'
         optional :include_versionless, type: Boolean,
                        desc: 'Returns packages without a version'
+        optional :status, type: String, values: Packages::Package.statuses.keys,
+                 desc: 'Return packages with specified status'
       end
       get ':id/packages' do
         packages = ::Packages::PackagesFinder.new(
           user_project,
-          declared_params.slice(:order_by, :sort, :package_type, :package_name, :include_versionless)
+          declared_params.slice(:order_by, :sort, :package_type, :package_name, :include_versionless, :status)
         ).execute
 
-        present paginate(packages), with: ::API::Entities::Package, user: current_user
+        present paginate(packages), with: ::API::Entities::Package, user: current_user, namespace: user_project.namespace
       end
 
       desc 'Get a single project package' do
@@ -53,7 +55,7 @@ module API
         package = ::Packages::PackageFinder
           .new(user_project, params[:package_id]).execute
 
-        present package, with: ::API::Entities::Package, user: current_user
+        present package, with: ::API::Entities::Package, user: current_user, namespace: user_project.namespace
       end
 
       desc 'Remove a package' do
@@ -68,7 +70,9 @@ module API
         package = ::Packages::PackageFinder
           .new(user_project, params[:package_id]).execute
 
-        destroy_conditionally!(package)
+        destroy_conditionally!(package) do |package|
+          ::Packages::DestroyPackageService.new(container: package, current_user: current_user).execute
+        end
       end
     end
   end

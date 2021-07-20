@@ -1,12 +1,13 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import * as Sentry from '~/sentry/wrapper';
+import { __ } from '~/locale';
 
 import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
-import { initialiseFormData } from '../utils';
+import { getSubmissionParams, initialiseFormData } from '../utils';
 import FormStatus from './form_status.vue';
 import SharedForm from './shared_form.vue';
 
@@ -104,6 +105,7 @@ export default {
       Sentry.captureException(error);
     },
     setSavingError(error, userFriendlyText) {
+      this.saving = false;
       this.saveErrorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
@@ -112,18 +114,16 @@ export default {
       this.saveErrorMessage = '';
 
       try {
-        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
+        const params = getSubmissionParams(
+          this.formData,
+          this.pipelineConfigurationFullPathEnabled,
+        );
         const { data } = await this.$apollo.mutate({
           mutation: updateComplianceFrameworkMutation,
           variables: {
             input: {
               id: this.graphqlId,
-              params: {
-                name,
-                description,
-                pipelineConfigurationFullPath,
-                color,
-              },
+              params,
             },
           },
         });
@@ -133,15 +133,15 @@ export default {
         if (error) {
           this.setSavingError(new Error(error), error);
         } else {
-          this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
         this.setSavingError(e, SAVE_ERROR);
       }
-
-      this.saving = false;
     },
+  },
+  i18n: {
+    submitButtonText: __('Save changes'),
   },
 };
 </script>
@@ -155,6 +155,7 @@ export default {
       :description.sync="formData.description"
       :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
+      :submit-button-text="$options.i18n.submitButtonText"
       @submit="onSubmit"
     />
   </form-status>

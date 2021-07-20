@@ -19,7 +19,7 @@ RSpec.describe CreateGithubWebhookWorker do
   describe '#perform' do
     before do
       project.ensure_external_webhook_token
-      project.save
+      project.save!
     end
 
     it 'creates the webhook' do

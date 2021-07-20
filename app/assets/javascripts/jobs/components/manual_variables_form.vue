@@ -1,14 +1,16 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlLink, GlSprintf } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { mapActions } from 'vuex';
-import { s__, sprintf } from '~/locale';
+import { helpPagePath } from '~/helpers/help_page_helper';
+import { s__ } from '~/locale';
 
 export default {
   name: 'ManualVariablesForm',
   components: {
     GlButton,
+    GlLink,
+    GlSprintf,
   },
   props: {
     action: {
@@ -24,11 +26,6 @@ export default {
         );
       },
     },
-    variablesSettingsUrl: {
-      type: String,
-      required: true,
-      default: '',
-    },
   },
   inputTypes: {
     key: 'key',
@@ -37,26 +34,21 @@ export default {
   i18n: {
     keyPlaceholder: s__('CiVariables|Input variable key'),
     valuePlaceholder: s__('CiVariables|Input variable value'),
+    formHelpText: s__(
+      'CiVariables|Specify variable values to be used in this run. The values specified in %{linkStart}CI/CD settings%{linkEnd} will be used as default',
+    ),
   },
   data() {
     return {
       variables: [],
       key: '',
       secretValue: '',
+      triggerBtnDisabled: false,
     };
   },
   computed: {
-    helpText() {
-      return sprintf(
-        s__(
-          'CiVariables|Specify variable values to be used in this run. The values specified in %{linkStart}CI/CD settings%{linkEnd} will be used as default',
-        ),
-        {
-          linkStart: `<a href="${this.variablesSettingsUrl}">`,
-          linkEnd: '</a>',
-        },
-        false,
-      );
+    variableSettings() {
+      return helpPagePath('ci/variables/index', { anchor: 'add-a-cicd-variable-to-a-project' });
     },
   },
   watch: {
@@ -98,6 +90,11 @@ export default {
         1,
       );
     },
+    trigger() {
+      this.triggerBtnDisabled = true;
+
+      this.triggerManualJob(this.variables);
+    },
   },
 };
 </script>
@@ -111,7 +108,12 @@ export default {
         <div class="table-section section-50" role="rowheader">{{ s__('CiVariables|Value') }}</div>
       </div>
 
-      <div v-for="variable in variables" :key="variable.id" class="gl-responsive-table-row">
+      <div
+        v-for="variable in variables"
+        :key="variable.id"
+        class="gl-responsive-table-row"
+        data-testid="ci-variable-row"
+      >
         <div class="table-section section-50">
           <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Key') }}</div>
           <div class="table-mobile-content gl-mr-3">
@@ -120,6 +122,7 @@ export default {
               v-model="variable.key"
               :placeholder="$options.i18n.keyPlaceholder"
               class="ci-variable-body-item form-control"
+              data-testid="ci-variable-key"
             />
           </div>
         </div>
@@ -132,6 +135,7 @@ export default {
               v-model="variable.secret_value"
               :placeholder="$options.i18n.valuePlaceholder"
               class="ci-variable-body-item form-control"
+              data-testid="ci-variable-value"
             />
           </div>
         </div>
@@ -143,6 +147,7 @@ export default {
               category="tertiary"
               icon="clear"
               :aria-label="__('Delete variable')"
+              data-testid="delete-variable-btn"
               @click="deleteVariable(variable.id)"
             />
           </div>
@@ -174,15 +179,23 @@ export default {
         </div>
       </div>
     </div>
-    <div class="d-flex gl-mt-3 justify-content-center">
-      <p class="text-muted" v-html="helpText"></p>
+    <div class="gl-text-center gl-mt-3">
+      <gl-sprintf :message="$options.i18n.formHelpText">
+        <template #link="{ content }">
+          <gl-link :href="variableSettings" target="_blank">
+            {{ content }}
+          </gl-link>
+        </template>
+      </gl-sprintf>
     </div>
     <div class="d-flex justify-content-center">
       <gl-button
         variant="info"
         category="primary"
         :aria-label="__('Trigger manual job')"
-        @click="triggerManualJob(variables)"
+        :disabled="triggerBtnDisabled"
+        data-testid="trigger-manual-job-btn"
+        @click="trigger"
       >
         {{ action.button_title }}
       </gl-button>

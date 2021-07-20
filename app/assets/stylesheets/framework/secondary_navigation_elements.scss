@@ -108,7 +108,7 @@
     > .dropdown,
     > input,
     > form {
-      margin-right: $gl-padding-top;
+      margin-right: $gl-padding-8;
 
       &:last-child {
         margin-right: 0;
@@ -180,6 +180,11 @@
         margin: 0 0 $gl-padding-8;
         display: block;
         width: 100%;
+      }
+
+      /* This resets the width of the control so that the search button doesn't wrap */
+      .gl-search-box-by-click .form-control {
+        width: 1%;
       }
 
       .dropdown-menu-toggle {

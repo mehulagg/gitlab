@@ -13,6 +13,10 @@ class Namespace < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include IgnorableColumns
   include Namespaces::Traversal::Recursive
+  include Namespaces::Traversal::Linear
+  include EachBatch
+
+  ignore_column :delayed_project_removal, remove_with: '14.1', remove_after: '2021-05-22'
 
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
@@ -43,6 +47,9 @@ class Namespace < ApplicationRecord
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
   has_one :package_setting_relation, inverse_of: :namespace, class_name: 'PackageSetting'
 
+  has_one :admin_note, inverse_of: :namespace
+  accepts_nested_attributes_for :admin_note, update_only: true
+
   validates :owner, presence: true, unless: ->(n) { n.type == "Group" }
   validates :name,
     presence: true,
@@ -63,11 +70,10 @@ class Namespace < ApplicationRecord
 
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
+  validate :validate_parent_type, if: -> { Feature.enabled?(:validate_namespace_parent_type) }
   validate :nesting_level_allowed
   validate :changing_shared_runners_enabled_is_allowed
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
-
-  validates_associated :runners
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
@@ -83,10 +89,16 @@ class Namespace < ApplicationRecord
   after_update :move_dir, if: :saved_change_to_path_or_parent?
   before_destroy(prepend: true) { prepare_for_destroy }
   after_destroy :rm_dir
+  after_commit :expire_child_caches, on: :update, if: -> {
+    Feature.enabled?(:cached_route_lookups, self, type: :ops, default_enabled: :yaml) &&
+      saved_change_to_name? || saved_change_to_path? || saved_change_to_parent_id?
+  }
 
-  scope :for_user, -> { where('type IS NULL') }
+  scope :for_user, -> { where(type: nil) }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
   scope :include_route, -> { includes(:route) }
+  scope :by_parent, -> (parent) { where(parent_id: parent) }
+  scope :filter_by_path, -> (query) { where('lower(path) = :query', query: query.downcase) }
 
   scope :with_statistics, -> do
     joins('LEFT JOIN project_statistics ps ON ps.namespace_id = namespaces.id')
@@ -104,9 +116,17 @@ class Namespace < ApplicationRecord
       )
   end
 
+  scope :sorted_by_similarity_and_parent_id_desc, -> (search) do
+    order_expression = Gitlab::Database::SimilarityScore.build_expression(search: search, rules: [
+      { column: arel_table["path"], multiplier: 1 },
+      { column: arel_table["name"], multiplier: 0.7 }
+    ])
+    reorder(order_expression.desc, Namespace.arel_table['parent_id'].desc.nulls_last, Namespace.arel_table['id'].desc)
+  end
+
   # Make sure that the name is same as strong_memoize name in root_ancestor
   # method
-  attr_writer :root_ancestor
+  attr_writer :root_ancestor, :emails_disabled_memoized
 
   class << self
     def by_path(path)
@@ -164,6 +184,10 @@ class Namespace < ApplicationRecord
       name = host.delete_suffix(gitlab_host)
       Namespace.where(parent_id: nil).by_path(name)
     end
+
+    def top_most
+      where(parent_id: nil)
+    end
   end
 
   def package_settings
@@ -187,7 +211,7 @@ class Namespace < ApplicationRecord
   end
 
   def any_project_has_container_registry_tags?
-    all_projects.any?(&:has_container_registry_tags?)
+    all_projects.includes(:container_repositories).any?(&:has_container_registry_tags?)
   end
 
   def first_project_with_container_registry_tags
@@ -230,7 +254,7 @@ class Namespace < ApplicationRecord
 
   # any ancestor can disable emails for all descendants
   def emails_disabled?
-    strong_memoize(:emails_disabled) do
+    strong_memoize(:emails_disabled_memoized) do
       if parent_id
         self_and_ancestors.where(emails_disabled: true).exists?
       else
@@ -255,18 +279,12 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    if Feature.enabled?(:recursive_approach_for_all_projects)
-      namespace = user? ? self : self_and_descendants
+    if Feature.enabled?(:recursive_approach_for_all_projects, default_enabled: :yaml)
+      namespace = user? ? self : self_and_descendant_ids
       Project.where(namespace: namespace)
     else
       Project.inside_path(full_path)
     end
-  end
-
-  # Includes pipelines from this namespace and pipelines from all subgroups
-  # that belongs to this namespace
-  def all_pipelines
-    Ci::Pipeline.where(project: all_projects)
   end
 
   def has_parent?
@@ -282,8 +300,13 @@ class Namespace < ApplicationRecord
     false
   end
 
+  # Deprecated, use #licensed_feature_available? instead. Remove once Namespace#feature_available? isn't used anymore.
+  def feature_available?(feature)
+    licensed_feature_available?(feature)
+  end
+
   # Overridden in EE::Namespace
-  def feature_available?(_feature)
+  def licensed_feature_available?(_feature)
     false
   end
 
@@ -339,6 +362,10 @@ class Namespace < ApplicationRecord
 
   def actual_plan
     Plan.default
+  end
+
+  def paid?
+    root? && actual_plan.paid?
   end
 
   def actual_limits
@@ -400,15 +427,27 @@ class Namespace < ApplicationRecord
     !has_parent?
   end
 
+  def recent?
+    created_at >= 90.days.ago
+  end
+
+  def issue_repositioning_disabled?
+    Feature.enabled?(:block_issue_repositioning, self, type: :ops, default_enabled: :yaml)
+  end
+
   private
 
-  def all_projects_with_pages
-    if all_projects.pages_metadata_not_migrated.exists?
-      Gitlab::BackgroundMigration::MigratePagesMetadata.new.perform_on_relation(
-        all_projects.pages_metadata_not_migrated
-      )
+  def expire_child_caches
+    Namespace.where(id: descendants).each_batch do |namespaces|
+      namespaces.touch_all
     end
 
+    all_projects.each_batch do |projects|
+      projects.touch_all
+    end
+  end
+
+  def all_projects_with_pages
     all_projects.with_pages_deployed
   end
 
@@ -437,6 +476,16 @@ class Namespace < ApplicationRecord
     end
   end
 
+  def validate_parent_type
+    return unless has_parent?
+
+    if user?
+      errors.add(:parent_id, 'a user namespace cannot have a parent')
+    elsif group?
+      errors.add(:parent_id, 'a group cannot have a user namespace as its parent') if parent.user?
+    end
+  end
+
   def sync_share_with_group_lock_with_parent
     if parent&.share_with_group_lock?
       self.share_with_group_lock = true
@@ -460,4 +509,4 @@ class Namespace < ApplicationRecord
   end
 end
 
-Namespace.prepend_if_ee('EE::Namespace')
+Namespace.prepend_mod_with('Namespace')

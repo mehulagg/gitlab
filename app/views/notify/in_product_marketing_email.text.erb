@@ -1,23 +1,32 @@
-<%= in_product_marketing_tagline(@track, @series) %>
+<%= @message.tagline %>
 
-<%= in_product_marketing_title(@track, @series) %>
-<%= in_product_marketing_subtitle(@track, @series) %>
-
-
-<%= in_product_marketing_body_line1(@track, @series) %>
-
-<%= in_product_marketing_body_line2(@track, @series) %>
-
-<%= cta_link(@track, @series, @group) %>
+<%= @message.title %>
+<%= @message.subtitle %>
 
 
+<%= @message.body_line1 %>
 
+<%= @message.body_line2 %>
+
+<% if @message.cta_text %>
+<%= @message.cta_link %>
 
 
 
+<% else %>
+<% (1..5).each do |rating| %>
+<%= "#{rating} - #{@message.feedback_ratings(rating).upcase} - #{@message.feedback_link(rating)}" %>
+<% end %>
 
-<%= footer_links %>
 
-<%= address %>
+<%= @message.feedback_thanks %>
+<% end %>
 
-<%= unsubscribe %>
+
+
+
+<%= @message.footer_links %>
+
+<%= @message.address %>
+
+<%= @message.unsubscribe %>

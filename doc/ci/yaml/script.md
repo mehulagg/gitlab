@@ -1,13 +1,13 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# GitLab CI/CD script syntax
+# GitLab CI/CD script syntax **(FREE)**
 
-You can use special syntax in [`script`](README.md#script) sections to:
+You can use special syntax in [`script`](index.md#script) sections to:
 
 - [Split long commands](#split-long-commands) into multiline commands.
 - [Use color codes](#add-color-codes-to-script-output) to make job logs easier to review.
@@ -86,7 +86,7 @@ Second command line.
 When you omit the `>` or `|` block scalar indicators, GitLab concatenates non-empty
 lines to form the command. Make sure the lines can run when concatenated.
 
-[Shell here documents](https://en.wikipedia.org/wiki/Here_document) work with the
+[These documents](https://en.wikipedia.org/wiki/Here_document) work with the
 `|` and `>` operators as well. The example below transliterates lower case letters
 to upper case:
 
@@ -121,10 +121,10 @@ job:
     - echo -e "\e[31mThis text is red,\e[0m but this text isn't\e[31m however this text is red again."
 ```
 
-You can define the color codes in Shell variables, or even [custom environment variables](../variables/README.md#custom-cicd-variables),
+You can define the color codes in Shell environment variables, or even [custom CI/CD variables](../variables/index.md#custom-cicd-variables),
 which makes the commands easier to read and reusable.
 
-For example, using the same example as above and variables defined in a `before_script`:
+For example, using the same example as above and environment variables defined in a `before_script`:
 
 ```yaml
 job:
@@ -144,4 +144,35 @@ job:
   script:
     - Write-Host $TXT_RED"This text is red,"$TXT_CLEAR" but this text isn't"$TXT_RED" however this text is red again."
     - Write-Host "This text is not colored"
+```
+
+## Troubleshooting
+
+### `Syntax is incorrect` in scripts that use `:`
+
+If you use a colon (`:`) in a script, GitLab might output:
+
+- `Syntax is incorrect`
+- `script config should be a string or a nested array of strings up to 10 levels deep`
+
+For example, if you use `"PRIVATE-TOKEN: ${PRIVATE_TOKEN}"` as part of a cURL command:
+
+```yaml
+pages-job:
+  stage: deploy
+  script:
+    - curl --header 'PRIVATE-TOKEN: ${PRIVATE_TOKEN}' "https://gitlab.example.com/api/v4/projects"
+```
+
+The YAML parser thinks the `:` defines a YAML keyword, and outputs the
+`Syntax is incorrect` error.
+
+To use commands that contain a colon, you should wrap the whole command
+in single quotes. You might need to change existing single quotes (`'`) into double quotes (`"`):
+
+```yaml
+pages-job:
+  stage: deploy
+  script:
+    - 'curl --header "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" "https://gitlab.example.com/api/v4/projects"'
 ```

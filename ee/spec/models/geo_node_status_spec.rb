@@ -7,7 +7,7 @@ RSpec.describe GeoNodeStatus, :geo do
   using RSpec::Parameterized::TableSyntax
 
   let!(:primary) { create(:geo_node, :primary) }
-  let!(:secondary) { create(:geo_node) }
+  let!(:secondary) { create(:geo_node, :secondary) }
 
   let_it_be(:group)     { create(:group) }
   let_it_be(:project_1) { create(:project, group: group) }
@@ -43,6 +43,16 @@ RSpec.describe GeoNodeStatus, :geo do
       expect(rails_cache).to receive(:write).with(described_class.cache_key, kind_of(Hash))
 
       status.update_cache!
+    end
+  end
+
+  describe '#for_active_secondaries' do
+    it 'excludes primaries and disabled nodes' do
+      create(:geo_node_status, geo_node: primary)
+      create(:geo_node_status, geo_node: create(:geo_node, :secondary, enabled: false))
+      enabled_secondary_status = create(:geo_node_status, geo_node: create(:geo_node, :secondary, enabled: true))
+
+      expect(described_class.for_active_secondaries).to match_array([enabled_secondary_status])
     end
   end
 
@@ -163,7 +173,7 @@ RSpec.describe GeoNodeStatus, :geo do
   describe '#attachments_failed_count' do
     it 'counts failed avatars, attachment, personal snippets and files' do
       # These two should be ignored
-      create(:geo_lfs_object_registry, :with_lfs_object, :failed)
+      create(:geo_lfs_object_registry, :failed)
       create(:geo_upload_registry, :with_file)
 
       create(:geo_upload_registry, :with_file, :failed, file_type: :personal_file)
@@ -206,63 +216,6 @@ RSpec.describe GeoNodeStatus, :geo do
       stub_current_geo_node(primary)
 
       expect(subject.db_replication_lag_seconds).to eq(nil)
-    end
-  end
-
-  describe '#lfs_objects_synced_count' do
-    it 'counts synced LFS objects' do
-      # These four should be ignored
-      create(:geo_upload_registry, :failed)
-      create(:geo_upload_registry, :avatar)
-      create(:geo_upload_registry, file_type: :attachment)
-      create(:geo_lfs_object_registry, :failed)
-
-      create(:geo_lfs_object_registry)
-
-      expect(subject.lfs_objects_synced_count).to eq(1)
-    end
-  end
-
-  describe '#lfs_objects_synced_missing_on_primary_count' do
-    it 'counts LFS objects marked as synced due to file missing on the primary' do
-      # These four should be ignored
-      create(:geo_upload_registry, :failed)
-      create(:geo_upload_registry, :avatar, missing_on_primary: true)
-      create(:geo_upload_registry, file_type: :attachment, missing_on_primary: true)
-      create(:geo_lfs_object_registry, :failed)
-
-      create(:geo_lfs_object_registry, missing_on_primary: true)
-
-      expect(subject.lfs_objects_synced_missing_on_primary_count).to eq(1)
-    end
-  end
-
-  describe '#lfs_objects_failed_count' do
-    it 'counts failed LFS objects' do
-      # These four should be ignored
-      create(:geo_upload_registry, :failed)
-      create(:geo_upload_registry, :avatar, :failed)
-      create(:geo_upload_registry, :failed, file_type: :attachment)
-      create(:geo_lfs_object_registry)
-
-      create(:geo_lfs_object_registry, :failed)
-
-      expect(subject.lfs_objects_failed_count).to eq(1)
-    end
-  end
-
-  describe '#lfs_objects_synced_in_percentage' do
-    it 'returns 0 when there are no registries' do
-      expect(subject.lfs_objects_synced_in_percentage).to eq(0)
-    end
-
-    it 'returns the right percentage' do
-      create(:geo_lfs_object_registry)
-      create(:geo_lfs_object_registry, :failed)
-      create(:geo_lfs_object_registry, :never_synced)
-      create(:geo_lfs_object_registry, :never_synced)
-
-      expect(subject.lfs_objects_synced_in_percentage).to be_within(0.0001).of(25)
     end
   end
 
@@ -1146,12 +1099,36 @@ RSpec.describe GeoNodeStatus, :geo do
     end
   end
 
+  context 'secondary usage data' do
+    shared_examples_for 'a field from secondary_usage_data' do |field|
+      describe '#load_secondary_usage_data' do
+        it 'loads the latest data from Geo::SecondaryUsageData' do
+          data = create(:geo_secondary_usage_data)
+
+          expect(described_class.current_node_status.status[field]).to eq(data.payload[field])
+        end
+
+        it 'reports nil if there is no collected data in Geo::SecondaryUsageData' do
+          expect(status.status[field]).to be_nil
+        end
+      end
+    end
+
+    described_class.usage_data_fields.each do |field|
+      context "##{field}" do
+        it_behaves_like 'a field from secondary_usage_data', field
+      end
+    end
+  end
+
   context 'Replicator stats' do
     where(:replicator, :model_factory, :registry_factory) do
+      Geo::LfsObjectReplicator             | :lfs_object                  | :geo_lfs_object_registry
       Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
       Geo::PackageFileReplicator           | :package_file                | :geo_package_file_registry
       Geo::TerraformStateVersionReplicator | :terraform_state_version     | :geo_terraform_state_version_registry
       Geo::SnippetRepositoryReplicator     | :snippet_repository          | :geo_snippet_repository_registry
+      Geo::GroupWikiRepositoryReplicator   | :group_wiki_repository       | :geo_group_wiki_repository_registry
     end
 
     with_them do
@@ -1366,12 +1343,6 @@ RSpec.describe GeoNodeStatus, :geo do
         stub_current_geo_node(primary)
       end
 
-      it 'does not call LfsObjectRegistryFinder#registry_count' do
-        expect_any_instance_of(Geo::LfsObjectRegistryFinder).not_to receive(:registry_count)
-
-        subject
-      end
-
       it 'does not call AttachmentRegistryFinder#registry_count' do
         expect_any_instance_of(Geo::AttachmentRegistryFinder).not_to receive(:registry_count)
 
@@ -1386,12 +1357,6 @@ RSpec.describe GeoNodeStatus, :geo do
     end
 
     context 'on the secondary' do
-      it 'calls LfsObjectRegistryFinder#registry_count' do
-        expect_any_instance_of(Geo::LfsObjectRegistryFinder).to receive(:registry_count).twice
-
-        subject
-      end
-
       it 'calls AttachmentRegistryFinder#registry_count' do
         expect_any_instance_of(Geo::AttachmentRegistryFinder).to receive(:registry_count).twice
 

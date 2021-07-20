@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
   let_it_be(:user) { create(:user) }
+
   let(:eoa_bronze_plan_end_date) { Date.current + 5.days}
 
   stub_feature_flags(show_billing_eoa_banner: true)
@@ -53,7 +54,7 @@ RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
 
   shared_examples 'with a different plan than Bronze' do
     before do
-      allow(namespace).to receive(:actual_plan_name).and_return(::Plan::SILVER)
+      allow(namespace).to receive(:actual_plan_name).and_return(::Plan::PREMIUM)
     end
 
     it 'does not display the banner' do
@@ -111,6 +112,10 @@ RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
     it_behaves_like 'with a different plan than Bronze' do
       let(:namespace) { group }
     end
+
+    it_behaves_like 'when user dismissed the banner' do
+      let(:namespace) { group }
+    end
   end
 
   context 'with personal namespace' do
@@ -134,6 +139,10 @@ RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
     end
 
     it_behaves_like 'with a different plan than Bronze' do
+      let(:namespace) { current_user.namespace }
+    end
+
+    it_behaves_like 'when user dismissed the banner' do
       let(:namespace) { current_user.namespace }
     end
   end

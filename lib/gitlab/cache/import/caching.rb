@@ -113,6 +113,17 @@ module Gitlab
           end
         end
 
+        # Returns the values of the given set.
+        #
+        # raw_key - The key of the set to check.
+        def self.values_from_set(raw_key)
+          key = cache_key_for(raw_key)
+
+          Redis::Cache.with do |redis|
+            redis.smembers(key)
+          end
+        end
+
         # Sets multiple keys to given values.
         #
         # mapping - A Hash mapping the cache keys to their values.
@@ -160,6 +171,34 @@ module Gitlab
           end
 
           val ? true : false
+        end
+
+        # Adds a value to a hash.
+        #
+        # raw_key - The key of the hash to add to.
+        # field - The field to add to the hash.
+        # value - The field value to add to the hash.
+        # timeout - The new timeout of the key.
+        def self.hash_add(raw_key, field, value, timeout: TIMEOUT)
+          key = cache_key_for(raw_key)
+
+          Redis::Cache.with do |redis|
+            redis.multi do |m|
+              m.hset(key, field, value)
+              m.expire(key, timeout)
+            end
+          end
+        end
+
+        # Returns the values of the given hash.
+        #
+        # raw_key - The key of the set to check.
+        def self.values_from_hash(raw_key)
+          key = cache_key_for(raw_key)
+
+          Redis::Cache.with do |redis|
+            redis.hgetall(key)
+          end
         end
 
         def self.cache_key_for(raw_key)

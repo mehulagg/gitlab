@@ -6,6 +6,10 @@ module Ci
     include Importable
     include Ci::HasStatus
     include Gitlab::OptimisticLocking
+    include Presentable
+    include IgnorableColumns
+
+    ignore_column :id_convert_to_bigint, remove_with: '14.2', remove_after: '2021-08-22'
 
     enum status: Ci::HasStatus::STATUSES_ENUM
 
@@ -14,11 +18,14 @@ module Ci
 
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :stage_id
     has_many :latest_statuses, -> { ordered.latest }, class_name: 'CommitStatus', foreign_key: :stage_id
+    has_many :retried_statuses, -> { ordered.retried }, class_name: 'CommitStatus', foreign_key: :stage_id
     has_many :processables, class_name: 'Ci::Processable', foreign_key: :stage_id
     has_many :builds, foreign_key: :stage_id
     has_many :bridges, foreign_key: :stage_id
 
     scope :ordered, -> { order(position: :asc) }
+    scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
+    scope :by_name, ->(names) { where(name: names) }
 
     with_options unless: :importing? do
       validates :project, presence: true
@@ -35,9 +42,9 @@ module Ci
       next if position.present?
 
       self.position = statuses.select(:stage_idx)
-        .where('stage_idx IS NOT NULL')
+        .where.not(stage_idx: nil)
         .group(:stage_idx)
-        .order('COUNT(*) DESC')
+        .order('COUNT(id) DESC')
         .first&.stage_idx.to_i
     end
 
@@ -84,7 +91,7 @@ module Ci
     end
 
     def set_status(new_status)
-      retry_optimistic_lock(self) do
+      retry_optimistic_lock(self, name: 'ci_stage_set_status') do
         case new_status
         when 'created' then nil
         when 'waiting_for_resource' then request_resource
@@ -138,7 +145,7 @@ module Ci
     end
 
     def latest_stage_status
-      statuses.latest.composite_status || 'skipped'
+      statuses.latest.composite_status(project: project) || 'skipped'
     end
   end
 end

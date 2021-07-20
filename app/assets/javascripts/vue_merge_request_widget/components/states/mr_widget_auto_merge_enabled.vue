@@ -2,10 +2,10 @@
 import { GlLoadingIcon, GlSkeletonLoader } from '@gitlab/ui';
 import autoMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/auto_merge';
 import autoMergeEnabledQuery from 'ee_else_ce/vue_merge_request_widget/queries/states/auto_merge_enabled.query.graphql';
+import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { deprecatedCreateFlash as Flash } from '../../../flash';
 import { AUTO_MERGE_STRATEGIES } from '../../constants';
 import eventHub from '../../event_hub';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
@@ -71,11 +71,11 @@ export default {
       return (this.glFeatures.mergeRequestWidgetGraphql ? this.state : this.mr).targetBranch;
     },
     shouldRemoveSourceBranch() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.shouldRemoveSourceBranch || this.state.forceRemoveSourceBranch;
-      }
+      if (!this.glFeatures.mergeRequestWidgetGraphql) return this.mr.shouldRemoveSourceBranch;
 
-      return this.mr.shouldRemoveSourceBranch;
+      if (!this.state.shouldRemoveSourceBranch) return false;
+
+      return this.state.shouldRemoveSourceBranch || this.state.forceRemoveSourceBranch;
     },
     autoMergeStrategy() {
       return (this.glFeatures.mergeRequestWidgetGraphql ? this.state : this.mr).autoMergeStrategy;
@@ -109,7 +109,9 @@ export default {
         })
         .catch(() => {
           this.isCancellingAutoMerge = false;
-          Flash(__('Something went wrong. Please try again.'));
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          });
         });
     },
     removeSourceBranch() {
@@ -135,7 +137,9 @@ export default {
         })
         .catch(() => {
           this.isRemovingSourceBranch = false;
-          Flash(__('Something went wrong. Please try again.'));
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          });
         });
     },
   },
@@ -169,10 +173,11 @@ export default {
             role="button"
             href="#"
             class="btn btn-sm btn-default js-cancel-auto-merge"
+            data-qa-selector="cancel_auto_merge_button"
             data-testid="cancelAutomaticMergeButton"
             @click.prevent="cancelAutomaticMerge"
           >
-            <gl-loading-icon v-if="isCancellingAutoMerge" inline class="gl-mr-1" />
+            <gl-loading-icon v-if="isCancellingAutoMerge" size="sm" inline class="gl-mr-1" />
             {{ cancelButtonText }}
           </a>
         </h4>
@@ -195,7 +200,7 @@ export default {
               data-testid="removeSourceBranchButton"
               @click.prevent="removeSourceBranch"
             >
-              <gl-loading-icon v-if="isRemovingSourceBranch" inline class="gl-mr-1" />
+              <gl-loading-icon v-if="isRemovingSourceBranch" size="sm" inline class="gl-mr-1" />
               {{ s__('mrWidget|Delete source branch') }}
             </a>
           </p>

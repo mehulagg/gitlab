@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Checks::LfsCheck do
-  include_context 'change access checks context'
+  include_context 'changes access checks context'
 
   let(:blob_object) { project.repository.blob_at_branch('lfs', 'files/lfs/lfs_object.iso') }
 
@@ -15,6 +15,10 @@ RSpec.describe Gitlab::Checks::LfsCheck do
 
   describe '#validate!' do
     context 'with LFS not enabled' do
+      before do
+        allow(project).to receive(:lfs_enabled?).and_return(false)
+      end
+
       it 'skips integrity check' do
         expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
@@ -39,13 +43,26 @@ RSpec.describe Gitlab::Checks::LfsCheck do
         end
       end
 
-      context 'deletion' do
-        let(:changes) { { oldrev: oldrev, ref: ref } }
+      context 'with deletion' do
+        shared_examples 'a skipped integrity check' do
+          it 'skips integrity check' do
+            expect(project.repository).not_to receive(:new_objects)
+            expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
-        it 'skips integrity check' do
-          expect(project.repository).not_to receive(:new_objects)
+            subject.validate!
+          end
+        end
 
-          subject.validate!
+        context 'with missing newrev' do
+          it_behaves_like 'a skipped integrity check' do
+            let(:changes) { [{ oldrev: oldrev, ref: ref }] }
+          end
+        end
+
+        context 'with blank newrev' do
+          it_behaves_like 'a skipped integrity check' do
+            let(:changes) { [{ oldrev: oldrev, newrev: Gitlab::Git::BLANK_SHA, ref: ref }] }
+          end
         end
       end
 

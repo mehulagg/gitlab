@@ -2,11 +2,11 @@
 
 module Registrations
   class ExperienceLevelsController < ApplicationController
-    layout 'signup_onboarding'
+    layout 'minimal'
 
     before_action :ensure_namespace_path_param
 
-    feature_category :navigation
+    feature_category :onboarding
 
     def update
       current_user.experience_level = params[:experience_level]
@@ -38,7 +38,7 @@ module Registrations
     end
 
     def learn_gitlab
-      @learn_gitlab ||= LearnGitlab.new(current_user)
+      @learn_gitlab ||= LearnGitlab::Project.new(current_user)
     end
   end
 end

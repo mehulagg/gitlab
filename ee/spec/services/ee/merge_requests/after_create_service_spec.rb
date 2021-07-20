@@ -5,13 +5,13 @@ require 'spec_helper'
 RSpec.describe MergeRequests::AfterCreateService do
   let_it_be(:merge_request) { create(:merge_request) }
 
-  let(:service_object) { described_class.new(merge_request.target_project, merge_request.author) }
+  let(:service_object) { described_class.new(project: merge_request.target_project, current_user: merge_request.author) }
 
   describe '#execute' do
     subject(:execute) { service_object.execute(merge_request) }
 
     before do
-      allow(SyncSecurityReportsToReportApprovalRulesWorker).to receive(:perform_async)
+      allow(Ci::SyncReportsToReportApprovalRulesWorker).to receive(:perform_async)
     end
 
     context 'when the merge request has actual_head_pipeline' do
@@ -26,7 +26,7 @@ RSpec.describe MergeRequests::AfterCreateService do
         execute
 
         expect(merge_request).to have_received(:update_head_pipeline).ordered
-        expect(SyncSecurityReportsToReportApprovalRulesWorker).to have_received(:perform_async).ordered.with(pipeline_id)
+        expect(Ci::SyncReportsToReportApprovalRulesWorker).to have_received(:perform_async).ordered.with(pipeline_id)
       end
     end
 
@@ -34,7 +34,7 @@ RSpec.describe MergeRequests::AfterCreateService do
       it 'does not schedule a background job to sync security reports to approval rules' do
         execute
 
-        expect(SyncSecurityReportsToReportApprovalRulesWorker).not_to have_received(:perform_async)
+        expect(Ci::SyncReportsToReportApprovalRulesWorker).not_to have_received(:perform_async)
       end
     end
   end

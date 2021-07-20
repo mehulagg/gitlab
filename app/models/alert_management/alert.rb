@@ -20,7 +20,13 @@ module AlertManagement
       resolved: 2,
       ignored: 3
     }.freeze
-    private_constant :STATUSES
+
+    STATUS_DESCRIPTIONS = {
+      triggered: 'Investigation has not started',
+      acknowledged: 'Someone is actively investigating the problem',
+      resolved: 'No further work is required',
+      ignored: 'No action will be taken on the alert'
+    }.freeze
 
     belongs_to :project
     belongs_to :issue, optional: true
@@ -204,7 +210,7 @@ module AlertManagement
     end
 
     def self.link_reference_pattern
-      @link_reference_pattern ||= super("alert_management", /(?<alert>\d+)\/details(\#)?/)
+      @link_reference_pattern ||= super("alert_management", %r{(?<alert>\d+)/details(\#)?})
     end
 
     def self.reference_valid?(reference)
@@ -217,6 +223,10 @@ module AlertManagement
 
     def self.open_status?(status)
       open_statuses.include?(status)
+    end
+
+    def open?
+      self.class.open_status?(status_name)
     end
 
     def status_event_for(status)
@@ -242,10 +252,10 @@ module AlertManagement
       "#{project.to_reference_base(from, full: full)}#{reference}"
     end
 
-    def execute_services
-      return unless project.has_active_services?(:alert_hooks)
+    def execute_integrations
+      return unless project.has_active_integrations?(:alert_hooks)
 
-      project.execute_services(hook_data, :alert_hooks)
+      project.execute_integrations(hook_data, :alert_hooks)
     end
 
     # Representation of the alert's payload. Avoid accessing
@@ -271,4 +281,4 @@ module AlertManagement
   end
 end
 
-AlertManagement::Alert.prepend_if_ee('EE::AlertManagement::Alert')
+AlertManagement::Alert.prepend_mod_with('AlertManagement::Alert')

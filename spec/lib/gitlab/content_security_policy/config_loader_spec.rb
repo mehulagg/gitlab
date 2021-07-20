@@ -20,15 +20,75 @@ RSpec.describe Gitlab::ContentSecurityPolicy::ConfigLoader do
   end
 
   describe '.default_settings_hash' do
-    it 'returns empty defaults' do
-      settings = described_class.default_settings_hash
+    let(:settings) { described_class.default_settings_hash }
 
-      expect(settings['enabled']).to be_falsey
+    it 'returns defaults for all keys' do
+      expect(settings['enabled']).to be_truthy
       expect(settings['report_only']).to be_falsey
 
-      described_class::DIRECTIVES.each do |directive|
-        expect(settings['directives'].has_key?(directive)).to be_truthy
-        expect(settings['directives'][directive]).to be_nil
+      directives = settings['directives']
+      directive_names = (described_class::DIRECTIVES - ['report_uri'])
+      directive_names.each do |directive|
+        expect(directives.has_key?(directive)).to be_truthy
+        expect(directives[directive]).to be_truthy
+      end
+
+      expect(directives.has_key?('report_uri')).to be_truthy
+      expect(directives['report_uri']).to be_nil
+      expect(directives['child_src']).to eq(directives['frame_src'])
+    end
+
+    context 'when in production' do
+      before do
+        allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production'))
+      end
+
+      it 'is disabled' do
+        expect(settings['enabled']).to be_falsey
+      end
+    end
+
+    context 'when GITLAB_CDN_HOST is set' do
+      before do
+        stub_env('GITLAB_CDN_HOST', 'https://example.com')
+      end
+
+      it 'adds GITLAB_CDN_HOST to CSP' do
+        directives = settings['directives']
+
+        expect(directives['script_src']).to eq("'strict-dynamic' 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.recaptcha.net https://apis.google.com https://example.com")
+        expect(directives['style_src']).to eq("'self' 'unsafe-inline' https://example.com")
+        expect(directives['font_src']).to eq("'self' https://example.com")
+      end
+    end
+
+    context 'when CUSTOMER_PORTAL_URL is set' do
+      before do
+        stub_env('CUSTOMER_PORTAL_URL', 'https://customers.example.com')
+      end
+
+      context 'when in production' do
+        before do
+          allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production'))
+        end
+
+        it 'does not add CUSTOMER_PORTAL_URL to CSP' do
+          directives = settings['directives']
+
+          expect(directives['frame_src']).to eq("'self' https://www.google.com/recaptcha/ https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com")
+        end
+      end
+
+      context 'when in development' do
+        before do
+          allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('development'))
+        end
+
+        it 'adds CUSTOMER_PORTAL_URL to CSP' do
+          directives = settings['directives']
+
+          expect(directives['frame_src']).to eq("'self' https://www.google.com/recaptcha/ https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com https://customers.example.com")
+        end
       end
     end
   end

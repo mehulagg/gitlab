@@ -28,9 +28,9 @@ RSpec.shared_examples 'new issuable with scoped labels' do
 
       context 'when using label_ids parameter' do
         it 'adds only last selected exclusive scoped label' do
-          issuable = described_class.new(
-            parent, user, title: 'test', label_ids: [label1.id, label3.id, label4.id, label2.id]
-          ).execute
+          args = { **described_class.constructor_container_arg(parent), current_user: user, params: { title: 'test', label_ids: [label1.id, label3.id, label4.id, label2.id] } }
+          args[:spam_params] = nil if described_class.private_instance_methods.include?(:spam_params)
+          issuable = described_class.new(**args).execute
 
           expect(issuable.labels).to match_array([label1, label2])
         end
@@ -38,9 +38,9 @@ RSpec.shared_examples 'new issuable with scoped labels' do
 
       context 'when using labels parameter' do
         it 'adds only last selected exclusive scoped label' do
-          issuable = described_class.new(
-            parent, user, title: 'test', labels: [label1.title, label3.title, label4.title, label2.title]
-          ).execute
+          args = { **described_class.constructor_container_arg(parent), current_user: user, params: { title: 'test', labels: [label1.title, label3.title, label4.title, label2.title] } }
+          args[:spam_params] = nil if described_class.private_instance_methods.include?(:spam_params)
+          issuable = described_class.new(**args).execute
 
           expect(issuable.labels).to match_array([label1, label2])
         end
@@ -58,9 +58,9 @@ RSpec.shared_examples 'new issuable with scoped labels' do
         label3 = create_label('key::label2')
         label4 = create_label('key::label3')
 
-        issuable = described_class.new(
-          parent, user, title: 'test', label_ids: [label1.id, label3.id, label4.id, label2.id]
-        ).execute
+        args = { **described_class.constructor_container_arg(parent), current_user: user, params: { title: 'test', label_ids: [label1.id, label3.id, label4.id, label2.id] } }
+        args[:spam_params] = nil if described_class.private_instance_methods.include?(:spam_params)
+        issuable = described_class.new(**args).execute
 
         expect(issuable.labels).to match_array([label1, label2, label3, label4])
       end
@@ -87,7 +87,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
           issuable.reload
 
           described_class.new(
-            parent, user, label_ids: [label1.id, label3.id]
+            **described_class.constructor_container_arg(parent), current_user: user, params: { label_ids: [label1.id, label3.id] }
           ).execute(issuable)
 
           expect(issuable.reload.labels).to match_array([label3])
@@ -102,7 +102,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
           issuable.reload
 
           described_class.new(
-            parent, user, labels: [label1.title, label3.title]
+            **described_class.constructor_container_arg(parent), current_user: user, params: { labels: [label1.title, label3.title] }
           ).execute(issuable)
 
           expect(issuable.reload.labels).to match_array([label3])
@@ -118,7 +118,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
           issuable.reload
 
           described_class.new(
-            parent, user, label_ids: [label2.id, label3.id]
+            **described_class.constructor_container_arg(parent), current_user: user, params: { label_ids: [label2.id, label3.id] }
           ).execute(issuable)
 
           expect(issuable.reload.labels).to match_array([label2, label3])
@@ -138,7 +138,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
         issuable.reload
 
         described_class.new(
-          parent, user, label_ids: [label1.id, label2.id, label3.id]
+          **described_class.constructor_container_arg(parent), current_user: user, params: { label_ids: [label1.id, label2.id, label3.id] }
         ).execute(issuable)
 
         expect(issuable.reload.labels).to match_array([label1, label2, label3])

@@ -8,7 +8,9 @@ exports[`Status Page settings form default state should match the default snapsh
   <div
     class="settings-header"
   >
-    <h4>
+    <h4
+      class="settings-title js-settings-toggle js-settings-toggle-trigger-only"
+    >
       
       Status page
     
@@ -37,13 +39,14 @@ exports[`Status Page settings form default state should match the default snapsh
   >
     <p>
       <gl-sprintf-stub
-        message="To publish incidents to an external status page, GitLab will store a JSON file in your Amazon S3 account in a location accessible to your external status page service. Make sure to also set up %{docsLink}"
+        message="To publish incidents to an external status page, GitLab stores a JSON file in your Amazon S3 account at a location that your external status page service can access. Make sure to also set up %{docsLink}"
       />
     </p>
      
     <form>
       <gl-form-group-stub
         class="gl-pl-0 mb-3"
+        labeldescription=""
       >
         <gl-form-checkbox-stub>
           <span
@@ -59,6 +62,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="Status page URL"
         label-for="status-page-url"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-url"
@@ -69,11 +73,11 @@ exports[`Status Page settings form default state should match the default snapsh
           class="form-text text-muted"
         >
           <gl-link-stub
-            href="/help/operations/incident_management/status_page"
+            href="/help/operations/incident_management/status_page#configure-gitlab-with-cloud-provider-information"
             target="_blank"
           >
             
-            Status page frontend documentation
+            Configuration help
           
           </gl-link-stub>
         </p>
@@ -84,6 +88,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="S3 Bucket name"
         label-for="status-page-s3-bucket-name"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-s3-bucket-name"
@@ -104,6 +109,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="AWS region"
         label-for="status-page-aws-region"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-aws-region"
@@ -115,7 +121,7 @@ exports[`Status Page settings form default state should match the default snapsh
           class="form-text text-muted"
         >
           <gl-sprintf-stub
-            message="For help with configuration, visit %{docsLink}"
+            message="AWS %{docsLink}"
           />
         </p>
       </gl-form-group-stub>
@@ -125,6 +131,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="AWS access key ID"
         label-for="status-page-aws-access-key"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-aws-access-key "
@@ -137,6 +144,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="AWS Secret access key"
         label-for="status-page-aws-secret-access-key"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-aws-secret-access-key "
@@ -151,7 +159,7 @@ exports[`Status Page settings form default state should match the default snapsh
         icon=""
         size="medium"
         type="submit"
-        variant="success"
+        variant="confirm"
       >
         
         Save changes

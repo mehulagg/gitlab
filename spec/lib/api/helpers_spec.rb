@@ -3,7 +3,69 @@
 require 'spec_helper'
 
 RSpec.describe API::Helpers do
+  using RSpec::Parameterized::TableSyntax
+
   subject { Class.new.include(described_class).new }
+
+  describe '#current_user' do
+    include Rack::Test::Methods
+
+    let(:user) { build(:user, id: 42) }
+
+    let(:helper) do
+      Class.new(Grape::API::Instance) do
+        helpers API::APIGuard::HelperMethods
+        helpers API::Helpers
+        format :json
+
+        get 'user' do
+          current_user ? { id: current_user.id } : { found: false }
+        end
+
+        get 'protected' do
+          authenticate_by_gitlab_geo_node_token!
+        end
+      end
+    end
+
+    def app
+      helper
+    end
+
+    before do
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
+    end
+
+    it 'handles sticking when a user could be found' do
+      allow_any_instance_of(API::Helpers).to receive(:initial_current_user).and_return(user)
+
+      expect(Gitlab::Database::LoadBalancing::RackMiddleware)
+        .to receive(:stick_or_unstick).with(any_args, :user, 42)
+
+      get 'user'
+
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'id' => user.id })
+    end
+
+    it 'does not handle sticking if no user could be found' do
+      allow_any_instance_of(API::Helpers).to receive(:initial_current_user).and_return(nil)
+
+      expect(Gitlab::Database::LoadBalancing::RackMiddleware)
+        .not_to receive(:stick_or_unstick)
+
+      get 'user'
+
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'found' => false })
+    end
+
+    it 'returns the user if one could be found' do
+      allow_any_instance_of(API::Helpers).to receive(:initial_current_user).and_return(user)
+
+      get 'user'
+
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'id' => user.id })
+    end
+  end
 
   describe '#find_project' do
     let(:project) { create(:project) }
@@ -42,6 +104,111 @@ RSpec.describe API::Helpers do
           expect(Project).not_to receive(:find_by_full_path)
 
           subject.find_project(non_existing_id)
+        end
+      end
+    end
+  end
+
+  describe '#find_project!' do
+    let_it_be(:project) { create(:project, :public) }
+    let_it_be(:user) { create(:user) }
+
+    shared_examples 'private project without access' do
+      before do
+        project.update_column(:visibility_level, Gitlab::VisibilityLevel.level_value('private'))
+        allow(subject).to receive(:authenticate_non_public?).and_return(false)
+      end
+
+      it 'returns not found' do
+        expect(subject).to receive(:not_found!)
+
+        subject.find_project!(project.id)
+      end
+    end
+
+    context 'when user is authenticated' do
+      before do
+        subject.instance_variable_set(:@current_user, user)
+        subject.instance_variable_set(:@initial_current_user, user)
+      end
+
+      context 'public project' do
+        it 'returns requested project' do
+          expect(subject.find_project!(project.id)).to eq(project)
+        end
+      end
+
+      context 'private project' do
+        it_behaves_like 'private project without access'
+      end
+    end
+
+    context 'when user is not authenticated' do
+      before do
+        subject.instance_variable_set(:@current_user, nil)
+        subject.instance_variable_set(:@initial_current_user, nil)
+      end
+
+      context 'public project' do
+        it 'returns requested project' do
+          expect(subject.find_project!(project.id)).to eq(project)
+        end
+      end
+
+      context 'private project' do
+        it_behaves_like 'private project without access'
+      end
+    end
+  end
+
+  describe '#find_project!' do
+    let_it_be(:project) { create(:project) }
+
+    let(:user) { project.owner}
+
+    before do
+      allow(subject).to receive(:current_user).and_return(user)
+      allow(subject).to receive(:authorized_project_scope?).and_return(true)
+      allow(subject).to receive(:job_token_authentication?).and_return(false)
+      allow(subject).to receive(:authenticate_non_public?).and_return(false)
+    end
+
+    shared_examples 'project finder' do
+      context 'when project exists' do
+        it 'returns requested project' do
+          expect(subject.find_project!(existing_id)).to eq(project)
+        end
+
+        it 'returns nil' do
+          expect(subject).to receive(:render_api_error!).with('404 Project Not Found', 404)
+          expect(subject.find_project!(non_existing_id)).to be_nil
+        end
+      end
+    end
+
+    context 'when ID is used as an argument' do
+      let(:existing_id) { project.id }
+      let(:non_existing_id) { non_existing_record_id }
+
+      it_behaves_like 'project finder'
+    end
+
+    context 'when PATH is used as an argument' do
+      let(:existing_id) { project.full_path }
+      let(:non_existing_id) { 'something/else' }
+
+      it_behaves_like 'project finder'
+
+      context 'with an invalid PATH' do
+        let(:non_existing_id) { 'undefined' } # path without slash
+
+        it_behaves_like 'project finder'
+
+        it 'does not hit the database' do
+          expect(Project).not_to receive(:find_by_full_path)
+          expect(subject).to receive(:render_api_error!).with('404 Project Not Found', 404)
+
+          subject.find_project!(non_existing_id)
         end
       end
     end
@@ -139,6 +306,49 @@ RSpec.describe API::Helpers do
     it_behaves_like 'user namespace finder'
   end
 
+  describe '#authorized_project_scope?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:other_project) { create(:project) }
+    let_it_be(:job) { create(:ci_build) }
+
+    let(:send_authorized_project_scope) { subject.authorized_project_scope?(project) }
+
+    where(:job_token_authentication, :route_setting, :feature_flag, :same_job_project, :expected_result) do
+      false | false | false | false | true
+      false | false | false | true  | true
+      false | false | true  | false | true
+      false | false | true  | true  | true
+      false | true  | false | false | true
+      false | true  | false | true  | true
+      false | true  | true  | false | true
+      false | true  | true  | true  | true
+      true  | false | false | false | true
+      true  | false | false | true  | true
+      true  | false | true  | false | true
+      true  | false | true  | true  | true
+      true  | true  | false | false | false
+      true  | true  | false | true  | false
+      true  | true  | true  | false | false
+      true  | true  | true  | true  | true
+    end
+
+    with_them do
+      before do
+        allow(subject).to receive(:job_token_authentication?).and_return(job_token_authentication)
+        allow(subject).to receive(:route_authentication_setting).and_return(job_token_scope: route_setting ? :project : nil)
+        allow(subject).to receive(:current_authenticated_job).and_return(job)
+        allow(job).to receive(:project).and_return(same_job_project ? project : other_project)
+
+        stub_feature_flags(ci_job_token_scope: false)
+        stub_feature_flags(ci_job_token_scope: project) if feature_flag
+      end
+
+      it 'returns the expected result' do
+        expect(send_authorized_project_scope).to eq(expected_result)
+      end
+    end
+  end
+
   describe '#send_git_blob' do
     let(:repository) { double }
     let(:blob) { double(name: 'foobar') }
@@ -175,64 +385,27 @@ RSpec.describe API::Helpers do
     end
   end
 
-  describe '#track_event' do
-    it "creates a gitlab tracking event", :snowplow do
-      subject.track_event('my_event', category: 'foo')
-
-      expect_snowplow_event(category: 'foo', action: 'my_event')
-    end
-
-    it "logs an exception" do
-      expect(Gitlab::AppLogger).to receive(:warn).with(/Tracking event failed/)
-
-      subject.track_event('my_event', category: nil)
-    end
-  end
-
   describe '#increment_unique_values' do
     let(:value) { '9f302fea-f828-4ca9-aef4-e10bd723c0b3' }
     let(:event_name) { 'g_compliance_dashboard' }
     let(:unknown_event) { 'unknown' }
-    let(:feature) { "usage_data_#{event_name}" }
 
-    before do
-      skip_feature_flags_yaml_validation
+    it 'tracks redis hll event' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(event_name, values: value)
+
+      subject.increment_unique_values(event_name, value)
     end
 
-    context 'with feature enabled' do
-      before do
-        stub_feature_flags(feature => true)
-      end
+    it 'logs an exception for unknown event' do
+      expect(Gitlab::AppLogger).to receive(:warn).with("Redis tracking event failed for event: #{unknown_event}, message: Unknown event #{unknown_event}")
 
-      it 'tracks redis hll event' do
-        expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(event_name, values: value)
-
-        subject.increment_unique_values(event_name, value)
-      end
-
-      it 'logs an exception for unknown event' do
-        expect(Gitlab::AppLogger).to receive(:warn).with("Redis tracking event failed for event: #{unknown_event}, message: Unknown event #{unknown_event}")
-
-        subject.increment_unique_values(unknown_event, value)
-      end
-
-      it 'does not track event for nil values' do
-        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
-
-        subject.increment_unique_values(unknown_event, nil)
-      end
+      subject.increment_unique_values(unknown_event, value)
     end
 
-    context 'with feature disabled' do
-      before do
-        stub_feature_flags(feature => false)
-      end
+    it 'does not track event for nil values' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
 
-      it 'does not track event' do
-        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
-
-        subject.increment_unique_values(event_name, value)
-      end
+      subject.increment_unique_values(unknown_event, nil)
     end
   end
 

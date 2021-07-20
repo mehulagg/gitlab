@@ -1,15 +1,18 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, concepts, howto
 ---
 
-# CI/CD development documentation
+# CI/CD development documentation **(FREE)**
 
 Development guides that are specific to CI/CD are listed here.
 
 If you are creating new CI/CD templates, please read [the development guide for GitLab CI/CD templates](templates.md).
+
+See the [CI/CD YAML reference documentation guide](cicd_reference_documentation_guide.md)
+to learn how to update the [reference page](../../ci/yaml/index.md).
 
 ## CI Architecture overview
 
@@ -23,14 +26,14 @@ On the left side we have the events that can trigger a pipeline based on various
 
 - A `git push` is the most common event that triggers a pipeline.
 - The [Web API](../../api/pipelines.md#create-a-new-pipeline).
-- A user clicking the "Run Pipeline" button in the UI.
-- When a [merge request is created or updated](../../ci/merge_request_pipelines/index.md#pipelines-for-merge-requests).
-- When an MR is added to a [Merge Train](../../ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md#merge-trains).
+- A user clicking the "Run pipeline" button in the UI.
+- When a [merge request is created or updated](../../ci/pipelines/merge_request_pipelines.md#pipelines-for-merge-requests).
+- When an MR is added to a [Merge Train](../../ci/pipelines/merge_trains.md#merge-trains).
 - A [scheduled pipeline](../../ci/pipelines/schedules.md#pipeline-schedules).
-- When project is [subscribed to an upstream project](../../ci/multi_project_pipelines.md#trigger-a-pipeline-when-an-upstream-project-is-rebuilt).
+- When project is [subscribed to an upstream project](../../ci/pipelines/multi_project_pipelines.md#trigger-a-pipeline-when-an-upstream-project-is-rebuilt).
 - When [Auto DevOps](../../topics/autodevops/index.md) is enabled.
 - When GitHub integration is used with [external pull requests](../../ci/ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).
-- When an upstream pipeline contains a [bridge job](../../ci/yaml/README.md#trigger) which triggers a downstream pipeline.
+- When an upstream pipeline contains a [bridge job](../../ci/yaml/index.md#trigger) which triggers a downstream pipeline.
 
 Triggering any of these events invokes the [`CreatePipelineService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/ci/create_pipeline_service.rb)
 which takes as input event data and the user triggering it, then attempts to create a pipeline.
@@ -39,7 +42,7 @@ The `CreatePipelineService` relies heavily on the [`YAML Processor`](https://git
 component, which is responsible for taking in a YAML blob as input and returns the abstract data structure of a
 pipeline (including stages and all jobs). This component also validates the structure of the YAML while
 processing it, and returns any syntax or semantic errors. The `YAML Processor` component is where we define
-[all the keywords](../../ci/yaml/README.md) available to structure a pipeline.
+[all the keywords](../../ci/yaml/index.md) available to structure a pipeline.
 
 The `CreatePipelineService` receives the abstract data structure returned by the `YAML Processor`,
 which then converts it to persisted models (pipeline, stages, jobs, etc.). After that, the pipeline is ready
@@ -58,13 +61,13 @@ successfully or fail. Each status transition for job within a pipeline triggers 
 looks for the next jobs to be transitioned towards completion. While doing that, `ProcessPipelineService`
 updates the status of jobs, stages and the overall pipeline.
 
-On the right side of the diagram we have a list of [runners](../../ci/runners/README.md)
+On the right side of the diagram we have a list of [runners](../../ci/runners/index.md)
 connected to the GitLab instance. These can be shared runners, group runners, or project-specific runners.
 The communication between runners and the Rails server occurs through a set of API endpoints, grouped as
 the `Runner API Gateway`.
 
 We can register, delete, and verify runners, which also causes read/write queries to the database. After a runner is connected,
-it keeps asking for the next job to execute. This invokes the [`RegisterJobService`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/services/ci/register_job_service.rb)
+it keeps asking for the next job to execute. This invokes the [`RegisterJobService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/ci/register_job_service.rb)
 which picks the next job and assigns it to the runner. At this point the job transitions to a
 `running` state, which again triggers `ProcessPipelineService` due to the status change.
 For more details read [Job scheduling](#job-scheduling)).
@@ -76,12 +79,12 @@ case the runner downloads them using a dedicated API endpoint.
 Artifacts are stored in object storage, while metadata is kept in the database. An important example of artifacts
 are reports (JUnit, SAST, DAST, etc.) which are parsed and rendered in the merge request.
 
-Job status transitions are not all automated. A user may run [manual jobs](../../ci/yaml/README.md#whenmanual), cancel a pipeline, retry
+Job status transitions are not all automated. A user may run [manual jobs](../../ci/yaml/index.md#whenmanual), cancel a pipeline, retry
 specific failed jobs or the entire pipeline. Anything that
 causes a job to change status triggers `ProcessPipelineService`, as it's responsible for
 tracking the status of the entire pipeline.
 
-A special type of job is the [bridge job](../../ci/yaml/README.md#trigger) which is executed server-side
+A special type of job is the [bridge job](../../ci/yaml/index.md#trigger) which is executed server-side
 when transitioning to the `pending` state. This job is responsible for creating a downstream pipeline, such as
 a multi-project or child pipeline. The workflow loop starts again
 from the `CreatePipelineService` every time a downstream pipeline is triggered.
@@ -100,7 +103,7 @@ A job with the `created` state isn't seen by the runner yet. To make it possible
 When the runner is connected, it requests the next `pending` job to run by polling the server continuously.
 
 NOTE:
-API endpoints used by the runner to interact with GitLab are defined in [`lib/api/ci/runner.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/api/ci/runner.rb)
+API endpoints used by the runner to interact with GitLab are defined in [`lib/api/ci/runner.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/api/ci/runner.rb)
 
 After the server receives the request it selects a `pending` job based on the [`Ci::RegisterJobService` algorithm](#ciregisterjobservice), then assigns and sends the job to the runner.
 
@@ -118,7 +121,7 @@ Once the runner is [registered](https://docs.gitlab.com/runner/register/) using 
 
 The runner initiates the communication by requesting jobs to execute with `POST /api/v4/jobs/request`. Although this polling generally happens every few seconds we leverage caching via HTTP headers to reduce the server-side work load if the job queue doesn't change.
 
-This API endpoint runs [`Ci::RegisterJobService`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/services/ci/register_job_service.rb), which:
+This API endpoint runs [`Ci::RegisterJobService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/ci/register_job_service.rb), which:
 
 1. Picks the next job to run from the pool of `pending` jobs
 1. Assigns it to the runner

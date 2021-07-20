@@ -3,20 +3,29 @@
 require 'spec_helper'
 
 RSpec.describe Issues::CreateService do
+  include AfterNextHelpers
+
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
+
+  let(:spam_params) { double }
 
   describe '#execute' do
     let_it_be(:assignee) { create(:user) }
     let_it_be(:milestone) { create(:milestone, project: project) }
-    let(:issue) { described_class.new(project, user, opts).execute }
+
+    let(:issue) { described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute }
+
+    before do
+      stub_spam_services
+    end
 
     context 'when params are valid' do
       let_it_be(:labels) { create_pair(:label, project: project) }
 
       before_all do
-        project.add_maintainer(user)
-        project.add_maintainer(assignee)
+        project.add_guest(user)
+        project.add_guest(assignee)
       end
 
       let(:opts) do
@@ -41,7 +50,7 @@ RSpec.describe Issues::CreateService do
       end
 
       context 'when skip_system_notes is true' do
-        let(:issue) { described_class.new(project, user, opts).execute(skip_system_notes: true) }
+        let(:issue) { described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute(skip_system_notes: true) }
 
         it 'does not call Issuable::CommonSystemNotesService' do
           expect(Issuable::CommonSystemNotesService).not_to receive(:new)
@@ -64,7 +73,6 @@ RSpec.describe Issues::CreateService do
 
         it_behaves_like 'incident issue'
         it_behaves_like 'has incident label'
-        it_behaves_like 'an incident management tracked event', :incident_management_incident_created
 
         it 'does create an incident label' do
           expect { subject }
@@ -76,8 +84,8 @@ RSpec.describe Issues::CreateService do
             opts.merge!(title: '')
           end
 
-          it 'does not create an incident label prematurely' do
-            expect { subject }.not_to change(Label, :count)
+          it 'does not apply an incident label prematurely' do
+            expect { subject }.to not_change(LabelLink, :count).and not_change(Issue, :count)
           end
         end
       end
@@ -86,15 +94,11 @@ RSpec.describe Issues::CreateService do
         expect { issue }.to change { project.open_issues_count }.from(0).to(1)
       end
 
-      context 'when current user cannot admin issues in the project' do
-        let_it_be(:guest) { create(:user) }
+      context 'when current user cannot set issue metadata in the project' do
+        let_it_be(:non_member) { create(:user) }
 
-        before_all do
-          project.add_guest(guest)
-        end
-
-        it 'filters out params that cannot be set without the :admin_issue permission' do
-          issue = described_class.new(project, guest, opts).execute
+        it 'filters out params that cannot be set without the :set_issue_metadata permission' do
+          issue = described_class.new(project: project, current_user: non_member, params: opts, spam_params: spam_params).execute
 
           expect(issue).to be_persisted
           expect(issue.title).to eq('Awesome issue')
@@ -105,31 +109,17 @@ RSpec.describe Issues::CreateService do
           expect(issue.due_date).to be_nil
         end
 
-        it 'creates confidential issues' do
-          issue = described_class.new(project, guest, confidential: true).execute
+        it 'can create confidential issues' do
+          issue = described_class.new(project: project, current_user: non_member, params: { confidential: true }, spam_params: spam_params).execute
 
           expect(issue.confidential).to be_truthy
         end
       end
 
-      it 'creates a pending todo for new assignee' do
-        attributes = {
-          project: project,
-          author: user,
-          user: assignee,
-          target_id: issue.id,
-          target_type: issue.class.name,
-          action: Todo::ASSIGNED,
-          state: :pending
-        }
-
-        expect(Todo.where(attributes).count).to eq 1
-      end
-
       it 'moves the issue to the end, in an asynchronous worker' do
         expect(IssuePlacementWorker).to receive(:perform_async).with(be_nil, Integer)
 
-        described_class.new(project, user, opts).execute
+        described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
       end
 
       context 'when label belongs to project group' do
@@ -216,7 +206,7 @@ RSpec.describe Issues::CreateService do
         it 'invalidates open issues counter for assignees when issue is assigned' do
           project.add_maintainer(assignee)
 
-          described_class.new(project, user, opts).execute
+          described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           expect(assignee.assigned_open_issues_count).to eq 1
         end
@@ -240,18 +230,18 @@ RSpec.describe Issues::CreateService do
         opts = { title: 'Title', description: 'Description', confidential: false }
 
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :issue_hooks)
-        expect(project).to receive(:execute_services).with(an_instance_of(Hash), :issue_hooks)
+        expect(project).to receive(:execute_integrations).with(an_instance_of(Hash), :issue_hooks)
 
-        described_class.new(project, user, opts).execute
+        described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
       end
 
       it 'executes confidential issue hooks when issue is confidential' do
         opts = { title: 'Title', description: 'Description', confidential: true }
 
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :confidential_issue_hooks)
-        expect(project).to receive(:execute_services).with(an_instance_of(Hash), :confidential_issue_hooks)
+        expect(project).to receive(:execute_integrations).with(an_instance_of(Hash), :confidential_issue_hooks)
 
-        described_class.new(project, user, opts).execute
+        described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
       end
 
       context 'after_save callback to store_mentions' do
@@ -279,10 +269,8 @@ RSpec.describe Issues::CreateService do
         end
       end
 
-      it 'deletes milestone issues count cache' do
-        expect_next_instance_of(Milestones::IssuesCountService, milestone) do |service|
-          expect(service).to receive(:delete_cache).and_call_original
-        end
+      it 'schedules a namespace onboarding create action worker' do
+        expect(Namespaces::OnboardingIssueCreatedWorker).to receive(:perform_async).with(project.namespace.id)
 
         issue
       end
@@ -297,7 +285,7 @@ RSpec.describe Issues::CreateService do
         it 'removes assignee when user id is invalid' do
           opts = { title: 'Title', description: 'Description', assignee_ids: [-1] }
 
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           expect(issue.assignees).to be_empty
         end
@@ -305,7 +293,7 @@ RSpec.describe Issues::CreateService do
         it 'removes assignee when user id is 0' do
           opts = { title: 'Title', description: 'Description', assignee_ids: [0] }
 
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           expect(issue.assignees).to be_empty
         end
@@ -314,7 +302,7 @@ RSpec.describe Issues::CreateService do
           project.add_maintainer(assignee)
           opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
 
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           expect(issue.assignees).to eq([assignee])
         end
@@ -332,7 +320,7 @@ RSpec.describe Issues::CreateService do
               project.update!(visibility_level: level)
               opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
 
-              issue = described_class.new(project, user, opts).execute
+              issue = described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
               expect(issue.assignees).to be_empty
             end
@@ -342,7 +330,7 @@ RSpec.describe Issues::CreateService do
     end
 
     it_behaves_like 'issuable record that supports quick actions' do
-      let(:issuable) { described_class.new(project, user, params).execute }
+      let(:issuable) { described_class.new(project: project, current_user: user, params: params, spam_params: spam_params).execute }
     end
 
     context 'Quick actions' do
@@ -382,14 +370,14 @@ RSpec.describe Issues::CreateService do
         let(:opts) { { discussion_to_resolve: discussion.id, merge_request_to_resolve_discussions_of: merge_request.iid } }
 
         it 'resolves the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
           discussion.first_note.reload
 
           expect(discussion.resolved?).to be(true)
         end
 
         it 'added a system note to the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           reloaded_discussion = MergeRequest.find(merge_request.id).discussions.first
 
@@ -397,17 +385,20 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'assigns the title and description for the issue' do
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           expect(issue.title).not_to be_nil
           expect(issue.description).not_to be_nil
         end
 
         it 'can set nil explicitly to the title and description' do
-          issue = described_class.new(project, user,
-                                      merge_request_to_resolve_discussions_of: merge_request,
-                                      description: nil,
-                                      title: nil).execute
+          issue = described_class.new(project: project, current_user: user,
+                                      params: {
+                                        merge_request_to_resolve_discussions_of: merge_request,
+                                        description: nil,
+                                        title: nil
+                                      },
+                                      spam_params: spam_params).execute
 
           expect(issue.description).to be_nil
           expect(issue.title).to be_nil
@@ -418,14 +409,14 @@ RSpec.describe Issues::CreateService do
         let(:opts) { { merge_request_to_resolve_discussions_of: merge_request.iid } }
 
         it 'resolves the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
           discussion.first_note.reload
 
           expect(discussion.resolved?).to be(true)
         end
 
         it 'added a system note to the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           reloaded_discussion = MergeRequest.find(merge_request.id).discussions.first
 
@@ -433,17 +424,20 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'assigns the title and description for the issue' do
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
 
           expect(issue.title).not_to be_nil
           expect(issue.description).not_to be_nil
         end
 
         it 'can set nil explicitly to the title and description' do
-          issue = described_class.new(project, user,
-                                      merge_request_to_resolve_discussions_of: merge_request,
-                                      description: nil,
-                                      title: nil).execute
+          issue = described_class.new(project: project, current_user: user,
+                                      params: {
+                                        merge_request_to_resolve_discussions_of: merge_request,
+                                        description: nil,
+                                        title: nil
+                                      },
+                                      spam_params: spam_params).execute
 
           expect(issue.description).to be_nil
           expect(issue.title).to be_nil
@@ -452,47 +446,27 @@ RSpec.describe Issues::CreateService do
     end
 
     context 'checking spam' do
-      let(:request) { double(:request) }
-      let(:api) { true }
-      let(:captcha_response) { 'abc123' }
-      let(:spam_log_id) { 1 }
-
       let(:params) do
         {
-          title: 'Spam issue',
-          request: request,
-          api: api,
-          captcha_response: captcha_response,
-          spam_log_id: spam_log_id
+          title: 'Spam issue'
         }
       end
 
       subject do
-        described_class.new(project, user, params)
-      end
-
-      before do
-        allow_next_instance_of(UserAgentDetailService) do |instance|
-          allow(instance).to receive(:create)
-        end
+        described_class.new(project: project, current_user: user, params: params, spam_params: spam_params)
       end
 
       it 'executes SpamActionService' do
-        spam_params = Spam::SpamParams.new(
-          api: api,
-          captcha_response: captcha_response,
-          spam_log_id: spam_log_id
-        )
         expect_next_instance_of(
           Spam::SpamActionService,
           {
-            spammable: an_instance_of(Issue),
-            request: request,
-            user: user,
+            spammable: kind_of(Issue),
+            spam_params: spam_params,
+            user: an_instance_of(User),
             action: :create
           }
         ) do |instance|
-          expect(instance).to receive(:execute).with(spam_params: spam_params)
+          expect(instance).to receive(:execute)
         end
 
         subject.execute

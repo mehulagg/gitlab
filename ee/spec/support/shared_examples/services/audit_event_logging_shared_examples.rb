@@ -60,9 +60,12 @@ RSpec.shared_examples 'logs the custom audit event' do
     expect { service.security_event }.to change(AuditEvent, :count).by(1)
     security_event = AuditEvent.last
 
-    expect(security_event.details).to eq(custom_message: custom_message,
-                                         ip_address: ip_address,
-                                         action: :custom)
+    expect(security_event.details).to eq(
+      author_name: user.name,
+      custom_message: custom_message,
+      ip_address: ip_address,
+      action: :custom
+    )
     expect(security_event.author_id).to eq(user.id)
     expect(security_event.entity_id).to eq(entity.id)
     expect(security_event.entity_type).to eq(entity_type)
@@ -101,11 +104,14 @@ RSpec.shared_examples 'logs the release audit event' do
 
     security_event = AuditEvent.last
 
-    expect(security_event.details).to eq(custom_message: custom_message,
-                                         ip_address: ip_address,
-                                         target_details: target_details,
-                                         target_id: target_id,
-                                         target_type: target_type)
+    expect(security_event.details).to eq(
+      author_name: user.name,
+      custom_message: custom_message,
+      ip_address: ip_address,
+      target_details: target_details,
+      target_id: target_id,
+      target_type: target_type
+    )
 
     expect(security_event.author_id).to eq(user.id)
     expect(security_event.entity_id).to eq(entity.id)

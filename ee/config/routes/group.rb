@@ -11,11 +11,14 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       patch :override, on: :member
     end
 
+    resources :compliance_frameworks, only: [:new, :edit]
+
     get '/analytics', to: redirect('groups/%{group_id}/-/analytics/value_stream_analytics')
     resource :contribution_analytics, only: [:show]
 
     namespace :analytics do
       resource :ci_cd_analytics, only: :show, path: 'ci_cd'
+      resource :devops_adoption, controller: :devops_adoption, only: :show
       resource :productivity_analytics, only: :show
       resources :coverage_reports, only: :index
       resource :merge_request_analytics, only: :show
@@ -24,17 +27,21 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
         resources :stages, only: [:index, :create, :update, :destroy] do
           member do
-            get :duration_chart
+            get :average_duration_chart
             get :median
+            get :average
             get :records
+            get :count
           end
         end
         resources :value_streams, only: [:index, :create, :update, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
-              get :duration_chart
+              get :average_duration_chart
               get :median
+              get :average
               get :records
+              get :count
             end
           end
         end
@@ -81,14 +88,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
     resources :autocomplete_sources, only: [] do
       collection do
-        get 'members'
-        get 'issues'
-        get 'merge_requests'
-        get 'labels'
         get 'epics'
         get 'vulnerabilities'
-        get 'commands'
-        get 'milestones'
       end
     end
 
@@ -119,6 +120,10 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
     resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
 
+    resources :iteration_cadences, path: 'cadences(/*vueroute)', action: :index do
+      resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }, controller: :iteration_cadences, action: :index
+    end
+
     resources :issues, only: [] do
       collection do
         post :bulk_update
@@ -138,7 +143,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
     end
 
-    resources :epic_boards, only: [:index]
+    resources :epic_boards, only: [:index, :show]
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard

@@ -23,6 +23,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
     let_it_be(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs, project: project) }
     let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast, job: build_dast, project: project) }
     let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds, project: project) }
+
     let!(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast, project: project) }
 
     let(:cs_count) { read_fixture(artifact_cs)['vulnerabilities'].count }
@@ -73,15 +74,67 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
           end
         end
       end
+
+      it 'does not have N+1 queries' do
+        # We need to create a situation where we have one Vulnerabilities::Finding
+        # AND one Vulnerability for each finding in the sast and dast reports
+        #
+        # Running the pipeline vulnerabilities finder on both report types should
+        # use the same number of queries, regardless of the number of findings
+        # contained in the pipeline report.
+
+        container_scanning_findings = pipeline.security_reports.reports['container_scanning'].findings
+        dep_findings = pipeline.security_reports.reports['dependency_scanning'].findings
+        # this test is invalid if we don't have more container_scanning findings than dep findings
+        expect(container_scanning_findings.count).to be > dep_findings.count
+
+        (container_scanning_findings + dep_findings).each do |report_finding|
+          # create a finding and a vulnerability for each report finding
+          # (the vulnerability is created with the :confirmed trait)
+          create(:vulnerabilities_finding,
+            :confirmed,
+            project: project,
+            report_type: report_finding.report_type,
+            project_fingerprint: report_finding.project_fingerprint)
+        end
+
+        # Need to warm the cache
+        described_class.new(pipeline: pipeline, params: { report_type: %w[dependency_scanning] }).execute
+
+        # should be the same number of queries between different report types
+        expect do
+          described_class.new(pipeline: pipeline, params: { report_type: %w[container_scanning] }).execute
+        end.to issue_same_number_of_queries_as {
+          described_class.new(pipeline: pipeline, params: { report_type: %w[dependency_scanning] }).execute
+        }
+
+        # should also be the same number of queries on the same report type
+        # with a different number of findings
+        #
+        # The pipeline.security_reports object is created dynamically from
+        # pipeline artifacts. We're caching the value so that we can mock it
+        # and force it to include another finding.
+        orig_security_reports = pipeline.security_reports
+        new_finding = create(:ci_reports_security_finding)
+        expect do
+          described_class.new(pipeline: pipeline, params: { report_type: %w[container_scanning] }).execute
+        end.to issue_same_number_of_queries_as {
+          orig_security_reports.reports['container_scanning'].add_finding(new_finding)
+          allow(pipeline).to receive(:security_reports).and_return(orig_security_reports)
+          described_class.new(pipeline: pipeline, params: { report_type: %w[container_scanning] }).execute
+        }
+      end
     end
 
     context 'by report type' do
       context 'when sast' do
         let(:params) { { report_type: %w[sast] } }
         let(:sast_report_fingerprints) {pipeline.security_reports.reports['sast'].findings.map(&:location).map(&:fingerprint) }
+        let(:sast_report_uuids) {pipeline.security_reports.reports['sast'].findings.map(&:uuid) }
 
         it 'includes only sast' do
           expect(subject.findings.map(&:location_fingerprint)).to match_array(sast_report_fingerprints)
+          expect(subject.findings.map(&:uuid)).to match_array(sast_report_uuids)
           expect(subject.findings.count).to eq(sast_count)
         end
       end
@@ -121,52 +174,107 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
       let(:ds_finding) { pipeline.security_reports.reports["dependency_scanning"].findings.first }
       let(:sast_finding) { pipeline.security_reports.reports["sast"].findings.first }
 
-      let!(:feedback) do
-        [
-          create(
-            :vulnerability_feedback,
-            :dismissal,
-            :dependency_scanning,
-            project: project,
-            pipeline: pipeline,
-            project_fingerprint: ds_finding.project_fingerprint,
-            vulnerability_data: ds_finding.raw_metadata
-          ),
-          create(
-            :vulnerability_feedback,
-            :dismissal,
-            :sast,
-            project: project,
-            pipeline: pipeline,
-            project_fingerprint: sast_finding.project_fingerprint,
-            vulnerability_data: sast_finding.raw_metadata
-          )
-        ]
-      end
+      context 'when vulnerability_finding_tracking_signatures feature flag is disabled' do
+        let!(:feedback) do
+          [
+            create(
+              :vulnerability_feedback,
+              :dismissal,
+              :dependency_scanning,
+              project: project,
+              pipeline: pipeline,
+              project_fingerprint: ds_finding.project_fingerprint,
+              vulnerability_data: ds_finding.raw_metadata,
+              finding_uuid: ds_finding.uuid
+            ),
+            create(
+              :vulnerability_feedback,
+              :dismissal,
+              :sast,
+              project: project,
+              pipeline: pipeline,
+              project_fingerprint: sast_finding.project_fingerprint,
+              vulnerability_data: sast_finding.raw_metadata,
+              finding_uuid: sast_finding.uuid
+            )
+          ]
+        end
 
-      context 'when unscoped' do
-        subject { described_class.new(pipeline: pipeline).execute }
+        before do
+          stub_feature_flags(vulnerability_finding_tracking_signatures: false)
+        end
 
-        it 'returns non-dismissed vulnerabilities' do
-          expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count - feedback.count)
-          expect(subject.findings.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
+        context 'when unscoped' do
+          subject { described_class.new(pipeline: pipeline).execute }
+
+          it 'returns non-dismissed vulnerabilities' do
+            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count - feedback.count)
+            expect(subject.findings.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
+          end
+        end
+
+        context 'when `dismissed`' do
+          subject { described_class.new(pipeline: pipeline, params: { report_type: %w[dependency_scanning], scope: 'dismissed' } ).execute }
+
+          it 'returns non-dismissed vulnerabilities' do
+            expect(subject.findings.count).to eq(ds_count - 1)
+            expect(subject.findings.map(&:project_fingerprint)).not_to include(ds_finding.project_fingerprint)
+          end
+        end
+
+        context 'when `all`' do
+          let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
+
+          it 'returns all vulnerabilities' do
+            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+          end
         end
       end
 
-      context 'when `dismissed`' do
-        subject { described_class.new(pipeline: pipeline, params: { report_type: %w[dependency_scanning], scope: 'dismissed' } ).execute }
-
-        it 'returns non-dismissed vulnerabilities' do
-          expect(subject.findings.count).to eq(ds_count - 1)
-          expect(subject.findings.map(&:project_fingerprint)).not_to include(ds_finding.project_fingerprint)
+      context 'when vulnerability_finding_tracking_signatures feature flag is enabled' do
+        let!(:feedback) do
+          [
+            create(
+              :vulnerability_feedback,
+              :dismissal,
+              :sast,
+              project: project,
+              pipeline: pipeline,
+              project_fingerprint: sast_finding.project_fingerprint,
+              vulnerability_data: sast_finding.raw_metadata,
+              finding_uuid: sast_finding.uuid
+            )
+          ]
         end
-      end
 
-      context 'when `all`' do
-        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
+        before do
+          stub_feature_flags(vulnerability_finding_tracking_signatures: true)
+        end
 
-        it 'returns all vulnerabilities' do
-          expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+        context 'when unscoped' do
+          subject { described_class.new(pipeline: pipeline).execute }
+
+          it 'returns non-dismissed vulnerabilities' do
+            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count - feedback.count)
+            expect(subject.findings.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
+          end
+        end
+
+        context 'when `dismissed`' do
+          subject { described_class.new(pipeline: pipeline, params: { report_type: %w[sast], scope: 'dismissed' } ).execute }
+
+          it 'returns non-dismissed vulnerabilities' do
+            expect(subject.findings.count).to eq(sast_count - 1)
+            expect(subject.findings.map(&:project_fingerprint)).not_to include(sast_finding.project_fingerprint)
+          end
+        end
+
+        context 'when `all`' do
+          let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
+
+          it 'returns all vulnerabilities' do
+            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+          end
         end
       end
     end
@@ -212,7 +320,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline).execute }
 
         it 'returns all vulnerabilities with all scanners available' do
-          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy]
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy]
         end
       end
 
@@ -225,13 +333,81 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
       end
     end
 
+    context 'by state' do
+      let(:params) { {} }
+      let(:aggregated_report) { described_class.new(pipeline: pipeline, params: params).execute }
+
+      subject(:finding_uuids) { aggregated_report.findings.map(&:uuid) }
+
+      let(:finding_with_feedback) { pipeline.security_reports.reports['sast'].findings.first }
+
+      before do
+        create(:vulnerability_feedback, :dismissal,
+               :sast,
+               project: project,
+               pipeline: pipeline,
+               category: finding_with_feedback.report_type,
+               project_fingerprint: finding_with_feedback.project_fingerprint,
+               vulnerability_data: finding_with_feedback.raw_metadata,
+               finding_uuid: finding_with_feedback.uuid)
+      end
+
+      context 'when the state parameter is not given' do
+        it 'returns all findings' do
+          expect(finding_uuids.length).to be(40)
+        end
+      end
+
+      context 'when the state parameter is given' do
+        let(:params) { { state: state } }
+        let(:finding_with_associated_vulnerability) { pipeline.security_reports.reports['dependency_scanning'].findings.first }
+
+        before do
+          vulnerability = create(:vulnerability, state, project: project)
+
+          create(:vulnerabilities_finding, :identifier,
+                 vulnerability: vulnerability,
+                 report_type: finding_with_associated_vulnerability.report_type,
+                 project: project,
+                 project_fingerprint: finding_with_associated_vulnerability.project_fingerprint,
+                 uuid: finding_with_associated_vulnerability.uuid)
+        end
+
+        context 'when the given state is `dismissed`' do
+          let(:state) { 'dismissed' }
+
+          it { is_expected.to match_array([finding_with_associated_vulnerability.uuid, finding_with_feedback.uuid]) }
+        end
+
+        context 'when the given state is `detected`' do
+          let(:state) { 'detected' }
+
+          it 'returns all detected findings' do
+            expect(finding_uuids.length).to be(40)
+          end
+        end
+
+        context 'when the given state is `confirmed`' do
+          let(:state) { 'confirmed' }
+
+          it { is_expected.to match_array([finding_with_associated_vulnerability.uuid]) }
+        end
+
+        context 'when the given state is `resolved`' do
+          let(:state) { 'resolved' }
+
+          it { is_expected.to match_array([finding_with_associated_vulnerability.uuid]) }
+        end
+      end
+    end
+
     context 'by all filters' do
       context 'with found entity' do
-        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy], scope: 'all' } }
+        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy], scope: 'all' } }
 
         it 'filters by all params' do
           expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
-          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy]
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy]
           expect(subject.findings.map(&:confidence).uniq).to match_array(%w[unknown low medium high])
           expect(subject.findings.map(&:severity).uniq).to match_array(%w[unknown low medium high critical info])
         end
@@ -276,7 +452,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
 
       let(:confirmed_fingerprint) do
         Digest::SHA1.hexdigest(
-          'python/hardcoded/hardcoded-tmp.py:52865813c884a507be1f152d654245af34aba8a391626d01f1ab6d3f52ec8779:B108')
+          'groovy/src/main/java/com/gitlab/security_products/tests/App.groovy:29:CIPHER_INTEGRITY')
       end
 
       let(:resolved_fingerprint) do

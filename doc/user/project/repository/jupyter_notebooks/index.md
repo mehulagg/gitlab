@@ -12,18 +12,17 @@ type: reference
 interactive computing in many fields and contain a complete record of the
 user's sessions and include code, narrative text, equations, and rich output.
 
-When added to a repository, Jupyter Notebooks with a `.ipynb` extension will be
-rendered to HTML when viewed.
+When added to a repository, Jupyter Notebooks with a `.ipynb` extension are
+rendered to HTML when viewed:
 
 ![Jupyter Notebook Rich Output](img/jupyter_notebook.png)
 
-Interactive features, including JavaScript plots, will not work when viewed in
+Interactive features, including JavaScript plots, don't work when viewed in
 GitLab.
-
-## Jupyter Hub as a GitLab Managed App
-
-You can deploy [Jupyter Hub as a GitLab managed app](../../../clusters/applications.md#jupyterhub).
 
 ## Jupyter Git integration
 
-Find out how to [leverage JupyterLab’s Git extension on your Kubernetes cluster](../../../clusters/applications.md#jupyter-git-integration).
+Jupyter can be configured as an OAuth application with repository access, acting
+on behalf of the authenticated user. See the
+[Runbooks documentation](../../../project/clusters/runbooks/index.md) for an
+example configuration.

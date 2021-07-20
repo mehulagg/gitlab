@@ -109,7 +109,7 @@ namespace :gitlab do
           puts "GITLAB_BACKUP_MAX_CONCURRENCY and GITLAB_BACKUP_MAX_STORAGE_CONCURRENCY must have a value of at least 1".color(:red)
           exit 1
         else
-          Backup::Repositories.new(progress).dump(
+          Backup::Repositories.new(progress, strategy: repository_backup_strategy).dump(
             max_concurrency: max_concurrency,
             max_storage_concurrency: max_storage_concurrency
           )
@@ -119,7 +119,7 @@ namespace :gitlab do
 
       task restore: :gitlab_environment do
         puts_time "Restoring repositories ...".color(:blue)
-        Backup::Repositories.new(progress).restore
+        Backup::Repositories.new(progress, strategy: repository_backup_strategy).restore
         puts_time "done".color(:green)
       end
     end
@@ -282,6 +282,7 @@ namespace :gitlab do
 
     def puts_time(msg)
       progress.puts "#{Time.now} -- #{msg}"
+      Gitlab::BackupLogger.info(message: "#{Rainbow.uncolor(msg)}")
     end
 
     def progress
@@ -292,6 +293,16 @@ namespace :gitlab do
         StringIO.new
       else
         $stdout
+      end
+    end
+
+    def repository_backup_strategy
+      if Feature.enabled?(:gitaly_backup)
+        max_concurrency = ENV['GITLAB_BACKUP_MAX_CONCURRENCY'].presence
+        max_storage_concurrency = ENV['GITLAB_BACKUP_MAX_STORAGE_CONCURRENCY'].presence
+        Backup::GitalyBackup.new(progress, parallel: max_concurrency, parallel_storage: max_storage_concurrency)
+      else
+        Backup::GitalyRpcBackup.new(progress)
       end
     end
   end

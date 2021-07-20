@@ -4,11 +4,16 @@ module Issues
   class UpdateService < Issues::BaseService
     extend ::Gitlab::Utils::Override
 
+    # NOTE: For Issues::UpdateService, we default the spam_params to nil, because spam_checking is not
+    # necessary in many cases, and we don't want to require every caller to explicitly pass it as nil
+    # to disable spam checking.
+    def initialize(project:, current_user: nil, params: {}, spam_params: nil)
+      super(project: project, current_user: current_user, params: params)
+      @spam_params = spam_params
+    end
+
     def execute(issue)
       handle_move_between_ids(issue)
-
-      @request = params.delete(:request)
-      @spam_params = Spam::SpamActionService.filter_spam_params!(params)
 
       change_issue_duplicate(issue)
       move_issue_to_new_project(issue) || clone_issue(issue) || update_task_event(issue) || update(issue)
@@ -20,37 +25,24 @@ module Issues
       super
     end
 
-    override :filter_params
-    def filter_params(issue)
-      super
-
-      # filter confidential in `Issues::UpdateService` and not in `IssuableBaseService#filtr_params`
-      # because we do allow users that cannot admin issues to set confidential flag when creating an issue
-      unless can_admin_issuable?(issue)
-        params.delete(:confidential)
-      end
-    end
-
     def before_update(issue, skip_spam_check: false)
       return if skip_spam_check
 
       Spam::SpamActionService.new(
         spammable: issue,
-        request: request,
+        spam_params: spam_params,
         user: current_user,
         action: :update
-      ).execute(spam_params: spam_params)
-    end
-
-    def after_update(issue)
-      IssuesChannel.broadcast_to(issue, event: 'updated') if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
+      ).execute
     end
 
     def handle_changes(issue, options)
+      super
       old_associations = options.fetch(:old_associations, {})
       old_labels = old_associations.fetch(:labels, [])
       old_mentioned_users = old_associations.fetch(:mentioned_users, [])
       old_assignees = old_associations.fetch(:assignees, [])
+      old_severity = old_associations[:severity]
 
       if has_changes?(issue, old_labels: old_labels, old_assignees: old_assignees)
         todo_service.resolve_todos_for_target(issue, current_user)
@@ -61,12 +53,7 @@ module Issues
         todo_service.update_issue(issue, current_user, old_mentioned_users)
       end
 
-      if issue.assignees != old_assignees
-        create_assignee_note(issue, old_assignees)
-        notification_service.async.reassigned_issue(issue, current_user, old_assignees)
-        todo_service.reassigned_assignable(issue, current_user, old_assignees)
-        track_incident_action(current_user, issue, :incident_assigned)
-      end
+      handle_assignee_changes(issue, old_assignees)
 
       if issue.previous_changes.include?('confidential')
         # don't enqueue immediately to prevent todos removal in case of a mistake
@@ -88,6 +75,21 @@ module Issues
       if added_mentions.present?
         notification_service.async.new_mentions_in_issue(issue, added_mentions, current_user)
       end
+
+      handle_severity_change(issue, old_severity)
+    end
+
+    def handle_assignee_changes(issue, old_assignees)
+      return if issue.assignees == old_assignees
+
+      create_assignee_note(issue, old_assignees)
+      notification_service.async.reassigned_issue(issue, current_user, old_assignees)
+      todo_service.reassigned_assignable(issue, current_user, old_assignees)
+      track_incident_action(current_user, issue, :incident_assigned)
+
+      if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
+        GraphqlTriggers.issuable_assignees_updated(issue)
+      end
     end
 
     def handle_task_changes(issuable)
@@ -96,17 +98,15 @@ module Issues
     end
 
     def handle_move_between_ids(issue)
-      return unless params[:move_between_ids]
+      issue.check_repositioning_allowed! if params[:move_between_ids]
 
-      after_id, before_id = params.delete(:move_between_ids)
-      board_group_id = params.delete(:board_group_id)
+      super
 
-      issue_before = get_issue_if_allowed(before_id, board_group_id)
-      issue_after = get_issue_if_allowed(after_id, board_group_id)
-      raise ActiveRecord::RecordNotFound unless issue_before || issue_after
-
-      issue.move_between(issue_before, issue_after)
       rebalance_if_needed(issue)
+    end
+
+    def positioning_scope_key
+      :board_group_id
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -117,7 +117,7 @@ module Issues
       canonical_issue = IssuesFinder.new(current_user).find_by(id: canonical_issue_id)
 
       if canonical_issue
-        Issues::DuplicateService.new(project, current_user).execute(issue, canonical_issue)
+        Issues::DuplicateService.new(project: project, current_user: current_user).execute(issue, canonical_issue)
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
@@ -130,12 +130,12 @@ module Issues
           target_project != issue.project
 
       update(issue)
-      Issues::MoveService.new(project, current_user).execute(issue, target_project)
+      Issues::MoveService.new(project: project, current_user: current_user).execute(issue, target_project)
     end
 
     private
 
-    attr_reader :request, :spam_params
+    attr_reader :spam_params
 
     def clone_issue(issue)
       target_project = params.delete(:target_clone_project)
@@ -146,14 +146,14 @@ module Issues
 
       # we've pre-empted this from running in #execute, so let's go ahead and update the Issue now.
       update(issue)
-      Issues::CloneService.new(project, current_user).execute(issue, target_project, with_notes: with_notes)
+      Issues::CloneService.new(project: project, current_user: current_user).execute(issue, target_project, with_notes: with_notes)
     end
 
     def create_merge_request_from_quick_action
       create_merge_request_params = params.delete(:create_merge_request)
       return unless create_merge_request_params
 
-      MergeRequests::CreateFromIssueService.new(project, current_user, create_merge_request_params).execute
+      MergeRequests::CreateFromIssueService.new(project: project, current_user: current_user, mr_params: create_merge_request_params).execute
     end
 
     def handle_milestone_change(issue)
@@ -184,8 +184,14 @@ module Issues
       end
     end
 
+    def handle_severity_change(issue, old_severity)
+      return unless old_severity && issue.severity != old_severity
+
+      ::IncidentManagement::AddSeveritySystemNoteWorker.perform_async(issue.id, current_user.id)
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
-    def get_issue_if_allowed(id, board_group_id = nil)
+    def issuable_for_positioning(id, board_group_id = nil)
       return unless id
 
       issue =
@@ -202,7 +208,17 @@ module Issues
     def create_confidentiality_note(issue)
       SystemNoteService.change_issue_confidentiality(issue, issue.project, current_user)
     end
+
+    override :add_incident_label?
+    def add_incident_label?(issue)
+      issue.issue_type != params[:issue_type] && !issue.incident?
+    end
+
+    override :remove_incident_label?
+    def remove_incident_label?(issue)
+      issue.issue_type != params[:issue_type] && issue.incident?
+    end
   end
 end
 
-Issues::UpdateService.prepend_if_ee('EE::Issues::UpdateService')
+Issues::UpdateService.prepend_mod_with('Issues::UpdateService')

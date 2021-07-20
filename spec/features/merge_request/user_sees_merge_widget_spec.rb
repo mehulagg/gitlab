@@ -32,7 +32,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     end
 
     it 'shows widget status after creating new merge request' do
-      click_button 'Submit merge request'
+      click_button 'Create merge request'
 
       wait_for_requests
 
@@ -104,7 +104,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     before do
       create(:service, project: project,
                        active: true,
-                       type: 'CiService',
+                       type: 'DroneCiService',
                        category: 'ci')
 
       visit project_merge_request_path(project, merge_request)
@@ -154,9 +154,9 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     end
 
     it 'shows information about blocked pipeline' do
-      expect(page).to have_content("Pipeline blocked")
+      expect(page).to have_content("Merge blocked")
       expect(page).to have_content(
-        "The pipeline for this merge request requires a manual action")
+        "pipeline must succeed. It's waiting for a manual action to continue.")
       expect(page).to have_css('.ci-status-icon-manual')
     end
   end
@@ -274,10 +274,10 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       visit project_merge_request_path(project, merge_request)
     end
 
-    it 'has info button when MWBS button' do
+    it 'has confirm button when MWBS button' do
       # Wait for the `ci_status` and `merge_check` requests
       wait_for_requests
-      expect(page).to have_selector('.accept-merge-request.btn-info')
+      expect(page).to have_selector('.accept-merge-request.btn-confirm')
     end
   end
 
@@ -373,7 +373,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       wait_for_requests
 
       page.within('.mr-widget-body') do
-        expect(page).to have_content('Fast-forward merge is not possible')
+        expect(page).to have_content('Merge Merge blocked: fast-forward merge is not possible. To merge this request, first rebase locally.')
       end
     end
   end
@@ -432,7 +432,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
     it 'user cannot remove source branch', :sidekiq_might_not_need_inline do
       expect(page).not_to have_field('remove-source-branch-input')
-      expect(page).to have_content('Deletes source branch')
+      expect(page).to have_content('The source branch will be deleted')
     end
   end
 
@@ -445,7 +445,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       wait_for_requests
 
       expect(page).not_to have_button('Merge')
-      expect(page).to have_content('This merge request is in the process of being merged')
+      expect(page).to have_content('Merging!')
     end
   end
 
@@ -651,7 +651,6 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
             within(".js-report-section-container") do
               expect(page).to have_content('rspec found 1 failed out of 1 total test')
               expect(page).to have_content('junit found no changed test results out of 1 total test')
-              expect(page).not_to have_content('New')
               expect(page).to have_content('Test#sum when a is 1 and b is 3 returns summary')
             end
           end
@@ -792,7 +791,6 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
             within(".js-report-section-container") do
               expect(page).to have_content('rspec found 1 error out of 1 total test')
               expect(page).to have_content('junit found no changed test results out of 1 total test')
-              expect(page).not_to have_content('New')
               expect(page).to have_content('Test#sum when a is 4 and b is 4 returns summary')
             end
           end

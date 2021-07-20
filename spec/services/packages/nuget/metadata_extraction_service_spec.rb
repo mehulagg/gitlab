@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Packages::Nuget::MetadataExtractionService do
-  let(:package_file) { create(:nuget_package).package_files.first }
+  let_it_be(:package_file) { create(:nuget_package).package_files.first }
+
   let(:service) { described_class.new(package_file.id) }
 
   describe '#execute' do
@@ -20,7 +21,8 @@ RSpec.describe Packages::Nuget::MetadataExtractionService do
             version: '12.0.3'
           }
         ],
-        package_tags: []
+        package_tags: [],
+        package_types: []
       }
 
       it { is_expected.to eq(expected_metadata) }
@@ -28,7 +30,7 @@ RSpec.describe Packages::Nuget::MetadataExtractionService do
 
     context 'with nuspec file' do
       before do
-        allow(service).to receive(:nuspec_file).and_return(fixture_file(nuspec_filepath))
+        allow(service).to receive(:nuspec_file_content).and_return(fixture_file(nuspec_filepath))
       end
 
       context 'with dependencies' do
@@ -46,6 +48,16 @@ RSpec.describe Packages::Nuget::MetadataExtractionService do
         end
       end
 
+      context 'with package types' do
+        let(:nuspec_filepath) { 'packages/nuget/with_package_types.nuspec' }
+
+        it { is_expected.to have_key(:package_types) }
+
+        it 'extracts package types' do
+          expect(subject[:package_types]).to include('SymbolsPackage')
+        end
+      end
+
       context 'with a nuspec file with metadata' do
         let(:nuspec_filepath) { 'packages/nuget/with_metadata.nuspec' }
 
@@ -57,7 +69,7 @@ RSpec.describe Packages::Nuget::MetadataExtractionService do
       let_it_be(:nuspec_filepath) { 'packages/nuget/with_metadata.nuspec' }
 
       before do
-        allow(service).to receive(:nuspec_file).and_return(fixture_file(nuspec_filepath))
+        allow(service).to receive(:nuspec_file_content).and_return(fixture_file(nuspec_filepath))
       end
 
       it { expect(subject[:license_url]).to eq('https://opensource.org/licenses/MIT') }

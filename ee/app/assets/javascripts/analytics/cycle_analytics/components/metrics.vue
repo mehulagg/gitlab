@@ -1,13 +1,24 @@
 <script>
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
-import { OVERVIEW_METRICS } from '../constants';
-import TimeMetricsCard from './time_metrics_card.vue';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlPopover } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
+import Api from 'ee/api';
+import createFlash from '~/flash';
+import { sprintf, __, s__ } from '~/locale';
+import { OVERVIEW_METRICS, METRICS_POPOVER_CONTENT } from '../constants';
+import { removeFlash, prepareTimeMetricsData } from '../utils';
+
+const requestData = ({ requestType, groupPath, requestParams }) => {
+  return requestType === OVERVIEW_METRICS.TIME_SUMMARY
+    ? Api.cycleAnalyticsTimeSummaryData(groupPath, requestParams)
+    : Api.cycleAnalyticsSummaryData(groupPath, requestParams);
+};
 
 export default {
   name: 'OverviewActivity',
   components: {
-    TimeMetricsCard,
-    MetricCard,
+    GlSkeletonLoading,
+    GlSingleStat,
+    GlPopover,
   },
   props: {
     groupPath: {
@@ -19,30 +30,89 @@ export default {
       required: true,
     },
   },
-  overviewMetrics: OVERVIEW_METRICS,
+  data() {
+    return {
+      metrics: [],
+      isLoading: false,
+    };
+  },
+  watch: {
+    requestParams() {
+      this.fetchData();
+    },
+  },
+  mounted() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      removeFlash();
+      this.isLoading = true;
+
+      Promise.all([
+        this.fetchMetricsByType(OVERVIEW_METRICS.TIME_SUMMARY),
+        this.fetchMetricsByType(OVERVIEW_METRICS.RECENT_ACTIVITY),
+      ])
+        .then(([timeSummaryData = [], recentActivityData = []]) => {
+          this.metrics = [
+            ...prepareTimeMetricsData(timeSummaryData, METRICS_POPOVER_CONTENT),
+            ...prepareTimeMetricsData(recentActivityData, METRICS_POPOVER_CONTENT),
+          ];
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
+    },
+    fetchMetricsByType(requestType) {
+      return requestData({
+        requestType,
+        groupPath: this.groupPath,
+        requestParams: this.requestParams,
+      })
+        .then(({ data }) => data)
+        .catch(() => {
+          const requestTypeName =
+            requestType === OVERVIEW_METRICS.TIME_SUMMARY
+              ? __('time summary')
+              : __('recent activity');
+          createFlash({
+            message: sprintf(
+              s__(
+                'There was an error while fetching value stream analytics %{requestTypeName} data.',
+              ),
+              { requestTypeName },
+            ),
+          });
+        });
+    },
+  },
 };
 </script>
 <template>
-  <div class="js-recent-activity gl-mt-3 gl-display-flex">
-    <div class="gl-flex-fill-1 gl-pr-2">
-      <time-metrics-card
-        #default="{ metrics, loading }"
-        :group-path="groupPath"
-        :additional-params="requestParams"
-        :request-type="$options.overviewMetrics.TIME_SUMMARY"
-      >
-        <metric-card :title="__('Time')" :metrics="metrics" :is-loading="loading" />
-      </time-metrics-card>
+  <div class="gl-display-flex gl-flex-wrap" data-testid="vsa-time-metrics">
+    <div v-if="isLoading" class="gl-h-auto gl-py-3 gl-pr-9 gl-my-6">
+      <gl-skeleton-loading />
     </div>
-    <div class="gl-flex-fill-1 gl-pl-2">
-      <time-metrics-card
-        #default="{ metrics, loading }"
-        :group-path="groupPath"
-        :additional-params="requestParams"
-        :request-type="$options.overviewMetrics.RECENT_ACTIVITY"
-      >
-        <metric-card :title="__('Recent Activity')" :metrics="metrics" :is-loading="loading" />
-      </time-metrics-card>
-    </div>
+    <template v-else>
+      <div v-for="metric in metrics" :key="metric.key" class="gl-my-6 gl-pr-9">
+        <gl-single-stat
+          :id="metric.key"
+          :value="`${metric.value}`"
+          :title="metric.label"
+          :unit="metric.unit || ''"
+          :should-animate="true"
+          :animation-decimal-places="1"
+          tabindex="0"
+        />
+        <gl-popover :target="metric.key" placement="bottom">
+          <template #title>
+            <span class="gl-display-block gl-text-left">{{ metric.label }}</span>
+          </template>
+
+          <span v-if="metric.description">{{ metric.description }}</span>
+        </gl-popover>
+      </div>
+    </template>
   </div>
 </template>

@@ -28,18 +28,18 @@ The cost of a GitLab self-managed subscription is determined by the following:
 - GitLab tier
 - Subscription seats
 
-## GitLab tier
+## Choose a GitLab tier
 
-Pricing is [tier-based](https://about.gitlab.com/pricing/), allowing you to choose
-the features which fit your budget. For information on what features are available
-at each tier, see the
+Pricing is [tier-based](https://about.gitlab.com/pricing/), so you can choose
+the features that fit your budget. For information on the features available
+for each tier, see the
 [GitLab self-managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/).
 
 ## Subscription seats
 
 A GitLab self-managed subscription uses a hybrid model. You pay for a subscription
 according to the maximum number of users enabled during the subscription period.
-For instances that aren't offline or on a closed network, the maximum number of
+For instances that are offline or on a closed network, the maximum number of
 simultaneous users in the GitLab self-managed installation is checked each quarter,
 using [Seat Link](#seat-link).
 
@@ -48,8 +48,8 @@ using [Seat Link](#seat-link).
 A _billable user_ counts against the number of subscription seats. Every user is considered a
 billable user, with the following exceptions:
 
-- [Deactivated users](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) and
-  [blocked users](../../user/admin_area/blocking_unblocking_users.md) don't count as billable users in the current subscription. When they are either deactivated or blocked they release a _billable user_ seat. However, they may
+- [Deactivated users](../../user/admin_area/moderate_users.md#deactivating-a-user) and
+  [blocked users](../../user/admin_area/moderate_users.md#blocking-a-user) don't count as billable users in the current subscription. When they are either deactivated or blocked they release a _billable user_ seat. However, they may
   count toward overages in the subscribed seat count.
 - Users who are [pending approval](../../user/admin_area/approving_users.md).
 - Members with Guest permissions on an Ultimate subscription.
@@ -91,8 +91,8 @@ instance, ensure you're purchasing enough seats to
 
 If you are an administrator, you can view the status of your subscription:
 
-1. Go to **Admin Area**.
-1. From the left-hand menu, select **License**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **License**.
 
 The **License** page includes the following details:
 
@@ -150,9 +150,9 @@ You purchase a license for 10 users.
 
 | Event                                              | Billable members | Maximum users |
 |:---------------------------------------------------|:-----------------|:--------------|
-| Ten people (users) occupy all 10 seats.            | 10               | 10            |
-| Two new people join.                               | 12               | 12            |
-| Three people leave and their accounts are removed. | 9                | 12            |
+| Ten users occupy all 10 seats.                     | 10               | 10            |
+| Two new users join.                                | 12               | 12            |
+| Three users leave and their accounts are removed.  | 9                | 12            |
 
 Users over license = 12 - 10 (Maximum users - users in license)
 
@@ -183,14 +183,14 @@ Starting 30 days before a subscription expires, GitLab notifies administrators o
 
 We recommend following these steps during renewal:
 
-1. Prune any inactive or unwanted users by [blocking them](../../user/admin_area/blocking_unblocking_users.md#blocking-a-user).
+1. Prune any inactive or unwanted users by [blocking them](../../user/admin_area/moderate_users.md#blocking-a-user).
 1. Determine if you have a need for user growth in the upcoming subscription.
 1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in) and select the **Renew** button beneath your existing subscription.
 
    NOTE:
-   If you need to change your [GitLab tier](https://about.gitlab.com/pricing/), contact our sales team via `renewals@gitlab.com` for assistance as this can't be done in the Customers Portal.
+   If you need to change your [GitLab tier](https://about.gitlab.com/pricing/), contact our sales team via [the sales contact form](https://about.gitlab.com/sales/) for assistance as this can't be done in the Customers Portal.
 
-1. In the first box, enter the total number of user licenses you’ll need for the upcoming year. Be sure this number is at least **equal to, or greater than** the number of billable users in the system at the time of performing the renewal.
+1. In the first box, enter the total number of user licenses you'll need for the upcoming year. Be sure this number is at least **equal to, or greater than** the number of billable users in the system at the time of performing the renewal.
 1. Enter the number of [users over license](#users-over-license) in the second box for the user overage incurred in your previous subscription term.
 1. Review your renewal details and complete the payment process.
 1. A license for the renewal term is available for download on the [Manage Purchases](https://customers.gitlab.com/subscriptions) page on the relevant subscription card. Select **Copy license to clipboard** or **Download license** to get a copy.
@@ -200,7 +200,7 @@ An invoice is generated for the renewal and available for viewing or download on
 
 ### Seat Link
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208832) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.9.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208832) in GitLab 12.9.
 
 Seat Link allows GitLab Inc. to provide our GitLab self-managed customers with prorated charges for user growth throughout the year using a quarterly reconciliation process.
 
@@ -209,9 +209,14 @@ Seat Link daily sends a count of all users in connected GitLab self-managed inst
 Seat Link provides **only** the following information to GitLab:
 
 - Date
+- Timestamp
 - License key
 - Historical maximum user count
 - Billable users count
+- GitLab version
+- Hostname
+- Instance ID
+- MD5 hash of license
 
 For offline or closed network customers, the existing [true-up model](#users-over-license) is used. Prorated charges are not possible without user count data.
 
@@ -220,6 +225,8 @@ For offline or closed network customers, the existing [true-up model](#users-ove
 
 <pre><code>
 {
+  gitlab_version: '13.12.0',
+  timestamp: '2020-01-29T18:25:57+00:00',
   date: '2020-01-29',
   license_key: 'ZXlKa1lYUmhJam9pWm5WNmVsTjVZekZ2YTJoV2NucDBh
 RXRxTTA5amQxcG1VMVZqDQpXR3RwZEc5SGIyMVhibmxuZDJ0NWFrNXJTVzVH
@@ -255,8 +262,9 @@ TjJ4eVlVUkdkWEJtDQpkSHByYWpreVJrcG9UVlo0Y0hKSU9URndiV2RzVFdO
 VlhHNXRhVmszTkV0SVEzcEpNMWRyZEVoRU4ydHINCmRIRnFRVTlCVUVVM1pV
 SlRORE4xUjFaYVJGb3JlWGM5UFZ4dUlpd2lhWFlpt2lKV00yRnNVbk5RTjJk
 Sg0KU1hNMGExaE9SVGR2V2pKQlBUMWNiaUo5DQo=',
-  max_historical_user_count: 10,
-  active_users: 6
+  hostname: 'gitlab.example.com',
+  instance_id: 'c1ac02cb-cb3f-4120-b7fe-961bbfa3abb7',
+  license_md5: '7cd897fffb3517dddf01b79a0889b515'
 }
 </code></pre>
 
@@ -264,16 +272,22 @@ Sg0KU1hNMGExaE9SVGR2V2pKQlBUMWNiaUo5DQo=',
 
 You can view the exact JSON payload in the administration panel. To view the payload:
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling** and expand **Seat Link**.
-1. Click **Preview payload**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Metrics and profiling** and expand **Seat Link**.
+1. Select **Preview payload**.
 
 #### Disable Seat Link
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212375) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.10.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212375) in GitLab 12.10.
 
 Seat Link is enabled by default.
 
-To disable this feature, go to **Admin Area > Settings > Metrics and profiling**, uncheck the **Enable Seat Link** checkbox > **Save changes**.
+To disable this feature:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Metrics and profiling** and expand **Seat Link**.
+1. Clear the **Enable Seat Link** checkbox.
+1. Select **Save changes**.
 
 To disable Seat Link in an Omnibus GitLab installation, and prevent it from
 being configured in the future through the administration panel, set the following in
@@ -318,18 +332,15 @@ The new tier takes effect when the new license is uploaded.
 
 ## Subscription expiry
 
-When your subscription or trial expires, GitLab does not delete your data, but it
-may become inaccessible, depending on the tier at expiry. Some features may not
-behave as expected if you're not prepared for the expiry. For example,
-[environment specific variables not being passed](https://gitlab.com/gitlab-org/gitlab/-/issues/24759).
-If you renew or upgrade, your data is again accessible.
+When your license expires, GitLab locks down features, like Git pushes
+and issue creation. Then, your instance becomes read-only and
+an expiration message is displayed to all administrators.
 
-For GitLab self-managed customers, there is a 14-day grace period when your features
-continue to work as-is, after which the entire instance becomes read
-only.
+For GitLab self-managed instances, you have a 14-day grace period
+before this occurs.
 
-However, if you remove the license, you immediately revert to Free
-features, and the instance become read / write again.
+- To resume functionality, upload a new license.
+- To fall back to Free features, delete the expired license.
 
 ## Contact Support
 

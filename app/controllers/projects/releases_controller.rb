@@ -8,14 +8,11 @@ class Projects::ReleasesController < Projects::ApplicationController
   # We have to check `download_code` permission because detail URL path
   # contains git-tag name.
   before_action :authorize_download_code!, except: [:index]
-  before_action do
-    push_frontend_feature_flag(:graphql_release_data, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_milestone_stats, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_releases_page, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_individual_release_page, project, default_enabled: true)
-  end
   before_action :authorize_update_release!, only: %i[edit update]
   before_action :authorize_create_release!, only: :new
+  before_action only: :index do
+    push_frontend_feature_flag(:releases_index_apollo_client, project, default_enabled: :yaml)
+  end
 
   feature_category :release_orchestration
 
@@ -25,12 +22,6 @@ class Projects::ReleasesController < Projects::ApplicationController
         require_non_empty_project
       end
       format.json { render json: releases }
-    end
-  end
-
-  def new
-    unless Feature.enabled?(:new_release_page, project, default_enabled: true)
-      redirect_to(new_project_tag_path(@project))
     end
   end
 

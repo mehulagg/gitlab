@@ -4,7 +4,11 @@ module EE
   module GeoHelpers
     def stub_current_geo_node(node)
       allow(::Gitlab::Geo).to receive(:current_node).and_return(node)
-      allow(node).to receive(:current?).and_return(true) unless node.nil?
+
+      # GeoNode.current? returns true only when the node is passed
+      # otherwise it returns false
+      allow(GeoNode).to receive(:current?).and_return(false)
+      allow(GeoNode).to receive(:current?).with(node).and_return(true)
     end
 
     def stub_current_node_name(name)
@@ -19,14 +23,6 @@ module EE
     def stub_secondary_node
       allow(::Gitlab::Geo).to receive(:primary?).and_return(false)
       allow(::Gitlab::Geo).to receive(:secondary?).and_return(true)
-    end
-
-    def stub_node_disabled(node)
-      allow(node).to receive(:enabled?).and_return(false)
-    end
-
-    def stub_selective_sync(node, value)
-      allow(node).to receive(:selective_sync?).and_return(value)
     end
 
     def create_project_on_shard(shard_name)
@@ -64,6 +60,10 @@ module EE
         end
 
         def handle_after_create_commit
+          true
+        end
+
+        def handle_after_checksum_succeeded
           true
         end
 

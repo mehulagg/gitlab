@@ -51,19 +51,17 @@ See the epic for:
 - A list of known issues.
 - Our planned direction and next steps.
 
-If you find an issue that isn’t listed, please leave a comment on the epic or create a
+If you find an issue that isn't listed, please leave a comment on the epic or create a
 new issue.
 
 Dark mode is available as a navigation theme, for MVC and compatibility reasons. In
 the future, we plan to make it configurable in its own section along with support for
 [different navigation themes](https://gitlab.com/gitlab-org/gitlab/-/issues/219512).
 
-NOTE:
 Dark theme only works with the **Dark** syntax highlighting theme.
 
 ## Syntax highlighting theme
 
-NOTE:
 GitLab uses the [rouge Ruby library](http://rouge.jneen.net/ "Rouge website")
 for syntax highlighting outside of any Editor context. The WebIDE (like Snippets)
 uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) and it's provided
@@ -88,11 +86,7 @@ The default syntax theme is White, and you can choose among 5 different themes:
 
 ![Profile preferences syntax highlighting themes](img/profile-preferences-syntax-themes.png)
 
-[Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in 13.0, the theme
-you choose also applies to the [Web IDE](../project/web_ide/index.md)'s code editor and [Snippets](../snippets.md).
-The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
-the [Solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
-which apply to the entire Web IDE screen.
+Introduced in GitLab 13.6, the themes [Solarized](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) and [Monokai](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) also apply to the [Web IDE](../project/web_ide/index.md) and [Snippets](../snippets.md).
 
 ## Behavior
 
@@ -114,12 +108,13 @@ select few, the amount of activity on the default Dashboard page can be
 overwhelming. Changing this setting allows you to redefine your default
 dashboard.
 
-You have 8 options here that you can use for your default dashboard view:
+You can include the following options for your default dashboard view:
 
 - Your projects (default)
 - Starred projects
 - Your projects' activity
 - Starred projects' activity
+- Followed Users' Activity
 - Your groups
 - Your [To-Do List](../todos.md)
 - Assigned Issues
@@ -129,7 +124,7 @@ You have 8 options here that you can use for your default dashboard view:
 ### Group overview content
 
 The **Group overview content** dropdown allows you to choose what information is
-displayed on a group’s home page.
+displayed on a group's home page.
 
 You can choose between 2 options:
 
@@ -139,7 +134,7 @@ You can choose between 2 options:
 ### Project overview content
 
 The **Project overview content** setting allows you to choose what content you want to
-see on a project’s home page.
+see on a project's home page.
 
 ### Tab width
 
@@ -168,7 +163,31 @@ You can choose one of the following options as the first day of the week:
 - Sunday
 - Monday
 
-If you select **System Default**, the system-wide default setting is used.
+If you select **System Default**, the [instance default](../admin_area/settings/index.md#default-first-day-of-the-week) setting is used.
+
+## Time preferences
+
+### Use relative times
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/65570) in GitLab 14.1.
+
+You can select your preferred time format for the GitLab user interface:
+
+- Relative times, for example, `30 minutes ago`.
+- Absolute times, for example, `May 18, 2021, 3:57 PM`.
+
+The times are formatted depending on your chosen language and browser locale.
+
+To set your time preference:
+
+1. On the **Preferences** page, go to **Time preferences**.
+1. Select the **Use relative times** checkbox to use relative times,
+   or clear the checkbox to use absolute times.
+1. Select **Save changes**.
+
+NOTE:
+This feature is experimental, and choosing absolute times might break certain layouts.
+Please open an issue if you notice that using absolute times breaks a layout.
 
 ## Integrations
 

@@ -10,10 +10,8 @@ import {
   AvailableSortOptions,
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
-import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-
-import { __ } from '~/locale';
+import { ISSUES_LIST_FETCH_ERROR } from '../constants';
+import getJiraIssuesQuery from '../graphql/queries/get_jira_issues.query.graphql';
 import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
 export default {
@@ -51,8 +49,6 @@ export default {
     return {
       jiraLogo,
       issues: [],
-      issuesListLoading: false,
-      issuesListLoadFailed: false,
       totalIssues: 0,
       currentState: this.initialState,
       filterParams: this.initialFilterParams,
@@ -66,76 +62,61 @@ export default {
     };
   },
   computed: {
+    issuesListLoading() {
+      return this.$apollo.queries.jiraIssues.loading;
+    },
     showPaginationControls() {
-      return Boolean(
-        !this.issuesListLoading &&
-          !this.issuesListLoadFailed &&
-          this.issues.length &&
-          this.totalIssues > 1,
-      );
+      return Boolean(!this.issuesListLoading && this.issues.length && this.totalIssues > 1);
     },
     hasFiltersApplied() {
-      return Boolean(this.filterParams.search);
+      return Boolean(this.filterParams.search || this.filterParams.labels);
     },
     urlParams() {
       return {
-        state: this.currentState,
-        page: this.currentPage,
-        sort: this.sortedBy,
+        'labels[]': this.filterParams.labels,
         search: this.filterParams.search,
+        ...(this.currentPage === 1 ? {} : { page: this.currentPage }),
+        ...(this.sortedBy === this.initialSortBy ? {} : { sort: this.sortedBy }),
+        ...(this.currentState === this.initialState ? {} : { state: this.currentState }),
       };
     },
   },
-  mounted() {
-    this.fetchIssues();
+  apollo: {
+    jiraIssues: {
+      query: getJiraIssuesQuery,
+      variables() {
+        return {
+          issuesFetchPath: this.issuesFetchPath,
+          labels: this.filterParams.labels,
+          page: this.currentPage,
+          search: this.filterParams.search,
+          sort: this.sortedBy,
+          state: this.currentState,
+        };
+      },
+      result({ data, error }) {
+        // let error() callback handle errors
+        if (error) {
+          return;
+        }
+
+        const { pageInfo, nodes, errors } = data?.jiraIssues ?? {};
+        if (errors?.length > 0) {
+          this.onJiraIssuesQueryError(new Error(errors[0]));
+          return;
+        }
+
+        this.issues = nodes;
+        this.currentPage = pageInfo.page;
+        this.totalIssues = pageInfo.total;
+        this.issuesCount[this.currentState] = nodes.length;
+      },
+      error() {
+        this.onJiraIssuesQueryError(new Error(ISSUES_LIST_FETCH_ERROR));
+      },
+    },
   },
   methods: {
-    fetchIssues() {
-      this.issuesListLoading = true;
-      this.issuesListLoadFailed = false;
-      return axios
-        .get(this.issuesFetchPath, {
-          params: {
-            with_labels_details: true,
-            page: this.currentPage,
-            per_page: this.$options.defaultPageSize,
-            state: this.currentState,
-            sort: this.sortedBy,
-            search: this.filterParams.search,
-          },
-        })
-        .then((res) => {
-          const { headers, data } = res;
-          this.currentPage = parseInt(headers['x-page'], 10);
-          this.totalIssues = parseInt(headers['x-total'], 10);
-          this.issues = data.map((rawIssue, index) => {
-            const issue = convertObjectPropsToCamelCase(rawIssue, { deep: true });
-
-            return {
-              ...issue,
-              // JIRA issues don't have ID so we extract
-              // an ID equivalent from references.relative
-              id: parseInt(rawIssue.references.relative.split('-').pop(), 10),
-              author: {
-                ...issue.author,
-                id: index,
-              },
-            };
-          });
-          this.issuesCount[this.currentState] = this.issues.length;
-        })
-        .catch((error) => {
-          this.issuesListLoadFailed = true;
-          createFlash({
-            message: __('An error occurred while loading issues'),
-            captureError: true,
-            error,
-          });
-        })
-        .finally(() => {
-          this.issuesListLoading = false;
-        });
-    },
     getFilteredSearchValue() {
       return [
         {
@@ -146,11 +127,25 @@ export default {
         },
       ];
     },
-    fetchIssuesBy(propsName, propValue) {
-      this[propsName] = propValue;
-      this.fetchIssues();
+    onJiraIssuesQueryError(error) {
+      createFlash({
+        message: error.message,
+        captureError: true,
+        error,
+      });
     },
-    handleFilterIssues(filters = []) {
+    onIssuableListClickTab(selectedIssueState) {
+      this.currentPage = 1;
+      this.currentState = selectedIssueState;
+    },
+    onIssuableListPageChange(selectedPage) {
+      this.currentPage = selectedPage;
+    },
+    onIssuableListSort(selectedSort) {
+      this.currentPage = 1;
+      this.sortedBy = selectedSort;
+    },
+    onIssuableListFilter(filters = []) {
       const filterParams = {};
       const plainText = [];
 
@@ -165,7 +160,6 @@ export default {
       }
 
       this.filterParams = filterParams;
-      this.fetchIssues();
     },
   },
 };
@@ -190,33 +184,34 @@ export default {
     :previous-page="currentPage - 1"
     :next-page="currentPage + 1"
     :url-params="urlParams"
-    :enable-label-permalinks="false"
+    label-filter-param="labels"
     recent-searches-storage-key="jira_issues"
-    @click-tab="fetchIssuesBy('currentState', $event)"
-    @page-change="fetchIssuesBy('currentPage', $event)"
-    @sort="fetchIssuesBy('sortedBy', $event)"
-    @filter="handleFilterIssues"
+    @click-tab="onIssuableListClickTab"
+    @page-change="onIssuableListPageChange"
+    @sort="onIssuableListSort"
+    @filter="onIssuableListFilter"
   >
     <template #nav-actions>
-      <gl-button :href="issueCreateUrl" target="_blank"
-        >{{ s__('Integrations|Create new issue in Jira') }}<gl-icon name="external-link"
-      /></gl-button>
+      <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5">
+        {{ s__('Integrations|Create new issue in Jira') }}
+        <gl-icon name="external-link" />
+      </gl-button>
     </template>
     <template #reference="{ issuable }">
       <span v-safe-html="jiraLogo" class="svg-container jira-logo-container"></span>
-      <span>{{ issuable.references.relative }}</span>
+      <span v-if="issuable">{{ issuable.references.relative }}</span>
     </template>
     <template #author="{ author }">
       <gl-sprintf message="%{authorName} in Jira">
         <template #authorName>
-          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl"
-            >{{ author.name }}
+          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl">
+            {{ author.name }}
           </gl-link>
         </template>
       </gl-sprintf>
     </template>
     <template #status="{ issuable }">
-      {{ issuable.status }}
+      <template v-if="issuable"> {{ issuable.status }} </template>
     </template>
     <template #empty-state>
       <jira-issues-list-empty-state

@@ -20,8 +20,9 @@ The logo in the header of some emails can be customized, see the [logo customiza
 The additional text appears at the bottom of any email and can be used for
 legal/auditing/compliance reasons.
 
-1. Go to **Admin Area > Settings > Preferences** (`/admin/application_settings/preferences`).
-1. Expand the **Email** section.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Preferences** (`/admin/application_settings/preferences`).
+1. Expand **Email**.
 1. Enter your text in the **Additional text** field.
 1. Click **Save**.
 
@@ -29,13 +30,14 @@ legal/auditing/compliance reasons.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22560) in GitLab 11.5.
 
-This configuration option sets the email hostname for [private commit emails](../../profile/index.md#private-commit-email).
+This configuration option sets the email hostname for [private commit emails](../../profile/index.md#use-an-automatically-generated-private-commit-email).
  By default it is set to `users.noreply.YOUR_CONFIGURED_HOSTNAME`.
 
 In order to change this option:
 
-1. Go to **Admin Area > Settings > Preferences** (`/admin/application_settings/preferences`).
-1. Expand the **Email** section.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Preferences** (`/admin/application_settings/preferences`).
+1. Expand **Email**.
 1. Enter the desired hostname in the **Custom hostname (for private commit emails)** field.
 1. Select **Save changes**.
 

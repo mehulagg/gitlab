@@ -1,17 +1,15 @@
 import { INVALID_CURRENT_ENVIRONMENT_NAME } from '../../../constants';
 
-export const currentEnvironmentName = ({ currentEnvironmentId, environments }) => {
-  const environment = environments.find(({ id }) => id === currentEnvironmentId);
-  return environment ? environment.name : INVALID_CURRENT_ENVIRONMENT_NAME;
-};
+export const currentEnvironment = ({ currentEnvironmentId, environments }) =>
+  environments.find((environment) => environment.id === currentEnvironmentId);
+
+export const currentEnvironmentName = (state, getters) =>
+  getters.currentEnvironment?.name ?? INVALID_CURRENT_ENVIRONMENT_NAME;
+
+export const currentEnvironmentGid = (state, getters) => getters.currentEnvironment?.global_id;
 
 export const canChangeEnvironment = ({
   isLoadingEnvironments,
-  isLoadingWafStatistics,
   isLoadingNetworkPolicyStatistics,
   environments,
-}) =>
-  !isLoadingEnvironments &&
-  !isLoadingWafStatistics &&
-  !isLoadingNetworkPolicyStatistics &&
-  environments.length > 0;
+}) => !isLoadingEnvironments && !isLoadingNetworkPolicyStatistics && environments.length > 0;

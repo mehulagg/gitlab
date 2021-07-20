@@ -6,6 +6,7 @@ RSpec.describe 'Adding a Note' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
+
   let(:noteable) { create(:merge_request, source_project: project, target_project: project) }
   let(:project) { create(:project) }
   let(:discussion) { nil }
@@ -30,6 +31,8 @@ RSpec.describe 'Adding a Note' do
     before do
       project.add_developer(current_user)
     end
+
+    it_behaves_like 'a working GraphQL mutation'
 
     it_behaves_like 'a Note mutation that creates a Note'
 

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Admin::DevOpsReportController do
   describe 'show_adoption?' do
     it 'is always false' do
-      expect(controller.show_adoption?).to be false
+      expect(controller.show_adoption?).to be_falsey
     end
   end
 
@@ -25,6 +25,8 @@ RSpec.describe Admin::DevOpsReportController do
 
       it_behaves_like 'tracking unique visits', :show do
         let(:target_id) { 'i_analytics_dev_ops_score' }
+
+        let(:request_params) { { tab: 'devops-score' } }
       end
     end
   end

@@ -1,8 +1,16 @@
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
+import {
+  REPO_BLOB_LOAD_VIEWER_START,
+  REPO_BLOB_LOAD_VIEWER_FINISH,
+  REPO_BLOB_LOAD_VIEWER,
+  REPO_BLOB_SWITCH_TO_VIEWER_START,
+  REPO_BLOB_SWITCH_VIEWER,
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 import { fixTitle } from '~/tooltips';
-import { deprecatedCreateFlash as Flash } from '../../flash';
 import axios from '../../lib/utils/axios_utils';
 import { handleLocationHash } from '../../lib/utils/common_utils';
 import eventHub from '../../notes/event_hub';
@@ -15,6 +23,8 @@ const loadRichBlobViewer = (type) => {
       return import(/* webpackChunkName: 'notebook_viewer' */ '../notebook_viewer');
     case 'openapi':
       return import(/* webpackChunkName: 'openapi_viewer' */ '../openapi_viewer');
+    case 'csv':
+      return import(/* webpackChunkName: 'csv_viewer' */ '../csv_viewer');
     case 'pdf':
       return import(/* webpackChunkName: 'pdf_viewer' */ '../pdf_viewer');
     case 'sketch':
@@ -32,13 +42,18 @@ export const handleBlobRichViewer = (viewer, type) => {
   loadRichBlobViewer(type)
     .then((module) => module?.default(viewer))
     .catch((error) => {
-      Flash(__('Error loading file viewer.'));
+      createFlash({
+        message: __('Error loading file viewer.'),
+      });
       throw error;
     });
 };
 
 export default class BlobViewer {
   constructor() {
+    performanceMarkAndMeasure({
+      mark: REPO_BLOB_LOAD_VIEWER_START,
+    });
     const viewer = document.querySelector('.blob-viewer[data-type="rich"]');
     const type = viewer?.dataset?.richType;
     BlobViewer.initAuxiliaryViewer();
@@ -62,6 +77,7 @@ export default class BlobViewer {
     this.switcher = document.querySelector('.js-blob-viewer-switcher');
     this.switcherBtns = document.querySelectorAll('.js-blob-viewer-switch-btn');
     this.copySourceBtn = document.querySelector('.js-copy-blob-source-btn');
+    this.copySourceBtnTooltip = document.querySelector('.js-copy-blob-source-btn-tooltip');
 
     this.simpleViewer = this.$fileHolder[0].querySelector('.blob-viewer[data-type="simple"]');
     this.richViewer = this.$fileHolder[0].querySelector('.blob-viewer[data-type="rich"]');
@@ -109,26 +125,29 @@ export default class BlobViewer {
   toggleCopyButtonState() {
     if (!this.copySourceBtn) return;
     if (this.simpleViewer.getAttribute('data-loaded')) {
-      this.copySourceBtn.setAttribute('title', __('Copy file contents'));
+      this.copySourceBtnTooltip.setAttribute('title', __('Copy file contents'));
       this.copySourceBtn.classList.remove('disabled');
     } else if (this.activeViewer === this.simpleViewer) {
-      this.copySourceBtn.setAttribute(
+      this.copySourceBtnTooltip.setAttribute(
         'title',
         __('Wait for the file to load to copy its contents'),
       );
       this.copySourceBtn.classList.add('disabled');
     } else {
-      this.copySourceBtn.setAttribute(
+      this.copySourceBtnTooltip.setAttribute(
         'title',
         __('Switch to the source to copy the file contents'),
       );
       this.copySourceBtn.classList.add('disabled');
     }
 
-    fixTitle($(this.copySourceBtn));
+    fixTitle($(this.copySourceBtnTooltip));
   }
 
   switchToViewer(name) {
+    performanceMarkAndMeasure({
+      mark: REPO_BLOB_SWITCH_TO_VIEWER_START,
+    });
     const newViewer = this.$fileHolder[0].querySelector(`.blob-viewer[data-type='${name}']`);
     if (this.activeViewer === newViewer) return;
 
@@ -157,13 +176,34 @@ export default class BlobViewer {
     BlobViewer.loadViewer(newViewer)
       .then((viewer) => {
         $(viewer).renderGFM();
+        window.requestIdleCallback(() => {
+          this.$fileHolder.trigger('highlight:line');
+          handleLocationHash();
 
-        this.$fileHolder.trigger('highlight:line');
-        handleLocationHash();
+          viewer.setAttribute('data-loaded', 'true');
+          this.toggleCopyButtonState();
+          eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
+        });
 
-        this.toggleCopyButtonState();
+        performanceMarkAndMeasure({
+          mark: REPO_BLOB_LOAD_VIEWER_FINISH,
+          measures: [
+            {
+              name: REPO_BLOB_LOAD_VIEWER,
+              start: REPO_BLOB_LOAD_VIEWER_START,
+            },
+            {
+              name: REPO_BLOB_SWITCH_VIEWER,
+              start: REPO_BLOB_SWITCH_TO_VIEWER_START,
+            },
+          ],
+        });
       })
-      .catch(() => new Flash(__('Error loading viewer')));
+      .catch(() =>
+        createFlash({
+          message: __('Error loading viewer'),
+        }),
+      );
   }
 
   static loadViewer(viewerParam) {
@@ -178,9 +218,10 @@ export default class BlobViewer {
 
     return axios.get(url).then(({ data }) => {
       viewer.innerHTML = data.html;
-      viewer.setAttribute('data-loaded', 'true');
 
-      eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
+      window.requestIdleCallback(() => {
+        viewer.removeAttribute('data-loading');
+      });
 
       return viewer;
     });

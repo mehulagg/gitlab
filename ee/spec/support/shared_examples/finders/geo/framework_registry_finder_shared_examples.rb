@@ -3,9 +3,12 @@
 RSpec.shared_examples 'a framework registry finder' do |registry_factory|
   include ::EE::GeoHelpers
 
+  # rubocop:disable Rails/SaveBang
   let!(:registry1) { create(registry_factory) }
   let!(:registry2) { create(registry_factory) }
   let!(:registry3) { create(registry_factory) }
+  # rubocop:enable Rails/SaveBang
+
   let(:params) { {} }
 
   subject(:registries) { described_class.new(user, params).execute }

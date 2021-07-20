@@ -37,19 +37,21 @@ RSpec.describe EE::WelcomeHelper do
     end
   end
 
-  describe '#in_invitation_flow?' do
-    where(:user_return_to_path, :expected_result) do
-      '/-/invites/xxx' | true
-      '/invites/xxx'   | false
-      '/foo'           | false
-      nil              | false
+  describe '#show_trial_during_signup?' do
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    where(:setup_for_company, :expected_result) do
+      true  | true
+      false | false
     end
 
     with_them do
-      it 'returns the expected_result' do
-        allow(helper).to receive(:session).and_return('user_return_to' => user_return_to_path)
+      let(:user) { create(:user, setup_for_company: setup_for_company) }
 
-        expect(helper.in_invitation_flow?).to eq(expected_result)
+      it 'returns the expected_result' do
+        expect(helper.show_trial_during_signup?).to eq(expected_result)
       end
     end
   end
@@ -92,13 +94,13 @@ RSpec.describe EE::WelcomeHelper do
 
   shared_context 'with the various user flows' do
     let(:in_subscription_flow) { false }
-    let(:in_invitation_flow) { false }
+    let(:user_has_memberships) { false }
     let(:in_oauth_flow) { false }
     let(:in_trial_flow) { false }
 
     before do
       allow(helper).to receive(:in_subscription_flow?).and_return(in_subscription_flow)
-      allow(helper).to receive(:in_invitation_flow?).and_return(in_invitation_flow)
+      allow(helper).to receive(:user_has_memberships?).and_return(user_has_memberships)
       allow(helper).to receive(:in_oauth_flow?).and_return(in_oauth_flow)
       allow(helper).to receive(:in_trial_flow?).and_return(in_trial_flow)
     end
@@ -121,7 +123,7 @@ RSpec.describe EE::WelcomeHelper do
     context 'when in the subscription flow, regardless of all other flows' do
       let(:in_subscription_flow) { true }
 
-      where(:in_invitation_flow, :in_oauth_flow, :in_trial_flow) do
+      where(:user_has_memberships, :in_oauth_flow, :in_trial_flow) do
         true  | false | false
         false | true  | false
         false | false | true
@@ -140,7 +142,7 @@ RSpec.describe EE::WelcomeHelper do
 
     context 'when not in the subscription flow' do
       context 'but in the invitation, oauth, or trial flow' do
-        where(:in_invitation_flow, :in_oauth_flow, :in_trial_flow) do
+        where(:user_has_memberships, :in_oauth_flow, :in_trial_flow) do
           true  | false | false
           false | true  | false
           false | false | true
@@ -197,7 +199,7 @@ RSpec.describe EE::WelcomeHelper do
 
     context 'when not in the subscription or trial flow' do
       context 'but in the invitation or oauth flow' do
-        where(:in_invitation_flow, :in_oauth_flow) do
+        where(:user_has_memberships, :in_oauth_flow) do
           true  | false
           false | true
         end
@@ -248,22 +250,20 @@ RSpec.describe EE::WelcomeHelper do
     end
   end
 
-  describe '#skip_setup_for_company?' do
-    let(:user) { create(:user) }
+  describe '#user_has_memberships?' do
+    let_it_be(:user) { create(:user) }
 
     before do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    it 'will skip the setup if memberships are found' do
-      member = create(:project_member, :invited)
-      member.accept_invite!(user)
+    it 'is true when the current_user has memberships' do
+      create(:project_member, user: user)
 
-      expect(helper.skip_setup_for_company?).to be true
+      expect(helper).to be_user_has_memberships
     end
-
-    it 'will not skip the setup when a user has no memberships' do
-      expect(helper.skip_setup_for_company?).to be false
+    it 'is false when the current_user has no memberships' do
+      expect(helper).not_to be_user_has_memberships
     end
   end
 
@@ -286,20 +286,33 @@ RSpec.describe EE::WelcomeHelper do
   describe '#signup_onboarding_enabled?' do
     subject { helper.signup_onboarding_enabled? }
 
-    where(:is_com, :feature_flag_enabled, :result) do
-      true  | true  | true
-      true  | false | false
-      false | true  | false
-      false | false | false
+    where(:is_com, :result) do
+      true  | true
+      false | false
     end
 
     with_them do
       before do
         expect(Gitlab).to receive(:com?).and_return(is_com)
-        stub_feature_flags(signup_onboarding: feature_flag_enabled)
       end
 
       it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#already_showed_trial_activation?' do
+    subject { helper.already_showed_trial_activation? }
+
+    it 'returns true if query param hide_trial_activation_banner is set to true' do
+      allow(helper).to receive(:params).and_return({ hide_trial_activation_banner: 'true' })
+
+      is_expected.to eq(true)
+    end
+
+    it 'returns true if query param hide_trial_activation_banner is not set' do
+      allow(helper).to receive(:params).and_return({})
+
+      is_expected.to eq(false)
     end
   end
 end

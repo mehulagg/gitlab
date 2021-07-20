@@ -15,12 +15,12 @@ module EE
             _("Adds %{epic_ref} as child epic.") % { epic_ref: child_epic.to_reference(quick_action_target) } if child_epic
           end
           types Epic
-          condition { action_allowed_only_on_update? }
+          condition { action_allowed? }
           params '<&epic | group&epic | Epic URL>'
           command :child_epic do |epic_param|
             child_epic = extract_epic(epic_param)
 
-            @execution_message[:child_epic] = add_child_epic(quick_action_target, child_epic)
+            @execution_message[:child_epic] = set_child_epic_update(quick_action_target, child_epic)
           end
 
           desc _('Remove child epic from an epic')
@@ -102,12 +102,12 @@ module EE
             epic.child?(target_epic.id) || target_epic.child?(epic.id)
           end
 
-          def add_child_epic(target_epic, child_epic)
+          def set_child_epic_update(target_epic, child_epic)
             return child_error_message(:not_present) unless child_epic.present?
             return child_error_message(:already_related) if epics_related?(child_epic, target_epic)
             return child_error_message(:no_permission) unless current_user.can?(:read_epic, child_epic)
 
-            EpicLinks::CreateService.new(target_epic, current_user, { target_issuable: child_epic }).execute
+            @updates[:quick_action_assign_child_epic] = child_epic
 
             _("Added %{epic_ref} as a child epic.") % { epic_ref: child_epic.to_reference(target_epic) }
           end

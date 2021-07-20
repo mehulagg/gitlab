@@ -28,8 +28,8 @@ module QA
                 element :template_option_row
               end
 
-              view 'ee/app/views/projects/_new_ci_cd_only_project_tab.html.haml' do
-                element :ci_cd_project_tab
+              view 'app/assets/javascripts/vue_shared/new_namespace/components/welcome.vue' do
+                element :panel_link
               end
             end
           end
@@ -50,8 +50,8 @@ module QA
             find_element(:instance_template_tab_badge).text
           end
 
-          def click_ci_cd_for_external_repo
-            click_element :ci_cd_project_tab
+          def click_cicd_for_external_repo
+            click_element(:panel_link, panel_name: 'cicd_for_external_repo')
           end
         end
       end

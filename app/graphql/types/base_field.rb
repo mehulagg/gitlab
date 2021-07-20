@@ -2,55 +2,52 @@
 
 module Types
   class BaseField < GraphQL::Schema::Field
-    prepend Gitlab::Graphql::Authorize
     include GitlabStyleDeprecations
 
     argument_class ::Types::BaseArgument
 
     DEFAULT_COMPLEXITY = 1
 
-    def initialize(*args, **kwargs, &block)
+    attr_reader :deprecation, :doc_reference
+
+    def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
-      @constant_complexity = !!kwargs[:complexity]
+      @doc_reference = kwargs.delete(:see)
+      @constant_complexity = kwargs[:complexity].is_a?(Integer) && kwargs[:complexity] > 0
       @requires_argument = !!kwargs.delete(:requires_argument)
+      @authorize = Array.wrap(kwargs.delete(:authorize))
       kwargs[:complexity] = field_complexity(kwargs[:resolver_class], kwargs[:complexity])
       @feature_flag = kwargs[:feature_flag]
       kwargs = check_feature_flag(kwargs)
-      kwargs = gitlab_deprecation(kwargs)
+      @deprecation = gitlab_deprecation(kwargs)
 
-      super(*args, **kwargs, &block)
+      super(**kwargs, &block)
+
+      # We want to avoid the overhead of this in prod
+      extension ::Gitlab::Graphql::CallsGitaly::FieldExtension if Gitlab.dev_or_test_env?
+      extension ::Gitlab::Graphql::Present::FieldExtension
+      extension ::Gitlab::Graphql::Authorize::ConnectionFilterExtension
+    end
+
+    def may_call_gitaly?
+      @constant_complexity || @calls_gitaly
     end
 
     def requires_argument?
       @requires_argument || arguments.values.any? { |argument| argument.type.non_null? }
     end
 
-    # Based on https://github.com/rmosolgo/graphql-ruby/blob/v1.11.4/lib/graphql/schema/field.rb#L538-L563
-    # Modified to fix https://github.com/rmosolgo/graphql-ruby/issues/3113
-    def resolve_field(obj, args, ctx)
-      ctx.schema.after_lazy(obj) do |after_obj|
-        query_ctx = ctx.query.context
-        inner_obj = after_obj&.object
-
-        ctx.schema.after_lazy(to_ruby_args(after_obj, args, ctx)) do |ruby_args|
-          if authorized?(inner_obj, ruby_args, query_ctx)
-            if @resolve_proc
-              # We pass `after_obj` here instead of `inner_obj` because extensions expect a GraphQL::Schema::Object
-              with_extensions(after_obj, ruby_args, query_ctx) do |extended_obj, extended_args|
-                # Since `extended_obj` is now a GraphQL::Schema::Object, we need to get the inner object and pass that to `@resolve_proc`
-                extended_obj = extended_obj.object if extended_obj.is_a?(GraphQL::Schema::Object)
-
-                @resolve_proc.call(extended_obj, args, ctx)
-              end
-            else
-              public_send_field(after_obj, ruby_args, query_ctx)
-            end
-          else
-            err = GraphQL::UnauthorizedFieldError.new(object: inner_obj, type: obj.class, context: ctx, field: self)
-            query_ctx.schema.unauthorized_field(err)
-          end
-        end
-      end
+    # By default fields authorize against the current object, but that is not how our
+    # resolvers work - they use declarative permissions to authorize fields
+    # manually (so we make them opt in).
+    # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/300922
+    #       (separate out authorize into permissions on the object, and on the
+    #       resolved values)
+    # We do not support argument authorization in our schema. If/when we do,
+    # we should call `super` here, to apply argument authorization checks.
+    # See: https://gitlab.com/gitlab-org/gitlab/-/issues/324647
+    def authorized?(object, args, ctx)
+      field_authorized?(object, ctx) && resolver_authorized?(object, ctx)
     end
 
     def base_complexity
@@ -68,7 +65,7 @@ module Types
     end
 
     def visible?(context)
-      return false if feature_flag.present? && !Feature.enabled?(feature_flag)
+      return false if feature_flag.present? && !Feature.enabled?(feature_flag, default_enabled: :yaml)
 
       super
     end
@@ -77,13 +74,43 @@ module Types
 
     attr_reader :feature_flag
 
+    def field_authorized?(object, ctx)
+      authorization.ok?(object, ctx[:current_user])
+    end
+
+    # Historically our resolvers have used declarative permission checks only
+    # for _what they resolved_, not the _object they resolved these things from_
+    # We preserve these semantics here, and only apply resolver authorization
+    # if the resolver has opted in.
+    def resolver_authorized?(object, ctx)
+      if @resolver_class && @resolver_class.try(:authorizes_object?)
+        @resolver_class.authorized?(object, ctx)
+      else
+        true
+      end
+    end
+
+    def authorization
+      @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(@authorize)
+    end
+
     def feature_documentation_message(key, description)
-      "#{description} Available only when feature flag `#{key}` is enabled."
+      message_parts = ["#{description} Available only when feature flag `#{key}` is enabled."]
+
+      message_parts << if Feature::Definition.has_definition?(key) && Feature::Definition.default_enabled?(key)
+                         "This flag is enabled by default."
+                       else
+                         "This flag is disabled by default, because the feature is experimental and is subject to change without notice."
+                       end
+
+      message_parts.join(' ')
     end
 
     def check_feature_flag(args)
-      args[:description] = feature_documentation_message(args[:feature_flag], args[:description]) if args[:feature_flag].present?
-      args.delete(:feature_flag)
+      ff = args.delete(:feature_flag)
+      return args unless ff.present?
+
+      args[:description] = feature_documentation_message(ff, args[:description])
 
       args
     end
@@ -106,7 +133,9 @@ module Types
       # items which can be loaded.
       proc do |ctx, args, child_complexity|
         # Resolvers may add extra complexity depending on used arguments
-        complexity = child_complexity + self.resolver&.try(:resolver_complexity, args, child_complexity: child_complexity).to_i
+        complexity = child_complexity + resolver&.try(
+          :resolver_complexity, args, child_complexity: child_complexity
+        ).to_i
         complexity += 1 if calls_gitaly?
         complexity += complexity * connection_complexity_multiplier(ctx, args)
 
@@ -121,7 +150,7 @@ module Types
 
       page_size   = field_defn.connection_max_page_size || ctx.schema.default_max_page_size
       limit_value = [args[:first], args[:last], page_size].compact.min
-      multiplier  = self.resolver&.try(:complexity_multiplier, args).to_f
+      multiplier  = resolver&.try(:complexity_multiplier, args).to_f
       limit_value * multiplier
     end
   end

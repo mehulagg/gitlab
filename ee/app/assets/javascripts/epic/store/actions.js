@@ -1,5 +1,6 @@
 import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -41,7 +42,9 @@ export const fetchEpicDetails = ({ state, dispatch }) => {
 };
 
 export const requestEpicParticipantsFailure = () => {
-  flash(__('There was an error getting the epic participants.'));
+  createFlash({
+    message: __('There was an error getting the epic participants.'),
+  });
 };
 
 export const requestEpicStatusChange = ({ commit }) => commit(types.REQUEST_EPIC_STATUS_CHANGE);
@@ -51,7 +54,9 @@ export const requestEpicStatusChangeSuccess = ({ commit }, data) =>
 
 export const requestEpicStatusChangeFailure = ({ commit }) => {
   commit(types.REQUEST_EPIC_STATUS_CHANGE_FAILURE);
-  flash(__('Unable to update this epic at this time.'));
+  createFlash({
+    message: __('Unable to update this epic at this time.'),
+  });
 };
 
 export const triggerIssuableEvent = (_, { isEpicOpen }) => {
@@ -60,7 +65,7 @@ export const triggerIssuableEvent = (_, { isEpicOpen }) => {
   // comment form (part of Notes app) We've wrapped
   // call to `$(document).trigger` within `triggerDocumentEvent`
   // for ease of testing
-  epicUtils.triggerDocumentEvent('issuable_vue_app:change', isEpicOpen);
+  epicUtils.triggerDocumentEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, isEpicOpen);
   epicUtils.triggerDocumentEvent('issuable:change', isEpicOpen);
 };
 
@@ -105,9 +110,13 @@ export const requestEpicTodoToggleFailure = ({ commit, state }, data) => {
   commit(types.REQUEST_EPIC_TODO_TOGGLE_FAILURE, data);
 
   if (state.todoExists) {
-    flash(__('There was an error deleting the To Do.'));
+    createFlash({
+      message: __('There was an error deleting the To Do.'),
+    });
   } else {
-    flash(__('There was an error adding a To Do.'));
+    createFlash({
+      message: __('There was an error adding a To Do.'),
+    });
   }
 };
 export const triggerTodoToggleEvent = (_, { count }) => {
@@ -149,11 +158,11 @@ export const requestEpicDateSaveSuccess = ({ commit }, data) =>
   commit(types.REQUEST_EPIC_DATE_SAVE_SUCCESS, data);
 export const requestEpicDateSaveFailure = ({ commit }, data) => {
   commit(types.REQUEST_EPIC_DATE_SAVE_FAILURE, data);
-  flash(
-    sprintf(s__('Epics|An error occurred while saving the %{epicDateType} date'), {
+  createFlash({
+    message: sprintf(s__('Epics|An error occurred while saving the %{epicDateType} date'), {
       epicDateType: dateTypes.start === data.dateType ? s__('Epics|start') : s__('Epics|due'),
     }),
-  );
+  });
 };
 export const saveDate = ({ state, dispatch }, { dateType, dateTypeIsFixed, newDate }) => {
   const updateEpicInput = {
@@ -194,34 +203,8 @@ export const saveDate = ({ state, dispatch }, { dateType, dateTypeIsFixed, newDa
     });
 };
 
-export const updateConfidentialityOnIssuable = ({ state, commit }, { confidential }) => {
-  const updateEpicInput = {
-    iid: `${state.epicIid}`,
-    groupPath: state.fullPath,
-    confidential,
-  };
-
-  return epicUtils.gqClient
-    .mutate({
-      mutation: updateEpic,
-      variables: {
-        updateEpicInput,
-      },
-    })
-    .then(({ data }) => {
-      if (!data?.updateEpic?.errors.length) {
-        commit(types.SET_EPIC_CONFIDENTIAL, confidential);
-      } else {
-        const errMsg =
-          data?.updateEpic?.errors[0]?.replace(/Confidential /, '') ||
-          s__('Epics|Unable to perform this action');
-        throw errMsg;
-      }
-    })
-    .catch((error) => {
-      flash(error);
-      throw error;
-    });
+export const updateConfidentialityOnIssuable = ({ commit }, confidential) => {
+  commit(types.SET_EPIC_CONFIDENTIAL, confidential);
 };
 
 /**
@@ -232,7 +215,9 @@ export const receiveEpicLabelsSelectSuccess = ({ commit }, labels) =>
   commit(types.RECEIVE_EPIC_LABELS_SELECT_SUCCESS, labels);
 export const receiveEpicLabelsSelectFailure = ({ commit }) => {
   commit(types.RECEIVE_EPIC_LABELS_SELECT_FAILURE);
-  flash(s__('Epics|An error occurred while updating labels.'));
+  createFlash({
+    message: s__('Epics|An error occurred while updating labels.'),
+  });
 };
 export const updateEpicLabels = ({ dispatch, state }, labels) => {
   const addLabelIds = labels.filter((label) => label.set).map((label) => label.id);
@@ -275,9 +260,13 @@ export const requestEpicSubscriptionToggleSuccess = ({ commit }, data) =>
 export const requestEpicSubscriptionToggleFailure = ({ commit, state }) => {
   commit(types.REQUEST_EPIC_SUBSCRIPTION_TOGGLE_FAILURE);
   if (state.subscribed) {
-    flash(__('An error occurred while unsubscribing to notifications.'));
+    createFlash({
+      message: __('An error occurred while unsubscribing to notifications.'),
+    });
   } else {
-    flash(__('An error occurred while subscribing to notifications.'));
+    createFlash({
+      message: __('An error occurred while subscribing to notifications.'),
+    });
   }
 };
 export const toggleEpicSubscription = ({ state, dispatch }) => {
@@ -318,7 +307,9 @@ export const requestEpicCreate = ({ commit }) => commit(types.REQUEST_EPIC_CREAT
 export const requestEpicCreateSuccess = (_, webUrl) => visitUrl(webUrl);
 export const requestEpicCreateFailure = ({ commit }) => {
   commit(types.REQUEST_EPIC_CREATE_FAILURE);
-  flash(s__('Error creating epic'));
+  createFlash({
+    message: s__('Error creating epic'),
+  });
 };
 export const createEpic = ({ state, dispatch }) => {
   dispatch('requestEpicCreate');

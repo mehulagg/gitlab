@@ -17,8 +17,9 @@ module Gitlab
 
         override :find_and_update!
         def find_and_update!
-          save("GroupSaml Provider ##{saml_provider.id}")
+          add_or_update_user_identities
 
+          save("GroupSaml Provider ##{@saml_provider.id}")
           # Do not return un-persisted user so user is prompted
           # to sign-in to existing account.
           return unless valid_sign_in?
@@ -37,7 +38,7 @@ module Gitlab
         override :gl_user
         def gl_user
           strong_memoize(:gl_user) do
-            identity&.user || build_new_user
+            identity&.user || find_by_email || build_new_user
           end
         end
 
@@ -45,6 +46,14 @@ module Gitlab
           strong_memoize(:identity) do
             ::Auth::GroupSamlIdentityFinder.new(saml_provider, auth_hash).first
           end
+        end
+
+        override :find_by_email
+        def find_by_email
+          user = super
+          return unless user&.authorized_by_provisioning_group?(saml_provider.group)
+
+          user
         end
 
         override :build_new_user
@@ -70,6 +79,20 @@ module Gitlab
             hash[:saml_provider_id] = @saml_provider.id
             hash[:provider] = ::Users::BuildService::GROUP_SAML_PROVIDER
           end
+        end
+
+        override :add_or_update_user_identities
+        def add_or_update_user_identities
+          return unless gl_user
+          return if self.identity # extern_uid hasn't changed
+
+          # find_or_initialize_by doesn't update `gl_user.identities`, and isn't autosaved.
+          identity = gl_user.identities.find { |identity| identity.provider == auth_hash.provider && identity.saml_provider_id == @saml_provider.id }
+          identity ||= gl_user.identities.build(provider: auth_hash.provider, saml_provider: @saml_provider)
+
+          identity.extern_uid = auth_hash.uid
+
+          identity
         end
 
         def update_group_membership

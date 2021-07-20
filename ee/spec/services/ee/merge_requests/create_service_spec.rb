@@ -6,7 +6,7 @@ RSpec.describe MergeRequests::CreateService do
   include ProjectForksHelper
 
   let(:project) { create(:project, :repository) }
-  let(:service) { described_class.new(project, user, opts) }
+  let(:service) { described_class.new(project: project, current_user: user, params: opts) }
   let(:opts) do
     {
       title: 'Awesome merge_request',
@@ -28,14 +28,11 @@ RSpec.describe MergeRequests::CreateService do
       project.add_maintainer(user)
     end
 
-    it 'refreshes code owners for the merge request' do
-      fake_refresh_service = instance_double(::MergeRequests::SyncCodeOwnerApprovalRules)
-
-      expect(::MergeRequests::SyncCodeOwnerApprovalRules)
-        .to receive(:new).with(kind_of(MergeRequest)).and_return(fake_refresh_service)
-      expect(fake_refresh_service).to receive(:execute)
-
-      service.execute
+    it 'schedules refresh of code owners for the merge request' do
+      Sidekiq::Testing.fake! do
+        expect { service.execute }.to change(::MergeRequests::SyncCodeOwnerApprovalRulesWorker.jobs, :size).by(1)
+        ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.clear
+      end
     end
 
     context 'report approvers' do

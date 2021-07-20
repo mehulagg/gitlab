@@ -148,7 +148,7 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
 
         context 'when the oauth_application is missing' do
           before do
-            node.oauth_application.destroy
+            node.oauth_application.destroy!
             node.oauth_application = nil
           end
 
@@ -156,17 +156,28 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
             expect(node).to be_valid
 
             expect(node.oauth_application).to be_present
-            expect(node.oauth_application.redirect_uri).to eq(node.oauth_callback_url)
+            expect(node.oauth_application).to have_attributes(
+              confidential: true,
+              trusted: true,
+              redirect_uri: node.oauth_callback_url
+            )
           end
         end
 
-        it 'overwrites redirect_uri' do
+        it 'overwrites name, and redirect_uri attributes' do
+          node.oauth_application.name = 'Fake App'
+          node.oauth_application.confidential = false
+          node.oauth_application.trusted = false
           node.oauth_application.redirect_uri = 'http://wrong-callback-url'
           node.oauth_application.save!
 
           expect(node).to be_valid
-
-          expect(node.oauth_application.redirect_uri).to eq(node.oauth_callback_url)
+          expect(node.oauth_application).to have_attributes(
+            name: "Geo node: #{node.url}",
+            confidential: false,
+            trusted: false,
+            redirect_uri: node.oauth_callback_url
+          )
         end
       end
 
@@ -244,7 +255,7 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
     it 'expires cache when removed' do
       expect(node).to receive(:expire_cache!) # 1 for creation 1 for deletion
 
-      node.destroy
+      node.destroy!
     end
   end
 
@@ -350,17 +361,17 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
     end
   end
 
-  describe '#current?' do
+  describe '.current?' do
     it 'returns true when node is the current node' do
       node = described_class.new(name: described_class.current_node_name)
 
-      expect(node.current?).to be_truthy
+      expect(described_class.current?(node)).to be_truthy
     end
 
     it 'returns false when node is not the current node' do
       node = described_class.new(name: 'some other node')
 
-      expect(node.current?).to be_falsy
+      expect(described_class.current?(node)).to be_falsy
     end
   end
 
@@ -585,7 +596,7 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
 
       expect(status).to be_a(GeoNodeStatus)
 
-      status.save
+      status.save!
 
       expect(new_node.find_or_build_status).to eq(status)
     end

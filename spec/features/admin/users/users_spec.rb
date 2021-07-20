@@ -3,19 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe 'Admin::Users' do
-  include Spec::Support::Helpers::Features::ResponsiveTableHelpers
+  include Spec::Support::Helpers::Features::AdminUsersHelpers
 
   let_it_be(:user, reload: true) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
-  let_it_be(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
+  let_it_be(:current_user) { create(:admin) }
 
   before do
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
   end
 
-  describe 'GET /admin/users' do
+  describe 'GET /admin/users', :js do
     before do
-      stub_feature_flags(vue_admin_users: false)
       visit admin_users_path
     end
 
@@ -24,17 +23,30 @@ RSpec.describe 'Admin::Users' do
     end
 
     it "has users list" do
+      current_user.reload
+
       expect(page).to have_content(current_user.email)
       expect(page).to have_content(current_user.name)
       expect(page).to have_content(current_user.created_at.strftime('%e %b, %Y'))
-      expect(page).to have_content(current_user.last_activity_on.strftime('%e %b, %Y'))
       expect(page).to have_content(user.email)
       expect(page).to have_content(user.name)
       expect(page).to have_content('Projects')
+
+      click_user_dropdown_toggle(user.id)
+
       expect(page).to have_button('Block')
       expect(page).to have_button('Deactivate')
       expect(page).to have_button('Delete user')
       expect(page).to have_button('Delete user and contributions')
+    end
+
+    it 'clicking edit user takes us to edit page', :aggregate_failures do
+      page.within("[data-testid='user-actions-#{user.id}']") do
+        click_link 'Edit'
+      end
+
+      expect(page).to have_content('Name')
+      expect(page).to have_content('Password')
     end
 
     describe 'view extra user information' do
@@ -112,7 +124,6 @@ RSpec.describe 'Admin::Users' do
         visit admin_users_path(search_query: 'Foo')
 
         sort_by('Name')
-
         expect(page).not_to have_content('Dmitriy')
         expect(first_row.text).to include('Foo Bar')
         expect(second_row.text).to include('Foo Baz')
@@ -282,19 +293,42 @@ RSpec.describe 'Admin::Users' do
       end
     end
 
-    def click_action_in_user_dropdown(user_id, action)
-      find("[data-testid='user-action-button-#{user_id}']").click
+    describe 'internal users' do
+      context 'when showing a `Ghost User`' do
+        let_it_be(:ghost_user) { create(:user, :ghost) }
 
-      within find("[data-testid='user-action-dropdown-#{user_id}']") do
-        find('li button', text: action).click
+        it 'does not render actions dropdown' do
+          expect(page).not_to have_css("[data-testid='user-actions-#{ghost_user.id}'] [data-testid='dropdown-toggle']")
+        end
       end
 
-      wait_for_requests
+      context 'when showing a `Bot User`' do
+        let_it_be(:bot_user) { create(:user, user_type: :alert_bot) }
+
+        it 'does not render actions dropdown' do
+          expect(page).not_to have_css("[data-testid='user-actions-#{bot_user.id}'] [data-testid='dropdown-toggle']")
+        end
+      end
+    end
+
+    context 'user group count', :js do
+      before do
+        group = create(:group)
+        group.add_developer(current_user)
+        project = create(:project, group: create(:group))
+        project.add_reporter(current_user)
+      end
+
+      it 'displays count of the users authorized groups' do
+        wait_for_requests
+
+        expect(page.find("[data-testid='user-group-count-#{current_user.id}']").text).to eq("2")
+      end
     end
   end
 
   describe 'GET /admin/users/new' do
-    let(:user_username) { 'bang' }
+    let_it_be(:user_username) { 'bang' }
 
     before do
       visit new_admin_user_path
@@ -344,7 +378,7 @@ RSpec.describe 'Admin::Users' do
     end
 
     context 'username contains spaces' do
-      let(:user_username) { 'Bing bang' }
+      let_it_be(:user_username) { 'Bing bang' }
 
       it "doesn't create the user and shows an error message" do
         expect { click_button 'Create user' }.to change {User.count}.by(0)
@@ -361,22 +395,6 @@ RSpec.describe 'Admin::Users' do
           stub_application_setting(user_default_internal_regex: '\.internal@')
 
           visit new_admin_user_path
-        end
-
-        def expects_external_to_be_checked
-          expect(find('#user_external')).to be_checked
-        end
-
-        def expects_external_to_be_unchecked
-          expect(find('#user_external')).not_to be_checked
-        end
-
-        def expects_warning_to_be_hidden
-          expect(find('#warning_external_automatically_set', visible: :all)[:class]).to include 'hidden'
-        end
-
-        def expects_warning_to_be_shown
-          expect(find('#warning_external_automatically_set')[:class]).not_to include 'hidden'
         end
 
         it 'automatically unchecks external for matching email' do
@@ -413,55 +431,22 @@ RSpec.describe 'Admin::Users' do
 
           expect(new_user.external).to be_falsy
         end
-      end
-    end
-  end
 
-  describe 'GET /admin/users/:id/edit' do
-    before do
-      stub_feature_flags(vue_admin_users: false)
-      visit admin_users_path
-      click_link "edit_user_#{user.id}"
-    end
-
-    it 'has user edit page' do
-      expect(page).to have_content('Name')
-      expect(page).to have_content('Password')
-    end
-
-    describe 'Update user' do
-      before do
-        fill_in 'user_name', with: 'Big Bang'
-        fill_in 'user_email', with: 'bigbang@mail.com'
-        fill_in 'user_password', with: 'AValidPassword1'
-        fill_in 'user_password_confirmation', with: 'AValidPassword1'
-        choose 'user_access_level_admin'
-        click_button 'Save changes'
-      end
-
-      it 'shows page with new data' do
-        expect(page).to have_content('bigbang@mail.com')
-        expect(page).to have_content('Big Bang')
-      end
-
-      it 'changes user entry' do
-        user.reload
-        expect(user.name).to eq('Big Bang')
-        expect(user.admin?).to be_truthy
-        expect(user.password_expires_at).to be <= Time.now
-      end
-    end
-
-    describe 'update username to non ascii char' do
-      it do
-        fill_in 'user_username', with: '\u3042\u3044'
-        click_button('Save')
-
-        page.within '#error_explanation' do
-          expect(page).to have_content('Username')
+        def expects_external_to_be_checked
+          expect(find('#user_external')).to be_checked
         end
 
-        expect(page).to have_selector(%(form[action="/admin/users/#{user.username}"]))
+        def expects_external_to_be_unchecked
+          expect(find('#user_external')).not_to be_checked
+        end
+
+        def expects_warning_to_be_hidden
+          expect(find('#warning_external_automatically_set', visible: :all)[:class]).to include 'hidden'
+        end
+
+        def expects_warning_to_be_shown
+          expect(find('#warning_external_automatically_set')[:class]).not_to include 'hidden'
+        end
       end
     end
   end
@@ -541,15 +526,66 @@ RSpec.describe 'Admin::Users' do
 
       check_breadcrumb('Edit Identity')
     end
+
+    def check_breadcrumb(content)
+      expect(find('.breadcrumbs-sub-title')).to have_content(content)
+    end
   end
 
-  def check_breadcrumb(content)
-    expect(find('.breadcrumbs-sub-title')).to have_content(content)
+  describe 'GET /admin/users/:id/edit' do
+    before do
+      visit edit_admin_user_path(user)
+    end
+
+    describe 'Update user' do
+      before do
+        fill_in 'user_name', with: 'Big Bang'
+        fill_in 'user_email', with: 'bigbang@mail.com'
+        fill_in 'user_password', with: 'AValidPassword1'
+        fill_in 'user_password_confirmation', with: 'AValidPassword1'
+        choose 'user_access_level_admin'
+        click_button 'Save changes'
+      end
+
+      it 'shows page with new data' do
+        expect(page).to have_content('bigbang@mail.com')
+        expect(page).to have_content('Big Bang')
+      end
+
+      it 'changes user entry' do
+        user.reload
+        expect(user.name).to eq('Big Bang')
+        expect(user.admin?).to be_truthy
+        expect(user.password_expires_at).to be <= Time.now
+      end
+    end
+
+    describe 'update username to non ascii char' do
+      it do
+        fill_in 'user_username', with: '\u3042\u3044'
+        click_button('Save')
+
+        page.within '#error_explanation' do
+          expect(page).to have_content('Username')
+        end
+
+        expect(page).to have_selector(%(form[action="/admin/users/#{user.username}"]))
+      end
+    end
   end
 
-  def sort_by(text)
-    page.within('.user-sort-dropdown') do
-      click_link text
+  def first_row
+    page.all('[role="row"]')[1]
+  end
+
+  def second_row
+    page.all('[role="row"]')[2]
+  end
+
+  def sort_by(option)
+    page.within('.filtered-search-block') do
+      find('.dropdown-menu-toggle').click
+      click_link option
     end
   end
 end

@@ -5,9 +5,9 @@ module QA
     module Project
       module Settings
         class Integrations < QA::Page::Base
-          view 'app/views/shared/integrations/_index.html.haml' do
-            element :prometheus_link, 'data: { qa_selector: "#{integration.to_param' # rubocop:disable QA/ElementWithPattern
-            element :jira_link, 'data: { qa_selector: "#{integration.to_param' # rubocop:disable QA/ElementWithPattern
+          view 'app/assets/javascripts/integrations/index/components/integrations_table.vue' do
+            element :prometheus_link, %q(:data-qa-selector="`${item.name}_link`") # rubocop:disable QA/ElementWithPattern
+            element :jira_link, %q(:data-qa-selector="`${item.name}_link`") # rubocop:disable QA/ElementWithPattern
           end
 
           def click_on_prometheus_integration
@@ -23,4 +23,4 @@ module QA
   end
 end
 
-QA::Page::Project::Settings::Integrations.prepend_if_ee('QA::EE::Page::Project::Settings::Integrations')
+QA::Page::Project::Settings::Integrations.prepend_mod_with('Page::Project::Settings::Integrations', namespace: QA)

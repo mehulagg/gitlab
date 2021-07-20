@@ -5,6 +5,7 @@ import {
   GlModal,
   GlSkeletonLoader,
   GlTable,
+  GlSafeHtmlDirective,
   GlTooltipDirective,
   GlDropdown,
   GlDropdownItem,
@@ -12,6 +13,7 @@ import {
 } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -25,6 +27,7 @@ export default {
     GlIcon,
   },
   directives: {
+    SafeHtml: GlSafeHtmlDirective,
     GlTooltip: GlTooltipDirective,
   },
   props: {
@@ -115,8 +118,16 @@ export default {
     },
   },
   methods: {
+    deleteTitle(item) {
+      return this.isPolicyProfile(item)
+        ? s__('DastProfiles|This profile is currently being used in a policy.')
+        : s__('DastProfiles|Delete profile');
+    },
     handleDelete() {
       this.$emit('delete-profile', this.toBeDeletedProfileId);
+    },
+    isPolicyProfile(item) {
+      return Boolean(item?.referencedInSecurityPolicies?.length);
     },
     prepareProfileDeletion(profileId) {
       this.toBeDeletedProfileId = profileId;
@@ -155,7 +166,11 @@ export default {
                 :aria-label="__('DastProfiles|Error Details')"
                 class="gl-p-0 gl-m-0"
               >
-                <li v-for="errorDetail in errorDetails" :key="errorDetail">{{ errorDetail }}</li>
+                <li
+                  v-for="errorDetail in errorDetails"
+                  :key="errorDetail"
+                  v-safe-html="errorDetail"
+                ></li>
               </ul>
             </gl-alert>
           </td>
@@ -178,14 +193,15 @@ export default {
             <gl-dropdown
               v-gl-tooltip
               class="gl-display-none gl-md-display-inline-flex!"
-              toggle-class="gl-border-0! gl-shadow-none!"
+              toggle-class="gl-border-0! gl-shadow-none! gl-pl-2!"
               no-caret
               right
               category="tertiary"
+              size="small"
               :title="__('More actions')"
             >
               <template #button-content>
-                <gl-icon name="ellipsis_v" />
+                <gl-icon name="ellipsis_v" class="gl-mr-0!" />
                 <span class="gl-sr-only">{{ __('Actions') }}</span>
               </template>
 
@@ -193,15 +209,33 @@ export default {
                 v-if="item.editPath"
                 :href="item.editPath"
                 :title="s__('DastProfiles|Edit profile')"
-                >{{ __('Edit') }}</gl-dropdown-item
               >
+                {{ __('Edit') }}
+              </gl-dropdown-item>
 
               <gl-dropdown-item
+                v-gl-tooltip="{
+                  boundary: 'viewport',
+                  placement: 'bottom',
+                  disabled: !isPolicyProfile(item),
+                }"
+                boundary="viewport"
+                :class="{
+                  'gl-cursor-default': isPolicyProfile(item),
+                }"
+                :disabled="isPolicyProfile(item)"
+                :aria-disabled="isPolicyProfile(item)"
                 variant="danger"
-                :title="s__('DastProfiles|Delete profile')"
+                :title="deleteTitle(item)"
                 @click="prepareProfileDeletion(item.id)"
               >
-                {{ __('Delete') }}
+                <span
+                  :class="{
+                    'gl-text-gray-200!': isPolicyProfile(item),
+                  }"
+                >
+                  {{ __('Delete') }}
+                </span>
               </gl-dropdown-item>
             </gl-dropdown>
             <gl-button
@@ -210,18 +244,27 @@ export default {
               category="tertiary"
               class="gl-ml-3 gl-my-1 gl-md-display-none"
               size="small"
-              >{{ __('Edit') }}</gl-button
             >
-            <gl-button
+              {{ __('Edit') }}
+            </gl-button>
+            <span
               v-gl-tooltip.hover.focus
-              category="tertiary"
-              icon="remove"
-              variant="danger"
-              size="small"
-              class="gl-mx-3 gl-my-1 gl-md-display-none"
-              :title="s__('DastProfiles|Delete profile')"
-              @click="prepareProfileDeletion(item.id)"
-            />
+              :title="deleteTitle(item)"
+              data-testid="dast-profile-delete-tooltip"
+            >
+              <gl-button
+                category="tertiary"
+                icon="remove"
+                variant="danger"
+                size="small"
+                class="gl-mx-3 gl-my-1 gl-md-display-none"
+                data-testid="dast-profile-delete-button"
+                :disabled="isPolicyProfile(item)"
+                :aria-disabled="isPolicyProfile(item)"
+                :aria-label="s__('DastProfiles|Delete profile')"
+                @click="prepareProfileDeletion(item.id)"
+              />
+            </span>
           </div>
         </template>
 

@@ -135,14 +135,16 @@ module Trigger
     end
 
     def extra_variables
-      # Use CI_MERGE_REQUEST_SOURCE_BRANCH_SHA for omnibus checkouts due to pipeline for merged results
-      # and fallback to CI_COMMIT_SHA for the `detached` pipelines.
-      # We also set IMAGE_TAG so the GitLab and QA docker images are tagged with
-      # that SHA.
+      # Use CI_MERGE_REQUEST_SOURCE_BRANCH_SHA (MR HEAD commit) so that the image is in sync with the assets and QA images.
+      # See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#with-pipeline-for-merged-results.
+      # We also set IMAGE_TAG so the GitLab Docker image is tagged with that SHA.
       source_sha = Trigger.non_empty_variable_value('CI_MERGE_REQUEST_SOURCE_BRANCH_SHA') || ENV['CI_COMMIT_SHA']
+
       {
         'GITLAB_VERSION' => source_sha,
         'IMAGE_TAG' => source_sha,
+        'QA_IMAGE' => "#{ENV['CI_REGISTRY']}/#{ENV['CI_PROJECT_PATH']}/gitlab-ee-qa:#{ENV['CI_COMMIT_REF_SLUG']}",
+        'SKIP_QA_DOCKER' => 'true',
         'ALTERNATIVE_SOURCES' => 'true',
         'SECURITY_SOURCES' => Trigger.security? ? 'true' : 'false',
         'ee' => Trigger.ee? ? 'true' : 'false',
@@ -170,17 +172,19 @@ module Trigger
     end
 
     def trigger_token
-      ENV['BUILD_TRIGGER_TOKEN']
+      ENV['CI_JOB_TOKEN']
     end
 
     def extra_variables
       edition = Trigger.ee? ? 'EE' : 'CE'
+      # Use CI_MERGE_REQUEST_SOURCE_BRANCH_SHA (MR HEAD commit) so that the image is in sync with the assets and QA images.
+      source_sha = Trigger.non_empty_variable_value('CI_MERGE_REQUEST_SOURCE_BRANCH_SHA') || ENV['CI_COMMIT_SHA']
 
       {
         "ee" => Trigger.ee? ? "true" : "false",
-        "GITLAB_VERSION" => ENV['CI_COMMIT_SHA'],
+        "GITLAB_VERSION" => source_sha,
         "GITLAB_TAG" => ENV['CI_COMMIT_TAG'],
-        "GITLAB_ASSETS_TAG" => ENV['CI_COMMIT_TAG'] ? ENV['CI_COMMIT_REF_NAME'] : ENV['CI_COMMIT_SHA'],
+        "GITLAB_ASSETS_TAG" => ENV['CI_COMMIT_TAG'] ? ENV['CI_COMMIT_REF_NAME'] : source_sha,
         "FORCE_RAILS_IMAGE_BUILDS" => 'true',
         "#{edition}_PIPELINE" => 'true'
       }
@@ -214,15 +218,7 @@ module Trigger
     => If something doesn't work, drop a line in the #docs chat channel.
     MSG
 
-    # Create a remote branch in gitlab-docs and immediately cancel the pipeline
-    # to avoid race conditions, since a triggered pipeline will also run right
-    # after the branch creation. This only happens the very first time a branch
-    # is created and will be skipped in subsequent runs. Read more in
-    # https://gitlab.com/gitlab-org/gitlab-docs/issues/154.
-    #
     def deploy!
-      create_remote_branch!
-      cancel_latest_pipeline!
       invoke!.wait!
       display_success_message
     end
@@ -231,31 +227,52 @@ module Trigger
     # Remove a remote branch in gitlab-docs.
     #
     def cleanup!
-      gitlab_client(:downstream).delete_branch(downstream_project_path, ref)
-      puts "=> Remote branch '#{downstream_project_path}' deleted"
+      environment = gitlab_client(:downstream).environments(downstream_project_path, name: downstream_environment).first
+      return unless environment
+
+      environment = gitlab_client(:downstream).stop_environment(downstream_project_path, environment.id)
+      if environment.state == 'stopped'
+        puts "=> Downstream environment '#{downstream_environment}' stopped"
+      else
+        puts "=> Downstream environment '#{downstream_environment}' failed to stop."
+      end
     end
 
     private
+
+    def downstream_environment
+      "review/#{ref}#{review_slug}"
+    end
+
+    # We prepend the `-` here because we cannot use variable substitution in `environment.name`/`environment.url`
+    # Some projects (e.g. `omnibus-gitlab`) use this script for branch pipelines, so we fallback to using `CI_COMMIT_REF_SLUG` for those cases.
+    def review_slug
+      identifier = ENV['CI_MERGE_REQUEST_IID'] || ENV['CI_COMMIT_REF_SLUG']
+
+      "-#{project_slug}-#{identifier}"
+    end
 
     def downstream_project_path
       ENV['DOCS_PROJECT_PATH'] || 'gitlab-org/gitlab-docs'
     end
 
     def ref
-      if ENV['CI_MERGE_REQUEST_IID'].nil?
-        "docs-preview-#{slug}-#{ENV['CI_COMMIT_REF_SLUG']}"
-      else
-        "docs-preview-#{slug}-#{ENV['CI_MERGE_REQUEST_IID']}"
-      end
+      ENV['DOCS_BRANCH'] || 'main'
+    end
+
+    # `gitlab-org/gitlab-docs` pipeline trigger "Triggered from gitlab-org/gitlab 'review-docs-deploy' job"
+    def trigger_token
+      ENV['DOCS_TRIGGER_TOKEN']
     end
 
     def extra_variables
       {
-        "BRANCH_#{slug.upcase}" => ENV['CI_COMMIT_REF_NAME']
+        "BRANCH_#{project_slug.upcase}" => ENV['CI_COMMIT_REF_NAME'],
+        "REVIEW_SLUG" => review_slug
       }
     end
 
-    def slug
+    def project_slug
       case ENV['CI_PROJECT_PATH']
       when 'gitlab-org/gitlab-foss'
         'ce'
@@ -270,43 +287,44 @@ module Trigger
       end
     end
 
+    # app_url is the URL of the `gitlab-docs` Review App URL defined in
+    # https://gitlab.com/gitlab-org/gitlab-docs/-/blob/b38038132cf82a24271bbb294dead7c2f529e275/.gitlab-ci.yml#L383
     def app_url
-      "http://#{ref}.#{ENV['DOCS_REVIEW_APPS_DOMAIN']}/#{slug}"
-    end
-
-    def create_remote_branch!
-      gitlab_client(:downstream).create_branch(downstream_project_path, ref, 'master')
-      puts "=> Remote branch '#{ref}' created"
-    rescue Gitlab::Error::BadRequest
-      puts "=> Remote branch '#{ref}' already exists!"
-    end
-
-    def cancel_latest_pipeline!
-      pipelines = nil
-
-      # Wait until the pipeline is started
-      loop do
-        sleep 1
-        puts "=> Waiting for pipeline to start..."
-        pipelines = gitlab_client(:downstream).pipelines(downstream_project_path, { ref: ref })
-        break if pipelines.any?
-      end
-
-      # Get the first pipeline ID which should be the only one for the branch
-      pipeline_id = pipelines.first.id
-
-      # Cancel the pipeline
-      gitlab_client(:downstream).cancel_pipeline(downstream_project_path, pipeline_id)
+      "http://#{ref}#{review_slug}.#{ENV['DOCS_REVIEW_APPS_DOMAIN']}/#{project_slug}"
     end
 
     def display_success_message
-      format(SUCCESS_MESSAGE, app_url: app_url)
+      puts format(SUCCESS_MESSAGE, app_url: app_url)
     end
   end
 
   class DatabaseTesting < Base
+    IDENTIFIABLE_NOTE_TAG = 'gitlab-org/database-team/gitlab-com-database-testing:identifiable-note'
+
     def self.access_token
       ENV['GITLABCOM_DATABASE_TESTING_ACCESS_TOKEN']
+    end
+
+    def invoke!(post_comment: false, downstream_job_name: nil)
+      pipeline = super
+      gitlab = gitlab_client(:upstream)
+      project_path = base_variables['TOP_UPSTREAM_SOURCE_PROJECT']
+      merge_request_id = base_variables['TOP_UPSTREAM_MERGE_REQUEST_IID']
+      comment = "<!-- #{IDENTIFIABLE_NOTE_TAG} --> \nStarted database testing [pipeline](https://ops.gitlab.net/#{downstream_project_path}/-/pipelines/#{pipeline.id}) " \
+                "(limited access). This comment will be updated once the pipeline has finished running."
+
+      # Look for an existing note
+      db_testing_notes = gitlab.merge_request_notes(project_path, merge_request_id).auto_paginate.select do |note|
+        note.body.include?(IDENTIFIABLE_NOTE_TAG)
+      end
+
+      if db_testing_notes.empty?
+        # This is the first note
+        note = gitlab.create_merge_request_note(project_path, merge_request_id, comment)
+
+        puts "Posted comment to:\n"
+        puts "https://gitlab.com/#{project_path}/-/merge_requests/#{merge_request_id}#note_#{note.id}"
+      end
     end
 
     private
@@ -364,6 +382,8 @@ module Trigger
     INTERVAL = 60 # seconds
     MAX_DURATION = 3600 * 3 # 3 hours
 
+    attr_reader :id
+
     def self.unscoped_class_name
       name.split('::').last
     end
@@ -392,7 +412,7 @@ module Trigger
           raise "#{self.class.unscoped_class_name} did not succeed!"
         end
 
-        STDOUT.flush
+        $stdout.flush
       end
 
       raise "#{self.class.unscoped_class_name} timed out after waiting for #{duration} minutes!"
@@ -413,7 +433,7 @@ module Trigger
 
     private
 
-    attr_reader :project, :id, :gitlab_client, :start_time
+    attr_reader :project, :gitlab_client, :start_time
   end
 
   Job = Class.new(Pipeline)

@@ -2,9 +2,10 @@
 import { GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapState, mapActions } from 'vuex';
+import { STEPS } from 'ee/subscriptions/constants';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { s__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
-import Step from './step.vue';
 
 export default {
   components: {
@@ -128,11 +129,12 @@ export default {
     stateSelectPrompt: s__('Checkout|Please select a state'),
     zipCodeLabel: s__('Checkout|Zip code'),
   },
+  stepId: STEPS[1].id,
 };
 </script>
 <template>
   <step
-    step="billingAddress"
+    :step-id="$options.stepId"
     :title="$options.i18n.stepTitle"
     :is-valid="isValid"
     :next-step-button-text="$options.i18n.nextStepButtonText"
@@ -144,22 +146,35 @@ export default {
           v-autofocusonshow
           :options="countryOptionsWithDefault"
           class="js-country"
+          data-qa-selector="country"
           @change="fetchStates"
         />
       </gl-form-group>
       <gl-form-group :label="$options.i18n.streetAddressLabel" label-size="sm" class="mb-3">
-        <gl-form-input v-model="streetAddressLine1Model" type="text" />
-        <gl-form-input v-model="streetAddressLine2Model" type="text" class="mt-2" />
+        <gl-form-input
+          v-model="streetAddressLine1Model"
+          type="text"
+          data-qa-selector="street_address_1"
+        />
+        <gl-form-input
+          v-model="streetAddressLine2Model"
+          type="text"
+          data-qa-selector="street_address_2"
+        />
       </gl-form-group>
       <gl-form-group :label="$options.i18n.cityLabel" label-size="sm" class="mb-3">
-        <gl-form-input v-model="cityModel" type="text" />
+        <gl-form-input v-model="cityModel" type="text" data-qa-selector="city" />
       </gl-form-group>
       <div class="combined d-flex">
         <gl-form-group :label="$options.i18n.stateLabel" label-size="sm" class="mr-3 w-50">
-          <gl-form-select v-model="countryStateModel" :options="stateOptionsWithDefault" />
+          <gl-form-select
+            v-model="countryStateModel"
+            :options="stateOptionsWithDefault"
+            data-qa-selector="state"
+          />
         </gl-form-group>
         <gl-form-group :label="$options.i18n.zipCodeLabel" label-size="sm" class="w-50">
-          <gl-form-input v-model="zipCodeModel" type="text" />
+          <gl-form-input v-model="zipCodeModel" type="text" data-qa-selector="zip_code" />
         </gl-form-group>
       </div>
     </template>

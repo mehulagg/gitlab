@@ -168,11 +168,13 @@ RSpec.describe ApplicationHelper do
     it { expect(helper.active_when(false)).to eq(nil) }
   end
 
-  describe '#promo_host' do
-    subject { helper.promo_host }
+  unless Gitlab.jh?
+    describe '#promo_host' do
+      subject { helper.promo_host }
 
-    it 'returns the url' do
-      is_expected.to eq('about.gitlab.com')
+      it 'returns the url' do
+        is_expected.to eq('about.gitlab.com')
+      end
     end
   end
 
@@ -180,7 +182,7 @@ RSpec.describe ApplicationHelper do
     subject { helper.promo_url }
 
     it 'returns the url' do
-      is_expected.to eq('https://about.gitlab.com')
+      is_expected.to eq("https://#{helper.promo_host}")
     end
 
     it 'changes if promo_host changes' do
@@ -194,7 +196,7 @@ RSpec.describe ApplicationHelper do
     subject { helper.contact_sales_url }
 
     it 'returns the url' do
-      is_expected.to eq('https://about.gitlab.com/sales')
+      is_expected.to eq("https://#{helper.promo_host}/sales")
     end
 
     it 'changes if promo_url changes' do
@@ -282,14 +284,29 @@ RSpec.describe ApplicationHelper do
   end
 
   describe '#autocomplete_data_sources' do
-    let(:project) { create(:project) }
-    let(:noteable_type) { Issue }
+    context 'group' do
+      let(:group) { create(:group) }
+      let(:noteable_type) { Issue }
 
-    it 'returns paths for autocomplete_sources_controller' do
-      sources = helper.autocomplete_data_sources(project, noteable_type)
-      expect(sources.keys).to match_array([:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
-      sources.keys.each do |key|
-        expect(sources[key]).not_to be_nil
+      it 'returns paths for autocomplete_sources_controller' do
+        sources = helper.autocomplete_data_sources(group, noteable_type)
+        expect(sources.keys).to include(:members, :issues, :mergeRequests, :labels, :milestones, :commands)
+        sources.keys.each do |key|
+          expect(sources[key]).not_to be_nil
+        end
+      end
+    end
+
+    context 'project' do
+      let(:project) { create(:project) }
+      let(:noteable_type) { Issue }
+
+      it 'returns paths for autocomplete_sources_controller' do
+        sources = helper.autocomplete_data_sources(project, noteable_type)
+        expect(sources.keys).to match_array([:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
+        sources.keys.each do |key|
+          expect(sources[key]).not_to be_nil
+        end
       end
     end
   end
@@ -316,9 +333,7 @@ RSpec.describe ApplicationHelper do
       let(:user) { create(:user, static_object_token: 'hunter1') }
 
       before do
-        allow_next_instance_of(ApplicationSetting) do |instance|
-          allow(instance).to receive(:static_objects_external_storage_url).and_return('https://cdn.gitlab.com')
-        end
+        stub_application_setting(static_objects_external_storage_url: 'https://cdn.gitlab.com')
         allow(helper).to receive(:current_user).and_return(user)
       end
 

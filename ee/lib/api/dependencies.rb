@@ -36,7 +36,7 @@ module API
       get ':id/dependencies' do
         authorize! :read_dependencies, user_project
 
-        track_event('view_dependencies')
+        ::Gitlab::Tracking.event(self.options[:for].name, 'view_dependencies', project: user_project, user: current_user, namespace: user_project.namespace)
 
         dependency_params = declared_params(include_missing: false).merge(project: user_project)
         dependencies = dependencies_by(dependency_params)

@@ -2,12 +2,12 @@
 
 class Groups::IssuesAnalyticsController < Groups::ApplicationController
   include IssuableCollections
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
   before_action :authorize_read_group!
   before_action :authorize_read_issue_analytics!
 
-  track_unique_visits :show, target_id: 'g_analytics_issues'
+  track_redis_hll_event :show, name: 'g_analytics_issues'
 
   feature_category :planning_analytics
 
@@ -31,7 +31,7 @@ class Groups::IssuesAnalyticsController < Groups::ApplicationController
   private
 
   def authorize_read_issue_analytics!
-    render_404 unless group.feature_available?(:issues_analytics)
+    render_404 unless group.licensed_feature_available?(:issues_analytics)
   end
 
   def authorize_read_group!

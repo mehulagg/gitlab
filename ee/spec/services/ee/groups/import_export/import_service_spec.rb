@@ -41,16 +41,6 @@ RSpec.describe Groups::ImportExport::ImportService do
       end
     end
 
-    context 'when feature flag :group_wiki_import_export is disabled' do
-      it 'does not export group wiki repositories' do
-        stub_feature_flags(group_wiki_import_export: false)
-
-        expect(::Gitlab::ImportExport::Group::GroupAndDescendantsRepoRestorer).not_to receive(:new)
-
-        import_service.execute
-      end
-    end
-
     context 'when export file not in ndjson format' do
       let(:import_file) { fixture_file_upload('spec/fixtures/legacy_group_export.tar.gz') }
 

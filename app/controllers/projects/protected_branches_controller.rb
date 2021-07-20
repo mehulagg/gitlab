@@ -21,6 +21,7 @@ class Projects::ProtectedBranchesController < Projects::ProtectedRefsController
 
   def protected_ref_params(*attrs)
     attrs = ([:name,
+              :allow_force_push,
               merge_access_levels_attributes: access_level_attributes,
               push_access_levels_attributes: access_level_attributes] + attrs).uniq
 
@@ -28,4 +29,4 @@ class Projects::ProtectedBranchesController < Projects::ProtectedRefsController
   end
 end
 
-Projects::ProtectedBranchesController.prepend_if_ee('EE::Projects::ProtectedBranchesController')
+Projects::ProtectedBranchesController.prepend_mod_with('Projects::ProtectedBranchesController')

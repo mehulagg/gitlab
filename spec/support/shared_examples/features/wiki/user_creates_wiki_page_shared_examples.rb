@@ -20,17 +20,6 @@ RSpec.shared_examples 'User creates wiki page' do
       click_link "Create your first page"
     end
 
-    it "shows validation error message if the form is force submitted", :js do
-      page.within(".wiki-form") do
-        fill_in(:wiki_content, with: "")
-
-        page.execute_script("window.onbeforeunload = null")
-        page.execute_script("document.querySelector('.wiki-form').submit()")
-      end
-
-      expect(page).to have_content("The form contains the following error:").and have_content("Content can't be blank")
-    end
-
     it "disables the submit button", :js do
       page.within(".wiki-form") do
         fill_in(:wiki_content, with: "")
@@ -240,7 +229,7 @@ RSpec.shared_examples 'User creates wiki page' do
       end
     end
 
-    it "shows the emoji autocompletion dropdown" do
+    it "shows the emoji autocompletion dropdown", :js do
       click_link("New page")
 
       page.within(".wiki-form") do

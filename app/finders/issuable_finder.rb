@@ -47,9 +47,10 @@ class IssuableFinder
   NEGATABLE_PARAMS_HELPER_KEYS = %i[project_id scope status include_subgroups].freeze
 
   attr_accessor :current_user, :params
+  attr_reader :original_params
   attr_writer :parent
 
-  delegate(*%i[assignee milestones], to: :params)
+  delegate(*%i[milestones], to: :params)
 
   class << self
     def scalar_params
@@ -87,7 +88,7 @@ class IssuableFinder
     end
 
     def valid_params
-      @valid_params ||= scalar_params + [array_params.merge(not: {})]
+      @valid_params ||= scalar_params + [array_params.merge(or: {}, not: {})]
     end
   end
 
@@ -101,6 +102,7 @@ class IssuableFinder
 
   def initialize(current_user, params = {})
     @current_user = current_user
+    @original_params = params
     @params = params_class.new(params, current_user, klass)
   end
 
@@ -117,20 +119,18 @@ class IssuableFinder
     # https://www.postgresql.org/docs/current/static/queries-with.html
     items = by_search(items)
 
-    items = sort(items)
-
-    items
+    sort(items)
   end
 
   def filter_items(items)
+    # Selection by group is already covered by `by_project` and `projects` for project-based issuables
+    # Group-based issuables have their own group filter methods
     items = by_project(items)
-    items = by_group(items)
     items = by_scope(items)
     items = by_created_at(items)
     items = by_updated_at(items)
     items = by_closed_at(items)
     items = by_state(items)
-    items = by_group(items)
     items = by_assignee(items)
     items = by_author(items)
     items = by_non_archived(items)
@@ -142,16 +142,12 @@ class IssuableFinder
   end
 
   def should_filter_negated_args?
-    return false unless Feature.enabled?(:not_issuable_queries, params.group || params.project, default_enabled: true)
-
     # API endpoints send in `nil` values so we test if there are any non-nil
     not_params.present? && not_params.values.any?
   end
 
   # Negates all params found in `negatable_params`
   def filter_negated_items(items)
-    items = by_negated_author(items)
-    items = by_negated_assignee(items)
     items = by_negated_label(items)
     items = by_negated_milestone(items)
     items = by_negated_release(items)
@@ -243,7 +239,7 @@ class IssuableFinder
 
         # These are "helper" params that modify the results, like :in and :search. They usually come in at the top-level
         # params, but if they do come in inside the `:not` params, the inner ones should take precedence.
-        not_helpers = params.slice(*NEGATABLE_PARAMS_HELPER_KEYS).merge(params[:not].slice(*NEGATABLE_PARAMS_HELPER_KEYS))
+        not_helpers = params.slice(*NEGATABLE_PARAMS_HELPER_KEYS).merge(params[:not].to_h.slice(*NEGATABLE_PARAMS_HELPER_KEYS))
         not_helpers.each do |key, value|
           not_params[key] = value unless not_params[key].present?
         end
@@ -319,11 +315,6 @@ class IssuableFinder
     end
   end
 
-  def by_group(items)
-    # Selection by group is already covered by `by_project` and `projects`
-    items
-  end
-
   # rubocop: disable CodeReuse/ActiveRecord
   def by_project(items)
     if params.project?
@@ -342,8 +333,7 @@ class IssuableFinder
     return items if items.is_a?(ActiveRecord::NullRelation)
 
     if use_cte_for_search?
-      cte = Gitlab::SQL::RecursiveCTE.new(klass.table_name)
-      cte << items
+      cte = Gitlab::SQL::CTE.new(klass.table_name, items)
 
       items = klass.with(cte.to_arel).from(klass.table_name)
     end
@@ -372,54 +362,23 @@ class IssuableFinder
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def by_author(items)
-    if params.author
-      items.where(author_id: params.author.id)
-    elsif params.no_author?
-      items.where(author_id: nil)
-    elsif params.author_id? || params.author_username? # author not found
-      items.none
-    else
-      items
-    end
+    Issuables::AuthorFilter.new(
+      params: original_params,
+      or_filters_enabled: or_filters_enabled?
+    ).filter(items)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
-
-  # rubocop: disable CodeReuse/ActiveRecord
-  def by_negated_author(items)
-    if not_params.author
-      items.where.not(author_id: not_params.author.id)
-    elsif not_params.author_id? || not_params.author_username? # author not found
-      items.none
-    else
-      items
-    end
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def by_assignee(items)
-    if params.filter_by_no_assignee?
-      items.unassigned
-    elsif params.filter_by_any_assignee?
-      items.assigned
-    elsif params.assignee
-      items.assigned_to(params.assignee)
-    elsif params.assignee_id? || params.assignee_username? # assignee not found
-      items.none
-    else
-      items
-    end
+    assignee_filter.filter(items)
   end
 
-  def by_negated_assignee(items)
-    # We want CE users to be able to say "Issues not assigned to either PersonA nor PersonB"
-    if not_params.assignees.present?
-      items.not_assigned_to(not_params.assignees)
-    elsif not_params.assignee_id? || not_params.assignee_username? # assignee not found
-      items.none
-    else
-      items
+  def assignee_filter
+    strong_memoize(:assignee_filter) do
+      Issuables::AssigneeFilter.new(
+        params: original_params,
+        or_filters_enabled: or_filters_enabled?
+      )
     end
   end
 
@@ -513,5 +472,15 @@ class IssuableFinder
 
   def by_non_archived(items)
     params[:non_archived].present? ? items.non_archived : items
+  end
+
+  def or_filters_enabled?
+    strong_memoize(:or_filters_enabled) do
+      Feature.enabled?(:or_issuable_queries, feature_flag_scope, default_enabled: :yaml)
+    end
+  end
+
+  def feature_flag_scope
+    params.group || params.project
   end
 end

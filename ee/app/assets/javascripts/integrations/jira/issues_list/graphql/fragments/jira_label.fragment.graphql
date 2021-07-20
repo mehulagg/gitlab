@@ -1,0 +1,6 @@
+fragment JiraLabel on Label {
+  title
+  name
+  color
+  textColor
+}

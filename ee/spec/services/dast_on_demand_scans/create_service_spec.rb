@@ -3,32 +3,41 @@
 require 'spec_helper'
 
 RSpec.describe DastOnDemandScans::CreateService do
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
-  let(:dast_site_profile) { create(:dast_site_profile, project: project) }
-  let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
+
+  let(:params) { { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile } }
 
   subject do
     described_class.new(
       container: project,
       current_user: user,
-      params: {
-        dast_site_profile: dast_site_profile,
-        dast_scanner_profile: dast_scanner_profile
-      }
+      params: params
     ).execute
+  end
+
+  shared_examples 'a service that calls Ci::RunDastScanService' do
+    it 'delegates pipeline creation to Ci::RunDastScanService', :aggregate_failures do
+      service = double(Ci::RunDastScanService)
+      response = ServiceResponse.error(message: 'Stubbed response')
+
+      expect(Ci::RunDastScanService).to receive(:new).and_return(service)
+      expect(service).to receive(:execute).with(expected_params).and_return(response)
+
+      subject
+    end
   end
 
   describe 'execute' do
     context 'when on demand scan licensed feature is not available' do
       context 'when the user cannot run an on demand scan' do
-        it 'communicates failure' do
+        it 'communicates failure', :aggregate_failures do
           stub_licensed_features(security_on_demand_scans: false)
 
-          aggregate_failures do
-            expect(subject.status).to eq(:error)
-            expect(subject.message).to eq('Insufficient permissions')
-          end
+          expect(subject.status).to eq(:error)
+          expect(subject.message).to eq('Insufficient permissions')
         end
       end
     end
@@ -47,33 +56,39 @@ RSpec.describe DastOnDemandScans::CreateService do
           expect(subject.status).to eq(:success)
         end
 
-        it 'returns a pipeline and pipeline_url' do
-          aggregate_failures do
-            expect(subject.payload[:pipeline]).to be_a(Ci::Pipeline)
-            expect(subject.payload[:pipeline_url]).to be_a(String)
+        it 'returns a pipeline and pipeline_url', :aggregate_failures do
+          expect(subject.payload[:pipeline]).to be_a(Ci::Pipeline)
+          expect(subject.payload[:pipeline_url]).to be_a(String)
+        end
+
+        it_behaves_like 'a service that calls Ci::RunDastScanService' do
+          let(:expected_params) do
+            hash_including(
+              branch: project.default_branch,
+              dast_site_profile: dast_site_profile,
+              dast_scanner_profile: dast_scanner_profile,
+              ci_configuration: kind_of(String)
+            )
           end
         end
 
-        it 'delegates pipeline creation to Ci::RunDastScanService' do
-          expected_params = {
-            branch: 'master',
-            full_scan_enabled: false,
-            show_debug_messages: false,
-            spider_timeout: nil,
-            target_timeout: nil,
-            target_url: dast_site_profile.dast_site.url,
-            use_ajax_spider: false
-          }
+        context 'when a branch is specified' do
+          context 'when the branch does not exist' do
+            let(:params) { { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch: 'other-branch' } }
 
-          service = double(Ci::RunDastScanService)
-          response = ServiceResponse.error(message: 'Stubbed response')
-
-          aggregate_failures do
-            expect(Ci::RunDastScanService).to receive(:new).and_return(service)
-            expect(service).to receive(:execute).with(expected_params).and_return(response)
+            it 'responds with error message', :aggregate_failures do
+              expect(subject).not_to be_success
+              expect(subject.message).to eq('Reference not found')
+            end
           end
 
-          subject
+          context 'when the branch exists' do
+            let(:params) { { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch: 'orphaned-branch' } }
+
+            it 'communicates success' do
+              expect(subject.status).to eq(:success)
+            end
+          end
         end
 
         context 'when dast_scanner_profile is nil' do
@@ -84,14 +99,26 @@ RSpec.describe DastOnDemandScans::CreateService do
           end
         end
 
+        context 'when dast_profile is specified' do
+          let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+
+          let(:params) { { dast_profile: dast_profile } }
+
+          it 'communicates success' do
+            expect(subject.status).to eq(:success)
+          end
+
+          it_behaves_like 'a service that calls Ci::RunDastScanService' do
+            let(:expected_params) { hash_including(dast_profile: dast_profile) }
+          end
+        end
+
         context 'when target is not validated and an active scan is requested' do
           let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, scan_type: 'active') }
 
-          it 'communicates failure' do
-            aggregate_failures do
-              expect(subject.status).to eq(:error)
-              expect(subject.message).to eq('Cannot run active scan against unvalidated target')
-            end
+          it 'communicates failure', :aggregate_failures do
+            expect(subject.status).to eq(:error)
+            expect(subject.message).to eq('Cannot run active scan against unvalidated target')
           end
         end
       end

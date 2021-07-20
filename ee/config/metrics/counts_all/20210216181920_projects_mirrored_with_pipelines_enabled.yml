@@ -1,0 +1,18 @@
+---
+data_category: Optional
+key_path: counts.projects_mirrored_with_pipelines_enabled
+description: Projects with repository mirroring enabled
+product_section: ops
+product_stage: verify
+product_group: group::pipeline execution
+product_category:
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ee
+tier:
+- premium
+- ultimate
+

@@ -194,6 +194,14 @@ RSpec.describe Admin::ApplicationSettingsController do
             expect(ApplicationSetting.current.required_instance_ci_template).to be_nil
           end
         end
+
+        context 'without key' do
+          it 'does not set required_instance_ci_template to nil' do
+            put :update, params: { application_setting: {} }
+
+            expect(ApplicationSetting.current.required_instance_ci_template).to be == 'Auto-DevOps'
+          end
+        end
       end
     end
 
@@ -201,7 +209,7 @@ RSpec.describe Admin::ApplicationSettingsController do
       put :update, params: { application_setting: { repository_size_limit: '100' } }
 
       expect(response).to redirect_to(general_admin_application_settings_path)
-      expect(response).to set_flash[:notice].to('Application settings saved successfully')
+      expect(controller).to set_flash[:notice].to('Application settings saved successfully')
     end
 
     it 'does not accept negative repository_size_limit' do
@@ -326,10 +334,10 @@ RSpec.describe Admin::ApplicationSettingsController do
 
       let!(:task) { create(:elastic_reindexing_task) }
 
-      it 'assigns elasticsearch reindexing task' do
+      it 'assigns last elasticsearch reindexing task' do
         get :advanced_search
 
-        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
+        expect(assigns(:last_elasticsearch_reindexing_task)).to eq(task)
         expect(response.body).to include("Reindexing Status: #{task.state}")
       end
     end
@@ -372,8 +380,8 @@ RSpec.describe Admin::ApplicationSettingsController do
       end
 
       before_all do
-        HistoricalData.create!(recorded_at: yesterday - 1.day, active_user_count: max_count)
-        HistoricalData.create!(recorded_at: yesterday, active_user_count: current_count)
+        create(:historical_data, recorded_at: yesterday - 1.day, active_user_count: max_count)
+        create(:historical_data, recorded_at: yesterday, active_user_count: current_count)
       end
 
       before do
@@ -388,7 +396,6 @@ RSpec.describe Admin::ApplicationSettingsController do
         body = response.body
         expect(body).to start_with('<span id="LC1" class="line" lang="json">')
         expect(body).to include('<span class="nl">"license_key"</span>')
-        expect(body).to include("<span class=\"s2\">\"#{yesterday.to_date}\"</span>")
         expect(body).to include("<span class=\"s2\">\"#{yesterday.iso8601}\"</span>")
         expect(body).to include("<span class=\"mi\">#{max_count}</span>")
         expect(body).to include("<span class=\"mi\">#{current_count}</span>")

@@ -6,15 +6,12 @@ RSpec.shared_examples 'restricts access to protected environments' do |developer
     let(:project) { create(:project, :repository) }
     let(:pipeline) { create(:ci_pipeline, project: project) }
     let(:environment) { create(:environment, project: project, name: 'production') }
-    let(:build) { create(:ci_build, :created, pipeline: pipeline, environment: environment.name) }
+    let(:build) { create(:ci_build, :created, pipeline: pipeline, environment: environment.name, project: project) }
     let(:protected_environment) { create(:protected_environment, name: environment.name, project: project) }
     let(:service) { described_class.new(project, user) }
 
     before do
-      allow(project).to receive(:feature_available?).and_call_original
-      allow(project).to receive(:feature_available?)
-        .with(:protected_environments).and_return(true)
-      allow(build).to receive(:project) { project }
+      stub_licensed_features(protected_environments: true)
 
       project.add_developer(user)
       protected_environment

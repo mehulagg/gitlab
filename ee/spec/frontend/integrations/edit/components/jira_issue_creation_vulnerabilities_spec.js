@@ -22,7 +22,11 @@ describe('JiraIssuesFields', () => {
     { id: '3', name: 'epic', description: 'epic' },
   ];
 
-  const createComponent = (mountFn) => ({ props } = {}) => {
+  const createComponent = (mountFn) => ({ isInheriting = false, props } = {}) => {
+    store = createStore({
+      defaultState: isInheriting ? {} : undefined,
+    });
+
     return extendedWrapper(
       mountFn(JiraIssueCreationVulnerabilities, {
         store,
@@ -45,13 +49,8 @@ describe('JiraIssuesFields', () => {
   const setEnableJiraVulnerabilitiesChecked = (isChecked) =>
     findEnableJiraVulnerabilities().vm.$emit('input', isChecked);
 
-  beforeEach(() => {
-    store = createStore();
-  });
-
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('content', () => {
@@ -99,6 +98,26 @@ describe('JiraIssuesFields', () => {
       await setEnableJiraVulnerabilitiesChecked(isChecked);
       expect(findIssueTypeSection().exists()).toBe(isChecked);
     });
+
+    describe('when isInheriting = true', () => {
+      beforeEach(() => {
+        wrapper = createShallowComponent({ isInheriting: true });
+      });
+
+      it('disables the checkbox', () => {
+        expect(findEnableJiraVulnerabilities().attributes('disabled')).toBe('true');
+      });
+    });
+  });
+
+  describe('when showFullFeature is off', () => {
+    beforeEach(() => {
+      wrapper = createShallowComponent({ props: { showFullFeature: false } });
+    });
+
+    it('does not show the issue type section', () => {
+      expect(findIssueTypeSection().exists()).toBe(false);
+    });
   });
 
   describe('Jira issue type dropdown', () => {
@@ -123,8 +142,8 @@ describe('JiraIssuesFields', () => {
 
     describe('with Jira issues fetching in progress', () => {
       beforeEach(async () => {
-        store.state.isLoadingJiraIssueTypes = true;
         wrapper = createShallowComponent();
+        store.state.isLoadingJiraIssueTypes = true;
         await setEnableJiraVulnerabilitiesChecked(true);
       });
 
@@ -138,8 +157,8 @@ describe('JiraIssuesFields', () => {
 
     describe('with Jira issues fetched', () => {
       beforeEach(async () => {
-        store.state.jiraIssueTypes = TEST_JIRA_ISSUE_TYPES;
         wrapper = createShallowComponent({ props: { projectKey: 'TES' } });
+        store.state.jiraIssueTypes = TEST_JIRA_ISSUE_TYPES;
         await setEnableJiraVulnerabilitiesChecked(true);
       });
 
@@ -164,8 +183,8 @@ describe('JiraIssuesFields', () => {
 
     describe('with Jira issue fetch failure', () => {
       beforeEach(async () => {
-        store.state.loadingJiraIssueTypesErrorMessage = 'something went wrong';
         wrapper = createShallowComponent();
+        store.state.loadingJiraIssueTypesErrorMessage = 'something went wrong';
         await setEnableJiraVulnerabilitiesChecked(true);
       });
 

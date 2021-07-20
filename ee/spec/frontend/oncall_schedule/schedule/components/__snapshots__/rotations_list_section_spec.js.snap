@@ -4,232 +4,168 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
 <div
   class="list-section"
 >
-  <div
-    class="list-item list-item-empty clearfix"
-  >
-    <span
-      class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
+  <div>
+    <div
+      class="gl-clearfix"
     >
       <span
-        class="gl-str-truncated"
+        class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
-        Rotation 242
+        <span
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
+        >
+          Rotation 242
+        </span>
+         
+        <div
+          class="gl-px-2 btn-group"
+          role="group"
+        >
+          <button
+            aria-label="Edit rotation"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            title="Edit rotation"
+            type="button"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="pencil-icon"
+              role="img"
+            >
+              <use
+                href="#pencil"
+              />
+            </svg>
+              
+            <!---->
+          </button>
+           
+          <button
+            aria-label="Delete rotation"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            title="Delete rotation"
+            type="button"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="remove-icon"
+              role="img"
+            >
+              <use
+                href="#remove"
+              />
+            </svg>
+              
+            <!---->
+          </button>
+        </div>
       </span>
        
-      <div
-        class="gl-px-2 btn-group"
-        role="group"
-      >
-        <button
-          aria-label="Edit rotation"
-          class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
-          title="Edit rotation"
-          type="button"
-        >
-          <!---->
-           
-          <svg
-            aria-hidden="true"
-            class="gl-button-icon gl-icon s16"
-            data-testid="pencil-icon"
-          >
-            <use
-              href="#pencil"
-            />
-          </svg>
-            
-          <!---->
-        </button>
-         
-        <button
-          aria-label="Delete rotation"
-          class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
-          title="Delete rotation"
-          type="button"
-        >
-          <!---->
-           
-          <svg
-            aria-hidden="true"
-            class="gl-button-icon gl-icon s16"
-            data-testid="remove-icon"
-          >
-            <use
-              href="#remove"
-            />
-          </svg>
-            
-          <!---->
-        </button>
-      </div>
-    </span>
-     
-    <span
-      class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
-      data-testid="timelineCell"
-    >
       <span
-        class="current-day-indicator"
-        data-testid="current-day-indicator"
-        style="left: 7.142857142857143%;"
-      />
-       
-      <div>
-        <div
-          class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-          style="left: 0px; width: 0px;"
-        >
-          <span
-            class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
+        data-testid="timeline-cell"
+        style="width: calc(100% - 180px);"
+      >
+        <span
+          class="current-day-indicator"
+          data-testid="current-day-indicator"
+          style="left: 14.285714285714286%;"
+        />
+         
+        <div>
+          <div
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
           >
-            <span
-              class="gl-token-content"
+            <div
+              class="gl-h-6 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-2"
+              style="background-color: rgb(87, 114, 255);"
             >
               <div
-                class="gl-avatar-labeled"
-                shape="circle"
-                size="16"
-                title="nora.schaden"
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <div
-                  class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                  title="nora.schaden"
-                >
-                  
-  
-
-                </div>
+                <!---->
                  
-                <div
-                  class="gl-avatar-labeled-labels gl-text-left!"
-                >
-                  <div
-                    class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                  >
-                    <span
-                      class="gl-avatar-labeled-label"
-                    >
-                      nora.schaden
-                    </span>
-                     
-                  </div>
-                   
-                  <span
-                    class="gl-avatar-labeled-sublabel"
-                  >
-                    
-                  </span>
-                </div>
+                <!---->
               </div>
-               
-              <!---->
-            </span>
-          </span>
-           
-          <div
-            class="gl-popover"
-            title="nora.schaden"
-          >
-            <p
-              class="gl-m-0"
-              data-testid="rotation-assignee-starts-at"
-            >
-              Starts: January 12, 2021, 10:04am GMT+0000
-            </p>
+            </div>
              
-            <p
-              class="gl-m-0"
-              data-testid="rotation-assignee-ends-at"
+            <div
+              class="gl-popover"
             >
-              Ends: January 15, 2021, 10:04am GMT+0000
-            </p>
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-starts-at"
+              >
+                
+      Starts: January 12, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+               
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-ends-at"
+              >
+                
+      Ends: January 15, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+            </div>
           </div>
-        </div>
-        <div
-          class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-          style="left: 2px; width: 0px;"
-        >
-          <span
-            class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
+          <div
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
           >
-            <span
-              class="gl-token-content"
+            <div
+              class="gl-h-6 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-3"
+              style="background-color: rgb(209, 78, 0);"
             >
               <div
-                class="gl-avatar-labeled"
-                shape="circle"
-                size="16"
-                title="racheal.loving"
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <div
-                  class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                  title="racheal.loving"
-                >
-                  
-  
-
-                </div>
+                <!---->
                  
-                <div
-                  class="gl-avatar-labeled-labels gl-text-left!"
-                >
-                  <div
-                    class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                  >
-                    <span
-                      class="gl-avatar-labeled-label"
-                    >
-                      racheal.loving
-                    </span>
-                     
-                  </div>
-                   
-                  <span
-                    class="gl-avatar-labeled-sublabel"
-                  >
-                    
-                  </span>
-                </div>
+                <!---->
               </div>
-               
-              <!---->
-            </span>
-          </span>
-           
-          <div
-            class="gl-popover"
-            title="racheal.loving"
-          >
-            <p
-              class="gl-m-0"
-              data-testid="rotation-assignee-starts-at"
-            >
-              Starts: January 16, 2021, 10:04am GMT+0000
-            </p>
+            </div>
              
-            <p
-              class="gl-m-0"
-              data-testid="rotation-assignee-ends-at"
+            <div
+              class="gl-popover"
             >
-              Ends: January 18, 2021, 10:04am GMT+0000
-            </p>
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-starts-at"
+              >
+                
+      Starts: January 16, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+               
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-ends-at"
+              >
+                
+      Ends: January 18, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    </span>
-    <span
-      class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
-      data-testid="timelineCell"
-    >
-      <!---->
-       
-      <div>
-        <!---->
-        <!---->
-      </div>
-    </span>
+      </span>
+    </div>
   </div>
-   
-  <!---->
 </div>
 `;

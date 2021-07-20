@@ -37,6 +37,7 @@ RSpec.describe Gitlab::DataBuilder::Pipeline do
       expect(build_data[:id]).to eq(build.id)
       expect(build_data[:status]).to eq(build.status)
       expect(build_data[:allow_failure]).to eq(build.allow_failure)
+      expect(build_data[:environment]).to be_nil
       expect(runner_data).to eq(nil)
       expect(project_data).to eq(project.hook_attrs(backward: false))
       expect(data[:merge_request]).to be_nil
@@ -57,9 +58,10 @@ RSpec.describe Gitlab::DataBuilder::Pipeline do
       it 'has runner attributes', :aggregate_failures do
         expect(runner_data[:id]).to eq(ci_runner.id)
         expect(runner_data[:description]).to eq(ci_runner.description)
+        expect(runner_data[:runner_type]).to eq(ci_runner.runner_type)
         expect(runner_data[:active]).to eq(ci_runner.active)
-        expect(runner_data[:is_shared]).to eq(ci_runner.instance_type?)
         expect(runner_data[:tags]).to match_array(tag_names)
+        expect(runner_data[:is_shared]).to eq(ci_runner.instance_type?)
       end
     end
 
@@ -114,6 +116,13 @@ RSpec.describe Gitlab::DataBuilder::Pipeline do
         expect(data[:builds].count).to eq(1)
         expect(build_data[:id]).to eq(build.id)
       end
+    end
+
+    context 'build with environment' do
+      let!(:build) { create(:ci_build, :teardown_environment, pipeline: pipeline) }
+
+      it { expect(build_data[:environment][:name]).to eq(build.expanded_environment_name) }
+      it { expect(build_data[:environment][:action]).to eq(build.environment_action) }
     end
   end
 end

@@ -1,5 +1,0 @@
----
-title: Ignore connection error when changing the Elasticsearch Server URL
-merge_request: 52645
-author:
-type: fixed

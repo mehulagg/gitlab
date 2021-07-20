@@ -117,7 +117,7 @@ export default {
       class="ide-navigator-btn d-flex align-items-center d-transparent border-0 bg-transparent"
       @click="refresh"
     >
-      <gl-icon :size="18" name="retry" class="m-auto" />
+      <gl-icon :size="18" name="retry" use-deprecated-sizes class="m-auto" />
     </button>
     <div class="position-relative w-100 gl-ml-2">
       <input
@@ -126,7 +126,11 @@ export default {
         class="ide-navigator-location form-control bg-white"
         readonly
       />
-      <gl-loading-icon v-if="loading" class="position-absolute ide-preview-loading-icon" />
+      <gl-loading-icon
+        v-if="loading"
+        size="sm"
+        class="position-absolute ide-preview-loading-icon"
+      />
     </div>
   </header>
 </template>

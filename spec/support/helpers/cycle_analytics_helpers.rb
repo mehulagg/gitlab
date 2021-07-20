@@ -3,19 +3,60 @@
 module CycleAnalyticsHelpers
   include GitHelpers
 
-  def wait_for_stages_to_load
-    expect(page).to have_selector '.js-stage-table'
+  def toggle_value_stream_dropdown
+    page.find('[data-testid="dropdown-value-streams"]').click
+  end
+
+  def path_nav_stage_names_without_median
+    # Returns the path names with the median value stripped out
+    page.all('.gl-path-button').collect(&:text).map {|name_with_median| name_with_median.split("\n")[0] }
+  end
+
+  def fill_in_custom_stage_fields
+    index = page.all('[data-testid="value-stream-stage-fields"]').length
+    last_stage = page.all('[data-testid="value-stream-stage-fields"]').last
+
+    within last_stage do
+      find('[name*="custom-stage-name-"]').fill_in with: "Cool custom stage - name #{index}"
+      select_dropdown_option_by_value "custom-stage-start-event-", :merge_request_created
+      select_dropdown_option_by_value "custom-stage-end-event-", :merge_request_merged
+    end
+  end
+
+  def add_custom_stage_to_form
+    page.find_button(s_('CreateValueStreamForm|Add another stage')).click
+
+    fill_in_custom_stage_fields
+  end
+
+  def save_value_stream(custom_value_stream_name)
+    fill_in 'create-value-stream-name', with: custom_value_stream_name
+
+    page.find_button(s_('CreateValueStreamForm|Create Value Stream')).click
     wait_for_requests
   end
 
-  def select_group(target_group)
+  def create_custom_value_stream(custom_value_stream_name)
+    toggle_value_stream_dropdown
+    page.find_button(_('Create new Value Stream')).click
+
+    add_custom_stage_to_form
+    save_value_stream(custom_value_stream_name)
+  end
+
+  def wait_for_stages_to_load(selector = '.js-path-navigation')
+    expect(page).to have_selector selector
+    wait_for_requests
+  end
+
+  def select_group(target_group, ready_selector = '.js-path-navigation')
     visit group_analytics_cycle_analytics_path(target_group)
 
-    wait_for_stages_to_load
+    wait_for_stages_to_load(ready_selector)
   end
 
   def toggle_dropdown(field)
-    page.within("[data-testid='#{field}']") do
+    page.within("[data-testid*='#{field}']") do
       find('.dropdown-toggle').click
 
       wait_for_requests
@@ -26,7 +67,7 @@ module CycleAnalyticsHelpers
 
   def select_dropdown_option_by_value(name, value, elem = '.dropdown-item')
     toggle_dropdown name
-    page.find("[data-testid='#{name}'] .dropdown-menu").find("#{elem}[value='#{value}']").click
+    page.find("[data-testid*='#{name}'] .dropdown-menu").find("#{elem}[value='#{value}']").click
   end
 
   def create_commit_referencing_issue(issue, branch_name: generate(:branch))
@@ -93,17 +134,17 @@ module CycleAnalyticsHelpers
       target_branch: 'master'
     }
 
-    mr = MergeRequests::CreateService.new(project, user, opts).execute
+    mr = MergeRequests::CreateService.new(project: project, current_user: user, params: opts).execute
     NewMergeRequestWorker.new.perform(mr, user)
     mr
   end
 
   def merge_merge_requests_closing_issue(user, project, issue)
     merge_requests = Issues::ReferencedMergeRequestsService
-                       .new(project, user)
+                       .new(project: project, current_user: user)
                        .closed_by_merge_requests(issue)
 
-    merge_requests.each { |merge_request| MergeRequests::MergeService.new(project, user, sha: merge_request.diff_head_sha).execute(merge_request) }
+    merge_requests.each { |merge_request| MergeRequests::MergeService.new(project: project, current_user: user, params: { sha: merge_request.diff_head_sha }).execute(merge_request) }
   end
 
   def deploy_master(user, project, environment: 'production')

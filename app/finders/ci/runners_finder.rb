@@ -4,7 +4,8 @@ module Ci
   class RunnersFinder < UnionFinder
     include Gitlab::Allowable
 
-    NUMBER_OF_RUNNERS_PER_PAGE = 30
+    ALLOWED_SORTS = %w[contacted_asc contacted_desc created_at_asc created_at_desc created_date].freeze
+    DEFAULT_SORT = 'created_at_desc'
 
     def initialize(current_user:, group: nil, params:)
       @params = params
@@ -18,20 +19,16 @@ module Ci
       filter_by_runner_type!
       filter_by_tag_list!
       sort!
-      paginate!
+      request_tag_list!
 
-      @runners.with_tags
+      @runners
 
     rescue Gitlab::Access::AccessDeniedError
       Ci::Runner.none
     end
 
     def sort_key
-      if @params[:sort] == 'contacted_asc'
-        'contacted_asc'
-      else
-        'created_date'
-      end
+      ALLOWED_SORTS.include?(@params[:sort]) ? @params[:sort] : DEFAULT_SORT
     end
 
     private
@@ -77,8 +74,8 @@ module Ci
       @runners = @runners.order_by(sort_key)
     end
 
-    def paginate!
-      @runners = @runners.page(@params[:page]).per(NUMBER_OF_RUNNERS_PER_PAGE)
+    def request_tag_list!
+      @runners = @runners.with_tags if !@params[:preload].present? || @params.dig(:preload, :tag_name)
     end
 
     def filter_by!(scope_name, available_scopes)

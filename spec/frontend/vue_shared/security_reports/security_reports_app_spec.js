@@ -8,9 +8,9 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { trimText } from 'helpers/text_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
-  expectedDownloadDropdownProps,
-  securityReportDownloadPathsQueryNoArtifactsResponse,
-  securityReportDownloadPathsQueryResponse,
+  expectedDownloadDropdownPropsWithText,
+  securityReportMergeRequestDownloadPathsQueryNoArtifactsResponse,
+  securityReportMergeRequestDownloadPathsQueryResponse,
   sastDiffSuccessMock,
   secretScanningDiffSuccessMock,
 } from 'jest/vue_shared/security_reports/mock_data';
@@ -22,7 +22,7 @@ import {
   REPORT_TYPE_SAST,
   REPORT_TYPE_SECRET_DETECTION,
 } from '~/vue_shared/security_reports/constants';
-import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
+import securityReportMergeRequestDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_merge_request_download_paths.query.graphql';
 import SecurityReportsApp from '~/vue_shared/security_reports/security_reports_app.vue';
 
 jest.mock('~/flash');
@@ -59,12 +59,13 @@ describe('Security reports app', () => {
   };
 
   const pendingHandler = () => new Promise(() => {});
-  const successHandler = () => Promise.resolve({ data: securityReportDownloadPathsQueryResponse });
+  const successHandler = () =>
+    Promise.resolve({ data: securityReportMergeRequestDownloadPathsQueryResponse });
   const successEmptyHandler = () =>
-    Promise.resolve({ data: securityReportDownloadPathsQueryNoArtifactsResponse });
+    Promise.resolve({ data: securityReportMergeRequestDownloadPathsQueryNoArtifactsResponse });
   const failureHandler = () => Promise.resolve({ errors: [{ message: 'some error' }] });
   const createMockApolloProvider = (handler) => {
-    const requestHandlers = [[securityReportDownloadPathsQuery, handler]];
+    const requestHandlers = [[securityReportMergeRequestDownloadPathsQuery, handler]];
 
     return createMockApollo(requestHandlers);
   };
@@ -98,7 +99,7 @@ describe('Security reports app', () => {
     });
 
     it('renders the download dropdown', () => {
-      expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+      expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownPropsWithText);
     });
 
     it('renders the expected message', () => {
@@ -202,7 +203,7 @@ describe('Security reports app', () => {
           });
 
           it('renders the download dropdown', () => {
-            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownPropsWithText);
           });
         });
 
@@ -224,7 +225,7 @@ describe('Security reports app', () => {
           });
 
           it('renders the download dropdown', () => {
-            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownPropsWithText);
           });
         });
 
@@ -246,7 +247,7 @@ describe('Security reports app', () => {
           });
 
           it('renders the download dropdown', () => {
-            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownPropsWithText);
           });
         });
 

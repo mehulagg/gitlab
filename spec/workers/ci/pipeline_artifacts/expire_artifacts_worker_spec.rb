@@ -7,11 +7,11 @@ RSpec.describe Ci::PipelineArtifacts::ExpireArtifactsWorker do
 
   describe '#perform' do
     let_it_be(:pipeline_artifact) do
-      create(:ci_pipeline_artifact, :with_coverage_report, expire_at: 1.week.ago)
+      create(:ci_pipeline_artifact, :with_coverage_report, :unlocked, expire_at: 1.week.ago)
     end
 
     it 'executes a service' do
-      expect_next_instance_of(::Ci::PipelineArtifacts::DestroyExpiredArtifactsService) do |instance|
+      expect_next_instance_of(::Ci::PipelineArtifacts::DestroyAllExpiredService) do |instance|
         expect(instance).to receive(:execute)
       end
 

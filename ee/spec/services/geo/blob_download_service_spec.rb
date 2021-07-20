@@ -8,6 +8,7 @@ RSpec.describe Geo::BlobDownloadService do
 
   let_it_be(:primary) { create(:geo_node, :primary) }
   let_it_be(:secondary) { create(:geo_node) }
+
   let(:model_record) { create(:package_file, :npm) }
   let(:replicator) { model_record.replicator }
   let(:registry_class) { replicator.registry_class }

@@ -7,7 +7,7 @@ import Form from './components/list.vue';
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient({}, { assumeImmutableResults: true }),
 });
 
 const createComplianceFrameworksListApp = (el) => {
@@ -15,7 +15,7 @@ const createComplianceFrameworksListApp = (el) => {
     return false;
   }
 
-  const { emptyStateSvgPath, groupPath } = el.dataset;
+  const { addFrameworkPath, editFrameworkPath, emptyStateSvgPath, groupPath } = el.dataset;
 
   return new Vue({
     el,
@@ -23,6 +23,8 @@ const createComplianceFrameworksListApp = (el) => {
     render(createElement) {
       return createElement(Form, {
         props: {
+          addFrameworkPath,
+          editFrameworkPath,
           emptyStateSvgPath,
           groupPath,
         },

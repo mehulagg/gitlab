@@ -18,46 +18,13 @@ exports[`ThreatMonitoringApp component given there is a default environment with
 
 exports[`ThreatMonitoringApp component given there is a default environment with data renders the network policy tab 1`] = `
 <gl-tab-stub
+  data-qa-selector="policies_tab"
   title="Policies"
   titlelinkclass=""
 >
-  <network-policy-list-stub
+  <policy-list-stub
     documentationpath="/docs"
     newpolicypath="/policy/new"
   />
 </gl-tab-stub>
-`;
-
-exports[`ThreatMonitoringApp component given there is a default environment with data renders the waf section 1`] = `
-<threat-monitoring-section-stub
-  anomaloustitle="Anomalous Requests"
-  chartemptystatesvgpath="/waf-no-data-svg"
-  chartemptystatetext="The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
-  chartemptystatetitle="Application firewall not detected"
-  documentationanchor="web-application-firewall"
-  documentationpath="/docs"
-  nominaltitle="Total Requests"
-  storenamespace="threatMonitoringWaf"
-  subtitle="Requests"
-  title="Web Application Firewall"
-  ylegend="Requests"
-/>
-`;
-
-exports[`ThreatMonitoringApp component given there is a default environment with data shows the alert 1`] = `
-<gl-alert-stub
-  class="my-3"
-  dismissible="true"
-  dismisslabel="Dismiss"
-  primarybuttonlink=""
-  primarybuttontext=""
-  secondarybuttonlink="/docs"
-  secondarybuttontext="View documentation"
-  title=""
-  variant="info"
->
-  
-    The graph below is an overview of traffic coming to your application as tracked by the Web Application Firewall (WAF). View the docs for instructions on how to access the WAF logs to see what type of malicious traffic is trying to access your app. The docs link is also accessible by clicking the "?" icon next to the title below.
-  
-</gl-alert-stub>
 `;

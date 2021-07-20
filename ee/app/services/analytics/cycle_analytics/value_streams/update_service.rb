@@ -26,7 +26,7 @@ module Analytics
 
         def to_be_deleted?(processed_params, stage_id)
           processed_params.has_key?(:stages_attributes) &&
-          processed_params[:stages_attributes].none? { |attrs| Integer(attrs[:id]) == stage_id }
+          processed_params[:stages_attributes].none? { |attrs| attrs[:id] && Integer(attrs[:id]) == stage_id }
         end
 
         def success_http_status

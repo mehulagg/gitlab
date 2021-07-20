@@ -173,19 +173,21 @@ export default {
         :active-slot-names="[visibleForm]"
         class="gl-p-5 gl-pb-0"
       >
-        <h6 v-for="slot in formSlots" :key="slot.name" :slot="slot.name">
-          {{ slot.value }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="question-o"
-            class="gl-text-gray-500"
-            :title="
-              __(
-                'The parent epic is confidential and can only contain confidential epics and issues',
-              )
-            "
-          />
-        </h6>
+        <template v-for="slot in formSlots" #[slot.name]>
+          <h6 :key="slot.name">
+            {{ slot.value }}
+            <gl-icon
+              v-gl-tooltip.hover
+              name="question-o"
+              class="gl-text-gray-500"
+              :title="
+                __(
+                  'The parent epic is confidential and can only contain confidential epics and issues',
+                )
+              "
+            />
+          </h6>
+        </template>
       </slot-switch>
       <slot-switch
         v-if="visibleForm"
@@ -196,35 +198,38 @@ export default {
           'gl-show-field-errors': itemAddFailure,
         }"
       >
-        <add-item-form
-          :slot="$options.FORM_SLOTS.addItem"
-          :issuable-type="issuableType"
-          :input-value="itemInputValue"
-          :is-submitting="itemAddInProgress"
-          :pending-references="pendingReferences"
-          :auto-complete-sources="itemAutoCompleteSources"
-          :path-id-separator="itemPathIdSeparator"
-          :has-error="itemAddFailure"
-          :item-add-failure-type="itemAddFailureType"
-          :item-add-failure-message="itemAddFailureMessage"
-          :confidential="parentItem.confidential"
-          @pendingIssuableRemoveRequest="handlePendingItemRemove"
-          @addIssuableFormInput="handleAddItemFormInput"
-          @addIssuableFormBlur="handleAddItemFormBlur"
-          @addIssuableFormSubmit="handleAddItemFormSubmit"
-          @addIssuableFormCancel="handleAddItemFormCancel"
-        />
-        <create-epic-form
-          :slot="$options.FORM_SLOTS.createEpic"
-          :is-submitting="itemCreateInProgress"
-          @createEpicFormSubmit="handleCreateEpicFormSubmit"
-          @createEpicFormCancel="handleCreateEpicFormCancel"
-        />
-        <create-issue-form
-          :slot="$options.FORM_SLOTS.createIssue"
-          @cancel="toggleCreateIssueForm({ toggleState: false })"
-          @submit="createNewIssue"
-        />
+        <template #[$options.FORM_SLOTS.addItem]>
+          <add-item-form
+            :issuable-type="issuableType"
+            :input-value="itemInputValue"
+            :is-submitting="itemAddInProgress"
+            :pending-references="pendingReferences"
+            :auto-complete-sources="itemAutoCompleteSources"
+            :path-id-separator="itemPathIdSeparator"
+            :has-error="itemAddFailure"
+            :item-add-failure-type="itemAddFailureType"
+            :item-add-failure-message="itemAddFailureMessage"
+            :confidential="parentItem.confidential"
+            @pendingIssuableRemoveRequest="handlePendingItemRemove"
+            @addIssuableFormInput="handleAddItemFormInput"
+            @addIssuableFormBlur="handleAddItemFormBlur"
+            @addIssuableFormSubmit="handleAddItemFormSubmit"
+            @addIssuableFormCancel="handleAddItemFormCancel"
+          />
+        </template>
+        <template #[$options.FORM_SLOTS.createEpic]>
+          <create-epic-form
+            :is-submitting="itemCreateInProgress"
+            @createEpicFormSubmit="handleCreateEpicFormSubmit"
+            @createEpicFormCancel="handleCreateEpicFormCancel"
+          />
+        </template>
+        <template #[$options.FORM_SLOTS.createIssue]>
+          <create-issue-form
+            @cancel="toggleCreateIssueForm({ toggleState: false })"
+            @submit="createNewIssue"
+          />
+        </template>
       </slot-switch>
       <related-items-tree-body
         v-if="!itemsFetchResultEmpty"

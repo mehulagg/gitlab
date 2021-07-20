@@ -4,13 +4,14 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Discord Notifications service
+# Discord Notifications service **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22684) in GitLab 11.6.
 
 The Discord Notifications service sends event notifications from GitLab to the channel for which the webhook was created.
 
-To send GitLab event notifications to a Discord channel, create a webhook in Discord and configure it in GitLab.
+To send GitLab event notifications to a Discord channel, [create a webhook in Discord](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+and configure it in GitLab.
 
 ## Create webhook
 

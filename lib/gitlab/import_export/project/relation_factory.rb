@@ -31,7 +31,9 @@ module Gitlab
                       ci_cd_settings: 'ProjectCiCdSetting',
                       error_tracking_setting: 'ErrorTracking::ProjectErrorTrackingSetting',
                       links: 'Releases::Link',
-                      metrics_setting: 'ProjectMetricsSetting' }.freeze
+                      metrics_setting: 'ProjectMetricsSetting',
+                      commit_author: 'MergeRequest::DiffCommitUser',
+                      committer: 'MergeRequest::DiffCommitUser' }.freeze
 
         BUILD_MODELS = %i[Ci::Build commit_status].freeze
 
@@ -56,6 +58,7 @@ module Gitlab
           external_pull_request
           external_pull_requests
           DesignManagement::Design
+          MergeRequest::DiffCommitUser
         ].freeze
 
         def create
@@ -80,6 +83,7 @@ module Gitlab
           when :notes then setup_note
           when :'Ci::Pipeline' then setup_pipeline
           when *BUILD_MODELS then setup_build
+          when :issues then setup_issue
           end
 
           update_project_references
@@ -135,6 +139,22 @@ module Gitlab
           end
         end
 
+        def setup_issue
+          @relation_hash['relative_position'] = compute_relative_position
+        end
+
+        def compute_relative_position
+          return unless max_relative_position
+
+          max_relative_position + (@relation_index + 1) * Gitlab::RelativePositioning::IDEAL_DISTANCE
+        end
+
+        def max_relative_position
+          Rails.cache.fetch("import:#{@importable.model_name.plural}:#{@importable.id}:hierarchy_max_issues_relative_position", expires_in: 24.hours) do
+            ::RelativePositioning.mover.context(Issue.in_projects(@importable.root_ancestor.all_projects).first)&.max_relative_position || ::Gitlab::RelativePositioning::START_POSITION
+          end
+        end
+
         def legacy_trigger?
           @relation_name == :'Ci::Trigger' && @relation_hash['owner_id'].nil?
         end
@@ -158,4 +178,4 @@ module Gitlab
   end
 end
 
-Gitlab::ImportExport::Project::RelationFactory.prepend_if_ee('::EE::Gitlab::ImportExport::Project::RelationFactory')
+Gitlab::ImportExport::Project::RelationFactory.prepend_mod_with('Gitlab::ImportExport::Project::RelationFactory')

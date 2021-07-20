@@ -14,26 +14,6 @@ RSpec.describe AuditEvent, type: :model do
   end
 
   describe 'callbacks' do
-    context 'parallel_persist' do
-      let_it_be(:details) do
-        { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X', target_type: 'User' }
-      end
-
-      let_it_be(:event) { create(:project_audit_event, details: details, entity_path: nil, target_details: nil) }
-
-      it 'sets author_name' do
-        expect(event[:author_name]).to eq('Kungfu Panda')
-      end
-
-      it 'sets entity_path' do
-        expect(event[:entity_path]).to eq('gitlab-org/gitlab')
-      end
-
-      it 'sets target_details' do
-        expect(event[:target_details]).to eq('Project X')
-      end
-    end
-
     context 'truncate_fields' do
       shared_examples 'a truncated field' do
         context 'when values are provided' do

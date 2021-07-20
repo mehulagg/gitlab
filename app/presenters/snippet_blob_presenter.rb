@@ -9,18 +9,16 @@ class SnippetBlobPresenter < BlobPresenter
     render_rich_partial
   end
 
-  def plain_data
-    return if blob.binary?
-
-    highlight(plain: false)
-  end
-
   def raw_path
     snippet_blob_raw_route(only_path: true)
   end
 
   def raw_url
     snippet_blob_raw_route
+  end
+
+  def raw_plain_data
+    blob.data unless blob.binary?
   end
 
   private

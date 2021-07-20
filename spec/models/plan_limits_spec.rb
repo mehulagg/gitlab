@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe PlanLimits do
   let_it_be(:project) { create(:project) }
   let_it_be(:plan_limits) { create(:plan_limits) }
+
   let(:project_hooks_count) { 2 }
 
   before do
@@ -184,6 +185,7 @@ RSpec.describe PlanLimits do
         ci_max_artifact_size_junit
         ci_max_artifact_size_sast
         ci_max_artifact_size_dast
+        ci_max_artifact_size_cluster_image_scanning
         ci_max_artifact_size_codequality
         ci_max_artifact_size_license_management
         ci_max_artifact_size_performance
@@ -210,6 +212,8 @@ RSpec.describe PlanLimits do
         ci_active_jobs
         storage_size_limit
         daily_invites
+        web_hook_calls
+        ci_daily_pipeline_schedule_triggers
       ] + disabled_max_artifact_size_columns
     end
 

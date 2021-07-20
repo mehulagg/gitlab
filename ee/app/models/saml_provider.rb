@@ -10,6 +10,7 @@ class SamlProvider < ApplicationRecord
   validates :sso_url, presence: true, addressable_url: { schemes: %w(https), ascii_only: true }
   validates :certificate_fingerprint, presence: true, certificate_fingerprint: true
   validates :default_membership_role, presence: true
+  validate :git_check_enforced_allowed
   validate :access_level_inclusion
 
   after_initialize :set_defaults, if: :new_record?
@@ -32,7 +33,11 @@ class SamlProvider < ApplicationRecord
   end
 
   def enforced_sso?
-    enabled? && super && group.feature_available?(:group_saml)
+    enabled? && super && group.licensed_feature_available?(:group_saml)
+  end
+
+  def git_check_enforced?
+    super && enforced_sso?
   end
 
   def enforced_group_managed_accounts?
@@ -53,7 +58,7 @@ class SamlProvider < ApplicationRecord
   class DefaultOptions
     include Gitlab::Routing
 
-    NAME_IDENTIFIER_FORMAT = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'.freeze
+    NAME_IDENTIFIER_FORMAT = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
 
     def initialize(group_path)
       @group_path = group_path
@@ -92,11 +97,18 @@ class SamlProvider < ApplicationRecord
     errors.add(:default_membership_role, "is not included in the list")
   end
 
+  def git_check_enforced_allowed
+    return unless git_check_enforced
+    return if enforced_sso?
+
+    errors.add(:git_check_enforced, "is not allowed when SSO is not enforced.")
+  end
+
   def set_defaults
     self.enabled = true
   end
 
   def strip_left_to_right_chars(input)
-    input&.gsub(/[\u200E]/, '')
+    input&.gsub(/\u200E/, '')
   end
 end

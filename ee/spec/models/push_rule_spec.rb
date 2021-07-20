@@ -12,6 +12,7 @@ RSpec.describe PushRule do
 
   describe "Associations" do
     it { is_expected.to belong_to(:project).inverse_of(:push_rule) }
+    it { is_expected.to have_one(:group).inverse_of(:push_rule).autosave(true) }
   end
 
   describe "Validation" do
@@ -298,14 +299,14 @@ RSpec.describe PushRule do
           it_behaves_like 'an unavailable push_rule'
         end
 
-        context 'with a Silver plan' do
-          let(:plan) { :silver }
+        context 'with a Premium plan' do
+          let(:plan) { :premium }
 
           it_behaves_like 'an available push_rule'
         end
 
-        context 'with a Gold plan' do
-          let(:plan) { :gold }
+        context 'with a Ultimate plan' do
+          let(:plan) { :ultimate }
 
           it_behaves_like 'an available push_rule'
         end

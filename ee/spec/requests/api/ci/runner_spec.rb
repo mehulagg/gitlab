@@ -18,12 +18,13 @@ RSpec.describe API::Ci::Runner do
                 engine: { name: 'kv-v2', path: 'kv-v2' },
                 path: 'production/db',
                 field: 'password'
-              }
+              },
+              file: true
             }
           }
         end
 
-        let!(:ci_build) { create(:ci_build, pipeline: pipeline, secrets: secrets) }
+        let!(:ci_build) { create(:ci_build, :pending, :queued, pipeline: pipeline, secrets: secrets) }
 
         context 'when secrets management feature is available' do
           before do
@@ -70,7 +71,8 @@ RSpec.describe API::Ci::Runner do
                         'engine' => { 'name' => 'kv-v2', 'path' => 'kv-v2' },
                         'path' => 'production/db',
                         'field' => 'password'
-                      }
+                      },
+                      'file' => true
                     }
                   }
                 )

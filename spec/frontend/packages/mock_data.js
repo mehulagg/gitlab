@@ -79,6 +79,9 @@ export const npmFiles = [
     pipelines: [
       { id: 1, project: { commit_url: 'http://foo.bar' }, git_commit_message: 'foo bar baz?' },
     ],
+    file_sha256: 'file_sha256',
+    file_md5: 'file_md5',
+    file_sha1: 'file_sha1',
   },
 ];
 
@@ -134,6 +137,23 @@ export const nugetPackage = {
   },
 };
 
+export const rubygemsPackage = {
+  created_at: '2015-12-10',
+  id: 4,
+  name: 'RubyGem1',
+  package_files: [],
+  package_type: 'rubygems',
+  project_id: 1,
+  tags: [],
+  updated_at: '2015-12-10',
+  version: '1.0.0',
+  rubygems_metadatum: {
+    author: 'Fake Name',
+    summary: 'My gem',
+    email: 'tanuki@fake.com',
+  },
+};
+
 export const pypiPackage = {
   created_at: '2015-12-10',
   id: 5,
@@ -156,6 +176,20 @@ export const composerPackage = {
   tags: [],
   updated_at: '2015-12-10',
   version: '1.0.0',
+};
+
+export const terraformModule = {
+  created_at: '2015-12-10',
+  id: 2,
+  name: 'Test/system-22',
+  package_type: 'terraform_module',
+  project_path: 'foo/bar/baz',
+  projectPathName: 'foo/bar/baz',
+  project_id: 1,
+  updated_at: '2015-12-10',
+  version: '0.1',
+  versions: [],
+  _links,
 };
 
 export const mockTags = [

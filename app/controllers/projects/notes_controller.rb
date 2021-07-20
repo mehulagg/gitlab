@@ -6,11 +6,10 @@ class Projects::NotesController < Projects::ApplicationController
   include NotesHelper
   include ToggleAwardEmoji
 
-  before_action :whitelist_query_limiting, only: [:create, :update]
+  before_action :disable_query_limiting, only: [:create, :update]
   before_action :authorize_read_note!
   before_action :authorize_create_note!, only: [:create]
   before_action :authorize_resolve_note!, only: [:resolve, :unresolve]
-  before_action :create_rate_limit, only: [:create]
 
   feature_category :issue_tracking
 
@@ -88,23 +87,7 @@ class Projects::NotesController < Projects::ApplicationController
     access_denied! unless can?(current_user, :create_note, noteable)
   end
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42383')
-  end
-
-  def create_rate_limit
-    key = :notes_create
-    return unless rate_limiter.throttled?(key, scope: [current_user], users_allowlist: rate_limit_users_allowlist)
-
-    rate_limiter.log_request(request, "#{key}_request_limit".to_sym, current_user)
-    render plain: _('This endpoint has been requested too many times. Try again later.'), status: :too_many_requests
-  end
-
-  def rate_limiter
-    ::Gitlab::ApplicationRateLimiter
-  end
-
-  def rate_limit_users_allowlist
-    Gitlab::CurrentSettings.current_application_settings.notes_create_limit_allowlist
+  def disable_query_limiting
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20800')
   end
 end

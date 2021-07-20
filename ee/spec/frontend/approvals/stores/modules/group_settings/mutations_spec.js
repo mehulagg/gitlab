@@ -18,9 +18,19 @@ describe('Group settings store mutations', () => {
 
   describe('RECEIVE_SETTINGS_SUCCESS', () => {
     it('updates settings', () => {
-      mutations.RECEIVE_SETTINGS_SUCCESS(state, { allow_author_approval: true });
+      mutations.RECEIVE_SETTINGS_SUCCESS(state, {
+        allow_author_approval: true,
+        allow_committer_approval: true,
+        allow_overrides_to_approver_list_per_merge_request: true,
+        require_password_to_approve: true,
+        retain_approvals_on_push: true,
+      });
 
       expect(state.settings.preventAuthorApproval).toBe(false);
+      expect(state.settings.preventCommittersApproval).toBe(false);
+      expect(state.settings.preventMrApprovalRuleEdit).toBe(false);
+      expect(state.settings.requireUserPassword).toBe(true);
+      expect(state.settings.removeApprovalsOnPush).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });
@@ -43,9 +53,17 @@ describe('Group settings store mutations', () => {
 
   describe('UPDATE_SETTINGS_SUCCESS', () => {
     it('updates settings', () => {
-      mutations.UPDATE_SETTINGS_SUCCESS(state, { allow_author_approval: true });
+      mutations.UPDATE_SETTINGS_SUCCESS(state, {
+        allow_author_approval: true,
+        allow_overrides_to_approver_list_per_merge_request: true,
+        require_password_to_approve: true,
+        retain_approvals_on_push: true,
+      });
 
       expect(state.settings.preventAuthorApproval).toBe(false);
+      expect(state.settings.preventMrApprovalRuleEdit).toBe(false);
+      expect(state.settings.requireUserPassword).toBe(true);
+      expect(state.settings.removeApprovalsOnPush).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });
@@ -55,6 +73,21 @@ describe('Group settings store mutations', () => {
       mutations.UPDATE_SETTINGS_ERROR(state);
 
       expect(state.isLoading).toBe(false);
+    });
+  });
+
+  describe.each`
+    mutation                               | prop
+    ${'SET_PREVENT_AUTHOR_APPROVAL'}       | ${'preventAuthorApproval'}
+    ${'SET_PREVENT_COMMITTERS_APPROVAL'}   | ${'preventCommittersApproval'}
+    ${'SET_PREVENT_MR_APPROVAL_RULE_EDIT'} | ${'preventMrApprovalRuleEdit'}
+    ${'SET_REMOVE_APPROVALS_ON_PUSH'}      | ${'removeApprovalsOnPush'}
+    ${'SET_REQUIRE_USER_PASSWORD'}         | ${'requireUserPassword'}
+  `('$mutation', ({ mutation, prop }) => {
+    it(`sets the ${prop}`, () => {
+      mutations[mutation](state, true);
+
+      expect(state.settings[prop]).toBe(true);
     });
   });
 });

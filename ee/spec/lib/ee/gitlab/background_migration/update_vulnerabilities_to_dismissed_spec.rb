@@ -20,7 +20,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateVulnerabilitiesToDismissed, :m
   let!(:project) { projects.create!(id: 123, namespace_id: 12, name: 'gitlab', path: 'gitlab') }
 
   let(:scanner) do
-    scanners.create!(id: 6, project_id: project.id, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: project.id, external_id: 'trivy', name: 'Security Scanner')
   end
 
   let(:identifier) do

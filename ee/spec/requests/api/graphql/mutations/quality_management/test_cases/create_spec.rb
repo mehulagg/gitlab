@@ -8,6 +8,7 @@ RSpec.describe 'Create test case' do
   let_it_be_with_refind(:project) { create(:project, :private) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:label) { create(:label, project: project) }
+
   let(:variables) { { project_path: project.full_path, title: 'foo', description: 'bar', label_ids: [label.id] } }
 
   let(:mutation) do
@@ -45,14 +46,6 @@ RSpec.describe 'Create test case' do
                                'The resource that you are attempting to access does not exist '\
                                'or you don\'t have permission to perform this action'
                               ]
-
-      context 'with authorized logged user', :aggregate_failures do
-        before_all do
-          project.add_reporter(current_user)
-        end
-
-        it_behaves_like 'a mutation that returns errors in the response', errors: ["Test cases are not available for this project"]
-      end
     end
 
     context 'when quality management feature is available' do

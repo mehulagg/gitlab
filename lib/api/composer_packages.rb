@@ -47,8 +47,12 @@ module API
         end
       end
 
+      def composer_v2?
+        headers['User-Agent'].to_s.include?('Composer/2')
+      end
+
       def presenter
-        @presenter ||= ::Packages::Composer::PackagesPresenter.new(user_group, packages)
+        @presenter ||= ::Packages::Composer::PackagesPresenter.new(user_group, packages, composer_v2?)
       end
     end
 
@@ -66,33 +70,36 @@ module API
       end
 
       desc 'Composer packages endpoint at group level'
-
       route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
-
       get ':id/-/packages/composer/packages' do
         presenter.root
       end
 
       desc 'Composer packages endpoint at group level for packages list'
-
       params do
         requires :sha, type: String, desc: 'Shasum of current json'
       end
-
       route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
-
       get ':id/-/packages/composer/p/:sha' do
         presenter.provider
       end
 
-      desc 'Composer packages endpoint at group level for package versions metadata'
-
+      desc 'Composer v2 packages p2 endpoint at group level for package versions metadata'
       params do
         requires :package_name, type: String, file_path: true, desc: 'The Composer package name'
       end
-
       route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+      get ':id/-/packages/composer/p2/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
+        not_found! if packages.empty?
 
+        presenter.package_versions
+      end
+
+      desc 'Composer packages endpoint at group level for package versions metadata'
+      params do
+        requires :package_name, type: String, file_path: true, desc: 'The Composer package name'
+      end
+      route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
       get ':id/-/packages/composer/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
         not_found! if packages.empty?
         not_found! if params[:sha].blank?
@@ -111,7 +118,6 @@ module API
       end
 
       desc 'Composer packages endpoint for registering packages'
-
       namespace ':id/packages/composer' do
         route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
@@ -120,7 +126,6 @@ module API
           optional :tag, type: String, desc: 'The name of the tag'
           exactly_one_of :tag, :branch
         end
-
         post do
           authorize_create_package!(authorized_user_project)
 
@@ -132,7 +137,7 @@ module API
             bad_request!
           end
 
-          track_package_event('push_package', :composer)
+          track_package_event('push_package', :composer, project: authorized_user_project, user: current_user, namespace: authorized_user_project.namespace)
 
           ::Packages::Composer::CreatePackageService
             .new(authorized_user_project, current_user, declared_params.merge(build: current_authenticated_job))
@@ -145,7 +150,6 @@ module API
           requires :sha, type: String, desc: 'Shasum of current json'
           requires :package_name, type: String, file_path: true, desc: 'The Composer package name'
         end
-
         get 'archives/*package_name' do
           metadata = unauthorized_user_project
             .packages
@@ -156,6 +160,8 @@ module API
             &.composer_metadatum
 
           not_found! unless metadata
+
+          track_package_event('pull_package', :composer, project: unauthorized_user_project, namespace: unauthorized_user_project.namespace)
 
           send_git_archive unauthorized_user_project.repository, ref: metadata.target_sha, format: 'zip', append_sha: true
         end

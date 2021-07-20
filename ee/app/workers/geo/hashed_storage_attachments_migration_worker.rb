@@ -3,6 +3,8 @@
 module Geo
   class HashedStorageAttachmentsMigrationWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include GeoQueue
 
     loggable_arguments 1, 2

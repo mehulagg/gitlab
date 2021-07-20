@@ -46,6 +46,7 @@ module Groups
     def ensure_allowed_transfer
       raise_transfer_error(:group_is_already_root) if group_is_already_root?
       raise_transfer_error(:same_parent_as_current) if same_parent?
+      raise_transfer_error(:has_subscription) if has_subscription?
       raise_transfer_error(:invalid_policies) unless valid_policies?
       raise_transfer_error(:namespace_with_same_path) if namespace_with_same_path?
       raise_transfer_error(:group_contains_images) if group_projects_contain_registry_images?
@@ -71,6 +72,10 @@ module Groups
 
     def same_parent?
       @new_parent_group && @new_parent_group.id == @group.parent_id
+    end
+
+    def has_subscription?
+      @group.paid?
     end
 
     def transfer_to_subgroup?
@@ -108,10 +113,13 @@ module Groups
 
       @group.parent = @new_parent_group
       @group.clear_memoization(:self_and_ancestors_ids)
+      @group.clear_memoization(:root_ancestor) if different_root_ancestor?
 
       inherit_group_shared_runners_settings
 
       @group.save!
+      # #reload is called to make sure traversal_ids are reloaded
+      @group.reload # rubocop:disable Cop/ActiveRecordAssociationReload
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -200,16 +208,16 @@ module Groups
     end
 
     def update_integrations
-      @group.services.inherit.delete_all
-      Service.create_from_active_default_integrations(@group, :group_id)
+      @group.integrations.inherit.delete_all
+      Integration.create_from_active_default_integrations(@group, :group_id)
     end
 
     def propagate_integrations
-      @group.services.inherit.each do |integration|
+      @group.integrations.inherit.each do |integration|
         PropagateIntegrationWorker.perform_async(integration.id)
       end
     end
   end
 end
 
-Groups::TransferService.prepend_if_ee('EE::Groups::TransferService')
+Groups::TransferService.prepend_mod_with('Groups::TransferService')

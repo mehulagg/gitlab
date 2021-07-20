@@ -7,6 +7,7 @@ RSpec.describe API::Projects do
 
   let(:user) { create(:user) }
   let_it_be(:another_user) { create(:user) }
+
   let(:project) { create(:project, namespace: user.namespace) }
 
   shared_examples 'inaccessable by reporter role and lower' do
@@ -90,9 +91,32 @@ RSpec.describe API::Projects do
         expect(json_response.first['id']).to eq project.id
       end
     end
+
+    context 'when there are several projects owned by groups' do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'avoids N+1 queries' do
+        create(:project, :public, namespace: create(:group))
+
+        # Warming up context
+        get api('/projects', admin)
+
+        control = ActiveRecord::QueryRecorder.new do
+          get api('/projects', admin)
+        end
+
+        create_list(:project, 2, :public, namespace: create(:group))
+
+        expect do
+          get api('/projects', admin)
+        end.not_to exceed_query_limit(control.count)
+      end
+    end
   end
 
   describe 'GET /projects/:id' do
+    subject { get api("/projects/#{project.id}", user) }
+
     context 'with external authorization' do
       let(:project) do
         create(:project,
@@ -148,7 +172,7 @@ RSpec.describe API::Projects do
         before do
           create(:ip_restriction, group: group)
           group.add_maintainer(user)
-          project.update(namespace: group)
+          project.update!(namespace: group)
         end
 
         context 'when the group_ip_restriction feature is not available' do
@@ -209,8 +233,6 @@ RSpec.describe API::Projects do
     end
 
     context 'project soft-deletion' do
-      subject { get api("/projects/#{project.id}", user) }
-
       let(:project) do
         create(:project, :public, archived: true, marked_for_deletion_at: 1.day.ago, deleting_user: user)
       end
@@ -251,6 +273,34 @@ RSpec.describe API::Projects do
 
           expect(json_response).not_to have_key 'marked_for_deletion_on'
         end
+      end
+    end
+
+    context 'issuable default templates feature is available' do
+      before do
+        stub_licensed_features(issuable_default_templates: true)
+      end
+
+      it 'returns issuable default templates' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to have_key 'issues_template'
+        expect(json_response).to have_key 'merge_requests_template'
+      end
+    end
+
+    context 'issuable default templates feature not available' do
+      before do
+        stub_licensed_features(issuable_default_templates: false)
+      end
+
+      it 'does not return issuable default templates' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).not_to have_key 'issues_template'
+        expect(json_response).not_to have_key 'merge_requests_template'
       end
     end
   end
@@ -554,6 +604,7 @@ RSpec.describe API::Projects do
   describe 'GET projects/:id/audit_events' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project, :public, namespace: user.namespace) }
+
     let(:path) { "/projects/#{project.id}/audit_events" }
 
     it_behaves_like 'inaccessable by reporter role and lower'
@@ -780,6 +831,65 @@ RSpec.describe API::Projects do
 
   describe 'PUT /projects/:id' do
     let(:project) { create(:project, namespace: user.namespace) }
+    let(:project_params) { {} }
+
+    subject { put api("/projects/#{project.id}", user), params: project_params }
+
+    context 'issuable default templates feature is available' do
+      before do
+        stub_licensed_features(issuable_default_templates: true)
+      end
+
+      context 'when updating issues_template' do
+        let(:project_params) { { issues_template: '## New Issue Template' } }
+
+        it 'updates the content' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['issues_template']).to eq(project_params[:issues_template])
+        end
+      end
+
+      context 'when updating merge_requests_template' do
+        let(:project_params) { { merge_requests_template: '## New Merge Request Template' } }
+
+        it 'updates the content' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['merge_requests_template']).to eq(project_params[:merge_requests_template])
+        end
+      end
+    end
+
+    context 'issuable default templates feature not available' do
+      before do
+        stub_licensed_features(issuable_default_templates: false)
+      end
+
+      context 'when updating issues_template' do
+        let(:project_params) { { issues_template: '## New Issue Template' } }
+
+        it 'does not update the content' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).not_to have_key 'issues_template'
+        end
+      end
+
+      context 'when updating merge_requests_template' do
+        let(:project_params) { { merge_requests_template: '## New Merge Request Template' } }
+
+        it 'does not update the content' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).not_to have_key 'merge_requests_template'
+        end
+      end
+    end
 
     context 'when updating external classification' do
       before do
@@ -787,8 +897,10 @@ RSpec.describe API::Projects do
         stub_licensed_features(external_authorization_service_api_management: true)
       end
 
+      let(:project_params) { { external_authorization_classification_label: 'new label' } }
+
       it 'updates the classification label' do
-        put(api("/projects/#{project.id}", user), params: { external_authorization_classification_label: 'new label' })
+        subject
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(project.reload.external_authorization_classification_label).to eq('new label')
@@ -797,7 +909,7 @@ RSpec.describe API::Projects do
 
     context 'when updating mirror related attributes' do
       let(:import_url) { generate(:url) }
-      let(:mirror_params) do
+      let(:project_params) do
         {
           mirror: true,
           import_url: import_url,
@@ -813,7 +925,7 @@ RSpec.describe API::Projects do
         end
 
         it 'does not update mirror related attributes' do
-          put(api("/projects/#{project.id}", user), params: mirror_params)
+          subject
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(project.reload.mirror).to be false
@@ -823,12 +935,12 @@ RSpec.describe API::Projects do
           admin = create(:admin)
           unrelated_user = create(:user)
 
-          mirror_params[:mirror_user_id] = unrelated_user.id
+          project_params[:mirror_user_id] = unrelated_user.id
           project.add_maintainer(admin)
 
           expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!).once
 
-          put(api("/projects/#{project.id}", admin), params: mirror_params)
+          put(api("/projects/#{project.id}", admin), params: project_params)
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(project.reload).to have_attributes(
@@ -845,7 +957,7 @@ RSpec.describe API::Projects do
       it 'updates mirror related attributes' do
         expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!).once
 
-        put(api("/projects/#{project.id}", user), params: mirror_params)
+        subject
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(project.reload).to have_attributes(
@@ -861,7 +973,7 @@ RSpec.describe API::Projects do
       it 'updates project without mirror attributes when the project is unable to set up repository mirroring' do
         stub_licensed_features(repository_mirrors: false)
 
-        put(api("/projects/#{project.id}", user), params: mirror_params)
+        subject
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(project.reload.mirror).to be false
@@ -870,9 +982,9 @@ RSpec.describe API::Projects do
       it 'renders an API error when mirror user is invalid' do
         invalid_mirror_user = create(:user)
         project.add_developer(invalid_mirror_user)
-        mirror_params[:mirror_user_id] = invalid_mirror_user.id
+        project_params[:mirror_user_id] = invalid_mirror_user.id
 
-        put(api("/projects/#{project.id}", user), params: mirror_params)
+        subject
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response["message"]["mirror_user_id"].first).to eq("is invalid")
@@ -882,7 +994,7 @@ RSpec.describe API::Projects do
         developer = create(:user)
         project.add_developer(developer)
 
-        put(api("/projects/#{project.id}", developer), params: mirror_params)
+        put(api("/projects/#{project.id}", developer), params: project_params)
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
@@ -890,10 +1002,10 @@ RSpec.describe API::Projects do
 
     describe 'updating approvals_before_merge attribute' do
       context 'when authenticated as project owner' do
-        it 'updates approvals_before_merge' do
-          project_param = { approvals_before_merge: 3 }
+        let(:project_params) { { approvals_before_merge: 3 } }
 
-          put api("/projects/#{project.id}", user), params: project_param
+        it 'updates approvals_before_merge' do
+          subject
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['approvals_before_merge']).to eq(3)
@@ -909,7 +1021,7 @@ RSpec.describe API::Projects do
       end
 
       it 'restores project' do
-        project.update(archived: true, marked_for_deletion_at: 1.day.ago, deleting_user: user)
+        project.update!(archived: true, marked_for_deletion_at: 1.day.ago, deleting_user: user)
 
         post api("/projects/#{project.id}/restore", user)
 
@@ -975,7 +1087,11 @@ RSpec.describe API::Projects do
       end
 
       context 'delayed project removal is enabled for group' do
-        let(:group) { create(:group, delayed_project_removal: true) }
+        let(:group) { create(:group) }
+
+        before do
+          group.namespace_settings.update!(delayed_project_removal: true)
+        end
 
         it_behaves_like 'marks project for deletion'
 

@@ -1,5 +1,31 @@
 # Changelog for gitlab-workhorse
 
+## v8.65.0
+
+### Fixed
+- Fix long polling to default to 50 s instead of 50 ns
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/687
+
+### Security
+- Use URL.EscapePath() in upstream router
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/
+
+## v8.64.0
+
+### Other
+- Revert "Migrate to labkit error tracking"
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/685
+
+## v8.63.0
+
+### Added
+- Accept more paths as Git HTTP
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/684
+
+### Other
+- Migrate error tracking from raven to labkit
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/671
+
 ## v8.62.0
 
 ### Added

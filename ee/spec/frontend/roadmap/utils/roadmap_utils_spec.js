@@ -305,8 +305,10 @@ describe('getEpicsTimeframeRange', () => {
 
     expect(range).toEqual(
       expect.objectContaining({
-        startDate: '2017-7-1',
-        dueDate: '2019-3-31',
+        timeframe: {
+          start: '2017-07-01',
+          end: '2019-03-31',
+        },
       }),
     );
   });
@@ -320,8 +322,10 @@ describe('getEpicsTimeframeRange', () => {
 
     expect(range).toEqual(
       expect.objectContaining({
-        startDate: '2017-11-1',
-        dueDate: '2018-6-30',
+        timeframe: {
+          start: '2017-11-01',
+          end: '2018-06-30',
+        },
       }),
     );
   });
@@ -335,8 +339,10 @@ describe('getEpicsTimeframeRange', () => {
 
     expect(range).toEqual(
       expect.objectContaining({
-        startDate: '2017-12-17',
-        dueDate: '2018-2-3',
+        timeframe: {
+          start: '2017-12-17',
+          end: '2018-02-03',
+        },
       }),
     );
   });

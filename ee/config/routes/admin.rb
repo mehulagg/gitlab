@@ -28,9 +28,12 @@ namespace :admin do
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+    post :sync_seat_link, on: :collection
 
     resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
+
+  resource :subscription, only: [:show]
 
   # using `only: []` to keep duplicate routes from being created
   resource :application_settings, only: [] do
@@ -48,8 +51,6 @@ namespace :admin do
     get '/designs', to: redirect(path: 'admin/geo/replication/designs')
 
     resources :nodes, only: [:index, :create, :new, :edit, :update]
-
-    resources :nodes_beta, only: [:index]
 
     scope '/replication' do
       get '/', to: redirect(path: 'admin/geo/replication/projects')

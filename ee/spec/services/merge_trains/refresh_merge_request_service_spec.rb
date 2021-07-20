@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe MergeTrains::RefreshMergeRequestService do
   let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user) }
+
   let(:service) { described_class.new(project, maintainer, require_recreate: require_recreate) }
   let(:require_recreate) { false }
 
@@ -208,7 +209,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
           expect(merge_request).to receive(:cleanup_refs).with(only: :train)
           expect(merge_request.merge_train).to receive(:start_merge!).and_call_original
           expect(merge_request.merge_train).to receive(:finish_merge!).and_call_original
-          expect_next_instance_of(MergeRequests::MergeService, project, maintainer, anything) do |service|
+          expect_next_instance_of(MergeRequests::MergeService, project: project, current_user: maintainer, params: instance_of(HashWithIndifferentAccess)) do |service|
             expect(service).to receive(:execute).with(merge_request, skip_discussions_check: true).and_call_original
           end
 

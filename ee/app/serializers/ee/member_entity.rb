@@ -18,6 +18,8 @@ module EE
       end
 
       expose :override, as: :is_overridden
+
+      expose :provisioned_by_this_group?, as: :provisioned_by_this_group
     end
 
     private

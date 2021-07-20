@@ -9,14 +9,15 @@ RSpec.describe Groups::GroupLinksController do
   let(:group_member) { create(:user) }
   let!(:project) { create(:project, group: shared_group) }
 
-  around do |example|
-    travel_to DateTime.new(2019, 4, 1) { example.run }
-  end
-
   before do
+    travel_to DateTime.new(2019, 4, 1)
     sign_in(user)
 
     shared_with_group.add_developer(group_member)
+  end
+
+  after do
+    travel_back
   end
 
   shared_examples 'placeholder is passed as `id` parameter' do |action|
@@ -87,7 +88,7 @@ RSpec.describe Groups::GroupLinksController do
         end
       end
 
-      it 'updates project permissions' do
+      it 'updates project permissions', :sidekiq_inline do
         expect { subject }.to change { group_member.can?(:read_project, project) }.from(false).to(true)
       end
 
@@ -206,7 +207,7 @@ RSpec.describe Groups::GroupLinksController do
         end
       end
 
-      it 'updates project permissions' do
+      it 'updates project permissions', :sidekiq_inline do
         expect { subject }.to change { group_member.can?(:create_release, project) }.from(true).to(false)
       end
     end
@@ -243,7 +244,7 @@ RSpec.describe Groups::GroupLinksController do
         expect { subject }.to change(GroupGroupLink, :count).by(-1)
       end
 
-      it 'updates project permissions' do
+      it 'updates project permissions', :sidekiq_inline do
         expect { subject }.to change { group_member.can?(:create_release, project) }.from(true).to(false)
       end
     end

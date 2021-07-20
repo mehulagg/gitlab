@@ -40,7 +40,7 @@ RSpec.describe MergeRequests::RefreshService do
 
   let(:oldrev) { TestEnv::BRANCH_SHA[source_branch] }
   let(:newrev) { TestEnv::BRANCH_SHA['after-create-delete-modify-move'] } # Pretend source_branch is now updated
-  let(:service) { described_class.new(project, current_user) }
+  let(:service) { described_class.new(project: project, current_user: current_user) }
   let(:current_user) { merge_request.author }
 
   subject { service.execute(oldrev, newrev, "refs/heads/#{source_branch}") }
@@ -122,6 +122,18 @@ RSpec.describe MergeRequests::RefreshService do
 
             it_behaves_like 'does not refresh the code owner rules'
           end
+
+          context 'when the branch is deleted' do
+            let(:newrev) { Gitlab::Git::BLANK_SHA }
+
+            it_behaves_like 'does not refresh the code owner rules'
+          end
+
+          context 'when the branch is created' do
+            let(:oldrev) { Gitlab::Git::BLANK_SHA }
+
+            it_behaves_like 'does not refresh the code owner rules'
+          end
         end
 
         context 'when the branch is not protected' do
@@ -141,7 +153,7 @@ RSpec.describe MergeRequests::RefreshService do
     describe '#update_approvers_for_source_branch_merge_requests' do
       let(:owner) { create(:user, username: 'default-codeowner') }
       let(:current_user) { merge_request.author }
-      let(:service) { described_class.new(project, current_user) }
+      let(:service) { described_class.new(project: project, current_user: current_user) }
       let(:enable_code_owner) { true }
       let(:enable_report_approver_rules) { true }
       let(:todo_service) { double(:todo_service, add_merge_request_approvers: true) }
@@ -249,8 +261,8 @@ RSpec.describe MergeRequests::RefreshService do
       end
     end
 
-    describe 'Pipelines for merge requests' do
-      let(:service) { described_class.new(project, current_user) }
+    describe 'Pipelines for merge requests', :sidekiq_inline do
+      let(:service) { described_class.new(project: project, current_user: current_user) }
       let(:current_user) { merge_request.author }
 
       let(:config) do
@@ -274,7 +286,7 @@ RSpec.describe MergeRequests::RefreshService do
         expect { subject }
           .to change { merge_request.pipelines_for_merge_request.count }.by(1)
 
-        expect(merge_request.all_pipelines.last).to be_merge_request_pipeline
+        expect(merge_request.all_pipelines.last).to be_merged_result_pipeline
       end
 
       context 'when MergeRequestUpdateWorker is retried by an exception' do
@@ -371,7 +383,7 @@ RSpec.describe MergeRequests::RefreshService do
       end
 
       context 'push to fork repo source branch' do
-        let(:service) { described_class.new(forked_project, user) }
+        let(:service) { described_class.new(project: forked_project, current_user: user) }
 
         def refresh
           allow(service).to receive(:execute_hooks)
@@ -409,7 +421,7 @@ RSpec.describe MergeRequests::RefreshService do
       context 'push to fork repo target branch' do
         describe 'changes to merge requests' do
           before do
-            described_class.new(forked_project, user).execute(oldrev, newrev, 'refs/heads/feature')
+            described_class.new(project: forked_project, current_user: user).execute(oldrev, newrev, 'refs/heads/feature')
             reload_mrs
           end
 
@@ -547,7 +559,7 @@ RSpec.describe MergeRequests::RefreshService do
         .parent_id
     end
 
-    let(:refresh_service) { described_class.new(project, user) }
+    let(:refresh_service) { described_class.new(project: project, current_user: user) }
 
     before do
       merge_request.auto_merge_strategy = auto_merge_strategy

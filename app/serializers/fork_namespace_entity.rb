@@ -13,7 +13,7 @@ class ForkNamespaceEntity < Grape::Entity
   end
 
   expose :forked_project_path do |namespace, options|
-    if forked_project = namespace.find_fork_of(options[:project])
+    if forked_project = options.dig(:forked_projects, namespace.id)
       project_path(forked_project)
     end
   end
@@ -23,7 +23,7 @@ class ForkNamespaceEntity < Grape::Entity
   end
 
   expose :relative_path do |namespace|
-    polymorphic_path(namespace)
+    group_path(namespace)
   end
 
   expose :markdown_description do |namespace|
@@ -31,7 +31,11 @@ class ForkNamespaceEntity < Grape::Entity
   end
 
   expose :can_create_project do |namespace, options|
-    options[:current_user].can?(:create_projects, namespace)
+    if Feature.enabled?(:fork_project_form, options[:project], default_enabled: :yaml)
+      true
+    else
+      options[:current_user].can?(:create_projects, namespace)
+    end
   end
 
   private
@@ -49,4 +53,4 @@ class ForkNamespaceEntity < Grape::Entity
   end
 end
 
-ForkNamespaceEntity.prepend_if_ee('EE::ForkNamespaceEntity')
+ForkNamespaceEntity.prepend_mod_with('ForkNamespaceEntity')

@@ -12,13 +12,14 @@ module EE
 
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
+        mount ::API::StatusChecks
         mount ::API::ProjectApprovalSettings
+        mount ::API::Dora::Metrics
         mount ::API::EpicIssues
         mount ::API::EpicLinks
         mount ::API::Epics
         mount ::API::ElasticsearchIndexedNamespaces
         mount ::API::Experiments
-        mount ::API::Geo
         mount ::API::GeoReplication
         mount ::API::GeoNodes
         mount ::API::Ldap
@@ -49,6 +50,10 @@ module EE
         mount ::API::ResourceIterationEvents
         mount ::API::Iterations
         mount ::API::GroupRepositoryStorageMoves
+        mount ::API::Ci::Minutes
+
+        mount ::API::Internal::AppSec::Dast::SiteValidations
+        mount ::API::Internal::UpcomingReconciliations
       end
     end
   end

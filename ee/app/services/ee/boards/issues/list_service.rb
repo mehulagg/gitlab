@@ -32,7 +32,7 @@ module EE
         # rubocop: disable CodeReuse/ActiveRecord
         def label_links(label_ids)
           if has_valid_milestone?
-            super.where("issues.milestone_id = ?", board.milestone_id)
+            super.where(issues: { milestone_id: board.milestone_id })
           else
             super
           end
@@ -65,7 +65,7 @@ module EE
         def all_iteration_lists
           # Note that the names are very similar but these are different.
           # One is a license name and the other is a feature flag
-          if parent.feature_available?(:board_iteration_lists) && ::Feature.enabled?(:iteration_board_lists, parent)
+          if parent.feature_available?(:board_iteration_lists) && ::Feature.enabled?(:iteration_board_lists, parent, default_enabled: :yaml)
             board.lists.iteration.where.not(iteration_id: nil)
           else
             ::List.none

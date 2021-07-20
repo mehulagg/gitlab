@@ -7,17 +7,21 @@ RSpec.describe AuditEventPresenter do
 
   let(:details) do
     {
-      author_name: 'author',
-      ip_address: '127.0.0.1',
-      target_details: 'target name',
-      entity_path: 'path',
+      change: 'name',
       from: 'a',
-      to: 'b'
+      to: 'b',
+      entity_path: 'path'
     }
   end
 
   let(:audit_event) do
-    create(:audit_event, ip_address: '10.2.1.1', details: details)
+    create(
+      :audit_event,
+      author_name: 'author',
+      target_details: 'target name',
+      ip_address: '10.2.1.1',
+      details: details
+    )
   end
 
   subject(:presenter) do
@@ -36,13 +40,7 @@ RSpec.describe AuditEventPresenter do
     end
 
     context 'event authored by a user that no longer exists' do
-      let(:user) { create(:user) }
-      let(:audit_event) { create(:audit_event, user: user, details: details) }
-
-      before do
-        user.destroy
-        audit_event.reload
-      end
+      let(:audit_event) { build(:audit_event, user: build(:user), details: details) }
 
       context 'when `author_name` is not included in the details' do
         let(:details) do
@@ -62,49 +60,10 @@ RSpec.describe AuditEventPresenter do
       end
 
       context 'when `author_name` is included in the details and not in the author_name column' do
-        before do
-          audit_event.update!(author_name: nil)
-        end
+        let(:audit_event) { build(:audit_event, author_name: nil, details: details) }
 
         it 'shows the author name as provided in the details' do
           expect(presenter.author_name).to eq(details[:author_name])
-        end
-      end
-    end
-
-    context 'event authored by an unauthenticated user' do
-      before do
-        audit_event.author_id = -1
-      end
-
-      context 'when `author_name` is not included in details and not in the author_name column' do
-        before do
-          audit_event.update!(author_name: nil)
-        end
-
-        let(:details) do
-          {
-            author_name: nil,
-            ip_address: '127.0.0.1',
-            target_details: 'target name',
-            entity_path: 'path',
-            from: 'a',
-            to: 'b'
-          }
-        end
-
-        it 'shows `An unauthenticated user` as the author name' do
-          expect(presenter.author_name).to eq('An unauthenticated user')
-        end
-      end
-
-      context 'when `author_name` is included in details and not in the author_name column' do
-        before do
-          audit_event.update!(author_name: nil)
-        end
-
-        it 'shows the author name as provided in the details' do
-          expect(presenter.author_name).to eq('author')
         end
       end
     end
@@ -153,6 +112,6 @@ RSpec.describe AuditEventPresenter do
   end
 
   it 'exposes the action' do
-    expect(presenter.action).to eq('Changed author from a to b')
+    expect(presenter.action).to eq('Changed name from a to b')
   end
 end

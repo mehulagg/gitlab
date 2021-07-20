@@ -49,3 +49,5 @@ export const PREV = 'prev';
 export const NEXT = 'next';
 
 export const DEFAULT_PAGE_SIZE = 20;
+
+export const RESYNC_MODAL_ID = 'resync-all-geo';

@@ -15,6 +15,7 @@ export const createUniqueLinkId = (stageName, jobName) => `${stageName}-${jobNam
 
 export const generateLinksData = ({ links }, containerID, modifier = '') => {
   const containerEl = document.getElementById(containerID);
+
   return links.map((link) => {
     const path = d3.path();
 
@@ -59,18 +60,26 @@ export const generateLinksData = ({ links }, containerID, modifier = '') => {
       paddingTop +
       sourceNodeCoordinates.height / 2;
 
-    // Start point
-    path.moveTo(sourceNodeX, sourceNodeY);
+    const sourceNodeLeftX = sourceNodeCoordinates.left - containerCoordinates.x - paddingLeft;
+
+    // If the source and target X values are the same,
+    // it means the nodes are in the same column so we
+    // want to start the line on the left of the pill
+    // instead of the right to have a nice curve.
+    const firstPointCoordinateX = sourceNodeLeftX === targetNodeX ? sourceNodeLeftX : sourceNodeX;
+
+    // First point
+    path.moveTo(firstPointCoordinateX, sourceNodeY);
 
     // Make cross-stages lines a straight line all the way
     // until we can safely draw the bezier to look nice.
     // The adjustment number here is a magic number to make things
     // look nice and should change if the padding changes. This goes well
-    // with gl-px-6. gl-px-8 is more like 100.
-    const straightLineDestinationX = targetNodeX - 60;
+    // with gl-px-9 which we translate with 100px here.
+    const straightLineDestinationX = targetNodeX - 100;
     const controlPointX = straightLineDestinationX + (targetNodeX - straightLineDestinationX) / 2;
 
-    if (straightLineDestinationX > 0) {
+    if (straightLineDestinationX > firstPointCoordinateX) {
       path.lineTo(straightLineDestinationX, sourceNodeY);
     }
 

@@ -7,7 +7,7 @@ class Milestone < ApplicationRecord
   include FromUnion
   include Importable
 
-  prepend_if_ee('::EE::Milestone') # rubocop: disable Cop/InjectEnterpriseEditionModule
+  prepend_mod_with('Milestone') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
   class Predefined
     ALL = [::Timebox::None, ::Timebox::Any, ::Timebox::Started, ::Timebox::Upcoming].freeze
@@ -36,6 +36,7 @@ class Milestone < ApplicationRecord
   scope :order_by_dates_and_title, -> { order(due_date: :asc, start_date: :asc, title: :asc) }
 
   validates_associated :milestone_releases, message: -> (_, obj) { obj[:value].map(&:errors).map(&:full_messages).join(",") }
+  validate :uniqueness_of_title, if: :title_changed?
 
   state_machine :state, initial: :active do
     event :close do
@@ -89,8 +90,12 @@ class Milestone < ApplicationRecord
       .order(:project_id, :group_id, :due_date).select('DISTINCT ON (project_id, group_id) id')
   end
 
+  def self.with_web_entity_associations
+    preload(:group, project: [:project_feature, group: [:parent], namespace: :route])
+  end
+
   def participants
-    User.joins(assigned_issues: :milestone).where("milestones.id = ?", id).distinct
+    User.joins(assigned_issues: :milestone).where(milestones: { id: id }).distinct
   end
 
   def self.sort_by_attribute(method)
@@ -111,6 +116,19 @@ class Milestone < ApplicationRecord
       else
         order_by(method)
       end
+
+    sorted.with_order_id_desc
+  end
+
+  def self.sort_with_expired_last(method)
+    # NOTE: this is a custom ordering of milestones
+    # to prioritize displaying non-expired milestones and milestones without due dates
+    sorted = reorder(Arel.sql("(CASE WHEN due_date IS NULL THEN 1 WHEN due_date >= CURRENT_DATE THEN 0 ELSE 2 END) ASC"))
+    sorted = if method.to_s == 'expired_last_due_date_desc'
+               sorted.order(due_date: :desc)
+             else
+               sorted.order(due_date: :asc)
+             end
 
     sorted.with_order_id_desc
   end
@@ -167,5 +185,17 @@ class Milestone < ApplicationRecord
 
   def issues_finder_params
     { project_id: project_id, group_id: group_id, include_subgroups: group_id.present? }.compact
+  end
+
+  # milestone titles must be unique across project and group milestones
+  def uniqueness_of_title
+    if project
+      relation = self.class.for_projects_and_groups([project_id], [project.group&.id])
+    elsif group
+      relation = self.class.for_projects_and_groups(group.projects.select(:id), [group.id])
+    end
+
+    title_exists = relation.find_by_title(title)
+    errors.add(:title, _("already being used for another group or project %{timebox_name}.") % { timebox_name: timebox_name }) if title_exists
   end
 end

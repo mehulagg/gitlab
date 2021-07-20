@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
@@ -13,12 +13,15 @@ GitLab [continuous integration](https://about.gitlab.com/stages-devops-lifecycle
 Before you start, make sure you have:
 
 - A project in GitLab that you would like to use CI/CD for.
-- Maintainer or owner access for the project.
+- The [Maintainer or Owner role](../../user/permissions.md) for the project.
 
 If you are migrating from another CI/CD tool, view this documentation:
 
 - [Migrate from CircleCI](../migration/circleci.md).
 - [Migrate from Jenkins](../migration/jenkins.md).
+
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [First time GitLab & CI/CD](https://www.youtube.com/watch?v=kTNfi5z6Uvk&t=553s). This includes a quick introduction to GitLab, the first steps with CI/CD, building a Go project, running tests, using the CI/CD pipeline editor, detecting secrets and security vulnerabilities and offers more exercises for async practice.
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [Intro to GitLab CI](https://www.youtube.com/watch?v=l5705U8s_nQ&t=358s). This workshop uses the Web IDE to quickly get going with building source code using CI/CD, and run unit tests.
 
 ## CI/CD process overview
 
@@ -38,7 +41,7 @@ The job results [are displayed in a pipeline](#view-the-status-of-your-pipeline-
 In GitLab, runners are agents that run your CI/CD jobs.
 
 You might already have runners available for your project, including
-[shared runners](../runners/README.md#shared-runners), which are
+[shared runners](../runners/runners_scope.md), which are
 available to all projects in your GitLab instance.
 
 To view available runners:
@@ -66,14 +69,14 @@ In this file, you define:
 - The decisions the runner should make when specific conditions are encountered.
 
 For example, you might want to run a suite of tests when you commit to
-any branch except `master`. When you commit to `master`, you want
+any branch except the default branch. When you commit to the default branch, you want
 to run the same suite, but also publish your application.
 
 All of this is defined in the `.gitlab-ci.yml` file.
 
 To create a `.gitlab-ci.yml` file:
 
-1. Go to **Project overview > Details**.
+1. On the left sidebar, select **Project information > Details**.
 1. Above the file list, select the branch you want to commit to,
    click the plus icon, then select **New file**:
 
@@ -117,22 +120,29 @@ The pipeline starts when the commit is committed.
 
 #### `.gitlab-ci.yml` tips
 
-- If you want the runner to use a Docker image to run the jobs, edit the `.gitlab-ci.yml` file
-  to include your image name:
+- If you want the runner to [use a Docker container to run the jobs](../docker/using_docker_images.md),
+  edit the `.gitlab-ci.yml` file
+  to include an image name:
 
   ```yaml
   default:
     image: ruby:2.7.2
   ```
 
-  This command tells the runner to use a Ruby image from Docker Hub.
+  This command tells the runner to use a Ruby image from Docker Hub
+  and to run the jobs in a container that's generated from the image.
+
+  This process is different than
+  [building an application as a Docker container](../docker/using_docker_build.md).
+  Your application does not need to be built as a Docker container to
+  run CI/CD jobs in Docker containers.
 
 - To validate your `.gitlab-ci.yml` file, use the
   [CI Lint tool](../lint.md), which is available in every project.
 - You can also use [CI/CD configuration visualization](../pipeline_editor/index.md#visualize-ci-configuration) to
   view a graphical representation of your `.gitlab-ci.yml` file.
 - For the complete `.gitlab-ci.yml` syntax, see
-  [the `.gitlab-ci.yml` reference topic](../yaml/README.md).
+  [the `.gitlab-ci.yml` reference topic](../yaml/index.md).
 
 ### View the status of your pipeline and jobs
 
@@ -140,7 +150,7 @@ When you committed your changes, a pipeline started.
 
 To view your pipeline:
 
-- Go **CI/CD > Pipelines**.
+- Go to **CI/CD > Pipelines**.
 
   A pipeline with three stages should be displayed:
 
@@ -154,4 +164,9 @@ To view your pipeline:
 
   ![Job details](img/job_details_v13_6.png)
 
-If the job status is `stuck`, check to ensure a runner is probably configured for the project.
+If the job status is `stuck`, check to ensure a runner is properly configured for the project.
+
+> To learn more about GitLab CI/CD, check out these video walkthroughs:
+>
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [First time GitLab & CI/CD](https://www.youtube.com/watch?v=kTNfi5z6Uvk&t=150s).
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [Intro to GitLab CI](https://www.youtube.com/watch?v=l5705U8s_nQ&t=358s).

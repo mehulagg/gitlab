@@ -5,22 +5,17 @@ module EE
     module UpdateService
       extend ::Gitlab::Utils::Override
 
-      include CleanupApprovers
+      private
 
-      override :execute
-      def execute(merge_request)
+      override :general_fallback
+      def general_fallback(merge_request)
         unless update_task_event?
-          should_remove_old_approvers = params.delete(:remove_old_approvers)
           old_approvers = merge_request.overall_approvers(exclude_code_owners: true)
         end
 
         reset_approval_rules(merge_request) if params.delete(:reset_approval_rules_to_defaults)
 
         merge_request = super(merge_request)
-
-        if should_remove_old_approvers && merge_request.valid?
-          cleanup_approvers(merge_request, reload: true)
-        end
 
         merge_request.reset_approval_cache!
 
@@ -40,29 +35,20 @@ module EE
         merge_request
       end
 
-      private
-
       override :after_update
       def after_update(merge_request)
         super
 
-        ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute
+        merge_request.run_after_commit do
+          ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request)
+        end
       end
 
       override :create_branch_change_note
-      def create_branch_change_note(merge_request, branch_type, old_branch, new_branch)
+      def create_branch_change_note(merge_request, branch_type, event_type, old_branch, new_branch)
         super
 
         reset_approvals(merge_request)
-      end
-
-      override :handle_assignees_change
-      def handle_assignees_change(merge_request, _old_assignees)
-        super
-
-        return unless merge_request.project.feature_available?(:code_review_analytics)
-
-        ::Analytics::RefreshReassignData.new(merge_request).execute_async
       end
 
       def reset_approval_rules(merge_request)

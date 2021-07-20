@@ -60,6 +60,11 @@ export default {
       required: false,
       default: null,
     },
+    lines: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
     note: {
       type: Object,
       required: false,
@@ -201,7 +206,7 @@ export default {
     changedCommentText() {
       return sprintf(
         __(
-          'This comment has changed since you started editing, please review the %{startTag}updated comment%{endTag} to ensure information is not lost.',
+          'This comment changed after you started editing it. Review the %{startTag}updated comment%{endTag} to ensure information is not lost.',
         ),
         {
           startTag: `<a href="${this.noteHash}" target="_blank" rel="noopener noreferrer">`,
@@ -333,6 +338,7 @@ export default {
           :help-page-path="helpPagePath"
           :show-suggest-popover="showSuggestPopover"
           :textarea-value="updatedNoteBody"
+          :lines="lines"
           @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
         >
           <template #textarea>
@@ -345,7 +351,7 @@ export default {
               class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
               data-qa-selector="reply_field"
               dir="auto"
-              :aria-label="__('Description')"
+              :aria-label="__('Reply to comment')"
               :placeholder="__('Write a comment or drag your files here…')"
               @keydown.meta.enter="handleKeySubmit()"
               @keydown.ctrl.enter="handleKeySubmit()"
@@ -356,36 +362,26 @@ export default {
           </template>
         </markdown-field>
       </comment-field-layout>
-      <div class="note-form-actions clearfix">
+      <div class="note-form-actions">
         <template v-if="showBatchCommentsActions">
           <p v-if="showResolveDiscussionToggle">
             <label>
               <template v-if="discussionResolved">
-                <input
-                  v-model="isUnresolving"
-                  type="checkbox"
-                  class="js-unresolve-checkbox"
-                  data-qa-selector="unresolve_review_discussion_checkbox"
-                />
+                <input v-model="isUnresolving" type="checkbox" class="js-unresolve-checkbox" />
                 {{ __('Unresolve thread') }}
               </template>
               <template v-else>
-                <input
-                  v-model="isResolving"
-                  type="checkbox"
-                  class="js-resolve-checkbox"
-                  data-qa-selector="resolve_review_discussion_checkbox"
-                />
+                <input v-model="isResolving" type="checkbox" class="js-resolve-checkbox" />
                 {{ __('Resolve thread') }}
               </template>
             </label>
           </p>
-          <div class="gl-display-sm-flex gl-flex-wrap">
+          <div class="gl-display-flex gl-flex-wrap gl-mb-n3">
             <gl-button
               :disabled="isDisabled"
               category="primary"
-              variant="success"
-              class="gl-mr-3"
+              variant="confirm"
+              class="gl-sm-mr-3 gl-mb-3"
               data-qa-selector="start_review_button"
               @click="handleAddToReview"
             >
@@ -395,15 +391,15 @@ export default {
             <gl-button
               :disabled="isDisabled"
               category="secondary"
-              variant="default"
+              variant="confirm"
               data-qa-selector="comment_now_button"
-              class="gl-mr-3 js-comment-button"
+              class="gl-sm-mr-3 gl-mb-3 js-comment-button"
               @click="handleUpdate()"
             >
               {{ __('Add comment now') }}
             </gl-button>
             <gl-button
-              class="note-edit-cancel js-close-discussion-note-form"
+              class="note-edit-cancel gl-mb-3 js-close-discussion-note-form"
               category="secondary"
               variant="default"
               data-testid="cancelBatchCommentsEnabled"
@@ -418,7 +414,7 @@ export default {
             <gl-button
               :disabled="isDisabled"
               category="primary"
-              variant="success"
+              variant="confirm"
               data-qa-selector="reply_comment_button"
               class="gl-mr-3 js-vue-issue-save js-comment-button"
               @click="handleUpdate()"

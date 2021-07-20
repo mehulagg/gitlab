@@ -1,0 +1,17 @@
+---
+key_path: usage_activity_by_stage.secure.user_api_fuzzing_scans
+description: Number of users who have run a API Fuzzing scan
+product_section: sec
+product_stage: secure
+product_group: category::fuzz testing
+product_category: fuzz_testing
+value_type: number
+status: data_available
+data_category: Optional
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49444
+time_frame: all
+data_source: database
+distribution:
+  - ee
+tier:
+  - ultimate

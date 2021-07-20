@@ -8,11 +8,13 @@ FactoryBot.define do
 
     trait(:attachment) { file_type { :attachment } }
     trait(:avatar) { file_type { :avatar } }
+    trait(:'bulk_imports/export') { file_type { :'bulk_imports/export' } }
+    trait(:favicon) { file_type { :favicon } }
     trait(:file) { file_type { :file } }
+    trait(:import_export) { file_type { :import_export } }
+    trait(:issuable_metric_image) { file_type { :issuable_metric_image } }
     trait(:namespace_file) { file_type { :namespace_file } }
     trait(:personal_file) { file_type { :personal_file } }
-    trait(:favicon) { file_type { :favicon } }
-    trait(:import_export) { file_type { :import_export } }
 
     trait :failed do
       success { false }
@@ -27,9 +29,7 @@ FactoryBot.define do
     trait :with_file do
       after(:build, :stub) do |registry, _|
         file =
-          if registry.file_type.to_sym == :lfs
-            raise NotImplementedError, 'Use create(:geo_lfs_object_registry, :with_lfs_object) instead'
-          elsif registry.file_type.to_sym == :job_artifact
+          if registry.file_type.to_sym == :job_artifact
             raise NotImplementedError, 'Use create(:geo_job_artifact_registry, :with_artifact) instead'
           else
             create(:upload)

@@ -1,6 +1,6 @@
 ---
-stage: Verify
-group: Testing
+stage: Secure
+group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
@@ -10,20 +10,24 @@ type: reference, howto
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in GitLab 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
-Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/README.md), you can analyze your
-source code quality using GitLab Code Quality.
+To ensure your project's code stays simple, readable, and easy to contribute to,
+you can use [GitLab CI/CD](../../../ci/index.md) to analyze your source code quality.
+
+For example, while you're implementing a feature, you can run Code Quality reports
+to analyze how your improvements are impacting your code's quality. You can
+use this information to ensure that your changes are improving performance rather
+than degrading it.
 
 Code Quality:
 
-- Uses [Code Climate Engines](https://codeclimate.com), which are
+- Uses [plugins](https://docs.codeclimate.com/docs/list-of-engines) supported by Code Climate, which are
   free and open source. Code Quality does not require a Code Climate
   subscription.
-- Runs in [pipelines](../../../ci/pipelines/index.md) using a Docker image built in the
-  [GitLab Code
-  Quality](https://gitlab.com/gitlab-org/ci-cd/codequality) project using [default Code Climate configurations](https://gitlab.com/gitlab-org/ci-cd/codequality/-/tree/master/codeclimate_defaults).
+- Runs in [pipelines](../../../ci/pipelines/index.md) by using a Docker image built in the
+  [GitLab Code Quality](https://gitlab.com/gitlab-org/ci-cd/codequality) project.
+- Uses [default Code Climate configurations](https://gitlab.com/gitlab-org/ci-cd/codequality/-/tree/master/codeclimate_defaults).
 - Can make use of a [template](#example-configuration).
-- Is available with [Auto
-  DevOps](../../../topics/autodevops/stages.md#auto-code-quality).
+- Is available by using [Auto Code Quality](../../../topics/autodevops/stages.md#auto-code-quality), provided by [Auto DevOps](../../../topics/autodevops/index.md).
 - Can be extended through [Analysis Plugins](https://docs.codeclimate.com/docs/list-of-engines) or a [custom tool](#implementing-a-custom-tool).
 
 ## Code Quality Widget
@@ -34,7 +38,7 @@ Code Quality:
 Going a step further, GitLab can show the Code Quality report right
 in the merge request widget area if a report from the target branch is available to compare to:
 
-![Code Quality Widget](img/code_quality.png)
+![Code Quality Widget](img/code_quality_widget_13_11.png)
 
 Watch a quick walkthrough of Code Quality in action:
 
@@ -50,20 +54,18 @@ For one customer, the auditor found that having Code Quality, SAST, and Containe
 
 See also the Code Climate list of [Supported Languages for Maintainability](https://docs.codeclimate.com/docs/supported-languages-for-maintainability).
 
-## Use cases
+## Code Quality in diff view **(ULTIMATE)**
 
-For instance, consider the following workflow:
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267612) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.11.
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/284140) in GitLab 13.12.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284140) in GitLab 14.1.
+> - [Inline annotation added](https://gitlab.com/gitlab-org/gitlab/-/issues/2526) in GitLab 14.1.
 
-1. Your backend team member starts a new implementation for making a certain
-   feature in your app faster.
-1. With Code Quality reports, they analyze how their implementation is impacting
-   the code quality.
-1. The metrics show that their code degrades the quality by 10 points.
-1. You ask a co-worker to help them with this modification.
-1. They both work on the changes until Code Quality report displays no
-   degradations, only improvements.
-1. You approve the merge request and authorize its deployment to staging.
-1. Once verified, their changes are deployed to production.
+Changes to files in merge requests can cause Code Quality to fall if merged. In these cases,
+the merge request's diff view displays an indicator next to lines with new Code Quality violations. For example:
+
+![Code Quality MR diff report](img/code_quality_mr_diff_report_v14.png)
 
 ## Example configuration
 
@@ -86,11 +88,11 @@ include:
 
 The above example creates a `code_quality` job in your CI/CD pipeline which
 scans your source code for code quality issues. The report is saved as a
-[Code Quality report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality)
+[Code Quality report artifact](../../../ci/yaml/index.md#artifactsreportscodequality)
 that you can later download and analyze.
 
 It's also possible to override the URL to the Code Quality image by
-setting the `CODE_QUALITY_IMAGE` variable. This is particularly useful if you want
+setting the `CODE_QUALITY_IMAGE` CI/CD variable. This is particularly useful if you want
 to lock in a specific version of Code Quality, or use a fork of it:
 
 ```yaml
@@ -236,29 +238,28 @@ was chosen as an operational decision by the runner team, instead of exposing `d
 
 ### Disabling the code quality job
 
-The `code_quality` job doesn't run if the `$CODE_QUALITY_DISABLED` environment
-variable is present. Please refer to the environment variables [documentation](../../../ci/variables/README.md)
+The `code_quality` job doesn't run if the `$CODE_QUALITY_DISABLED` CI/CD variable
+is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/index.md)
 to learn more about how to define one.
 
-To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom environment
-variable. This can be done:
+To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom CI/CD variable.
+This can be done:
 
-- For the whole project, [in the project settings](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
-  or [CI/CD configuration](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
+- For [the whole project](../../../ci/variables/index.md#custom-cicd-variables).
 - For a single pipeline run:
 
   1. Go to **CI/CD > Pipelines**
-  1. Click **Run Pipeline**
+  1. Click **Run pipeline**
   1. Add `CODE_QUALITY_DISABLED` as the variable key, with any value.
 
 ### Using with merge request pipelines
 
 The configuration provided by the Code Quality template does not let the `code_quality` job
-run on [pipelines for merge requests](../../../ci/merge_request_pipelines/index.md).
+run on [pipelines for merge requests](../../../ci/pipelines/merge_request_pipelines.md).
 
 If pipelines for merge requests is enabled, the `code_quality:rules` must be redefined.
 
-The template has these [`rules`](../../../ci/yaml/README.md#rules) for the `code quality` job:
+The template has these [`rules`](../../../ci/yaml/index.md#rules) for the `code quality` job:
 
 ```yaml
 code_quality:
@@ -268,7 +269,7 @@ code_quality:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
 ```
 
-If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/README.md#workflowrules))
+If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/index.md#workflow))
 might look like this example:
 
 ```yaml
@@ -310,7 +311,7 @@ do this:
 
 1. Define a job in your `.gitlab-ci.yml` file that generates the
    [Code Quality report
-   artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality).
+   artifact](../../../ci/yaml/index.md#artifactsreportscodequality).
 1. Configure your tool to generate the Code Quality report artifact as a JSON
    file that implements a subset of the [Code Climate
    spec](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types).
@@ -318,13 +319,13 @@ do this:
 The Code Quality report artifact JSON file must contain an array of objects
 with the following properties:
 
-| Name                   | Description                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `description`          | A description of the code quality violation.                                           |
-| `fingerprint`          | A unique fingerprint to identify the code quality violation. For example, an MD5 hash. |
-| `severity`             | A severity string (can be `info`, `minor`, `major`, `critical`, or `blocker`).                          |
-| `location.path`        | The relative path to the file containing the code quality violation.                   |
-| `location.lines.begin` | The line on which the code quality violation occurred.                                 |
+| Name                   | Description                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `description`          | A description of the code quality violation.                                              |
+| `fingerprint`          | A unique fingerprint to identify the code quality violation. For example, an MD5 hash.    |
+| `severity`             | A severity string (can be `info`, `minor`, `major`, `critical`, or `blocker`).            |
+| `location.path`        | The relative path to the file containing the code quality violation.                      |
+| `location.lines.begin` or `location.positions.begin.line` | The line on which the code quality violation occurred. |
 
 Example:
 
@@ -347,8 +348,14 @@ Example:
 NOTE:
 Although the Code Climate spec supports more properties, those are ignored by
 GitLab.
+The GitLab parser does not allow a [byte order mark](https://en.wikipedia.org/wiki/Byte_order_mark)
+at the beginning of the file.
 
-## Code Quality reports
+## Code Quality reports **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21527) in GitLab Premium 12.9.
+
+![Code Quality Report](img/code_quality_report_13_11.png)
 
 After the Code Quality job completes:
 
@@ -356,16 +363,16 @@ After the Code Quality job completes:
   The Code Quality widget in the merge request compares the reports from the base and head of the branch,
   then lists any violations that are resolved or created when the branch is merged.
 - The full JSON report is available as a
-  [downloadable artifact](../../../ci/pipelines/job_artifacts.md#downloading-artifacts)
+  [downloadable artifact](../../../ci/pipelines/job_artifacts.md#download-job-artifacts)
   for the `code_quality` job.
 - The full list of code quality violations generated by a pipeline is shown in the
   Code Quality tab of the Pipeline Details page. **(PREMIUM)**
 
-### Generating an HTML report
+## Generate an HTML report
 
 In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/ci-cd/codequality/-/issues/10),
 it is possible to generate an HTML report file by setting the `REPORT_FORMAT`
-variable to `html`. This is useful if you just want to view the report in a more
+CI/CD variable to `html`. This is useful if you just want to view the report in a more
 human-readable format or to publish this artifact on GitLab Pages for even
 easier reviewing.
 
@@ -497,18 +504,19 @@ to change the default configuration, **not** a `.codequality.yml` file. If you u
 the wrong filename, the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml.template)
 is still used.
 
-### No Code Quality report is displayed in a Merge Request
+### No Code Quality report is displayed in a merge request
 
 This can be due to multiple reasons:
 
 - You just added the Code Quality job in your `.gitlab-ci.yml`. The report does not
   have anything to compare to yet, so no information can be displayed. It only displays
   after future merge requests have something to compare to.
-- Your pipeline is not set to run the code quality job on your default branch. If there is no report generated from the default branch, your MR branch reports have nothing to compare to.
+- Your pipeline is not set to run the code quality job on your target branch. If there is no report generated from the target branch, your MR branch reports have nothing to compare to.
 - If no [degradation or error is detected](https://docs.codeclimate.com/docs/maintainability#section-checks),
   nothing is displayed.
-- The [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) CI/CD
+- The [`artifacts:expire_in`](../../../ci/yaml/index.md#artifactsexpire_in) CI/CD
   setting can cause the Code Quality artifact(s) to expire faster than desired.
+- The widgets use the pipeline of the latest commit to the target branch. If commits are made to the default branch that do not run the code quality job, this may cause the merge request widget to have no base report for comparison.
 - If you use the [`REPORT_STDOUT` environment variable](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables), no report file is generated and nothing displays in the merge request.
 - Large `gl-code-quality-report.json` files (esp. >10 MB) are [known to prevent the report from being displayed](https://gitlab.com/gitlab-org/gitlab/-/issues/2737).
   As a work-around, try removing [properties](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types)
@@ -552,3 +560,8 @@ plugins:
     enabled: true
     channel: rubocop-0-67
 ```
+
+### No Code Quality appears on merge requests when using custom tool
+
+If your merge requests do not show any code quality changes when using a custom tool,
+ensure that the line property is an `integer`.

@@ -1,8 +1,0 @@
----
-name: geo_package_file_verification
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46998
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/271680
-milestone: '13.6'
-type: development
-group: group::geo
-default_enabled: false

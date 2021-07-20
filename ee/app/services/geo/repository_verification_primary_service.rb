@@ -20,7 +20,7 @@ module Geo
     def verify_checksum(type, repository)
       checksum = calculate_checksum(repository)
       update_repository_state!(type, checksum: checksum)
-    rescue => e
+    rescue StandardError => e
       log_error("Error calculating the #{type} checksum", e, type: type)
       update_repository_state!(type, failure: e.message)
     end

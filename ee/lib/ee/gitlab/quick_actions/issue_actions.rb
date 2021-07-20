@@ -52,21 +52,11 @@ module EE
           end
 
           promote_message = _('Promote issue to an epic')
-          promote_message_confidential = _('Promote confidential issue to a non-confidential epic')
 
           desc do
-            if quick_action_target.confidential?
-              promote_message_confidential
-            else
-              promote_message
-            end
+            promote_message
           end
           explanation promote_message
-          warning do
-            if quick_action_target.confidential?
-              promote_message_confidential
-            end
-          end
           icon 'confidential'
           types Issue
           condition do
@@ -75,11 +65,7 @@ module EE
           command :promote do
             @updates[:promote_to_epic] = true
 
-            @execution_message[:promote] = if quick_action_target.confidential?
-                                             _('Promoted confidential issue to a non-confidential epic. Information in this issue is no longer confidential as epics are public to group members.')
-                                           else
-                                             _('Promoted issue to an epic.')
-                                           end
+            @execution_message[:promote] = _('Promoted issue to an epic.')
           end
 
           desc _('Set iteration')
@@ -131,7 +117,7 @@ module EE
           end
 
           def find_iterations(project, params = {})
-            parent_params = ::IterationsFinder.params_for_parent(project, include_ancestors: true)
+            parent_params = { parent: project, include_ancestors: true }
 
             ::IterationsFinder.new(current_user, params.merge(parent_params)).execute
           end

@@ -17,6 +17,7 @@ class OnboardingProgress < ApplicationRecord
     :code_owners_enabled,
     :scoped_label_created,
     :security_scan_enabled,
+    :issue_created,
     :issue_auto_closed,
     :repository_imported,
     :repository_mirrored
@@ -47,6 +48,10 @@ class OnboardingProgress < ApplicationRecord
       safe_find_or_create_by(namespace: namespace)
     end
 
+    def onboarding?(namespace)
+      where(namespace: namespace).any?
+    end
+
     def register(namespace, action)
       return unless root_namespace?(namespace) && ACTIONS.include?(action)
 
@@ -62,6 +67,13 @@ class OnboardingProgress < ApplicationRecord
       where(namespace: namespace).where.not(action_column => nil).exists?
     end
 
+    def not_completed?(namespace_id, action)
+      return unless ACTIONS.include?(action)
+
+      action_column = column_name(action)
+      where(namespace_id: namespace_id).where(action_column => nil).exists?
+    end
+
     def column_name(action)
       :"#{action}_at"
     end
@@ -71,6 +83,10 @@ class OnboardingProgress < ApplicationRecord
     def root_namespace?(namespace)
       namespace && namespace.root?
     end
+  end
+
+  def number_of_completed_actions
+    attributes.extract!(*ACTIONS.map { |action| self.class.column_name(action).to_s }).compact!.size
   end
 
   private

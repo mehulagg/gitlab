@@ -78,12 +78,12 @@ describe('CodeReviewAnalyticsApp component', () => {
     wrapper.destroy();
   });
 
-  const findFilterBar = () => wrapper.find(FilterBar);
-  const findEmptyState = () => wrapper.find(GlEmptyState);
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findBadge = () => wrapper.find(GlBadge);
-  const findMrTable = () => wrapper.find(MergeRequestTable);
-  const findPagination = () => wrapper.find(GlPagination);
+  const findFilterBar = () => wrapper.findComponent(FilterBar);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findBadge = () => wrapper.findComponent(GlBadge);
+  const findMrTable = () => wrapper.findComponent(MergeRequestTable);
+  const findPagination = () => wrapper.findComponent(GlPagination);
 
   describe('template', () => {
     it('renders the filter bar component', () => {

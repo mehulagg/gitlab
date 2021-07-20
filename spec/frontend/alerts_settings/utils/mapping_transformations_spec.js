@@ -1,29 +1,29 @@
-import parsedMapping from '~/alerts_settings/components/mocks/parsedMapping.json';
 import {
   getMappingData,
-  getPayloadFields,
+  setFieldsLabels,
   transformForSave,
 } from '~/alerts_settings/utils/mapping_transformations';
-import alertFields from '../mocks/alertFields.json';
+import alertFields from '../mocks/alert_fields.json';
+import parsedMapping from '../mocks/parsed_mapping.json';
 
 describe('Mapping Transformation Utilities', () => {
   const nameField = {
     label: 'Name',
     path: ['alert', 'name'],
-    type: 'string',
+    type: 'STRING',
   };
   const dashboardField = {
     label: 'Dashboard Id',
     path: ['alert', 'dashboardId'],
-    type: 'string',
+    type: 'STRING',
   };
 
   describe('getMappingData', () => {
     it('should return mapping data', () => {
       const result = getMappingData(
         alertFields,
-        getPayloadFields(parsedMapping.samplePayload.payloadAlerFields.nodes.slice(0, 3)),
-        parsedMapping.storedMapping.nodes.slice(0, 3),
+        parsedMapping.payloadAlerFields.slice(0, 3),
+        parsedMapping.payloadAttributeMappings.slice(0, 3),
       );
 
       result.forEach((data, index) => {
@@ -44,8 +44,8 @@ describe('Mapping Transformation Utilities', () => {
       const mockMappingData = [
         {
           name: fieldName,
-          mapping: 'alert_name',
-          mappingFields: getPayloadFields([dashboardField, nameField]),
+          mapping: ['alert', 'name'],
+          mappingFields: [dashboardField, nameField],
         },
       ];
       const result = transformForSave(mockMappingData);
@@ -61,7 +61,7 @@ describe('Mapping Transformation Utilities', () => {
         {
           name: fieldName,
           mapping: null,
-          mappingFields: getPayloadFields([nameField, dashboardField]),
+          mappingFields: [nameField, dashboardField],
         },
       ];
       const result = transformForSave(mockMappingData);
@@ -69,13 +69,32 @@ describe('Mapping Transformation Utilities', () => {
     });
   });
 
-  describe('getPayloadFields', () => {
-    it('should add name field to each payload field', () => {
-      const result = getPayloadFields([nameField, dashboardField]);
-      expect(result).toEqual([
-        { ...nameField, name: 'alert_name' },
-        { ...dashboardField, name: 'alert_dashboardId' },
-      ]);
+  describe('setFieldsLabels', () => {
+    const nonNestedFields = [{ label: 'title' }];
+    const nonNestedFieldsResult = { displayLabel: 'Title', tooltip: undefined };
+
+    const nestedFields = [
+      {
+        label: 'field/subfield',
+      },
+    ];
+    const nestedFieldsResult = { displayLabel: '...Subfield', tooltip: 'field.subfield' };
+
+    const nestedArrayFields = [
+      {
+        label: 'fields[1]/subfield',
+      },
+    ];
+
+    const nestedArrayFieldsResult = { displayLabel: '...Subfield', tooltip: 'fields[1].subfield' };
+
+    it.each`
+      type                     | fields               | result
+      ${'not nested field'}    | ${nonNestedFields}   | ${nonNestedFieldsResult}
+      ${'nested field'}        | ${nestedFields}      | ${nestedFieldsResult}
+      ${'nested inside array'} | ${nestedArrayFields} | ${nestedArrayFieldsResult}
+    `('adds correct displayLabel and tooltip for $type', ({ fields, result }) => {
+      expect(setFieldsLabels(fields)[0]).toMatchObject(result);
     });
   });
 });

@@ -31,23 +31,6 @@ RSpec.describe Issuable::BulkUpdateService do
     end
   end
 
-  shared_examples 'updates iterations' do
-    it 'succeeds' do
-      result = bulk_update(issuables, sprint_id: iteration.id)
-
-      expect(result.success?).to be_truthy
-      expect(result.payload[:count]).to eq(issuables.count)
-    end
-
-    it 'updates the issuables iteration' do
-      bulk_update(issuables, sprint_id: iteration.id)
-
-      issuables.each do |issuable|
-        expect(issuable.reload.iteration).to eq(iteration)
-      end
-    end
-  end
-
   shared_examples 'updating labels' do
     def create_issue_with_labels(labels)
       create(:labeled_issue, project: project, labels: labels)
@@ -118,6 +101,22 @@ RSpec.describe Issuable::BulkUpdateService do
     end
   end
 
+  shared_examples 'scheduling cached group count clear' do
+    it 'schedules worker' do
+      expect(Issuables::ClearGroupsIssueCounterWorker).to receive(:perform_async)
+
+      bulk_update(issuables, params)
+    end
+  end
+
+  shared_examples 'not scheduling cached group count clear' do
+    it 'does not schedule worker' do
+      expect(Issuables::ClearGroupsIssueCounterWorker).not_to receive(:perform_async)
+
+      bulk_update(issuables, params)
+    end
+  end
+
   context 'with issuables at a project level' do
     let(:parent) { project }
 
@@ -148,6 +147,11 @@ RSpec.describe Issuable::BulkUpdateService do
         expect(project.issues.opened).to be_empty
         expect(project.issues.closed).not_to be_empty
       end
+
+      it_behaves_like 'scheduling cached group count clear' do
+        let(:issuables) { issues }
+        let(:params) { { state_event: 'close' } }
+      end
     end
 
     describe 'reopen issues' do
@@ -165,6 +169,11 @@ RSpec.describe Issuable::BulkUpdateService do
 
         expect(project.issues.closed).to be_empty
         expect(project.issues.opened).not_to be_empty
+      end
+
+      it_behaves_like 'scheduling cached group count clear' do
+        let(:issuables) { issues }
+        let(:params) { { state_event: 'reopen' } }
       end
     end
 
@@ -248,21 +257,10 @@ RSpec.describe Issuable::BulkUpdateService do
       let(:milestone) { create(:milestone, project: project) }
 
       it_behaves_like 'updates milestones'
-    end
 
-    describe 'updating iterations' do
-      let_it_be(:group) { create(:group) }
-      let_it_be(:project) { create(:project, group: group) }
-      let_it_be(:issuables) { [create(:issue, project: project)] }
-      let_it_be(:iteration) { create(:iteration, group: group) }
-
-      let(:parent) { project }
-
-      before do
-        group.add_reporter(user)
+      it_behaves_like 'not scheduling cached group count clear' do
+        let(:params) { { milestone_id: milestone.id } }
       end
-
-      it_behaves_like 'updates iterations'
     end
 
     describe 'updating labels' do
@@ -316,6 +314,7 @@ RSpec.describe Issuable::BulkUpdateService do
 
   context 'with issuables at a group level' do
     let_it_be(:group) { create(:group) }
+
     let(:parent) { group }
 
     before do
@@ -344,19 +343,6 @@ RSpec.describe Issuable::BulkUpdateService do
         let(:issuables)      { [merge_request1, merge_request2] }
 
         it_behaves_like 'updates milestones'
-      end
-    end
-
-    describe 'updating iterations' do
-      let_it_be(:iteration) { create(:iteration, group: group) }
-      let_it_be(:project)   { create(:project, :repository, group: group) }
-
-      context 'when issues' do
-        let_it_be(:issue1)    { create(:issue, project: project) }
-        let_it_be(:issue2)    { create(:issue, project: project) }
-        let_it_be(:issuables) { [issue1, issue2] }
-
-        it_behaves_like 'updates iterations'
       end
     end
 

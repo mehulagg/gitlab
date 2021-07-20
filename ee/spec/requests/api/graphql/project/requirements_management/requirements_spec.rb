@@ -14,7 +14,7 @@ RSpec.describe 'getting a requirement list for a project' do
     <<~QUERY
     edges {
       node {
-        #{all_graphql_fields_for('requirements'.classify)}
+        #{all_graphql_fields_for('requirements'.classify, max_depth: 1)}
       }
     }
     QUERY
@@ -65,6 +65,7 @@ RSpec.describe 'getting a requirement list for a project' do
 
     context 'query performance with test reports' do
       let_it_be(:test_report) { create(:test_report, requirement: requirement, state: "passed") }
+
       let(:fields) do
         <<~QUERY
         edges {
@@ -168,6 +169,18 @@ RSpec.describe 'getting a requirement list for a project' do
           expect(graphql_errors).to be_nil
 
           match_single_result(requirement1)
+        end
+
+        context 'for MISSING status' do
+          let_it_be(:requirement3) { create(:requirement, project: filter_project, author: other_user, title: 'need test report') }
+
+          let(:params) { '(lastTestReportState: MISSING)' }
+
+          it 'returns filtered requirements' do
+            expect(graphql_errors).to be_nil
+
+            match_single_result(requirement3)
+          end
         end
       end
     end

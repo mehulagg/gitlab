@@ -39,12 +39,6 @@ RSpec.describe 'Pages edits pages settings', :js do
         end
       end
 
-      it 'renders first deployment warning' do
-        visit project_pages_path(project)
-
-        expect(page).to have_content('It may take up to 30 minutes before the site is available after the first deployment.')
-      end
-
       shared_examples 'does not render access control warning' do
         it 'does not render access control warning' do
           visit project_pages_path(project)
@@ -140,7 +134,7 @@ RSpec.describe 'Pages edits pages settings', :js do
 
       before do
         allow(Projects::UpdateService).to receive(:new).and_return(service)
-        allow(service).to receive(:execute).and_return(status: :error, message: 'Some error has occured')
+        allow(service).to receive(:execute).and_return(status: :error, message: 'Some error has occurred')
       end
 
       it 'tries to change the setting' do
@@ -150,7 +144,7 @@ RSpec.describe 'Pages edits pages settings', :js do
 
         click_button 'Save'
 
-        expect(page).to have_text('Some error has occured')
+        expect(page).to have_text('Some error has occurred')
       end
     end
 
@@ -175,7 +169,6 @@ RSpec.describe 'Pages edits pages settings', :js do
 
         expect(page).not_to have_field(:project_pages_https_only)
         expect(page).not_to have_content('Force HTTPS (requires valid certificates)')
-        expect(page).to have_button('Save')
       end
     end
   end

@@ -167,10 +167,10 @@ export default {
           variables: {
             iid: this.alert.iid,
             assigneeUsernames: [this.isActive(assignees) ? '' : assignees],
-            projectPath: this.projectPath,
+            fullPath: this.projectPath,
           },
         })
-        .then(({ data: { alertSetAssignees: { errors } = [] } = {} } = {}) => {
+        .then(({ data: { issuableSetAssignees: { errors } = [] } = {} } = {}) => {
           this.hideDropdown();
 
           if (errors[0]) {
@@ -192,21 +192,33 @@ export default {
 </script>
 
 <template>
-  <div class="block alert-assignees">
-    <div ref="assignees" class="sidebar-collapsed-icon" @click="$emit('toggle-sidebar')">
-      <gl-icon name="user" :size="14" />
-      <gl-loading-icon v-if="isUpdating" />
-    </div>
-    <gl-tooltip :target="() => $refs.assignees" boundary="viewport" placement="left">
-      <gl-sprintf :message="$options.i18n.ASSIGNEES_BLOCK">
-        <template #assignees>
-          {{ userName }}
-        </template>
-      </gl-sprintf>
-    </gl-tooltip>
+  <div
+    class="alert-assignees gl-py-5 gl-w-70p"
+    :class="{ 'gl-border-b-1 gl-border-b-solid gl-border-b-gray-100': !sidebarCollapsed }"
+  >
+    <template v-if="sidebarCollapsed">
+      <div
+        ref="assignees"
+        class="gl-mb-6 gl-ml-6"
+        data-testid="assignees-icon"
+        @click="$emit('toggle-sidebar')"
+      >
+        <gl-icon name="user" />
+        <gl-loading-icon v-if="isUpdating" size="sm" />
+      </div>
+      <gl-tooltip :target="() => $refs.assignees" boundary="viewport" placement="left">
+        <gl-sprintf :message="$options.i18n.ASSIGNEES_BLOCK">
+          <template #assignees>
+            {{ userName }}
+          </template>
+        </gl-sprintf>
+      </gl-tooltip>
+    </template>
 
-    <div class="hide-collapsed">
-      <p class="title gl-display-flex gl-justify-content-space-between">
+    <div v-else>
+      <p
+        class="gl-text-gray-900 gl-mb-2 gl-line-height-20 gl-display-flex gl-justify-content-space-between"
+      >
         {{ __('Assignee') }}
         <a
           v-if="isEditable"
@@ -258,13 +270,17 @@ export default {
           <p v-else-if="userListEmpty" class="gl-mx-5 gl-my-4">
             {{ __('No Matching Results') }}
           </p>
-          <gl-loading-icon v-else />
+          <gl-loading-icon v-else size="sm" />
         </div>
       </gl-dropdown>
     </div>
 
-    <gl-loading-icon v-if="isUpdating" :inline="true" />
-    <div v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !userName }">
+    <gl-loading-icon v-if="isUpdating" size="sm" :inline="true" />
+    <div
+      v-else-if="!isDropdownShowing"
+      class="hide-collapsed value gl-m-0"
+      :class="{ 'no-value': !userName }"
+    >
       <div v-if="userName" class="gl-display-inline-flex gl-mt-2" data-testid="assigned-users">
         <span class="gl-relative gl-mr-4">
           <img

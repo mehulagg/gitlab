@@ -6,14 +6,30 @@ module Boards
     include ActiveRecord::ConnectionAdapters::Quoting
 
     def execute
-      return items.order_closed_date_desc if list&.closed?
+      items = init_collection
 
-      ordered_items
+      order(items)
     end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def metadata
+      issuables = item_model.arel_table
+      keys = metadata_fields.keys
+      # TODO: eliminate need for SQL literal fragment
+      columns = Arel.sql(metadata_fields.values_at(*keys).join(', '))
+      results = item_model.where(id: init_collection.select(issuables[:id])).pluck(columns)
+
+      Hash[keys.zip(results.flatten)]
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     private
 
-    def ordered_items
+    def metadata_fields
+      { size: 'COUNT(*)' }
+    end
+
+    def order(items)
       raise NotImplementedError
     end
 
@@ -31,8 +47,8 @@ module Boards
 
     # We memoize the query here since the finder methods we use are quite complex. This does not memoize the result of the query.
     # rubocop: disable CodeReuse/ActiveRecord
-    def items
-      strong_memoize(:items) do
+    def init_collection
+      strong_memoize(:init_collection) do
         filter(finder.execute).reorder(nil)
       end
     end
@@ -113,7 +129,7 @@ module Boards
     # rubocop: disable CodeReuse/ActiveRecord
     def label_links(label_ids)
       LabelLink
-        .where('label_links.target_type = ?', item_model)
+        .where(label_links: { target_type: item_model })
         .where(item_model.arel_table[:id].eq(LabelLink.arel_table[:target_id]).to_sql)
         .where(label_id: label_ids)
     end

@@ -32,9 +32,11 @@
   - if page_canonical_link
     %link{ rel: 'canonical', href: page_canonical_link }
 
+  = yield :prefetch_asset_tags
+
   = favicon_link_tag favicon, id: 'favicon', data: { original_href: favicon }, type: 'image/png'
 
-  = render 'layouts/startup_css'
+  = render 'layouts/startup_css', { startup_filename: local_assigns.fetch(:startup_filename, nil) }
   - if user_application_theme == 'gl-dark'
     = stylesheet_link_tag_defer "application_dark"
     = yield :page_specific_styles
@@ -44,6 +46,7 @@
     = yield :page_specific_styles
     = stylesheet_link_tag_defer "application_utilities"
   = stylesheet_link_tag "disable_animations", media: "all" if Rails.env.test? || Gitlab.config.gitlab['disable_animations']
+  = stylesheet_link_tag "test_environment", media: "all" if Rails.env.test?
 
   = stylesheet_link_tag_defer "highlight/themes/#{user_color_scheme}"
 
@@ -54,14 +57,12 @@
   = Gon::Base.render_data(nonce: content_security_policy_nonce)
 
   = javascript_include_tag locale_path unless I18n.locale == :en
-  -# Temporarily commented out to investigate performance: https://gitlab.com/gitlab-org/gitlab/-/issues/251179
-  -# = webpack_bundle_tag "sentry" if Gitlab.config.sentry.enabled
+  = webpack_bundle_tag "sentry" if Gitlab.config.sentry.enabled
   = webpack_bundle_tag 'performance_bar' if performance_bar_enabled?
 
   = yield :page_specific_javascripts
 
   = webpack_controller_bundle_tags
-  = webpack_bundle_tag "chrome_84_icon_fix" if browser.chrome?([">=84", "<84.0.4147.125"]) || browser.edge?([">=84", "<84.0.522.59"])
 
   = yield :project_javascripts
 
@@ -70,7 +71,7 @@
   = action_cable_meta_tag
 
   %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1' }
-  %meta{ name: 'theme-color', content: '#474D57' }
+  %meta{ name: 'theme-color', content: user_theme_primary_color }
 
   -# Apple Safari/iOS home screen icons
   = favicon_link_tag 'touch-icon-iphone.png', rel: 'apple-touch-icon'

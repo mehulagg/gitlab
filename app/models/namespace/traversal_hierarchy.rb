@@ -20,7 +20,7 @@ class Namespace
     end
 
     def initialize(root)
-      raise StandardError.new('Must specify a root node') if root.parent_id
+      raise StandardError, 'Must specify a root node' if root.parent_id
 
       @root = root
     end
@@ -38,7 +38,13 @@ class Namespace
             WHERE namespaces.id = cte.id
               AND namespaces.traversal_ids <> cte.traversal_ids
             """
-      Namespace.connection.exec_query(sql)
+      Namespace.transaction do
+        @root.lock!
+        Namespace.connection.exec_query(sql)
+      end
+    rescue ActiveRecord::Deadlocked
+      db_deadlock_counter.increment(source: 'Namespace#sync_traversal_ids!')
+      raise
     end
 
     # Identify all incorrect traversal_ids in the current namespace hierarchy.
@@ -58,7 +64,7 @@ class Namespace
     def recursive_traversal_ids
       root_id = Integer(@root.id)
 
-      """
+      <<~SQL
       WITH RECURSIVE cte(id, traversal_ids, cycle) AS (
         VALUES(#{root_id}, ARRAY[#{root_id}], false)
       UNION ALL
@@ -67,7 +73,7 @@ class Namespace
         WHERE n.parent_id = cte.id AND NOT cycle
       )
       SELECT id, traversal_ids FROM cte
-      """
+      SQL
     end
 
     # This is essentially Namespace#root_ancestor which will soon be rewritten
@@ -79,6 +85,10 @@ class Namespace
         .base_and_ancestors
         .reorder(nil)
         .find_by(parent_id: nil)
+    end
+
+    def db_deadlock_counter
+      Gitlab::Metrics.counter(:db_deadlock, 'Counts the times we have deadlocked in the database')
     end
   end
 end

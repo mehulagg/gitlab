@@ -48,6 +48,12 @@ export default {
       }
       return this.labels;
     },
+    showDropdownFooter() {
+      return (
+        (this.isDropdownVariantSidebar || this.isDropdownVariantEmbedded) &&
+        (this.allowLabelCreate || this.labelsManagePath)
+      );
+    },
     showNoMatchingResultsMessage() {
       return Boolean(this.searchKey) && this.visibleLabels.length === 0;
     },
@@ -83,12 +89,13 @@ export default {
       const highlightedLabel = this.$refs.labelsListContainer.querySelector('.is-focused');
 
       if (highlightedLabel) {
-        const rect = highlightedLabel.getBoundingClientRect();
-        if (rect.bottom > this.$refs.labelsListContainer.clientHeight) {
-          highlightedLabel.scrollIntoView(false);
-        }
-        if (rect.top < 0) {
-          highlightedLabel.scrollIntoView();
+        const container = this.$refs.labelsListContainer.getBoundingClientRect();
+        const label = highlightedLabel.getBoundingClientRect();
+
+        if (label.bottom > container.bottom) {
+          this.$refs.labelsListContainer.scrollTop += label.bottom - container.bottom;
+        } else if (label.top < container.top) {
+          this.$refs.labelsListContainer.scrollTop -= container.top - label.top;
         }
       }
     },
@@ -125,6 +132,9 @@ export default {
       } else if (e.keyCode === ENTER_KEY_CODE && this.currentHighlightItem > -1) {
         this.updateSelectedLabels([this.visibleLabels[this.currentHighlightItem]]);
         this.searchKey = '';
+
+        // Prevent parent form submission upon hitting enter.
+        e.preventDefault();
       } else if (e.keyCode === ESC_KEY_CODE) {
         this.toggleDropdownContents();
       }
@@ -177,7 +187,7 @@ export default {
           class="labels-fetch-loading gl-align-items-center w-100 h-100"
           size="md"
         />
-        <ul v-else class="list-unstyled mb-0">
+        <ul v-else class="list-unstyled gl-mb-0 gl-word-break-word">
           <label-item
             v-for="(label, index) in visibleLabels"
             :key="label.id"
@@ -191,11 +201,7 @@ export default {
           </li>
         </ul>
       </div>
-      <div
-        v-if="isDropdownVariantSidebar || isDropdownVariantEmbedded"
-        class="dropdown-footer"
-        data-testid="dropdown-footer"
-      >
+      <div v-if="showDropdownFooter" class="dropdown-footer" data-testid="dropdown-footer">
         <ul class="list-unstyled">
           <li v-if="allowLabelCreate">
             <gl-link
@@ -205,7 +211,7 @@ export default {
               {{ footerCreateLabelTitle }}
             </gl-link>
           </li>
-          <li>
+          <li v-if="labelsManagePath">
             <gl-link
               :href="labelsManagePath"
               class="gl-display-flex flex-row text-break-word label-item"

@@ -178,7 +178,7 @@ RSpec.describe 'Git LFS API and storage' do
           let(:authorization) { authorize_deploy_key }
 
           before do
-            project.deploy_keys_projects.create(deploy_key: key, can_push: true)
+            project.deploy_keys_projects.create!(deploy_key: key, can_push: true)
           end
 
           it_behaves_like 'pushes new LFS objects'

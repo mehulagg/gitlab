@@ -47,6 +47,7 @@ RSpec.describe EE::IssuesHelper do
   describe '#issue_in_subepic?' do
     let_it_be(:epic) { create(:epic) }
     let_it_be(:epic_issue) { create(:epic_issue, epic: epic) }
+
     let(:issue) { build_stubbed(:issue, epic_issue: epic_issue) }
     let(:new_issue) { build_stubbed(:issue) }
 
@@ -120,6 +121,66 @@ RSpec.describe EE::IssuesHelper do
 
       it_behaves_like 'without license'
       it_behaves_like 'with license'
+    end
+  end
+
+  describe '#issues_list_data' do
+    let(:current_user) { double.as_null_object }
+    let(:finder) { double.as_null_object }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:can?).and_return(true)
+      allow(helper).to receive(:url_for).and_return('#')
+      allow(helper).to receive(:import_csv_namespace_project_issues_path).and_return('#')
+    end
+
+    context 'when features are enabled' do
+      before do
+        stub_licensed_features(epics: true, iterations: true, issue_weights: true, issuable_health_status: true, blocked_issues: true, multiple_issue_assignees: true)
+      end
+
+      it 'returns data with licensed features enabled' do
+        expected = {
+          has_blocked_issues_feature: 'true',
+          has_issuable_health_status_feature: 'true',
+          has_issue_weights_feature: 'true',
+          has_iterations_feature: 'true',
+          has_multiple_issue_assignees_feature: 'true',
+          group_epics_path: group_epics_path(project.group, format: :json)
+        }
+
+        expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
+      end
+
+      context 'when project does not have group' do
+        let(:project_with_no_group) { create :project }
+
+        it 'does not return group_epics_path' do
+          expect(helper.issues_list_data(project_with_no_group, current_user, finder)).not_to include(:group_epics_path)
+        end
+      end
+    end
+
+    context 'when features are disabled' do
+      before do
+        stub_licensed_features(epics: false, iterations: false, issue_weights: false, issuable_health_status: false, blocked_issues: false, multiple_issue_assignees: false)
+      end
+
+      it 'returns data with licensed features disabled' do
+        expected = {
+          has_blocked_issues_feature: 'false',
+          has_issuable_health_status_feature: 'false',
+          has_issue_weights_feature: 'false',
+          has_iterations_feature: 'false',
+          has_multiple_issue_assignees_feature: 'false'
+        }
+
+        result = helper.issues_list_data(project, current_user, finder)
+
+        expect(result).to include(expected)
+        expect(result).not_to include(:group_epics_path)
+      end
     end
   end
 end

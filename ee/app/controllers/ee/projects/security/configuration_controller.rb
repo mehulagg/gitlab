@@ -7,8 +7,6 @@ module EE
         extend ::Gitlab::Utils::Override
 
         prepended do
-          include SecurityAndCompliancePermissions
-
           alias_method :vulnerable, :project
 
           before_action :ensure_security_dashboard_feature_enabled!, except: [:show]
@@ -16,8 +14,8 @@ module EE
 
           before_action only: [:show] do
             push_frontend_feature_flag(:security_auto_fix, project, default_enabled: false)
-            push_frontend_feature_flag(:sast_configuration_ui, project, default_enabled: true)
-            push_frontend_feature_flag(:api_fuzzing_configuration_ui, project, default_enabled: :yaml)
+            push_frontend_feature_flag(:sec_dependency_scanning_ui_enable, project, default_enabled: :yaml)
+            push_frontend_feature_flag(:dast_configuration_ui, project, default_enabled: :yaml)
           end
 
           before_action only: [:auto_fix] do
@@ -26,6 +24,10 @@ module EE
           end
 
           feature_category :static_application_security_testing
+
+          before_action only: [:show] do
+            push_frontend_feature_flag(:security_configuration_redesign_ee, project, default_enabled: :yaml)
+          end
         end
 
         # rubocop:disable Gitlab/ModuleWithInstanceVariables

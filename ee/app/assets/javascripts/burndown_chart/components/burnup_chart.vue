@@ -1,15 +1,17 @@
 <script>
+import { GlResizeObserverDirective as GlResizeObserver } from '@gitlab/ui';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import { merge } from 'lodash';
 import { __, n__, sprintf } from '~/locale';
-import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import commonChartOptions from './common_chart_options';
 
 export default {
+  directives: {
+    GlResizeObserver,
+  },
   components: {
     GlLineChart,
-    ResizableChartContainer,
   },
   props: {
     startDate: {
@@ -83,7 +85,14 @@ export default {
       });
     },
   },
+
   methods: {
+    setChart(chart) {
+      this.chart = chart;
+    },
+    onResize() {
+      this.chart?.resize();
+    },
     // transform the object to a chart-friendly array of date + value
     transform(key) {
       return this.burnupData.map((val) => [val.date, val[key]]);
@@ -119,21 +128,21 @@ export default {
     <div class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burnup chart') }}</h3>
     </div>
-    <resizable-chart-container v-if="!loading" class="js-burnup-chart">
-      <gl-line-chart
-        slot-scope="{ width }"
-        :width="width"
-        :data="dataSeries"
-        :option="options"
-        :format-tooltip-text="formatTooltipText"
-        :include-legend-avg-max="false"
-      >
-        <template slot="tooltip-title">{{ tooltip.title }}</template>
-        <template slot="tooltip-content">
-          <div>{{ tooltip.total }}</div>
-          <div>{{ tooltip.completed }}</div>
-        </template>
-      </gl-line-chart>
-    </resizable-chart-container>
+    <gl-line-chart
+      v-if="!loading"
+      v-gl-resize-observer="onResize"
+      class="js-burnup-chart"
+      :data="dataSeries"
+      :option="options"
+      :format-tooltip-text="formatTooltipText"
+      :include-legend-avg-max="false"
+      @created="setChart"
+    >
+      <template #tooltip-title>{{ tooltip.title }}</template>
+      <template #tooltip-content>
+        <div>{{ tooltip.total }}</div>
+        <div>{{ tooltip.completed }}</div>
+      </template>
+    </gl-line-chart>
   </div>
 </template>

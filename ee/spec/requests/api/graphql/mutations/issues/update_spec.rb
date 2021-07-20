@@ -8,7 +8,8 @@ RSpec.describe 'Update of an existing issue' do
   let_it_be(:group) { create(:group) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project, :public, group: group) }
-  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:issue, refind: true) { create(:issue, project: project) }
+
   let(:input) do
     {
       'iid' => issue.iid.to_s,

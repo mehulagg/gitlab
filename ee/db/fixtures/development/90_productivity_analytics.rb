@@ -52,7 +52,7 @@ class Gitlab::Seeder::ProductivityAnalytics
       }
 
       Timecop.travel rand(10).days.from_now do
-        Issues::CreateService.new(@project, @project.team.users.sample, issue_params).execute
+        Issues::CreateService.new(project: @project, current_user: @project.team.users.sample, params: issue_params, spam_params: nil).execute
       end
     end
   end
@@ -108,7 +108,7 @@ class Gitlab::Seeder::ProductivityAnalytics
         target_branch: 'master'
       }
       Timecop.travel issue.created_at do
-        MergeRequests::CreateService.new(issue.project, @user, opts).execute
+        MergeRequests::CreateService.new(project: issue.project, current_user: @user, params: opts).execute
       end
     end
   end

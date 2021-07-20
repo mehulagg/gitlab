@@ -5,7 +5,7 @@ import ResolutionAlert, { COOKIE_NAME } from 'ee/vulnerabilities/components/reso
 
 describe('Vulnerability list component', () => {
   let wrapper;
-  const defaultBranchName = 'not-always-master';
+  const defaultBranchName = 'not-always-main';
   const vulnerabilityId = 61;
 
   const createWrapper = (options = {}) => {

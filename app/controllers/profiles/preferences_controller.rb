@@ -49,9 +49,10 @@ class Profiles::PreferencesController < Profiles::ApplicationController
       :tab_width,
       :sourcegraph_enabled,
       :gitpod_enabled,
-      :render_whitespace_in_code
+      :render_whitespace_in_code,
+      :markdown_surround_selection
     ]
   end
 end
 
-Profiles::PreferencesController.prepend_if_ee('::EE::Profiles::PreferencesController')
+Profiles::PreferencesController.prepend_mod_with('Profiles::PreferencesController')

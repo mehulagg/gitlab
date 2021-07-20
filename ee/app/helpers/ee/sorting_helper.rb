@@ -25,7 +25,9 @@ module EE
         sort_value_start_date_later => sort_title_start_date,
         sort_value_start_date_soon => sort_title_start_date,
         sort_value_end_date_later => sort_title_end_date,
-        sort_value_end_date => sort_title_end_date
+        sort_value_end_date => sort_title_end_date,
+        sort_value_title => sort_title_title,
+        sort_value_title_desc => sort_title_title
       }
     end
 
@@ -37,8 +39,8 @@ module EE
         sort_value_oldest_created => sort_value_recently_created,
         sort_value_oldest_updated => sort_value_recently_updated,
         sort_value_start_date_soon => sort_value_start_date_later,
-        sort_value_end_date => sort_value_end_date_later
-
+        sort_value_end_date => sort_value_end_date_later,
+        sort_value_title => sort_value_title_desc
       }
     end
 
@@ -72,7 +74,7 @@ module EE
 
       link_to sprite_icon(sort_icon),
               page_filter_path(sort: opposite_sorting_param),
-              class: "btn btn-default has-tooltip qa-reverse-sort btn-sort-direction",
+              class: "btn gl-button btn-default btn-icon has-tooltip qa-reverse-sort btn-sort-direction",
               title: _("Sort direction")
     end
   end

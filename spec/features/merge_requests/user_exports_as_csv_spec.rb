@@ -12,13 +12,9 @@ RSpec.describe 'Merge Requests > Exports as CSV', :js do
     visit(project_merge_requests_path(project))
   end
 
-  subject { page.find('.nav-controls') }
-
-  it { is_expected.to have_button('Export as CSV') }
-
   context 'button is clicked' do
     before do
-      click_button('Export as CSV')
+      click_button 'Export as CSV'
     end
 
     it 'shows a success message' do

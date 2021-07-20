@@ -87,11 +87,5 @@ RSpec.describe 'Query.project(fullPath).dastScannerProfiles' do
 
       it { is_expected.to eq(dast_scanner_profile.to_global_id.to_s) }
     end
-
-    describe 'first dast scanner profile globalId' do
-      subject { response_data.dig('project', 'dastScannerProfiles', 'nodes').first['globalId'] }
-
-      it { is_expected.to eq(dast_scanner_profile.to_global_id.to_s) }
-    end
   end
 end

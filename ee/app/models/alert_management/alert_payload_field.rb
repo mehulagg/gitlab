@@ -5,7 +5,7 @@ module AlertManagement
     include ActiveModel::Model
     include ActiveModel::Validations
 
-    attr_accessor :project, :path, :label, :type
+    attr_accessor :project, :path, :label, :type, :field_name
 
     ARRAY_TYPE = 'array'
     DATETIME_TYPE = 'datetime'
@@ -16,18 +16,22 @@ module AlertManagement
     validates :label, presence: true
     validates :type, inclusion: { in: SUPPORTED_TYPES }
 
-    validate :ensure_path_is_non_empty_list_of_strings
+    validate :valid_path
 
     private
 
-    def ensure_path_is_non_empty_list_of_strings
-      return if path_is_non_empty_list_of_strings?
+    def valid_path
+      return if valid_path?
 
-      errors.add(:path, 'must be a list of strings')
+      errors.add(:path, 'must be a list of strings or integers')
     end
 
-    def path_is_non_empty_list_of_strings?
-      path.is_a?(Array) && !path.empty? && path.all? { |segment| segment.is_a?(String) }
+    def valid_path?
+      path.is_a?(Array) && !path.empty? && valid_path_elements?(path)
+    end
+
+    def valid_path_elements?(path)
+      path.all? { |segment| segment.is_a?(String) || segment.is_a?(Integer) }
     end
   end
 end

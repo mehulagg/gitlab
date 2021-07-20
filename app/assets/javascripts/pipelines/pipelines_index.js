@@ -22,23 +22,33 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
 
   const {
     endpoint,
+    artifactsEndpoint,
+    artifactsEndpointPlaceholder,
     pipelineScheduleUrl,
-    helpPagePath,
     emptyStateSvgPath,
     errorStateSvgPath,
     noPipelinesSvgPath,
-    autoDevopsHelpPath,
     newPipelinePath,
+    pipelineEditorPath,
+    suggestedCiTemplates,
     canCreatePipeline,
     hasGitlabCi,
     ciLintPath,
     resetCachePath,
     projectId,
     params,
+    codeQualityPagePath,
+    ciRunnerSettingsPath,
   } = el.dataset;
 
   return new Vue({
     el,
+    provide: {
+      pipelineEditorPath,
+      artifactsEndpoint,
+      artifactsEndpointPlaceholder,
+      suggestedCiTemplates: JSON.parse(suggestedCiTemplates),
+    },
     data() {
       return {
         store: new PipelinesStore(),
@@ -56,11 +66,9 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
           store: this.store,
           endpoint,
           pipelineScheduleUrl,
-          helpPagePath,
           emptyStateSvgPath,
           errorStateSvgPath,
           noPipelinesSvgPath,
-          autoDevopsHelpPath,
           newPipelinePath,
           canCreatePipeline: parseBoolean(canCreatePipeline),
           hasGitlabCi: parseBoolean(hasGitlabCi),
@@ -68,6 +76,8 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
           resetCachePath,
           projectId,
           params: JSON.parse(params),
+          codeQualityPagePath,
+          ciRunnerSettingsPath,
         },
       });
     },

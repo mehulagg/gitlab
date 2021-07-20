@@ -204,10 +204,6 @@
     margin-bottom: 10px;
   }
 
-  &:hover {
-    @extend .form-control:hover;
-  }
-
   &.focus,
   &.focus:hover {
     border-color: $blue-300;
@@ -265,6 +261,7 @@
   flex: 1;
   position: relative;
   min-width: 0;
+  height: 2rem;
   background-color: $input-bg;
 }
 
@@ -293,14 +290,14 @@
   flex-direction: column;
 }
 
-.filtered-search-history-dropdown-toggle-button {
-  flex: 1;
-  width: auto;
+.filtered-search-history-dropdown-toggle-button.gl-button {
   border-radius: $border-radius-default 0 0 $border-radius-default;
-  border: 0;
   border-right: 1px solid $border-color;
+  box-shadow: none;
   color: $gl-text-color-secondary;
+  flex: 1;
   transition: color 0.1s linear;
+  width: auto;
 
   &:hover,
   &:focus {
@@ -338,12 +335,6 @@
 
   > .value {
     font-weight: $gl-font-weight-bold;
-  }
-}
-
-.filter-dropdown-container {
-  .dropdown-toggle {
-    line-height: 22px;
   }
 }
 
@@ -401,7 +392,6 @@
 
     > svg {
       position: absolute;
-      top: 11px;
       right: 6px;
     }
   }
@@ -453,7 +443,7 @@
 .search-token-target-branch {
   .value {
     font-family: $monospace-font;
-    font-size: 13px;
+    font-size: $gl-font-size-monospace;
   }
 }
 

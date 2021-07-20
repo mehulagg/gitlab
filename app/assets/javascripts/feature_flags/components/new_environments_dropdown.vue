@@ -8,7 +8,7 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __, sprintf } from '~/locale';
 
@@ -52,7 +52,9 @@ export default {
           this.results = data || [];
         })
         .catch(() => {
-          createFlash(__('Something went wrong on our end. Please try again.'));
+          createFlash({
+            message: __('Something went wrong on our end. Please try again.'),
+          });
         })
         .finally(() => {
           this.isLoading = false;
@@ -78,7 +80,7 @@ export default {
       @focus="fetchEnvironments"
       @keyup="fetchEnvironments"
     />
-    <gl-loading-icon v-if="isLoading" />
+    <gl-loading-icon v-if="isLoading" size="sm" />
     <gl-dropdown-item
       v-for="environment in results"
       v-else-if="results.length"

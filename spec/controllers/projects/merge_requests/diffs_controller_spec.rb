@@ -69,13 +69,25 @@ RSpec.describe Projects::MergeRequests::DiffsController do
     end
   end
 
+  shared_examples 'show the right diff files with previous diff_id' do
+    context 'with previous diff_id' do
+      let!(:merge_request_diff_1) { merge_request.merge_request_diffs.create!(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
+      let!(:merge_request_diff_2) { merge_request.merge_request_diffs.create!(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e', diff_type: :merge_head) }
+
+      subject { go(diff_id: merge_request_diff_1.id, diff_head: true) }
+
+      it 'shows the right diff files' do
+        subject
+        expect(json_response["diff_files"].size).to eq(merge_request_diff_1.files_count)
+      end
+    end
+  end
+
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
   before do
-    stub_feature_flags(diffs_gradual_load: false)
-
     project.add_maintainer(user)
     sign_in(user)
   end
@@ -142,6 +154,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
     it_behaves_like '404 for unexistent diffable'
 
+    it_behaves_like 'show the right diff files with previous diff_id'
+
     context 'when not authorized' do
       let(:another_user) { create(:user) }
 
@@ -180,7 +194,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
           start_version: nil,
           start_sha: nil,
           commit: nil,
-          latest_diff: true
+          latest_diff: true,
+          only_context_commits: false
         }
 
         expect_next_instance_of(DiffsMetadataSerializer) do |instance|
@@ -203,7 +218,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
       end
 
       it "correctly generates the right diff between versions" do
-        MergeRequests::MergeToRefService.new(project, merge_request.author).execute(merge_request)
+        MergeRequests::MergeToRefService.new(project: project, current_user: merge_request.author).execute(merge_request)
 
         expect_next_instance_of(CompareService) do |service|
           expect(service).to receive(:execute).with(
@@ -261,7 +276,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
           start_version: nil,
           start_sha: nil,
           commit: nil,
-          latest_diff: true
+          latest_diff: true,
+          only_context_commits: false
         }
 
         expect_next_instance_of(DiffsMetadataSerializer) do |instance|
@@ -290,7 +306,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
           start_version: nil,
           start_sha: nil,
           commit: merge_request.diff_head_commit,
-          latest_diff: nil
+          latest_diff: nil,
+          only_context_commits: false
         }
 
         expect_next_instance_of(DiffsMetadataSerializer) do |instance|
@@ -455,8 +472,6 @@ RSpec.describe Projects::MergeRequests::DiffsController do
         diff_view: :inline,
         merge_ref_head_diff: nil,
         pagination_data: {
-          current_page: nil,
-          next_page: nil,
           total_pages: nil
         }.merge(pagination_data)
       }
@@ -467,7 +482,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
         namespace_id: project.namespace.to_param,
         project_id: project,
         id: merge_request.iid,
-        page: 1,
+        page: 0,
         per_page: 20,
         format: 'json'
       }
@@ -476,6 +491,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
     end
 
     it_behaves_like '404 for unexistent diffable'
+
+    it_behaves_like 'show the right diff files with previous diff_id'
 
     context 'when not authorized' do
       let(:other_user) { create(:user) }
@@ -496,7 +513,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
       it_behaves_like 'serializes diffs with expected arguments' do
         let(:collection) { Gitlab::Diff::FileCollection::MergeRequestDiffBatch }
-        let(:expected_options) { collection_arguments(current_page: 1, total_pages: 1) }
+        let(:expected_options) { collection_arguments(total_pages: 20).merge(merge_ref_head_diff: false) }
       end
 
       it_behaves_like 'successful request'
@@ -519,7 +536,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
       it_behaves_like 'serializes diffs with expected arguments' do
         let(:collection) { Gitlab::Diff::FileCollection::Compare }
-        let(:expected_options) { collection_arguments }
+        let(:expected_options) { collection_arguments.merge(merge_ref_head_diff: false) }
       end
 
       it_behaves_like 'successful request'
@@ -536,7 +553,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
       it_behaves_like 'serializes diffs with expected arguments' do
         let(:collection) { Gitlab::Diff::FileCollection::MergeRequestDiffBatch }
         let(:expected_options) do
-          collection_arguments(current_page: 1, total_pages: 1)
+          collection_arguments(total_pages: 20)
         end
       end
 
@@ -555,18 +572,18 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
       it_behaves_like 'serializes diffs with expected arguments' do
         let(:collection) { Gitlab::Diff::FileCollection::MergeRequestDiffBatch }
-        let(:expected_options) { collection_arguments(current_page: 1, total_pages: 1) }
+        let(:expected_options) { collection_arguments(total_pages: 20) }
       end
 
       it_behaves_like 'successful request'
     end
 
     context 'with smaller diff batch params' do
-      subject { go(page: 2, per_page: 5) }
+      subject { go(page: 5, per_page: 5) }
 
       it_behaves_like 'serializes diffs with expected arguments' do
         let(:collection) { Gitlab::Diff::FileCollection::MergeRequestDiffBatch }
-        let(:expected_options) { collection_arguments(current_page: 2, next_page: 3, total_pages: 4) }
+        let(:expected_options) { collection_arguments(total_pages: 20) }
       end
 
       it_behaves_like 'successful request'

@@ -12,13 +12,21 @@ module QA
       end
 
       before(:all) do
+        @original_personal_access_token = Runtime::Env.personal_access_token
+
+        # We need to nil out any existing personal token generated for the non-admin LDAP user and also set
+        # Runtime::Env.ldap_username=nil so that it is not used to create the api client.
+        Runtime::Env.personal_access_token = nil
+        ldap_username = Runtime::Env.ldap_username
+        Runtime::Env.ldap_username = nil
+        @admin_api_client = Runtime::API::Client.as_admin
+        Runtime::Feature.enable(:invite_members_group_modal)
+        Runtime::Env.ldap_username = ldap_username
+
         # Create the sandbox group as the LDAP user. Without this the admin user
         # would own the sandbox group and then in subsequent tests the LDAP user
         # would not have enough permission to push etc.
         Resource::Sandbox.fabricate_via_api!
-
-        # Create an admin personal access token and use it for the remaining API calls
-        @original_personal_access_token = Runtime::Env.personal_access_token
 
         Page::Main::Menu.perform do |menu|
           menu.sign_out if menu.has_personal_area?
@@ -27,7 +35,7 @@ module QA
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
         Page::Main::Login.perform(&:sign_in_using_admin_credentials)
 
-        Runtime::Env.personal_access_token = Resource::PersonalAccessToken.fabricate!.access_token
+        Runtime::Env.personal_access_token = Resource::PersonalAccessToken.fabricate!.token
         Page::Main::Menu.perform(&:sign_out)
       end
 
@@ -82,7 +90,7 @@ module QA
           Page::Group::Menu.perform(&:go_to_ldap_sync_settings)
 
           EE::Page::Group::Settings::LDAPSync.perform do |settings|
-            settings.set_sync_method('LDAP Group cn')
+            settings.set_ldap_group_sync_method
             settings.set_group_cn('Engineering')
             settings.click_add_sync_button
           end
@@ -161,6 +169,7 @@ module QA
             resource.email = user[:email]
             resource.extern_uid = user[:extern_uid]
             resource.provider = user[:provider]
+            resource.api_client = @admin_api_client
           end
         end
         created_users

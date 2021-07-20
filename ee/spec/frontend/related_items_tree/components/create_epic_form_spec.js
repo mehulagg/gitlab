@@ -1,5 +1,7 @@
-import { GlFormInput, GlButton } from '@gitlab/ui';
+import { GlFormInput, GlButton, GlDropdownItem } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
 
 import CreateEpicForm from 'ee/related_items_tree/components/create_epic_form.vue';
@@ -28,13 +30,16 @@ const createComponent = (isSubmitting = false) => {
 describe('RelatedItemsTree', () => {
   describe('CreateEpicForm', () => {
     let wrapper;
+    let mock;
 
     beforeEach(() => {
+      mock = new MockAdapter(axios);
       wrapper = createComponent();
     });
 
     afterEach(() => {
       wrapper.destroy();
+      mock.restore();
     });
 
     describe('computed', () => {
@@ -75,14 +80,26 @@ describe('RelatedItemsTree', () => {
       });
 
       describe('dropdownPlaceholderText', () => {
-        it('returns placeholder when no group is selected', () => {
-          expect(wrapper.vm.dropdownPlaceholderText).toBe('Search a group');
+        it('returns parent group name when no group is selected', () => {
+          expect(wrapper.vm.dropdownPlaceholderText).toBe(mockParentItem.groupName);
         });
 
         it('returns group name when a group is selected', () => {
           const group = { name: 'Group 1' };
           wrapper.setData({ selectedGroup: group });
           expect(wrapper.vm.dropdownPlaceholderText).toBe(group.name);
+        });
+      });
+
+      describe('canShowParentGroup', () => {
+        it.each`
+          searchTerm                  | expected
+          ${undefined}                | ${true}
+          ${'FooBar'}                 | ${false}
+          ${mockParentItem.groupName} | ${true}
+        `('returns `$expected` when searchTerm is $searchTerm', ({ searchTerm, expected }) => {
+          wrapper.setData({ searchTerm });
+          expect(wrapper.vm.canShowParentGroup).toBe(expected);
         });
       });
     });
@@ -135,6 +152,12 @@ describe('RelatedItemsTree', () => {
 
         expect(actionButtons.at(0).text()).toBe('Create epic');
         expect(actionButtons.at(1).text()).toBe('Cancel');
+      });
+
+      it('renders parent group item as the first dropdown item', () => {
+        const items = wrapper.findAll(GlDropdownItem);
+
+        expect(items.at(0).text()).toContain(mockParentItem.groupName);
       });
     });
   });

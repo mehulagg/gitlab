@@ -5,6 +5,8 @@ module Gitlab
     module Reports
       module Security
         class Finding
+          include ::VulnerabilityFindingHelpers
+
           UNSAFE_SEVERITIES = %w[unknown high critical].freeze
 
           attr_reader :compare_key
@@ -24,10 +26,12 @@ module Gitlab
           attr_reader :uuid
           attr_reader :remediations
           attr_reader :details
+          attr_reader :signatures
+          attr_reader :project_id
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}) # rubocop:disable Metrics/ParameterLists
+          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}, signatures: [], project_id: nil, vulnerability_finding_signatures_enabled: false) # rubocop:disable Metrics/ParameterLists
             @compare_key = compare_key
             @confidence = confidence
             @identifiers = identifiers
@@ -43,6 +47,9 @@ module Gitlab
             @uuid = uuid
             @remediations = remediations
             @details = details
+            @signatures = signatures
+            @project_id = project_id
+            @vulnerability_finding_signatures_enabled = vulnerability_finding_signatures_enabled
 
             @project_fingerprint = generate_project_fingerprint
           end
@@ -64,6 +71,7 @@ module Gitlab
               severity
               uuid
               details
+              signatures
             ].each_with_object({}) do |key, hash|
               hash[key] = public_send(key) # rubocop:disable GitlabSecurity/PublicSend
             end
@@ -83,13 +91,22 @@ module Gitlab
           end
 
           def eql?(other)
-            report_type == other.report_type &&
-              location.fingerprint == other.location.fingerprint &&
-              primary_fingerprint == other.primary_fingerprint
+            return false unless report_type == other.report_type && primary_identifier_fingerprint == other.primary_identifier_fingerprint
+
+            if @vulnerability_finding_signatures_enabled
+              matches_signatures(other.signatures, other.uuid)
+            else
+              location.fingerprint == other.location.fingerprint
+            end
           end
 
           def hash
-            report_type.hash ^ location.fingerprint.hash ^ primary_fingerprint.hash
+            if @vulnerability_finding_signatures_enabled && !signatures.empty?
+              highest_signature = signatures.max_by(&:priority)
+              report_type.hash ^ highest_signature.signature_hex.hash ^ primary_identifier_fingerprint.hash
+            else
+              report_type.hash ^ location.fingerprint.hash ^ primary_identifier_fingerprint.hash
+            end
           end
 
           def valid?
@@ -102,8 +119,24 @@ module Gitlab
             end
           end
 
-          def primary_fingerprint
+          def primary_identifier_fingerprint
             primary_identifier&.fingerprint
+          end
+
+          def <=>(other)
+            if severity == other.severity
+              compare_key <=> other.compare_key
+            else
+              ::Enums::Vulnerability.severity_levels[other.severity] <=>
+                ::Enums::Vulnerability.severity_levels[severity]
+            end
+          end
+
+          def scanner_order_to(other)
+            return 1 unless scanner
+            return -1 unless other&.scanner
+
+            scanner <=> other.scanner
           end
 
           private

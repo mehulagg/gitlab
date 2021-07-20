@@ -4,7 +4,7 @@ import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_moni
 import createStore from 'ee/threat_monitoring/store';
 import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
 import { timeRanges, defaultTimeRange } from '~/vue_shared/constants';
-import { mockEnvironmentsResponse } from '../mock_data';
+import { mockEnvironmentsResponse } from '../mocks/mock_data';
 
 const mockEnvironments = mockEnvironmentsResponse.environments;
 
@@ -66,24 +66,17 @@ describe('ThreatMonitoringFilters component', () => {
   });
 
   describe.each`
-    context                            | isLoadingEnvironments | isLoadingWafStatistics | isLoadingNetworkPolicyStatistics | environments
-    ${'environments are loading'}      | ${true}               | ${false}               | ${false}                         | ${mockEnvironments}
-    ${'WAF statistics are loading'}    | ${false}              | ${true}                | ${false}                         | ${mockEnvironments}
-    ${'NetPol statistics are loading'} | ${false}              | ${false}               | ${true}                          | ${mockEnvironments}
-    ${'there are no environments'}     | ${false}              | ${false}               | ${false}                         | ${[]}
+    context                            | isLoadingEnvironments | isLoadingNetworkPolicyStatistics | environments
+    ${'environments are loading'}      | ${true}               | ${false}                         | ${mockEnvironments}
+    ${'NetPol statistics are loading'} | ${false}              | ${true}                          | ${mockEnvironments}
+    ${'there are no environments'}     | ${false}              | ${false}                         | ${[]}
   `(
     'given $context',
-    ({
-      isLoadingEnvironments,
-      isLoadingWafStatistics,
-      isLoadingNetworkPolicyStatistics,
-      environments,
-    }) => {
+    ({ isLoadingEnvironments, isLoadingNetworkPolicyStatistics, environments }) => {
       beforeEach(() => {
         factory({
           environments,
           isLoadingEnvironments,
-          isLoadingWafStatistics,
           isLoadingNetworkPolicyStatistics,
         });
 

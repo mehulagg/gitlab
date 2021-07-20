@@ -31,6 +31,7 @@ RSpec.describe Issuable::BulkUpdateService do
   context 'with issues' do
     let_it_be(:type) { 'issue' }
     let_it_be(:parent) { group }
+
     let(:issue1) { create(:issue, project: project1, health_status: :at_risk) }
     let(:issue2) { create(:issue, project: project2, health_status: :at_risk) }
     let(:issuables) { [issue1, issue2] }
@@ -119,6 +120,56 @@ RSpec.describe Issuable::BulkUpdateService do
         it_behaves_like 'does not update issuables attribute', :epic
       end
     end
+
+    describe 'updating iterations' do
+      shared_examples 'updates iterations' do
+        it 'succeeds' do
+          result = bulk_update(issuables, sprint_id: iteration.id)
+
+          expect(result.success?).to be_truthy
+          expect(result.payload[:count]).to eq(issuables.count)
+        end
+
+        it 'updates the issuables iteration' do
+          bulk_update(issuables, sprint_id: iteration.id)
+
+          issuables.each do |issuable|
+            expect(issuable.reload.iteration).to eq(iteration)
+          end
+        end
+      end
+
+      context 'at group level' do
+        let_it_be(:group) { create(:group) }
+        let_it_be(:iteration) { create(:iteration, group: group) }
+        let_it_be(:project)   { create(:project, :repository, group: group) }
+
+        let(:parent) { group }
+
+        context 'when issues' do
+          let_it_be(:issue1)    { create(:issue, project: project) }
+          let_it_be(:issue2)    { create(:issue, project: project) }
+          let_it_be(:issuables) { [issue1, issue2] }
+
+          it_behaves_like 'updates iterations'
+        end
+      end
+
+      context 'at project level' do
+        let_it_be(:group) { create(:group) }
+        let_it_be(:project) { create(:project, group: group) }
+        let_it_be(:issuables) { [create(:issue, project: project)] }
+        let_it_be(:iteration) { create(:iteration, group: group) }
+
+        let(:parent) { project }
+
+        before do
+          group.add_reporter(user)
+        end
+
+        it_behaves_like 'updates iterations'
+      end
+    end
   end
 
   context 'with epics' do
@@ -177,5 +228,13 @@ RSpec.describe Issuable::BulkUpdateService do
         end
       end
     end
+  end
+
+  def bulk_update(issuables, extra_params = {})
+    bulk_update_params = extra_params
+                           .reverse_merge(issuable_ids: Array(issuables).map(&:id).join(','))
+
+    type = Array(issuables).first.model_name.param_key
+    Issuable::BulkUpdateService.new(parent, user, bulk_update_params).execute(type)
   end
 end

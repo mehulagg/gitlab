@@ -30,21 +30,33 @@ RSpec.describe Gitlab::AlertManagement::AlertPayloadFieldExtractor do
         discarded_null: nil,
         discarded_bool_true: true,
         discarded_bool_false: false,
-        arr: %w[one two three]
+        arr: [
+          { key_a: 'string', key_b: ['nested_arr_value'] },
+          'non_hash_value',
+          [['array_a'], 'array_b']
+        ]
       )
     end
 
     it 'returns all the possible field combination and types suggestions' do
       expect(fields).to contain_exactly(
-        a_field(['str'], 'Str', 'string'),
-        a_field(%w(nested key), 'Key', 'string'),
-        a_field(%w(nested deep key), 'Key', 'string'),
-        a_field(['time'], 'Time', 'datetime'),
-        a_field(['time_iso_8601_and_rfc_3339'], 'Time iso 8601 and rfc 3339', 'datetime'),
-        a_field(['time_iso_8601'], 'Time iso 8601', 'datetime'),
-        a_field(['time_iso_8601_short'], 'Time iso 8601 short', 'datetime'),
-        a_field(['time_rfc_3339'], 'Time rfc 3339', 'datetime'),
-        a_field(['arr'], 'Arr', 'array')
+        a_field(['str'], 'str', 'string'),
+        a_field(%w(nested key), 'nested/key', 'string'),
+        a_field(%w(nested deep key), 'nested/deep/key', 'string'),
+        a_field(['time'], 'time', 'datetime'),
+        a_field(['time_iso_8601_and_rfc_3339'], 'time_iso_8601_and_rfc_3339', 'datetime'),
+        a_field(['time_iso_8601'], 'time_iso_8601', 'datetime'),
+        a_field(['time_iso_8601_short'], 'time_iso_8601_short', 'datetime'),
+        a_field(['time_rfc_3339'], 'time_rfc_3339', 'datetime'),
+        a_field(['arr'], 'arr', 'array'),
+        a_field(['arr', 0, 'key_a'], 'arr[0]/key_a', 'string'),
+        a_field(['arr', 0, 'key_b'], 'arr[0]/key_b', 'array'),
+        a_field(['arr', 0, 'key_b', 0], 'arr[0]/key_b[0]', 'string'),
+        a_field(['arr', 1], 'arr[1]', 'string'),
+        a_field(['arr', 2], 'arr[2]', 'array'),
+        a_field(['arr', 2, 0], 'arr[2][0]', 'array'),
+        a_field(['arr', 2, 1], 'arr[2][1]', 'string'),
+        a_field(['arr', 2, 0, 0], 'arr[2][0][0]', 'string')
       )
     end
   end

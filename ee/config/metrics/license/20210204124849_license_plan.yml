@@ -1,0 +1,17 @@
+---
+key_path: license_plan
+description: The plan of the GitLab license
+product_section: fulfillment
+product_stage: fulfillment
+product_group: group::license
+product_category: license
+value_type: string
+status: data_available
+time_frame: none
+data_source: license
+data_category: Subscription
+distribution:
+- ee
+tier:
+- premium
+- ultimate

@@ -8,8 +8,10 @@ RSpec.describe Mutations::GitlabSubscriptions::Activate do
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
   let_it_be(:user) { create(:admin) }
+  let_it_be(:created_license) { License.last }
+
   let(:activation_code) { 'activation_code' }
-  let(:result) { { success: true } }
+  let(:result) { { success: true, license: created_license } }
 
   describe '#resolve' do
     before do
@@ -24,7 +26,7 @@ RSpec.describe Mutations::GitlabSubscriptions::Activate do
       it 'adds the issue to the epic' do
         result = mutation.resolve(activation_code: activation_code)
 
-        expect(result).to eq({ errors: [] })
+        expect(result).to eq({ errors: [], license: created_license })
       end
     end
 
@@ -34,7 +36,7 @@ RSpec.describe Mutations::GitlabSubscriptions::Activate do
       it 'returns errors' do
         result = mutation.resolve(activation_code: activation_code)
 
-        expect(result).to eq({ errors: ['foo'] })
+        expect(result).to eq({ errors: ['foo'], license: nil })
       end
     end
 

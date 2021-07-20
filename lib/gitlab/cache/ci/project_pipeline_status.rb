@@ -50,8 +50,6 @@ module Gitlab
         def load_status
           return if loaded?
 
-          return unless Gitlab::Ci::Features.pipeline_status_omit_commit_sha_in_cache_key?(project) || commit
-
           if has_cache?
             load_from_cache
           else
@@ -69,7 +67,9 @@ module Gitlab
         def load_from_project
           return unless commit
 
-          self.sha, self.status, self.ref = commit.sha, commit.status, project.default_branch
+          self.sha = commit.sha
+          self.status = commit.status
+          self.ref = project.default_branch
         end
 
         # We only cache the status for the HEAD commit of a project
@@ -117,11 +117,7 @@ module Gitlab
         end
 
         def cache_key
-          if Gitlab::Ci::Features.pipeline_status_omit_commit_sha_in_cache_key?(project)
-            "#{Gitlab::Redis::Cache::CACHE_NAMESPACE}:project:#{project.id}:pipeline_status"
-          else
-            "#{Gitlab::Redis::Cache::CACHE_NAMESPACE}:project:#{project.id}:pipeline_status:#{commit&.sha}"
-          end
+          "#{Gitlab::Redis::Cache::CACHE_NAMESPACE}:project:#{project.id}:pipeline_status"
         end
 
         def commit

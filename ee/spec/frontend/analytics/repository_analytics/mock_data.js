@@ -12,7 +12,7 @@ export const projects = [
     name: 'test',
     id: 1,
     repository: {
-      rootRef: 'master',
+      rootRef: 'main',
     },
     codeCoveragePath: '#',
     codeCoverageSummary: {

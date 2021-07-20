@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ClearNamespaceSharedRunnersMinutesService do
+  include AfterNextHelpers
+
   describe '#execute' do
     subject { described_class.new(namespace).execute }
 
@@ -23,6 +25,12 @@ RSpec.describe ClearNamespaceSharedRunnersMinutesService do
 
       it 'successfully clears minutes' do
         expect(subject).to be_truthy
+      end
+
+      it 'expires the CachedQuota' do
+        expect_next(Gitlab::Ci::Minutes::CachedQuota).to receive(:expire!)
+
+        subject
       end
     end
 

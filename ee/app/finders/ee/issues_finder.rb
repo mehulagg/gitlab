@@ -16,7 +16,7 @@ module EE
 
       override :negatable_params
       def negatable_params
-        @negatable_params ||= super + [:iteration_title]
+        @negatable_params ||= super + [:iteration_title, :weight]
       end
     end
 
@@ -42,19 +42,6 @@ module EE
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    override :by_assignee
-    def by_assignee(items)
-      if params.assignees.any?
-        params.assignees.each do |assignee|
-          items = items.assigned_to(assignee)
-        end
-
-        return items
-      end
-
-      super
-    end
 
     def by_epic(items)
       return items unless params.by_epic?
@@ -88,8 +75,15 @@ module EE
     def filter_negated_items(items)
       items = by_negated_epic(items)
       items = by_negated_iteration(items)
+      items = by_negated_weight(items)
 
       super(items)
+    end
+
+    def by_negated_weight(items)
+      return items unless not_params[:weight].present?
+
+      items.without_weights(not_params[:weight])
     end
 
     def by_negated_epic(items)
@@ -103,8 +97,10 @@ module EE
 
       if not_params.filter_by_current_iteration?
         items.not_in_iterations(get_current_iteration)
-      else
+      elsif not_params.filter_by_iteration_title?
         items.without_iteration_title(not_params[:iteration_title])
+      else
+        items.not_in_iterations(not_params[:iteration_id])
       end
     end
 
@@ -117,10 +113,13 @@ module EE
     end
 
     def iterations_finder_params
-      IterationsFinder.params_for_parent(params.parent, include_ancestors: true).merge!(
+      {
+        parent: params.parent,
+        include_ancestors: true,
         state: 'opened',
         start_date: Date.today,
-        end_date: Date.today)
+        end_date: Date.today
+      }
     end
   end
 end

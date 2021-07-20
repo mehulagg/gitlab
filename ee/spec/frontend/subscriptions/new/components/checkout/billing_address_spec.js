@@ -1,36 +1,54 @@
-import { mount } from '@vue/test-utils';
-import Vue, { nextTick } from 'vue';
+import { mount, createLocalVue } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
-import Component from 'ee/subscriptions/new/components/checkout/billing_address.vue';
-import Step from 'ee/subscriptions/new/components/checkout/step.vue';
+import { STEPS } from 'ee/subscriptions/constants';
+import BillingAddress from 'ee/subscriptions/new/components/checkout/billing_address.vue';
 import { getStoreConfig } from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
+import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
+import { createMockApolloProvider } from 'ee_jest/vue_shared/purchase_flow/spec_helper';
 
-Vue.use(Vuex);
+const localVue = createLocalVue();
+localVue.use(Vuex);
+localVue.use(VueApollo);
 
 describe('Billing Address', () => {
   let store;
   let wrapper;
+  let mockApolloProvider;
 
   const actionMocks = {
     fetchCountries: jest.fn(),
     fetchStates: jest.fn(),
   };
 
-  const createComponent = () => {
+  function activateNextStep() {
+    return mockApolloProvider.clients.defaultClient.mutate({
+      mutation: activateNextStepMutation,
+    });
+  }
+
+  function createStore() {
     const { actions, ...storeConfig } = getStoreConfig();
-    store = new Vuex.Store({
+    return new Vuex.Store({
       ...storeConfig,
       actions: { ...actions, ...actionMocks },
     });
+  }
 
-    wrapper = mount(Component, {
-      store,
+  function createComponent(options = {}) {
+    return mount(BillingAddress, {
+      localVue,
+      ...options,
     });
-  };
+  }
 
   beforeEach(() => {
-    createComponent();
+    store = createStore();
+    mockApolloProvider = createMockApolloProvider(STEPS);
+    wrapper = createComponent({ store, apolloProvider: mockApolloProvider });
   });
 
   afterEach(() => {
@@ -110,14 +128,15 @@ describe('Billing Address', () => {
   });
 
   describe('showing the summary', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       store.commit(types.UPDATE_COUNTRY, 'country');
       store.commit(types.UPDATE_STREET_ADDRESS_LINE_ONE, 'address line 1');
       store.commit(types.UPDATE_STREET_ADDRESS_LINE_TWO, 'address line 2');
       store.commit(types.UPDATE_COUNTRY_STATE, 'state');
       store.commit(types.UPDATE_CITY, 'city');
       store.commit(types.UPDATE_ZIP_CODE, 'zip');
-      store.commit(types.UPDATE_CURRENT_STEP, 'nextStep');
+      await activateNextStep();
+      await activateNextStep();
     });
 
     it('should show the entered address line 1', () => {

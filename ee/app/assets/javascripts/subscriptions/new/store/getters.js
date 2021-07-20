@@ -1,11 +1,5 @@
 import { s__ } from '~/locale';
-import { STEPS, NEW_GROUP } from '../constants';
-
-export const currentStep = (state) => state.currentStep;
-
-export const stepIndex = () => (step) => STEPS.findIndex((el) => el === step);
-
-export const currentStepIndex = (state, getters) => getters.stepIndex(state.currentStep);
+import { NEW_GROUP } from '../constants';
 
 export const selectedPlanText = (state, getters) => getters.selectedPlanDetails.text;
 
@@ -32,6 +26,7 @@ export const confirmOrderParams = (state, getters) => ({
     plan_id: state.selectedPlan,
     payment_method_id: state.paymentMethodId,
     quantity: state.numberOfUsers,
+    source: state.source,
   },
 });
 

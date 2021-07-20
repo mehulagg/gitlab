@@ -1,3 +1,9 @@
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+
+import AccessorUtilities from '~/lib/utils/accessor';
+
+import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
+
 import {
   stripQuotes,
   uniqueTokens,
@@ -5,6 +11,8 @@ import {
   processFilters,
   filterToQueryObject,
   urlQueryToFilter,
+  getRecentlyUsedSuggestions,
+  setTokenValueToRecentlyUsed,
 } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 
 import {
@@ -13,6 +21,12 @@ import {
   tokenValueMilestone,
   tokenValuePlain,
 } from './mock_data';
+
+const mockStorageKey = 'recent-tokens';
+
+function setLocalStorageAvailability(isAvailable) {
+  jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(isAvailable);
+}
 
 describe('Filtered Search Utils', () => {
   describe('stripQuotes', () => {
@@ -199,6 +213,19 @@ describe('filterToQueryObject', () => {
     const res = filterToQueryObject({ [token]: value });
     expect(res).toEqual(result);
   });
+
+  it.each([
+    [FILTERED_SEARCH_TERM, [{ value: '' }], { search: '' }],
+    [FILTERED_SEARCH_TERM, [{ value: 'bar' }], { search: 'bar' }],
+    [FILTERED_SEARCH_TERM, [{ value: 'bar' }, { value: '' }], { search: 'bar' }],
+    [FILTERED_SEARCH_TERM, [{ value: 'bar' }, { value: 'baz' }], { search: 'bar baz' }],
+  ])(
+    'when filteredSearchTermKey=search gathers filter values %s=%j into query object=%j',
+    (token, value, result) => {
+      const res = filterToQueryObject({ [token]: value }, { filteredSearchTermKey: 'search' });
+      expect(res).toEqual(result);
+    },
+  );
 });
 
 describe('urlQueryToFilter', () => {
@@ -244,8 +271,135 @@ describe('urlQueryToFilter', () => {
       },
     ],
     ['not[foo][]=bar', { foo: [{ value: 'bar', operator: '!=' }] }],
-  ])('gathers filter values %s into query object=%j', (query, result) => {
-    const res = urlQueryToFilter(query);
-    expect(res).toEqual(result);
+    ['nop=1&not[nop]=2', {}, { filterNamesAllowList: ['foo'] }],
+    [
+      'foo[]=bar&not[foo][]=baz&nop=xxx&not[nop]=yyy',
+      {
+        foo: [
+          { value: 'bar', operator: '=' },
+          { value: 'baz', operator: '!=' },
+        ],
+      },
+      { filterNamesAllowList: ['foo'] },
+    ],
+    [
+      'search=term&foo=bar',
+      {
+        [FILTERED_SEARCH_TERM]: [{ value: 'term' }],
+        foo: { value: 'bar', operator: '=' },
+      },
+      { filteredSearchTermKey: 'search' },
+    ],
+    [
+      'search=my terms',
+      {
+        [FILTERED_SEARCH_TERM]: [{ value: 'my' }, { value: 'terms' }],
+      },
+      { filteredSearchTermKey: 'search' },
+    ],
+    [
+      'search[]=my&search[]=terms',
+      {
+        [FILTERED_SEARCH_TERM]: [{ value: 'my' }, { value: 'terms' }],
+      },
+      { filteredSearchTermKey: 'search' },
+    ],
+    [
+      'search=my+terms',
+      {
+        [FILTERED_SEARCH_TERM]: [{ value: 'my' }, { value: 'terms' }],
+      },
+      { filteredSearchTermKey: 'search', legacySpacesDecode: false },
+    ],
+    [
+      'search=my terms&foo=bar&nop=xxx',
+      {
+        [FILTERED_SEARCH_TERM]: [{ value: 'my' }, { value: 'terms' }],
+        foo: { value: 'bar', operator: '=' },
+      },
+      { filteredSearchTermKey: 'search', filterNamesAllowList: ['foo'] },
+    ],
+  ])(
+    'gathers filter values %s into query object=%j when options %j',
+    (query, result, options = undefined) => {
+      const res = urlQueryToFilter(query, options);
+      expect(res).toEqual(result);
+    },
+  );
+});
+
+describe('getRecentlyUsedSuggestions', () => {
+  useLocalStorageSpy();
+
+  beforeEach(() => {
+    localStorage.removeItem(mockStorageKey);
+  });
+
+  it('returns array containing recently used token values from provided recentSuggestionsStorageKey', () => {
+    setLocalStorageAvailability(true);
+
+    const mockExpectedArray = [{ foo: 'bar' }];
+    localStorage.setItem(mockStorageKey, JSON.stringify(mockExpectedArray));
+
+    expect(getRecentlyUsedSuggestions(mockStorageKey)).toEqual(mockExpectedArray);
+  });
+
+  it('returns empty array when provided recentSuggestionsStorageKey does not have anything in localStorage', () => {
+    setLocalStorageAvailability(true);
+
+    expect(getRecentlyUsedSuggestions(mockStorageKey)).toEqual([]);
+  });
+
+  it('returns empty array when when access to localStorage is not available', () => {
+    setLocalStorageAvailability(false);
+
+    expect(getRecentlyUsedSuggestions(mockStorageKey)).toEqual([]);
+  });
+});
+
+describe('setTokenValueToRecentlyUsed', () => {
+  const mockTokenValue1 = { foo: 'bar' };
+  const mockTokenValue2 = { bar: 'baz' };
+  useLocalStorageSpy();
+
+  beforeEach(() => {
+    localStorage.removeItem(mockStorageKey);
+  });
+
+  it('adds provided tokenValue to localStorage for recentSuggestionsStorageKey', () => {
+    setLocalStorageAvailability(true);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toEqual([mockTokenValue1]);
+  });
+
+  it('adds provided tokenValue to localStorage at the top of existing values (i.e. Stack order)', () => {
+    setLocalStorageAvailability(true);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue2);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toEqual([
+      mockTokenValue2,
+      mockTokenValue1,
+    ]);
+  });
+
+  it('ensures that provided tokenValue is not added twice', () => {
+    setLocalStorageAvailability(true);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toEqual([mockTokenValue1]);
+  });
+
+  it('does not add any value when acess to localStorage is not available', () => {
+    setLocalStorageAvailability(false);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toBeNull();
   });
 });

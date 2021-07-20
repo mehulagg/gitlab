@@ -8,7 +8,7 @@ import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
 
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import {
   issuableTypesMap,
@@ -280,6 +280,24 @@ describe('RelatedItemTree', () => {
         });
       });
 
+      describe('setWeightSum', () => {
+        it('set weightSum', () => {
+          const descendantWeightSum = mockQueryResponse.data.group.epic;
+          testAction(
+            actions.setWeightSum,
+            descendantWeightSum,
+            {},
+            [
+              {
+                type: types.SET_WEIGHT_SUM,
+                payload: descendantWeightSum,
+              },
+            ],
+            [],
+          );
+        });
+      });
+
       describe('requestItems', () => {
         it('should set `state.itemsFetchInProgress` to true', () => {
           testAction(
@@ -324,7 +342,9 @@ describe('RelatedItemTree', () => {
             {},
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 
@@ -357,6 +377,7 @@ describe('RelatedItemTree', () => {
             children: { pageInfo: epicPageInfo },
             issues: { pageInfo: issuesPageInfo },
             descendantCounts: epicDescendantCounts,
+            descendantWeightSum,
             healthStatus,
           } = mockQueryResponse.data.group.epic;
 
@@ -406,6 +427,10 @@ describe('RelatedItemTree', () => {
                   parentItem: mockParentItem,
                   pageInfo: issuesPageInfo,
                 },
+              },
+              {
+                type: 'setWeightSum',
+                payload: descendantWeightSum,
               },
               {
                 type: 'setChildrenCount',
@@ -458,7 +483,9 @@ describe('RelatedItemTree', () => {
             {},
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 
@@ -636,10 +663,6 @@ describe('RelatedItemTree', () => {
       });
 
       describe('receiveRemoveItemFailure', () => {
-        beforeEach(() => {
-          setFixtures('<div class="flash-container"></div>');
-        });
-
         it('should set `state.childrenFlags[ref].itemRemoveInProgress` to false', () => {
           testAction(
             actions.receiveRemoveItemFailure,
@@ -665,7 +688,9 @@ describe('RelatedItemTree', () => {
             },
           );
 
-          expect(createFlash).toHaveBeenCalledWith('An error occurred while removing epics.');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'An error occurred while removing epics.',
+          });
         });
       });
 
@@ -1047,7 +1072,9 @@ describe('RelatedItemTree', () => {
             },
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 
@@ -1136,7 +1163,9 @@ describe('RelatedItemTree', () => {
             },
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 
@@ -1281,7 +1310,9 @@ describe('RelatedItemTree', () => {
             },
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 
@@ -1478,7 +1509,9 @@ describe('RelatedItemTree', () => {
             },
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 
@@ -1604,7 +1637,9 @@ describe('RelatedItemTree', () => {
             },
           );
 
-          expect(createFlash).toHaveBeenCalledWith(message);
+          expect(createFlash).toHaveBeenCalledWith({
+            message,
+          });
         });
       });
 

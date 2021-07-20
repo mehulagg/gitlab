@@ -1,8 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
-import Api from '~/api';
-import { mapToScopesViewModel } from '~/feature_flags/store/helpers';
 import {
   requestFeatureFlags,
   receiveFeatureFlagsSuccess,
@@ -17,18 +15,12 @@ import {
   updateFeatureFlag,
   receiveUpdateFeatureFlagSuccess,
   receiveUpdateFeatureFlagError,
-  requestUserLists,
-  receiveUserListsSuccess,
-  receiveUserListsError,
-  fetchUserLists,
-  deleteUserList,
-  receiveDeleteUserListError,
   clearAlert,
 } from '~/feature_flags/store/index/actions';
 import * as types from '~/feature_flags/store/index/mutation_types';
 import state from '~/feature_flags/store/index/state';
 import axios from '~/lib/utils/axios_utils';
-import { getRequestData, rotateData, featureFlag, userList } from '../../mock_data';
+import { getRequestData, rotateData, featureFlag } from '../../mock_data';
 
 jest.mock('~/api.js');
 
@@ -154,99 +146,6 @@ describe('Feature flags actions', () => {
     });
   });
 
-  describe('fetchUserLists', () => {
-    beforeEach(() => {
-      Api.fetchFeatureFlagUserLists.mockResolvedValue({ data: [userList], headers: {} });
-    });
-
-    describe('success', () => {
-      it('dispatches requestUserLists and receiveUserListsSuccess ', (done) => {
-        testAction(
-          fetchUserLists,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestUserLists',
-            },
-            {
-              payload: { data: [userList], headers: {} },
-              type: 'receiveUserListsSuccess',
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('error', () => {
-      it('dispatches requestUserLists and receiveUserListsError ', (done) => {
-        Api.fetchFeatureFlagUserLists.mockRejectedValue();
-
-        testAction(
-          fetchUserLists,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestUserLists',
-            },
-            {
-              type: 'receiveUserListsError',
-            },
-          ],
-          done,
-        );
-      });
-    });
-  });
-
-  describe('requestUserLists', () => {
-    it('should commit RECEIVE_USER_LISTS_SUCCESS mutation', (done) => {
-      testAction(
-        requestUserLists,
-        null,
-        mockedState,
-        [{ type: types.REQUEST_USER_LISTS }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveUserListsSuccess', () => {
-    it('should commit RECEIVE_USER_LISTS_SUCCESS mutation', (done) => {
-      testAction(
-        receiveUserListsSuccess,
-        { data: [userList], headers: {} },
-        mockedState,
-        [
-          {
-            type: types.RECEIVE_USER_LISTS_SUCCESS,
-            payload: { data: [userList], headers: {} },
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveUserListsError', () => {
-    it('should commit RECEIVE_USER_LISTS_ERROR mutation', (done) => {
-      testAction(
-        receiveUserListsError,
-        null,
-        mockedState,
-        [{ type: types.RECEIVE_USER_LISTS_ERROR }],
-        [],
-        done,
-      );
-    });
-  });
-
   describe('rotateInstanceId', () => {
     let mock;
 
@@ -355,7 +254,6 @@ describe('Feature flags actions', () => {
     beforeEach(() => {
       mockedState.featureFlags = getRequestData.feature_flags.map((flag) => ({
         ...flag,
-        scopes: mapToScopesViewModel(flag.scopes || []),
       }));
       mock = new MockAdapter(axios);
     });
@@ -414,7 +312,6 @@ describe('Feature flags actions', () => {
     beforeEach(() => {
       mockedState.featureFlags = getRequestData.feature_flags.map((f) => ({
         ...f,
-        scopes: mapToScopesViewModel(f.scopes || []),
       }));
     });
 
@@ -438,7 +335,6 @@ describe('Feature flags actions', () => {
     beforeEach(() => {
       mockedState.featureFlags = getRequestData.feature_flags.map((f) => ({
         ...f,
-        scopes: mapToScopesViewModel(f.scopes || []),
       }));
     });
 
@@ -462,7 +358,6 @@ describe('Feature flags actions', () => {
     beforeEach(() => {
       mockedState.featureFlags = getRequestData.feature_flags.map((f) => ({
         ...f,
-        scopes: mapToScopesViewModel(f.scopes || []),
       }));
     });
 
@@ -475,69 +370,6 @@ describe('Feature flags actions', () => {
           {
             type: 'RECEIVE_UPDATE_FEATURE_FLAG_ERROR',
             payload: featureFlag.id,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-  describe('deleteUserList', () => {
-    beforeEach(() => {
-      mockedState.userLists = [userList];
-    });
-
-    describe('success', () => {
-      beforeEach(() => {
-        Api.deleteFeatureFlagUserList.mockResolvedValue();
-      });
-
-      it('should refresh the user lists', (done) => {
-        testAction(
-          deleteUserList,
-          userList,
-          mockedState,
-          [],
-          [{ type: 'requestDeleteUserList', payload: userList }, { type: 'fetchUserLists' }],
-          done,
-        );
-      });
-    });
-
-    describe('error', () => {
-      beforeEach(() => {
-        Api.deleteFeatureFlagUserList.mockRejectedValue({ response: { data: 'some error' } });
-      });
-
-      it('should dispatch receiveDeleteUserListError', (done) => {
-        testAction(
-          deleteUserList,
-          userList,
-          mockedState,
-          [],
-          [
-            { type: 'requestDeleteUserList', payload: userList },
-            {
-              type: 'receiveDeleteUserListError',
-              payload: { list: userList, error: 'some error' },
-            },
-          ],
-          done,
-        );
-      });
-    });
-  });
-
-  describe('receiveDeleteUserListError', () => {
-    it('should commit RECEIVE_DELETE_USER_LIST_ERROR with the given list', (done) => {
-      testAction(
-        receiveDeleteUserListError,
-        { list: userList, error: 'mock error' },
-        mockedState,
-        [
-          {
-            type: 'RECEIVE_DELETE_USER_LIST_ERROR',
-            payload: { list: userList, error: 'mock error' },
           },
         ],
         [],

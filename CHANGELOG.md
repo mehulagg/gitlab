@@ -2,6 +2,3555 @@
 documentation](doc/development/changelog.md) for instructions on adding your own
 entry.
 
+## 14.0.6 (2021-07-20)
+
+### Fixed (4 changes)
+
+- [Fix validation method regarding MIME type keys](gitlab-org/gitlab@2cc6d89cc77368b9472c8ec22e97bb3481409fb3) ([merge request](gitlab-org/gitlab!66403))
+- [Geo: Fix snippet verification by replicating the HEAD ref](gitlab-org/gitlab@4dbf36af8553775603c170784ad8bfcdc436a669) ([merge request](gitlab-org/gitlab!66403)) **GitLab Enterprise Edition**
+- [Fix LFS objects not downloading with Bitbucket](gitlab-org/gitlab@161776f9a4975dfeb2760b06e83160def902c61f) ([merge request](gitlab-org/gitlab!66403))
+- [Replace Excon with Faraday for requesting object storage](gitlab-org/gitlab@a223d526d5b97f248c8810ef0b968d2c3b0323e0) ([merge request](gitlab-org/gitlab!66403))
+
+## 14.0.5 (2021-07-08)
+
+### Fixed (4 changes)
+
+- [Return empty strings for Jira links when URL is not set](gitlab-org/gitlab@6da7890d8137b1879297ad81c6737312d6f672b3) ([merge request](gitlab-org/gitlab!65728))
+- [Add prefix to autocomplete path](gitlab-org/gitlab@5256ab7db346610a816ebb975ae9a6ce0d853435) ([merge request](gitlab-org/gitlab!65728))
+- [Do not create audit event for failed logins on read-only DB](gitlab-org/gitlab@30c7944ddddfe92566b3f66a7f549bef3ffd8d82) ([merge request](gitlab-org/gitlab!65728)) **GitLab Enterprise Edition**
+- [Fix git clone for projects with a trailing dot over HTTP](gitlab-org/gitlab@a91be9412a09b069390cc33c14d1bc72216cdbf0) ([merge request](gitlab-org/gitlab!65728))
+
+### Other (1 change)
+
+- [Initialize conversion of ci_builds_metadata.id for bigint migration](gitlab-org/gitlab@34522b102be43118063aa3245d23af313173700d) ([merge request](gitlab-org/gitlab!65728))
+
+## 14.0.4 (2021-07-07)
+
+### Security (1 change)
+
+- [Disable file and network premailer strategies](gitlab-org/security/gitlab@4af58e3d8ee1b25048f34208db6e685cf0bf1411) ([merge request](gitlab-org/security/gitlab!1544))
+
+## 14.0.3 (2021-07-06)
+
+### Fixed (7 changes)
+
+- [Fix deploy keys not working with LFS auth check](gitlab-org/gitlab@134b244c7f59f8a20cb191bc0d2aaa43171f3d6e) ([merge request](gitlab-org/gitlab!65498))
+- [DevOps Adoption - ensure displayNamespaceId is included](gitlab-org/gitlab@1166130f1e6786a8c96735b6518241fb704047b1) ([merge request](gitlab-org/gitlab!65498)) **GitLab Enterprise Edition**
+- [Geo - Fix state value in the lfs_object_registry table](gitlab-org/gitlab@b6f30299d255949b79d149ee71ee50025ac0c8c2) ([merge request](gitlab-org/gitlab!65498)) **GitLab Enterprise Edition**
+- [Fix broken Time Tracking Reports on Issuable sidebar](gitlab-org/gitlab@da0b4a92f791a3f621ec8da8e2fbb0ad4e39d399) ([merge request](gitlab-org/gitlab!65498))
+- [Fix bug where Milestone page led to console error](gitlab-org/gitlab@179948d489ed92f5d8158c23190430e819941a29) ([merge request](gitlab-org/gitlab!65498))
+- [Fix frequent items timestamps not updated](gitlab-org/gitlab@481d4d36252dc91291afe9dacd7d48558878d27f) ([merge request](gitlab-org/gitlab!65498))
+- [Fix pages deployment storage migration](gitlab-org/gitlab@0eab6e579890c557bf97dd48dd6a2a7adaf97358) ([merge request](gitlab-org/gitlab!65498))
+
+### Changed (2 changes)
+
+- [Geo - Move migration to a pre-deployment migration](gitlab-org/gitlab@84327652855cafe36c574df798322b63d0649561) ([merge request](gitlab-org/gitlab!65498)) **GitLab Enterprise Edition**
+- [Reintroduce recursive_approach_for_all_projects default-enabled](gitlab-org/gitlab@14b3aa69cad85541ae6b845b346c80d1eaea099b) ([merge request](gitlab-org/gitlab!65498))
+
+## 14.0.2 (2021-07-01)
+
+### Added (1 change)
+
+- [Added omniauth_user check when verifying user cap](gitlab-org/security/gitlab@68c5d856fbf83f5f5ade562ea84b6aa06db96c60) ([merge request](gitlab-org/security/gitlab!1501)) **GitLab Enterprise Edition**
+
+### Security (14 changes)
+
+- [Update rdoc to 6.3.1](gitlab-org/security/gitlab@341334cbb2d822f6aa057933934b819c34b87932) ([merge request](gitlab-org/security/gitlab!1533))
+- [Forbid GET requests with mutations](gitlab-org/security/gitlab@895c99b35efa6795fb050bfb4ef4574f3e32a373) ([merge request](gitlab-org/security/gitlab!1528))
+- [Prevent GraphQL API access by deactivated users](gitlab-org/security/gitlab@2dda4163dadc04b59ee3367990b72bee933adf9b) ([merge request](gitlab-org/security/gitlab!1525))
+- [Add sanitizing for name field](gitlab-org/security/gitlab@ecb5a598b87d670906df67ed4432426a375efa05) ([merge request](gitlab-org/security/gitlab!1499))
+- [Copy feature visibility settings to a fork](gitlab-org/security/gitlab@fcc87978b1c865c8bdcb3fc5d8dc221b7370192c) ([merge request](gitlab-org/security/gitlab!1522))
+- [Fix XSS on audit log for feature flag actions](gitlab-org/security/gitlab@94fc41d49e828a6457f1de31f2b239b087679c12) ([merge request](gitlab-org/security/gitlab!1521))
+- [Avoid disclosing project in web IDE](gitlab-org/security/gitlab@9de99878401713bc5f3a76ca85901dc3a9ca0cd8) ([merge request](gitlab-org/security/gitlab!1511))
+- [Sanitize input on pasteGFM](gitlab-org/security/gitlab@7bb97cfa11a11bb0725bc707dec73831e16fe177) ([merge request](gitlab-org/security/gitlab!1514))
+- [Fix merge request diff display issue with unsupported encoding](gitlab-org/security/gitlab@8c21afdce6c6214c14db1863df1aad80ed501377) ([merge request](gitlab-org/security/gitlab!1509))
+- [Fix deploy key fallback issue in protected branch](gitlab-org/security/gitlab@a24aa5412a8f1dad01359de6b2f0b66bb741f5d4) ([merge request](gitlab-org/security/gitlab!1508))
+- [Add total http read timeout](gitlab-org/security/gitlab@cf4e0aa0a3f668fb63de6721d062c3157fdd9f84) ([merge request](gitlab-org/security/gitlab!1507))
+- [Allow only same-origin URLs for Edit Release Cancel button](gitlab-org/security/gitlab@4b78e1e31f0a23b964953b1766d156e12a75115f) ([merge request](gitlab-org/security/gitlab!1506))
+- [Update Nokogiri to 1.11.4](gitlab-org/security/gitlab@c43001973ca1b684b4719f5559819179be2394da) ([merge request](gitlab-org/security/gitlab!1500))
+- [Add new username validation](gitlab-org/security/gitlab@c904a128f2c2262288d00f673294423316318f4d) ([merge request](gitlab-org/security/gitlab!1498))
+
+## 14.0.1 (2021-06-24)
+
+### Fixed (3 changes)
+
+- [Remove add button from Devops Adoption](gitlab-org/gitlab@1c60bdf5daf64f10f001eeb5134f08a53a148d90) ([merge request](gitlab-org/gitlab!64764)) **GitLab Enterprise Edition**
+- [DevOps Adoption - ensure displayNamespaceId is included](gitlab-org/gitlab@9eb7cd5212cfc19f4cd6578c8e4afc7b4da27eab) ([merge request](gitlab-org/gitlab!64764)) **GitLab Enterprise Edition**
+- [Add Helm-2to3.gitlab-ci.yml to Auto DevOps](gitlab-org/gitlab@61ac7f46b06fcf151be62407dc0837a44843800e) ([merge request](gitlab-org/gitlab!64764))
+
+## 14.0.0 (2021-06-21)
+
+### Added (116 changes)
+
+- [Add Packages::Helm::ProcessFileService](gitlab-org/gitlab@dae2f102ec92a656eb56a753fa7dc625e3489ae3) ([merge request](gitlab-org/gitlab!62760))
+- [Add unique index for Helm packages](gitlab-org/gitlab@cb08762e7c878e3dd0a1ca9f922f387f8b8e453a) ([merge request](gitlab-org/gitlab!62760))
+- [Disable policies linked to no container repositories](gitlab-org/gitlab@120e0486368cff65da3782de377c82ec47a0b28e) ([merge request](gitlab-org/gitlab!62461))
+- [Allow storing detection_method in vulnerability findings](gitlab-org/gitlab@e2a66be7a2b5d3f14c3698e0c74214b4164c0b9c) ([merge request](gitlab-org/gitlab!63989))
+- [Expose `humanTimeEstimate` & `humanTotalTimeSpent`](gitlab-org/gitlab@4d078467643f9d3c48e43b18c706bb42746b9434) ([merge request](gitlab-org/gitlab!64081))
+- [Make max diff files and max diff lines configurable](gitlab-org/gitlab@3e26e2528384efcd6e1b0b2e28c6aca687a23d6a) ([merge request](gitlab-org/gitlab!56722))
+- [Add GraphQL endpoint to list agent configurations (via KAS)](gitlab-org/gitlab@d91cbf733ddbb6b9369efe1fecdb8b6fce6384ee) ([merge request](gitlab-org/gitlab!62646)) **GitLab Enterprise Edition**
+- [Add checkbox in group settings for prevent sharing outside hierarchy](gitlab-org/gitlab@86eb11f2523f441f9a97f69c950816596208b0ab) ([merge request](gitlab-org/gitlab!63810))
+- [Add "Enterprise" badge to users that are provisioned via SAML/SCIM](gitlab-org/gitlab@5f961f652a202d7dcbe872d827a48eb0e2bfd17b) ([merge request](gitlab-org/gitlab!63474)) **GitLab Enterprise Edition**
+- [Update Bulk Import state more accurately](gitlab-org/gitlab@cea74ea42d4464c30ff39ca929b2bdadcb7083de) ([merge request](gitlab-org/gitlab!63883))
+- [Enable DB Load-balancer flag USE_NEW_LOAD_BALANCER_QUERY by default](gitlab-org/gitlab@b44a37ba10472f7797867b988e41f7548c093e02) ([merge request](gitlab-org/gitlab!63910))
+- [Allow toggle job_token_scope_enabled via GraphQL](gitlab-org/gitlab@3ca540c424d26e8f9cad16f846a7ca4366cd74b1) ([merge request](gitlab-org/gitlab!63778))
+- [Publish package hash on Package Page](gitlab-org/gitlab@df0417560c5eb9438a1dcba46b94adcc191a8ae2) ([merge request](gitlab-org/gitlab!63279))
+- [Add backend support for Coverage-Check rule](gitlab-org/gitlab@d8d6a39c1dc6fa51d5c29aea777f2d7bc820c9d8) ([merge request](gitlab-org/gitlab!63079))
+- [Add project setting to toggle job token scope](gitlab-org/gitlab@99aacbf5339605d7e7116285e245508f48370456) ([merge request](gitlab-org/gitlab!63446))
+- [Scope JobToken to only authorized projects](gitlab-org/gitlab@a8016a6bb4a7f446d77b7738260425fa65c01e01) ([merge request](gitlab-org/gitlab!63446))
+- [Scope JobToken to only authorized projects](gitlab-org/gitlab@22718b69b813d7af3d17eac79b66ade310678392) ([merge request](gitlab-org/gitlab!63446))
+- [Mark pending todo as done when resolving design discussions](gitlab-org/gitlab@0a27c129bc1ccab09be9f5e71ed194b55394caaf) ([merge request](gitlab-org/gitlab!62951))
+- [Migration for fixing missing traversal ids](gitlab-org/gitlab@cb53af00930569beb75ee50f713858fb99fb90bc) ([merge request](gitlab-org/gitlab!63847))
+- [Add qrtly reconciliation alert](gitlab-org/gitlab@c263de9b122c2e00899674b65d3cc0f5e5bf8d10) ([merge request](gitlab-org/gitlab!63181)) **GitLab Enterprise Edition**
+- [Enable by default FF sidebar_refactor](gitlab-org/gitlab@8fefd5b5a6e5f1bf4963038c433d7bdfbe570f33) ([merge request](gitlab-org/gitlab!61679))
+- [Add time_change in Issue, MR and Note webhook](gitlab-org/gitlab@56bf4a7f980bdb6304d4e71717e3ff8274b9b6b5) ([merge request](gitlab-org/gitlab!55087))
+- [Prepopulates the pipeline editor with a 3 stage template](gitlab-org/gitlab@d8a1ad6125ba7f6cb33c8f67cbf67e751f94c3e9) ([merge request](gitlab-org/gitlab!63498))
+- [Add commit type to generic security reports](gitlab-org/gitlab@3a367350f0339a6faa44db5e3d86cc7e3e933c2d) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63723)) **GitLab Enterprise Edition**
+- [Adjust indexes for iterations and iteration cadences](gitlab-org/gitlab@45702b59f5dace0b416ec7908dcf13e72e23fc57) ([merge request](gitlab-org/gitlab!62348))
+- [Epic Boards](gitlab-org/gitlab@0531b906b69fa81b99672ff15975e7eb1dfd6cbe) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62644)) **GitLab Enterprise Edition**
+- [Add order_project_path to package graphql API sort](gitlab-org/gitlab@76ed62782a0dd62f9dd66a31ce127afd3cd0c40f) ([merge request](gitlab-org/gitlab!62473))
+- [Add provisioning group to pipeline validation payload](gitlab-org/gitlab@43d8c865b51da106fd75b2875b956a30259dba88) ([merge request](gitlab-org/gitlab!63606)) **GitLab Enterprise Edition**
+- [Add index for description in ci_runners table](gitlab-org/gitlab@b9b33ee15c9d1a9f8ed166314dce862d84903f22) ([merge request](gitlab-org/gitlab!63036))
+- [Show security report scan errors on pipeline view](gitlab-org/gitlab@61418b8ad3a66e062ae486839c40331e8c837302) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62971)) **GitLab Enterprise Edition**
+- [Upgrade GitLab Pages to 1.40.0](gitlab-org/gitlab@6eaf97ebc6828d06bc9a0d90e96969ccb89a0793) ([merge request](gitlab-org/gitlab!63610))
+- [Check hierarchy sharing settings in GroupLinks::CreateService](gitlab-org/gitlab@aa55411bd92550190098e9410233a67794618087) ([merge request](gitlab-org/gitlab!63107))
+- [Allow user to create epics via epic board list](gitlab-org/gitlab@df231ee29d04e0bfce6b40ba5c45a9d2ab010816) ([merge request](gitlab-org/gitlab!62455)) **GitLab Enterprise Edition**
+- [Create table for tracking ci minute purchases](gitlab-org/gitlab@d9d7332981ed423b40f25016254ef6e71d263054) ([merge request](gitlab-org/gitlab!62393)) **GitLab Enterprise Edition**
+- [Add epic's note system_note_meta to import/export](gitlab-org/gitlab@ca32a0f9d848b4d8a8086dd2aab15525b92cdbcf) ([merge request](gitlab-org/gitlab!63551)) **GitLab Enterprise Edition**
+- [Add Group Avatar endpoint](gitlab-org/gitlab@b8f7c83542d4ec5a994228098c426d002d2813c3) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62596))
+- [Add Content Editor support for wikis](gitlab-org/gitlab@2dddbe794cf79b28c98cd11002860a16563958f7) ([merge request](gitlab-org/gitlab!62919))
+- [Enable CORS headers for OpenID Connect discovery endpoints](gitlab-org/gitlab@fdfb3420cca8d54baaa8181b126433fbaf41bb8b) ([merge request](gitlab-org/gitlab!63276))
+- [Add a GET endpoint to user preferences](gitlab-org/gitlab@d0a597155ae4f526626ad494777202b1ccc8b2ad) ([merge request](gitlab-org/gitlab!63462))
+- [Escaped markdown not interpreted as shortcuts](gitlab-org/gitlab@f8e1fb75d5eac0876ffdd249f26943799fdd0be7) ([merge request](gitlab-org/gitlab!63452))
+- [Allow to make test cases confidential](gitlab-org/gitlab@fa6b3af2e457b2ea056ccfd89fc0a2bc8c4d697e) ([merge request](gitlab-org/gitlab!63098)) **GitLab Enterprise Edition**
+- [Add is_shared and runner_type to hooks and API responses](gitlab-org/gitlab@342cd36c4bc4b94caf45eb8516bba985f967dbb6) ([merge request](gitlab-org/gitlab!62942))
+- [Enable reporting of usage data for Jira integration](gitlab-org/gitlab@45ce55af6f7f9de0de064dfcbf42e51589d8bf7b) ([merge request](gitlab-org/gitlab!63184))
+- [Create metric events for service desk emails](gitlab-org/gitlab@1ec39fb2ff13f1828821b6e1844a3b779337cbc7) ([merge request](gitlab-org/gitlab!63037))
+- [Add option to disable printing of root password during DB seeding](gitlab-org/gitlab@9e06ec3a768a08320eea3818b056d3416072c7b1) ([merge request](gitlab-org/gitlab!63271))
+- [Allow users to specify their pronouns](gitlab-org/gitlab@5c6be0aaabeb0b4d34ec5d149d0a6ffb8b4e8971) ([merge request](gitlab-org/gitlab!63221))
+- [Gracefully handle query timeouts for project VSA](gitlab-org/gitlab@c334e13a81c1f53986429c6f5a14508401baae60) ([merge request](gitlab-org/gitlab!63301))
+- [Add title and tooltip to diff preferences dropdown](gitlab-org/gitlab@b6762723f91eb15bd45dc0550b0ac79f622ae47b) ([merge request](gitlab-org/gitlab!61840))
+- [Add group-level lead time charts](gitlab-org/gitlab@84a5e859181c7b7d7475bd26e8cc7969455ee486) ([merge request](gitlab-org/gitlab!62941)) **GitLab Enterprise Edition**
+- [Change pipeline url to have underline](gitlab-org/gitlab@ee4ad9fa9738e45d6a74cdc2abba73f9869ce548) ([merge request](gitlab-org/gitlab!63325))
+- [Add danger for merge trains](gitlab-org/gitlab@a7337266dd61ced6f27d1763d4e890c359401288) ([merge request](gitlab-org/gitlab!63094))
+- [Optionally include trailers in the commits API](gitlab-org/gitlab@b8fefa073aeedcf2c34a0d4d1b36c5df88fe4a20) ([merge request](gitlab-org/gitlab!63228))
+- [Add compliance tab to redesigned Security-Configuration Page](gitlab-org/gitlab@632524a7b5a441b54577568713578539e8769dd6) ([merge request](gitlab-org/gitlab!63078))
+- [Instrumenting project sidebar menus](gitlab-org/gitlab@6e4caf1fffb5b73884362cc74757f5c60cac6035) ([merge request](gitlab-org/gitlab!62030))
+- [Add upcoming_reconciliations table and model](gitlab-org/gitlab@b28478bdf19bd78c4a452b8da63849a390387789) ([merge request](gitlab-org/gitlab!63054))
+- [Support graceful shutdown of Workhorse connections](gitlab-org/gitlab@73f323b077834b80574b807853e3f5b0fd11b780) ([merge request](gitlab-org/gitlab!62701))
+- [Add Clone with VS Code for SSH](gitlab-org/gitlab@d0ee6aa31e987003b54d71356fd70371055573d3) ([merge request](gitlab-org/gitlab!59396))
+- [Get ancestors of an Epic using GraphQL](gitlab-org/gitlab@63aa2fb0628c110bdba6d4234d4eb63f3954ab02) ([merge request](gitlab-org/gitlab!61154)) **GitLab Enterprise Edition**
+- [Add wiki page diff url to Slack notification message](gitlab-org/gitlab@452b791834cbc7530ce3854c2503a6234ed880f0) ([merge request](gitlab-org/gitlab!63082))
+- [Allow administrators to enable automatic deactivation of dormant users](gitlab-org/gitlab@029bc739503ba10b90d438851526c8eccac505ef) ([merge request](gitlab-org/gitlab!62969))
+- [Add pipeline source to custom CI_JOB_JWT claims](gitlab-org/gitlab@572ad1851d9ae2f47e7da560e7f071d5f184c6b2) ([merge request](gitlab-org/gitlab!62754))
+- [Display credit card status in /admin/users/:id page](gitlab-org/gitlab@7914eeffb19b8eeb991be0b21e86672aeae7c3c1) ([merge request](gitlab-org/gitlab!62803)) **GitLab Enterprise Edition**
+- [Allow users to delete items from the package file list](gitlab-org/gitlab@750cca34851a633eeea0d0012371264affe68c32) ([merge request](gitlab-org/gitlab!62179))
+- [Show generic 'code' type on vuln details](gitlab-org/gitlab@b9af9a5e1734cfce757ea884681f3c1de5f785b2) ([merge request](gitlab-org/gitlab!62861)) **GitLab Enterprise Edition**
+- [Add ability to search instanceSecurityDashboard.projects GraphQL query](gitlab-org/gitlab@e6d18ad71821410f33edb6196f9cf9636f375934) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62933)) **GitLab Enterprise Edition**
+- [Add `latest_pipeline_id` column to `vulnerability_statistics` table](gitlab-org/gitlab@d99873557afd16716de7249b5e0511ae3a43d420) ([merge request](gitlab-org/gitlab!62610))
+- [Import group boards & board lists via ndjson when using Bulk Import](gitlab-org/gitlab@1d5dab27000c359bf148bdaf6011fa19e755bf3e) ([merge request](gitlab-org/gitlab!62668)) **GitLab Enterprise Edition**
+- [Add an option to expose description_html in Release API](gitlab-org/gitlab@687a7cc9bf3360151dc055dd84e87ec4ce000b3f) ([merge request](gitlab-org/gitlab!62802))
+- [Render table types on generic vulnerability report](gitlab-org/gitlab@3f4feebaab10d79d5567b733bb0fd8bc7b844d7c) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62546)) **GitLab Enterprise Edition**
+- [Remove Web Application Firewall related frontend files](gitlab-org/gitlab@2e2382d16b3595c9a9adb5a7fe0c176ee198f702) ([merge request](gitlab-org/gitlab!61489)) **GitLab Enterprise Edition**
+- [Add link to navigate to profile settings page](gitlab-org/gitlab@0fdb5b9536764e6573da243ed84516f3ab9e2b3d) ([merge request](gitlab-org/gitlab!62791))
+- [Persist the `page` parameter for VSA pagination](gitlab-org/gitlab@3df8ae120ad7ba7edff4e9a075a804ab3d24cba0) ([merge request](gitlab-org/gitlab!62439)) **GitLab Enterprise Edition**
+- [Adds block_changes_at to LicenseType in GraphQL](gitlab-org/gitlab@344eec81dc069f821756f8f2fc8b4f0c935574d0) ([merge request](gitlab-org/gitlab!62510)) **GitLab Enterprise Edition**
+- [Add .drafts scope to MergeRequests](gitlab-org/gitlab@93c77e146328d539476f7aaca365629df1c8f342) ([merge request](gitlab-org/gitlab!62718))
+- [Add delete branch modals behind feature flag](gitlab-org/gitlab@e006d7b35cfcdb6c4c95ab6dc5b8dd54a0a8dbed) ([merge request](gitlab-org/gitlab!56782))
+- [Add the documentation for sidekiq routing rules](gitlab-org/gitlab@4a476ebb0735bb761b0f46d9c0d6a17ce2b3c33f) ([merge request](gitlab-org/gitlab!60479))
+- [Helm chart download API endpoint](gitlab-org/gitlab@13ff8bde2fdf7b8cd81cc7024000733c88728033) ([merge request](gitlab-org/gitlab!61014))
+- [Add custom header text to free personal namespaces billing page](gitlab-org/gitlab@f711ee6ab906d14604dbc1dd7fd3fb301bd08a1a) ([merge request](gitlab-org/gitlab!62365))
+- [Add delete escalation policy GraphQL mutation](gitlab-org/gitlab@64f1ae7cb0cf8a9a5c8f930c95beb7a504c00ee9) ([merge request](gitlab-org/gitlab!62009))
+- [Add file-location component for generic security reports](gitlab-org/gitlab@893aa26510e5a96df7535757a8d3214c1d0a036d) ([merge request](gitlab-org/gitlab!62653)) **GitLab Enterprise Edition**
+- [Store CI runner config data](gitlab-org/gitlab@dca1424b5efdf5900e9b3a3e17a3572509af5aba) ([merge request](gitlab-org/gitlab!57953))
+- [Expose the state field for vulnerability findings](gitlab-org/gitlab@29e8f53a59d511e65604490742b73992219e375a) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62147)) **GitLab Enterprise Edition**
+- [Add graphql API to list Scan Execution Policies](gitlab-org/gitlab@6db5e69a42438e766e510b59e1288fc67c87b8c2) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62403)) **GitLab Enterprise Edition**
+- [Support custom messages in the cherry-pick API](gitlab-org/gitlab@5a7d3be2be0aac8b3c66864775e0b0e8fbd960d0) ([merge request](gitlab-org/gitlab!62481))
+- [Add post migration to cleanup orphaned records](gitlab-org/gitlab@0d346291f613e7e3191e844d4bbd4a1f06a71a09) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61787))
+- [GraphQl: Allow filtering epics by negated parameters](gitlab-org/gitlab@b44e246b909cb929f87a93b937d28fbe93fd3261) ([merge request](gitlab-org/gitlab!61823))
+- [Add finding evidence header](gitlab-org/gitlab@d79129b4f1a4dd2d27e94bf2975b880df426966e) ([merge request](gitlab-org/gitlab!61402))
+- [Add module-name component for generic security reports](gitlab-org/gitlab@6144a4a1a6eb3e2e459d00e925544a4112821153) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62447)) **GitLab Enterprise Edition**
+- [Use assignee sidebar widget in the alert drawer](gitlab-org/gitlab@7c29ff14ffcad46869c97086edb3cac9c6ce48cf) ([merge request](gitlab-org/gitlab!61839)) **GitLab Enterprise Edition**
+- [Add 'show_whitespace_in_diffs' to the UserPreferences endpoint](gitlab-org/gitlab@896b2d6efee062f89b7daebcf4ee551fc7e153e4) ([merge request](gitlab-org/gitlab!62245))
+- [Update button variants alignment and spacing](gitlab-org/gitlab@b7a9bbd3f0752a33b264e50dd85706d39faacb10) ([merge request](gitlab-org/gitlab!61791))
+- [Allow recording of experiment subjects](gitlab-org/gitlab@2d6bff529163940b8e7f6ef342cb51b9c4cae1a3) ([merge request](gitlab-org/gitlab!61914))
+- [Set the git default branch to "main"](gitlab-org/gitlab@a8bfdf5729ec45c3bbcb0f2dff7a901f0ed54884) ([merge request](gitlab-org/gitlab!62467))
+- [Add memory view to Performance Bar](gitlab-org/gitlab@865cd871e58d58e2dc372c45c5e7722435fb88a3) ([merge request](gitlab-org/gitlab!61332))
+- [Add user IP data to external pipeline validation service](gitlab-org/gitlab@410b7bceb82136eddf3709a612c9bea946d93afd) ([merge request](gitlab-org/gitlab!62438))
+- [Backfill primary key migration for self-managed instances](gitlab-org/gitlab@3da2450dc1d9ca7ab0157792ea395e9d248b382c) ([merge request](gitlab-org/gitlab!61321))
+- [Makes the invite button on empty projects permanent](gitlab-org/gitlab@20ded4ce65e8e3928fe577a97a540fc294f58f68) ([merge request](gitlab-org/gitlab!62417))
+- [Restrict trial during free signup to company users](gitlab-org/gitlab@26aa54acfa50e08ea96d667940a9d2d6e7b78c5c) ([merge request](gitlab-org/gitlab!62382))
+- [Add credit card validation checkbox to admin users panel](gitlab-org/gitlab@508e926c0bb2ee2ad2c43b7f7e434c9faf344b69) ([merge request](gitlab-org/gitlab!62160))
+- [Delay worker execution for workers utilizing LB](gitlab-org/gitlab@1c82d36c06cdfc04a8259faf587423a693a24991) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62374))
+- [Optionally start a trial during free signup](gitlab-org/gitlab@c6ed9500c8d0ae9a51b0a0278cd7454c18ed75b6) ([merge request](gitlab-org/gitlab!62174))
+- [Adds content to createCommit mutation](gitlab-org/gitlab@bd5eaf0b2eda7890aa0db47f3f63031c8589693f) ([merge request](gitlab-org/gitlab!60938))
+- [Add dast_runner_site_validation feature flag](gitlab-org/gitlab@c5a9d59cd97cb99f12ed34189a60dfd22fedcc66) ([merge request](gitlab-org/gitlab!62299))
+- [Add GraphQL types for escalation policies and rules](gitlab-org/gitlab@2879b4a12d34491ad2100667392e0bcea183c8aa) ([merge request](gitlab-org/gitlab!62299))
+- [Debian Group and Project Distribution Keys schema](gitlab-org/gitlab@38ca1e1860bc7181d7c19c8de0bd54a4fdfd853f) ([merge request](gitlab-org/gitlab!62012))
+- [Compress oversized Sidekiq job payload before dispatching into Redis](gitlab-org/gitlab@ce40f0010967d17b40c17b7b1d7c8a7040374187) ([merge request](gitlab-org/gitlab!62012))
+- [Add metrics to calculate rate of project imports](gitlab-org/gitlab@8b694f1b82a226c06a546123996601de02014274) ([merge request](gitlab-org/gitlab!62012))
+- [Enable Kroki on reStructuredText and Textile documents](gitlab-org/gitlab@9d799fd9d5b702f7ad190a4063935aeef2ee5597) ([merge request](gitlab-org/gitlab!62012))
+- [Add admin page for batched background migrations](gitlab-org/gitlab@575187d9fdbdc1bd6a374a1abec6b6e1e3a6b24a) ([merge request](gitlab-org/gitlab!62012))
+- [Remove threat_monitoring_alerts feature flag](gitlab-org/gitlab@2efff7692093008ebd8fb0495aad303ddbc16e53) ([merge request](gitlab-org/gitlab!62148))
+- [Add GraphQL types for escalation policies and rules](gitlab-org/gitlab@078890677fbd80545445e9b424e42463a0ca0df7) ([merge request](gitlab-org/gitlab!61439))
+- [Update button variants and avatar layout](gitlab-org/gitlab@4bf39340d0afc449d6c112f0c114cb2fc9828d79) ([merge request](gitlab-org/gitlab!61504))
+- [Add admin page for batched background migrations](gitlab-org/gitlab@0203c5dd44f5f97318d08f75c69c604055ee1bf5) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60911))
+- [Add Sidekiq payload compression log fields](gitlab-org/gitlab@4ab91e3ecfbe3063f42eb307b956c159fd555801) ([merge request](gitlab-org/gitlab!61667))
+- [Add Sidekiq payload decomression server middleware](gitlab-org/gitlab@4a9999355056dad75cf79c544239d9c2ec0ac156) ([merge request](gitlab-org/gitlab!61667))
+- [Implement Sidekiq job payload compressor](gitlab-org/gitlab@32b110e80331890a694e36642f0f2cbb1befd62d) ([merge request](gitlab-org/gitlab!61667))
+
+### Fixed (161 changes)
+
+- [Only update required instance CI template when the parameter is present](gitlab-org/gitlab@c68b31bf53fa46c6582328ec624b1c4192435c68) ([merge request](gitlab-org/gitlab!63344))
+- [Bugfix: avoid 500  when resending confirmation](gitlab-org/gitlab@c793f4db1a65003b3b8e8d5e93b896af94ef7e38) ([merge request](gitlab-org/gitlab!64234))
+- [Deal with invalid caches](gitlab-org/gitlab@56203843d2a5f489bda9cf01537c4b8f55bfffac) ([merge request](gitlab-org/gitlab!63395))
+- [Fix CI/CD > Pipelines active routes](gitlab-org/gitlab@86573c3fb3122535e8597ed85169a1d96d44fb44) ([merge request](gitlab-org/gitlab!64119))
+- [Fix unreachable ES url exception](gitlab-org/gitlab@a778d4f76de5e554e8c6a84aed0eb57ff31aec13) ([merge request](gitlab-org/gitlab!63764)) **GitLab Enterprise Edition**
+- [Fix problems with ldap users with expired password](gitlab-org/gitlab@e521e9736b3d2d444d239636f5af780d4df98bcc) ([merge request](gitlab-org/gitlab!63466))
+- [Fix DA dropdown alignment](gitlab-org/gitlab@0abf60e391fc90fb4ce0bdc92338db2e0e2d2903) ([merge request](gitlab-org/gitlab!64174)) **GitLab Enterprise Edition**
+- [Normalize buttons whitespace to only rely on margins](gitlab-org/gitlab@520f936fba16f15ed53824b6fd6a773d6444feee) ([merge request](gitlab-org/gitlab!64078))
+- [JS error on continuous onboarding welcome page](gitlab-org/gitlab@4480ea1f2981cbf8db4b74c05e23a5c43592f752) ([merge request](gitlab-org/gitlab!63830)) **GitLab Enterprise Edition**
+- [Only show coverage fuzzing artifact download when the job exists](gitlab-org/gitlab@7d462536bb0c43733a705ea35ecb65818d0a6326) ([merge request](gitlab-org/gitlab!63957))
+- [Align file line numbers for some Safari users](gitlab-org/gitlab@1801b1f7fc8bd90a4c17e92bf184dfd2fe1ce2bd) ([merge request](gitlab-org/gitlab!63132))
+- [Use context-aware translation for cloud license](gitlab-org/gitlab@a99df9bfb96e9d553763113a13209fd8d6376ce8) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64162)) **GitLab Enterprise Edition**
+- [Fix Embedded Snippet CSS to remove unnecessary vertical scroll bar](gitlab-org/gitlab@7e268f512aff5e8f44d344cdb4d44e2b95da7c4f) ([merge request](gitlab-org/gitlab!62945))
+- [Rebuild iterations automation index](gitlab-org/gitlab@42c4987315f357284cfab40240ef5c7d86d7b489) ([merge request](gitlab-org/gitlab!63858))
+- [Fix migration for SSH key expiration enforcement](gitlab-org/gitlab@5df1166f3e824c08c3a7d5d051e68215af95e1b6) ([merge request](gitlab-org/gitlab!64124))
+- [Fix spacing between deploy buttons in MR widget](gitlab-org/gitlab@4bbd3fcf2da42dae3647300e5441cd96665d2d0b) ([merge request](gitlab-org/gitlab!64078))
+- [Fix blank state styling for welcome screens](gitlab-org/gitlab@dfca5d63c5593cb522b170c3d5941427856e8213) ([merge request](gitlab-org/gitlab!64082))
+- [Fix sidebar item on Jira issue details page](gitlab-org/gitlab@1d2bcbcd411102377d4de7b8fef98653925ffe34) ([merge request](gitlab-org/gitlab!63954)) **GitLab Enterprise Edition**
+- [checks: Fix LFS pointer checks only verifying first reference](gitlab-org/gitlab@b37691bcaecbd090280dcded103a3c323498d5cc) ([merge request](gitlab-org/gitlab!61355))
+- [Fix NameError Admin::ApplicationSettings::UpdateService](gitlab-org/gitlab@5b4e81e10e84b4d92d37f1b2151fe38b8465da0a) ([merge request](gitlab-org/gitlab!64055))
+- [Fix CI editor template not updating on commit](gitlab-org/gitlab@56e33f473e99ff98dfd0d8921fd47c970d4c5231) ([merge request](gitlab-org/gitlab!64029))
+- [Add select_rows to the list of NON_STICKY_READS](gitlab-org/gitlab@d095deff7524ed2e11dd05c6feaa7afaf49b5dc5) ([merge request](gitlab-org/gitlab!63893))
+- [Allow nil on delegated CI/CD settings](gitlab-org/gitlab@9b71913e96f703b022f0927644c382e84012ca8c) ([merge request](gitlab-org/gitlab!63809))
+- [Fetch from all parent groups in issue epic select](gitlab-org/gitlab@8a8d2017011e5bbef4d7e6a561dde63220477f5d) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63618)) **GitLab Enterprise Edition**
+- [Prevent CI schema from registering if schema_linting flag is off](gitlab-org/gitlab@2d3db8025650746cd5f27ad942d49e7fb63e704d) ([merge request](gitlab-org/gitlab!63552))
+- [Conditionally render create group buttons](gitlab-org/gitlab@ef09a654c4c23cb716de5348f1b93270c4c317a1) ([merge request](gitlab-org/gitlab!63871))
+- [Do not trim wiki content by default](gitlab-org/gitlab@e8e492d034770037abb04581e95c0e3942f234b4) ([merge request](gitlab-org/gitlab!63930))
+- [Show the bytes when git reports the file as undiffable](gitlab-org/gitlab@de19a30b8e339c8603b817ffdfb6a5f60a333173) ([merge request](gitlab-org/gitlab!62445))
+- [Use unstranslated names for telemetry on membership](gitlab-org/gitlab@64a5c41156b1a153fd77984132c1b82d387fdb38) ([merge request](gitlab-org/gitlab!63906))
+- [Hide search icon on larger breakpoints again](gitlab-org/gitlab@399519194933202c21f2d6a25456b5cee49bbca8) ([merge request](gitlab-org/gitlab!63861))
+- [Use user config for first day of week in issue datepicker](gitlab-org/gitlab@285a4d6bfe29dfaebb8fbd6bd8cafc60ad6f2c1f) ([merge request](gitlab-org/gitlab!63821))
+- [Fix accessing the errors property of the scan objects](gitlab-org/gitlab@38a4febd36bd3b89cdc5c65b6e40f69d4b2c55e1) ([merge request](gitlab-org/gitlab!63808)) **GitLab Enterprise Edition**
+- [Gracefully handle unknown failure reason in runner CI job](gitlab-org/gitlab@4e52147696c760610939df5260e15aa4427c43f5) ([merge request](gitlab-org/gitlab!63828))
+- [Check Security::Scan resources to identify ran security jobs](gitlab-org/gitlab@0b4b2ca47398429f08740dfbae173e1521275f98) ([merge request](gitlab-org/gitlab!63807)) **GitLab Enterprise Edition**
+- [Fix bug where disabling usage ping via gitlab.rb did not work](gitlab-org/gitlab@c4c513b8a6f0e1b23485e7a05b9311de6f6742fe) ([merge request](gitlab-org/gitlab!63784))
+- [Add default_branch support for Project API](gitlab-org/gitlab@24e3c5bfd58d56882e885daf09b075020024f8fd) ([merge request](gitlab-org/gitlab!63771))
+- [Avoid idling in transaction while saving project export object](gitlab-org/gitlab@fa4e7efb5ed98a0648a0477649f37dd76bfdd561) ([merge request](gitlab-org/gitlab!63350))
+- [Fix timeouts on expiring SSH keys](gitlab-org/gitlab@08e99e90260915fbccb58e45d1fa92aa1d02afb9) ([merge request](gitlab-org/gitlab!63623))
+- [Only check for modified paths when the branch is updated](gitlab-org/gitlab@c3329e788a824152078857aa7558c167ec13edb5) ([merge request](gitlab.com/gitlab-org/gitlab/-/merge_requests/63523)) **GitLab Enterprise Edition**
+- [Change meta tag theme color to match theme](gitlab-org/gitlab@493e5b79e0856892733e281d9118d09dcf9eadd5) ([merge request](gitlab-org/gitlab!63648))
+- [fix: VulnerabilityFinding equality should exclude other record types](gitlab-org/gitlab@356e004a1cd12d9047fb1a43965e4e535e75b101) ([merge request](gitlab-org/gitlab!63554)) **GitLab Enterprise Edition**
+- [Fix trendline error](gitlab-org/gitlab@8b5eadfa9f9450a98698ed0c7915ddf7025061ee) ([merge request](gitlab-org/gitlab!63312)) **GitLab Enterprise Edition**
+- [Fix unintentional cleanup of Import/Export tmp files](gitlab-org/gitlab@45f991a1c0cb21148a0f5a9766e60412d3c8fa38) ([merge request](gitlab-org/gitlab!63065))
+- [Use issueable reference prefix in basic search results](gitlab-org/gitlab@fba94120e74a6fd6e5cdb4d0750910abc1b94c1d) ([merge request](gitlab-org/gitlab!63164))
+- [Calculate mergeability check sync on first widget load](gitlab-org/gitlab@46ffa7b826ddf560f7a827ea4c40ed8454c2c490) ([merge request](gitlab-org/gitlab!63506))
+- [Fix fetch policy in pipeline editor branch switcher](gitlab-org/gitlab@e7ee68235b411e58cc496dff7993338ea63d7e56) ([merge request](gitlab-org/gitlab!62275))
+- [Fix upload-file-experiment-trigger setting incorrect base route](gitlab-org/gitlab@f528dd41f688b0dd723a74d993532ddd7524fe60) ([merge request](gitlab-org/gitlab!63487))
+- [Add guard - diff missing from merge_request_diffs](gitlab-org/gitlab@a3cac1386911794fd0e63a1b3afc253d5af9fb9e) ([merge request](gitlab-org/gitlab!63338))
+- [Resolve Yajl encoding incompatibility](gitlab-org/gitlab@bc56a61fc4f0cdf5d700a47e6170b5304584d912) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63379))
+- [Fix MR approval by reporters](gitlab-org/gitlab@ce0f10f69fa660c731a244451f60e87b48142e41) ([merge request](gitlab-org/gitlab!63153)) **GitLab Enterprise Edition**
+- [Fix conflict resolve to handle FailedPrecondition error correctly](gitlab-org/gitlab@4214e8b561d79bcdb4788ff552fb486c1b06a132) ([merge request](gitlab-org/gitlab!61988))
+- [Repurpose Key.expired_today_and_not_notified scope](gitlab-org/gitlab@02f2bf821791331fb8c47bbb7fc43c6a0fa9fb9d) ([merge request](gitlab-org/gitlab!62114))
+- [Fix escaping characters in authors name for "Pending Comments" dropdown](gitlab-org/gitlab@2b4768797cb4a66fe2df33d60a5176d7d9330d7a) ([merge request](gitlab-org/gitlab!63349))
+- [Fix links in code quality widget](gitlab-org/gitlab@102652819993e263567386b398d70edfaa73d40e) ([merge request](gitlab-org/gitlab!63346))
+- [Fix spam detection with Akismet client](gitlab-org/gitlab@ba1815659837e00d04b4dcd0a6a4426a41e81138) ([merge request](gitlab-org/gitlab!63117))
+- [Do not display bulk selection when user is auditor](gitlab-org/gitlab@bd27eb022dfd047fe0e4a5514242324dd611081e) ([merge request](gitlab-org/gitlab!62685)) **GitLab Enterprise Edition**
+- [Add guard condition for when cilium](gitlab-org/gitlab@2e7fd9662f0e7396a770a40eceb5777af86be0c7) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63258)) **GitLab Enterprise Edition**
+- [Enable HTML labels in Mermaid](gitlab-org/gitlab@80570c0a1a790ccc668c84aa076c8e520e4f43eb) ([merge request](gitlab-org/gitlab!63101))
+- [Upgrade gitaly dependency to use proper go modules versioning](gitlab-org/gitlab@c75ac6642b3151b5730ba6d5641a866b3f76c346) ([merge request](gitlab-org/gitlab!63284))
+- [Fix MR diff compare with previous version](gitlab-org/gitlab@116280a6448ae08d41e63e057a2f92e3bbaba2df) ([merge request](gitlab-org/gitlab!62535))
+- [Use tag helper to generate custom emojis](gitlab-org/gitlab@4346a386773e2096165821a5885695935c621cf9) ([merge request](gitlab-org/gitlab!63275))
+- [Allow GraphQL MemberInterface to support null users](gitlab-org/gitlab@86b0a8c9c75c29c4dccd20839df22eadb186c511) ([merge request](gitlab-org/gitlab!63262))
+- [Fix blank error message for codequality diff](gitlab-org/gitlab@f6721845e2529a76985cdd9481c4afa1f20b0238) ([merge request](gitlab-org/gitlab!63230)) **GitLab Enterprise Edition**
+- [Fix known issues with the CSP](gitlab-org/gitlab@f3e12343371fd29cae5e996416b1bdce57e648a2) ([merge request](gitlab-org/gitlab!63206))
+- [Whitelist pages in mermaid rendering](gitlab-org/gitlab@e1a4b221e3d4d7d822e3ddb007865779ae1a6b1c) ([merge request](gitlab-org/gitlab!62451))
+- [Fix pipeline graph visualization lines disappearing](gitlab-org/gitlab@4242057e0456e2b9b88165dc97e815fe3edc7dcc) ([merge request](gitlab-org/gitlab!63083))
+- [Set CSP back to disabled by default](gitlab-org/gitlab@226b5c8dc96e1c9d91a2dd083e0b5d3ddc3eb184) ([merge request](gitlab-org/gitlab!62961))
+- [Fix Advanced Search retry migration button](gitlab-org/gitlab@aace51ef8ca37552919261ca5d4832a75f62e41a) ([merge request](gitlab-org/gitlab!63012)) **GitLab Enterprise Edition**
+- [Permit symbols when loading mail_room.yml](gitlab-org/gitlab@b2fb691e17e180e765e253f7fbedb122bf79c183) ([merge request](gitlab-org/gitlab!62780))
+- [Use `#use_open_file` for NuGet metadata extraction](gitlab-org/gitlab@6c112a100a9129d8ec88d4604b94042de924f746) ([merge request](gitlab-org/gitlab!62471))
+- [Fix iteration wildcard id filtering for boards](gitlab-org/gitlab@c094a3215315355ecfe18a6ab9fdafe63d87073a) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62801)) **GitLab Enterprise Edition**
+- [Fix reference to `isSquashReadOnly`](gitlab-org/gitlab@e0ed769c5be91cfe0b2397bf24a8585ba1459edc) ([merge request](gitlab-org/gitlab!62851))
+- [Prevent error when accessing optional needs in pipeline graph](gitlab-org/gitlab@f0b4301d636383b64f8850fbd996801fcab2b645) ([merge request](gitlab-org/gitlab!62948))
+- [Prevent prepending single quote to issue CSV exports](gitlab-org/gitlab@b4d1a6ed5145e38a7edb510155e396b7802e5f36) ([merge request](gitlab-org/gitlab!62730))
+- [Record impersonation details on Auditor](gitlab-org/gitlab@20b7c5d6c53acfc41d087a5367ddd5b882a47dab) ([merge request](gitlab-org/gitlab!62257)) **GitLab Enterprise Edition**
+- [Set default retries for mailers to 3](gitlab-org/gitlab@d1b9c81059109afca661427a874b12c64f1f5bba) ([merge request](gitlab-org/gitlab!62814))
+- [Fix non-custom Total stage in VSA](gitlab-org/gitlab@df2c5bb9cc2cf625722b71a4f706ccf9839c47d7) ([merge request](gitlab-org/gitlab!62889)) **GitLab Enterprise Edition**
+- [Do not enforce UTF-8 in any forms](gitlab-org/gitlab@c697eb6e8f77df493e6da85cb0d004400fbe470c) ([merge request](gitlab-org/gitlab!62820))
+- [Fix indexer running longer than lock timeout](gitlab-org/gitlab@be5ddaf6b670593968f1d00877d5f63129508d53) ([merge request](gitlab-org/gitlab!62366)) **GitLab Enterprise Edition**
+- [Fix junit report attachment in tests with error](gitlab-org/gitlab@15b5b59254c7e4ace8a92827e529ccdf69d6d451) ([merge request](gitlab-org/gitlab!62874))
+- [Force use of UTC in formatting seconds into MM:SS](gitlab-org/gitlab@347ae9254788d47d0ec0a536c22021af5318e23b) ([merge request](gitlab-org/gitlab!62873))
+- [Fix known issues with the CSP](gitlab-org/gitlab@c827770c8a2f7bda98d88211a8d07aef9e42c87a) ([merge request](gitlab-org/gitlab!62615))
+- [Fix CSP issues related to captchas](gitlab-org/gitlab@c7f10973eab348ab62c5fe6907a328cc83cd862c) ([merge request](gitlab-org/gitlab!62849))
+- [Fix "Security & Compliance" access for auditors](gitlab-org/gitlab@9541fe044ca52c7daebd7608e2ef75c6201e6b98) ([merge request](gitlab-org/gitlab!62837)) **GitLab Enterprise Edition**
+- [Add the deduplication hash to the job payload](gitlab-org/gitlab@88ace86eb8442fbf849fb2ccb23cb0cc4d82fc91) ([merge request](gitlab-org/gitlab!62842))
+- [Authorize GraphQL Vulnerabilities::IssueLink type](gitlab-org/gitlab@90692666eb913398888c434514a59cb2d3716d66) ([merge request](gitlab-org/gitlab!62815)) **GitLab Enterprise Edition**
+- [Fix the `requiring_cleanup` scope](gitlab-org/gitlab@1d40aa404a84d6d04d6b401cfba239f6f4163a46) ([merge request](gitlab-org/gitlab!62827))
+- [Do not remove export when uploading via URL](gitlab-org/gitlab@c2e09e8fae35f18d8ad53a34cd932a4b387c1e71) ([merge request](gitlab-org/gitlab!62763))
+- [Set iteration state based on updated dates](gitlab-org/gitlab@97809627d8fe274c4fe3a84c2ecfedd165dcbeef) ([merge request](gitlab-org/gitlab!62558))
+- [Update google-protobuf to v3.17.1](gitlab-org/gitlab@bc8f2e0d6d4ffd8ca0195295e5c0b2d208f287e0) ([merge request](gitlab-org/gitlab!62792))
+- [Fix CSS for MR widget for dark mode](gitlab-org/gitlab@978ea85dd470ec12787f4435ed77586ab8742483) ([merge request](gitlab-org/gitlab!62783))
+- [Fix shared runner minutes reset on self-managed](gitlab-org/gitlab@bba3204bf91bff6d8b13aefb91b13af6347d5270) ([merge request](gitlab-org/gitlab!62781)) **GitLab Enterprise Edition**
+- [Fix layout, spacing, and style of reaction emoji on issuables](gitlab-org/gitlab@60b799d6b3e36ddd59f0383c9a579be64bccb394) ([merge request](gitlab-org/gitlab!62621))
+- [fix: Update StoreReportService to better unique signature violations](gitlab-org/gitlab@2779305502de592a784a477a0d1768ffb4e3db2b) ([merge request](gitlab-org/gitlab!61269)) **GitLab Enterprise Edition**
+- [Update startup css which fixes login pages](gitlab-org/gitlab@b609d6eb12395694cd51fed21944b5d4370d33f5) ([merge request](gitlab-org/gitlab!62486))
+- [Make arrow on generic report section clickable](gitlab-org/gitlab@c5971a111941e2ce0b9a2d50923b427999627c7d) ([merge request](gitlab-org/gitlab!62429)) **GitLab Enterprise Edition**
+- [Determine Jira deployment_type based on URL](gitlab-org/gitlab@28a4e491b5a7b058a51c8b5813ea5a511c7a3f8c) ([merge request](gitlab-org/gitlab!62040))
+- [Fix ability for non project member to subscribe to an issue](gitlab-org/gitlab@b444b07ff8b666a6b53f2111166cfbeaa8c9c7df) ([merge request](gitlab-org/gitlab!61953))
+- [Fix Releases page/GraphQL pagination](gitlab-org/gitlab@52341a0b230e5d09c2daa40448c1125419695950) ([merge request](gitlab-org/gitlab!62256))
+- [Overhaul CSS in performance bar in Dark mode](gitlab-org/gitlab@47bee03e03651809cd7198b574265467746d962c) ([merge request](gitlab-org/gitlab!61552))
+- [Fix `Security::FindingsFinder` for multiple report artifacts](gitlab-org/gitlab@d6e099293532827e3b2fa1da127fc87ab8aea112) ([merge request](gitlab-org/gitlab!62643)) **GitLab Enterprise Edition**
+- [Stop using basic auth for GKE cluster creation](gitlab-org/gitlab@c1f0d4ada8ae360d58612c3282682e57d4d69360) ([merge request](gitlab-org/gitlab!62518))
+- [Allow error-free deletion of orphaned group members](gitlab-org/gitlab@b5775a56be21c5c2597c70ad367473efa413cef0) ([merge request](gitlab-org/gitlab!62603))
+- [Fix "Leave this group" button for subgroups listed in group overview](gitlab-org/gitlab@07765ef3740422208fb40a4630b0326e8d28a1e9) ([merge request](gitlab-org/gitlab!62488))
+- [Adds a conditional to not uncheck an unchecked MR](gitlab-org/gitlab@4e5989253ccedc0e655afee37406d6efcfbfae4b) ([merge request](gitlab-org/gitlab!61759))
+- [Fix alignment of global alerts](gitlab-org/gitlab@d5c248137c71af978b6c55dc6c4c60bc216bd1d9) ([merge request](gitlab-org/gitlab!62498))
+- [Fix vuln scanner filter not working when report type has no scanner IDs](gitlab-org/gitlab@5fd9f9c9a150c31d8e77b7dc7a7e76cd7958e7ab) ([merge request](gitlab-org/gitlab!62565))
+- [Call RedisHllUserEvent only when a user is set](gitlab-org/gitlab@95b4471661be21eca12160fd29702c92d8f95725) ([merge request](gitlab-org/gitlab!62560))
+- [Fix Gitpod url in user preferences](gitlab-org/gitlab@85a3357a2518db44fba9b3541c41e947b3a89e61) ([merge request](gitlab-org/gitlab!62544))
+- [Fix Jira issue fields not disabled when inheriting](gitlab-org/gitlab@0570f7362da2fb3629313a4c69adaa8ff3b4f6d4) ([merge request](gitlab-org/gitlab!62364))
+- [Handle invalid project ID in reply-by-email](gitlab-org/gitlab@da6bd2eb0e47696bbbdbfac960801dbfb17b78ec) ([merge request](gitlab-org/gitlab!62530))
+- [Fix tooltip positioning on job view list](gitlab-org/gitlab@57b32f6b93eea94c397a793627575b87335a9013) ([merge request](gitlab-org/gitlab!62504))
+- [Fix typo showing error message after destroy page](gitlab-org/gitlab@115ab6ee52ce5924a187d735e85c96c8e1a9ec5d) ([merge request](gitlab-org/gitlab!62478))
+- [Process emails for projects with not unique service desk keys](gitlab-org/gitlab@cf9290cab12080d87b699cd52aa880fa91d84fb9) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62139))
+- [Fix JavaScript initialization in readonly mode](gitlab-org/gitlab@cf425a12d9177b76a86a3928ad641e476c15f10e) ([merge request](gitlab-org/gitlab!62427))
+- [Update Gitaly's binary path in init.d scripts](gitlab-org/gitlab@e2dbfb22e6f5a0d28006d4f1684200049a2b1cb0) ([merge request](gitlab-org/gitlab!62456))
+- [Pin the GKE version to 1.18 for cluster creation](gitlab-org/gitlab@a5c82ceb7e13d3de00440ff252bcc8b142e857a7) ([merge request](gitlab-org/gitlab!62341))
+- [Fix N+1 problem for ForksController#new](gitlab-org/gitlab@614a0c47aca587482810d54637eef5c9938b39ab) ([merge request](gitlab-org/gitlab!62323))
+- [Fix missing system notes and system events on create issue](gitlab-org/gitlab@25b6738ccefc0717c04d6eba8548f6bbfbf80745) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61746))
+- [Avoid conflicting workers in `authorized_projects` namespace](gitlab-org/gitlab@2e11d9f55e3c730097cb19c07fee9181205fb9ff) ([merge request](gitlab-org/gitlab!62442))
+- [Fix humanized size numbers for negative values](gitlab-org/gitlab@69f1f173d5634cfb24021b4f595a9759eb7545e5) ([merge request](gitlab-org/gitlab!62441))
+- [Fix double render in project's git URL redirect](gitlab-org/gitlab@45512b2c5f3aec8034e961b09f10443911076d13) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62053))
+- [Fix issue with frames not loading in Safari](gitlab-org/gitlab@5341e159d714e973489c83daa383e9369c5f1423) ([merge request](gitlab-org/gitlab!62421))
+- [Fix timeouts when destroying a project with many notes](gitlab-org/gitlab@3e5a944e4a2614fc4b829e6dd14f79ea8c2c4823) ([merge request](gitlab-org/gitlab!62389))
+- [Check user permissions for pipeline operations](gitlab-org/gitlab@2424584193443b4666e7d41ba5e1d602d065c1b7) ([merge request](gitlab-org/gitlab!62137))
+- [Include environments from current and descendant pipelines](gitlab-org/gitlab@6edd3da0b2c76a09bd986991b2d400007729a785) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62080))
+- [Render Discover link for `Security & Compliance`](gitlab-org/gitlab@74fb4d54fbf36223871cda48c9667b9ddb465f4d) ([merge request](gitlab-org/gitlab!62019)) **GitLab Enterprise Edition**
+- [Avoid updating Elasticsearch when project is pending_delete](gitlab-org/gitlab@a574bbe0d8c95d9b656045536403796ffa9b25ed) ([merge request](gitlab-org/gitlab!61917))
+- [Remove feature flag around policy alert creation](gitlab-org/gitlab@ec1712284b282e2fc82c22c60796ce6b2290f0c1) ([merge request](gitlab-org/gitlab!62319)) **GitLab Enterprise Edition**
+- [Fix bulk edit vulnerability dropdown layering issue](gitlab-org/gitlab@b361a36073ecea89fdb89480afe86f7a3f4e769d) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62317)) **GitLab Enterprise Edition**
+- [Bump Cluster Applications version which includes:](gitlab-org/gitlab@5d05e470b6b4d81ba65f29a11122a17a11fcafea) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62117))
+- [Only check index status if modifying Advanced Search form](gitlab-org/gitlab@0b14d4f8e9ef58a99f61262c693c77324dd85957) ([merge request](gitlab-org/gitlab!62299))
+- [Preserve epic labels association during Group Import/Export](gitlab-org/gitlab@2ffe53ed1779e7b96f89f9368e803593dcc00053) ([merge request](gitlab-org/gitlab!62299))
+- [Hide billing plans with truthy hide_card attribute](gitlab-org/gitlab@2bd16f0afe9bf1b1e383ff69349b20ddfad8f69b) ([merge request](gitlab-org/gitlab!62299))
+- [Check for credit card when playing manual jobs](gitlab-org/gitlab@6349060e62348f90211b988c53afc6fef4f1e76b) ([merge request](gitlab-org/gitlab!62299))
+- [Ensure post-update actions are applied when assignees change](gitlab-org/gitlab@7b0078180b70b762aaa72c812fea5339d90ed755) ([merge request](gitlab-org/gitlab!62012))
+- [Fix errors in instance and group-level integration pages for some integrations](gitlab-org/gitlab@4225a25961f403f267fbad55bb0e5d9a9d0ed5d6) ([merge request](gitlab-org/gitlab!62012))
+- [Return 404 from branches API when repository does not exist](gitlab-org/gitlab@9f9fce8261e9da6832915fb44667e7048909765a) ([merge request](gitlab-org/gitlab!62012))
+- [Fixed Rails Save Bang offenses in few spec/models/* files](gitlab-org/gitlab@baef3bca17f8c00301ec95c8626ce5dfa7d8aada) ([merge request](gitlab-org/gitlab!62012))
+- [Fix blob preview error](gitlab-org/gitlab@7a5bbd2e4397e66429bcce4f4fa81be54c176e97) ([merge request](gitlab-org/gitlab!62012))
+- [Fix atom feed with push events for multiple tags](gitlab-org/gitlab@c4769d7ea59c0f3687237d71a4ebc493a56bd668) ([merge request](gitlab-org/gitlab!62012))
+- [Resolve Time tracking report is bugged on GraphQL boards](gitlab-org/gitlab@d7ae653b464937a957bac21621f48447b9204edc) ([merge request](gitlab-org/gitlab!62012))
+- [Fixed Rails Save Bang offenses in few spec/models/* files](gitlab-org/gitlab@50b037b744fe6cd3271ffd38b985b318e62a3703) ([merge request](gitlab-org/gitlab!62012))
+- [Properly process stale ongoing container repository cleanups](gitlab-org/gitlab@948413b6b3961a850bcdce2f9f1776741bbc0ea6) ([merge request](gitlab-org/gitlab!62012))
+- [Execute member hooks only if an associated user is present](gitlab-org/gitlab@473656bab27d7227d48d85011d6bf25e9752a855) ([merge request](gitlab-org/gitlab!62012))
+- [Fix `pry` debugging location with `pry-byebug` and `pry-shell` by updating the `pry-shell` gem](gitlab-org/gitlab@57dfda62eb0d94a35975bda5af9de1034c53a086) ([merge request](gitlab-org/gitlab!62012))
+- [Fix permission check when setting issue/merge request subscription in GraphQL API.](gitlab-org/gitlab@77dea32e5921154fd6613021a73c751f626baaef) ([merge request](gitlab-org/gitlab!62012))
+- [Fix pipeline graph undefined needs error](gitlab-org/gitlab@68ce1ff09a3f56a71d791f736db7ee26d492dcd1) ([merge request](gitlab-org/gitlab!62012))
+- [Prevent overflows in WebHook#backoff_count](gitlab-org/gitlab@db0366a681a5cd35b13a2fa56370287c3543d7b4) ([merge request](gitlab-org/gitlab!62012))
+- [Prevent overflows in WebHook#backoff_count](gitlab-org/gitlab@2ba4cab79d2c482aba89d31729466c75e64f7034) ([merge request](gitlab-org/gitlab!62202))
+- [Ensure that we always run the update worker](gitlab-org/gitlab@185fea33cd8d1e39e96a104dccb20db818c97d90) ([merge request](gitlab-org/gitlab!61897))
+- [Execute member hooks only if an associated user is present](gitlab-org/gitlab@37cbe23aa7076d74c12eb4210fc802a62d8ef294) ([merge request](gitlab-org/gitlab!62175))
+- [Check for credit card when playing manual jobs](gitlab-org/gitlab@f65f4827115f90734c6f49fb578ee3952e884a4c) ([merge request](gitlab-org/gitlab!62124))
+- [Added changelogfile](gitlab-org/gitlab@4caa2dfca72d5dfeeb9f8859718d0d8ae999124c) ([merge request](gitlab-org/gitlab!62165))
+- [Fixed offenses in spec/models/* part 5](gitlab-org/gitlab@b4acc814eac0a235c38f86ced8a2d141eda9b718) ([merge request](gitlab-org/gitlab!62165))
+- [Fix blob preview error](gitlab-org/gitlab@2b72facccc9a36ebe346797b643811fd722b4380) ([merge request](gitlab-org/gitlab!62128))
+- [Return 404 from branches API when repository does not exist](gitlab-org/gitlab@5dba6b526e91d5b9e1ae611b38613ad7217a2e6f) ([merge request](gitlab-org/gitlab!62089))
+- [Preserve epic labels association during Group Import/Export](gitlab-org/gitlab@f105ac61bc42098a9c02b40e82c613a7c9ece570) ([merge request](gitlab-org/gitlab!62074))
+- [Fix atom feed with push events for multiple tags](gitlab-org/gitlab@cbf91d4bd789bafa23227ca19b5e1c893cd42532) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62059))
+- [Fixed offenses in spec/models/* part 2](gitlab-org/gitlab@17afb671c4e7b0cf95c762e2fb04fe20302db682) ([merge request](gitlab-org/gitlab!61961))
+- [Fix UI bug overflowing the text in TODO list](gitlab-org/gitlab@0eb1b9d3ea9deb9ac09582ecacd23cadc5d7c9f5) ([merge request](gitlab-org/gitlab!61910))
+
+### Changed (155 changes)
+
+- [Move admin cohorts to separate controller](gitlab-org/gitlab@e6fb06fb73ab8a639bac04077c07f5b54670e2eb) ([merge request](gitlab-org/gitlab!64015))
+- [Improve beta state communication of content editor](gitlab-org/gitlab@e36a419e2d4fad464bacb2ebcb15fe1c1dd6a02e) ([merge request](gitlab-org/gitlab!63775))
+- [DA use dropdown for adding groups](gitlab-org/gitlab@8bd72f34f1c2f3568ed9f338041bd9b9f479026d) ([merge request](gitlab-org/gitlab!63746)) **GitLab Enterprise Edition**
+- [Remove ci_register_job_service_one_by_one feature flag](gitlab-org/gitlab@564e6f2260286e5364303464fd23973eb04ccf07) ([merge request](gitlab-org/gitlab!64121))
+- [Use database as SSOT for diffs whitespace](gitlab-org/gitlab@24135de77137981c82bcd7268c3875bf7f80a874) ([merge request](gitlab-org/gitlab!63927))
+- [Namespace translations in view switcher for clarity](gitlab-org/gitlab@e7d63b3c8512fa486c8d785d7b4f1f5906ac8cc5) ([merge request](gitlab-org/gitlab!64102))
+- [Show update branch message when MR branch diverged from target branch](gitlab-org/gitlab@7e3da6b74001c4f3661799c3eac06418e9221bbb) ([merge request](gitlab-org/gitlab!64090)) **GitLab Enterprise Edition**
+- [Backend support for multi-select project search](gitlab-org/gitlab@40b38dd3675eddb06a3c43aca4e9c9dbbb180a5a) ([merge request](gitlab-org/gitlab!62606)) **GitLab Enterprise Edition**
+- [Use GraphQL for Time tracking info on Issuables](gitlab-org/gitlab@ea7b1fa1ffe5c4d8cde14c146917ec62707a2736) ([merge request](gitlab-org/gitlab!63773))
+- [Bump DAST to use version 2](gitlab-org/gitlab@322e7b3c13205f887449f8daac9fc4baf632f772) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62597)) **GitLab Enterprise Edition**
+- [Fix Helm version regexp to match unprefixed semver too](gitlab-org/gitlab@9ec76dc9a43ffb2032f9a276a314d270b96d5932) ([merge request](gitlab-org/gitlab!63967))
+- [Add deprecation notice to Managed-Cluster-Applications.gitlab-ci.yml](gitlab-org/gitlab@1983d1f28dee21f029776bb41ee53aeaaee021e9) ([merge request](gitlab-org/gitlab!64050))
+- [Hide tooltips and popovers with escape key](gitlab-org/gitlab@6dcc5b7b98b37aded59a4f217e39729002065fa0) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63922))
+- [Adds more identifiers to Seat Link](gitlab-org/gitlab@9dc094515375295ea01f49cf67f3c41847ec07d3) ([merge request](gitlab-org/gitlab!63909)) **GitLab Enterprise Edition**
+- [Usage dictionary: update name, Group Overview](gitlab-org/gitlab@67c7f965a7a4293cb5b6329da915692b0c8a51c6) ([merge request](gitlab-org/gitlab!63780)) **GitLab Enterprise Edition**
+- [Set PostgreSQL 12 as the minimum supported version](gitlab-org/gitlab@50fe067049b75b26b8223470803092a10a23cab1) ([merge request](gitlab-org/gitlab!63471))
+- [Fix: update incident sidebar severity title margin](gitlab-org/gitlab@e0d2cfc76405f3083d227b5c42dbdadc03fc42ee) ([merge request](gitlab-org/gitlab!63998))
+- [Add webhook rate-limit threshold for Free plan on gitlab.com](gitlab-org/gitlab@772754bc41547860405e55868758f0566c878c22) ([merge request](gitlab-org/gitlab!62918))
+- [Update instructions how to initialize/clone git repository](gitlab-org/gitlab@c73781b1c180543c5083bb40796420f2cc613b7c) ([merge request](gitlab-org/gitlab!63985))
+- [Add indices for created_at+id and contacted_at+id on ci_runners](gitlab-org/gitlab@53d0a6326a42e3dce9d040497440604b1f201d41) ([merge request](gitlab-org/gitlab!62310))
+- [Update Diff UI settings to match style guides](gitlab-org/gitlab@0c95661892bb830056d7d3dee2996e9a192db3e1) ([merge request](gitlab-org/gitlab!62500))
+- [Relate Test Reports and Requirement Issues](gitlab-org/gitlab@5927399c2175fdbba680b01690c1ff8c3029305e) ([merge request](gitlab-org/gitlab!63512))
+- [Add verification for MR diffs using SSF](gitlab-org/gitlab@9d390d48b98be62beb953ce45fa3b437101cdf6c) ([merge request](gitlab-org/gitlab!63309)) **GitLab Enterprise Edition**
+- [Make Alert details table attributes clickable](gitlab-org/gitlab@976d9cf0f0a0dd70e2af14858aff43efd404d006) ([merge request](gitlab-org/gitlab!63593))
+- [Add migrations for adding verification for MR diffs](gitlab-org/gitlab@9fadd0b863d796b876ed0f627323e663602a9acb) ([merge request](gitlab-org/gitlab!60935))
+- [Allow guest user to assign issue metadata on create](gitlab-org/gitlab@ae50169e7f121dd76ccc516ab2920ed4b829848f) ([merge request](gitlab-org/gitlab!62816))
+- [Replace plugin.log with file_hook.log](gitlab-org/gitlab@9602f4cfcd1eb94c98455a07bb0586b30ad87633) ([merge request](gitlab-org/gitlab!57515))
+- [Restore previous month perspective](gitlab-org/gitlab@478e20ce28fb7b9df789ea42d1ecf7ab9898327c) ([merge request](gitlab-org/gitlab!63217)) **GitLab Enterprise Edition**
+- [Update Styling of MR-Widget](gitlab-org/gitlab@38842cbde3cf4ed7fcdbb871cc14e88cf33c1924) ([merge request](gitlab-org/gitlab!63736))
+- [Enforce SSH key expiration by default](gitlab-org/gitlab@f023457f2203d08c0bce352c6422191d760d6e16) ([merge request](gitlab-org/gitlab!62432))
+- [Tidy up language on access tokens UI page](gitlab-org/gitlab@a192f5d2ca5be0081203a6967ef77f73504c77b8) ([merge request](gitlab-org/gitlab!62939))
+- [Move "Appearances" menu item into "Settings" in Admin Area](gitlab-org/gitlab@c08debbc2cad25b401507eebf48e9e45f2aa9718) ([merge request](gitlab-org/gitlab!62522))
+- [Geo: Remove feature flag geo_terraform_state_version_verification](gitlab-org/gitlab@eb1a208ddccc1c1b09bf50663a9d9374907a19a3) ([merge request](gitlab-org/gitlab!63661)) **GitLab Enterprise Edition**
+- [Retry pipelines in the background](gitlab-org/gitlab@0852bacfd11317532b79acedd6fe2c6b3cfe23d0) ([merge request](gitlab-org/gitlab!63789))
+- [Remove feature flag `introduce_marker_ranges`](gitlab-org/gitlab@ce8ec7312bea6c31e84dce00eb6b2b33b41b9c85) ([merge request](gitlab-org/gitlab!59251))
+- [Add input rules for creating links](gitlab-org/gitlab@87b4bb69e8796470e5d63e5b10d1d4dfdfe8519a) ([merge request](gitlab-org/gitlab!63664))
+- [Add new way of encrypting tokens](gitlab-org/gitlab@1914a1e3493f8b87cc1948d5b29f755af7a72c20) ([merge request](gitlab-org/gitlab!58902))
+- [Remove maven metadata CTE FF](gitlab-org/gitlab@f6b9d3ed06497eea3d39eb3cf3838965e1e28eb7) ([merge request](gitlab-org/gitlab!63657))
+- [Bump major version of auto-deploy-image in Auto Deploy template](gitlab-org/gitlab@1051cc3ac6e0837aecc091159c632e06619838ee) ([merge request](gitlab-org/gitlab!62876))
+- [Fix title, value spacing of various sidebar blocks](gitlab-org/gitlab@8914310b7b4b1e2961a16b49cffc642f74300120) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61650)) **GitLab Enterprise Edition**
+- [Expose include_ancestor_groups arg for epics query](gitlab-org/gitlab@87062904489597a8ab18b8fc96ca4d7231a27557) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63374)) **GitLab Enterprise Edition**
+- [Change vulnerability filters All option text to be "All <filter name>"](gitlab-org/gitlab@fd6379ae0eb88bbc97767371cdd697a75f8e8e28) ([merge request](gitlab-org/gitlab!63709)) **GitLab Enterprise Edition**
+- [Replace work_in_progress with draft](gitlab-org/gitlab@05c9b9ed141d9a0ab037a407da26f9a976d25e42) ([merge request](gitlab-org/gitlab!63473))
+- [Successful sync should cause verification](gitlab-org/gitlab@f9e904874082ecb3471a1309b93055c9009eda1c) ([merge request](gitlab-org/gitlab!63104)) **GitLab Enterprise Edition**
+- [Wait until DB is ready to list data on legacy storage](gitlab-org/gitlab@d2eea674fd70f5874dcc19729e2916fa5e24ddb6) ([merge request](gitlab-org/gitlab!63692))
+- [Add level four heading to text style dropdown](gitlab-org/gitlab@76f4d550751c6be3feb3ed0b82840453e5d5f1e8) ([merge request](gitlab-org/gitlab!63639))
+- [Reintroduce DA group max requests](gitlab-org/gitlab@c441ef23d2107ea860d74baccdc867e8dfa36a51) ([merge request](gitlab-org/gitlab!63628)) **GitLab Enterprise Edition**
+- [Remove env var restriction for Database load balancing](gitlab-org/gitlab@5548633db5395f78afa55535e67f5f6f75c150db) ([merge request](gitlab-org/gitlab!63627))
+- [Hide scanner filter vendor header when there's only the GitLab vendor](gitlab-org/gitlab@b6a51e4cf99543174e80359db44c049a1e301156) ([merge request](gitlab-org/gitlab!63596)) **GitLab Enterprise Edition**
+- [Add vulnerability activity filters in GraphQL](gitlab-org/gitlab@830c9f6346309aa82e08368088fc8174b26a3108) ([merge request](gitlab-org/gitlab!63311)) **GitLab Enterprise Edition**
+- [Update the vendored cluster management Project Template](gitlab-org/gitlab@7d650079171513057435268d7fbc71eb6f7af941) ([merge request](gitlab-org/gitlab!63577))
+- [Projects API show the project's squash option](gitlab-org/gitlab@631ee2c376f6423642ab6cff204f359afa002eec) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63543))
+- [Add git push counter to geo node status](gitlab-org/gitlab@70568e0a583f54e5c440cc56d37feb015e48dfec) ([merge request](gitlab-org/gitlab!63427)) **GitLab Enterprise Edition**
+- [Adjust Button Sizes on Secure MR Widget](gitlab-org/gitlab@9c5f6b9e80467e8f02274e60b91991574b2a665b) ([merge request](gitlab-org/gitlab!63407))
+- [Apply Slack's UI guide to channel placeholders](gitlab-org/gitlab@581a71f5e532dd5d05a49038fa277cfe13910af0) ([merge request](gitlab-org/gitlab!63046))
+- [Remove DA max requests for groups](gitlab-org/gitlab@5acc14099db7e2741050222f123682381bbcadf0) ([merge request](gitlab-org/gitlab!63491)) **GitLab Enterprise Edition**
+- [Rollout arel_package_scopes feature](gitlab-org/gitlab@edcaa59c6e1c57c119f4a32fe47ad74e4eb3e720) ([merge request](gitlab-org/gitlab!62614))
+- [Allow iteration cadence argument on iteration creation](gitlab-org/gitlab@aecc475aa5e6d7bf8f7729f1f01f31984eb51a10) ([merge request](gitlab-org/gitlab!63505))
+- [Migrate board label select to Vue](gitlab-org/gitlab@233554a8710d8267d372be1a9a6fc6e228c9e320) ([merge request](gitlab-org/gitlab!62626))
+- [Remove old Advanced Search migrations](gitlab-org/gitlab@42eb2e7f830aa4b82413cb484450dfb2fce2f8df) ([merge request](gitlab-org/gitlab!63001)) **GitLab Enterprise Edition**
+- [Added a check for user: null](gitlab-org/gitlab@198f25dfee0021b45181b7717002264782d60e70) ([merge request](gitlab-org/gitlab!63167))
+- [Enable :disable_service_templates FF by default](gitlab-org/gitlab@f6c9bfb440831a2086ef8c756c771658f86f53e5) ([merge request](gitlab-org/gitlab!61312))
+- [Remove load_balancing_atomic_replica feature flag](gitlab-org/gitlab@5bdb634f8ae2c24633fad3a50c5eaaa8683574b1) ([merge request](gitlab-org/gitlab!63380))
+- [Replaces Klar by Trivy from the specs](gitlab-org/gitlab@a1e6576cf6513bc6b8a4b767cb1a221d69f77311) ([merge request](gitlab-org/gitlab!62328))
+- [Add vulnerability scanner ID filter in GraphQL](gitlab-org/gitlab@b5336ba15ce135239201bab8ab3544ed453a2aae) ([merge request](gitlab-org/gitlab!63335)) **GitLab Enterprise Edition**
+- [Right align action buttons on jobs index page](gitlab-org/gitlab@c0ecc3c392b58dce17ecef2e43f73de50c57b2cb) ([merge request](gitlab-org/gitlab!62869))
+- [Move component and spec to static site editor](gitlab-org/gitlab@ead8cb57e15b21cbcc90c50026fc08742b0b94a1) ([merge request](gitlab-org/gitlab!55934))
+- [Geo Node 2.0 - Remove geo_nodes_beta FF](gitlab-org/gitlab@35e5f26ab079c12af3286413d8ee5fa1442d6550) ([merge request](gitlab-org/gitlab!62309)) **GitLab Enterprise Edition**
+- [Remove geo_lfs_object_replication feature flag](gitlab-org/gitlab@3fbea8278a43cb91415cf76d634a1da74a0fdbef) ([merge request](gitlab-org/gitlab!62039)) **GitLab Enterprise Edition**
+- [Increase max groups fetched for DA](gitlab-org/gitlab@d0ea76aec56d87bac687ff85aa95737e5ab3262b) ([merge request](gitlab-org/gitlab!63415)) **GitLab Enterprise Edition**
+- [Update breadcrumbs for project imports](gitlab-org/gitlab@8685b3538adb1b4b92034eb95b399c71a661d9a3) ([merge request](gitlab-org/gitlab!63089))
+- [Revise UI phrasing around force pushes](gitlab-org/gitlab@162830f52299e8beb3d902b36bf14cf3d2eed897) ([merge request](gitlab-org/gitlab!63310)) **GitLab Enterprise Edition**
+- [Upgrade to Mermaid v8.10.2](gitlab-org/gitlab@d886a3fb6390b22cfcf05d91bfba244412a0a869) ([merge request](gitlab-org/gitlab!63354))
+- [Enable validate_import_decompressed_archive_size feature flag by default](gitlab-org/gitlab@a180695a5b50e8141f91dd3545ab4d8f2a952bd3) ([merge request](gitlab-org/gitlab!63025))
+- [Improve VSM date tooltip](gitlab-org/gitlab@59fa8146ed11ddda9ee2c3bc7eef618e246abd8f) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62194)) **GitLab Enterprise Edition**
+- [Pass through escaped variable values to Runner](gitlab-org/gitlab@e5cf22fbcbf6d86a792a3748f29b73f1a7e33f0a) ([merge request](gitlab-org/gitlab!56603))
+- [Update deprecated GlIcon size in IDE branch search](gitlab-org/gitlab@c9d6a5a5c80171ebd654b3a19eaadf8ca579f989) ([merge request](gitlab-org/gitlab!62782))
+- [Use application/octet-stream as Content-Type for files in CI artifacts](gitlab-org/gitlab@c487ba4597d1ae9b3a283480c374d612d85e3e5c) ([merge request](gitlab-org/gitlab!63273))
+- [Rename Browser Performance template jobs](gitlab-org/gitlab@eb7f75682911d87dbd42901c6f88715bd40c74d6) ([merge request](gitlab-org/gitlab!62727))
+- [Rearrange 'Security & Compliance' menu items](gitlab-org/gitlab@7d95cdb47bc13ac6ffedb55feed5163b6745487d) ([merge request](gitlab-org/gitlab!62448)) **GitLab Enterprise Edition**
+- [Enable prevent_retry_of_retried_jobs feature flag on by default](gitlab-org/gitlab@4b552ded173c95b8795b48c4a34f33999c01bb41) ([merge request](gitlab-org/gitlab!63112))
+- [Simplify npm.gitlab-ci.yml using new CI variables](gitlab-org/gitlab@a945fb61276a3ef06f7a76afcc0db2cc44fb8523) ([merge request](gitlab-org/gitlab!56141))
+- [Enable cross pipeline artifacts download](gitlab-org/gitlab@16da2f245ab8c801a1ea00b534f278997d6764d6) ([merge request](gitlab-org/gitlab!63074))
+- [Rename read_vulnerability to read_security_resource policy](gitlab-org/gitlab@ee4fe811415971df46610f5b64f39bbcda848b3d) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58704)) **GitLab Enterprise Edition**
+- [Remove feature flag usage_data_p_terraform_state_api_unique_users](gitlab-org/gitlab@ca975e5303bb9eaa5a48148773d734288cd4b804) ([merge request](gitlab-org/gitlab!62975))
+- [Remove feature flag create_cloud_run_clusters](gitlab-org/gitlab@b878883f6a80fc670b8112f91b0c82da4db2b965) ([merge request](gitlab-org/gitlab!62977))
+- [Remove ci-trace-read-consistency feature flag](gitlab-org/gitlab@2d3a33230fba32f4046f0709a8142741f98db110) ([merge request](gitlab-org/gitlab!62840))
+- [Added path navigation to project VSA](gitlab-org/gitlab@937099d47529ea384404eeacdd8c6aeb653d2d16) ([merge request](gitlab-org/gitlab!62630)) **GitLab Enterprise Edition**
+- [Enable ci_fix_commit_status_retried by default](gitlab-org/gitlab@406ad6b0bbc450a757e7ca549a6df63d35a3b0f2) ([merge request](gitlab-org/gitlab!62907))
+- [Change docs link style in group CI settings](gitlab-org/gitlab@b2cdff999c7e3f591c013a35e18106194500b966) ([merge request](gitlab-org/gitlab!62065))
+- [Upgrade Sentry gem to 4.4.0](gitlab-org/gitlab@fa3e6a81fbc036f67a17d6236ddbf8dcf631aed0) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62387))
+- [Refactor performance bar cookie check](gitlab-org/gitlab@91490dca3a323e322fff16661065f50c899160d4) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62675))
+- [Database Load Balancing feature available in GitLab Free](gitlab-org/gitlab@064e9d3c5fbb65ee7cbca4eb54c9c58c77ab5c4d) ([merge request](gitlab-org/gitlab!62739))
+- [Align titles and icons in Security pages](gitlab-org/gitlab@d98f9442f52b198bba31a7116665b54b915afc63) ([merge request](gitlab-org/gitlab!62841)) **GitLab Enterprise Edition**
+- [Prevent projects with same slug from having same project key](gitlab-org/gitlab@85177b67e9b5ff8f3378b3f7b6ab8f251dd3d785) ([merge request](gitlab-org/gitlab!62240))
+- [Allow reporters to read project statistics](gitlab-org/gitlab@af23428c618e5547c03646e6f674743c7971aa0a) ([merge request](gitlab-org/gitlab!62736))
+- [Simplify network policy sidebar](gitlab-org/gitlab@b477ebde931c6f1624c6b26ab8eca432ec09ac85) ([merge request](gitlab-org/gitlab!62134)) **GitLab Enterprise Edition**
+- [Rename instance_statistics_measurements_table](gitlab-org/gitlab@a29bffcdc0a319fe4f90555787755e6a490fcd06) ([merge request](gitlab-org/gitlab!62797))
+- [Converted issuable id to string](gitlab-org/gitlab@52580c529627d29679bc4b784630fff55082c127) ([merge request](gitlab-org/gitlab!62804))
+- [Fixed scroll on todos](gitlab-org/gitlab@bcd934db8c991d197ff5683942ab2fabc3d1a36d) ([merge request](gitlab-org/gitlab!62807))
+- [Replace Flash with GlAlert in Boards](gitlab-org/gitlab@76c6c7538c0860ba0f34d2d1cd15e3daf458dac7) ([merge request](gitlab-org/gitlab!61969))
+- [Improve fork error message](gitlab-org/gitlab@1d45ae6f9c8f681c34ad55dc5234b857e30929ca) ([merge request](gitlab-org/gitlab!62664))
+- [Allow `extra` parameter for Snowplow events](gitlab-org/gitlab@b75c135b4b4c588dadfc9540f16c06e450406d91) ([merge request](!56869))
+- [Import group epics via ndjson when using Bulk Import](gitlab-org/gitlab@03b2fe02d5c4d118382b4f9676d0def6ca990d88) ([merge request](gitlab-org/gitlab!62590)) **GitLab Enterprise Edition**
+- [What's New content link opens in new tab](gitlab-org/gitlab@af59ed027df3fec6caba85f48247a148b5b57225) ([merge request](gitlab-org/gitlab!61954))
+- [No Longer Send Legacy Feature Flags](gitlab-org/gitlab@d52208fc3e180de5f84ddb6906b1fdb1afc6f739) ([merge request](gitlab-org/gitlab!62484))
+- [Strip out junit screenshot path](gitlab-org/gitlab@c13fdd442560d3d060b29fab2ad6f3b1eecd7523) ([merge request](gitlab-org/gitlab!62520))
+- [Remove unused ProcessPrometheusAlertWorker worker](gitlab-org/gitlab@9ea5ec8d23b968d31c7e5709145505d9d8ce2ab9) ([merge request](gitlab-org/gitlab!62579))
+- [Rename experiment_subjects group_id column](gitlab-org/gitlab@66f28b08867a6678b3168e28ca4459539dfd5a8f) ([merge request](gitlab-org/gitlab!62696))
+- [Remove unused ProcessAlertWorker](gitlab-org/gitlab@f7a81d88c89f5ab0b3bc50ae32c41b10e8516dbf) ([merge request](gitlab-org/gitlab!62582))
+- [Update pipeline failed notification emails to refer to jobs](gitlab-org/gitlab@c01132d844c88a0fab88d7a94679ccc6ff185d93) ([merge request](gitlab-org/gitlab!62671))
+- [Improve approvers text](gitlab-org/gitlab@47478e05bfcce81704b44c09a4ca1f67dca2dfe6) ([merge request](gitlab-org/gitlab!62657)) **GitLab Enterprise Edition**
+- [Update securityReportSummary to avoid expensive operation](gitlab-org/gitlab@a796af895c2332a6f19f14048f356d394f2c4010) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61221)) **GitLab Enterprise Edition**
+- [Redesign policy editor page](gitlab-org/gitlab@c81e65ff1e7a17946a4e4bc5688a975311e6ac67) ([merge request](gitlab-org/gitlab!62344)) **GitLab Enterprise Edition**
+- [Enable builds queue on replicas by default](gitlab-org/gitlab@2a7b20d0911b8c7876f79047ddb9a98bb7abf0da) ([merge request](gitlab-org/gitlab!62619))
+- [Update Unknown signin email timestamp to use 24 hour time](gitlab-org/gitlab@cc0a6c567bbaa677e64b2f98a67d303dfcd6539d) ([merge request](gitlab-org/gitlab!47748))
+- [Move cluster management projects out of alpha](gitlab-org/gitlab@d4189c0846a401f3bb4c6bc9f25a66452f96306a) ([merge request](gitlab-org/gitlab!62255))
+- [Update group creation UI](gitlab-org/gitlab@db58b29afcf18b46c5d844a1c086454e394d8079) ([merge request](gitlab-org/gitlab!61100))
+- [Remove group timelog mandatory arguments](gitlab-org/gitlab@cfdedd479eeac7e319aabcf84635e248a518a2fc) ([merge request](gitlab-org/gitlab!61847))
+- [Remove include_lfs_blobs_in_archive feature flag](gitlab-org/gitlab@c17834bb95399626e55a3b161e6bc0d9f019f84f) ([merge request](gitlab-org/gitlab!62539))
+- [Add BulkImports NdjsonExtractor & update labels pipeline to use it](gitlab-org/gitlab@53ca7bd16d6f92610343d7da34e3f2f1a867dc1b) ([merge request](gitlab-org/gitlab!62409))
+- [Remove @service from integrations contollers](gitlab-org/gitlab@3add719db257714bb462c580b7c83d89a20e7ad0) ([merge request](gitlab-org/gitlab!62551))
+- [Allow url without .git suffix for import](gitlab-org/gitlab@b6981d9baaa8d5680cd7e5a267b8c1be84f22836) ([merge request](gitlab-org/gitlab!62552))
+- [Enforce maximum attachment size in project API uploads by default](gitlab-org/gitlab@c8c13203828c8443487eb44f719856b6f12998e8) ([merge request](gitlab-org/gitlab!62542))
+- [Added path navigation to project VSA](gitlab-org/gitlab@70abdb446166465578f8b90826ec3effab1d5949) ([merge request](gitlab-org/gitlab!61125)) **GitLab Enterprise Edition**
+- [Enable builds queue limit by default](gitlab-org/gitlab@c853efd7f8f3813c318ef44beaa809a4ad12bf5c) ([merge request](gitlab-org/gitlab!62405))
+- [Fix spacing for branch switcher in pipeline editor](gitlab-org/gitlab@ef1cbb855fa99d504f2ac954cfc5f083d89e9818) ([merge request](gitlab-org/gitlab!62534))
+- [Updates authorization for lint](gitlab-org/gitlab@f8524e7f322db547e578b5c205252d97aa068db8) ([merge request](gitlab-org/gitlab!62004))
+- [Separate adoption segment namespaces](gitlab-org/gitlab@212d28d988cbd9f8b6345236c77d2d49dad7cd28) ([merge request](gitlab-org/gitlab!61903))
+- [Use :latest image tag in default Ruby CI template](gitlab-org/gitlab@58439fb1fa48fba378e86039a6b241f152cc7bd4) ([merge request](gitlab-org/gitlab!61283))
+- [Globally enable better generic metrics comparison](gitlab-org/gitlab@d7c47fb1f98c27a064b662c6cee53aa40efcdeec) ([merge request](gitlab-org/gitlab!62335))
+- [Upgrade CQ for updated Rubocop for Ruby 3](gitlab-org/gitlab@551f2cdd6ce94bd9b39f7afda4b57d1e8f1b278d) ([merge request](gitlab-org/gitlab!61833))
+- [Remove Links header](gitlab-org/gitlab@47203a782e9f396add2f4c98e4dfc8c61b2a9a56) ([merge request](gitlab-org/gitlab!62388))
+- [Reduce queries when ticking the runner queue by default](gitlab-org/gitlab@f4170c07a4c59fab0c0bf4cee9cc84721e2a04f2) ([merge request](gitlab-org/gitlab!62146))
+- [Add codeowners to DevOps Adoption](gitlab-org/gitlab@c99eca0dfad287deee2c687266f930178cb32ebf) ([merge request](gitlab-org/gitlab!62072))
+- [Prevent retried builds from being retried again](gitlab-org/gitlab@f932aea58ee5500651017ea40357d2779ca10ea8) ([merge request](gitlab-org/gitlab!62349))
+- [Raise job rules without workflow warnings by default](gitlab-org/gitlab@bf779d0b1de98155c0472120db9e6ce967f23593) ([merge request](gitlab-org/gitlab!61945))
+- [Better errors to users for CustomersDot API calls](gitlab-org/gitlab@48440e250df8edf3921b958069756fe9add4562b) ([merge request](gitlab-org/gitlab!62367))
+- [Enable live consumption for all paid plans](gitlab-org/gitlab@acc183586a5eb8352e648540cfc78926872521a0) ([merge request](gitlab-org/gitlab!62178))
+- [Remove webhooks_moved user callout](gitlab-org/gitlab@43a5b008f10481a807cbe84bf0e62490aedcfe56) ([merge request](gitlab-org/gitlab!61960))
+- [Use new location for container-scanning analyzer](gitlab-org/gitlab@345978be218a53692196ee2adac531baf7a74363) ([merge request](gitlab-org/gitlab!62358))
+- [Remove code owner ribbon move announcement from settings](gitlab-org/gitlab@b038f48d279a3640f5bdb38081c9212a5df498cf) ([merge request](gitlab-org/gitlab!62299))
+- [Move gosec to alphabetical order](gitlab-org/gitlab@a08537d3bb3c530c51b27a625400d9df8f9a3865) ([merge request](gitlab-org/gitlab!62299))
+- [Update Operations settings forms to be UX consistent](gitlab-org/gitlab@835bee362133230a73890d8c0e47daa94f85d3d1) ([merge request](gitlab-org/gitlab!62299))
+- [Lock a newly created item card in boards](gitlab-org/gitlab@6fa9e817c5d6b4f45a71ea1f34aeab237035b6ca) ([merge request](gitlab-org/gitlab!62012))
+- [Simplify error code handling for external pipeline validation](gitlab-org/gitlab@5a17b30dc1d5e50a01eda71bccd5aeeafc17c7c7) ([merge request](gitlab-org/gitlab!62012))
+- [Backfill clusters_integration_prometheus.enabled](gitlab-org/gitlab@ccedc0a5f379bb5353ee950f1df251b564026070) ([merge request](gitlab-org/gitlab!62012))
+- [Add ease score onboarding in-product marketing email](gitlab-org/gitlab@7e2699e16cb397b0e40a62af23c6ce460087530c) ([merge request](gitlab-org/gitlab!62012))
+- [Allow issue type change for incidents](gitlab-org/gitlab@455192325b567617bf0bb5b809c1d23f6d7b7215) ([merge request](gitlab-org/gitlab!62012))
+- [Observe secondary email addresses when adding a member](gitlab-org/gitlab@4b57957a23fbd72c812fbafc50abd567015cc583) ([merge request](gitlab-org/gitlab!62012))
+- [Left-align certain application-wide cancel buttons to conform to the GitLab Pajamas style guide](gitlab-org/gitlab@ebf3df5f857dd5f0929ab1a110bc96f3f6db3286) ([merge request](gitlab-org/gitlab!62012))
+- [Remove old redirect rule for the usage trends feature](gitlab-org/gitlab@2151cf64c3447a7e9f00c2cd5d394fb657395fff) ([merge request](gitlab-org/gitlab!62012))
+- [Simplify error code handling for external pipeline validation](gitlab-org/gitlab@dd0cd8e32e3028276a994132c5840a0474dc6035) ([merge request](gitlab-org/gitlab!61190))
+- [Set minimum Redis version to 5.0](gitlab-org/gitlab@2cfe54c0d75d4752978a2a2e20b8eb5ba8d59829) ([merge request](gitlab-org/gitlab!62156))
+- [Observe secondary email addresses when adding a member](gitlab-org/gitlab@e77c72dcf38da384a73c47ebd6ce0e2d1b006f38) ([merge request](gitlab-org/gitlab!62024))
+
+### Deprecated (3 changes)
+
+- [Depreciate GMA from Logs view in Operations](gitlab-org/gitlab@71df6576657f8410fba8b4306eab5b15bbe87460) ([merge request](gitlab-org/gitlab!63517))
+- [Deprecate related projects_with_prometheus_alerts metrics](gitlab-org/gitlab@c719c378dcf63da7b8bb9c5be0869b64537ee868) ([merge request](gitlab-org/gitlab!61872))
+- [Remove OpenJDK-alpine Dockerfile template](gitlab-org/gitlab@8891a02665a0f316faefe802702f717fb0d4521f) ([merge request](gitlab-org/gitlab!61867))
+
+### Removed (46 changes)
+
+- [Remove metrics dashboard alert functionality](gitlab-org/gitlab@820924deb74368dd6263ddc4dcaa462b001acba9) ([merge request](gitlab-org/gitlab!63838))
+- [Remove load_balancing_for_web_hook_worker FF](gitlab-org/gitlab@8608f495de805f392e474334b0f108b3cab92bbf) ([merge request](gitlab-org/gitlab!63988))
+- [Drop license_management artifact](gitlab-org/gitlab@f385377cf38d187f138885af984a7d66f3628e0f) ([merge request](gitlab-org/gitlab!62302)) **GitLab Enterprise Edition**
+- [Remove ssh_key_expiration_email_notification feature flag](gitlab-org/gitlab@35bc6dd82316fd03a46dfe42b85c6d890a5339b2) ([merge request](gitlab-org/gitlab!63877))
+- [Remove support for creating/updating release notes via tags API](gitlab-org/gitlab@9bda56ad634f5088d2bbac2ad45420d7699fd4e1) ([merge request](gitlab-org/gitlab!63389))
+- [Drop support of legacy feature flag](gitlab-org/gitlab@d416cf01f4cd5c5ae3eaa853b9cfdc64db3ada5b) ([merge request](gitlab-org/gitlab!63614))
+- [Removes SAST_DEFAULT_ANALYZERS variable](gitlab-org/gitlab@aa31a30ac3b454b7d3723b71ef2b09a02768f324) ([merge request](gitlab-org/gitlab!63538))
+- [Replace 'tag_list' with 'topic_list' attribute on project](gitlab-org/gitlab@2ff0b5e350ff77e0122adbe2b462636382828a86) ([merge request](gitlab-org/gitlab!63493))
+- [Don't take fingerprints for the internal authorized_keys API](gitlab-org/gitlab@afeaa2e772e63b03ab235fed0f2abad9d5dbe014) ([merge request](gitlab-org/gitlab!63783))
+- [Remove redundant key/value pair from the payload of DORA metrics API](gitlab-org/gitlab@9064c0fbbe7caaceb22fc3ac2ae394822094cb6a) ([merge request](gitlab-org/gitlab!62875))
+- [Remove canary_ingress_weight_control feature flag](gitlab-org/gitlab@1b29140c696f1c3ba6d69031963069f092df9725) ([merge request](gitlab-org/gitlab!63710))
+- [Remove allow_group_deploy_token feature flag](gitlab-org/gitlab@0317654a7b106644439ac5bc6f971f63ba4cfe09) ([merge request](gitlab-org/gitlab!63727))
+- [Remove GitLab-managed applications UI](gitlab-org/gitlab@f770bce42385999dc5cfecd69a490911dacfc411) ([merge request](gitlab-org/gitlab!63348))
+- [Remove GMAv1 Fluentd](gitlab-org/gitlab@2a21bfcda7f0d9c67529559f4c27395c4954f67d) ([merge request](gitlab-org/gitlab!63755))
+- [Remove GraphQL deprecated fields](gitlab-org/gitlab@89009fc7e7c4830dbebec7ccd911fb4fcee17722) ([merge request](gitlab-org/gitlab!63293))
+- [Remove GitLab WAF related models, services and workers](gitlab-org/gitlab@d1146081367b992ff33f9956ea32c7306cab900a) ([merge request](gitlab-org/gitlab!61556)) **GitLab Enterprise Edition**
+- [Remove legacy profile routes](gitlab-org/gitlab@d7efa70a41956fcf8d13ce6079ac96b3f7efee31) ([merge request](gitlab-org/gitlab!63566))
+- [Replace 'tags' with 'topics' association on project](gitlab-org/gitlab@784c5dabe6cbb2393a306b1331d4e648631f005b) ([merge request](gitlab-org/gitlab!62549))
+- [Remove deprecated CI workers and arguments](gitlab-org/gitlab@5e2dbc0e2dc51e190fb04b3ad01ef056622ae2e3) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63323))
+- [Deprecate global usage of SAST_ANALYZER_IMAGE_TAG](gitlab-org/gitlab@422219bae6a101258826f96deca431072621f124) ([merge request](gitlab-org/gitlab!62724))
+- [Remove BuildsEmailService records from services](gitlab-org/gitlab@272464a44b95f0f8edb25c01aa91a1e0b80a6431) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63264))
+- [Remove metrics for Web Application Firewall](gitlab-org/gitlab@d4c579847bfe75192270be221bbce169956fb809) ([merge request](gitlab-org/gitlab!61448))
+- [Remove documentation for GitLab WAF](gitlab-org/gitlab@e5a771237f211bc339d663e1d94d1a4be6d6766c) ([merge request](gitlab-org/gitlab!61441))
+- [Remove Unicorn support](gitlab-org/gitlab@e2fc284cc73dea159baacb38d655d8d6e2fc3530) ([merge request](gitlab-org/gitlab!61888))
+- [Remove projects_with_prometheus_alerts and pod_logs_usages_total metrics](gitlab-org/gitlab@c90a373081c379b66ec1465ec62900280bd529e9) ([merge request](gitlab-org/gitlab!62962))
+- [Remove code coverage tracking feature flag](gitlab-org/gitlab@757dd33a6303d33061975e8513286192636144e4) ([merge request](gitlab-org/gitlab!62595))
+- [Remove pick_into_project feature flag](gitlab-org/gitlab@0ac685ba56d3367ff23c08a84c9647acfa6e0f20) ([merge request](gitlab-org/gitlab!62809))
+- [Remove postgres hll batch counting ff](gitlab-org/gitlab@38f718f80b9257ce39f67e8649dfc063ac3e9101) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62813))
+- [Remove `trace` parameter from `PUT /api/jobs/:id`](gitlab-org/gitlab@4c8900c0417cec10ccbb9cdc6c0bc91ad9d74537) ([merge request](gitlab-org/gitlab!62758))
+- [Remove CI_PROJECT_CONFIG_PATH variable](gitlab-org/gitlab@984218929c9c17f48b1b6ce44c57a826c40dba5d) ([merge request](gitlab-org/gitlab!61977))
+- [Remove inherited_issuable_templates feature flag](gitlab-org/gitlab@f424d6e6f70dbf35fd3088c4937205f771d062d3) ([merge request](gitlab-org/gitlab!56747))
+- [Remove deprecated `--experimental-queue-selector` flag for Sidekiq](gitlab-org/gitlab@f0dcc2d13e8271cfcc23265ac488e8b946ff7dac) ([merge request](gitlab-org/gitlab!62697))
+- [Remove unused instance statistics workers](gitlab-org/gitlab@d07788c23502f53fe22dd2a7d0a6546181dc13a7) ([merge request](gitlab-org/gitlab!62583))
+- [Remove Unicorn references from runtime logic](gitlab-org/gitlab@8c0ccaec331c0c8f9cea0ff11cf16ba6244281b6) ([merge request](gitlab-org/gitlab!62390))
+- [Remove unicorn-worker-killer gem and relations](gitlab-org/gitlab@fdc7dad54ac3f5cdbb7ce93ac9b391bd2a065a02) ([merge request](gitlab-org/gitlab!62293))
+- [Remove Unicorn detection in pid provider](gitlab-org/gitlab@6d875648769b638a1117617d7929b2ac21bbc9e3) ([merge request](gitlab-org/gitlab!62377))
+- [Remove assigned open issue count background worker](gitlab-org/gitlab@0ac4bc765a2cd35dd0062899b536a1a166a350bf) ([merge request](gitlab-org/gitlab!62370))
+- [Remove start-up scripts for Unicorn web server](gitlab-org/gitlab@74b58f507f910169e742a17b229547837975ad5e) ([merge request](gitlab-org/gitlab!62289))
+- [Remove UnicornCheck service](gitlab-org/gitlab@83d53d02cf77cfd8ec26b30d389103d148dbd196) ([merge request](gitlab-org/gitlab!62012))
+- [Remove support for /wip quick action](gitlab-org/gitlab@1842425ba033bb420e58a66aba40436800440cdc) ([merge request](gitlab-org/gitlab!62012))
+- [Redirect some of deprecated repository routes](gitlab-org/gitlab@942adb32b60ac9329c061e34e9094cdf972bc19f) ([merge request](gitlab-org/gitlab!62012))
+- [Remove some deprecated global routes](gitlab-org/gitlab@924890e647040a7dde8e200d9056edd38b90cfaa) ([merge request](gitlab-org/gitlab!62012))
+- [Remove Unicorn Sampler](gitlab-org/gitlab@311703895118692216ad14af4ddf100c4d41f48b) ([merge request](gitlab-org/gitlab!62012))
+- [Drop plugins directory support](gitlab-org/gitlab@dc87151f9f2ea5e3d3e307f361da4db3db406876) ([merge request](gitlab-org/gitlab!62012))
+- [Remove UnicornCheck service](gitlab-org/gitlab@6cc7c1c91dafd3d2830406e99da5c8eb778db48a) ([merge request](gitlab-org/gitlab!62204))
+- [Remove Unicorn Sampler and its dependencies](gitlab-org/gitlab@b30ae67d140973dcee5d292c13119d82f80182ad) ([merge request](gitlab-org/gitlab!62090))
+
+### Security (12 changes)
+
+- [Change button type so the form doesn't submit](gitlab-org/gitlab@9f96385312400a270d1b09f53b3a4e286505102a) ([merge request](gitlab-org/gitlab!63895))
+- [Bump BinData version](gitlab-org/gitlab@49f41ecab3cfc8dc54dda314a440630726455828)
+- [Use xpath search of Nokogiri instead of css search](gitlab-org/gitlab@66c21aca75fec6c8f9454f1b6fdda52c44e90db1)
+- [Truncate all non-blob markdown to 1MB by default](gitlab-org/gitlab@de3ea3cb762bb8d08d4419e048a171b4719aaf5e)
+- [Block access to GitLab for users with expired password](gitlab-org/gitlab@9abcdb766a3098f4191aab125ddfc04eea40ab44)
+- [Adds redirect page to OAuth](gitlab-org/gitlab@5d9a9224b590fb2f77ae3fe78370ca982578d22b)
+- [Opt in to Atlassians new context qsh](gitlab-org/gitlab@bd02953c891398513e69de00186b010a81f88f80)
+- [Limit oncall projects shown to scope of source](gitlab-org/gitlab@bf65867e699a43fcf41661c554bd40fafdff3482) **GitLab Enterprise Edition**
+- [Merge branch 'id-upgrade-rails-to-6.0.3.7' into 'master'](gitlab-org/gitlab@0d8d8c7ad7590b4c95ef89e3fd1ec43f89292372) ([merge request](gitlab-org/gitlab!62347))
+- [Update users two factor required from group](gitlab-org/gitlab@b9a6117b87fdbff54999a2282f41b8f27d1cea7d)
+- [Only verify commit signatures if the user email is verified](gitlab-org/gitlab@fe21bb58c79be0128530b02ef1db25ce3ea183ff)
+- [Prevent XSS on notebooks](gitlab-org/gitlab@1f23ad420d1c1853eb03722cd183758f749a375f)
+
+### Performance (45 changes)
+
+- [Add post deployment migration for cleanup policies](gitlab-org/gitlab@00dca6deae3d6159763d296af55a8e32e786d4b2) ([merge request](gitlab-org/gitlab!63841))
+- [Enable caching of PG typemap by default](gitlab-org/gitlab@ea9ae9731df199387d7d7a7abbc5072456afb462) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64010))
+- [Paginate diffs using Gitaly paths](gitlab-org/gitlab@b6e206b0ff7410abc28171aa0c53c80fd6acd1c3) ([merge request](gitlab-org/gitlab!62543))
+- [Prevent refetching commit data](gitlab-org/gitlab@4829a69f027d0a5f68cd9b34194f066ebf86c4a2) ([merge request](gitlab-org/gitlab!63870))
+- [Use title, not full_title for commit mentionables](gitlab-org/gitlab@d33a225801f62cf4d8ae39bed7fe718a9a542fdd) ([merge request](gitlab-org/gitlab!63869))
+- [Add index for project_features.container_registry_access_level](gitlab-org/gitlab@78c5f2b321f4861a13e0cd8a2faed0dce7c348a3) ([merge request](gitlab-org/gitlab!55071))
+- [Reduce number of gitaly calls in Snippet REST list Endpoints](gitlab-org/gitlab@913e8982efad68d4e759a4b1fa2176269e54904a) ([merge request](gitlab-org/gitlab!63735))
+- [Improve cache sharing between cached markdown fields and mentionables](gitlab-org/gitlab@c0e6dd6af5e675c46d1eaf852123a5f8650c4877) ([merge request](gitlab-org/gitlab!63040))
+- [Add protected pending build column and migrate data](gitlab-org/gitlab@8498d1089d98949716ac9cac21d64a5cf58ad7fb) ([merge request](gitlab-org/gitlab!63759))
+- [Prevent fetching commits for next page](gitlab-org/gitlab@ce8bba1418be55e2b01186d0e1101f0c94f02dc7) ([merge request](gitlab-org/gitlab!63525))
+- [Retry traversal_ids backfill jobs](gitlab-org/gitlab@a356b0ef27341ef89626bdf54bb783aa299920b4) ([merge request](gitlab-org/gitlab!62992))
+- [Enable label reference caching](gitlab-org/gitlab@d21e5bcaad2bef045af250e80230942bde3c78a7) ([merge request](gitlab-org/gitlab!61648))
+- [chore: Drop optimize_sql_query_for_security_report feature flag](gitlab-org/gitlab@d5e3be8a7be1f19e926a0faadad6365c1acfa1ea) ([merge request](gitlab-org/gitlab!63558)) **GitLab Enterprise Edition**
+- [Add tracking of running shared runner builds](gitlab-org/gitlab@7204a4815b7b2d3e3041da7c0e32180b806c6a9d) ([merge request](gitlab-org/gitlab!62912))
+- [Use specialized project_authorization workers](gitlab-org/gitlab@652c1ee874a8a699e3fd651fa3db1cc1cdc5f6c5) ([merge request](gitlab-org/gitlab!63637))
+- [Enable 'use_distinct_in_shas_cte' FF by default](gitlab-org/gitlab@425bec5bc5b72c8d47eb1c99a60f55586953c864) ([merge request](gitlab-org/gitlab!63532))
+- [Add background migration for unused expiration policies](gitlab-org/gitlab@eda4d6c1da822cc2120187ec1fd1c9bb301f59b5) ([merge request](gitlab-org/gitlab!61983))
+- [Fix N+1 problem for fork controller](gitlab-org/gitlab@945abee15a2aca596f84e2ca48966d4df7c164e1) ([merge request](gitlab-org/gitlab!63436))
+- [Preload blobs in repo view](gitlab-org/gitlab@b37b804c3fb448f4d68eb5798a2c212eb2542ea5) ([merge request](gitlab-org/gitlab!63066))
+- [Utilize load balancing capabilities for UserRefreshOverUserRangeWorker](gitlab-org/gitlab@dd5830e7676bf5ee86d4cbd2777607f6811be842) ([merge request](gitlab-org/gitlab!63280))
+- [Optimize queries that timeout in StuckCiJobsWorker](gitlab-org/gitlab@314b7edb776a04e66404dc94849733f6f7777184) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62239))
+- [Linear traversal query for Namespace#root_ancestor](gitlab-org/gitlab@fdf3d7f90ca040c3c41f8a1556387e5fc807411f) ([merge request](gitlab-org/gitlab!61799))
+- [Cache open epics count in group sidebar](gitlab-org/gitlab@b763267d9ee39a851742218f188611a5e3b16a1e) ([merge request](gitlab-org/gitlab!62940)) **GitLab Enterprise Edition**
+- [Cache sidebar merge requests count at group level](gitlab-org/gitlab@e57650e49ce6a63a2f792b5188432684c8e7bc27) ([merge request](gitlab-org/gitlab!62935))
+- [Moves the pipelines.json endpoint to startup js](gitlab-org/gitlab@8d74b69a7ff174ea5b6343ef23e387b0da1f612d) ([merge request](gitlab-org/gitlab!62936))
+- [Remove unreferenced lfs objects in batches](gitlab-org/gitlab@0b75859dedbee28bd0118f3354702b2555f199d7) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56959))
+- [Remove preloading of forks in projects API](gitlab-org/gitlab@2a3be447556fd31f32b024bfb72540216926f793) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62602))
+- [Enable pending builds parity by default](gitlab-org/gitlab@0b4c7bb40cb554702e6289101a1b6372c1d11c40) ([merge request](gitlab-org/gitlab!62195))
+- [Refine linear queries in Namespace#all_projects](gitlab-org/gitlab@e254445f21f25bc6ad491211ab0a079c1380e1dc) ([merge request](gitlab-org/gitlab!62268))
+- [Reinstate branches keyset pagination](gitlab-org/gitlab@a4bdb63bc00d90fed4dec1f3fe3ea91b4d35151e) ([merge request](gitlab-org/gitlab!62458))
+- [Optimize Nokogiri search for post-processing pipeline](gitlab-org/gitlab@567685431f4f18ebc52ee6a1865b545addaa1b85) ([merge request](gitlab-org/gitlab!61994))
+- [Removes unneeded preloading in Markdown rendering](gitlab-org/gitlab@c264427ea396ec74fcc989f88e1377c5ef76da79) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62273))
+- [Cache `branch_requires_code_owner_approval?`](gitlab-org/gitlab@0459ed2681f990f379ee7e8ced6d07dbf9635f16) ([merge request](gitlab-org/gitlab!56775)) **GitLab Enterprise Edition**
+- [Switch group member max access to use bulk load](gitlab-org/gitlab@daa4c18ec4d53863ccdf3263037e34c86b6774de) ([merge request](gitlab-org/gitlab!62226))
+- [Utilize load balancing capabilities for BuildHooksWorker](gitlab-org/gitlab@c8d86d0fc29c5b60e206240c6020d3609f57fd4f) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61905))
+- [Add viewer URL to StartupJS](gitlab-org/gitlab@1533d9ec085d503cac5229ebc1ac70babe6c006c) ([merge request](gitlab-org/gitlab!62068))
+- [Advanced Search: Allow indexing workers to use replicas](gitlab-org/gitlab@7bc460926a334cda4f4ba4e0248d3647fd24aea8) ([merge request](gitlab-org/gitlab!62299))
+- [Reduce memory consumption when an API exception goes to Sentry](gitlab-org/gitlab@1562bac71e71a316244bd762169267b3c6af04c2) ([merge request](gitlab-org/gitlab!62025))
+- [Use cache for CI::Build runners check](gitlab-org/gitlab@7c8637c8059d95b9f4b7c3f4e3d64b652c22ecc2) ([merge request](gitlab-org/gitlab!62012))
+- [Optimize query for loading artifacts in pipeline](gitlab-org/gitlab@2671124156243942eaab27283ca945896e9ea628) ([merge request](gitlab-org/gitlab!62012))
+- [Accelerate builds queuing using a denormalized accelerated table](gitlab-org/gitlab@f4897e038ab01c3ab4f8bd7a30ea85e66837e92c) ([merge request](gitlab-org/gitlab!62012))
+- [Remove the redundant update for API endpoint projects/:id/statuses/:sha](gitlab-org/gitlab@956958f2f08744bfedc5069196d772b2fdd3a88b) ([merge request](gitlab-org/gitlab!62012))
+- [Contributes to https://gitlab.com/gitlab-org/gitlab/-/issues/325744](gitlab-org/gitlab@c1ba906d216942ce3df70bb3839787bab2954c85) ([merge request](gitlab-org/gitlab!62012))
+- [Optimize query for loading artifacts in pipeline](gitlab-org/gitlab@e386fabed47af310f01f836e3f5ee666e61b3c9a) ([merge request](gitlab-org/gitlab!62249))
+- [Remove feature flag for "runners_cached_states"](gitlab-org/gitlab@1ebf16062a5cf38e95cacb6451f56f6632c193e5) ([merge request](gitlab-org/gitlab!61998))
+
+### Other (70 changes)
+
+- [Update alert markup in runners page](gitlab-org/gitlab@3ca125ad4c1f216962664c86ae36345827978ccb) ([merge request](gitlab-org/gitlab!63157))
+- [Use a new worker in lieu of UserRefreshWithLowUrgencyWorker as safeguard](gitlab-org/gitlab@f444387bc814b9775a89d08cc2c0c6da0ad5aadd) ([merge request](gitlab-org/gitlab!63840))
+- [Update test_file_finder and Faraday](gitlab-org/gitlab@7cb2ad42696c1e560f884653e0aa7c5a24cfd51b) ([merge request](gitlab-org/gitlab!64017))
+- [Remove notification_setting_recipient_refactor feature flag](gitlab-org/gitlab@379621f6c3fb1251142d0705becff156b4adb8d6) ([merge request](gitlab-org/gitlab!63827))
+- [Add Atlassian referrer to Jira links inside GitLab](gitlab-org/gitlab@cb4de493193d3bde64463ce442f3f6f337a27646) ([merge request](gitlab-org/gitlab!63900))
+- [Use the parent element to find elements to remove the child](gitlab-org/gitlab@1caa71c02bf05f460e2fe26936308985b0b29f5f) ([merge request](gitlab-org/gitlab!63935)) **GitLab Enterprise Edition**
+- [Remove ci_dynamic_child_pipeline feature flag](gitlab-org/gitlab@e7a278c333711af786422fc346ec8a2cdd888e5a) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63329))
+- [Add tracking for epic boards](gitlab-org/gitlab@650f6fb2fbc6bcf6dd6b3da8b11a29448fd4cd53) ([merge request](gitlab-org/gitlab!63765))
+- [Remove feature flag release_mr_issue_urls](gitlab-org/gitlab@4adabdc079d05f712bc19bbd4bf97abc36cf518e) ([merge request](gitlab-org/gitlab!63609))
+- [Standardize on roles term in UI](gitlab-org/gitlab@bab23d2b01ffcb649f832d7248b62a5ea2411516) ([merge request](gitlab-org/gitlab!63274))
+- [Add unique index on configuration for batched_background_migrations](gitlab-org/gitlab@73539f28f865186d8d2c49ad0a415bedac4b09d0) ([merge request](gitlab-org/gitlab!63599))
+- [Drop the web_hook_logs_archived table](gitlab-org/gitlab@1f663175e50e935b33dd7b932bca66f05ed6eaab) ([merge request](gitlab-org/gitlab!63649))
+- [Bump gitlab-fog-azure-rm version to 1.1.1](gitlab-org/gitlab@4d45433e891ea8105696e57f7f825797412e83f9) ([merge request](gitlab-org/gitlab!63633))
+- [Remove the nuget new file reader feature flag](gitlab-org/gitlab@0e7d5ae033cdd0ce63fbd9ab4d7b42490657ea46) ([merge request](gitlab-org/gitlab!63622))
+- [Clenup deployments_finder_implicitly_enforce_ordering feature flag](gitlab-org/gitlab@7b8046ec8ff8e323e9d575599915b8bdbb410b9c) ([merge request](gitlab-org/gitlab!63617))
+- [Extract CSS from user calendar JS](gitlab-org/gitlab@1e949ba57556dda6acdc933dbe17d86ac64cf005) ([merge request](gitlab-org/gitlab!62677))
+- [Add data migration to update draft on merge_requests](gitlab-org/gitlab@590f680b1b64d1a35cf9572fcb17b4a042fac68f) ([merge request](gitlab-org/gitlab!62627))
+- [Prepare ci_stages for bigint conversion](gitlab-org/gitlab@38a1cab9b2205fb0ab1d1bb716be45749e544617) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63488))
+- [Add source tracking to invites](gitlab-org/gitlab@3256a37101b5e2518e8cced3cfe54cf5ed553dca) ([merge request](gitlab-org/gitlab!62609))
+- [Track the validation error on Environment Update](gitlab-org/gitlab@15998eb46518b7b958b1f8f8c76ed92d8e984075) ([merge request](gitlab-org/gitlab!63398))
+- [Enable by default Allow force push option to Protected branches](gitlab-org/gitlab@2ebd2d0ada9da16db6f3f88acfa02b337839c022) ([merge request](gitlab-org/gitlab!62572))
+- [Update GitLab Shell to v13.19.0](gitlab-org/gitlab@1d518202c7832567b17501cd3c4d3cf568b66b1c) ([merge request](gitlab-org/gitlab!63298))
+- [Add the origin of squash merge feature to the docs](gitlab-org/gitlab@456b263e9ea75ddbf397cce85c0dffc426b58cc9) ([merge request](gitlab-org/gitlab!63171))
+- [Ensure delay for all UserRefreshOverUserRangeWorker jobs enqueued](gitlab-org/gitlab@9f148b15cd01146ee4185df4a038848ad3f3e32f) ([merge request](gitlab-org/gitlab!63026))
+- [Rename DevOpsAdoptionSegment](gitlab-org/gitlab@60e3a87963a8566f5e65716455d9caa803d00a95) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62834)) **GitLab Enterprise Edition**
+- [Prepare geo_job_artifact_deleted_events table](gitlab-org/gitlab@e046d93c752edf0f5454325908183796e50544bd) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62463))
+- [Prepare deployments table for bigint conversion](gitlab-org/gitlab@f54f4c1f917484d89edc9f215c420cb421b63887) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62459))
+- [Remove database_sourced_aggregated_metrics FF](gitlab-org/gitlab@114834811bab4fb7de71d8dc472a86cd6a7ece15) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62877))
+- [Document and lint that trailers are case-sensitive](gitlab-org/gitlab@878c3d43ec2562f4cb17ea1962fa723d188cec37) ([merge request](gitlab-org/gitlab!62915))
+- [Change JiraTrackerData#deployment_type based on URL](gitlab-org/gitlab@79e5264146efd2e87f26c9e831cee15696b0dc29) ([merge request](gitlab-org/gitlab!59902))
+- [Group-level Protected Environment Alpha Version](gitlab-org/gitlab@80c49f4fcb4c2f6c78888b1c711a52e25d870e1f) ([merge request](gitlab-org/gitlab!61575))
+- [Upgrade Puma to 5.3.2](gitlab-org/gitlab@57e6295b7e99080da4f703df61df88de03007b7c) ([merge request](gitlab-org/gitlab!62607))
+- [Add subgroups and user namespaces spec examples](gitlab-org/gitlab@969380e734ce4bc04b21bea0d71789754b635e90) ([merge request](gitlab-org/gitlab!61477))
+- [Add default value for merge_requests_author_approval](gitlab-org/gitlab@c7303b1aa99ad71798f38b0c217afb264e25c730) ([merge request](gitlab-org/gitlab!61949))
+- [Place multiselect drag drop behind a feature flag](gitlab-org/gitlab@cba9f264fd5859f1ed6710340faae63d79f2f65c) ([merge request](gitlab-org/gitlab!61955))
+- [Remove obsolete Segment selections table](gitlab-org/gitlab@a1df23f900bc6f96770ffeecabb11a48e0a9c798) ([merge request](gitlab-org/gitlab!62594))
+- [Explicitly destroy webhooks and logs before the project deletion](gitlab-org/gitlab@e6f828fc380d450bee65e6615b00ffc58837c071) ([merge request](gitlab-org/gitlab!61995))
+- [Remove :find_remote_root_refs_inmemory feature flag](gitlab-org/gitlab@cf786e6372e54bd8d7e8309b49846608fc591109) ([merge request](gitlab-org/gitlab!62501))
+- [Reschedules migration for uuid recalculation](gitlab-org/gitlab@bc61d908069c93ef26e8b37467c03844215f3446) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60540))
+- [Cleanup container_registry_enabled background migration](gitlab-org/gitlab@77892b2a6e3d1901ac1b773649efde9b202b78c8) ([merge request](gitlab-org/gitlab!56626))
+- [Update managed cluster template to avoid hardcoded master](gitlab-org/gitlab@ffce5b3aa0221809428f0c9368d4f3379f232ec8) ([merge request](gitlab-org/gitlab!62277))
+- [Prepare ci_builds_metadata for int8 migration](gitlab-org/gitlab@ab5226343130bc25769f9ebc6951d1f3fd37d1fd) ([merge request](gitlab-org/gitlab!62102))
+- [Remove the usage of `limit_projects_in_groups_api ` feature flag](gitlab-org/gitlab@93394180e0a7292fbb3081c0dd72c0fe1e8e3dbd) ([merge request](gitlab-org/gitlab!62454))
+- [Remove the check_maven_path_first feature flag](gitlab-org/gitlab@abee680a8e72c67c12b0e26ed8e85916d872665f) ([merge request](gitlab-org/gitlab!62187))
+- [Prepare taggings table for bigint conversion](gitlab-org/gitlab@4bcbf379291247f89e6583cbc439cf1ca7d7e1c9) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62205))
+- [Update ffi from 1.13.1 to 1.15.1](gitlab-org/gitlab@6ed4cd0b1f4c6ca099a74f7fa3ac4df1ec184760) ([merge request](gitlab-org/gitlab!62207))
+- [Remove DAST site profile related feature flags](gitlab-org/gitlab@255bae2bb92fc3a743adf518e8850fdf1283ae94) ([merge request](gitlab-org/gitlab!61460)) **GitLab Enterprise Edition**
+- [Remove the FF *_unique_users_pushing_mr_ciconfigfile](gitlab-org/gitlab@35e5175f877d794455520f524b35fbf92189f17f) ([merge request](gitlab-org/gitlab!62283))
+- [Remove the FF ci_needs_optional](gitlab-org/gitlab@d0c8120abb9cca60a05ce40057a6edaea063a0df) ([merge request](gitlab-org/gitlab!62282))
+- [Remove the FF usage_data_unique_users_committing_ciconfigfile](gitlab-org/gitlab@6d860a60564afb669c9142df807bc11189ccd277) ([merge request](gitlab-org/gitlab!62284))
+- [Remove delayed_perform_for_build_hooks_worker feature flag](gitlab-org/gitlab@fab6b3a8bdc0661ee4ea4e9f1f423b675bb75c3a) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62196))
+- [Update GitLab Runner Helm Chart to 0.29.0](gitlab-org/gitlab@08381980f543cc8eb21534bd59f3d97f9c5f92c4) ([merge request](gitlab-org/gitlab!62217))
+- [Remove threat_monitoring_alerts feature flag](gitlab-org/gitlab@6ee8b88b30f264cb4f75c09c90571588b19291b2) ([merge request](gitlab-org/gitlab!62299))
+- [VSA: Add decimal places to metrics](gitlab-org/gitlab@6eb9cf8f2ca5280a83ca0124590ec4fe287617ba) ([merge request](gitlab-org/gitlab!62299))
+- [Prepare ci_build_trace_sections for int8 migration](gitlab-org/gitlab@b4482857e765132febaa93258f55ac6b8f5ce3e5) ([merge request](gitlab-org/gitlab!62012))
+- [Update button variants and alignment to align with the Pajamas Design System...](gitlab-org/gitlab@0907700a8129a4f98ecee22954ecd564d137a40c) ([merge request](gitlab-org/gitlab!62012))
+- [Removed packages_finder_helper_deploy_token feature flag](gitlab-org/gitlab@9d4f5d6071743daaa53430c769b9f79d0d80f2dd) ([merge request](gitlab-org/gitlab!62012))
+- [Update group/project member tabs to comply with Pajamas design system](gitlab-org/gitlab@df2c797d50879b365c7a2f790e3b2c9beb3119d1) ([merge request](gitlab-org/gitlab!62012))
+- [Merge Request edit: make breadcrumbs consistent](gitlab-org/gitlab@50c75b71f421f90e0e4420ccd4f32e5f7c04019b) ([merge request](gitlab-org/gitlab!62012))
+- [Remove the feature flag for the external validation service](gitlab-org/gitlab@7302385e07859b891c24de3aeb08ba2e4b204c26) ([merge request](gitlab-org/gitlab!62012))
+- [Add options events to Redis HLL metrics for filtering data](gitlab-org/gitlab@b058b5bc9c07a66d4fce1a2685139b4b8aa94629) ([merge request](gitlab-org/gitlab!62012))
+- [Track usage of the resolve conflict UI](gitlab-org/gitlab@b0a07cac324c2cdbbfcf98dd012f11e1cd838822) ([merge request](gitlab-org/gitlab!62012))
+- [Remove the packages_finder_helper_deploy_token feature flag](gitlab-org/gitlab@cb4c3fa0deaebd033055fbaef6037717f5704eed) ([merge request](gitlab-org/gitlab!62189))
+- [Prepare ci_build_trace_sections for int8 migration](gitlab-org/gitlab@12af7f89b18269b3097c8abb1460082c25b28cbd) ([merge request](gitlab-org/gitlab!62098))
+- [Use @gitlab/ui color in member badges](gitlab-org/gitlab@9fc07a7c82354288b2934299f4215716ceabd540) ([merge request](gitlab-org/gitlab!62182))
+- [Remove the feature flag for the external validation service](gitlab-org/gitlab@de79da2a2ec759db01b9809dd05190d973ced7e7) ([merge request](gitlab-org/gitlab!61351))
+- [Update http-parser from 1.2.1 to 1.2.3](gitlab-org/gitlab@03ea5c828ce1625c6b744301ed1b236feb531cf5) ([merge request](gitlab-org/gitlab!62060))
+- [Track usage of the resolve UI](gitlab-org/gitlab@83519fa35b9b2ab17dbd181a1786be8e78d3efb1) ([merge request](gitlab-org/gitlab!61654))
+- [Add missing metrics information](gitlab-org/gitlab@89cd7fe3b95323e635b2d73e08549b2e6153dc4d) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61772/edit))
+- [Track usage of the resolve UI](gitlab-org/gitlab@35c8e30fce288cecefcf2f7c0077d4608e696519) ([merge request](gitlab-org/gitlab!61654))
+
+## 13.12.8 (2021-07-07)
+
+### Security (1 change)
+
+- [Disable file and network premailer strategies](gitlab-org/security/gitlab@ee69d6d6950bb116cb31523ca805e78af431c25c) ([merge request](gitlab-org/security/gitlab!1545))
+
+## 13.12.7 (2021-07-05)
+
+### Fixed (2 changes)
+
+- [Fix state value in the lfs_object_registry table](gitlab-org/gitlab@feca70558108299a9b7b499e4461b59b7c140ef7) ([merge request](gitlab-org/gitlab!65466)) **GitLab Enterprise Edition**
+- [Fix pages deployment storage migration](gitlab-org/gitlab@4e806a7b5e0eef8d88bcdb68724c6b7bf3c08293) ([merge request](gitlab-org/gitlab!65366))
+
+### Changed (1 change)
+
+- [Move migration to a pre-deployment migration](gitlab-org/gitlab@d02fcd44b3dd797e18221e4e91ab913372bdf18a) ([merge request](gitlab-org/gitlab!65466)) **GitLab Enterprise Edition**
+
+## 13.12.6 (2021-07-01)
+
+### Added (1 change)
+
+- [Added omniauth_user check when verifying user cap](gitlab-org/security/gitlab@a61062501630c35820301e9f79a036219d1e3074) ([merge request](gitlab-org/security/gitlab!1502)) **GitLab Enterprise Edition**
+
+### Security (14 changes)
+
+- [Bump rails gem version to 6.0.3.7](gitlab-org/security/gitlab@58d27ba819867baadf535e0d8d91d0cb818dc8b6) ([merge request](gitlab-org/security/gitlab!1515))
+- [Update rdoc to 6.3.1](gitlab-org/security/gitlab@ead11a6974576b0b1a974985493c75143e3bd575) ([merge request](gitlab-org/security/gitlab!1534))
+- [Add sanitizing for name field](gitlab-org/security/gitlab@2c5672eae4323c2682245485b327850e68e7e5b4) ([merge request](gitlab-org/security/gitlab!1490))
+- [Forbid GET requests with mutations](gitlab-org/security/gitlab@2b01d6dc310451fa3022f1865470ca004bbd4c33) ([merge request](gitlab-org/security/gitlab!1529))
+- [Copy feature visibility settings to a fork](gitlab-org/security/gitlab@5ee923ba64fb34fc38f831fc206a153d8f7eae91) ([merge request](gitlab-org/security/gitlab!1523))
+- [Avoid disclosing project in web IDE](gitlab-org/security/gitlab@759d1361e7f359d681c4f55ea2b6f7e1d0bb1e53) ([merge request](gitlab-org/security/gitlab!1512))
+- [Add new username validation](gitlab-org/security/gitlab@e79625541d04b0d6c94614f2afc6aaeb2ef40083) ([merge request](gitlab-org/security/gitlab!1495))
+- [Allow only same-origin URLs for Edit Release Cancel button](gitlab-org/security/gitlab@e5bda0a7e03978afee494616e2054b8650b61d3e) ([merge request](gitlab-org/security/gitlab!1486))
+- [Update Nokogiri to 1.11.4](gitlab-org/security/gitlab@d71973da1850df059b1ec1422d50bbccace21ff2) ([merge request](gitlab-org/security/gitlab!1479))
+- [Fix deploy key fallback issue in protected branch](gitlab-org/security/gitlab@0411bc45885e1122c06dbff084b48bf03d78c6a8) ([merge request](gitlab-org/security/gitlab!1478))
+- [Fix XSS on audit log for feature flag actions](gitlab-org/security/gitlab@22e2f903c821e54ce6d4b4b749a009d14abc4a13) ([merge request](gitlab-org/security/gitlab!1474))
+- [Sanitize input on pasteGFM](gitlab-org/security/gitlab@7dc511ebc2e77c3d22cd34ca87449f32120a5229) ([merge request](gitlab-org/security/gitlab!1453))
+- [Add total http read timeout](gitlab-org/security/gitlab@37c24c82d5dfa57fad03f265e7ba92f6ef250c30) ([merge request](gitlab-org/security/gitlab!1427))
+- [Fix merge request diff display issue with unsupported encoding](gitlab-org/security/gitlab@7d05892daa6aaf951b941628e2af41e17977b140) ([merge request](gitlab-org/security/gitlab!1424))
+
+## 13.12.5 (2021-06-21)
+
+### Fixed (3 changes)
+
+- [Fix failing spec](gitlab-org/gitlab@7d1a9b0155195eb082f5b33ba1310deed742a7a4) ([merge request](gitlab-org/gitlab!64488))
+- [Advanced Search Settings page does not load if the ES url is unreachable](gitlab-org/gitlab@80b262f0e79f02a89724ed4e3988e686f53c959c) ([merge request](gitlab-org/gitlab!64488)) **GitLab Enterprise Edition**
+- [Fix Password expired error on git fetch via SSH for LDAP user](gitlab-org/gitlab@19a7d7a6d3cd43f1c7559c729532ad3b9dafb75c) ([merge request](gitlab-org/gitlab!64488))
+
+## 13.12.4 (2021-06-14)
+
+### Fixed (3 changes)
+
+- [Add alias method usage_ping_enabled?](gitlab-org/gitlab@eb8755115a2a7045b6291171aaa0c7ae76f43fec) ([merge request](gitlab-org/gitlab!63974))
+- [Fix MR diff compare with previous version](gitlab-org/gitlab@96d4df8bb4eb5f148e4dabcc4c3eea88ad27cbc3) ([merge request](gitlab-org/gitlab!63974))
+- [Fix double render in project's git URL redirect](gitlab-org/gitlab@be4059b7a5cddd2e70fa760d8935b1d170068759) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62053))
+
+## 13.12.3 (2021-06-07)
+
+### Added (1 change)
+
+- [Add an option to expose description_html in Release API](gitlab-org/gitlab@47f3fba10dfa82c65b6b006d56cc1724aac411eb) ([merge request](gitlab-org/gitlab!63393))
+
+### Fixed (5 changes)
+
+- [Fix spam detection with Akismet client](gitlab-org/gitlab@75dbe8d017ed691d0517f0a6ca7b9bdd866fa9d9) ([merge request](gitlab-org/gitlab!63393))
+- [Set CSP back to disabled by default](gitlab-org/gitlab@f8f2dbf229693e20171185ae8e31fd59ce2131b3) ([merge request](gitlab-org/gitlab!63393))
+- [Fix CSP issues related to captchas](gitlab-org/gitlab@cec54814460994ea40311f1091fb7f091d04964f) ([merge request](gitlab-org/gitlab!63393))
+- [Fix issue with frames not loading in Safari](gitlab-org/gitlab@77b9355f244370b1c184943581f3b6cc27495931) ([merge request](gitlab-org/gitlab!63393))
+- [Catch PgQuery::ParseError errors and log as-is](gitlab-org/gitlab@a4f36df3701208b5d015e1e818f3d5be3577697a) ([merge request](gitlab-org/gitlab!62795))
+
+### Changed (1 change)
+
+- [Improve SSH key expiration warning emails](gitlab-org/gitlab@2e3929503046ab1da5635ef295321ce08843f937) ([merge request](gitlab-org/gitlab!63393))
+
+## 13.12.1 (2021-05-25)
+
+### Fixed (3 changes)
+
+- [Merge branch 'fix/pin-gke-version-to-1-18' into 'master'](gitlab-org/gitlab@44de5542ca82b371ed280db9ce03e0c4d4bd6135) ([merge request](gitlab-org/gitlab!62466))
+- [Merge branch '331562-fix-pipeline-security-tab-scanner-filter' into 'master'](gitlab-org/gitlab@1d70bf2efd574537d73b5fd80f92fd8dd939980b) ([merge request](gitlab-org/gitlab!62466))
+- [Update Gitaly's binary path in init.d scripts](gitlab-org/gitlab@0761e78434dbfa120c8ae14263bfe77f9ae48c71) ([merge request](gitlab-org/gitlab!62457))
+
+## 13.12.0 (2021-05-22)
+
+### Security (3 changes)
+
+- Prevent DOS from Chaining in Mermaid. !60382
+- Report pipeline creation success only when warranted. !60746
+- Fix XSS vulnerability in shared runner description. !60891
+
+### Removed (10 changes, 2 of them are from the community)
+
+- Delete feature flag for usage_data_a_compliance_audit_events_api. !52947
+- Remove feature flag api_always_use_application_json. !56777
+- Remove unneeded index on packages_debian_{project,group}_architectures.distribution_id. !59615 (Mathieu Parent)
+- Delete HipChat service database records. !59769
+- Set Hipchat metric definitions status to removed. !59779
+- Remove Legacy Group-Level DORA metrics API. !59858
+- Remove Alerts service metric. !60149
+- Remove description_html field from Release Rest API. !61327
+- Removes multiple_cache_per_job feature flag and associated code. (Laura Montemayor)
+- Remove support for WIP in merge request title toggle.
+
+### Fixed (108 changes, 32 of them are from the community)
+
+- Add warning when locally stored description is out of date. !29438
+- Disable unsupported task items in Markdown tables. !46060
+- Flush statistics cache anytime it is updated. !52938
+- Return an HTML response for a request with the Accept */* header. !56288
+- Resolve offense Performance/Count. !57007 (Shubham Kumar (@imskr))
+- Don't show due dates in red if the issue is closed. !57647 (Daniel Ziegenberg <daniel@ziegenberg.at>)
+- Fix Rails/SaveBang Rubocop offenses for wiki_page models. !57899 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang rubocop offenses in spec/frontend. !57909 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in spec/graphql. !57912 (Abdul Wadood @abdulwd)
+- Resolve RuboCop offenses for Style/RedundantRegexpCharacterClass. !57914 (Shubham Kumar @imskr)
+- Fixes rubocop offenses Style/RescueStandardError. !57923 (Shubham Kumar (@imskr))
+- Resolves rubocop offense Style/RedundantFileExtensionInRequire. !57963 (Shubham Kumar (@imskr))
+- Fix Rails/SaveBang Rubocop offenses for project related models. !57983 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for member models. !57994 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Resolves offenses Style/RaiseArgs. !58009 (Shubham Kumar @imskr)
+- Resolves offenses Style/RedundantBegin. !58017 (Shubham Kumar (@imskr))
+- Resolves offenses Security/YAMLLoad. !58042 (Shubham Kumar (@imskr))
+- Resolves rubocop offenses Rails/WhereEquals. !58067 (Shubham Kumar (@imskr))
+- Fix EmptyLineAfterFinalLetItBe offenses for merge request module. !58185 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for projects module. !58187 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses for alert management module. !58191 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/graphql/resolvers. !58239 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/ci. !58249 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/database. !58251 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/git. !58254 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/repository. !58308 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/packages. !58370 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/releases. !58384 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/wiki_page. !58388 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/presenters. !58405 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/ci. !58411 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/feature_flags. !58419 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in spec/workers. !58421 (Abdul Wadood @abdulwd)
+- Prevent loss of timelogs when deleting notes. !58525 (Lee Tickett @leetickett)
+- Fix multiline comment dragging in Firefox. !58692
+- Update cached count for "done" todos when deleting todo targets. !58773
+- Fix light label text color in dark mode. !59088
+- Fix false positive for codequality mr diff report. !59421
+- Fix for shell announcement banners. !59482
+- Reschedule background migration to copy projects.container_registry_enabled to project_features.container_registry_access_level. !59513
+- Fix images not showing in Jupyter Markdown tables. !59551
+- Fix paginator of Environment Serializer. !59751
+- Add generic avatar method for users and groups. !59758
+- Set Web hook defaults to intended default values. !59814
+- Fix restrictive permissions for ProjectMembers who are owners. !59844
+- Users search: fix avatar size. !59883
+- Fix cascading settings attr writer behavior. !59910
+- Set a default region to Workhorse S3 client. !59932
+- Fix invite banner display member count for subgroups page. !59948
+- Fix LFS push mirroring for mirrors set up a long time ago. !59972
+- Fix pipeline status when DAG jobs needs manual jobs. !59975
+- Fix tag matching behavior on New Release page. !60035
+- Fix bug that prevented searching for group/project members with multiple words. !60051
+- Fix link to subgroup OAuth application. !60066
+- Explicitly destroy webhooks and logs before the project deletion. !60122
+- Upgrade omniauth_openid_connect gem to our own fork. !60181
+- Fix bug when board card label is clicked. !60327
+- Align help icon for code quality merge request widget. !60330
+- Fast destroy job artifacts when destroying a pipeline. !60391
+- Ensure we never error in web hook logs. !60408
+- Fix bug where test report was not showing while pipeline was running. !60416
+- Do not set experiment cookie on self managed and delete existing cookies. !60419
+- Fix regression in GraphQL field MergeRequest.assignees.webUrl. !60428
+- Fix usage ping misreporting consolidated object storage settings. !60526
+- Fixes bug where variables are being filtered that do not have a value but a key. !60538
+- Fix MR sidebar rendering on mobile. !60552
+- Fix EnvironmentSerializer preloads unrelated pipelines/builds. !60562
+- Don't email issue email participants confidential comments. !60594 (Lee Tickett @leetickett)
+- Resolve Cannot Set Assignee in Boards View for self-managed GitLab with Relative URL. !60711
+- Check duplicate package regex against version as well as name. !60760
+- Fix Openshift template to run on main branch. !60811
+- Fix downloadable artifacts for pipeline. !60836
+- Fix SMTP errors when delivering service desk thank you emails with SMTP pool enabled. !60843
+- Fix changelog Dangerfile to convert MR IID to a string before comparison. !60899
+- Fix due date being randomly set in issue page. !60917
+- Disable autocomplete for due date in issue sidebar to prevent triggering updates on Chrome. !60973
+- Remove subscribed field from todos, related issues, and epic issues API. !60981
+- Fixed quick actions link not showing in diff line comment forms. !61029
+- Fixes merge request controls not visible when merge request has single commit. !61030
+- Fixed preview review comment not working with single file diff mode. !61032
+- Fixed dollar signs in suggestions getting replaced incorrectly. !61041
+- Fix artifacts dropdown for merge request and commits pipelines tables. !61045
+- Remove hyphen from Cloudrail CI template name. !61079
+- Bust the cache for /whats-new. !61081
+- Fix commit messages text color in dark mode. !61082
+- Suppress all non-nullable field errors for assignee widget graphql queries to remove assignee fetching error messages in boards. !61091
+- Correct the 'blocked' scope in 'Member' class. !61108
+- Preserve user changes in the wiki editor if multiple people edit the page. !61120
+- Fix multiple assignees checked in boards sidebar. !61227
+- Fix incorrect issue and merge requests counts with filters. !61230
+- Fix slack label filter behavior blank. !61236
+- GithubImport: Fix Review importer when the author does not exist anymore. !61257
+- Restrict issue creation via API by relevant permissions. !61281
+- Merge Request API: Treat 0 as a non-assigning sentinel value. !61301
+- Remove extra padding and margin from merge request widget review app dropdown chevron. !61302
+- Fix a bug displaying project commit anchors. !61361
+- Reset Source Editor's layout after Startup CSS. !61426
+- GithubImporter: Fix "ArgumentError: string contains null byte". !61480
+- Use correct scope when authorizing with Jira GitHub DVCS connector. !61496
+- Fix user popover bio overflow. !61555
+- Hide commit msg for package files without pipeline. !61571
+- Fix position of note actions. !61594
+- Inject Feature Flags Limit Value. !61621
+- Fix services API returning non-existing services. !61646
+- Fix Jira Connect sign in button style. !61665
+- Filter out unconnected-to-user members from receiving on access request emails. !61819
+- Fixed Rails Save Bang offenses in few spec/models/* files. !61862 (Suraj Tripathi @surajtripathy07)
+- Fix issuable search optimization in PG12. !61880
+
+### Deprecated (4 changes, 1 of them is from the community)
+
+- Deprecate Alerts service metric. !59899
+- Add Managed Prometheus deprecation warning. !60560
+- Deprecate SetWip GraphQL mutation and add SetDraft mutation. !60803
+- Add GraphQL field 'Project.topics' and deprecate 'Project.tag_list'. !61250 (Jonas Wälter @wwwjon)
+
+### Changed (145 changes, 52 of them are from the community)
+
+- Update admin users to use GitLab UI table by default. !54085
+- Remove artifact expiry backfill temp index. !54252
+- Enable the new pipeline form by default. !55250
+- Add migration to update plans on new post-EoA subscriptions. !55625
+- Add support for retries to Advanced Search reindexing. !55681
+- Add missing parts of GraphQL schema to GraphQL documentation. !55944
+- Update Keyboard shortcut help: adding search, update styling. !56400
+- Redirect to activity page when accepting invitation. !56695
+- Add external documentation references in GraphQL. !56704
+- Send in-product marketing email usage data. !56752
+- Enable new RPC to destroy wiki pages. !57106
+- Always resolve GitLab alerts when recovery alert payload is received. !57302
+- Add gl-badge for badges in pipeline schedules nav. !57937 (Yogi (@yo))
+- Add gl-badge for badges in jobs page nav. !57938 (Yogi (@yo))
+- Add gl-badge class for tag's badge. !57939 (Yogi (@yo))
+- Add gl-badge for badges in MRs and issues nav. !57942 (Yogi (@yo))
+- Add gl-badge for badges in todos nav. !57943 (Yogi (@yo))
+- Add gl-badge for badges in admin users nav. !57951 (Yogi (@yo))
+- Add gl-badge for storage badge in admin groups page. !57954 (Yogi (@yo))
+- Add gl-badge for badges in milestone drawer. !57964 (Yogi (@yo))
+- Add gl-badge for badges in snippets nav. !57966 (Yogi (@yo))
+- Add gl-badge for badges in pipeline page nav. !57970 (Yogi (@yo))
+- Add gl-badge for badges in project search page nav. !57971 (Yogi (@yo))
+- Add gl-badge for badges in new MR nav. !57995 (Yogi (@yo))
+- Apply gl-form-input for fields in ssh keys page. !58000 (Yogi (@yo))
+- Apply gl-form-input for fields in preferences page. !58004 (Yogi (@yo))
+- Apply gl-form-input for search field in milestone page. !58007 (Yogi (@yo))
+- Apply gl-form-input for fields in new project milestone page. !58010 (Yogi (@yo))
+- Move to btn-confirm from btn-success in emails directory. !58029 (Yogi (@yo))
+- Move badge to vue component in project badges. !58045 (Yogi (@yo))
+- Switch to gl-badge in whats new dropdown. !58235 (Yogi (@yo))
+- Add gl-form-input class for fields in create project page. !58299 (Yogi (@yo))
+- Move to btn-confirm from btn-success in create from template page. !58303 (Yogi (@yo))
+- Add gl-form-input class for fields in gitlab import page. !58304 (Yogi (@yo))
+- Add gl-form-input class for fields in bitbucket import page. !58309 (Yogi (@yo))
+- Add gl-form-input class for fields in fogbugz import page. !58312 (Yogi (@yo))
+- Add gl-form-input class for fields in gitea import page. !58313 (Yogi (@yo))
+- Add gl-form-input class for fields in import page. !58316 (Yogi (@yo))
+- Add gl-form-input class for fields in phabricator import page. !58318 (Yogi (@yo))
+- Change text for incident auto-resolve setting to match behavior. !58515
+- Move license history to gl-table utility class. !58531 (Yogi (@yo))
+- Add margin top for clear repo check button in admin. !58536 (Yogi (@yo))
+- Add more padding for whats new badge in drawer. !58544 (Yogi (@yo))
+- Add pause_ms column to batched_background_migrations and batched_background_migration_jobs. !58583
+- Geo: Add verification for Terraform States. !58800
+- Disable automatic setup of alerts for Prometheus cluster integration. !58853
+- Improve message for :project_not_found error to indicate possible cause. !58945 (Ignacy Moryc @ignacy)
+- Rename 'no contributions' to 'No contributions' in profile activity graph helper. !59076 (Yogi (@yo))
+- Center align project home navigation. !59079 (Yogi (@yo))
+- Move to new GitLab UI for card in health check page. !59081 (Yogi (@yo))
+- Update to question-o and change color in admin users. !59133 (Yogi (@yo))
+- Update to question-o from question icon in navbar. !59134 (Yogi (@yo))
+- Update to question-o from question icon in user stats. !59135 (Yogi (@yo))
+- Move card in billing page to gl-card utility class. !59138 (Yogi (@yo))
+- LibreOffice/OpenOffice file extensions in icon map. !59159 (Holzfeind, Daniel Georg)
+- Export issues sorted by relative position and recompute issue relative position on project import. !59175
+- Move 2fa recovery codes to GlCard component. !59219 (Yogi (@yo))
+- Add gl-form-input utility class for pin code field in 2fa. !59220 (Yogi (@yo))
+- Replace invite banner button with modal trigger. !59260
+- Resolve Abstract participants dropdown to a shared component. !59358
+- Make new project ui the only option. !59452
+- Add space next to spinner in Preview payload button. !59458 (Yogi (@yo))
+- Add btn-default class in seat link payload button. !59459 (Yogi (@yo))
+- Add VulnerabiltyFindingEvidenceRequest model. !59539
+- Add VulnerabiltyFindingEvidenceResponse model. !59563
+- Add gl-badge utility class for deleted projects tab. !59590 (Yogi (@yo))
+- Move npm and yarn to new dropdown UI. !59628
+- Change artifacts download button to a vertical ellipsis menu. !59667
+- Correct variant of Rebase button in MR widget. !59684
+- Improve merge message UI text. !59693
+- Use GlModal for Confirmation of Deploy Key Delete. !59697
+- Add ability to order cluster token by last used. !59716
+- Make new issue, merge request, and epic emails more consistent. !59718
+- Add merge request interaction details to MergeRequest.assignees. !59770
+- Expose enable_advanced_logs_querying in Environments API. !59772
+- Increase note actions target size. !59776
+- Redesign the DevOps Score report. !59856
+- Bumped image in the CI-Template Jobs/Build.gitlab-ci.yml to 0.6.0. !59882 (Daniel Estermann (@d.esterman))
+- Expose job and project queued duration in all APIs. !59901
+- Include installable and/or displayable packages only in package finders. !59921
+- Log exceptions in Lfs::PushService. !59960
+- Container Registry Details: split details from tags call. !59969
+- Add ability to include self in cascading setting lock check. !60031
+- Remove workhorse_extract_filename_base feature flag. !60070
+- Support worker_name predicate in Sidekiq queue selector. !60084
+- Add Gradle Kotlin installations commands. !60097 (Cromefire_ (@cromefire_))
+- Fix breadcrumbs and navigation in runner details pages. !60129
+- Improve dropdown and search in the tags page. !60145
+- Clarify image repository delete actions. !60154
+- Update RubyGems and NuGet packages to error status upon metadata extraction failure. !60172
+- Pre-fill user email address after confirming. !60179
+- Retain timelog spent_at time. !60191 (Lee Tickett @leetickett)
+- Update button variants to btn-confirm on MR page. !60254
+- Rename default branch for empty project actions. !60258
+- Remove visualization feature flag in pipeline editor. !60273
+- Reorder source_project_id foreign key constraint in merge_requests table. !60313
+- Update edit file buttons and spacing. !60318
+- Keep consistent Global Search tab order. !60319
+- Toggle subscribed state when clicking on icon in collapsed sidebar. !60345
+- Add a Spamcheck API key application setting. !60385 (jdsalaro)
+- Change product-marketing-email sending schedule. !60422
+- Fix copy on webhook admin pages for "Issues events" and "Confidential issues events". !60453
+- This change captures resizes of the runner installation instructions modal to make it usable on screens. !60588
+- Create table user_credit_card_validations. !60626
+- Update error tracking settings to use better copy and correct colors. !60627
+- Add sha256 to package file API payload. !60631
+- Github Importer: Add Cache to Pull Request Reviews importer. !60668
+- Add username and password fields for Advanced Search. !60710
+- Migrate DevOps Score empty state to Vue. !60715
+- Adds field authorization to pipeline fields. !60754
+- Change conan token expiration from 1 hour to 24 hours. !60763
+- Remove mobsf service for mobsf SAST job. !60770
+- Polish the "What's new" UI. !60804 (Kev @KevSlashNull)
+- Disable web-hooks that fail repeatedly. !60837
+- Add slack integration individual usage ping. !60847
+- Extend branch support for Static Site Editor. !60848
+- Store slice multiplier and max slices running for reindex in DB. !60861
+- Keep new prometheus cluster integration in sync with old cluster application. !60877
+- Validate release description length. !60892
+- i18n: Show translation levels for each language in the UI. !60905
+- Add kubernetes_agent_proxy_request to usage ping. !60978
+- Validate CI pipeline jobs dependencies. !60999
+- Update appearance of "Enable shared runners for this project" toggle in Project > Settings > CI/CD. !61043
+- Add offset and limit to branch names resolver. !61061
+- Require 3 or more characters in search term when searching groups in Jira Connect app. !61099
+- Enforce .git suffix when importing git repo. !61115
+- Improve field descriptions in the Jira integration form. !61205
+- Migrate 'tags' to 'topics' for project in the database context. !61237 (Jonas Wälter @wwwjon)
+- Rename master to main in views placeholders. !61252
+- Make pipeline retry endpoint async. !61270
+- Add relations export request when Bulk Import is initiated. !61365
+- Fix :focus styles for What's New. !61398
+- Add body to finding evidence requests. !61408
+- Make semgrep generally available. !61412
+- clicking backdrop closes modal for What's New. !61420
+- Scroll to the top of a diff file when it is collapsed. !61432
+- Wiki: Use FindAllCommits RPC to list page versions. !61459
+- Allows masking ~ character. !61517 (Thomas Dallmair)
+- Backfill clusters_integration_elastic_stack.enabled. !61521
+- Update rails project template to rails 6.1. !61547
+- Add body to finding evidence responses. !61631
+- Support warning in pipeline creation by default. !61803
+- Make find_remote_root_refs_inmemory feature flag enabled by default. !61824
+- Add link to email notifying of MR changing draft status. !61891
+- Remove success variant for primary button in upload file modal. (Yogi (@yo))
+
+### Performance (63 changes, 1 of them is from the community)
+
+- Make MergeService idempotent. !55368
+- Speed up save on New/Edit Release page. !57000
+- Cache path lookups for namespaces. !57027
+- Cache project tag list. !57031
+- Linear traversal query for Namespace#ancestors. !57137
+- Set traversal_ids for every namespace. !57318
+- Resolve admin_group_member group policy n+1. !58948
+- Optimize AvailableLabelsService for multiple labels search. !59032
+- Reduce number of SQL queries when creating SystemNotes. !59102
+- Enable pagination in the CompareController. !59162
+- Fix N+1 for commits with pipelines. !59234
+- Improve diff_files endpoint performance. !59489
+- Create the merge request pipeline asynchronously on push. !59624
+- Optimize CI Settings page to reduce N+1 queries. !59625
+- Linear traversal query for Namespace#descendants. !59632
+- Remove unnecessary validation avoiding N+1 queries when building integrations. !59635
+- Improve the packages finder helper SQL queries when handling deploy tokens. !59739
+- Improve shifting of positions when creating issues. !59745
+- Remove the longer_count_cache_validity_period feature flag. !59746
+- Recreate index for deployments updated_at and finished_at. !59771
+- Exclude build dependency calculation when creating the pipeline. !59810
+- Improve pagination of users in the admin panel. !59884
+- Prevent loading of cohorts data in the admin users list. !59890
+- Avoid loading user objects when bulk updating todos. !59909
+- Fix N+1 queries in namespace#any_project_has_container_registry_tags?. !59916
+- Replace OpenStruct with Struct in project_level_stage_adapter.rb. !59956 (Amit Patel @amit.savani)
+- Recalculate assigned open issues count after cache invalidation. !59961
+- Improve performance of LFS integrity checks. !59991
+- Add new service to handle add_spent_time to MRs. !60043
+- Stop exposing artifacts on pipelines.json. !60126
+- Improve the Maven API file endpoints response time when a non existing package is requested. !60142
+- Fix three N+1s in Releases API entity generation. !60189
+- Remove string duplication in BlobStitcher. !60406
+- Delete all label links asynchronously when issuable gets destroyed. !60487
+- Fix releases API N+1 in sorted_links usage. !60561
+- Refactor notification recipients builder for watchers. !60572
+- Remove N+1 query from Issue::Metrics#record. !60589
+- Fix repeating SQL queries when changing labels for a resource. !60718
+- Fine tune a few queries found in GroupMembers#index. !60857
+- Fix N+1 problem in CustomEmojiFilter. !60910
+- Create partial indexes for pending/running builds. !60942
+- Stop exposing has_downloadable_artifacts in pipelines.json. !60950
+- Improve performance of project issues API. !60981
+- Include other cols in index for pending builds. !60997
+- Remove unnecessary query from close_issue method. !61087
+- Partial index optimization for namespaces id. !61098
+- Decrease load time of project select dropdowns. !61117
+- Apply rate-limiting to webhook executions. !61151
+- Update grape-path-helpers to v1.6.3. !61196
+- Improve the performance of Release LIST v4 API endpoint by short-interval caching. !61223
+- Ensure iid is set before skipping ci pipeline. !61231
+- Stop exposing artifacts in pipelines.json. !61253
+- Ensure project iid is set before saving pipeline from web terminal. !61311
+- Sync traversal path of namespaces. !61329
+- Enable notification settings recipient refactor by default. !61443
+- Tie-breaker in Deployment Finder should respect the original sort direction. !61444
+- Improve memory consumption of issuable APIs. !61561
+- Fix environment filter of Deployments Finder. !61564
+- Optimize merge request permission check for references. !61591
+- Introduced granular control to Monaco tag. !61690
+- Apply rate-limit cache to branches endpoint. !61723
+- Enforce updated_at ordering in Deployment API for performance optimization. !61870
+- Resolve Remove `subscribed` from GraphQL boards list query. !61881
+
+### Added (114 changes, 16 of them are from the community)
+
+- Commit author for suggestions is note author. !39940
+- Report summarized Gitaly Apdex via usage ping. !47040
+- Allow disabling build stage for Auto Devops. !48638 (Shane Davidson @shanekdavidson)
+- Allow access to registry API of the current project using the job token. !49750 (Mathieu Parent)
+- Integrate with the Spamcheck anti-spam engine. !52385
+- Add generating Speedscope flamegraphs for a request. !53288
+- Add collapsible section shortcut to markdown controls. !54938
+- Add Terraform Module Registry. !55018
+- Clear group open issues count cache when bulk updating issues state. !56386
+- Add options for Slack and Mattermost label filter behavior. !56657
+- Create packages_helm_file_metadata table. !57017 (Mathieu Parent)
+- Add "previously merged commits" dropdown in merge request compare dropdown. !57026
+- Add specific rate limits for Package Registry (Package API). !57029 (Jonas Wälter @wwwjon)
+- Expose merge request timelogs via GraphQL. !57322 (Lee Tickett @leetickett)
+- Automate deactivation of dormant users for self-managed instances. !57778
+- Add indexes for cleanup policies on container_repositories and container_expiration_policies. !58123
+- Add CI runner counts to usage ping. !58197
+- Add snoplow tracking to Releases API. !58221
+- Add ConfigureSecretDetection graphql mutation. !58230
+- Adds access token endpoints to OpenAPI. !58620 (jimcser)
+- Add sorting for group and project packages type. !58657
+- Add more fields to the GraphQL blob type. !58906
+- Add commmit_pipeline_path to CreateCommit mutation. !58931
+- Add cascading namespace setting database migration helper. !58940
+- Add application setting for What's new. !59011 (Jonas Wälter @wwwjon)
+- Create "projects/import-remote" to import a project using a remote object storage to fetch the exported project
+. !59033
+- Add support to destroy iteration cadences in GraphQL. !59060
+- Remove feature flag from invite members banner. !59203
+- Send email to oncall rotation participants and project owners when user is removed. !59331
+- Improve errors reporting for board lists update. !59549
+- Add autocomplete to milestone description. !59564 (Jonas Wälter @wwwjon)
+- Add "active" filter to deploy tokens API. !59582 (Devin Christensen)
+- Implement Sidekiq queue re-routing in the application. !59604
+- Added type field into Issues API. !59648 (Raimund Hook @stingrayza)
+- Expose KAS metadata through GraphQL - enabled, version and externalUrl. !59696
+- Support board issue filtering by iids in GraphQL. !59703
+- Add note about SSH key title being public information. !59726
+- Add missing data to CiJob type. !59805
+- Add link to documentation in empty pipeline test reports. !59812
+- Add table to store Security Orchestration Policy Schedules. !59842
+- Add code owners metric to DevOps adoption page. !59874
+- Search projects by topic via API. !59900
+- Remove pages_serve_with_zip_file_protocol feature flag. !59908
+- Implement variables for pipeline workflow rules. !59970
+- Add Group relations export models. !59976
+- Add Group relations export API. !59978
+- Added tracking to diff view settings. !59979
+- Remove pages_update_legacy_storage feature flag. !60005
+- Remove pages_serve_from_legacy_storage feature flag. !60010
+- Add project_id foreign key to timelogs. !60040 (Lee Tickett @leetickett)
+- Lazy load artifacts on pipelines list page. !60058
+- Create database table dast_site_profiles_pipelines. !60090
+- Allow issueSetDueDate GraphQL mutation to accept null values. !60139
+- Introduce limit to number of registered runners. !60157
+- Add isuable time tracking report. !60161 (Lee Tickett @leetickett)
+- Add internal API support for updating issue types on issues. !60173
+- Allow merge request search via GraphQL. !60190 (Lee Tickett @leetickett)
+- Add CI template field to project GraphQL type. !60276
+- Keep latest pipeline artifact forever. !60400
+- Expose user permissions on JobType. !60427
+- Add description and roll_over columns to iterations_cadences. !60436
+- Populate timelogs.project_id. !60439 (Lee Tickett @leetickett)
+- Add Ci::Build graphql mutations. !60443
+- Ensure highlighting limits are documented, configurable, and monitorable. !60445
+- Add semgrep to SAST config UI. !60460
+- Add ability to swap revisions when comparing. !60491
+- Add status_changed_at to deployments webhooks. !60518
+- Show a random predefined message while MR merging is in progress. !60521
+- Add ability to view graph by job dependency. !60522
+- Show Deploy Boards for Environments in Folders. !60525
+- Allow frontend to observe Prometheus metrics. !60633
+- Add setting to allow or disallow duplicates for generic packages. !60664
+- Add Escalation policies and rule tables. !60685
+- Add support for create, updating, and filtering issues based on issue type in REST API. !60687
+- Improve logging in e-mail receiver processing. !60692
+- Allow migrating scheduled and retried Sidekiq jobs to new queues. !60724
+- Add support for creating/modifying different issue types via GraphQL API. !60747
+- Add Maven to Package Graphql types. !60808
+- Add API to set credit card validation timestamp for user. !60828
+- Add asset links to release keyword. !60896
+- Application setting for FloC participation (disabled by default). !60933
+- Add API endpoint for deleting a package file. !60970
+- Show total group counts in admin users table. !60998
+- Package: group and project graphql types - add search. !61001
+- Add missing status type and enum to package graphql type. !61002
+- Expose blob plain data in GraphQL. !61016
+- Lazy load artifacts dropdown in pipelines merge request widget. !61055
+- Remove feature flag from upgrade link in user menu. !61057
+- Show unit report attachments in the pipeline test report. !61075
+- Add Elastic Stack cluster integration. !61077
+- Implement bulk import for all groups on the page. !61097
+- Add shared_visible_only option to project's groups API. !61118
+- Add external status check responses. !61135
+- Add more attributes to the blob GraphQL API. !61155
+- Add complete field to indicate if a pipeline/job is complete. !61209 (Cong Chen @gentcys)
+- Add stuck field to CiJob. !61247
+- Add option to remove labels on issue close in the REST and GraphQL API. !61286
+- Ban user state and UI. !61292
+- Enable by default scheduled execution of batched background migrations. !61316
+- Enable by default automatic optimization of batched background migrations. !61317
+- Improve UX of the award emoji picker. !61384
+- Add semgrep to Secure-Binaries and update support docs. !61411
+- Add cron worker for cleaning up unit test tables. !61463
+- Redirect to the last visited epic board. !61474
+- Implement wildcard support for pipeline include file paths. !61507
+- Add DS_EXCLUDED_ANALYZERS var to Dependency Scanning template. !61529
+- Add fields to graphQL version type. !61567
+- Add pipeline editor drawer for introduction to CI. !61620
+- Add nuget metadata type to Package GraphQl type. !61695
+- Add repository diskPath parameter to GraphQL API. !61725
+- Upgrade Pages to v1.39.0. !61756
+- Add 3 stage pipeline template. !61762
+- Email users about SSH keys that are expired or expiring soon. !61812
+- Observe limit to hours setting in timelog report. !61849 (Lee Tickett @leetickett)
+
+### Other (122 changes, 38 of them are from the community)
+
+- Enable Content-Security-Policy header by default. !56923
+- Fix Rails/SaveBang Rubocop offenses for user related models. !57901 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Externalise strings in _abuse.html.haml. !57968 (nuwe1)
+- Externalise Strings in /application_settings/_gitaly.html.haml. !57976 (nuwe1)
+- Externalise strings in application_settings/_plantuml.html.haml. !58023 (nuwe1)
+- Externalise strings in /application_settings/_prometheus.html.haml. !58030 (nuwe1)
+- Externalize strings in /application_settings/_signin.html.haml. !58066 (nuwe1)
+- Externalize strings in application_settings/_spam.html.haml. !58076 (nuwe1)
+- Externalize strings in application_settings/_terminal.html.haml. !58081 (nuwe1)
+- Eternalize strings in application_settings/_usage.html.haml. !58088 (nuwe1)
+- Externalise strings in /admin/users/_form.html.haml. !58096 (nuwe1)
+- Externalize strings in admin/users/_profile.html.haml. !58106 (nuwe1)
+- Externalise strings in users/_projects.html.haml. !58110 (nuwe1)
+- Externalise strings in users/edit.html.haml. !58117 (nuwe1)
+- Externalize strings in users/projects.html.haml. !58122 (nuwe1)
+- Externalize strings in /users/show.html.haml. !58126 (nuwe1)
+- Externalize strings in appearances/_form.html.haml. !58135 (nuwe1)
+- Externalise strings in appearances/preview_sign_in.html.haml. !58138 (nuwe1)
+- Externalize strings in /background_jobs/show.html.haml. !58141 (nuwe1)
+- Externalize strings in broadcast_messages/_form.html.haml. !58143 (nuwe1)
+- Externalize strings in requests_profiles/index.html.haml. !58161 (nuwe1)
+- Externalizes strings in runners/show.html.haml. !58166 (nuwe1)
+- Externalises strings in spam_logs/index.html.haml. !58170 (nuwe1)
+- Externalise strings in confirmations/new.html.haml. !58173 (nuwe1)
+- Externalize strings in _confirmation_instructions_secondary.html.haml. !58216 (nuwe1)
+- Externalize strings in reset_password_instructions.html.haml. !58224 (nuwe1)
+- Externalise strings in reset_password_instructions.text.erb. !58226 (nuwe1)
+- Externalize strings in unlock_instructions.text.erb. !58229 (nuwe1)
+- Externalise strings in shared/_links.erb. !58278 (nuwe1)
+- Externalize strings in milestones/_header_title.html.haml. !58300 (nuwe1)
+- Externalize strings in milestones/new.html.haml. !58311 (nuwe1)
+- Externalize strings in viewers/_changelog.html.haml. !58446 (nuwe1)
+- Externalize strings in viewers/_contributing.html.haml. !58447 (nuwe1)
+- Externalize strings in viewers/_download.html.haml. !58450 (nuwe1)
+- Externalize strings in viewers/_license.html.haml. !58452 (nuwe1)
+- Externalise-strings-in-viewers/_readme.html.haml. !58456 (nuwe1)
+- Remove the global default branch feature flag. !59024
+- Review and revise custom issue tracker UI text. !59277
+- Add specs ensuring all metric definition key paths are present in Usage Ping structure. !59314
+- Review and revise EWM integration UI text. !59386
+- Review UI text and docs for Flowdock integration. !59388
+- Align UI of Merge Conflicts app with our design system. !59400
+- Prepare to convert PK type for ci_build_needs. !59467
+- Upgrade Bootstrap to v4.5.3. !59501
+- Review UI text and docs - Google Chat. !59518
+- Make Sentry processors for GitLab-internal error tracking compatible with new version of Sentry gem. !59565
+- Upgrades the final few bootstrap buttons. !59641
+- Remove the enabled by default feature flag for maven group level improvements. !59748
+- Initialize int8 migration for ci_job_artifacts. !59786
+- Do not require invited users to confirm their email address. !59790
+- Update GitLab Runner Helm Chart to 0.28.0. !59802
+- Update Create:Code Review metrics definitions. !59816
+- Update Metrics Definitions for Runner. !59824
+- Add group_level? and instance_level? helpers to Service model. !59838 (Amit Patel @amit.savani)
+- Update UI text for confluence integration. !59839
+- Revise project access tokens UI text. !59878
+- Remove usage_data_track_quickactions feature flag. !59914
+- Update, organize, and improve analytics metrics definition files. !59926
+- Add --ee option to Usage Metric Definition generator to fill correct tier and distribution. !59942
+- Initialize conversion of ci_sources_pipelines.source_job_id to bigint. !59951
+- Review and revise YouTrack integration UI text. !59998
+- Review UI text for pipeline error messages. !60018
+- Drop Vulnerabilities without backing Finding. !60023
+- Remove feature flags from known events. !60053
+- Update KaTeX integration to v0.13.0. !60071
+- Update Bugzilla integration UI text. !60080
+- Drop Jira proxy setting columns. !60123
+- Add index to support execution time order for batched migration jobs. !60133
+- Remove gldropdown_tags feature flag. !60153
+- Update active branch icon in IDE to conform to the Pajamas design guide. !60168 (Andreas Resch @reschandreas)
+- Add migration to swap partitioned web_hook_logs. !60184
+- Update UI links to docs. !60247
+- Add index to batched migration jobs status. !60248
+- Initialize int8 migration for ci_builds. !60265
+- Update GitLab Shell to v13.18.0. !60288
+- Remove not_issuable_queries feature flag. !60321
+- Remove optimized_timebox_queries feature flag. !60326
+- Initialize conversion of ci_build_trace_chunks.build_id to bigint. !60346
+- Add user availability status to status modal and settings. !60351
+- Align UI text for CI integrations with each other. !60352
+- Update 5 min app metric defintions. !60364
+- Initialize conversion of ci_builds_runner_session.build_id to bigint. !60366
+- Update instance_auto_devops_enabled metric team metadata. !60374
+- Update AWS deploy templates metrics. !60377
+- Remove graphql_release_data, graphql_milestone_stats, and graphql_releases_page feature flags. !60390
+- Remove invite_members_version_b experiment. !60426
+- Remove feature flag for pipeline status in pipeline editor. !60463
+- Review and revise project integration descriptions. !60510
+- Validate foreign key on GroupHooks. !60527
+- Bump capybara gem version. !60532
+- Remove unused :auto_create_cluster_management_project feature flag. !60550
+- Refactor Webex Teams integration settings text. !60565
+- Removed feature flag for Pipeline editor merged YAML tab. !60659
+- Invalid invite tokens should redirect to the GitLab product. !60666
+- Remove search_track_unique_users feature flag. !60706
+- Prepare devops adoption database structure for migration. !60733
+- Remove optimize_shifting_relative_positions feature flag. !60792
+- updating hover state to match other pipeline graph buttons. !60801 (Matt Saddington @mattsaddo)
+- Make RecalculateProjectAuthorizations background migration no-op. !60825
+- Create database structure to support project value streams. !60925
+- Remove invalidated CI Syntax Templates Experiment. !60937
+- Update messages when user cannot directly push code to project. !61071
+- Remove feature flags related with tracking using Redis HyperLogLog for code review events. !61078
+- Merge branch 'mo-update-artifact-documentation' into 'master'. !61084
+- Update projects approval rules Usage Data metrics. !61106
+- Add issue tracker integrations help text. !61158
+- Update checkbox styles in "Group" -> "Settings" -> "General" -> "Permissions, LFS, 2FA". !61294
+- Update usage ping metrics for group configure. !61373
+- Decrease space between invite and import members buttons to align with Pajamas spacing. !61396
+- Update button styles, spacing, variants and responsive behavior for the Tags page. !61413
+- Remove sort_diffs feature flag. !61440
+- Reschedule DropInvalidVulnerabilities and track jobs. !61491
+- Geo: Remove released feature flag `geo_package_file_verification`. !61568
+- Remove update merge request related feature flags. !61569
+- Fix inconsistent cancel merge train button label. !61597
+- Updating button variant and adding tooltip for the SSH delete key button. !61626
+- Add draft column to merge_requests table. !61681
+- Lowers the z-indexing of the pipeline drawer. !61683
+- Update temporary NuGet packages to have processing status. !61724
+- Log additional package extraction errors. !61745
+- Remove issuable destroy service related FFs. !61764
+- Change wording for design management upload. !61782
+
+
+## 13.11.7 (2021-07-07)
+
+### Security (1 change)
+
+- [Disable file and network premailer strategies](gitlab-org/security/gitlab@511ed3746b48a26e95c851f76ac6fdcd44c28fd8) ([merge request](gitlab-org/security/gitlab!1546))
+
+## 13.11.6 (2021-07-01)
+
+### Added (1 change)
+
+- [Added omniauth_user check when verifying user cap](gitlab-org/security/gitlab@60bc8ff36c41871271dbd4e07db960d09204607d) ([merge request](gitlab-org/security/gitlab!1503)) **GitLab Enterprise Edition**
+
+### Security (15 changes)
+
+- [Bump rails gem version to 6.0.3.7](gitlab-org/security/gitlab@23e4317622532de2564b7a7b0efb0812e5601a2e) ([merge request](gitlab-org/security/gitlab!1516))
+- [Update rdoc to 6.3.1](gitlab-org/security/gitlab@452f9c7370c844ea728cda7ae96f990d10c32ca2) ([merge request](gitlab-org/security/gitlab!1535))
+- [Prevent GraphQL API access by deactivated users](gitlab-org/security/gitlab@fdedb77bc2190dd87988171396bbb335fd8c47cd) ([merge request](gitlab-org/security/gitlab!1527))
+- [Add sanitizing for name field](gitlab-org/security/gitlab@d49da0e57d91fcc59f0732eb978f68b68619a761) ([merge request](gitlab-org/security/gitlab!1491))
+- [Copy feature visibility settings to a fork](gitlab-org/security/gitlab@5fd56f01c69edaefb64143ea593d680a0477cb28) ([merge request](gitlab-org/security/gitlab!1524))
+- [Avoid disclosing project in web IDE](gitlab-org/security/gitlab@6cba97cef6fa1ab0808db98c64baa33597e54979) ([merge request](gitlab-org/security/gitlab!1513))
+- [Add new username validation](gitlab-org/security/gitlab@9a5f5264f4c30248e83747e4ac79e2c2396461dd) ([merge request](gitlab-org/security/gitlab!1497))
+- [Allow only same-origin URLs for Edit Release Cancel button](gitlab-org/security/gitlab@b959550cf4cd057d42b4a1ae76aee968cc9133b4) ([merge request](gitlab-org/security/gitlab!1485))
+- [Limit creation of issues based on issue type](gitlab-org/security/gitlab@e8713df5341a6c54a4607d6eef0fbb70f93a375f) ([merge request](gitlab-org/security/gitlab!1481))
+- [Update Nokogiri to 1.11.4](gitlab-org/security/gitlab@ac29afd195e19cd5c38d9030ecf7fabdea9214d1) ([merge request](gitlab-org/security/gitlab!1480))
+- [Fix deploy key fallback issue in protected branch](gitlab-org/security/gitlab@bb0c95595c2b0db98af1feb882aa09870cee3600) ([merge request](gitlab-org/security/gitlab!1477))
+- [Fix XSS on audit log for feature flag actions](gitlab-org/security/gitlab@e0140c81b2d7eea963248f2c2bd103b1b5a908ee) ([merge request](gitlab-org/security/gitlab!1475))
+- [Sanitize input on pasteGFM](gitlab-org/security/gitlab@b47f364dfe82e59d480bb42adccc24ce691b18b1) ([merge request](gitlab-org/security/gitlab!1452))
+- [Add total http read timeout](gitlab-org/security/gitlab@2179f835eadec3afa3233d649fbcdad6125a92c5) ([merge request](gitlab-org/security/gitlab!1393))
+- [Fix merge request diff display issue with unsupported encoding](gitlab-org/security/gitlab@33971ea6fba1c493b2d8da4a82c8a0af71ef7e0f) ([merge request](gitlab-org/security/gitlab!1425))
+
+## 13.11.4 (2021-05-14)
+
+### Fixed (3 changes)
+
+- Fix N+1 SQL queries in PipelinesController#show. !60794
+- Omit trailing slash when proxying pre-authorized routes with no suffix. !61638
+- Omit trailing slash when checking allowed requests in the read-only middleware. !61641
+
+
+## 13.11.3 (2021-04-30)
+
+### Fixed (1 change)
+
+- Fix Instance-level Project Integration Management page for GitLab FOSS. !60354
+
+
+## 13.11.2 (2021-04-27)
+
+### Security (5 changes)
+
+- Prevent tokens with only read_api scope from executing mutations.
+- Do not allow deploy tokens in the dependency proxy authentication service.
+- Disable keyset pagination for branches by default.
+- Bump Carrierwave gem to v1.3.2.
+- Restrict setting system_note_timestamp to owners.
+
+
+## 13.11.1 (2021-04-22)
+
+### Changed (1 change)
+
+- Change unsubscribe language for email campaign on self managed. !59121
+
+### Added (1 change)
+
+- Add documentation about Pages deployment migration. !59475
+
+
+## 13.11.0 (2021-04-22)
+
+### Security (3 changes)
+
+- Update to Rails v6.0.3.6. !59328
+- Update mermaid to version 8.9.2.
+- Allow to disable exiftool depending on env variable.
+
+### Removed (10 changes, 1 of them is from the community)
+
+- Redirect deprecated pipeline routes. !53990
+- Remove CI lint button from Jobs page nav. !56854
+- Remove graphql_individual_release_page feature flag. !56882
+- Remove deprecated repository archive routes. !57236
+- Remove add issues modal from issue boards (this has been disabled since 13.6). !57329
+- Remove unused feature flag ':roadmap_buffered_rendering'. !57486
+- Remove HipChat integration from frontend and docs. !57556
+- Remove temporary index from vulnerabilities table. !57656 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Remove unused feature flag checks. !58469
+- Remove ability to create new service templates. !58624
+
+### Fixed (175 changes, 90 of them are from the community)
+
+- Update gatsby project template to address the pipeline failure. !37410 (Takuya Noguchi)
+- Fixed an issue where the link commit message did not end with a newline. !49086 (Kazuya Kojima)
+- Partially fix incorrect icons for non-standard license files. !53207
+- Add language- prefix to CSS class of markdown code blocks. !55076 (Camil Staps)
+- Filter out pipelines that were excluded in the relation scope in Ci::Pipeline#latest_pipeline_per_commit. !55657 (Cong Chen @gentcys)
+- Fix mermaid diagrams in dark mode. !56183
+- Catch network errors. !56457 (Shubham Kumar (@imskr))
+- Fix the Maven sync worker to not fail if the versionless package is not found. !56514
+- Fix `#current_authenticated_job` when used with `.authenticate_with` in Grape APIs. !56564
+- Move graphql timelogs to CE. !56633 (Lee Tickett @leetickett)
+- Fix bug in wiki link rewriter filter. !56636
+- Fix bug in Gollum Tags filter. !56638
+- Fix derivation of effective permissions (access level) of group members. !56677 (Jonas Wälter @wwwjon)
+- Fix word wrapping in parallel diffs. !56713
+- Don't close issue label select box on click if only mouseup outside. !56721 (Simon Stieger @sim0)
+- Fix reference widget icon and text spacing. !56759
+- Fix test report merge request widget summary and issues alignment. !56768
+- Fix artifacts section from showing up when no artifacts are present. !56784
+- Push confidential_notes feature flag to mr frontend. !56798 (Lee Tickett @leetickett)
+- Fixed offenses Layout/BeginEndAlignment. !56827 (Shubham Kumar (@imskr))
+- Close DropLab dropdowns on click instead of mousedown. !56847 (Simon Stieger @sim0)
+- Add labels to UI toggles. !56848
+- Fix offense Layout/RescueEnsureAlignment. !56870 (Shubham Kumar (@imskr))
+- Fixes offense Lint/RedundantSafeNavigation. !56884 (Shubham Kumar (@imskr))
+- In admin new user page, fix external checkbox warning hide with keyboard interaction. !56896
+- Fix Conan project-level API to return correct download-urls and fix Conan project-level functionality. !56899
+- Remove Kramdown patch and update to v2.3.1 gem. !56917
+- Fixed styling of commit comment buttons. !56982
+- Update weight transaltion for Russian locale. !56986 (Gennady Kovalev (@belolap))
+- Fixes rubocop offense Migration/DepartmentName. !56997 (Shubham Kumar (@imskr))
+- Do not render empty title in HelpPopover. !57025
+- Validate import manifest url scheme. !57071
+- Inherit default branch name for subgroups. !57101
+- Fix ruby alpine CI template. !57109
+- Fix rails binding for ruby alpine template. !57112
+- Update admin edit button icon class. !57151
+- Fix branch switch to be exact instead of partial match. !57197
+- Add aria labels to icon buttons. !57261
+- Ensure search param is kept in scrolled commit. !57307
+- Fix remote_mirrors usage ping metric. !57332
+- Remove calls to jQuery animations to fix infinite scrolling on the Repository commits page. !57379
+- Hide project-specific views on group / instance level integrations. !57381
+- A blocked URL for a push mirror is a hard failure. !57392
+- Fix usage data count start/finish export issue. !57403
+- Fix tooltip position in mini pipeline chart. !57425
+- Use search param in refs call to filter revisions. !57442
+- Update the Package settings to use the blue primary button. !57468
+- Always save default on empty values in Exp Policies. !57470
+- Allow all file types to be uploaded from the repo file upload tool. !57498
+- Fix Assignee dropdown showing assignee(s) twice. !57513
+- Fix inconsistent production environment definition on VSA. !57557
+- Fix namespace validation (unique path) on group creation. !57563 (Jonas Wälter @wwwjon)
+- Give better feedback when quick actions have no effect. !57570 (Hilco van der Wilk)
+- Fix security report fetching in Merge Requests. !57574
+- Display error message when runner installation instructions modal cannot be loaded correctly. !57588
+- Fix two data races in the branch names cache. !57607
+- Add aria labels to icon-only buttons. !57610
+- Fix Rails/SaveBang rubocop offenses in spec/controllers/projects/*. !57643 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang Rubocop offenses for admin controllers. !57644 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Make NuGet SearchQueryService q parameter optional. !57654 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix MR Source Branch styling. !57662
+- Fix updating GraphQL boards cards on assignees update. !57687
+- Revert Ignore default_enabled value in Feature.enabled?. !57707
+- Simplify Build Group name correction. !57739
+- Fix force_random_password option when creating Users via API. !57751
+- Fix issue where merge description not showing when merged with merge train. !57787
+- Covert has-tooltip on commit page to pajamas. !57858
+- Fix Rails/SaveBang rubocop offenses in spec/controllers/groups*. !57879 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang Rubocop offenses for requests module. !57883 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Disable trigger manual job button after click. !57885
+- Fix Rails/SaveBang rubocop offenses in auth controllers. !57886 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang Rubocop offenses for requests/api module. !57887 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for presenters. !57888 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang rubocop offenses in profiles & projects controllers. !57890 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in spec/features/admin. !57891 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in spec/features/dashboard. !57898 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in spec/features/issues. !57900 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in spec/features/projects. !57904 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in spec/features/. !57907 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang Rubocop offenses for hooks module. !57918 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fixes rubocop offenses Style/RedundantSelfAssignment. !57920 (Shubham Kumar (@imskr))
+- Fix closed icon for merge requests to match close issue icon. !57981 (jesus beltran)
+- Resolves offenses Style/ParallelAssignment. !57999 (Shubham Kumar (@imskr))
+- Resolves offenses Style/RedundantAssignment. !58013 (Shubham Kumar (@imskr))
+- Fix Rails/SaveBang Rubocop offenses for deployment modules. !58040 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for mattermost modules. !58048 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang rubocop offenses in spec/initializers. !58049 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang Rubocop offenses for issue models. !58052 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for legacy github import. !58054 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Resolves rubocop offenses Rails/WhereNot. !58062 (Shubham Kumar (@imskr))
+- Fix Rails/SaveBang Rubocop offenses for markdown cache modules. !58063 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for commit models. !58069 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Only link merge requests to successful deployments. !58072
+- Fix Rails/SaveBang Rubocop offenses for gitaly client models. !58089 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for email handlers. !58095 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang rubocop offenses in spec/factories_spec.rb. !58102 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang Rubocop offenses for ci models. !58104 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix Rails/SaveBang Rubocop offenses for banzai modules. !58108 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Ensures that the "Suggest GitLab CI" popover is shown after selecting a template type. !58120
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for groups controller. !58174 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for boards module. !58180 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses for error tracking module. !58182 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for groups module. !58183 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses for design management module. !58189 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for metrics module. !58190 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for helpers. !58192 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for api entities. !58193 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for api helpers. !58194 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix overflow UI bug with longer commit title on Wiki Page History. !58212 (Takuya Noguchi)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/graphql/types. !58241 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/banzai. !58242 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe in spec/lib/gitlab/alert_management. !58244 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/analytics. !58245 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/auth. !58246 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/checks. !58248 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Disable pages_serve_with_zip_file_protocol by default. !58253
+- Fix EmptyLineAfterFinalLetItBe offenses spec/lib/gitlab/github_import. !58256 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/graphql. !58261 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/hook_data. !58262 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses spec/lib/gitlab/import_export. !58264 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab/jira_import. !58266 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix visibility filter on explore projects page. !58293 (Jonas Wälter @wwwjon)
+- Fix EmptyLineAfterFinalLetItBe in spec/lib/gitlab/phabricator_import. !58297 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/lib/gitlab. !58314 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/mailers. !58319 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/blob_viewer. !58325 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/ci. !58327 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Update the group permission check in packages finder helper. !58329
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/concerns. !58367 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/models/project. !58372 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/policies. !58393 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/serializers. !58406 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/award_emojis. !58407 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/boards. !58413 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe in spec/services/design_management. !58416 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/environments. !58418 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/groups. !58423 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/ide. !58424 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/issues. !58425 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fix EmptyLineAfterFinalLetItBe offenses in spec/services/merge_requests. !58429 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Add aria labels to icon-only buttons. !58459
+- Fixes admin ci variables not showing up. !58496
+- Fix previous deployment fetches wrong deployment. !58567
+- Fix delete source branch status message. !58605
+- Fix member autocomplete sort order. !58652
+- Show bottom border on milestones sidebar widget for incident issues. !58662
+- Fix project access token creation group settings link. !58686
+- Avoid listing snippets through GraphQL when user profile is private. !58739
+- Fix notification when new Service Desk Issue is created. !58803
+- Fix dark mode colors of retried jobs in job details page. !58855
+- Fix Forward Deployment Worker causes deadlock. !58861
+- Fix select2 dropdowns in dark mode. !58862
+- Fix badge s and borders in dark mode info wells. !58875
+- Dark mode nav improvements. !58891
+- Fix style for adding a related issue in free tiers. !58893 (Michael Telgkamp @michael.telgkamp)
+- Fix user reference transformation in EpicsPipeline. !58913
+- Avoid inflating Redis memory when aborting pipelines. !59018
+- Fix sign out button in error pages. !59030
+- Add aria labels to icon-only buttons. !59037
+- Skip Rack Attack rate limiting for container registry event API. !59085
+- Fix loading pipelines by commit SHA for GraphQL. !59110
+- Drop user pipelines async when user is blocked. !59129
+- IPython KaTeX rendering of comparison operators for markdown. !59132 (Reinhold Gschweicher <pyro4hell@gmail.com>)
+- Fix MR diff file tree being hidden behind review bar. !59150
+- Add invited group members to search results on assignees widget. !59152
+- Fix tooltip not rendering. !59202
+- Fix revert commit query. !59356
+- Do not show sort by project in Package project page. !59367
+- Return 403 status code to the Runner when CI Job is deleted. !59382
+- Fix character escaping in Resolved By tooltips. !59428
+- Fix Jenkins integration for GitLab FOSS. !59476
+- Exclude projects dropdown from revert modal. !59504
+- Ensure all tooltips appear with a 500ms delay. !59561
+- Added feature flag to show/hide assignees GraphQL widget. !59620
+- Fix rare race condition in GitLab-internal feature flags with database load balancing enabled.
+
+### Deprecated (5 changes, 1 of them is from the community)
+
+- Rename event to action in Snowplow helpers and FE event handlers. !55698
+- Deprecate Product Intelligence test aggregated metrics. !57377
+- Bump recommended Redis version from 4.0 to 5.0. !59072 (Takuya Noguchi)
+- Deprecate Alerts for Managed Prometheus. !59433
+- Deprecate assigneeUsername issue filter in GraphQL. !59538
+
+### Changed (211 changes, 76 of them are from the community)
+
+- Adds CI pipeline and job features to GraphQL API. !44703
+- Unify the Docker Image build CI template and use the default branch instead of hardcoded 'master'. !51931 (dnsmichi)
+- Update performance bar background color to use Pajamas compliant colour palette. !52775 (Yogi (@yo))
+- Remove extra tooltip from pipelines overview page. !52902 (Yogi (@yo))
+- Update RubyGems metadata constraints and add gem metadata extraction. !53673
+- Returns deep stringified keys for merged_yaml in linting endpoint. !54336
+- Add space to graph in contributor page. !54431 (Yogi (@yo))
+- Move from btn-success to btn-confirm in app/views/profiles directory. !54748 (Yogi (@yo))
+- Add multi-line styling within contribution tooltip. !54765 (Yogi (@yo))
+- Update import statuses texts and icons. !54957
+- Add branch names field to repository GraphQL type. !55074
+- Remove referencing TokenWithIv model in the codebase and dynamic nonce creation feature flag. !55209
+- Move to btn-confirm from btn-success in views/invites directory. !55293 (Yogi (@yo))
+- Add validation for emails on push recipients. !55550
+- Migrate bootstrap modal to GlModal for repo single file uploads. !55587
+- Record sent in-product marketing emails and don't send the same email twice. !55840
+- Alerts integration form UX cleanup. !55892
+- Sync single-file mode user preference when changed from the MR cog menu checkbox. !55931
+- Remove group member: add option to also remove direct user membership from subgroups and projects. !55980 (Jonas Wälter @wwwjon)
+- Move to btn-danger for delete button in applications. !56088 (Yogi (@yo))
+- Apply new GitLab UI for badge in starrers page. !56091 (Yogi (@yo))
+- Move to btn-confirm from btn-primary in wiki empty state. !56192 (Yogi (@yo))
+- Move to btn-confirm in download directory dropdown. !56193 (Yogi (@yo))
+- Add btn-default class for Service Desk toggle in settings. !56195 (Yogi (@yo))
+- Move to confirm variant from success in pipeline_new directory. !56199 (Yogi (@yo))
+- Move to confirm varient from success in pipeline_editor directory. !56200 (Yogi (@yo))
+- Move from btn-success to btn-confirm in pipeline_schedules directory. !56201 (Yogi (@yo))
+- Move to confirm variant from success in feature_flags directory. !56202 (Yogi (@yo))
+- Move to confirm variant from success in alert_management directory. !56206 (Yogi (@yo))
+- Move from btn-success to btn-confirm in tracings directory. !56209 (Yogi (@yo))
+- Move from btn-success to btn-confirm in logs directory. !56211 (Yogi (@yo))
+- Move from btn-success to btn-confirm in environments directory. !56212 (Yogi (@yo))
+- Move from btn-success to btn-confirm in blob directory. !56213 (Yogi (@yo))
+- BulkImports: Track pipeline worker with BulkImports::Tracker#status. !56242
+- Update master to main inside monitor copy. !56264
+- Project Settings Operations headers Alerts/Error tracking/Jeager tracing/Jeager tracing expand/collapse on-click/on-tap. !56269 (Daniel Schömer)
+- Project Settings Operations header Grafana authentication expand/collapse on-click/on-tap. !56270 (Daniel Schömer)
+- Add support for commit_email to Users API. !56272
+- Project Settings Operations header Incidents expand/collapse on-click/on-tap. !56273 (Daniel Schömer)
+- Project Settings Operations header Metrics dashboard expand/collapse on-click/on-tap. !56274 (Daniel Schömer)
+- Clean up integration form titles and password fields. !56309
+- Move from btn-success to btn-confirm in branches directory. !56325 (Yogi (@yo))
+- Move from btn-success to btn-confirm in cleanup directory. !56329 (Yogi (@yo))
+- Move from btn-success to btn-confirm in default_branch directory. !56330 (Yogi (@yo))
+- Move from btn-success to btn-confirm in deploy_keys directory. !56331 (Yogi (@yo))
+- Move from btn-success to btn-confirm in forks directory. !56333 (Yogi (@yo))
+- Move from btn-success to btn-confirm in hooks directory. !56334 (Yogi (@yo))
+- Move from btn-success to btn-confirm in imports directory. !56336 (Yogi (@yo))
+- Allow setting the shard/replica separately for standalone indexes. !56344
+- Move from btn-success to btn-confirm in network directory. !56345 (Yogi (@yo))
+- Move usage of delayed_project_removal to namespace settings. !56397
+- Update buttons on issue page. !56425
+- Create new policies for read, destroy, and create tokens. !56464
+- Update Jira issues list to use new UI components. !56465
+- Move from btn-success to btn-confirm in protected_branches directory. !56477 (Yogi (@yo))
+- Move from btn-success to btn-confirm in protected_tags directory. !56478 (Yogi (@yo))
+- Move from btn-success to btn-confirm in runners directory. !56485 (Yogi (@yo))
+- Enable new RPC call to retrieve wiki files. !56491
+- Center the pipeline stages dropdown in the commit details page. !56505
+- Update mini pipeline appearance in commit page to match other mini pipelines in the application. !56510
+- Disable pipeline schedules when a user is blocked. !56513
+- Add Username to Email From Header in Notifications. !56588
+- WebIDE show fork button when cannot push code. !56608
+- Add empty state CTA in pipeline editor section for new root CI files. !56665
+- Support newlines for the chatops "run" command. !56668
+- Adds skipped state to duration cell for single stage manual pipelines. !56669
+- Support for --prefer-source option for Composer registry. !56693
+- Allow Email Replies to Notes to Create Discussions. !56711
+- Add id and short_sha GraphQL fields to jobType in the CI namespace. !56714
+- Remove the commit message from the package details UI. !56716
+- Assignee dropdown in issue page displays only participants by default. !56742
+- Render Kramdown format using Gitlab markup. !56750
+- Relax version validation on generic packages. !56755
+- Show popovers on hover and focus by default. !56778
+- Change icon size in the pipeline editor. !56780
+- Show password hint only if password_authentication_enabled_for_web? on new location logins. !56783 (Roger Meier)
+- Add Vulnerabilities::FindingEvidence model. !56790
+- Update compare branches button to btn-confirm. !56791
+- Update buttons and spacing on commit page. !56793
+- Update secondary nav elements right margin to 8px. !56794
+- Add created_at to job webhooks. !56835
+- Rename pipelines setting to CI/CD and move out from under repository section. !56857
+- Change the way deprecation information is presented in GraphQL documentation. !56864
+- Validate null constraint for cluster token name. !56868
+- Move from btn-success to btn-confirm in projects/services directory. !56937 (Yogi (@yo))
+- Move from btn-success to btn-confirm in projects/settings directory. !56938 (Yogi (@yo))
+- Move from btn-success to btn-confirm in projects/snippets directory. !56939 (Yogi (@yo))
+- Move from btn-success to btn-confirm in projects/tags directory. !56940 (Yogi (@yo))
+- Move from btn-success to btn-confirm in projects directory. !56943 (Yogi (@yo))
+- Move from btn-success to btn-confirm in registrations directory. !56944 (Yogi (@yo))
+- Move from btn-success to btn-confirm in users directory. !56945 (Yogi (@yo))
+- Adjust gitlab_database_transaction_seconds histogram bucket. !56952
+- Add extra fields to the external pipeline validation payload. !56969
+- Change assignee dropdown invite to utilize invite modal. !57002
+- Enable DISTINCT optimization for ObjectHierarchy globally. !57052
+- Redirect to the pipeline editor when clicking on CI/CD quick links. !57085
+- Update learn gitlab template for new registrations. !57098
+- Add loading icon to create merge request button. !57105
+- Move Pipeline Editor repo link outside of feature flag conditional. !57144
+- Show the Contribution Analytics promotion page for users without permission. !57222
+- Show skipped duration state for all skipped pipelines. !57242
+- Add Runner ID as title in Runner details page. !57247
+- Remove feature flag usage_data_track_ci_templates_unique_projects. !57280
+- Deprecate but keep support for Klar up to version 3. A new analyzer based on Trivy will be used from version 4 onwards. !57281
+- Hydrate some of the variables in the Overview tab suggestion commit placeholder by switching the Diffs data source for it. !57419
+- Remove Slack attachment from new issues created via Slash commands. !57431
+- Make VALIDATION_REQUEST_TIMEOUT configurable. !57521
+- Remove programmatic access to registration tokens. !57524
+- Update Jira subscriptions list to use Vue. !57561
+- Update runner badges look and feel in admin runners table. !57566
+- Rename jobs to promote a smoother transition between Klar and Trivy based scanners. !57593
+- Do not trim input for sample & test payload on alerts integration form. !57617
+- Allow a Global ID to be used when filtering issue by iterationId in GraphQL. !57620
+- Add tags field to jobType in the CI namespace. !57631
+- Expose createdAt and updatedAt fields for Board in the GraphQL API. !57645
+- Update validation trigger flow on the alerts integration form. !57697
+- Remove groupId and projectId arguments to Runner install instructions. !57720
+- GraphQL: expose milestone iid. !57732
+- Move commit neighbor buttons to sticky MR controls. !57743
+- Update title on revoke member invite modal and hide unneeded related issues and merge requests checkbox. !57755
+- Deprecate btn-warning on admin area delete user modal. !57761
+- Remove deprecated button classes from issue detail view. !57763
+- Utilize btn-tertiary for copy project id on project overview. !57766
+- Remove top margin for print layout. !57824
+- Fail batch-aborted pipelines with reason. !57838
+- Replace deprecated Close Milestone button on list view. !57871
+- Replace deprecated button on new epic creation form. !57874
+- Hide pipeline filtered search when no pipeline exists. !57881
+- Add gl-badge for badges in group members page. !57933 (Yogi (@yo))
+- Add gl-badge for badges in project members page. !57934 (Yogi (@yo))
+- Display error message when dashboard activity fetch fails. !57935
+- Add gl-badge for badges in dashboard nav. !57936 (Yogi (@yo))
+- Update GIicon size in geo_node_header.vue. !57952 (singhanshuman)
+- Move to confirm variant for buttons in vulnerabilities page. !57961 (Yogi (@yo))
+- Add gl-badge for badges in MR page nav. !57969 (Yogi (@yo))
+- Align project stars and date to center of project in groups page. !57972 (Yogi (@yo))
+- Add btn-icon class for GPG key delete button. !57974 (Yogi (@yo))
+- Add btn-default for mirror update button. !57978 (Yogi (@yo))
+- Update ruby-magic-static to v0.3.5. !57984
+- Reduce button size for revoke button in PAT page. !57989 (Yogi (@yo))
+- Apply gl-form-input for fields in GPG keys page. !58002 (Yogi (@yo))
+- Apply gl-form-input for fields in new schedule page. !58015 (Yogi (@yo))
+- Move to btn-confirm from btn-success in licenses directory. !58024 (Yogi (@yo))
+- Move to btn-confirm from btn-success in geo directory. !58031 (Yogi (@yo))
+- Move to btn-confirm from btn-success in push_rules directory. !58033 (Yogi (@yo))
+- Move to btn-confirm from btn-success in devise directory. !58035 (Yogi (@yo))
+- Add btn-default class for toggle button in admin templates. !58041 (Yogi (@yo))
+- Move to btn-confirm from btn-success in ee project settings. !58047 (Yogi (@yo))
+- Improve UI of Runner Installation instructions: add a loading indicator, use checkmark on selected options, reduce height of modal. !58055
+- Update New Issue form description copy from 'wite a comment' to 'wite a description'. !58068
+- BulkImports: Import milestone iid. !58107
+- Replace deprecated buttons on epic detail view. !58152
+- Replace deprecated buttons on board view. !58153
+- Small text updates on the SAST Config UI page. !58188
+- Update GlIcon size in environments.vue. !58208 (Md. Pial Ahamed (@root.pial))
+- Link to revision in version on admin dashboard. !58225 (Yogi (@yo))
+- Rename Gitlab to GitLab in admin dashboard. !58228 (Yogi (@yo))
+- Remove underline in apply for credit button in k8s page alert. !58232 (Yogi (@yo))
+- Add btn-default class for file picker button. !58238 (Yogi (@yo))
+- Rename Submit issue to Create issue in boards and docs. !58243 (Yogi (@yo))
+- Update label container background and border colour from dark grey to use the same light grey as the board's containers. !58279
+- UI improvement of Admin Dashboard top page. !58373 (Takuya Noguchi)
+- Add warning icon beside in progress text if pipeline is stuck. !58427
+- Set workhorse_extract_filename_base feature flag to default. !58504
+- Update resolving alert system notes to use term Recovery Alert. !58513
+- Update default spinner color to pajamas. !58517
+- Update ruby-magic to v0.3.2. !58537
+- Fix HAML in _promote_issue_weights.html.haml. !58546 (Yogi (@yo))
+- Update popover placement and cursor on warning icon in PB. !58552 (Yogi (@yo))
+- Remove vertical-align-middle from user location and work in profile. !58554 (Yogi (@yo))
+- Enable chronological sort order for other items in the performance bar. !58572
+- Use GlTable design system component for pipelines table. !58581
+- Update MobSF to version 3.4.0 in the SAST template. !58594
+- Add count of unique users to receive on-call notification to usage ping. !58606
+- Add global callout for Service template deprecation. !58613
+- Remove cached_api_merge_request_version feature flag. !58670
+- Bump minimum git version to v2.31.0. !58737
+- Add a chaos endpoint that signals QUIT. !58755
+- Improve runners status icon usability and accessibility in the project settings view. !58781
+- Make ref parameter optional in get raw file api. !58787
+- Centralize shared state in Authoring section. !58790
+- Update default branch in divergence graph. !58871
+- Update Pipeline Graph Visualization. !58889
+- Move initial pipeline processing to Sidekiq. !58901
+- Display runner token and description consistently in the job sidebar and admin list. !58904
+- Update ruby-magic to v0.4.0. !58947
+- Update search and sort from the branches page. !58951
+- Return email confirmation time from email entity. !58957
+- Update runner type indicators in view/edit pages. !59005
+- Default enable cascading settings feature flag. !59026
+- Fix gl-emoji in abuse report page. !59078 (Yogi (@yo))
+- Adds new clusters_integrations_prometheus table and model for Prometheus Cluster Integration. !59091
+- Include project and build ID in Pages tmp directory. !59106
+- Deactivate prune webhook logs worker. !59120
+- Reduce pipeline tooltip delay to 0. !59155
+- Remove gldropdown_branches feature flag. !59179
+- Clarify on welcome page that we do not share any data. !59183
+- Schedule artifact expiry backfill again. !59270
+- Create prometheus service asynchronously by default when creating a project. !59273
+- Show archive notice on empty project. !59286
+- Enable in-product emails only for free instances. !59290
+- Log all API uploads that exceed max attachment size. !59292
+- Pages: Add feature flag to disable deployment to legacy storage. !59298
+- Hide What's New for unauthenticated users. !59330
+- Add queue label to metrics dispatched by background transaction. !59344
+- Update Ruby from 2.5 to 2.7 in Dockerfile templates. !59345 (Takuya Noguchi)
+- Update profile SSH key labels to refer to expired keys as "Expired". !59381
+- Display project settings runners identifiers consistently. !59383
+- Migrate Start Review button on MRs to use confirm variant. !59523
+- Update auto-build-image to v0.6.0, updating the included docker to 20.10.6 and pack to 0.18.0. !59525
+- Apply new GitLab UI for buttons in create tag page. (Yogi (@yo))
+
+### Performance (107 changes, 1 of them is from the community)
+
+- Cache namespace traversal path. !52854
+- Use empty-query by default to check database connection. !54366 (Leandro Gomes @leandrogs)
+- API JSON caching for tags endpoint. !54975
+- Cache open merge requests count in group sidebar. !55971
+- Add index on ci_stages to speed up batch pipeline cancellation. !56126
+- Backfill traversal_ids for gitlab-org staging. !56293
+- Linear version of Namespace#self_and_descendants. !56296
+- Add database index for cancelable ci_pipelines on user and id. !56314
+- Improve the performance of Merge Request Analytics table. !56380
+- Move fetching projects and groups on todos page to API call. !56507
+- Fix Workhorse acceleration for encoded project IDs in API. !56731
+- Prevent sticking to DB primary when experiments are tracked. !56852
+- Move link icon to CSS. !56980
+- Drop unused preload from PipelineSerializer. !56988
+- Speed up destroying of group Todos when user leaves group. !56995
+- Optimise query for Deployment#previous_environment_deployment in LinkMergeRequestWorker. !57039
+- Optimize database performance of loading assigned issue count on header bar. !57073
+- Backfill traversal_ids for gitlab-org .com. !57075
+- Check access only for requesting user when checking if subscribed. !57201
+- Add gin index for namespaces.traversal_ids. !57207
+- Accelerate uploads via API with Workhorse. !57250
+- Add additional index to merge_requests table for project/status/created_at. !57267
+- Preload group parent to fix N+1 queries for project search. !57277
+- Preload additional data to fix N+1 queries for merge request search. !57284
+- Remove N+1 for API commits/:sha/merge_requests. !57290
+- Remove N+1 for API :id/deploy_keys. !57295
+- Reduce query count for ExpirePipelineCacheWorker. !57304
+- Remove N + 1 for milestones issues. !57349
+- Add partial index to improve mirrors update. !57353
+- Apply optimizations to JobsController#show.json. !57367
+- Fix N+1 issue when loading merge request comments. !57374
+- Perform more merge request creation tasks asynchronously to improve response times. !57453
+- Fix N+1 for searching notes (comments) scope. !57460
+- Resolve N + 1 for JIRA pulls. !57482
+- Make `ci_runner_builds_queue_on_replicas` default. !57484
+- Reduce queries on group labels controller. !57517
+- Reduce number of queries in mergeRequestSetAssignees GraphQL mutation. !57523
+- Reduce N+1 queries in creating todos after user mentions in a note. !57525
+- Optimize Deploy Keys Presenter. !57551
+- Add index to improve project deployments endpoint performance. !57554
+- Resolve N + 1 for deployments API. !57558
+- Cache merge request diff version API. !57568
+- Reduce SQL requests number for issue links. !57602
+- Avoid N+1 query when updating todo count cache. !57622
+- Resolve N + 1 for commits notes API. !57641
+- Resolve more N+1 issues in Jira pulls API. !57658
+- Reduce number of SQL queries in Profiles::SlacksController#edit. !57674
+- Preload all user callouts in a single request. !57679
+- Add TargetProject And SourceBranch Index To MergeRequest. !57691
+- Optimize group level Maven package finder query. !57692
+- Remove ci_lower_frequency_trace_update feature flag. !57713
+- Cache MRs count on milestone page. !57714
+- Fix N+1 for searching milestone scope. !57715
+- Avoid N+1 queries in breadcrumbs. !57725
+- Move project hooks routes under /-/ scope. !57734
+- Add composite index to support epic filtering by award emoji. !57759
+- Reduce query count for popular worker ExpireJobCacheWorker. !57773
+- Remove feature flag optimize_issue_filter_assigned_to_self. !57775
+- Ensure a project iid is set before transitioning on pipeline error. !57783
+- Fix N+1 in projects REST endpoint with forked projects. !57798
+- Bulk-abort user pipelines on block. !57801
+- Move pipelines calculation from widget.json to cached_widget.json. !57822
+- Delete all issuable todos asynchronously when issuable is destroyed. !57830
+- Reduce queries on projects labels controller. !57864
+- Optimize database query for last deployment. !57979
+- Fix N + 1 for MilestonesController#merge_requests. !57980
+- Minor performance improvement for ref finder. !58099
+- Reduce milestone issue list display limit to 500. !58168
+- Partial index optimization for namespaces id. !58220
+- Add caching to variables calculation of builds. !58286
+- Reduce SQL requests on building artifacts. !58339
+- Drop unused mirror_data index. !58349
+- Add index on file_store for pages_deployments table. !58355
+- Eliminage N+1 database queries on the user notifications page. !58397
+- Create finder for searching branch names via redis. !58439
+- Preload associations in Ci::Pipeline#cancel_running. !58484
+- Add new MergeRequests::SyncCodeOwnerApprovalRulesWorker. !58512
+- Create the pipelines asynchronously when refreshing merge requests. !58542
+- Optimize searching cherry-picked merge requests for linking deployments. !58568
+- Use object quarantine directory to enumerate new LFS pointers. !58634
+- Resolve merge request todos asynchronously on update. !58647
+- Enable cached avatar lookups by email. !58659
+- Resolve group_member policy n+1. !58668
+- Move CI related paths to cached MR widget. !58711
+- Fix N+1 in REST projects and service desk. !58747
+- Optimize environment serializer to reduce N+1 problems. !58748
+- Handle assignee changes side effects asynchronously. !58783
+- Remove paths from BuildArtifactEntity. !58818
+- Use fast path helpers in BuildDetailsEntity. !58824
+- Add framework for using specialized services to improve performance of MergeRequests::UpdateService. !58836
+- Fix N+1 for searching commits. !58867
+- Fix N+1 queries to find or initialize services. !58879
+- Adjust indices to improve query performance for notification_settings. !58895
+- Fix N+1 queries for issues search. !58915
+- Optimize query for cherry picked merge requests. !58967
+- Cache issues count in sidebar at group level. !59004
+- Improve performance by moving TODO creation out of the jobs/request path. !59022
+- Eliminate N+1 database queries on the user notifications page within the project notifications section. !59029
+- Add migration to index members on user_id, source_id, and source_type. !59051
+- Reduce the number of SQL queries executed on Maven file API endpoints. !59136
+- Add user index on spam logs. !59151
+- Limit number of GraphQL requests tracked in performance bar to 10. !59158
+- Add index for the path column on the packages_maven_metadata table. !59241
+- Reduce timeouts on tab counts for searches to 5s. !59435
+- Add partial index on members to optimize highest access level query. !59455
+- Optimize issuable updates. !59468
+- Ensure the project iid is set before dropping pipeline. !59626
+
+### Added (108 changes, 11 of them are from the community)
+
+- Support adding and removing assignees w/ push opts. !25904
+- Add Go Packages as a cache for the Go proxy. !34558 (Ethan Reesor (@firelizzard))
+- Allow admin users to define admin notes on groups. !47825
+- Resolve nested variable values sent to the runner. !48627
+- Hide "Resolve conflicts" button when source branch is protected. !51121 (Marcin Majkowski @marcinmajkowski)
+- Allow Add Comment To Review. !51718 (Lee Tickett @leetickett)
+- Add click to copy button over project ID. !53224 (Virgile MATHIEU @vmathieu)
+- Convert admin mode feature flag to system application setting. !53610 (Diego Louzán)
+- Send in-product marketing emails to guide users setting up their groups. !53715
+- Automatically try to migrate gitlab pages to zip storage. !54578
+- Add user-merge request interaction type. !54588
+- Save usage_data_id from versions app in raw_usage_data. !54738
+- Create UserPreferences API. !55033
+- Support group applications. !55152 (Jonas Wälter @wwwjon, Bastian Blank)
+- Ability to add Prometheus as cluster integration. !55244
+- Add JavaScript, TypeScript, and React support to the semgrep analyzer. !55257
+- Added local_store to Pages settings in gitlab.yml file. !55470
+- Add additional fields to dast_site_profiles database table. !55579
+- Cascade delayed project removal setting lookup to parent namespace. !55678
+- Support automatic transitions of Jira issues. !55773
+- Add blocked issues detail popover for boards cards. !55821
+- Allow users to mark pages projects as not deployed during migration to zip storage. !55862
+- Add dast_profile_secret_variables table. !56067
+- Support daily DORA metrics API. !56080
+- Track agent token last_used. !56143
+- Add CI_COMMIT_AUTHOR predefined variable. !56144 (Craig Andrews @candrews)
+- Linking to a single line number in Web IDE. !56159
+- Migrate group badges when using Bulk Import. !56357
+- Add Ability to Edit Freeze Periods. !56407
+- Add GraphQL mutation to delete an existing release asset link. !56417
+- Personal access token revoke for managed accounts (feature flag removed). !56427
+- Migration: add trial extension type to gitlab_subscription. !56460
+- Geo: Prepare snippet_repositories and snippet_repository_registry tables for adding verification. !56596
+- User Availability - Allow users to schedule un-setting of their status values. !56649
+- Add missing icon for files with .c++ extension. !56650 (Peter Kovář @peter.kovar)
+- Add in-page search for all settings pages. !56659
+- Support include_ancestors when querying group milestones via GraphQL. !56667
+- Add recaptcha to top-level group creation behind feature flag. !56707
+- Configure issue and merge request description templates at group level and rolldown description templates in the group hierarchy. !56737
+- Enabled phabricator importer by default. !56765
+- Generalize alert details status. !56800
+- Create database table dast_profiles_pipelines. !56821
+- Allow selecting a CI template by providing the template name as a URL param gitlab_ci_yml. !56861
+- Group SAML - Check SSO status on Git activity. !56867
+- Send email notification on SSH key expiration. !56888
+- Support custom tag formats for changelogs. !56889
+- Delete records from security_findings table with missing UUID values. !56975
+- Link squashed commits using the changelog API. !56985
+- Allow users to enable force push to protected branches. !57053
+- Add rake tasks for Pages deployment migration. !57120
+- Code suggestions correctly add based on multi-line comments. !57125
+- BulkImports: Add `BulkImports::PipelineWorker` to process each BulkImport pipeline on its own background job. !57153
+- Connect Registries searches to URL. !57251
+- Sort code quality degradations in MR Widget comparison reports. !57258
+- Add unified metrics definition YAML file API endpoint. !57270
+- Clarify what coverage means on the merge request pipeline section. !57275
+- Improve payload format of DORA metrics API. !57314
+- Expose timelogs against issues and merge requests in GraphQL. !57321 (Lee Tickett @leetickett)
+- Populate missing dismissal information for vulnerabilities. !57347
+- Clarify the impact of selecting incidents in the new issue form. !57373
+- Add jobs field to the project type. !57376
+- When removing a user, warn Admin user is part of an on-call schedule. !57397
+- Exposes schedulingType on CiJobType and adds usesNeeds to PipelineType. !57398
+- '/projects/:id/repository/compare' supports comparing branches/commits on different projects. !57418 (Exchizz (@Exchizz))
+- Add geo database changes for pipeline artifact replication. !57506
+- Add more fields to the job type. !57530
+- Capture test report summary widget views via usage ping. !57543
+- Allow filtering GraphQL alertManagementIntegrations and alertManagementHttpIntegrations by ID. !57590
+- Add search functionality to Jira Connect App namespaces. !57669
+- Add Conan GraphQL type to package. !57719
+- Log message when upload via API exceeds limit. !57774
+- Migration: Add cloud column to licenses. !57781
+- Re-add swap revisions feature (legacy). !57802
+- Add support for SMTP connection pooling when sending emails. !57805
+- Add a migration to insert trail plans within SAAS for Ultimate and Premium plans. !57814
+- Add link to test case file in the test report for merge requests. !57911
+- Upgrade GitLab Pages to v1.37.0. !57946
+- Add negative filters for merge requests API. !58021
+- Add setting to change default target project for merge requests from forks. !58093
+- Support negated filtering of issues by iids, label_name, milestone_title, assignee_usernames and assignee_id in GraphQL. !58154
+- User notification when SSH key is set to expire soon. !58171
+- Allow user to filter epics by their reaction emoji via GraphQL. !58211
+- Add config support for using Microsoft Graph with MailRoom. !58250
+- Let users create groups and projects at signup and onboard them through issues on gitlab.com. !58301
+- Reschedule background migration to copy projects.container_registry_enabled to project_features.container_registry_access_level. !58360
+- Prettify JSON of sample alert payload. !58433
+- Add spent quick action alias. !58539 (Lee Tickett @leetickett)
+- Add GraphQL endpoint for test report summary for pipelines. !58596
+- Show pipeline finished timestamp on MR widget. !58618
+- Add Hello World CI Template. !58649
+- Make blobs directly accessible through the graphql repository. !58677
+- Add target_type column to dast_site_profiles database table. !58723
+- Add GraphQL endpoint for a specific test suite in pipelines. !58924
+- Add blob filename to attachment content disposition. !58977
+- Rollout product_intelligence_metrics_names_suggestions feature flag. !58995
+- Support filtering by assignee wildcard in GraphQL board list issues query. !58996
+- Remove pages_serve_from_migrated_zip feature flag. !59002
+- Enables multiple_cache_per_job feature flag by default. !59016
+- Add CODECLIMATE_PREFIX variable to code quality template. !59041
+- Add instance_url column to the jira_connect_installations table. !59148
+- Remove codequality_backend_comparison feature flag. !59320
+- Allow cherry-picking to a fork's parent. !59399
+- Add kotlin support to spotbugs-sast job. !59431
+- Upgrade GitLab Pages to 1.38.0. !59464
+- Add documentation about Pages deployment migration. !59475
+- Re-enable serving pages with zip file protocol. !59486
+- Enable pipeline_status_for_pipeline_editor by default. !59495
+- Extract creation of prometheus service from Projects::CreateService.
+
+### Other (160 changes, 74 of them are from the community)
+
+- Resolve Improve text for error No issue found for given params in UI. !45064
+- Update gon gem to 6.4.0. !51210
+- Initialize conversion of events.id to bigint, and add execute_batched_migrations_on_schedule feature flag to control scheduled background migrations. !51332
+- Apply new GitLab UI buttons in the webhooks list. !51977 (Yogi (@yo))
+- Fix alignment of folder-caret and actions button in the subgroup list. !52400 (Yogi (@yo))
+- Remove JSON endpoint for project container index. !52407 (Takuya Noguchi)
+- Update HIPAA logo for project templates. !53270
+- Apply GitLab UI button styles to buttons in app/views/shared directory. !53474 (Yogi (@yo))
+- Drop non-partitioned audit_events_archived table. !53880
+- Add message for repository backup skip. !54285
+- Updated MR Approvals to specify settings section. !54985
+- Remove markdown from comment search result. !55255
+- Deduplicate issue_metrics table. !55285
+- Document how to use custom omniauth button icon. !55388 (Diego Louzán)
+- Create Cop to enforce using policies framework for administrators. !55693 (Diego Louzán)
+- Remove tabindex on skip link that could negatively impact keyboard focus management and order. !55756
+- Mark merge request as preparing on create. !56086
+- Update Search and Apply buttons to confirm variant to align with Pajamas design system. !56122
+- Decrease spacing between controls on the Commit page header. !56129
+- Create new unit test tables. !56137
+- Convert Commit dropdown to Vue. !56142
+- Enable the instance variables UI. !56255
+- Set the scope in search context from group issue and MR pages. !56383
+- Remove On-call Edit feature flag. !56445
+- Fix cop offenses for Style/HashTransformation in app directory. !56579 (Karthik Sivadas @karthik.sivadas)
+- Fix cop offenses for Style/HashTransformation in ee directory. !56581 (Karthik Sivadas @karthik.sivadas)
+- Fix cop offenses for Style/HashTransformation in lib directory. !56583 (Karthik Sivadas @karthik.sivadas)
+- Fix cop offenses for Style/HashTransformation in spec directory. !56586 (Karthik Sivadas @karthik.sivadas)
+- Track epic note created via usage ping. !56609
+- Aggregate code review metrics. !56734
+- Update android template to default branch. !56738
+- Stop using json-schema gem for production. !56745
+- Refactor docs and UI for Jaeger tracing. !56819
+- Add support for the MATERIALIZED keyword when using WITH (CTE) queries in PostgreSQL 12. !56976
+- Externalize project deploy keys (edit) strings. !57015 (Jonston Chan @JonstonChan)
+- Migrates the expand button in MR reports to GitLab UI. !57021
+- Update GitLab Runner Helm Chart to 0.27.0. !57048
+- Remove unnecessary use of freeze. !57056 (Lee Tickett @leetickett)
+- Remove unnecessary use of freeze. !57057 (Lee Tickett @leetickett)
+- Remove unnecessary use of freeze. !57058 (Lee Tickett @leetickett)
+- Remove unnecessary use of freeze. !57059 (Lee Tickett @leetickett)
+- Remove unnecessary use of freeze. !57060 (Lee Tickett @leetickett)
+- Remove the FF skip_dag_manual_and_delayed_jobs. !57086
+- Remove the FF ci_trigger_payload_into_pipeline. !57087
+- Updated documented K8s snippet to undeprecated API. !57100 (Raimund Hook (@stingrayza))
+- Validate NOT NULL constraint on gitlab_subscriptions namespace_id. !57113
+- Update button variants on the project boards controller to better align with the Pajamas Design System. !57129
+- Remove the recursive_namespace_lookup_as_inner_join feature flag. !57131
+- Only display focus mode button at md+ breakpoint and make it the tertiary style. !57139
+- Remove feature flag for customize homepage banner. !57147
+- Update issuable submit content order, button variants, and button alignment. !57172
+- Send invited users to sign up instead of sign in when possible. !57240
+- Updated UI text to match style guidelines. !57276
+- Enable RedundantFreeze Cop and Remove Remaining Offenses. !57288 (Lee Tickett @leetickett)
+- Review and revise Integrations/Asana UI text. !57362
+- Add enqueueing of Onboarding Progress to the Invite Service. !57372
+- Validate foreign key on ServiceHooks. !57483
+- Removed migrate_delayed_project_removal feature flag. !57541
+- Migration to cleanup after partitioned web_hook_logs backfill. !57580
+- Update BulkImport default page size to 500 in order to process larger page of data. !57594
+- Refactor member/invitation services to share common code. !57618
+- Fix triggers page externalization. !57637 (Jonston Chan @JonstonChan)
+- Add foreign key from web_hooks to groups. !57735
+- Remove batch_suggestions feature flag. !57745
+- Remove remove_resolve_note feature flag. !57757
+- Remove deprecated info button from issue list view. !57762
+- Track the different overflows for diff collections. !57790
+- Update Jira plugin UI copy. !57793 (Russell Dickenson rdickenson@gitlab.com)
+- Rename table/model vulnerability_finding_fingerprints to *_signatures. !57840
+- Move to btn-confirm from btn-success in pipelines quotas page. !57861 (Yogi (@yo))
+- Remove records without group from webhooks table. !57863
+- Updated UI text to match style guidelines. !57884
+- Add a template for using Indeni Cloudrail in GitLab. !57919
+- Externalise-strings in _ip_limits.html.haml. !58003 (nuwe1)
+- Externalise strings in application_settings/_pages.html.haml. !58011 (nuwe1)
+- Externalize strings in _performance.html.haml. !58016 (nuwe1)
+- Externalise strings in application_settings/_performance_bar.html.haml. !58018 (nuwe1)
+- Externalise strings in /application_settings/_realtime.html.haml. !58039 (nuwe1)
+- Externalise strings in _registry.html.haml. !58051 (nuwe1)
+- Externalise strings in /application_settings/_repository_check.html.haml. !58058 (nuwe1)
+- Update Design Management added design icon to be slightly smaller which conforms to the Pajamas design guide. !58086 (Andreas Resch @reschandreas)
+- Externalise strings in admin/users/_head.html.haml. !58101 (nuwe1)
+- Updating success button to confirm variant and reordering buttons per Pajamas Design System guidelines for buttons. !58112
+- Externalize strings in /abuse_reports/index.html.haml. !58132 (nuwe1)
+- Use Gitlab::AppLogger in settings. !58134 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Fill in all placeholder values in the apply suggestion commit message placeholder text. !58136
+- Externalize strings in broadcast_messages/index.html.haml. !58146 (nuwe1)
+- Externalize strings in deploy_keys/new.html.haml. !58148 (nuwe1)
+- Externalize strings in hook_logs/_index.html.haml. !58155 (nuwe1)
+- Externalize strings in projects/_projects.html.haml. !58158 (nuwe1)
+- Externalize strings in projects/index.html.haml. !58160 (nuwe1)
+- Externalize strings in services/index.html.haml. !58167 (nuwe1)
+- Externalise strings in runners/_runner.html.haml. !58168 (nuwe1)
+- Externalise strings in spam_logs/_spam_log.html.haml. !58169 (nuwe1)
+- Fix EmptyLineAfterFinalLetItBe Rubocop offenses for projects controller. !58176 (Huzaifa Iftikhar @huzaifaiftikhar)
+- Externalize strings in _confirmation_instructions_account.html.haml. !58214 (nuwe1)
+- Externalize strings in _confirmation_instructions_account.text.erb. !58215 (nuwe1)
+- Externalize strings in _confirmation_instructions_secondary.text.erb. !58218 (nuwe1)
+- Externalise strings in password_change files. !58219 (nuwe1)
+- Externalize strings in unlock_instructions.html.haml. !58227 (nuwe1)
+- Externalize strings in passwords/edit.html.haml. !58233 (nuwe1)
+- Externalize strings in passwords/new.html.haml. !58236 (nuwe1)
+- Externalize strings in sessions/_new_ldap.html.haml. !58267 (nuwe1)
+- Externalize strings in registrations/edit.html.erb. !58268 (nuwe1)
+- Externalize strings in sessions/_new_crowd.html.haml. !58269 (nuwe1)
+- Externalise strings in sessions/new.html.haml. !58274 (nuwe1)
+- Externalize strings in sessions/two_factor.html.haml. !58275 (nuwe1)
+- Externalize strings in shared/_omniauth_box.html.haml. !58281 (nuwe1)
+- Externalize strings in shared/_sign_in_link.html.haml. !58283 (nuwe1)
+- Externalise strings in shared/_tabs_ldap.html.haml. !58285 (nuwe1)
+- Externalize strings in unlocks/new.html.haml. !58289 (nuwe1)
+- Externalise strings in labels/edit.html.haml. !58294 (nuwe1)
+- Externalize strings in milestones/_form.html.haml. !58298 (nuwe1)
+- Externalize strings in milestones/edit.html.haml. !58306 (nuwe1)
+- Externalise strings in runners/edit.html.haml. !58315 (nuwe1)
+- Externalise strings in groups/_activities.html.haml. !58324 (nuwe1)
+- Externalize strings in groups/_create_chat_team.html.haml. !58328 (nuwe1)
+- Externalise strings in groups/_group_admin_settings.html.haml. !58331 (nuwe1)
+- Externalises strings in groups/activity.html.haml. !58332 (nuwe1)
+- Update pipeline email service UI text. !58377
+- Update pot file. !58392
+- Updated UI text for Assembla integration to match style guidelines. !58400
+- Externalize strings in instance_configuration/_gitlab_ci.html.haml. !58435 (nuwe1)
+- Externalize strings in instance_configuration/_gitlab_pages.html.haml. !58437 (nuwe1)
+- Externalize strings in help/index.html.haml. !58441 (nuwe1)
+- Externalize strings in instance_configuration.html.haml. !58443 (nuwe1)
+- Externalize strings in chat_names/_chat_name.html.haml. !58444 (nuwe1)
+- Externalizes strings in viewers/_empty.html.haml. !58451 (nuwe1)
+- Externalize strings in viewers/_loading_auxiliary.html.haml. !58454 (nuwe1)
+- Review and revise Pages settings-related UI text. !58479
+- Updated Alert integration UI text to match style guidelines. !58507
+- If creating a new issue fails in boards, remove the issue card from a list. !58558
+- Enable Layout/SpaceAfterColon cop for HAML. !58564 (Takuya Noguchi)
+- Update mattermost integration UI text. !58570
+- Update Emails on push UI Text to match style guidelines. !58597
+- Updated outdated UI text and docs. !58600
+- Update UI text of Jenkins integration. !58623
+- Track total_tuple_count for batched migrations. !58675
+- Update Project Management metrics definitions. !58710
+- Add correlation id in X-Request-ID for external pipeline validation. !58741
+- Update UI text from timing to Duration. !58838
+- Update Discord integration UI text. !58842
+- Update UI text for slack notifications integration. !58845
+- Review and revise Redmine Integration UI text. !58899
+- Bump devise-two-factor version. !58929
+- Update metric definition under verify testing group. !59028
+- Remove issue_perform_after_creation_tasks_async feature flag. !59042
+- Obtain pipeline validation service token from config not ENV. !59101
+- Bump rspec-rails to 4.1.2. !59130
+- Add index services on project and type where inherit is null. !59168
+- Replace deprecated skeleton loader in the user popover with slightly darker SVG based skelton loader. !59180
+- Bump rspec-rails to 5.0.1. !59194
+- Update drone integration UI text. !59231
+- Add index on (created_at, web_hook_id) to the partitioned web_hook_logs. !59261
+- Add index on web_hook_id to partitioned web_hook_logs. !59266
+- Add a foreign key from the partitioned web_hook_logs to web_hooks. !59282
+- Bump minimum required Go version for workhorse to 1.15. !59347
+- Update UI text for TeamCity integration. !59493
+- Remove redundant index from epics. !59494
+- Externalize strings in labels/new.html.haml. (nuwe1)
+
+
+## 13.10.4 (2021-04-27)
+
+### Security (6 changes)
+
+- Prevent tokens with only read_api scope from executing mutations.
+- Update mermaid to version 8.9.2.
+- Do not allow deploy tokens in the dependency proxy authentication service.
+- Disable keyset pagination for branches by default.
+- Bump Carrierwave gem to v1.3.2.
+- Restrict setting system_note_timestamp to owners.
+
+
+## 13.10.3 (2021-04-13)
+
+### Security (3 changes)
+
+- Check image content type before running exiftool in workhorse.
+- Clean only legitimate JPG and TIFF files.
+- Update ruby-saml and rexml gems.
+
+
+## 13.10.2 (2021-04-01)
+
+### Fixed (1 change)
+
+- Fixed rendering of the image blobs. !57479
+
+### Added (1 change)
+
+- Improve performance for composer v2 clients. !55169
+
+
+## 13.10.1 (2021-03-31)
+
+### Security (6 changes)
+
+- Leave pool repository on fork unlinking.
+- Fixed XSS in merge requests sidebar.
+- Fix arbitrary read/write in AsciiDoctor and Kroki gems.
+- Prevent infinite loop when checking if collaboration is allowed.
+- Disable arbitrary URI and file reads in JSON validator.
+- Require POST request to trigger system hooks.
+
+### Removed (1 change)
+
+- Make HipChat project service do nothing. !57434
+
+### Other (3 changes)
+
+- Remove direct mimemagic dependency. !57387
+- Refactor MimeMagic calls to new MimeType class. !57421
+- Switch to using a fake mimemagic gem. !57443
+
+
+## 13.10.0 (2021-03-22)
+
+### Security (3 changes)
+
+- Workhorse: prevent escaped router path traversal.
+- Workhorse: Stop logging when path is excluded.
+- Patch Kramdown syntax highlighter gem.
+
+### Removed (2 changes)
+
+- Remove Remove from board button from board sidebar. !53946
+- Remove workaround for icon loading in Chrome 84. !56114
+
+### Fixed (99 changes, 23 of them are from the community)
+
+- Fix button alignment in design management header. !48003
+- Updated UI text to match style guidelines. !50383
+- Don't close auto suggest select boxes on click if only the mouseup (but not the mousedown) event happened outside the box. !51139 (Simon Stieger @sim0)
+- Fix Auto DevOps deploys that use a default branch that's not named 'master'. !53280 (Mitchell Cash @MitchellCash)
+- Correct job artifacts API download for expired and locked files. !53567 (Fabio Huser)
+- Fix project import error occurring due to default visibility. !53827 (Jonas Wälter @wwwjon)
+- Fix relative URL with composer package. !53918
+- Cleanup incorrect data in projects.has_external_issue_tracker. !53936
+- Fix not skipped manual and delayed DAG jobs. !54073
+- Skip orphaned pool repositories on restore. !54112
+- Add space next to icons in epic issue list. !54138 (Yogi (@yo))
+- Render version dropdowns in MR changes view above tab navbar. !54159 (Simon Stieger @sim0)
+- Do not show button to resolve discussion opening an issue when issues are disabled. !54263
+- Hide issue count and link in project list for projects with disabled issues. !54275 (Simon Stieger @sim0)
+- Handle GlobalIDs with invalid resource names. !54290
+- Fix overflowing width - at mention container. !54377
+- Update k8s version for EKS cluster. !54389 (Vincent Firmin @winkies)
+- React to new DOM nodes being added to the page to bind the user information popover to them. !54411
+- move create_release_evidence sidekiq queue out of the cronjob namespace. !54432
+- Fix copy to clipboard tooltip button. !54472
+- Fix bold text mismatch in MR ⚙ menu. !54531
+- Wrap long code lines in markdown. !54540
+- Hide repeated trial offers on self-hosted instances. !54550
+- Fix bug when snippet blobs array contain a nil value. !54552
+- Fix the npm instance level API to exclude subgroups. !54554
+- Fix the value of `$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX` when used in group with a name containing uppercase letters. !54559 (Eric Engestrom @1ace)
+- Fixed typo on Two-Factor Authentication page. !54565 (Jani Uusitalo @uusijani)
+- Forcibly load OpenSSL::X509::DEFAULT_CERT_FILE. !54569
+- Stop scrollbar stretching filtered search box. !54574
+- Correctly style Dark Mode application header in profile preferences. !54575 (Simon Stieger @sim0)
+- Prevent removal of the last group owner if the last group owner is a blocked user. !54587 (Jonas Wälter @wwwjon)
+- Fix style issue with "reply" placeholder textarea in firefox. !54592
+- Update batch_loader gem to v2.0.0. !54639
+- Fix rendering of projects when the last pipeline changes during rendering. !54651
+- Search: Log search.scope for the default scope. !54684
+- Fix double scrollbar in ref selector dropdown. !54719
+- Fix double scrollbar issue in milestone selector dropdown. !54734
+- Skip two factor setup for help pages. !54739
+- Fixed diff notes GraphQL mutation not allowing comments on deleted lines. !54801
+- Expand left sidebar `Issues` when viewing project iterations. !54815
+- Added a missing class to reply placeholder. !54817
+- Renamed the second project panel to group. !54834 (Niklas van Schrick @Taucher2003)
+- Fix double scrollbars in some dropdowns. !54837
+- Fix pipeline notifications for Webex Teams / Unify Circuit integrations. !54852
+- Github Importer: Import Pull request "merged_at" attribute. !54862
+- Fix UTF-8 characters not working with Azure Blob storage. !54875
+- Upgrade gitlab-sidekiq-fetcher for correctly detecting interrupted jobs when Sidekiq pods are restarted. !54881
+- Include shared with groups in list of authorized groups. !54894
+- Fix `@` autocomplete selecting the loading icon. !54925
+- Fix status cache for upstream pipelines. !54937
+- Update gitlab-sidekiq-fetcher to 0.5.5 to handle namespaced queues. !55013
+- Use gitlab_web_url (if it exists) for issue title links in Issue lists. !55021
+- Fix issue with loading the repository compare page. !55058
+- Fix argument type for background migration. !55097
+- reconcile source installation and upgrade docs. !55170 (Jörg Behrmann @behrmann)
+- Sync the maven metadata file upon package deletion through the UI. !55207
+- Fix empty field in custom notification events modal. !55313 (Kev @KevSlashNull)
+- Fix 500 error for long commit messages. !55320
+- Include MRs for merge commits for changelogs. !55371
+- GithubImporter: Add Merge request approval only if it does not exists yet. !55376
+- Fix assignees search to show only project members. !55396
+- Do not break word in the code blocks under Safari. !55405
+- Fix typo in pipeline status email. !55412 (Gabriel Berke-Williams)
+- Fix inconsistent heading style in email diffs. !55420
+- Ensure Project Approvals API casts to boolean. !55492
+- Update fog-aws to v3.9.0. !55528
+- Handle relative position on issue move or clone. !55555
+- Fix horizontal alignment of MR Changes cog menu dropdown checkboxes. !55591
+- checks: Skip LFS checks when deleting refs. !55609
+- Fix edited timestamp updated when transforming / resolving comments. !55671 (Mycroft Kang @TaehyeokKang)
+- Allow saving repository weights after a storage has been removed. !55689
+- Resolve project from branch in commit resolver. !55694
+- Update validate_url gem. !55706
+- Fixes: No such file or directory lib/pager_duty/validator/schemas/message.json. !55725
+- Fix fork thumbnail overflow. !55764
+- Change terraform_states.locked_by_user_id foreign key to SET NULL. !55813
+- Fix invite member modal dropdown checkbox styling. !55832 (Kev @KevSlashNull)
+- Reenable OAuth password grants without client credentials. !55873
+- Fixed vestigial Anchor links in doc/development/usage_ping/dictionary.md. !55874 (Raimund Hook)
+- Fix 'viewed' checkbox in single-file view mode. !55922
+- Fix Web Project Export rate limiting scope. !55975
+- Remove merge manually message. !56016
+- fix stringify empty position object. !56037
+- Fix diff comment hidden dropdown. !56072
+- Handle RestClient errors in Discord integration. !56112
+- Turn off native autocomplete for ref selector components. !56128
+- Handle commits without descriptions for changelogs. !56224
+- Support maven plugins packaging in the maven metadata sync worker. !56229
+- Use gitlab-fog-google instead of upstream fog-google gem. !56245
+- Fix styling of "Enabled OAuth sign-in sources" checkboxes. !56254
+- Sanitize issue description in search result. !56256
+- Fix bug in wiki page destroy API endpoint when an error is raised. !56285
+- Correct generated maven repository instruction for Gradle Groovy DSL. !56318 (Cromefire_ (@cromefire_))
+- Add labels to GlToggles. !56387
+- Fixed error handling GraphQL API when issue board creation fails. !56467
+- Hide fork count and link in project list where forks are disabled. !56520 (Simon Stieger @sim0)
+- Fix upgrade banner for Jira issues showing on group / instance level integrations. !56628
+- Fix tooltips failing to hide in commit graph on Firefox. !56631 (Jonathan Duncan)
+- Hide MR count and link in project list where MRs are disabled. (Simon Stieger @sim0)
+
+### Changed (202 changes, 88 of them are from the community)
+
+- Mark `startDate` and `endDate` arguments as deprecated in the GraphQL schema for `Project.milestones` and `Group.milestones` (FOSS and EE), and `Project.iterations`, `Project.milestones`, `Group.epic`, `Group.epics`, `Group.iterations`, `Group.milestones`, `BoardEpic.children`, and `Epic.children` fields (EE-only). Previously these arguments were marked as deprecated only in their descriptions. !45229
+- Improve Linked Issues Usability. !50879 (Andrew Minion)
+- Make new issue title look like wiki. !50940 (Jacopo Beschi @jacopo-beschi)
+- Introduce WebIDE as an extension for Editor Lite. !51527
+- Update LaTeX Docker image in CI Templates to TexLive 2020. !52043 (Michael Schmitt @schmitmd)
+- Allow creation of iterations in the past. !52403
+- Allow overlapping iteration dates with ancestor group iterations and restrict dates overlapping for iterations within same group. !52403
+- Send gitlab_standard context with events from the frontend. !52959
+- Prefill first multiline commit message for new MRs. !52984 (Max Coplan @vegerot)
+- Auto-enable admin mode on privileged environments. !53015 (Diego Louzán)
+- Add loading indicator to "Update username" button in account settings. !53142 (Kev @KevSlashNull)
+- Replace btn-primary with btn-confirm in Start your free trial button. !53215 (Yogi (@yo))
+- Update project page buttons to conform to design system. !53260
+- Lift the NPM package naming convention for the project level API. !53266
+- Adds ability to have multiple cache per job. !53410
+- Improve Jira connect app styling and i18n. !53441
+- Restyle the repository compare show page. !53523
+- API: include external users in user search for non-admins. !53584 (Jonas Wälter @wwwjon)
+- Record onboarding action for issue creation. !53611
+- Merge Sentry's contexts into Gitlab::ApplicationContext. !53691
+- Add divergedFromTargetBranch field to MergeRequestType to indicate the target branch has diverged from the source branch. !53759
+- Provide name of expiring token in personal access token expiration mail. !53766
+- Convert merge request widget state to use GraphQL. !53846
+- Sidebar confidentiality component updates in real-time. !53858
+- Add creator to custom emoji. !53879
+- Migrate namespaces delayed_project_removal to namespace_settings. !53916
+- Add name field to cluster agent token. !53920
+- Apply new GitLab UI for request email button. !53966 (Yogi (@yo))
+- Add support for ETag caching when using GraphQL. !53978
+- Allow anonymous access to public Conan packages. !54047 (Steve Mokris @smokris)
+- Make the Geo OAuth application trusted by default. !54079
+- Add description field to cluster agent token. !54091
+- Project Settings CI/CD headers expand/collapse on click / tap. !54114 (Daniel Schömer)
+- Project Settings CI/CD Variables header expands/collapses on click / tap. !54117 (Daniel Schömer)
+- Add Role and Rolebinding for CiliumNetworkPolicies. !54130
+- Add btn-default and remove extra right margin. !54134 (Yogi (@yo))
+- Update user avatar in sidebar realtime. !54135 (Yogi (@yo))
+- Remove illustration in export/import CSV modal. !54136 (Yogi (@yo))
+- Update to btn-confirm and align subscription banner. !54137 (Yogi (@yo))
+- Remove service desk issue prefix. !54140 (Lee Tickett @leetickett)
+- Apply new GitLab UI for learn more button in time tracking. !54142 (Yogi (@yo))
+- Apply new GitLab UI for apply template button in new issue. !54143 (Yogi (@yo))
+- Remove gl-overflow-scroll in merge instructions modal. !54144 (Yogi (@yo))
+- Align merge conflict warning text to center. !54145 (Yogi (@yo))
+- Deprecate instanceStatisticsMeasurements in favor of usageTrendsMeasurements GraphQL field. !54153
+- Web IDE disallow commit when project has 'reject unsigned commits' rule. !54166
+- Add space next to download icon in download artifacts button. !54228 (Yogi (@yo))
+- Convert IDE nav form tab to GlTab. !54274
+- Add btn-icon class for commit action buttons. !54286 (Yogi (@yo))
+- Convert Threat Monitoring environment picker to GlDropdown. !54309
+- Allow importing groups as new top-level groups. !54323
+- Show user follow button first instead of center. !54326 (Yogi (@yo))
+- Update 'Get Started with CI/CD' button with latest URL. !54344
+- Log individual user usage of Slack service. !54347
+- Add duration and finishedAt GraphQL fields to jobType in the CI namespace. !54358
+- Show icon next to reviewers who have approved. !54365
+- Add btn-icon for buttons in pipeline schedules. !54426 (Yogi (@yo))
+- Restore Sentry functionaly to the frontend. !54441
+- Github Importer: Validate repository size before importing. !54449
+- Allow search for pipeline by SHA as well as IID via GraphQL. !54471
+- Change default API content_type to JSON. !54479
+- Added environment details to Job Hook and Pipeline Hook. !54480 (AdrianLC)
+- GraphQL: Expose Label "created_at" and "updated_at". !54487
+- Move CI_CONFIG_PATH as project variable and deprecate CI_PROJECT_CONFIG_PATH. !54498
+- Registry: make delete icon buttons secondary. !54545
+- Add GlToggle label in edit feature flag. !54546 (Yogi (@yo))
+- Add GlToggle label in sidebar subscription toggle. !54548 (Yogi (@yo))
+- Refine Registry Lists and Search Bar UI. !54549
+- Remove outdated ci db columns. !54564
+- BulkImports: Avoid import ProjectLabels in the Group import level. !54580
+- Update default title of alerts to New: Alert. !54621
+- Clear Environment Search in CI/CD Variables. !54626
+- Only show 2FA badge to project maintainers and group owners. !54646
+- Enable pages_serve_with_zip_file_protocol by default. !54650
+- Auto-scroll to top of page upon committing in pipeline editor. !54657
+- Remove Expiration Policy text from container registry header. !54665
+- Reduce elements in Pipeline page dropdowns with lazy. !54674
+- BulkImports: Import Label timestamps. !54678
+- Improve at.js members autocomplete matching. !54681
+- Use Root Image for images with missing name. !54693
+- Change the order of action buttons in the configure feature flags modal. !54731
+- Remove deprecated button variant in groups, projects and snippets. !54747 (Yogi (@yo))
+- Add selected state for ellipsis button in a commit. !54754 (Yogi (@yo))
+- Apply new GitLab UI for button in promotion link. !54755 (Yogi (@yo))
+- Apply new GitLab UI for buttons in empty label placeholder. !54760 (Yogi (@yo))
+- Add selected state for diff view in commit page. !54762 (Yogi (@yo))
+- Add selected state for chart button in vulnerabilities dashboard. !54763 (Yogi (@yo))
+- Add btn-default class for settings toggle button. !54764 (Yogi (@yo))
+- Apply new GitLab UI for badge in runners list. !54766 (Yogi (@yo))
+- Better error message when import fails due to backend validation. !54827
+- Moved CODEOWNERS tip into approvals Vue app. !54830
+- Add a new project feature called container_registry. !54831
+- Relax tag requirements when generating changelogs. !54832
+- Regroup alerts integration form into tabs. !54842
+- Reverts default sort order for Explore Projects to Last updated. !54879
+- Fix DOS on Math blocks. !54898
+- Added non-null constraint to terraform state name. !54940
+- Remove MergeRequestAssigneesMigrationProgressCheck background migration. !54943
+- Adjust text explaining content of Operations menu from visibility section of project settings. !54963
+- Use info colour for merged search results instead of primary. !55008
+- Update button variant to confirm on integration settings page. !55017
+- Allow `$CI_JOB_TOKEN` to access the "Download a single artifact file" endpoints of the Jobs Artifacts API. !55042 (Eric Engestrom @1ace)
+- Ignore prerelease tags when generating changelogs. !55065
+- Rename comment form textarea label to `Comment`. !55088
+- Add runners api context metadata. !55089
+- Reschedule artifact expiry backfill. !55093
+- Small visual updates to Git ref selector dropdown on New/Edit Release page. !55121
+- Group integration settings buttons to the left. !55139
+- Optimize Metrics Dictionary. !55145
+- Show nested environments when change tab, page. !55167
+- Move to btn-confirm in app/views/devise directory. !55200 (Yogi (@yo))
+- Move to btn-confirm in app/views/shared/empty_states directory. !55203 (Yogi (@yo))
+- Change the button to Primary Blue. !55204 (Yogi (@yo))
+- Update button to btn-confirm on merge requests page. !55218
+- Add empty state to pipeline editor section. !55227
+- Project Settings Repository Default branch header expand/collaps on click. !55228 (Daniel Schömer)
+- Project Settings Repository Mirroring repositories header expands/collapses on click / tap. !55229 (Daniel Schömer)
+- Project Settings CI/CD Variables header expands/collapses on click / tap. !55230 (Daniel Schömer)
+- Project Settings Repository Protected tags header expands/collapses on click / tap. !55231 (Daniel Schömer)
+- Project Settings Repository Cleanup header expands/collapses on click / tap. !55232 (Daniel Schömer)
+- Project Settings Repository Deploy tokens header expands/collapses on click / tap. !55233 (Daniel Schömer)
+- Project Settings Repository Deploy keys header expands/collapses on click / tap. !55234 (Daniel Schömer)
+- Collapse deployments in merge request if many. !55239
+- Move to btn-confirm from btn-success in abuse_reports folder. !55262 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin application_settings directory. !55263 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/appearances directory. !55264 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/applications directory. !55265 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/broadcast_messages directory. !55266 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/deploy_keys directory. !55267 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/groups directory. !55268 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/hooks directory. !55272 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/labels directory. !55273 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/projects directory. !55274 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/serverless directory. !55275 (Yogi (@yo))
+- Move to btn-confirm from btn-success in admin/users directory. !55276 (Yogi (@yo))
+- Move to btn-confirm from btn-success in views/doorkeeper directory. !55277 (Yogi (@yo))
+- Move to btn-confirm from btn-success in groups/milestones directory. !55278 (Yogi (@yo))
+- Move to btn-confirm from btn-success in groups/settings directory. !55281 (Yogi (@yo))
+- Move to btn-confirm from btn-success in groups directory. !55282 (Yogi (@yo))
+- Move to btn-confirm from btn-success in views/import directory. !55291 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/access_token directory. !55298 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/deploy_keys directory. !55299 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/deploy_tokens directory. !55300 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/gitpod directory. !55301 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/groups directory. !55302 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/issuable directory. !55303 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/labels directory. !55304 (Yogi (@yo))
+- Bump swagger-ui-dist to 3.44.1. !55310 (Roger Meier)
+- Move from btn-success to btn-confirm in shared/members directory. !55315 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared/wikis directory. !55316 (Yogi (@yo))
+- Move from btn-success to btn-confirm in shared directory. !55317 (Yogi (@yo))
+- Remove suggestions custom commit feature flag. !55344
+- Use policies for group access rights as admin. !55349 (Diego Louzán)
+- Increase contrast of Solarized Light in Web IDE. !55361
+- Enable `trace_memory_allocations` by default. !55369
+- Expose project access token value with create API. !55408
+- Allow alert to link to incidents. !55426
+- Send notifications to subscribers when merge request draft status removed. !55444
+- Show number of files in snippet lists. !55452
+- Use CodeQuality packaged with CodeClimate 0.85.23 by default in CI template. !55508
+- Simplify notifications dropdown. !55522
+- Improve Marginalia comments for API. !55564
+- Clarify epic delete warning. !55574
+- Exclude duplicates from emails on push recipients. !55588
+- Move IDE routes to Rails. !55597
+- Update cluster agent tokens with null names. !55673
+- Expand nested stopped environments. !55676
+- Add fields to BulkImports::Tracker for concurrent work. !55686
+- Move to confirm variant from success in 2fa codes component. !55729 (Yogi (@yo))
+- Move to confirm variant from success in badges component. !55730 (Yogi (@yo))
+- Add Gradle instructions and instruction selector to package details. !55738
+- Update text for email config under Incidents in Settings > Operations. !55753
+- Display suite errors on test summary page. !55770
+- Alert integrations UX cleanup. !55786
+- Remove project_transactionless_destroy feature flag. !55795
+- Update code owner approval tooltip message. !55842
+- Sort milestones within autocomplete dropdown. !55850
+- Adjust debug button icon size in job detail page. !55886
+- Link fields to types in GraphQL reference documentation. !55901
+- Remove `vue_project_members_list` feature flag. !55902
+- Public generic packages can now be accessed by developer, guest and anonymous users. !55978 (Mathieu Parent)
+- Port essential database metrics to Sidekiq. !56005
+- Add API Fuzzing to Security Configuration page, and re-order scanners. !56022
+- Add last_used_at field to cluster agent token. !56023
+- Change the default batch_class_name for batched_background_migrations to the unqualified class name. !56036
+- Improve styling of user access role badges. !56061
+- Temporary make `GC.compact` no-op. !56079
+- Move to btn-default and selected class in toggle comment button. !56090 (Yogi (@yo))
+- Apply new GitLab UI for buttons in GitLab Import page. !56095 (Yogi (@yo))
+- Apply new GitLab UI for buttons on GitHub Import page. !56096 (Yogi (@yo))
+- Move to confirm variant from success in environments directory. !56203 (Yogi (@yo))
+- Move from btn-success to btn-confirm in clusters directory. !56205 (Yogi (@yo))
+- Remove security & compliance config page feature flag. !56219
+- Display in progress for pipeline duration cell when pipeline has not finished running. !56266
+- Add project_id to pipeline api. !56339
+- Move from btn-success to btn-confirm in milestones directory. !56342 (Yogi (@yo))
+- Move from btn-success to btn-confirm in mirrors directory. !56343 (Yogi (@yo))
+- Move from btn-success to btn-confirm in pages directory. !56348 (Yogi (@yo))
+- Move from btn-success to btn-confirm in pages_domains directory. !56349 (Yogi (@yo))
+- Consume check if user is bot from Users API. !56362
+- Hide archived projects from group boards project select dropdown. !56452
+- Update mailroom to v0.0.9. !56592
+
+### Performance (32 changes)
+
+- Limit Project Authorizations refresh for shared groups only to direct members of the group being shared with. !51869
+- Remove unneeded transitions on MR for mark_as_unchecked event. !53537
+- Preload certain data used in the updating of a merge request. !53802
+- Enable codequality report comparison with backend. !54241
+- Add preload attribute to markdown videos. !54350
+- Improve pull mirroring performance. !54353
+- Remove coverage_data_new_finder feature flag. !54486
+- Improve performance of builds queuing by introducing a limit on the queue depth. !54579
+- Added composite index to epic_issues table and improved performance of loading bigger epic roadmaps. !54677
+- Consider only distinct user ids for project authorizations refresh jobs for group members. !54697
+- Improve performance of validations when a group has a lot of runners. !54774
+- Hardened "add" arithmetic for usage data. !54794
+- Harden added metrics. !54805
+- Cache /search/count requests in the browser. !55036
+- Use recursive approach to query all projects for a namespace. !55043
+- Fix N+1s related to per-build metadata lookups. !55053
+- Fetch build one-by-one. !55194
+- Improve build contention. !55202
+- Move branch deletion on merge to async worker. !55390
+- Improve performance of manual pipeline form by limiting the refs loaded on page load. !55394
+- Fix N+1 queries in api/v3/repos/:namespace/:project/events endpoint. !55442
+- Refactor blame view. !55488
+- Reduce queries when ticking runner queue. !55496
+- Shortcircuit expensive queries in Runner#can_pick?. !55518
+- Preload runner tags for `UpdateBuildQueueService`. !55543
+- Batch-load vulnerability findings by UUID. !55642
+- Improve a11y of the new project form by marking required fields. !55682
+- Reduce DB load when resetting CI minute notifications. !55765
+- Remove latest_builds_report_results preloading in pipeline serializer. !56181
+- Optimize branch commit resolution. !56204
+- Use `Namespace#all_projects` for NPM package finder. !56415
+- Project sharing to use specialized worker to calculate project authorizations. !56606
+
+### Added (91 changes, 11 of them are from the community)
+
+- Add setting to control merge when pipeline succeeds notification. !37880 (Ravishankar)
+- Adds Request CVE ID button to issue sidebar. !41203
+- convert to GlTabs in app/assets/javascripts/ide/components/repo_tabs.vue. !42162 (Brandon Everett)
+- Add invite_email Quick Action. !49264 (Lee Tickett)
+- Add API endpoint for fetching a single job by CI_JOB_TOKEN. !51727 (ahmet2mir)
+- Add API endpoint for deleting stale review envs. !52224
+- Add active period columns to on-call rotations. !52998
+- Add user preference to turn off selected text keystroke formatting. !53079
+- Display success message after successfully adding a namespace in Jira Connect. !53332
+- Add groups endpoint for Projects API. !53642
+- Add suppport for an end time on on-call rotations. !53675
+- Replace scss with stylelint in documentation. !53700
+- Add composer cache rake task. !53772
+- Limit the payload size of Sidekiq jobs before scheduling. !53829
+- Expose `failure_reasons` in `Build#features`. !53964
+- Create ExternalApprovalRule table and associations. !54002
+- Jira Connect app: add ability to select namespace from list of available namespaces. !54037
+- Expose container_registry_image_prefix to project API. !54090 (Mathieu Parent)
+- Default confidentiality of replies. !54122 (Lee Tickett @leetickett)
+- Add environment to custom CI_JOB_JWT claims. !54168
+- Make `to` in the changelog API optional. !54229
+- Add API endpoint /application/plan_limits for package file size limits. !54232 (Jonas Wälter @wwwjon)
+- Add pagination of file diffs when viewing a large commit. !54236
+- Add internal and external URL config for KAS. !54260
+- Add Azure ActiveDirectory v2 OmniAuth provider. !54265
+- Add application setting for enabling in-product marketing emails. !54324
+- Enable customize homepage banner by default. !54357
+- Expose epic board list collapsed value via GraphQL. !54541
+- Implement passing trigger payload into pipeline variable. !54544
+- Support "view_diffs_file_by_file" param in the Users create and update API. !54595
+- Add GraphQL mutation to create release asset link. !54605
+- Create tables to track auto-batched background migrations. !54628
+- Create system note on alert when its auto-resolved via alert integration. !54645
+- Add package list to group graphql type. !54672
+- Add Import options to projects and groups dropdown. !54749
+- Add mutation to accept merge requests. !54758
+- Add Operating System details to usage ping. !54778
+- Add is_removed column on Oncall Participant model. !54779
+- Add reviewers detail to new merge request email. !54781
+- Add wiki_size and storage_size to NamespaceStatistics. !54786
+- Add branch_name to dast_profiles table. !54891
+- Support composer v2 metadata-url. !54906
+- Bump auto-deploy-image tag in Deploy.latest.gitlab-ci.yml to v2.6.0, which includes changes to ciliumnetworkpolicies. !54983
+- Add CI_JOB_STARTED_AT and CI_PIPELINE_CREATED_AT variables. !54989 (Vincent Firmin @winkies)
+- Add styling to de-emphasize nested test reports in merge requests. !55001
+- Display parsing errors in test reports MR widget. !55037
+- Add user callouts to GraphQL. !55099
+- Add 'Followed User Activity' as dashboard user choices. !55165 (Benj Fassbind @randombenj)
+- Improve Vulnerability Tracking: Store Fingerprints. !55173
+- Cleanup invite_members_version_a experiment. !55178
+- Incident management: add issue state to alerts table. !55185
+- Document propagate_correlation_id configuration for GitLab Pages. !55205 (Ercan Ucan @ercan.ucan)
+- Add Allow force push option to Protected branches. !55261 (Mycroft Kang @TaehyeokKang)
+- Add a background migration to copy projects.container_registry_enabled to project_features.container_registry_access_level. !55327
+- Add trigger support for matrix jobs. !55348
+- Add more explanation about the presented data and show the last updated time on the DevOps Score page. !55357
+- Query group projects by ids with GraphQL. !55383
+- Allow users to work on non-default branch in pipeline editor. !55413
+- Add reviewers detail to merge when pipeline succeeds email. !55463
+- Implement needs:job:optional for CI pipelines. !55468
+- Add tier column to the environments table. !55471
+- Add DORA daily metrics modeling. !55473
+- Add setting to control Rails.application.config.hosts. !55491
+- Ignore reverted commits when generating changelogs. !55537
+- Add reviewers detail to merge request unmergeable email. !55582
+- Add reviewers detail to merge request status email. !55584
+- Add reviewers detail to merged merge request email. !55589
+- Add reviewers detail to text version of closed merge request email. !55594
+- Add client_id to application context. !55683
+- Allow release to be created on existing tag through the UI. !55697
+- Add index for pages migration. !55757
+- Remove improved_merge_diff_highlighting feature flag. !55771
+- Usage ping: Histogram for enabled integrations per project. !55782
+- Add Pages cache configuration settings. !55812
+- Add package and quickaction metrics to Metrics Dictionary. !55846
+- Enable serving GitLab Pages sites migrated to zip storage. !55847
+- Log large multipart messages from Rack. !55933
+- Add update GraphQL mutation for Oncall Rotations. !55955
+- Cache open issues count in group sidebar. !55968
+- Add the ability to cherry pick accross forks. !55970
+- Migrate group milestones when using Bulk Import. !55981
+- Introduce `info` column for the `security_scans` table. !55983
+- Support environment deployment tier. !56081
+- Add Prometheus metrics for ActionCable subscription events. !56157
+- Add reviewers detail to new mention in merge request email. !56184
+- Add more settings to group MR approval settings. !56215
+- Automatically retarget merge requests upon merge (default on). !56233
+- Add section headers for the test report widget on the merge request page. !56252
+- Add GraphQL mutation to update existing release asset link. !56265
+- Upgrade Pages to v1.36.0. !56295
+- Add plan limit for Terraform Module package file size. !56414
+
+### Other (74 changes, 9 of them are from the community)
+
+- Add a confirmation prompt to lock and unlock path locks. !44849
+- Recalculate UUID for all Vulnerability::Findings. !47529
+- Use Created instead of opened when describing issue creation. !49478
+- Removes collect_package_events_redis feature flag. !49897
+- Fix a crash when logging in using SAML for the first time when sign-ups are disabled. !50216
+- Add iterations_cadences table and respective model. !50707
+- Migrated Bootstrap dropdown to GitLab UI GlDropdown used for comment submit button. !50933
+- Rename indexes to remove inconsistencies. !51011
+- Notify issue email participants instead of external author. !51023 (Lee Tickett @leetickett)
+- Remove usage_data_i_source_code_code_intelligence flag. !51765
+- Apply GitLab UI button styles to buttons in ee/app/views/subscriptions/groups directory. !51784 (Yogi (@yo))
+- Updated UI text to match style guidelines. !53179
+- Update the Sign In button to use the new confirm button variant, migrate OAuth buttons to use the default variant of GlButton. !53254
+- Apply new GitLab UI for button is project settings/repository page. !53346 (Yogi (@yo))
+- Add btn-default class for edit buttons in admin projects and groups. !53453
+- Add btn-default for cancel button in issueable form. !53458 (Yogi (@yo))
+- Set MobSF version to 3.2.9 in SAST template. !53545
+- Move add reaction button of note to gl-button. !53565 (Yogi (@yo))
+- Improve Service Desk empty states. !54006
+- Spell "npm" with lowercase letters in Package Registry UI. !54163 (Simon Stieger @sim0)
+- Replace import/export CSV modal with Vue component. !54214
+- Add quick action data to usage ping. !54293
+- Add documentation for graphQL queries. !54302
+- Add NOT NULL constraint to gitlab_subscriptions namespace_id. !54319
+- Update accessibility of the "Reply to discussion" UX. !54380
+- Remove temporary index on issues. !54387 (Lee Tickett @leetickett)
+- Add Vue notifications dropdown component. !54422
+- Move wiki helper alert to Vue. !54517
+- Composer cache update worker. !54551
+- Fix setting default cadences migration. !54598
+- Update protected branches buttons to pajamas style. !54612
+- Dry up notes build service spec. !54632 (Lee Tickett @leetickett)
+- Updating general Chef .gitlab-ci.yml template. !54676
+- Enable `nakayoshi_fork` by default. !54688
+- Remove backup_labels table. !54856
+- Update GitLab Runner Helm Chart to 0.26.0. !54863
+- Add notification templates for merge request draft/WIP status change events. !54870
+- Remove pipeline editor feature flag. !54971
+- Remove graphql_logging feature flag. !54984
+- Add tracking to merge request time estimate/spent changes. !55046
+- Track usage pings when MR gets locked/unlocked. !55069
+- Deemphasize comment and close button. !55075
+- Log Optimistic Locks with retries. !55187
+- Add environment_scope column to ci_group_variables. !55256
+- Align heading style with subheadings in markdown. !55284
+- Restore accidental changes to structure.sql. !55352
+- Show API errors when a command-only comment fails. !55457
+- Remove dashboard_pipeline_status feature flag. !55472
+- Add tracking to merge request labels/milestone changes. !55484
+- Add tracking to merge request assignees/reviewers changes. !55486
+- Remove unique index and add composite key index to Security Orchestration. !55521
+- Fix Sidekiq system check for cluster mode. !55530 (Horst Prote)
+- Rename vulnerability fingerprints indexes. !55552
+- Refactor docs and UI for embedding Grafana panels. !55567
+- Remove the optimized_merge_request_count_with_merged_at_filter feature flag. !55600
+- Add histogram for optimistic lock retries. !55614
+- Replace Bootstrap popover with GitLab UI popover for merge conflict. !55652
+- Use more common help icon in security report MR widget. !55741
+- Schedule removal of duplicate Findings. !55749
+- Update spacing between Notifications dropdown, New Subgroup button, and New Project buttons while using the new confirm variant instead of the deprecated success variant for the New Project button. Better left alignment of Notifications dropdown at smaller breakpoints. variant. !55819
+- Update buttons on a job page to conform to the Pajamas design system. !55858
+- Add web_hook_logs partitioning migration. !55938
+- Updating usage dictionary generator. !55956
+- Reorder user profile actions and use the confirm variant for the follow button. !55999
+- Link to the merge request in its creation email notification. !56064
+- Update UI text to CI/CD from CI / CD. !56070
+- Harden Prometheus client usage data wrapper. !56210
+- Update Pages template examples to default branch. !56298
+- Update CI template examples to default branch. !56301
+- Update templates to refer to default branch. !56304
+- Remove bottom border from header. !56315
+- Remove merge_request_rebase_nowait_lock flag. !56406
+- Update mobsf version in the SAST template. !56413
+- Convert mattermost alert to pajamas. !56556
+
+
+## 13.9.7 (2021-04-27)
+
+### Security (6 changes)
+
+- Prevent tokens with only read_api scope from executing mutations.
+- Update mermaid to version 8.9.2.
+- Do not allow deploy tokens in the dependency proxy authentication service.
+- Disable keyset pagination for branches by default.
+- Bump Carrierwave gem to v1.3.2.
+- Restrict setting system_note_timestamp to owners.
+
+
+## 13.9.6 (2021-04-13)
+
+### Security (2 changes)
+
+- Clean only legitimate JPG and TIFF files.
+- Update ruby-saml and rexml gems.
+
+
+## 13.9.5 (2021-03-31)
+
+### Security (6 changes)
+
+- Leave pool repository on fork unlinking.
+- Fixed XSS in merge requests sidebar.
+- Fix arbitrary read/write in AsciiDoctor and Kroki gems.
+- Prevent infinite loop when checking if collaboration is allowed.
+- Disable arbitrary URI and file reads in JSON validator.
+- Require POST request to trigger system hooks.
+
+### Removed (1 change)
+
+- Make HipChat project service do nothing. !57434
+
+### Other (3 changes)
+
+- Remove direct mimemagic dependency. !57387
+- Refactor MimeMagic calls to new MimeType class. !57421
+- Switch to using a fake mimemagic gem. !57443
+
+
+## 13.9.4 (2021-03-17)
+
+### Security (1 change)
+
+- Patch Kramdown syntax highlighter gem.
+
+
+## 13.9.3 (2021-03-08)
+
+### Fixed (4 changes)
+
+- Upgrade gitlab-shell to v13.17.0. !55295
+- Update Kroki to fix Wavedrom graphs. !55659
+- Fix disabling of Kroki optional formats. !55665
+- Rename asset_proxy_allowlist column. !55884
+
+
+## 13.9.2 (2021-03-04)
+
+### Security (6 changes)
+
+- Bump thrift gem to 0.14.0.
+- Allow only owners to manage group variables.
+- Do not store marshalled sessions ids in Redis.
+- Fix XSS in wiki author email and name.
+- Workhorse: prevent escaped router path traversal.
+- Fix XSS vulnerability for swagger file viewer.
+
+
+## 13.9.1 (2021-02-23)
+
+### Fixed (6 changes, 1 of them is from the community)
+
+- Send SIGINT instead of SIGQUIT to puma. !54446 (Jörg Behrmann @behrmann)
+- Reset description template names cache key to reload an updated templates structure. !54614
+- Restore missing horizontal scrollbar on issue boards. !54634
+- Fix keep latest artifacts checkbox being always disabled. !54669
+- Fix Metric tab not showing up on operations page. !54736
+- Fix S3 object storage failing when endpoint is not specified. !54868
+
+### Changed (1 change)
+
+- Updates authorization for linting endpoint. !54492
+
+### Performance (1 change)
+
+- Fix N+1 SQL regression in exporting issues to CSV. !54287
+
+### Other (1 change)
+
+- Fix creating the idx_on_issues_where_service_desk_reply_to_is_not_null index before the post migration. !54346
+
+
+## 13.9.0 (2021-02-22)
+
+### Security (1 change)
+
+- Add token_with_iv table.
+
+### Removed (4 changes)
+
+- Remove implicit FF check on `Featurable`. !52223
+- Remove merge_request_reviewers feature flag. !52468
+- Removed unused Text dropdown. !53464
+- Remove legacy alerts service data and table. !53534
+
+### Fixed (131 changes, 29 of them are from the community)
+
+- Allow to retrieve all jobs for a given pipeline. !48589 (Alexander Kutelev)
+- Include submodule information for files in diff metadata. !50346 (Simon Stieger @sim0)
+- Fix "Stay on Page" alert showing in empty snippet. !50400 (Kev @KevSlashNull)
+- Add css to fix fluid layout for index file. !50626
+- Make System OAuth app index table responsive and externalize text. !50979 (Kev @KevSlashNull)
+- Prevent long variable names from overflowing the popover in CI/CD settings. !51018 (Kev @KevSlashNull)
+- Fix long CI variable name overflows on origin. !51021 (Kev @KevSlashNull)
+- Fix breadcrumb dropdown on mobile being too narrow. !51092 (Kev @KevSlashNull)
+- Show correct ref name in code coverage statistics header. !51385 (Andreas Schmidt)
+- Change Jira Connect update sequence id to use Unix Time. !51697
+- Fix batch query issue when primary key is -1. !51716
+- Allow versionless maven-metadata.xml file duplicates even when maven duplicates are disabled. !51758
+- Fix comment form dropdown check alignment. !51787 (Lee Tickett @leetickett)
+- Schedule artifact expiry date backfill background jobs. !51822
+- Fix alignment and font issues in project operations settings page. !51825 (Yogi (@yo))
+- Fix broken testsuite link if the suite contains a dot. !51828 (Michael Aigner @tonka3000)
+- Move Social connect button to new GitLab UI. !51835 (Yogi (@yo))
+- Fix border bottom color collapsed replies. !51871 (Yogi (@yo))
+- Fix alignment of chevron-down icon in toggle replies. !51872 (Yogi (@yo))
+- Remove container_class in project activity which removes extra padding. !51878 (Yogi (@yo))
+- Add btn-default to MR edit button. !51879 (Yogi (@yo))
+- Remove duplicates from related_commit_sha query. !51888
+- Add btn-default class to button in project breadcrumb. !51910 (Yogi (@yo))
+- Fix top border-radius of the login box. !51950 (Yogi (@yo))
+- Improve duplication validation on Release Links. !51951
+- Update Project/Group Exporter temp folder cleanup. !51969
+- Migrate incorrect value stream group stage records. !51975
+- Fixed notes polling incorrectly overwriting suggestions in the DOM. !51988
+- Global Search - Project Filter sets Group. !52015
+- Fix Y axis units of pipeline charts when values are small. !52024
+- Apply new GitLab UI for report abuse button. !52049 (Yogi (@yo))
+- Fix gitlab:cleanup:orphan_job_artifact_files rake task limit. !52056
+- Remove extra border-top on pipeline quota in the settings page. !52059 (Yogi (@yo))
+- Disable board configuration options for users without edit permission. !52077
+- Fixed merge requests locked status not showing. !52078
+- Fix reply box border on diffs. !52084
+- Fixed sdiff suggestions not working when replying to comments. !52100
+- Allow multiple comments on diff lines in inline view. !52111
+- Breaking change: Prevent mutual recursion in GraphQL Package. !52131
+- Update hamlit to v2.14.2. !52177
+- Fix pipeline and stage show success without considering bridge status. !52192 (Cong Chen @gentcys)
+- Update GitLab Workhorse to v8.61.0. !52195
+- Scope milestones on swimlane boards to project and its ancestors. !52199
+- Fixes GraphQl merge request types commits count. !52218
+- Fix URL in JiraConnect feature flag serializer. !52221
+- Allow user SSH public key endpoint to be publicly accessible again. !52227
+- Update max number of NuGet packages returned. !52265
+- Fix bug branch change with line selected. !52285
+- Resolve User cannot merge an issue. !52311
+- Fix Net::HTTP proxy encoding username and password. !52368
+- Correct the egress 'deny all' policy preview from Allow to Deny. !52370
+- Missing action prop on group page. !52379
+- Improve search filter by taking space in file path into account. !52392
+- Remove space next to the icon in email button on admin/users page. !52451 (Yogi (@yo))
+- Fix assignee avatar alignment in edit board modal. !52453 (Yogi (@yo))
+- Remove extra margin below tab on project template page. !52454 (Yogi (@yo))
+- Fix retry option does not work in Merge Trains. !52463
+- Fix action button alignment for application inside the table in oauth/applications. !52465 (Yogi (@yo))
+- Fix viewing blobs for broken MRs. !52483
+- Fix bug in personal snippet thread discussions. !52490
+- Fix exclude path for backup rsync command. !52503
+- Make CI Icon in merge request pipeline detail consistent with other widget icons. !52516
+- Make text on Repository Cleanup page translatable. !52529
+- Fix charts sometimes being hidden on milestone page. !52552
+- Fix diff discussions rendering on the wrong side. !52579
+- Add tooltips to requirement import and export buttons. !52582 (Kev @KevSlashNull)
+- Allow dots in label names through REST API. !52591
+- Fix tooltip when drag comment selection is enabled. !52595
+- Allow Environment Scopes to Wrap on Feature Flags Table. !52617
+- Allow cross-origin requests on /oauth/token. !52641
+- Show more appropriate error message when merging fails. !52671
+- Handle IPv6 hostname in ExternalHTTP instrumenter. !52691
+- Remove MR List counts if they cannot be generated. !52698
+- API: do not mangle dots when creating project with a name. !52725
+- Fix size of group member user status emoji. !52730
+- Fix bad request error when applying suggestions. !52735
+- Update the database when moving repos between identical storages. !52743
+- Don't expose project existence by redirecting from its .git URL. !52818
+- Fill default commit message values in the placeholder instead of showing the variable slugs. !52851
+- Make LifecycleEvents exceptions to be fatal. !52881
+- BulkImports: avoid infinity recursion on group migration. !52931
+- Fix to show auditor badging in admin user view. !52943
+- Fix empty pipeline analytics charts when time_zone is non-UTC. !52971
+- Fix fullscreen mode not working for comments in merge request changes view. !53009 (Simon Stieger @sim0)
+- Fix formatting of "to do" in alert sidebar and error. !53037
+- Change to-do formatting in Design error messages and sidebar. !53040
+- Fix opensearch for anonymous users. !53056
+- Allow HEAD requests for read_api and read_user scope tokens. !53088
+- Adjust job report artifacts downloads to handle multiple types. !53141
+- Fixed discussions on merge request commits not showing. !53143
+- Send only latest jobs in pipeline webhook payload. !53159
+- Fix snippet repository storage move API when snippet does not exist. !53211
+- Use user-provided timestamp when updating issue and merge request milestones, iterations, and weights using the API. !53237
+- Switch to correct localization function that strips namespaces. !53244
+- Fix welcome page alignment on CE. !53265
+- Fixes broken password reset link in account deletion message. !53274
+- Support multi-line string variable values when running a manual pipeline in the UI. !53292
+- Support fog-aws host options for Workhorse S3 client. !53326
+- Vertically centre CI icons on pipeline page. !53427
+- gitaly: Fix access checks with transactions and quarantine environments. !53449
+- Back Button now switches to last active analytics tab. !53495
+- Conditionally render test case file. !53497
+- Remove dependency_proxy_manifests records with content_type to prevent Dependency Proxy failures. !53506
+- Ensure note is promoted to discussion within reply create transaction. !53542
+- Allow users to fork to a group when their personal namespace is full. !53632
+- Fix some image diff URLs with special characters causing the diff to not show. !53638
+- Adds only_group_labels and include_ancestor_labels and include_descendant_groups arguments to the project and group labels resolvers respectively. !53639
+- Fix misalignment of assignee dropdown checkmark. !53664
+- Fix timeouts affecting certain test webhooks. !53676
+- Fix missing known usage data event. !53729
+- Align note actions icons. !53753 (Claudius Ellsel (@clel))
+- Fix left margin of Merge button in FF merge mode. !53756
+- Fix spurious not-adjacent error when moving designs. !53771
+- Cleanup incorrect data in projects.has_external_wiki. !53790
+- Update column 'updated_at' in container after repository storage move. !53821
+- Add post migration to backfill projects updated at after repository move. !53845
+- Fix Web IDE open MR to show opened files consistently. !53927
+- Removed ugly border around ellipsis dropdown Gitlab IDE. !53963 (Shubham Kumar @imskr)
+- Fix bug rendering snippet activity. !53993
+- Handle severity for generic payloads more gracefully. !53999
+- Fix gap in tree table header. !54025
+- Move GMA user badging in admin to EE only. !54125
+- Fix alignment of 'Rebase in progress' label. !54189
+- Fix incorrect breadcrumb path for import groups page. !54211
+- Update Sample GitLab Project Template with MR conflicts fix. !54248
+- Fix search functionality in Jira issues list. !54312
+- Fix force-routing to Gitaly primary with empty hook env. !54317
+- Fix pipeline test report not rendering when missing properties. !54363
+- Safe guard repo compare when data is undefined. !54371
+- Fix unneeded left margin in discussion filter container on mobile. !54379
+- Fix overflowing design buttons on mobile. !54381
+
+### Deprecated (1 change)
+
+- Deprecate GitLab-managed (v1) apps that will be removed in 14.0. !54162
+
+### Changed (107 changes, 16 of them are from the community)
+
+- Migrate button to gitlab ui in note form. !42221
+- Escaped markdown should not be interpreted as shortcuts. !45922
+- Display the user busy status in the MR sidebar. !47769
+- Move integration inheritance override dropdown above grid layout. !49325
+- Code extraction - refactoring of MR services classes. !49827
+- Create new assignees widget for boards. !50054
+- Update the HEX values and names of the color options for labels. !50393
+- Rename asset_proxy_whitelist column on application_settings. !50824
+- Prevent creating duplicate pipelines manually. !51076 (Kev @KevSlashNull)
+- Render WebP attachments as image by default. !51088 (Kev @KevSlashNull)
+- Add warning message for GitLab group migration. !51214
+- Display Terraform list errors to user. !51397
+- Global Search - UX Cleanup of Search Bar. !51409
+- Display full design name in tooltip. !51421
+- Change the project avatar preview into a rectangle. !51511 (Austin Regnery)
+- Add 'tags' field to runners in job/pipeline webhook payloads. !51633
+- Move to CE: mutation to create MR for SAST Configuration. !51634
+- Add converted_at(timestamp) & context(jsonb) columns to the experiment_subjects table. !51659
+- Link to more helpful docs from alert management pages. !51665
+- Move Cohorts page to Overiew-Users. !51707
+- Web IDE shows alert and disable buttons when user cannot push code. !51710
+- Add entity columns to vulnerability occurrences. !51739
+- Add PostgreSQL trigger to maintain projects.has_external_issue_tracker. !51852
+- Reduce vertical padding of registry list item. !51961
+- Update Workhorse to v8.60.0. !51965
+- Track exceptions when using Bulk Import. !52011
+- Remove redundant text in Terraform Widget. !52013
+- Add "What's new" item to the help dropdown. !52020
+- Change UI text for failed pipeline on an MR. !52023
+- Remove group owner data from webhooks. !52071
+- Move btn-primary to btn-confirm class as a part of Pajamas migration. !52090 (Yogi (@yo))
+- Add name validation to Terraform state. !52102
+- Change error message for user approval error. !52103
+- Admin dashboard basic stats redesign. !52176 (Yogi (@yo))
+- Drop repository_read_only column from namespaces table. !52181
+- Update styling of validation messages in New Feature Flag form. !52217
+- Add callout disabling feature to cleanup policy alert. !52327
+- Add pagination and filtering to htoup imports. !52340
+- BulkImports: Add pipeline step to the failures log. !52345
+- Improve accessibility of gray color CI status icons. !52356
+- Global Search - UX Refresh for Sort Button. !52387
+- Add 404 state to container registry details page. !52466
+- Monitor RackAttack redis usage and enrich auth structured logs. !52471
+- Remove compare switch revision button. !52547
+- Improve merge failed error. !52555
+- Add unique index on services project_id and type. !52563
+- Clean up uniqueness validations for service type. !52565
+- Redesign the search UI for the package list. !52575
+- Fix margins in social connect button on account settings. !52581 (Yogi (@yo))
+- Move the sub-section to gl-card in advanced search settings in admin. !52585 (Yogi (@yo))
+- Update styles for terraform MR widget. !52627
+- Bypass admin mode for internal api operations (ssh git & http rails). !52697 (Diego Louzán)
+- Increase the complexity score of GraphQL detailedStatus#label as it can call Gitaly. !52708
+- Migrate toggle button in subscription to GitLab UI component. !52717
+- Migrate feature flags page toggles to GlToggle. !52728
+- Migrate project settings to use GlToggle. !52729
+- Run pipeline_schedule_worker at every 10th minute from 3 through 59. !52756 (Ben Bodenmiller (@bbodenmiller))
+- Use realtime_changes endpoint for reporting group import status. !52796
+- Add content_type column to dependency_proxy_manifests. !52805
+- Replace erase job alert background color with color consistent with UI. !52810
+- Fix protected branches/tags border. !52816
+- Update download button size to sm from xs and add btn-default. !52867 (Yogi (@yo))
+- Change DevopsAdoption feature to work with single group only. !52871
+- Refactored admin user table headers. !52891 (Shubham Kumar (@imskr))
+- Show helper link on a new line in GPG status popover. !52894 (Yogi (@yo))
+- Fix bug, where the download email patches and plain diffs links did not download from the commit page. !52899 (Yogi (@yo))
+- Update code quality template to use 0.85.22. !52913
+- Remove ci_live_trace_use_fog_attributes feature flag. !52939
+- Only Display One Chart at a Time. !52952
+- Unwrap Sidekiq exceptions and jobs in the structured logs and metrics. !53006
+- GraphQL: Add mergedYaml to CiConfigResolver response. !53081
+- Add runner instructions modal in the CI/CD settings section. !53087
+- Align action buttons in jobs page. Reduce icon buttons width in jobs, artifacts and environment pages. !53155
+- Change the badge design in the jobs page. !53168
+- Improve user dropdown items. !53175
+- Update Rugged to v1.0.1. !53212
+- Introduce automatic class path correction in Cobertura parser. !53236
+- Sort milestone dropdown items by due date. !53242
+- Change pipeline empty state language. !53281
+- Stop notifying users of acknowledged alerts and stop changing the status of acknowledged Prometheus alerts to Triggered. !53330
+- Enable suggestions custom commit message feature flag by default. !53342
+- Redesign SSH keys list. !53351 (Yogi (@yo))
+- Track YAML-less Auto DevOps inclusions separately. !53383
+- Add sort argument to container_repositories graphql resolver. !53404
+- Update Ruby detection rules for SAST. !53414
+- Add loading display to Terraform lock action. !53475
+- Search: Add Sort by Last Updated to Issue/MR. !53589
+- Replace bootstrap modal in issuable_by_email HAML template. !53599
+- Change UI text for 2FA setup. !53677
+- Align and reorder boards search bar buttons. !53690
+- Skip new note notifications when author is deleted. !53699
+- Add release tooltip for guest users. !53722 (Jonas Wälter @wwwjon)
+- Accept deeply nested arrays for CI script keyword. !53737
+- Reset CI minutes only for namespaces that used minutes. !53740
+- Update Sample GitLab Project Template to be clearer and adjust prominent placement. !53750
+- Update blob page buttons to gitlab-ui pajamas styles. !53775
+- Highlight board lists when they are added. !53779
+- Add sort to container registry list page. !53820
+- Filter deployments by finished_at in Value Stream Analytics. !53861
+- Display loading when removing Terraform state. !53897
+- Improve project members management, filtering, and sorting. !53935
+- Add updated_at output to search results. !53958
+- Prepend the Marginalia comment in SQL query. !54015
+- Add OpenID SSO icon. !54026
+- Select the newest records for webhook test payloads. !54030
+- Upgrade Asciidoctor to 2.0.12. !54121 (Guillaume Grossetie)
+- Remove position sticky polyfill. !54299
+
+### Performance (14 changes)
+
+- Add database index to improve performance of usage ping metrics calculation. !48671
+- Add indexes for onboarding progress table. !50679
+- Support batch loading of merge head diffs. !51078
+- Extend index on ci_builds_metadata. !52123
+- Improve the performance of merge request and issue search by label(s). !52495
+- Project creation to use specialized worker to calculate project authorizations. !52719
+- Paginate single commit view. !52819
+- Introduce a rendering limit for commit titles. !52904
+- Add index to incident management oncall shifts table. !52961
+- Lower allocations in _collapsed partial. !53233
+- Memoize the fork suggestion button partial. !53256
+- Optimized loading of descendant group labels. !53356
+- Use Gitaly keyset pagination to optimize branches page. !53409
+- Speed up update merge request worker by memoizing whether a push is a force or not. !53536
+
+### Added (107 changes, 15 of them are from the community)
+
+- Add tag_list attribute to the JSON output for Jobs API. !44859 (Alon Liszt)
+- Add follow each other model, API and UI(profile, activity view). !45451 (Roger Meier)
+- Add Banzai filter for CustomEmoji. !47122 (Rajendra Kadam)
+- Deployments::CreateService executions are idempotent for duplicate params. !47610
+- Populate and migrate issue_email_participants. !48711 (Lee Tickett @leetickett)
+- Enable local file reviews (marking files as viewed) by default and add documentation for that feature. !48976
+- Add finder for getting commits with a trailer set. !49243
+- Enable/disable additional diagram formats on Kroki. !49304 (Guillaume Grossetie)
+- Allow opening projects with VS Code. !49460 (Kev @KevSlashNull)
+- Allow users to re-request a review from a reviewer. !50068
+- Add job to persist On-call shifts. !50239
+- Improve visibility of time spent with external HTTP calls. !50696
+- Add rake task to migrate Terraform states to object storage. !50740
+- Map common severity values from a Prometheus alert payload. !50871
+- Add keep latest artifact option for instances. !50889
+- Add GraphQL query for single Terraform state. !51145
+- Move "number of changed files" into Web IDE sidebar badge. !51166 (Kev @KevSlashNull)
+- Allow reviewers to be updated via MergeRequest API. !51186
+- Instrument CI parsers. !51241
+- Add a commit message parameter for the suggestion endpoints. !51245
+- Add dast_profiles database table. !51296
+- Editor Lite: support for Diff Instance. !51470
+- Populate the `uuid` attributes of the `security_findings` records and the `finding_uuid` attribute of the related `vulnerability_feedback` records. !51472
+- Add the Manage::Import total GMAU metric. !51496
+- Mark files as reviewed locally. !51513
+- Sync pipeline builds to Jira. !51627
+- Send deployment information to Jira. !51629
+- Database migration for compliance pipeline configuration location. !51663
+- Debian Group and Project Distribution Components. !51732 (Mathieu Parent)
+- Add a /request_review alias for /assign_reviewer. !51751
+- Log user approval/rejection in application logs. !51768
+- Enable synchronization of feature flags to Jira. !51796
+- Create Groups::RepositoryStorageMove table. !51803
+- Keyboard shortcut for switching to GitLab next (Canary). !51834 (Yogi (@yo))
+- Add On-call Rotations destroy mutation to GraphQL. !51860
+- Add enforced SSH key expiration. !51921
+- Pass dependency proxy credentials to runners to log in automatically. !51927
+- Add captcha-related fields to snippet GraphQL mutations. !51956
+- Support setting more attributes when forking a project. !51962
+- Add delete functionality to the Image Repository detail view. !51980
+- Expose if user is a bot in the REST api. !52003
+- Add chat notification label support. !52105
+- Support Project variables in `include` section of `gitlab-ci.yml`. !52108
+- Add API for generating Markdown changelogs. !52116
+- Add Jira proxy settings columns. !52119
+- Project access token management via API. !52139
+- BulkImports: Import Group Labels. !52260
+- Add repository_read_only column to NamespaceSettings table. !52300
+- Use a custom Ruby patch to instrument memory usage. !52306
+- Added ability to re-request a review from a reviewer. !52321
+- Add rake task to reset user password. !52347
+- Track monthly active users for QuickActions. !52398
+- Add `patch_hard_limit_bytes_hit` metric for monitoring diff patch size limit hits. !52456
+- Show confirmation dialog when exiting pipeline editor. !52458
+- Search across full name for mentions autocomplete. !52488
+- Add site landmarks for screen readers. !52514
+- Add `security_and_compliance_access_level` column into the `project_features` table. !52551
+- Add OpenSearch support. !52583
+- Show recent test case failures in the pipeline test report. !52606
+- Display epic related events on user activity feed. !52611
+- Adds README to OpenAPI docs. !52637 (Jim Cser @jimcser)
+- Add rubygems metadata table. !52639
+- Add subgroup_events column to web_hooks table. !52648
+- Improve Vulnerability Tracking: Add fingerprints table. !52720
+- Add git_two_factor_session_expiry column to application_settings table. !52761
+- Add auto_delete_at to environments. !52788
+- Matomo: Support the disabling of cookies. !52831 (otheus@gmail.com)
+- Debian Group and Project Distribution Component Files. !52885 (Mathieu Parent)
+- Adds jira issue enforcement field. !52896
+- Track CI minutes for namespace on a monthly basis. !52915
+- Debian Publications. !52916 (Mathieu Parent)
+- Add bot to User GraphQL Type. !52933
+- Support setting confidential note attribute in UI. !52949 (Lee Tickett @leetickett)
+- Pipeline-level concurrency control with Cross-Project/Parent-Child pipelines. !53007
+- Enable housekeeping for project and group wiki repos. !53011
+- Add GFM reference format for feature flags. !53021
+- BulkImports: Migrate Group Membership. !53083
+- Add metrics for merge request approvals and revoking approvals. !53201
+- Add empty jobs page with link to editor. !53240
+- Add status attribute to packages and ability to set 'hidden' for generic packages. !53385
+- Display unload warning if MR edit changed. !53438
+- Track CI minutes on a monthly basis at project level. !53460
+- Migration to add new Premium and Ultimate plan records. !53465
+- Add group_id to ci_daily_build_group_report_result. !53494
+- Enable group setting to allow or prevent duplicate Maven uploads. !53591
+- Add application rate limit for Notes creation. !53637
+- Add link to test case file in pipeline test report. !53650
+- Automatically retarget merge requests. !53710
+- Add Security Orchestration Policy Configuration. !53743
+- Import epic award emojis when using Bulk Import. !53747
+- Allow deploy keys to push to a protected branch. !53812
+- Add semgrep SAST analyzer. !53815 (Daniel Paul Searles)
+- Support Markdown for Feature Flags. !53816
+- Add an allowlist to exclude users from the rate limit on notes creation. !53866
+- Add user setting for opting into marketing emails. !53921
+- Improve highlighting for merge diffs. !53980
+- Add created_by_user to cluster agents. !54011
+- Make merge-ref base the default comparison mode. !54017
+- Add created_by_user to cluster agent tokens. !54019
+- Add indicator in admin dashboard if user is group managed. !54027
+- Add state events to merge request update mutation. !54133
+- Display user busy status in issue sidebar. !54165
+- Upgrade GitLab Pages to v1.35.0. !54167
+- Add '!reference' YAML tag to help merge CI configurations. !54198
+- Schedule user status cleanup after a given time interval via the REST API. !54207
+- Add merged Yaml tab feature to Pipeline Editor. !54223
+- Added warnings field to the pipelines GraphQL type. !54296
+
+### Other (170 changes, 101 of them are from the community)
+
+- Apply GitLab UI button styles to buttons in app/views/projects/notes directory. !44107 (Lakshit)
+- Remove duplicates from vulnerability_occurrences. !49937
+- Edited UI copy wording to comply with GitLab style. !50676
+- New Shared Partial for SSH Key Deletion. !50825 (Mehul Sharma)
+- Update buttons in _hook.html.haml to use GitLab UI. !51065 (nuwe1)
+- Adds GitLabUI button styles in _test_button.html.haml. !51070 (nuwe1)
+- Adds GitLabUI button styles in deploy tokens _table.html.haml. !51082 (nuwe1)
+- Apply GitLab UI styles to buttons in notification directory _new_button.html.haml. !51148 (nuwe1)
+- Apply GitLab UI styles to buttons in _comment_button.html.haml. !51152 (nuwe1)
+- Adds GitLab UI styles to button in _edit_form.html.haml. !51156 (nuwe1)
+- Adds GitLab UI styles to button in _form.html.haml. !51160 (nuwe1)
+- Add gl-button to Set up new device button in 2fa settings. !51283 (Yogi (@yo))
+- Add `gl-button` to promotion buttons on issue sidebar. !51287 (Yogi (@yo))
+- Add gl-button to personal access token page. !51294 (Yogi (@yo))
+- Add gl-button to new issues and MR page. !51295 (Yogi (@yo))
+- Updated UI text to match style guidelines. !51348
+- Add gl-button to nav buttons in the project page. !51427 (Yogi (@yo))
+- Add Composer cache classes and table. !51509
+- Bump doorkeeper to 5.4.0. !51559
+- [Commit Page] Migrate to GlModal for cherry-pick commit. !51650
+- Updated UI text to match style guidelines. !51658
+- Apply GitLab UI button styles to button in geo. !51777 (Yogi (@yo))
+- Apply GitLab UI button styles to button _blank_state_ee_trial. !51778 (Yogi (@yo))
+- Apply GitLab UI button styles to buttons in group settings. !51781 (Yogi (@yo))
+- Apply GitLab UI button styles to buttons in ee/app/views/users directory. !51783 (Yogi (@yo))
+- Improve Performance bar design. !51788 (Yogi (@yo))
+- Apply new GitLab UI for buttons in admin settings. !51789 (Yogi (@yo))
+- Update empty labels container background color. !51792 (Yogi (@yo))
+- Update milestone badge to gl-badge. !51794 (Yogi (@yo))
+- Apply GitLab UI for create file button in MR. !51795 (Yogi (@yo))
+- Remove huge bottom margin for expand file button. !51802 (Yogi (@yo))
+- Apply new GitLab UI for commit browse file button. !51805 (Yogi (@yo))
+- Update CI general pipeline settings UI text. !51806
+- Apply new GitLab UI style to mirror update button and add space after icon. !51808 (Yogi (@yo))
+- Migrate old button classes to our Pajamas style GitLab button in multiple areas. !51826 (Yogi (@yo))
+- Update links in Pages settings. !51847
+- Update button style for consistency in Settings > Integrations, Mermaid Diagram warning, and No SSH warning. !51864
+- Add empty state placeholder for milestones. !51887 (Yogi (@yo))
+- Move user action card to new GitLab UI card in admin. !51914 (Yogi (@yo))
+- Move email badges to new GitLab UI badges. !51915 (Yogi (@yo))
+- Apply GitLab UI to email status badge. !51916 (Yogi (@yo))
+- Remove fuzzy search for awards emoji and refactor GFM autocomplete emoji support. !51972 (Ethan Reesor (@firelizzard))
+- [MR Page] Migrate to GlModal for revert MR. !52019
+- Increase splay of Puma worker restarts. !52079
+- Add btn-default class for btn-build buttons. !52093 (Yogi (@yo))
+- Update GitLab Runner Helm Chart to 0.25.0. !52095
+- Apply new GitLab UI for form inputs project settings page. !52097 (Yogi (@yo))
+- When an MR diff is Too Large, highlight it like other collapsed diffs. !52146
+- Updated UI text to match style guidelines. !52152
+- Remove temp index in oauth_applications table. !52157
+- Apply new GitLab UI for input fields in auth screens. !52167 (Yogi (@yo))
+- Update doorkeeper to 5.5.0.rc2. !52171
+- Remove Avatar from Comment Forms. !52180 (Lee Tickett @leetickett)
+- Add gl-button class in relevant places on project html. !52183 (Gary Bell @garybell)
+- Track suggestion add/apply metrics. !52189
+- Track the number of users who are assigned and get requested for reviews. !52194
+- Apply new GitLab UI for badge and button in project's protected branch settings. !52207 (Yogi (@yo))
+- Disable nakayoshi_fork by default in examples. !52209
+- Remove graphql_pipeline_header feature flag. !52247
+- Updated UI text to match style guidelines. !52267
+- Update bundler-audit gem to 0.7.0.1. !52269
+- Update default_value_for gem to 3.4.0. !52271
+- Convert deploy token button to pajamas. !52277
+- Updated UI text to match style guidelines. !52284
+- Apply new GitLab UI badge for users in the admin page. !52289 (Yogi (@yo))
+- Apply new GitLab UI for inputs in admin/users directory. !52290 (Yogi (@yo))
+- Fix Add a to do spelling on epics. !52292 (Yogi (@yo))
+- Expose user availablility data on issuable pages. !52333
+- Convert project runner buttons to pajamas. !52358
+- Replace angle-double-left icon with chevron-double-lg-left. !52393
+- Apply new GitLab UI for subscribe buttons in issues. !52401 (Yogi (@yo))
+- Apply new GitLab UI for inputs in admin/application_settings directory. !52402 (Yogi (@yo))
+- Apply new GitLab UI for buttons and card in admin/license. !52408 (Yogi (@yo))
+- Apply new GitLab UI for input field in admin/appearance. !52409 (Yogi (@yo))
+- Apply new GitLab UI for input field in admin/applications. !52410 (Yogi (@yo))
+- Apply new GitLab UI for input field in admin/broadcast_messages. !52411 (Yogi (@yo))
+- Apply new GitLab UI for input field in admin/hooks. !52412 (Yogi (@yo))
+- Apply new GitLab UI for input field in admin/labels. !52413 (Yogi (@yo))
+- Move vulnerability report counts to GlCard. !52416 (Yogi (@yo))
+- Bold metricDetailsLabel in the performance bar. !52417 (Yogi (@yo))
+- Apply new GitLab UI for input field in user profile settings. !52424 (Yogi (@yo))
+- Apply new GitLab UI for input field in user applications. !52425 (Yogi (@yo))
+- Apply new GitLab UI for input field in user personal access token settings. !52426 (Yogi (@yo))
+- Apply new GitLab UI for input field in user email settings. !52427 (Yogi (@yo))
+- Apply new GitLab UI for buttons in blob header. !52429 (Yogi (@yo))
+- Add btn-default to settings toggle button in push rules. !52430 (Yogi (@yo))
+- Replace OpenSSL constants with strings. !52432 (Takuya Noguchi)
+- Fix spacing before toggle subscribe button on labels. !52459 (Yogi (@yo))
+- Apply new GitLab UI for input fields in file editor. !52461 (Yogi (@yo))
+- Improve variable settings ui text. !52462
+- Update starred empty state with new GitLab UI classes. !52467 (Yogi (@yo))
+- Track API requests from the the VS Code extension. !52484
+- Create constants for bv::show::modal and bv::hide::modal. !52518 (Kev @KevSlashNull)
+- Add additional instructions on deleting account on Gitlab.com. !52538
+- Remove v-html from mr_widget_pipeline.vue. !52564 (Kev @KevSlashNull)
+- Apply new GitLab UI for buttons in 2fa and changed deprecated info to confirm. !52580 (Yogi (@yo))
+- Allow new docs badges in UI links. !52651
+- Update (?) link to sprite question icon. !52655 (Yogi (@yo))
+- Improve overall copy, remove redundant reassurance in the form, and fix empty %p rendered in the DOM of the welcome page. !52660
+- Apply new GitLab UI class for U2F try again button. !52759 (Yogi (@yo))
+- Update question mark icon while checking pipeline status. !52760 (Yogi (@yo))
+- Update table and ellipsis button in performance bar metrics modal. !52762 (Yogi (@yo))
+- Replace bootstrap event strings with constants. !52777 (Kev @KevSlashNull)
+- Apply new GitLab UI style for todo button in the issuable sidebar. !52779 (Yogi (@yo))
+- Apply new GitLab UI for buttons in MR resolve conflicts page. !52783 (Yogi (@yo))
+- Review UI text - deploy keys settings. !52830
+- Add btn-default class for the download button in graphs page. !52857 (Yogi (@yo))
+- Add btn-default class for unlock button in locked files page. !52858 (Yogi (@yo))
+- Add btn-default class for history button in the contributors page. !52861 (Yogi (@yo))
+- Apply new GitLab UI for buttons in tags page. !52862 (Yogi (@yo))
+- Apply new GitLab UI for buttons in the tag edit page. !52863 (Yogi (@yo))
+- Apply new GitLab UI for buttons and input in the project graph page. !52864 (Yogi (@yo))
+- Add btn-default to buttons in tag action on the single tag page. !52866 (Yogi (@yo))
+- Apply new GitLab UI for badges in the project branch list. !52868 (Yogi (@yo))
+- Update rspec-* gem versions. !52873
+- Review UI text - deploy freezes. !52884
+- Apply new GitLab UI for RSS button in commits page. !52900 (Yogi (@yo))
+- Add btn-icon class for action buttons in the user profile. !52901 (Yogi (@yo))
+- Open CI/CD settings help links in new tab by default. !52948
+- Update links to redirected docs. !53004
+- Cleanup composer cache pages. !53005
+- Re-add migration to fix invalid merge request index. !53042
+- Update mermaid.js to v8.9.0. !53123
+- Move CleanupMultiprocDirService out of config.ru. !53139
+- Apply new GitLab UI for buttons in empty project snippets placeholder. !53157 (Yogi (@yo))
+- [MR Page] Migrate to GlModal for Cherry-pick MR. !53169
+- Bump cluster applications CI template to v0.40.0. !53183
+- Remove inconsistent index in backup_labels table. !53189
+- Set projects.has_external_wiki default to null if default value is present. !53216
+- Update bullet gem version to 6.1.3. !53217
+- Updated UI text to be sentence case. !53323
+- Add btn-default class for social buttons in login and signup page. !53347 (Yogi (@yo))
+- Apply new GitLab UI for buttons in pipeline page. !53364 (Yogi (@yo))
+- Apply new GitLab UI for search in frequent items search. !53368 (Yogi (@yo))
+- Apply new GitLab UI for badge in job page sidebar. !53386 (Yogi (@yo))
+- Geo - Update Patroni replication docs to automatic recover from a leader change on the primary site. !53424
+- Change secondary text color on Gitpod editor dropdown button. !53437
+- Apply new GitLab UI for new trial page. !53447 (Yogi (@yo))
+- Apply new GitLab UI for buttons in create project page. !53454 (Yogi (@yo))
+- Apply new GitLab UI for buttons in connect repo buttons in new project page. !53455
+- Apply new GitLab UI for buttons in new group page. !53456 (Yogi (@yo))
+- Show bottom tooltip for edit button in user profile. !53459 (Yogi (@yo))
+- Add Space before loading icon in toggle todo button. !53463 (Yogi (@yo))
+- Apply new GitLab UI for create mr button from issue. !53467 (Yogi (@yo))
+- Apply GitLab UI button styles to buttons in gitlab_slack_application file. !53478 (Yogi (@yo))
+- Remove namespace_onboarding_actions table. !53488
+- Update grape gem to 1.5.2. !53547
+- Apply new GitLab UI for buttons in empty issue placeholder. !53554 (Yogi (@yo))
+- Apply new GitLab UI for buttons in commit page. !53555 (Yogi (@yo))
+- Apply new GitLab UI for toggle buttons in CI/CD settings page. !53556 (Yogi (@yo))
+- Add margin and remove padding in project graph page. !53557 (Yogi (@yo))
+- Add btn-icon class for icon only buttons in issues header. !53562 (Yogi (@yo))
+- Remove gl-text-black-normal from detailed metric which is not visible in dark mode. !53563 (Yogi (@yo))
+- Improve error message reporting in snippet create or update. !53576
+- Add URL help text and edit other UI text. !53578
+- Apply new GitLab UI for no repo action buttons. !53580 (Yogi (@yo))
+- Track 5 mins production app template usage. !53618
+- Add clear_status_at column to user_status table. !53620
+- Fix /-/readiness probe for Puma Single. !53708
+- Prevent blocked user from triggering notifications. !53788
+- Track when a merge request is created from an issue. !53808
+- Allow running Puma in Single mode. !53830
+- Update GitLab Workhorse to v8.62.0. !53864
+- Remove caching_experiments feature flag. !53901
+- Improve profile status emoji alignment. !54078
+- Add tracking to measure the number of unique users committing CI config. !54192
+- Enable sorting diffs by default. !54210
+- Update GitLab Workhorse to v8.63.0. !54315
+- Add btn-default to buttons in todos page. (Yogi (@yo))
+- Apply new GitLab UI for buttons in pipeline schedules.
+
+
+## 13.8.8 (2021-04-13)
+
+### Security (2 changes)
+
+- Clean only legitimate JPG and TIFF files.
+- Update ruby-saml and rexml gems.
+
+
+## 13.8.7 (2021-03-31)
+
+### Security (5 changes)
+
+- Fixed XSS in merge requests sidebar.
+- Leave pool repository on fork unlinking.
+- Fix arbitrary read/write in AsciiDoctor and Kroki gems.
+- Prevent infinite loop when checking if collaboration is allowed.
+- Require POST request to trigger system hooks.
+
+### Removed (1 change)
+
+- Make HipChat project service do nothing. !57434
+
+### Other (3 changes)
+
+- Remove direct mimemagic dependency. !57387
+- Refactor MimeMagic calls to new MimeType class. !57421
+- Switch to using a fake mimemagic gem. !57443
+
+
+## 13.8.6 (2021-03-17)
+
+### Security (1 change)
+
+- Patch Kramdown syntax highlighter gem.
+
+
+## 13.8.5 (2021-03-04)
+
+### Security (6 changes)
+
+- Fix XSS in wiki author email and name.
+- Bump thrift gem to 0.14.0.
+- Allow only owners to manage group variables.
+- Do not store marshalled sessions ids in Redis.
+- Workhorse: prevent escaped router path traversal.
+- Fix XSS vulnerability for swagger file viewer.
+
+
 ## 13.8.4 (2021-02-11)
 
 ### Security (9 changes)
@@ -400,6 +3949,24 @@ entry.
 - Remove unneeded group label index. !51676
 - Apply GitLab UI button styles to buttons in project wiki. !51780 (Yogi (@yo))
 - Add verbiage + link sast to show it's in core. !51935
+
+
+## 13.7.9 (2021-03-17)
+
+### Security (1 change)
+
+- Patch Kramdown syntax highlighter gem.
+
+
+## 13.7.8 (2021-03-04)
+
+### Security (5 changes)
+
+- Bump thrift gem to 0.14.0.
+- Allow only owners to manage group variables.
+- Do not store marshalled sessions ids in Redis.
+- Workhorse: prevent escaped router path traversal.
+- Fix XSS vulnerability for swagger file viewer.
 
 
 ## 13.7.7 (2021-02-11)

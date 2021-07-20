@@ -1,15 +1,17 @@
-import { shallowMount } from '@vue/test-utils';
 import LoadingSkeleton from 'ee/threat_monitoring/components/loading_skeleton.vue';
 import StatisticsHistory from 'ee/threat_monitoring/components/statistics_history.vue';
 import StatisticsSummary from 'ee/threat_monitoring/components/statistics_summary.vue';
 import ThreatMonitoringSection from 'ee/threat_monitoring/components/threat_monitoring_section.vue';
 import createStore from 'ee/threat_monitoring/store';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
-import { mockNominalHistory, mockAnomalousHistory } from '../mock_data';
+import { mockNominalHistory, mockAnomalousHistory } from '../mocks/mock_data';
 
 describe('ThreatMonitoringSection component', () => {
   let store;
   let wrapper;
+
+  const title = 'Test Title';
 
   const timeRange = {
     from: new Date(Date.UTC(2020, 2, 6)).toISOString(),
@@ -18,7 +20,7 @@ describe('ThreatMonitoringSection component', () => {
 
   const factory = ({ propsData, state } = {}) => {
     store = createStore();
-    Object.assign(store.state.threatMonitoringWaf, {
+    Object.assign(store.state.threatMonitoringNetworkPolicy, {
       isLoadingStatistics: false,
       statistics: {
         total: 100,
@@ -34,10 +36,10 @@ describe('ThreatMonitoringSection component', () => {
 
     jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
 
-    wrapper = shallowMount(ThreatMonitoringSection, {
+    wrapper = shallowMountExtended(ThreatMonitoringSection, {
       propsData: {
-        storeNamespace: 'threatMonitoringWaf',
-        title: 'Web Application Firewall',
+        storeNamespace: 'threatMonitoringNetworkPolicy',
+        title,
         subtitle: 'Requests',
         nominalTitle: 'Total Requests',
         anomalousTitle: 'Anomalous Requests',
@@ -53,81 +55,84 @@ describe('ThreatMonitoringSection component', () => {
     });
   };
 
-  const findLoadingSkeleton = () => wrapper.find(LoadingSkeleton);
-  const findStatisticsHistory = () => wrapper.find(StatisticsHistory);
-  const findStatisticsSummary = () => wrapper.find(StatisticsSummary);
-  const findChartEmptyState = () => wrapper.find({ ref: 'chartEmptyState' });
-  const findChartTitle = () => wrapper.find({ ref: 'chartTitle' });
-  const findChartSubtitle = () => wrapper.find({ ref: 'chartSubtitle' });
-
-  beforeEach(() => {
-    factory({});
-  });
+  const findLoadingSkeleton = () => wrapper.findComponent(LoadingSkeleton);
+  const findStatisticsHistory = () => wrapper.findComponent(StatisticsHistory);
+  const findStatisticsSummary = () => wrapper.findComponent(StatisticsSummary);
+  const findChartEmptyState = () => wrapper.findByTestId('chartEmptyState');
+  const findChartTitle = () => wrapper.findByTestId('chartTitle');
+  const findChartSubtitle = () => wrapper.findByTestId('chartSubtitle');
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  it('does not show the loading skeleton', () => {
-    expect(findLoadingSkeleton().exists()).toBe(false);
-  });
-
-  it('sets data to the summary', () => {
-    const summary = findStatisticsSummary();
-    expect(summary.exists()).toBe(true);
-
-    expect(summary.props('data')).toStrictEqual({
-      anomalous: {
-        title: 'Anomalous Requests',
-        value: 0.2,
-      },
-      nominal: {
-        title: 'Total Requests',
-        value: 100,
-      },
+  describe('given there is data to display', () => {
+    beforeEach(() => {
+      factory({});
     });
-  });
 
-  it('sets data to the chart', () => {
-    const chart = findStatisticsHistory();
-    expect(chart.exists()).toBe(true);
-
-    expect(chart.props('data')).toStrictEqual({
-      anomalous: { title: 'Anomalous Requests', values: mockAnomalousHistory },
-      nominal: { title: 'Total Requests', values: mockNominalHistory },
-      ...timeRange,
+    it('shows the chart title', () => {
+      const chartTitle = findChartTitle();
+      expect(chartTitle.exists()).toBe(true);
+      expect(chartTitle.text()).toBe(title);
     });
-    expect(chart.props('yLegend')).toEqual('Requests');
-  });
 
-  it('shows the chart title', () => {
-    expect(findChartTitle().exists()).toBe(true);
-  });
+    it.each`
+      component               | status                | findComponent            | state
+      ${'loading skeleton'}   | ${'does not display'} | ${findLoadingSkeleton}   | ${false}
+      ${'chart subtitle'}     | ${'does display'}     | ${findChartSubtitle}     | ${true}
+      ${'statistics summary'} | ${'does display'}     | ${findStatisticsSummary} | ${true}
+      ${'statistics history'} | ${'does display'}     | ${findStatisticsHistory} | ${true}
+      ${'chart empty state'}  | ${'does not display'} | ${findChartEmptyState}   | ${false}
+    `('$status the $component', async ({ findComponent, state }) => {
+      expect(findComponent().exists()).toBe(state);
+    });
 
-  it('shows the chart subtitle', () => {
-    expect(findChartSubtitle().exists()).toBe(true);
-  });
+    it('sets data to the summary', () => {
+      const summary = findStatisticsSummary();
+      expect(summary.exists()).toBe(true);
 
-  it('does not show the chart empty state', () => {
-    expect(findChartEmptyState().exists()).toBe(false);
-  });
+      expect(summary.props('data')).toStrictEqual({
+        anomalous: {
+          title: 'Anomalous Requests',
+          value: 0.2,
+        },
+        nominal: {
+          title: 'Total Requests',
+          value: 100,
+        },
+      });
+    });
 
-  it('fetches statistics', () => {
-    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
-  });
+    it('sets data to the chart', () => {
+      const chart = findStatisticsHistory();
+      expect(chart.exists()).toBe(true);
 
-  it('fetches statistics on environment change', async () => {
-    store.dispatch.mockReset();
-    await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
+      expect(chart.props('data')).toStrictEqual({
+        anomalous: { title: 'Anomalous Requests', values: mockAnomalousHistory },
+        nominal: { title: 'Total Requests', values: mockNominalHistory },
+        ...timeRange,
+      });
+      expect(chart.props('yLegend')).toEqual('Requests');
+    });
 
-    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
-  });
+    it('fetches statistics', () => {
+      expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringNetworkPolicy/fetchStatistics');
+    });
 
-  it('fetches statistics on time window change', async () => {
-    store.dispatch.mockReset();
-    await store.commit('threatMonitoring/SET_CURRENT_TIME_WINDOW', 'hour');
+    it('fetches statistics on environment change', async () => {
+      store.dispatch.mockReset();
+      await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
 
-    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+      expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringNetworkPolicy/fetchStatistics');
+    });
+
+    it('fetches statistics on time window change', async () => {
+      store.dispatch.mockReset();
+      await store.commit('threatMonitoring/SET_CURRENT_TIME_WINDOW', 'hour');
+
+      expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringNetworkPolicy/fetchStatistics');
+    });
   });
 
   describe('given the statistics are loading', () => {
@@ -137,25 +142,15 @@ describe('ThreatMonitoringSection component', () => {
       });
     });
 
-    it('shows the loading skeleton', () => {
-      expect(findLoadingSkeleton().element).toMatchSnapshot();
-    });
-
-    it('does not show the summary or history statistics', () => {
-      expect(findStatisticsSummary().exists()).toBe(false);
-      expect(findStatisticsHistory().exists()).toBe(false);
-    });
-
-    it('shows the chart title', () => {
-      expect(findChartTitle().exists()).toBe(true);
-    });
-
-    it('does not show the chart subtitle', () => {
-      expect(findChartSubtitle().exists()).toBe(false);
-    });
-
-    it('does not show the chart empty state', () => {
-      expect(findChartEmptyState().exists()).toBe(false);
+    it.each`
+      component               | status                | findComponent            | state
+      ${'loading skeleton'}   | ${'does display'}     | ${findLoadingSkeleton}   | ${true}
+      ${'chart subtitle'}     | ${'does not display'} | ${findChartSubtitle}     | ${false}
+      ${'statistics summary'} | ${'does not display'} | ${findStatisticsSummary} | ${false}
+      ${'statistics history'} | ${'does not display'} | ${findStatisticsHistory} | ${false}
+      ${'chart empty state'}  | ${'does not display'} | ${findChartEmptyState}   | ${false}
+    `('$status the $component', async ({ findComponent, state }) => {
+      expect(findComponent().exists()).toBe(state);
     });
   });
 
@@ -172,25 +167,15 @@ describe('ThreatMonitoringSection component', () => {
       });
     });
 
-    it('does not show the loading skeleton', () => {
-      expect(findLoadingSkeleton().exists()).toBe(false);
-    });
-
-    it('does not show the summary or history statistics', () => {
-      expect(findStatisticsSummary().exists()).toBe(false);
-      expect(findStatisticsHistory().exists()).toBe(false);
-    });
-
-    it('shows the chart title', () => {
-      expect(findChartTitle().exists()).toBe(true);
-    });
-
-    it('does not show the chart subtitle', () => {
-      expect(findChartSubtitle().exists()).toBe(false);
-    });
-
-    it('shows the chart empty state', () => {
-      expect(findChartEmptyState().element).toMatchSnapshot();
+    it.each`
+      component               | status                | findComponent            | state
+      ${'loading skeleton'}   | ${'does not display'} | ${findLoadingSkeleton}   | ${false}
+      ${'chart subtitle'}     | ${'does not display'} | ${findChartSubtitle}     | ${false}
+      ${'statistics summary'} | ${'does not display'} | ${findStatisticsSummary} | ${false}
+      ${'statistics history'} | ${'does not display'} | ${findStatisticsHistory} | ${false}
+      ${'chart empty state'}  | ${'does not display'} | ${findChartEmptyState}   | ${true}
+    `('$status the $component', async ({ findComponent, state }) => {
+      expect(findComponent().exists()).toBe(state);
     });
   });
 });

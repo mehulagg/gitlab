@@ -6,7 +6,7 @@ module Geo
   class TrackingBase < ApplicationRecord
     self.abstract_class = true
 
-    NOT_CONFIGURED_MSG     = 'Geo secondary database is not configured'.freeze
+    NOT_CONFIGURED_MSG     = 'Geo secondary database is not configured'
     SecondaryNotConfigured = Class.new(StandardError)
 
     if ::Gitlab::Geo.geo_database_configured?
@@ -23,13 +23,13 @@ module Geo
       unless ::Gitlab::Geo.geo_database_configured?
         message = NOT_CONFIGURED_MSG
         message = "#{message}\nIn the GDK root, try running `make geo-setup`" if Rails.env.development?
-        raise SecondaryNotConfigured.new(message)
+        raise SecondaryNotConfigured, message
       end
 
       # Don't call super because LoadBalancing::ActiveRecordProxy will intercept it
       retrieve_connection
     rescue ActiveRecord::NoDatabaseError
-      raise SecondaryNotConfigured.new(NOT_CONFIGURED_MSG)
+      raise SecondaryNotConfigured, NOT_CONFIGURED_MSG
     end
   end
 end

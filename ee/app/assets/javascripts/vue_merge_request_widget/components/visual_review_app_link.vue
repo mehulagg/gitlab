@@ -153,7 +153,7 @@ export default {
 };
 </script>
 <template>
-  <div class="inline">
+  <div class="gl-display-inline-flex">
     <gl-button
       v-gl-modal="modalId"
       category="secondary"

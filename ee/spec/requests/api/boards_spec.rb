@@ -33,7 +33,7 @@ RSpec.describe API::Boards do
     let(:url) { "/projects/#{board_parent.id}/boards/#{board.id}" }
 
     it 'returns board with Upcoming milestone' do
-      board.update(milestone_id: Milestone::Upcoming.id)
+      board.update!(milestone_id: Milestone::Upcoming.id)
 
       get api(url, user)
 
@@ -41,7 +41,7 @@ RSpec.describe API::Boards do
     end
 
     it 'returns board with Started milestone' do
-      board.update(milestone_id: Milestone::Started.id)
+      board.update!(milestone_id: Milestone::Started.id)
 
       get api(url, user)
 
@@ -74,7 +74,7 @@ RSpec.describe API::Boards do
 
     context 'without WIP limits license' do
       before do
-        stub_feature_flags(wip_limits: false)
+        stub_licensed_features(wip_limits: false)
 
         get api(url, user)
       end

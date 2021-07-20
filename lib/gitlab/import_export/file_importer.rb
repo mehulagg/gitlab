@@ -28,12 +28,10 @@ module Gitlab
         copy_archive
 
         wait_for_archived_file do
-          # Disable archive validation by default
-          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/235949
-          validate_decompressed_archive_size if Feature.enabled?(:validate_import_decompressed_archive_size)
+          validate_decompressed_archive_size if Feature.enabled?(:validate_import_decompressed_archive_size, default_enabled: :yaml)
           decompress_archive
         end
-      rescue => e
+      rescue StandardError => e
         @shared.error(e)
         false
       ensure
@@ -57,7 +55,7 @@ module Gitlab
       def decompress_archive
         result = untar_zxf(archive: @archive_file, dir: @shared.export_path)
 
-        raise ImporterError.new("Unable to decompress #{@archive_file} into #{@shared.export_path}") unless result
+        raise ImporterError, "Unable to decompress #{@archive_file} into #{@shared.export_path}" unless result
 
         result
       end
@@ -67,7 +65,17 @@ module Gitlab
 
         @archive_file = File.join(@shared.archive_path, Gitlab::ImportExport.export_filename(exportable: @importable))
 
-        download_or_copy_upload(@importable.import_export_upload.import_file, @archive_file)
+        remote_download_or_download_or_copy_upload
+      end
+
+      def remote_download_or_download_or_copy_upload
+        import_export_upload = @importable.import_export_upload
+
+        if import_export_upload.remote_import_url.present?
+          download(import_export_upload.remote_import_url, @archive_file)
+        else
+          download_or_copy_upload(import_export_upload.import_file, @archive_file)
+        end
       end
 
       def remove_symlinks
@@ -87,7 +95,7 @@ module Gitlab
       end
 
       def validate_decompressed_archive_size
-        raise ImporterError.new(_('Decompressed archive size validation failed.')) unless size_validator.valid?
+        raise ImporterError, _('Decompressed archive size validation failed.') unless size_validator.valid?
       end
 
       def size_validator

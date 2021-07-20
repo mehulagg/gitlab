@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Elastic::Helper do
+RSpec.describe Gitlab::Elastic::Helper, :request_store do
   subject(:helper) { described_class.default }
 
   shared_context 'with a legacy index' do
@@ -18,7 +18,7 @@ RSpec.describe Gitlab::Elastic::Helper do
   end
 
   after do
-    helper.delete_index(index_name: @index_name)
+    helper.delete_index(index_name: @index_name) if @index_name
   end
 
   describe '.new' do
@@ -96,6 +96,12 @@ RSpec.describe Gitlab::Elastic::Helper do
       expect { helper.create_standalone_indices }.to raise_error(/already exists/)
     end
 
+    it 'does not raise an exception with skip_if_exists option' do
+      @indices = helper.create_standalone_indices
+
+      expect { helper.create_standalone_indices(options: { skip_if_exists: true }) }.not_to raise_error
+    end
+
     it 'raises an exception when there is an existing index' do
       @indices = helper.create_standalone_indices(with_alias: false)
 
@@ -159,7 +165,11 @@ RSpec.describe Gitlab::Elastic::Helper do
       include_context 'with an existing index and alias'
 
       it 'raises an error' do
-        expect { helper.create_empty_index }.to raise_error(RuntimeError)
+        expect { helper.create_empty_index }.to raise_error(/Index under '.+' already exists/)
+      end
+
+      it 'does not raise error with skip_if_exists option' do
+        expect { helper.create_empty_index(options: { skip_if_exists: true }) }.not_to raise_error
       end
     end
 
@@ -167,7 +177,7 @@ RSpec.describe Gitlab::Elastic::Helper do
       include_context 'with a legacy index'
 
       it 'raises an error' do
-        expect { helper.create_empty_index }.to raise_error(RuntimeError)
+        expect { helper.create_empty_index }.to raise_error(/Index or alias under '.+' already exists/)
       end
     end
   end

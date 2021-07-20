@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
@@ -20,7 +20,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
 
    ![Create project](img/external_repository.png)
 
-   GitLab imports the repository and enables [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository).
+   GitLab imports the repository and enables [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pull-from-a-remote-repository).
 
 1. In GitLab create a
    [Personal Access Token](../../user/profile/personal_access_tokens.md)
@@ -50,7 +50,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
 
    ![Bitbucket Cloud webhook](img/bitbucket_app_password.png)
 
-1. In GitLab, from **Settings > CI/CD > Environment variables**, add variables to allow
+1. In GitLab, from **Settings > CI/CD > Variables**, add variables to allow
    communication with Bitbucket via the Bitbucket API:
 
    `BITBUCKET_ACCESS_TOKEN`: the Bitbucket app password created above.

@@ -11,7 +11,7 @@ module QA
       end
     end
 
-    describe 'Project' do
+    describe 'Project', :requires_admin do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'awesome-project'
@@ -26,8 +26,7 @@ module QA
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
 
       context "Add project",
-              testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727',
-              quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/283925', type: :investigating, only: :production } do
+              testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727' do
         before do
           Resource::Project.fabricate_via_browser_ui! do |project|
             project.name = 'audit-add-project-via-ui'
@@ -37,8 +36,10 @@ module QA
         it_behaves_like 'audit event', ["Added project"]
       end
 
-      context "Add user access as guest", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
+      # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+      context "Add user access as guest", :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
         before do
+          Runtime::Feature.enable(:invite_members_group_modal)
           project.visit!
 
           Page::Project::Menu.perform(&:click_members)
@@ -82,7 +83,7 @@ module QA
         it_behaves_like 'audit event', ["Changed visibility from Public to Private"]
       end
 
-      context "Export file download", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296212', only: { subdomain: :staging }, type: :bug } do
+      context "Export file download", :skip_live_env, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127' do
         before do
           QA::Support::Retrier.retry_until do
             project = Resource::Project.fabricate_via_api! do |project|

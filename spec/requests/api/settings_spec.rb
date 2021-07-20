@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Settings, 'Settings' do
+RSpec.describe API::Settings, 'Settings', :do_not_mock_admin_mode_setting do
   let(:user) { create(:user) }
 
   let_it_be(:admin) { create(:admin) }
@@ -41,9 +41,12 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['snippet_size_limit']).to eq(50.megabytes)
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
+      expect(json_response['spam_check_api_key']).to be_nil
       expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
       expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
       expect(json_response['personal_access_token_prefix']).to be_nil
+      expect(json_response['admin_mode']).to be(false)
+      expect(json_response['whats_new_variant']).to eq('all_tiers')
     end
   end
 
@@ -110,6 +113,8 @@ RSpec.describe API::Settings, 'Settings' do
             terms: 'Hello world!',
             performance_bar_allowed_group_path: group.full_path,
             diff_max_patch_bytes: 300_000,
+            diff_max_files: 2000,
+            diff_max_lines: 50000,
             default_branch_protection: ::Gitlab::Access::PROTECTION_DEV_CAN_MERGE,
             local_markdown_version: 3,
             allow_local_requests_from_web_hooks_and_services: true,
@@ -120,11 +125,15 @@ RSpec.describe API::Settings, 'Settings' do
             issues_create_limit: 300,
             raw_blob_request_limit: 300,
             spam_check_endpoint_enabled: true,
-            spam_check_endpoint_url: 'https://example.com/spam_check',
+            spam_check_endpoint_url: 'grpc://example.com/spam_check',
+            spam_check_api_key: 'SPAM_CHECK_API_KEY',
+            mailgun_events_enabled: true,
+            mailgun_signing_key: 'MAILGUN_SIGNING_KEY',
             disabled_oauth_sign_in_sources: 'unknown',
             import_sources: 'github,bitbucket',
             wiki_page_max_content_bytes: 12345,
-            personal_access_token_prefix: "GL-"
+            personal_access_token_prefix: "GL-",
+            admin_mode: true
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -154,6 +163,8 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['terms']).to eq('Hello world!')
         expect(json_response['performance_bar_allowed_group_id']).to eq(group.id)
         expect(json_response['diff_max_patch_bytes']).to eq(300_000)
+        expect(json_response['diff_max_files']).to eq(2000)
+        expect(json_response['diff_max_lines']).to eq(50000)
         expect(json_response['default_branch_protection']).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
         expect(json_response['local_markdown_version']).to eq(3)
         expect(json_response['allow_local_requests_from_web_hooks_and_services']).to eq(true)
@@ -164,11 +175,15 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['issues_create_limit']).to eq(300)
         expect(json_response['raw_blob_request_limit']).to eq(300)
         expect(json_response['spam_check_endpoint_enabled']).to be_truthy
-        expect(json_response['spam_check_endpoint_url']).to eq('https://example.com/spam_check')
+        expect(json_response['spam_check_endpoint_url']).to eq('grpc://example.com/spam_check')
+        expect(json_response['spam_check_api_key']).to eq('SPAM_CHECK_API_KEY')
+        expect(json_response['mailgun_events_enabled']).to be(true)
+        expect(json_response['mailgun_signing_key']).to eq('MAILGUN_SIGNING_KEY')
         expect(json_response['disabled_oauth_sign_in_sources']).to eq([])
         expect(json_response['import_sources']).to match_array(%w(github bitbucket))
         expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
         expect(json_response['personal_access_token_prefix']).to eq("GL-")
+        expect(json_response['admin_mode']).to be(true)
       end
     end
 
@@ -456,10 +471,38 @@ RSpec.describe API::Settings, 'Settings' do
 
     context "missing spam_check_endpoint_url value when spam_check_endpoint_enabled is true" do
       it "returns a blank parameter error message" do
-        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true }
+        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true, spam_check_api_key: "SPAM_CHECK_API_KEY" }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq('spam_check_endpoint_url is missing')
+      end
+    end
+
+    context "missing spam_check_api_key value when spam_check_endpoint_enabled is true" do
+      it "returns a blank parameter error message" do
+        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true, spam_check_endpoint_url: "https://example.com/spam_check" }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('spam_check_api_key is missing')
+      end
+    end
+
+    context "overly long spam_check_api_key" do
+      it "fails to update the settings with too long spam_check_api_key" do
+        put api("/application/settings", admin), params: { spam_check_api_key: "0123456789" * 500 }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        message = json_response["message"]
+        expect(message["spam_check_api_key"]).to include(a_string_matching("is too long"))
+      end
+    end
+
+    context "missing mailgun_signing_key value when mailgun_events_enabled is true" do
+      it "returns a blank parameter error message" do
+        put api("/application/settings", admin), params: { mailgun_events_enabled: true }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('mailgun_signing_key is missing')
       end
     end
 
@@ -480,6 +523,33 @@ RSpec.describe API::Settings, 'Settings' do
           message = json_response["message"]
           expect(message["personal_access_token_prefix"]).to include(a_string_matching("can contain only letters of the Base64 alphabet"))
         end
+      end
+    end
+
+    context 'whats_new_variant setting' do
+      before do
+        Gitlab::CurrentSettings.current_application_settings.whats_new_variant_disabled!
+      end
+
+      it 'updates setting' do
+        new_value = 'all_tiers'
+        put api("/application/settings", admin),
+        params: {
+          whats_new_variant: new_value
+        }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['whats_new_variant']).to eq(new_value)
+      end
+
+      it 'fails to update setting with invalid value' do
+        put api("/application/settings", admin),
+        params: {
+          whats_new_variant: 'invalid_value'
+        }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('whats_new_variant does not have a valid value')
       end
     end
   end

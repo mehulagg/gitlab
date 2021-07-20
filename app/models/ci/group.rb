@@ -10,6 +10,7 @@ module Ci
   class Group
     include StaticModel
     include Gitlab::Utils::StrongMemoize
+    include GlobalID::Identification
 
     attr_reader :project, :stage, :name, :jobs
 
@@ -20,6 +21,17 @@ module Ci
       @stage = stage
       @name = name
       @jobs = jobs
+    end
+
+    def id
+      "#{stage.id}-#{name}"
+    end
+
+    def ==(other)
+      other.present? && other.is_a?(self.class) &&
+        project == other.project &&
+        stage == other.stage &&
+        name == other.name
     end
 
     def status
@@ -39,7 +51,7 @@ module Ci
     def status_struct
       strong_memoize(:status_struct) do
         Gitlab::Ci::Status::Composite
-          .new(@jobs)
+          .new(@jobs, project: project)
       end
     end
 

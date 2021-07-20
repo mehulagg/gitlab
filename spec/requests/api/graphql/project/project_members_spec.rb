@@ -50,6 +50,20 @@ RSpec.describe 'getting project members information' do
       invited_group.add_guest(invited_user)
     end
 
+    context 'when a member is invited only via email and current_user is a maintainer' do
+      before do
+        parent_project.add_maintainer(user)
+        create(:project_member, :invited, source: parent_project)
+      end
+
+      it 'returns null in the user field' do
+        fetch_members(project: parent_project, args: { relations: [:DIRECT] })
+
+        expect(graphql_errors).to be_nil
+        expect(graphql_data_at(:project, :project_members, :edges, :node)).to contain_exactly({ 'user' => { 'id' => global_id_of(user) } }, 'user' => nil)
+      end
+    end
+
     it 'returns direct members' do
       fetch_members(project: child_project, args: { relations: [:DIRECT] })
 
@@ -77,6 +91,22 @@ RSpec.describe 'getting project members information' do
       expect(graphql_errors.first)
         .to include('path' => %w[query project projectMembers relations],
                     'message' => a_string_including('invalid value ([OBLIQUE])'))
+    end
+
+    context 'when project is owned by a member' do
+      let_it_be(:project) { create(:project, namespace: user.namespace) }
+
+      before_all do
+        project.add_guest(child_user)
+        project.add_guest(invited_user)
+      end
+
+      it 'returns the owner in the response' do
+        fetch_members(project: project)
+
+        expect(graphql_errors).to be_nil
+        expect_array_response(user, child_user, invited_user)
+      end
     end
   end
 

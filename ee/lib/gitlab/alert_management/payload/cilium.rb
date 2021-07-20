@@ -4,8 +4,6 @@ module Gitlab
   module AlertManagement
     module Payload
       class Cilium < Gitlab::AlertManagement::Payload::Generic
-        DEFAULT_TITLE = 'New: Alert'
-
         attribute :description, paths: %w(flow verdict)
         attribute :title, paths: %w(ciliumNetworkPolicy metadata name), fallback: -> { DEFAULT_TITLE }
 
@@ -20,7 +18,7 @@ module Gitlab
           fpayload = fpayload['flow'].except('time', 'Summary')
           fpayload['l4']['TCP'].delete('flags') if fpayload.dig('l4', 'TCP', 'flags')
 
-          fpayload.to_s
+          fpayload.to_json
         end
       end
     end

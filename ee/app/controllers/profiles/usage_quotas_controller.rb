@@ -7,7 +7,7 @@ class Profiles::UsageQuotasController < Profiles::ApplicationController
 
   def index
     @namespace = current_user.namespace
-    @projects = @namespace.projects.with_shared_runners_limit_enabled.page(params[:page])
+    @projects = @namespace.projects.with_shared_runners.page(params[:page])
   end
 
   private

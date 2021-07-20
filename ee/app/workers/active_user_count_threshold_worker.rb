@@ -2,12 +2,15 @@
 
 class ActiveUserCountThresholdWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   # rubocop:disable Scalability/CronWorkerContext
   # This worker does not perform work scoped to a context
   include CronjobQueue
   # rubocop:enable Scalability/CronWorkerContext
 
   feature_category :license
+  tags :exclude_from_kubernetes
 
   def perform
     License.with_valid_license do |license|
@@ -21,7 +24,7 @@ class ActiveUserCountThresholdWorker # rubocop:disable Scalability/IdempotentWor
         .to_set
       # rubocop:enable CodeReuse/ActiveRecord
 
-      recipients << license.licensee["Email"] if license.licensee["Email"]
+      recipients << license.licensee_email if license.licensee_email
 
       LicenseMailer.approaching_active_user_count_limit(recipients.to_a)
     end

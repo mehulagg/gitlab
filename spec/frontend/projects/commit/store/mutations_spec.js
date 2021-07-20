@@ -27,7 +27,7 @@ describe('Commit form modal mutations', () => {
 
   describe('CLEAR_MODAL', () => {
     it('should clear modal state ', () => {
-      stateCopy = { branch: '_master_', defaultBranch: '_default_branch_' };
+      stateCopy = { branch: '_main_', defaultBranch: '_default_branch_' };
 
       mutations[types.CLEAR_MODAL](stateCopy);
 
@@ -35,9 +35,19 @@ describe('Commit form modal mutations', () => {
     });
   });
 
+  describe('SET_BRANCHES_ENDPOINT', () => {
+    it('should set branchesEndpoint', () => {
+      stateCopy = { branchesEndpoint: 'endpoint/1' };
+
+      mutations[types.SET_BRANCHES_ENDPOINT](stateCopy, 'endpoint/2');
+
+      expect(stateCopy.branchesEndpoint).toBe('endpoint/2');
+    });
+  });
+
   describe('SET_BRANCH', () => {
     it('should set branch', () => {
-      stateCopy = { branch: '_master_' };
+      stateCopy = { branch: '_main_' };
 
       mutations[types.SET_BRANCH](stateCopy, '_changed_branch_');
 
@@ -47,11 +57,21 @@ describe('Commit form modal mutations', () => {
 
   describe('SET_SELECTED_BRANCH', () => {
     it('should set selectedBranch', () => {
-      stateCopy = { selectedBranch: '_master_' };
+      stateCopy = { selectedBranch: '_main_' };
 
       mutations[types.SET_SELECTED_BRANCH](stateCopy, '_changed_branch_');
 
       expect(stateCopy.selectedBranch).toBe('_changed_branch_');
+    });
+  });
+
+  describe('SET_SELECTED_PROJECT', () => {
+    it('should set targetProjectId', () => {
+      stateCopy = { targetProjectId: '_project_1_' };
+
+      mutations[types.SET_SELECTED_PROJECT](stateCopy, '_project_2_');
+
+      expect(stateCopy.targetProjectId).toBe('_project_2_');
     });
   });
 });

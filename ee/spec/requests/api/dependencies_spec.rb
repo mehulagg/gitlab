@@ -10,6 +10,7 @@ RSpec.describe API::Dependencies do
     subject(:request) { get api("/projects/#{project.id}/dependencies", user), params: params }
 
     let(:params) { {} }
+    let(:snowplow_standard_context_params) { { user: user, project: project, namespace: project.namespace } }
 
     before do
       stub_licensed_features(dependency_scanning: true, security_dashboard: true)
@@ -18,8 +19,11 @@ RSpec.describe API::Dependencies do
     it_behaves_like 'a gitlab tracking event', described_class.name, 'view_dependencies'
 
     context 'with an authorized user with proper permissions' do
+      let_it_be(:finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata) }
+      let_it_be(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report, project: project) }
+      let_it_be(:finding_pipeline) { create(:vulnerabilities_finding_pipeline, finding: finding, pipeline: pipeline) }
+
       before do
-        create(:ee_ci_pipeline, :with_dependency_list_report, project: project)
         project.add_developer(user)
         request
       end
@@ -32,10 +36,13 @@ RSpec.describe API::Dependencies do
       end
 
       it 'returns vulnerabilities info' do
-        vulnerability = json_response.select { |dep| dep['name'] == 'debug' }[0]['vulnerabilities'][0]
+        vulnerability = json_response.select { |dep| dep['name'] == 'nokogiri' }[0]['vulnerabilities'][0]
+        path = "/security/vulnerabilities/#{finding.vulnerability_id}"
 
-        expect(vulnerability['name']).to eq('Regular Expression Denial of Service in debug')
-        expect(vulnerability['severity']).to eq('unknown')
+        expect(vulnerability['name']).to eq('Vulnerabilities in libxml2 in nokogiri')
+        expect(vulnerability['severity']).to eq('high')
+        expect(vulnerability['id']).to eq(finding.vulnerability_id)
+        expect(vulnerability['url']).to end_with(path)
       end
 
       context 'with nil package_manager' do

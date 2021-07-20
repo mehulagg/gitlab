@@ -52,7 +52,7 @@ module Gitlab
       class Error < StandardError
         def initialize(bucket:, error:, **args)
           super(
-            "Error occured #{error.class.name.inspect} " \
+            "Error occurred #{error.class.name.inspect} " \
             "for bucket #{bucket.inspect}. " \
             "Arguments: #{args.inspect}"
           )

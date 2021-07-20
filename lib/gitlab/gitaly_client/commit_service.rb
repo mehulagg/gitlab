@@ -107,6 +107,8 @@ module Gitlab
         entry.data = data.join
 
         entry unless entry.oid.blank?
+      rescue GRPC::NotFound
+        nil
       end
 
       def tree_entries(repository, revision, path, recursive)
@@ -243,6 +245,16 @@ module Gitlab
         request.order = opts[:order].upcase if opts[:order].present?
 
         response = GitalyClient.call(@repository.storage, :commit_service, :find_all_commits, request, timeout: GitalyClient.medium_timeout)
+        consume_commits_response(response)
+      end
+
+      def list_commits(revisions)
+        request = Gitaly::ListCommitsRequest.new(
+          repository: @gitaly_repo,
+          revisions: Array.wrap(revisions)
+        )
+
+        response = GitalyClient.call(@repository.storage, :commit_service, :list_commits, request, timeout: GitalyClient.medium_timeout)
         consume_commits_response(response)
       end
 

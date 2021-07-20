@@ -12,11 +12,7 @@ module Gitlab
       delegate :max_files, :max_lines, :max_bytes, :safe_max_files, :safe_max_lines, :safe_max_bytes, to: :limits
 
       def self.default_limits(project: nil)
-        if Feature.enabled?(:increased_diff_limits, project)
-          { max_files: 300, max_lines: 10000 }
-        else
-          { max_files: 100, max_lines: 5000 }
-        end
+        { max_files: ::Commit.diff_safe_max_files(project: project), max_lines: ::Commit.diff_safe_max_lines(project: project) }
       end
 
       def self.limits(options = {})
@@ -82,6 +78,30 @@ module Gitlab
         !!@overflow
       end
 
+      def overflow_max_lines?
+        !!@overflow_max_lines
+      end
+
+      def overflow_max_bytes?
+        !!@overflow_max_bytes
+      end
+
+      def overflow_max_files?
+        !!@overflow_max_files
+      end
+
+      def collapsed_safe_lines?
+        !!@collapsed_safe_lines
+      end
+
+      def collapsed_safe_files?
+        !!@collapsed_safe_files
+      end
+
+      def collapsed_safe_bytes?
+        !!@collapsed_safe_bytes
+      end
+
       def size
         @size ||= count # forces a loop using each method
       end
@@ -103,10 +123,9 @@ module Gitlab
       end
 
       def decorate!
-        collection = each_with_index do |element, i|
+        each_with_index do |element, i|
           @array[i] = yield(element)
         end
-        collection
       end
 
       alias_method :to_ary, :to_a
@@ -121,7 +140,15 @@ module Gitlab
       end
 
       def over_safe_limits?(files)
-        files >= safe_max_files || @line_count > safe_max_lines || @byte_count >= safe_max_bytes
+        if files >= safe_max_files
+          @collapsed_safe_files = true
+        elsif @line_count > safe_max_lines
+          @collapsed_safe_lines = true
+        elsif @byte_count >= safe_max_bytes
+          @collapsed_safe_bytes = true
+        end
+
+        @collapsed_safe_files || @collapsed_safe_lines || @collapsed_safe_bytes
       end
 
       def expand_diff?
@@ -154,6 +181,7 @@ module Gitlab
 
           if @enforce_limits && i >= max_files
             @overflow = true
+            @overflow_max_files = true
             break
           end
 
@@ -166,10 +194,19 @@ module Gitlab
           @line_count += diff.line_count
           @byte_count += diff.diff.bytesize
 
-          if @enforce_limits && (@line_count >= max_lines || @byte_count >= max_bytes)
+          if @enforce_limits && @line_count >= max_lines
             # This last Diff instance pushes us over the lines limit. We stop and
             # discard it.
             @overflow = true
+            @overflow_max_lines = true
+            break
+          end
+
+          if @enforce_limits && @byte_count >= max_bytes
+            # This last Diff instance pushes us over the lines limit. We stop and
+            # discard it.
+            @overflow = true
+            @overflow_max_bytes = true
             break
           end
 

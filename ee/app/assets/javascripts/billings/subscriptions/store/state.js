@@ -3,14 +3,16 @@ import { s__ } from '~/locale';
 export default () => ({
   isLoadingSubscription: false,
   hasErrorSubscription: false,
-  isLoadingBillableMembers: false,
-  hasErrorBillableMembers: false,
   namespaceId: null,
   plan: {
     code: null,
     name: null,
     trial: false,
     upgradable: false,
+  },
+  billing: {
+    subscriptionStartDate: null,
+    subscriptionEndDate: null,
   },
   tables: {
     free: {
@@ -171,5 +173,4 @@ export default () => ({
       ],
     },
   },
-  hasBillableGroupMembers: false,
 });

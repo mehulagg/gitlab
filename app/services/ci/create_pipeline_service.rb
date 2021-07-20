@@ -10,8 +10,10 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Build::Associations,
                 Gitlab::Ci::Pipeline::Chain::Validate::Abilities,
                 Gitlab::Ci::Pipeline::Chain::Validate::Repository,
+                Gitlab::Ci::Pipeline::Chain::Validate::SecurityOrchestrationPolicy,
                 Gitlab::Ci::Pipeline::Chain::Config::Content,
                 Gitlab::Ci::Pipeline::Chain::Config::Process,
+                Gitlab::Ci::Pipeline::Chain::Validate::AfterConfig,
                 Gitlab::Ci::Pipeline::Chain::RemoveUnwantedChatJobs,
                 Gitlab::Ci::Pipeline::Chain::Skip,
                 Gitlab::Ci::Pipeline::Chain::SeedBlock,
@@ -84,22 +86,26 @@ module Ci
 
       if pipeline.persisted?
         schedule_head_pipeline_update
-        record_conversion_event
         create_namespace_onboarding_action
+      else
+        # If pipeline is not persisted, try to recover IID
+        pipeline.reset_project_iid
       end
 
-      # If pipeline is not persisted, try to recover IID
-      pipeline.reset_project_iid unless pipeline.persisted?
-
-      pipeline
+      if error_message = pipeline.full_error_messages.presence || pipeline.failure_reason.presence
+        ServiceResponse.error(message: error_message, payload: pipeline)
+      else
+        ServiceResponse.success(payload: pipeline)
+      end
     end
     # rubocop: enable Metrics/ParameterLists
 
     def execute!(*args, &block)
-      source, params = args[0], Hash(args[1])
+      source = args[0]
+      params = Hash(args[1])
 
-      execute(source, **params, &block).tap do |pipeline|
-        unless pipeline.persisted?
+      execute(source, **params, &block).tap do |response|
+        unless response.payload.persisted?
           raise CreateError, pipeline.full_error_messages
         end
       end
@@ -121,10 +127,6 @@ module Ci
       end
     end
 
-    def record_conversion_event
-      Experiments::RecordConversionEventWorker.perform_async(:ci_syntax_templates, current_user.id)
-    end
-
     def create_namespace_onboarding_action
       Namespaces::OnboardingPipelineCreatedWorker.perform_async(project.namespace_id)
     end
@@ -135,4 +137,4 @@ module Ci
   end
 end
 
-Ci::CreatePipelineService.prepend_if_ee('EE::Ci::CreatePipelineService')
+Ci::CreatePipelineService.prepend_mod_with('Ci::CreatePipelineService')

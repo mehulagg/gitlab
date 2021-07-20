@@ -76,16 +76,10 @@ module Ci
     end
 
     def write_metadata_attribute(legacy_key, metadata_key, value)
-      # save to metadata or this model depending on the state of feature flag
-      if Feature.enabled?(:ci_build_metadata_config)
-        ensure_metadata.write_attribute(metadata_key, value)
-        write_attribute(legacy_key, nil)
-      else
-        write_attribute(legacy_key, value)
-        metadata&.write_attribute(metadata_key, nil)
-      end
+      ensure_metadata.write_attribute(metadata_key, value)
+      write_attribute(legacy_key, nil)
     end
   end
 end
 
-Ci::Metadatable.prepend_if_ee('EE::Ci::Metadatable')
+Ci::Metadatable.prepend_mod_with('Ci::Metadatable')

@@ -2,6 +2,8 @@ import { GlFilteredSearchToken } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import MembersFilteredSearchBar from '~/members/components/filter_sort/members_filtered_search_bar.vue';
+import { MEMBER_TYPES } from '~/members/constants';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
 const localVue = createLocalVue();
@@ -10,24 +12,33 @@ localVue.use(Vuex);
 describe('MembersFilteredSearchBar', () => {
   let wrapper;
 
-  const createComponent = (state) => {
+  const createComponent = ({ state = {}, provide = {} } = {}) => {
     const store = new Vuex.Store({
-      state: {
-        sourceId: 1,
-        filteredSearchBar: {
-          show: true,
-          tokens: ['two_factor'],
-          searchParam: 'search',
-          placeholder: 'Filter members',
-          recentSearchesStorageKey: 'group_members',
+      modules: {
+        [MEMBER_TYPES.user]: {
+          namespaced: true,
+          state: {
+            filteredSearchBar: {
+              show: true,
+              tokens: ['two_factor'],
+              searchParam: 'search',
+              placeholder: 'Filter members',
+              recentSearchesStorageKey: 'group_members',
+            },
+            ...state,
+          },
         },
-        canManageMembers: true,
-        ...state,
       },
     });
 
     wrapper = shallowMount(MembersFilteredSearchBar, {
       localVue,
+      provide: {
+        sourceId: 1,
+        canManageMembers: true,
+        namespace: MEMBER_TYPES.user,
+        ...provide,
+      },
       store,
     });
   };
@@ -55,7 +66,7 @@ describe('MembersFilteredSearchBar', () => {
           title: '2FA',
           token: GlFilteredSearchToken,
           unique: true,
-          operators: [{ value: '=', description: 'is' }],
+          operators: OPERATOR_IS_ONLY,
           options: [
             { value: 'enabled', title: 'Enabled' },
             { value: 'disabled', title: 'Disabled' },
@@ -68,14 +79,18 @@ describe('MembersFilteredSearchBar', () => {
     describe('when `canManageMembers` is false', () => {
       it('excludes 2FA token', () => {
         createComponent({
-          filteredSearchBar: {
-            show: true,
-            tokens: ['two_factor', 'with_inherited_permissions'],
-            searchParam: 'search',
-            placeholder: 'Filter members',
-            recentSearchesStorageKey: 'group_members',
+          state: {
+            filteredSearchBar: {
+              show: true,
+              tokens: ['two_factor', 'with_inherited_permissions'],
+              searchParam: 'search',
+              placeholder: 'Filter members',
+              recentSearchesStorageKey: 'group_members',
+            },
           },
-          canManageMembers: false,
+          provide: {
+            canManageMembers: false,
+          },
         });
 
         expect(findFilteredSearchBar().props('tokens')).toEqual([
@@ -85,7 +100,7 @@ describe('MembersFilteredSearchBar', () => {
             title: 'Membership',
             token: GlFilteredSearchToken,
             unique: true,
-            operators: [{ value: '=', description: 'is' }],
+            operators: OPERATOR_IS_ONLY,
             options: [
               { value: 'exclude', title: 'Direct' },
               { value: 'only', title: 'Inherited' },
@@ -132,6 +147,21 @@ describe('MembersFilteredSearchBar', () => {
         },
       ]);
     });
+
+    it('parses and passes search param with multiple words to `FilteredSearchBar` component as `initialFilterValue` prop', () => {
+      window.location.search = '?search=foo+bar+baz';
+
+      createComponent();
+
+      expect(findFilteredSearchBar().props('initialFilterValue')).toEqual([
+        {
+          type: 'filtered-search-term',
+          value: {
+            data: 'foo bar baz',
+          },
+        },
+      ]);
+    });
   });
 
   describe('when filter bar is submitted', () => {
@@ -161,6 +191,17 @@ describe('MembersFilteredSearchBar', () => {
       expect(window.location.href).toBe('https://localhost/?two_factor=enabled&search=foobar');
     });
 
+    it('adds search query param with multiple words', () => {
+      createComponent();
+
+      findFilteredSearchBar().vm.$emit('onFilter', [
+        { type: 'two_factor', value: { data: 'enabled', operator: '=' } },
+        { type: 'filtered-search-term', value: { data: 'foo bar baz' } },
+      ]);
+
+      expect(window.location.href).toBe('https://localhost/?two_factor=enabled&search=foo+bar+baz');
+    });
+
     it('adds sort query param', () => {
       window.location.search = '?sort=name_asc';
 
@@ -174,6 +215,18 @@ describe('MembersFilteredSearchBar', () => {
       expect(window.location.href).toBe(
         'https://localhost/?two_factor=enabled&search=foobar&sort=name_asc',
       );
+    });
+
+    it('adds active tab query param', () => {
+      window.location.search = '?tab=invited';
+
+      createComponent();
+
+      findFilteredSearchBar().vm.$emit('onFilter', [
+        { type: 'filtered-search-term', value: { data: 'foobar' } },
+      ]);
+
+      expect(window.location.href).toBe('https://localhost/?search=foobar&tab=invited');
     });
   });
 });

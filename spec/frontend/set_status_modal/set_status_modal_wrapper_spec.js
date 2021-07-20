@@ -2,7 +2,8 @@ import { GlModal, GlFormCheckbox } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { initEmojiMock } from 'helpers/emoji';
 import * as UserApi from '~/api/user_api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import EmojiPicker from '~/emoji/components/picker.vue';
+import createFlash from '~/flash';
 import SetStatusModalWrapper, {
   AVAILABILITY_STATUS,
 } from '~/set_status_modal/set_status_modal_wrapper.vue';
@@ -23,10 +24,9 @@ describe('SetStatusModalWrapper', () => {
     currentEmoji: defaultEmoji,
     currentMessage: defaultMessage,
     defaultEmoji,
-    canSetUserAvailability: true,
   };
 
-  const createComponent = (props = {}) => {
+  const createComponent = (props = {}, improvedEmojiPicker = false) => {
     return shallowMount(SetStatusModalWrapper, {
       propsData: {
         ...defaultProps,
@@ -34,6 +34,9 @@ describe('SetStatusModalWrapper', () => {
       },
       mocks: {
         $toast,
+      },
+      provide: {
+        glFeatures: { improvedEmojiPicker },
       },
     });
   };
@@ -44,6 +47,7 @@ describe('SetStatusModalWrapper', () => {
   const findNoEmojiPlaceholder = () => wrapper.find('.js-no-emoji-placeholder');
   const findToggleEmojiButton = () => wrapper.find('.js-toggle-emoji-menu');
   const findAvailabilityCheckbox = () => wrapper.find(GlFormCheckbox);
+  const findClearStatusAtMessage = () => wrapper.find('[data-testid="clear-status-at-message"]');
 
   const initModal = ({ mockOnUpdateSuccess = true, mockOnUpdateFailure = true } = {}) => {
     const modal = findModal();
@@ -57,18 +61,18 @@ describe('SetStatusModalWrapper', () => {
     return wrapper.vm.$nextTick();
   };
 
-  beforeEach(async () => {
-    mockEmoji = await initEmojiMock();
-    wrapper = createComponent();
-    return initModal();
-  });
-
   afterEach(() => {
     wrapper.destroy();
     mockEmoji.restore();
   });
 
   describe('with minimum props', () => {
+    beforeEach(async () => {
+      mockEmoji = await initEmojiMock();
+      wrapper = createComponent();
+      return initModal();
+    });
+
     it('sets the hidden status emoji field', () => {
       const field = findFormField('emoji');
       expect(field.exists()).toBe(true);
@@ -95,6 +99,28 @@ describe('SetStatusModalWrapper', () => {
       expect(wrapper.vm.showEmojiMenu).not.toHaveBeenCalled();
       findToggleEmojiButton().trigger('click');
       expect(wrapper.vm.showEmojiMenu).toHaveBeenCalled();
+    });
+
+    it('displays the clear status at dropdown', () => {
+      expect(wrapper.find('[data-testid="clear-status-at-dropdown"]').exists()).toBe(true);
+    });
+
+    it('does not display the clear status at message', () => {
+      expect(findClearStatusAtMessage().exists()).toBe(false);
+    });
+  });
+
+  describe('improvedEmojiPicker is true', () => {
+    beforeEach(async () => {
+      mockEmoji = await initEmojiMock();
+      wrapper = createComponent({}, true);
+      return initModal();
+    });
+
+    it('sets emojiTag when clicking in emoji picker', async () => {
+      await wrapper.findComponent(EmojiPicker).vm.$emit('click', 'thumbsup');
+
+      expect(wrapper.vm.emojiTag).toContain('data-name="thumbsup"');
     });
   });
 
@@ -146,9 +172,28 @@ describe('SetStatusModalWrapper', () => {
     });
   });
 
+  describe('with currentClearStatusAfter set', () => {
+    beforeEach(async () => {
+      mockEmoji = await initEmojiMock();
+      wrapper = createComponent({ currentClearStatusAfter: '2021-01-01 00:00:00 UTC' });
+      return initModal();
+    });
+
+    it('displays the clear status at message', () => {
+      const clearStatusAtMessage = findClearStatusAtMessage();
+
+      expect(clearStatusAtMessage.exists()).toBe(true);
+      expect(clearStatusAtMessage.text()).toBe('Your status resets on 2021-01-01 00:00:00 UTC.');
+    });
+  });
+
   describe('update status', () => {
     describe('succeeds', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
+        mockEmoji = await initEmojiMock();
+        wrapper = createComponent();
+        await initModal();
+
         jest.spyOn(UserApi, 'updateUserStatus').mockResolvedValue();
       });
 
@@ -167,18 +212,26 @@ describe('SetStatusModalWrapper', () => {
         // set the availability status
         findAvailabilityCheckbox().vm.$emit('input', true);
 
+        // set the currentClearStatusAfter to 30 minutes
+        wrapper.find('[data-testid="thirtyMinutes"]').vm.$emit('click');
+
         findModal().vm.$emit('ok');
         await wrapper.vm.$nextTick();
 
-        const commonParams = { emoji: defaultEmoji, message: defaultMessage };
+        const commonParams = {
+          emoji: defaultEmoji,
+          message: defaultMessage,
+        };
 
         expect(UserApi.updateUserStatus).toHaveBeenCalledTimes(2);
         expect(UserApi.updateUserStatus).toHaveBeenNthCalledWith(1, {
           availability: AVAILABILITY_STATUS.NOT_SET,
+          clearStatusAfter: null,
           ...commonParams,
         });
         expect(UserApi.updateUserStatus).toHaveBeenNthCalledWith(2, {
           availability: AVAILABILITY_STATUS.BUSY,
+          clearStatusAfter: '30_minutes',
           ...commonParams,
         });
       });
@@ -208,7 +261,11 @@ describe('SetStatusModalWrapper', () => {
     });
 
     describe('with errors', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
+        mockEmoji = await initEmojiMock();
+        wrapper = createComponent();
+        await initModal();
+
         jest.spyOn(UserApi, 'updateUserStatus').mockRejectedValue();
       });
 
@@ -232,22 +289,10 @@ describe('SetStatusModalWrapper', () => {
         findModal().vm.$emit('ok');
         await wrapper.vm.$nextTick();
 
-        expect(createFlash).toHaveBeenCalledWith(
-          "Sorry, we weren't able to set your status. Please try again later.",
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: "Sorry, we weren't able to set your status. Please try again later.",
+        });
       });
-    });
-  });
-
-  describe('with canSetUserAvailability=false', () => {
-    beforeEach(async () => {
-      mockEmoji = await initEmojiMock();
-      wrapper = createComponent({ canSetUserAvailability: false });
-      return initModal();
-    });
-
-    it('hides the set availability checkbox', () => {
-      expect(findAvailabilityCheckbox().exists()).toBe(false);
     });
   });
 });

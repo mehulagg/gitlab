@@ -44,11 +44,17 @@ module Elastic
             }
           end
 
-          query_hash[:query][:bool][:filter] = filters
+          query_hash[:query][:bool][:filter] += filters
         end
 
         search(query_hash, options)
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(:project_feature, :route)
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

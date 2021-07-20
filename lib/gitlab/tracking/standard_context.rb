@@ -3,11 +3,13 @@
 module Gitlab
   module Tracking
     class StandardContext
-      GITLAB_STANDARD_SCHEMA_URL = 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-3'.freeze
-      GITLAB_RAILS_SOURCE = 'gitlab-rails'.freeze
+      GITLAB_STANDARD_SCHEMA_URL = 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-5'
+      GITLAB_RAILS_SOURCE = 'gitlab-rails'
 
-      def initialize(namespace: nil, project: nil, user: nil, **data)
-        @data = data
+      def initialize(namespace: nil, project: nil, user: nil, **extra)
+        @namespace = namespace
+        @plan = @namespace&.actual_plan_name
+        @extra = extra
       end
 
       def to_context
@@ -15,9 +17,13 @@ module Gitlab
       end
 
       def environment
-        return 'production' if Gitlab.com_and_canary?
-
         return 'staging' if Gitlab.staging?
+
+        return 'production' if Gitlab.com?
+
+        return 'org' if Gitlab.org?
+
+        return 'self-managed' if Rails.env.production?
 
         'development'
       end
@@ -31,8 +37,10 @@ module Gitlab
       def to_h
         {
           environment: environment,
-          source: source
-        }.merge(@data)
+          source: source,
+          plan: @plan,
+          extra: @extra
+        }
       end
     end
   end

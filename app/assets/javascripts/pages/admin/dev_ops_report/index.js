@@ -1,5 +1,5 @@
-import initDevopAdoption from 'ee_else_ce/admin/dev_ops_report/devops_adoption';
-import initDevOpsScoreEmptyState from '~/admin/dev_ops_report/devops_score_empty_state';
+import initDevOpsScore from '~/analytics/devops_report/devops_score';
+import initDevOpsScoreDisabledServicePing from '~/analytics/devops_report/devops_score_disabled_service_ping';
 
-initDevOpsScoreEmptyState();
-initDevopAdoption();
+initDevOpsScoreDisabledServicePing();
+initDevOpsScore();

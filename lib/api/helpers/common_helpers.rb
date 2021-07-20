@@ -32,8 +32,12 @@ module API
           end
         end.compact.to_set
       end
+
+      def endpoint_id
+        "#{request.request_method} #{route.origin}"
+      end
     end
   end
 end
 
-API::Helpers::CommonHelpers.prepend_if_ee('EE::API::Helpers::CommonHelpers')
+API::Helpers::CommonHelpers.prepend_mod_with('API::Helpers::CommonHelpers')

@@ -1,10 +1,12 @@
+import { GlButton, GlButtonGroup } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header.vue';
-import getters from 'ee/boards/stores/getters';
+import defaultGetters from 'ee/boards/stores/getters';
 import { mockLabelList } from 'jest/boards/mock_data';
 import { ListType, inactiveId } from '~/boards/constants';
+import boardsEventHub from '~/boards/eventhub';
 import sidebarEventHub from '~/sidebar/event_hub';
 
 const localVue = createLocalVue();
@@ -15,24 +17,15 @@ describe('Board List Header Component', () => {
   let store;
   let wrapper;
 
-  beforeEach(() => {
-    store = new Vuex.Store({ state: { activeId: inactiveId }, getters });
-    jest.spyOn(store, 'dispatch').mockImplementation();
-  });
-
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-
-    localStorage.clear();
-  });
-
   const createComponent = ({
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
     isSwimlanesHeader = false,
     weightFeatureAvailable = false,
+    currentUserId = 1,
+    state = { activeId: inactiveId },
+    getters = {},
   } = {}) => {
     const boardId = '1';
 
@@ -54,6 +47,16 @@ describe('Board List Header Component', () => {
       );
     }
 
+    store = new Vuex.Store({
+      state,
+      getters: {
+        ...defaultGetters,
+        ...getters,
+      },
+    });
+
+    jest.spyOn(store, 'dispatch').mockImplementation();
+
     wrapper = shallowMount(BoardListHeader, {
       store,
       localVue,
@@ -65,11 +68,49 @@ describe('Board List Header Component', () => {
       provide: {
         boardId,
         weightFeatureAvailable,
+        currentUserId,
       },
     });
   };
 
   const findSettingsButton = () => wrapper.find({ ref: 'settingsBtn' });
+
+  afterEach(() => {
+    wrapper.destroy();
+
+    localStorage.clear();
+  });
+
+  describe('New epic button', () => {
+    let newEpicButton;
+
+    beforeEach(() => {
+      jest.spyOn(boardsEventHub, '$emit');
+      createComponent({
+        getters: {
+          isIssueBoard: () => false,
+          isEpicBoard: () => true,
+          isGroupBoard: () => true,
+        },
+      });
+      newEpicButton = wrapper.findComponent(GlButtonGroup).findComponent(GlButton);
+    });
+
+    it('renders New epic button', () => {
+      expect(newEpicButton.exists()).toBe(true);
+      expect(newEpicButton.attributes()).toMatchObject({
+        title: 'New epic',
+        'aria-label': 'New epic',
+      });
+    });
+
+    it('emits `toggle-epic-form` event on Sidebar eventHub when clicked', async () => {
+      await newEpicButton.vm.$emit('click');
+
+      expect(boardsEventHub.$emit).toHaveBeenCalledWith(`toggle-epic-form-${mockLabelList.id}`);
+      expect(boardsEventHub.$emit).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe('Settings Button', () => {
     const hasSettings = [ListType.assignee, ListType.milestone, ListType.iteration, ListType.label];
@@ -109,8 +150,12 @@ describe('Board List Header Component', () => {
       });
 
       it('does not emit event when there is an active List', () => {
-        store.state.activeId = mockLabelList.id;
-        createComponent({ listType: hasSettings[0] });
+        createComponent({
+          listType: hasSettings[0],
+          state: {
+            activeId: mockLabelList.id,
+          },
+        });
         wrapper.vm.openSidebarSettings();
 
         expect(sidebarEventHub.$emit).not.toHaveBeenCalled();

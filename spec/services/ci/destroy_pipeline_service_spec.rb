@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ::Ci::DestroyPipelineService do
-  let(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository) }
+
   let!(:pipeline) { create(:ci_pipeline, :success, project: project, sha: project.commit.id) }
 
   subject { described_class.new(project, user).execute(pipeline) }
@@ -17,12 +18,15 @@ RSpec.describe ::Ci::DestroyPipelineService do
       expect { pipeline.reload }.to raise_error(ActiveRecord::RecordNotFound)
     end
 
-    it 'clears the cache', :use_clean_rails_memory_store_caching do
+    it 'clears the cache', :use_clean_rails_redis_caching do
       create(:commit_status, :success, pipeline: pipeline, ref: pipeline.ref)
 
       expect(project.pipeline_status.has_status?).to be_truthy
 
       subject
+
+      # We need to reset lazy_latest_pipeline cache to simulate a new request
+      BatchLoader::Executor.clear_current
 
       # Need to use find to avoid memoization
       expect(Project.find(project.id).pipeline_status.has_status?).to be_falsey
@@ -56,6 +60,34 @@ RSpec.describe ::Ci::DestroyPipelineService do
           subject
 
           expect { artifact.reload }.to raise_error(ActiveRecord::RecordNotFound)
+        end
+
+        it 'inserts deleted objects for object storage files' do
+          expect { subject }.to change { Ci::DeletedObject.count }
+        end
+      end
+    end
+
+    context 'when pipeline is in cancelable state' do
+      before do
+        allow(pipeline).to receive(:cancelable?).and_return(true)
+      end
+
+      it 'cancels the pipeline' do
+        expect(pipeline).to receive(:cancel_running)
+
+        subject
+      end
+
+      context 'when cancel_pipelines_prior_to_destroy is disabled' do
+        before do
+          stub_feature_flags(cancel_pipelines_prior_to_destroy: false)
+        end
+
+        it "doesn't cancel the pipeline" do
+          expect(pipeline).not_to receive(:cancel_running)
+
+          subject
         end
       end
     end

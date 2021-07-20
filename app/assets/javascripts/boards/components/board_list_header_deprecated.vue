@@ -17,7 +17,7 @@ import AccessorUtilities from '../../lib/utils/accessor';
 import { inactiveId, LIST, ListType } from '../constants';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
-import IssueCount from './issue_count.vue';
+import IssueCount from './item_count.vue';
 
 // This component is being replaced in favor of './board_list_header.vue' for GraphQL boards
 
@@ -35,6 +35,9 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: {
+    currentUserId: {
+      default: null,
+    },
     boardId: {
       default: '',
     },
@@ -63,7 +66,7 @@ export default {
   computed: {
     ...mapState(['activeId']),
     isLoggedIn() {
-      return Boolean(gon.current_user_id);
+      return Boolean(this.currentUserId);
     },
     listType() {
       return this.list.type;
@@ -88,6 +91,12 @@ export default {
     },
     showListDetails() {
       return this.list.isExpanded || !this.isSwimlanesHeader;
+    },
+    showListHeaderActions() {
+      if (this.isLoggedIn) {
+        return this.isNewIssueShown || this.isSettingsShown;
+      }
+      return false;
     },
     issuesCount() {
       return this.list.issuesSize;
@@ -308,7 +317,7 @@ export default {
           <gl-tooltip :target="() => $refs.issueCount" :title="issuesTooltipLabel" />
           <span ref="issueCount" class="issue-count-badge-count">
             <gl-icon class="gl-mr-2" name="issues" />
-            <issue-count :issues-size="issuesCount" :max-issue-count="list.maxIssueCount" />
+            <issue-count :items-size="issuesCount" :max-issue-count="list.maxIssueCount" />
           </span>
           <!-- The following is only true in EE. -->
           <template v-if="weightFeatureAvailable">
@@ -320,10 +329,7 @@ export default {
           </template>
         </span>
       </div>
-      <gl-button-group
-        v-if="isNewIssueShown || isSettingsShown"
-        class="board-list-button-group pl-2"
-      >
+      <gl-button-group v-if="showListHeaderActions" class="board-list-button-group pl-2">
         <gl-button
           v-if="isNewIssueShown"
           ref="newIssueBtn"

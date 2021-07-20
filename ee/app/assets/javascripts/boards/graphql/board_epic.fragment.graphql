@@ -4,6 +4,7 @@ fragment BoardEpicNode on BoardEpic {
   title
   state
   reference
+  webPath
   webUrl
   createdAt
   closedAt

@@ -3,14 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe 'Admin Dashboard' do
+  before do
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
+  end
+
   describe 'Users statistic' do
     let_it_be(:users_statistics) { create(:users_statistics) }
-
-    before do
-      admin = create(:admin)
-      sign_in(admin)
-      gitlab_enable_admin_mode_sign_in(admin)
-    end
 
     describe 'license' do
       before do
@@ -66,9 +66,36 @@ RSpec.describe 'Admin Dashboard' do
       expect(page).to have_content("Users with highest role Maintainer 6")
       expect(page).to have_content("Users with highest role Owner 5")
       expect(page).to have_content("Bots 2")
+      expect(page).to have_content("Billable users 69")
+      expect(page).to have_content("Active users 71")
       expect(page).to have_content("Blocked users 7")
       expect(page).to have_content("Total users 78")
-      expect(page).to have_content("Billable users 71")
+    end
+  end
+
+  describe 'qrtly reconciliation alert', :js do
+    context 'on self-managed' do
+      before do
+        stub_ee_application_setting(should_check_namespace_plan: false)
+      end
+
+      context 'when qrtly reconciliation is available' do
+        let_it_be(:reconciliation) { create(:upcoming_reconciliation, :self_managed) }
+
+        before do
+          visit(admin_root_path)
+        end
+
+        it_behaves_like 'a visible dismissible qrtly reconciliation alert'
+      end
+
+      context 'when qrtly reconciliation is not available' do
+        before do
+          visit(admin_root_path)
+        end
+
+        it_behaves_like 'a hidden qrtly reconciliation alert'
+      end
     end
   end
 end

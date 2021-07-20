@@ -16,36 +16,31 @@ RSpec.describe GroupsHelper do
     group.add_owner(owner)
   end
 
-  describe '#group_epics_count' do
-    before do
-      stub_licensed_features(epics: true)
-    end
+  describe '#cached_issuables_count' do
+    context 'with epics type' do
+      let(:type) { :epics }
+      let(:count_service) { ::Groups::EpicsCountService }
 
-    describe 'filtering by state' do
-      before do
-        create_list(:epic, 3, :opened, group: group)
-        create_list(:epic, 2, :closed, group: group)
+      it_behaves_like 'cached issuables count'
+
+      context 'with subgroup epics' do
+        before do
+          stub_licensed_features(epics: true)
+          allow(helper).to receive(:current_user) { owner }
+          allow(count_service).to receive(:new).and_call_original
+        end
+
+        it 'counts also epics from subgroups not visible to user' do
+          parent_group = create(:group, :public)
+          subgroup = create(:group, :private, parent: parent_group)
+          create(:epic, :opened, group: parent_group)
+          create(:epic, :opened, group: subgroup)
+
+          expect(Ability.allowed?(owner, :read_epic, parent_group)).to be_truthy
+          expect(Ability.allowed?(owner, :read_epic, subgroup)).to be_falsey
+          expect(helper.cached_issuables_count(parent_group, type: type)).to eq('2')
+        end
       end
-
-      it 'returns open epics count' do
-        expect(helper.group_epics_count(state: 'opened')).to eq(3)
-      end
-
-      it 'returns closed epics count' do
-        expect(helper.group_epics_count(state: 'closed')).to eq(2)
-      end
-    end
-
-    it 'counts also epics from subgroups not visible to user' do
-      parent_group = create(:group, :public)
-      subgroup = create(:group, :private, parent: parent_group)
-      create(:epic, :opened, group: parent_group)
-      create(:epic, :opened, group: subgroup)
-      helper.instance_variable_set(:@group, parent_group)
-
-      expect(Ability.allowed?(owner, :read_epic, parent_group)).to be_truthy
-      expect(Ability.allowed?(owner, :read_epic, subgroup)).to be_falsey
-      expect(helper.group_epics_count(state: 'opened')).to eq(2)
     end
   end
 
@@ -91,20 +86,93 @@ RSpec.describe GroupsHelper do
         stub_feature_flags(group_ci_cd_analytics_page: false)
       end
 
-      it 'hides CI / CD Analytics' do
+      it 'hides CI/CD Analytics' do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
       end
     end
 
-    context 'when the user does not have permissions to view the CI / CD Analytics page' do
+    context 'when the user does not have permissions to view the CI/CD Analytics page' do
       let(:current_user) { create(:user) }
 
       before do
         group.add_guest(current_user)
       end
 
-      it 'hides CI / CD Analytics' do
+      it 'hides CI/CD Analytics' do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
+      end
+    end
+
+    context 'when iterations is available' do
+      before do
+        stub_licensed_features(iterations: true)
+        stub_feature_flags(iteration_cadences: false)
+      end
+
+      it 'shows iterations link' do
+        expect(helper.group_sidebar_links).to include(:iterations)
+      end
+
+      context 'when iteration_cadences is available' do
+        before do
+          stub_feature_flags(iteration_cadences: true)
+        end
+
+        it 'shows iterations link' do
+          expect(helper.group_sidebar_links).to include(:iteration_cadences)
+        end
+      end
+    end
+  end
+
+  describe '#render_setting_to_allow_project_access_token_creation?' do
+    context 'with self-managed' do
+      let_it_be(:parent) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent) }
+
+      before do
+        parent.add_owner(owner)
+        group.add_owner(owner)
+      end
+
+      it 'returns true if group is root' do
+        expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
+      end
+
+      it 'returns false if group is subgroup' do
+        expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
+      end
+    end
+
+    context 'on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+        stub_ee_application_setting(should_check_namespace_plan: true)
+      end
+
+      context 'with a free plan' do
+        let_it_be(:group) { create(:group) }
+
+        it 'returns false' do
+          expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
+        end
+      end
+
+      context 'with a paid plan' do
+        let_it_be(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+        let_it_be(:group) { create(:group, parent: parent) }
+
+        before do
+          parent.add_owner(owner)
+        end
+
+        it 'returns true if group is root' do
+          expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
+        end
+
+        it 'returns false if group is subgroup' do
+          expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
+        end
       end
     end
   end
@@ -164,7 +232,7 @@ RSpec.describe GroupsHelper do
       it 'returns the expected value' do
         allow(helper).to receive(:current_user) { user? ? owner : nil }
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(group).to receive(:feature_available?) { security_dashboard_feature_available? }
+        allow(group).to receive(:licensed_feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_group? }
 
         expected_value = user? && gitlab_com? && !security_dashboard_feature_available? && can_admin_group?

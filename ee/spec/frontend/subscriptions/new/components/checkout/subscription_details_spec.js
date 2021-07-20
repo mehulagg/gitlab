@@ -1,56 +1,56 @@
 import { mount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
-import Step from 'ee/subscriptions/new/components/checkout/step.vue';
+import { STEPS } from 'ee/subscriptions/constants';
 import Component from 'ee/subscriptions/new/components/checkout/subscription_details.vue';
 import { NEW_GROUP } from 'ee/subscriptions/new/constants';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
+import { createMockApolloProvider } from 'ee_jest/vue_shared/purchase_flow/spec_helper';
+
+const availablePlans = [
+  { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'bronze' },
+  { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver' },
+];
+
+const groupData = [
+  { id: 132, name: 'My first group', users: 3 },
+  { id: 483, name: 'My second group', users: 12 },
+];
+
+const defaultInitialStoreData = {
+  availablePlans: JSON.stringify(availablePlans),
+  groupData: JSON.stringify(groupData),
+  planId: 'secondPlanId',
+  namespaceId: null,
+  setupForCompany: 'true',
+  fullName: 'Full Name',
+};
 
 describe('Subscription Details', () => {
   const localVue = createLocalVue();
   localVue.use(Vuex);
+  localVue.use(VueApollo);
 
-  let store;
   let wrapper;
 
-  const availablePlans = [
-    { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'bronze' },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver' },
-  ];
-
-  const groupData = [
-    { id: 132, name: 'My first group', users: 3 },
-    { id: 483, name: 'My second group', users: 12 },
-  ];
-
-  let initialNamespaceId = null;
-  const initialData = (namespaceId) => {
-    return {
-      availablePlans: JSON.stringify(availablePlans),
-      groupData: JSON.stringify(groupData),
-      planId: 'secondPlanId',
-      namespaceId,
-      setupForCompany: 'true',
-      fullName: 'Full Name',
-    };
-  };
-
-  const createComponent = () => {
-    wrapper = mount(Component, {
+  function createComponent(options = {}) {
+    const { apolloProvider, store } = options;
+    return mount(Component, {
       localVue,
       store,
+      apolloProvider,
+      stubs: {
+        Step,
+      },
     });
-  };
+  }
 
   const organizationNameInput = () => wrapper.find({ ref: 'organization-name' });
   const groupSelect = () => wrapper.find({ ref: 'group-select' });
   const numberOfUsersInput = () => wrapper.find({ ref: 'number-of-users' });
   const companyLink = () => wrapper.find({ ref: 'company-link' });
-
-  beforeEach(() => {
-    store = createStore(initialData(initialNamespaceId));
-    createComponent();
-  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -58,8 +58,11 @@ describe('Subscription Details', () => {
 
   describe('A new user setting up for personal use', () => {
     beforeEach(() => {
+      const mockApollo = createMockApolloProvider(STEPS);
+      const store = createStore(defaultInitialStoreData);
       store.state.isNewUser = true;
       store.state.isSetupForCompany = false;
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
     });
 
     it('should not display an input field for the company or group name', () => {
@@ -85,8 +88,11 @@ describe('Subscription Details', () => {
 
   describe('A new user setting up for a company or group', () => {
     beforeEach(() => {
+      const mockApollo = createMockApolloProvider(STEPS);
+      const store = createStore(defaultInitialStoreData);
       store.state.isNewUser = true;
       store.state.groupData = [];
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
     });
 
     it('should display an input field for the company or group name', () => {
@@ -112,8 +118,11 @@ describe('Subscription Details', () => {
 
   describe('An existing user without any groups', () => {
     beforeEach(() => {
+      const mockApollo = createMockApolloProvider(STEPS);
+      const store = createStore(defaultInitialStoreData);
       store.state.isNewUser = false;
       store.state.groupData = [];
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
     });
 
     it('should display an input field for the company or group name', () => {
@@ -138,8 +147,13 @@ describe('Subscription Details', () => {
   });
 
   describe('An existing user with groups', () => {
+    let store;
+
     beforeEach(() => {
+      const mockApollo = createMockApolloProvider(STEPS);
+      store = createStore(defaultInitialStoreData);
       store.state.isNewUser = false;
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
     });
 
     it('should not display an input field for the company or group name', () => {
@@ -196,9 +210,13 @@ describe('Subscription Details', () => {
   });
 
   describe('An existing user coming from group billing page', () => {
+    let store;
+
     beforeEach(() => {
-      initialNamespaceId = '132';
+      const mockApollo = createMockApolloProvider(STEPS);
+      store = createStore({ ...defaultInitialStoreData, namespaceId: '132' });
       store.state.isNewUser = false;
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
     });
 
     it('should not display an input field for the company or group name', () => {
@@ -246,6 +264,13 @@ describe('Subscription Details', () => {
 
   describe('validations', () => {
     const isStepValid = () => wrapper.find(Step).props('isValid');
+    let store;
+
+    beforeEach(() => {
+      const mockApollo = createMockApolloProvider(STEPS);
+      store = createStore(defaultInitialStoreData);
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
+    });
 
     describe('when setting up for a company', () => {
       beforeEach(() => {
@@ -331,12 +356,16 @@ describe('Subscription Details', () => {
   });
 
   describe('Showing summary', () => {
+    let store;
+
     beforeEach(() => {
+      const mockApollo = createMockApolloProvider(STEPS, 1);
+      store = createStore(defaultInitialStoreData);
       store.commit(types.UPDATE_IS_SETUP_FOR_COMPANY, true);
       store.commit(types.UPDATE_SELECTED_PLAN, 'firstPlanId');
       store.commit(types.UPDATE_ORGANIZATION_NAME, 'My Organization');
       store.commit(types.UPDATE_NUMBER_OF_USERS, 25);
-      store.commit(types.UPDATE_CURRENT_STEP, 'nextStep');
+      wrapper = createComponent({ apolloProvider: mockApollo, store });
     });
 
     it('should show the selected plan', () => {

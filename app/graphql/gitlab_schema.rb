@@ -10,11 +10,9 @@ class GitlabSchema < GraphQL::Schema
   DEFAULT_MAX_DEPTH = 15
   AUTHENTICATED_MAX_DEPTH = 20
 
+  use GraphQL::Subscriptions::ActionCableSubscriptions
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
-  use Gitlab::Graphql::Authorize
-  use Gitlab::Graphql::Present
-  use Gitlab::Graphql::CallsGitaly
   use Gitlab::Graphql::Pagination::Connections
   use Gitlab::Graphql::GenericTracing
   use Gitlab::Graphql::Timeout, max_seconds: Gitlab.config.gitlab.graphql_timeout
@@ -27,6 +25,7 @@ class GitlabSchema < GraphQL::Schema
 
   query Types::QueryType
   mutation Types::MutationType
+  subscription Types::SubscriptionType
 
   default_max_page_size 100
 
@@ -34,9 +33,10 @@ class GitlabSchema < GraphQL::Schema
 
   class << self
     def multiplex(queries, **kwargs)
-      kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context])
+      kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context]) unless kwargs.key?(:max_complexity)
 
       queries.each do |query|
+        query[:max_complexity] ||= max_query_complexity(kwargs[:context]) unless query.key?(:max_complexity)
         query[:max_depth] = max_query_depth(kwargs[:context])
       end
 
@@ -51,9 +51,8 @@ class GitlabSchema < GraphQL::Schema
     end
 
     def get_type(type_name)
-      # This is a backwards compatibility hack to work around an accidentally
-      # released argument typed as EEIterationID
-      type_name = type_name.gsub(/^EE/, '') if type_name.end_with?('ID')
+      type_name = Gitlab::GlobalId::Deprecations.apply_to_graphql_name(type_name)
+
       super(type_name)
     end
 
@@ -113,6 +112,7 @@ class GitlabSchema < GraphQL::Schema
     #
     # Options:
     #  * :expected_type [Class] - the type of object this GlobalID should refer to.
+    #  * :expected_type [[Class]] - array of the types of object this GlobalID should refer to.
     #
     # e.g.
     #
@@ -122,14 +122,14 @@ class GitlabSchema < GraphQL::Schema
     #   gid.model_class == ::Project
     # ```
     def parse_gid(global_id, ctx = {})
-      expected_type = ctx[:expected_type]
+      expected_types = Array(ctx[:expected_type])
       gid = GlobalID.parse(global_id)
 
       raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
-      if expected_type && !gid.model_class.ancestors.include?(expected_type)
-        vars = { global_id: global_id, expected_type: expected_type }
-        msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
+      if expected_types.any? && expected_types.none? { |type| gid.model_class.ancestors.include?(type) }
+        vars = { global_id: global_id, expected_types: expected_types.join(', ') }
+        msg = _('%{global_id} is not a valid ID for %{expected_types}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg
       end
 
@@ -161,15 +161,14 @@ class GitlabSchema < GraphQL::Schema
     end
   end
 
-  # This is a backwards compatibility hack to work around an accidentally
-  # released argument typed as EE{Type}ID
   def get_type(type_name)
-    type_name = type_name.gsub(/^EE/, '') if type_name.end_with?('ID')
+    type_name = Gitlab::GlobalId::Deprecations.apply_to_graphql_name(type_name)
+
     super(type_name)
   end
 end
 
-GitlabSchema.prepend_if_ee('EE::GitlabSchema') # rubocop: disable Cop/InjectEnterpriseEditionModule
+GitlabSchema.prepend_mod_with('GitlabSchema') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
 # Force the schema to load as a workaround for intermittent errors we
 # see due to a lack of thread safety.

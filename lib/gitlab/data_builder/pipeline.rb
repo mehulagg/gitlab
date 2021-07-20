@@ -31,6 +31,7 @@ module Gitlab
           created_at: pipeline.created_at,
           finished_at: pipeline.finished_at,
           duration: pipeline.duration,
+          queued_duration: pipeline.queued_duration,
           variables: pipeline.variables.map(&:hook_attrs)
         }
       end
@@ -59,6 +60,8 @@ module Gitlab
           created_at: build.created_at,
           started_at: build.started_at,
           finished_at: build.finished_at,
+          duration: build.duration,
+          queued_duration: build.queued_duration,
           when: build.when,
           manual: build.action?,
           allow_failure: build.allow_failure,
@@ -67,7 +70,8 @@ module Gitlab
           artifacts_file: {
             filename: build.artifacts_file&.filename,
             size: build.artifacts_size
-          }
+          },
+          environment: environment_hook_attrs(build)
         }
       end
 
@@ -75,9 +79,19 @@ module Gitlab
         {
           id: runner.id,
           description: runner.description,
+          runner_type: runner.runner_type,
           active: runner.active?,
           is_shared: runner.instance_type?,
           tags: runner.tags&.map(&:name)
+        }
+      end
+
+      def environment_hook_attrs(build)
+        return unless build.has_environment?
+
+        {
+          name: build.expanded_environment_name,
+          action: build.environment_action
         }
       end
     end

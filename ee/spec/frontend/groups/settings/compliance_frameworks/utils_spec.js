@@ -16,6 +16,20 @@ describe('Utils', () => {
     mock.restore();
   });
 
+  describe('injectIdIntoEditPath', () => {
+    it.each`
+      path                          | id           | output
+      ${'group/framework/abc/edit'} | ${1}         | ${''}
+      ${'group/framework/id/edit'}  | ${undefined} | ${''}
+      ${'group/framework/id/edit'}  | ${null}      | ${''}
+      ${'group/framework/id/edit'}  | ${'abc'}     | ${''}
+      ${'group/framework/id/edit'}  | ${'1'}       | ${'group/framework/1/edit'}
+      ${'group/framework/id/edit'}  | ${1}         | ${'group/framework/1/edit'}
+    `('should return $output when $path and $id are given', ({ path, id, output }) => {
+      expect(Utils.injectIdIntoEditPath(path, id)).toStrictEqual(output);
+    });
+  });
+
   describe('initialiseFormData', () => {
     it('returns the initial form data object', () => {
       expect(Utils.initialiseFormData()).toStrictEqual({
@@ -25,6 +39,43 @@ describe('Utils', () => {
         color: null,
       });
     });
+  });
+
+  describe('getSubmissionParams', () => {
+    const baseFormData = {
+      name: 'a',
+      description: 'b',
+      color: '#000',
+    };
+
+    it.each([true, false])(
+      'should return the initial object when pipelineConfigurationFullPath is undefined and pipelineConfigurationFullPathEnabled is %s',
+      (enabled) => {
+        expect(Utils.getSubmissionParams(baseFormData, enabled)).toStrictEqual(baseFormData);
+      },
+    );
+
+    it.each`
+      pipelineConfigurationFullPath | pipelineConfigurationFullPathEnabled
+      ${'a/b'}                      | ${true}
+      ${null}                       | ${true}
+      ${'a/b'}                      | ${false}
+      ${null}                       | ${false}
+    `(
+      'should return the correct object when pipelineConfigurationFullPathEnabled is $pipelineConfigurationFullPathEnabled',
+      ({ pipelineConfigurationFullPath, pipelineConfigurationFullPathEnabled }) => {
+        const formData = Utils.getSubmissionParams(
+          { ...baseFormData, pipelineConfigurationFullPath },
+          pipelineConfigurationFullPathEnabled,
+        );
+
+        if (pipelineConfigurationFullPathEnabled) {
+          expect(formData).toStrictEqual({ ...baseFormData, pipelineConfigurationFullPath });
+        } else {
+          expect(formData).toStrictEqual(baseFormData);
+        }
+      },
+    );
   });
 
   describe('getPipelineConfigurationPathParts', () => {

@@ -1,10 +1,15 @@
 import { GlFilteredSearchToken } from '@gitlab/ui';
 import { mockLabels } from 'jest/vue_shared/components/sidebar/labels_select_vue/mock_data';
 import Api from '~/api';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import BranchToken from '~/vue_shared/components/filtered_search_bar/tokens/branch_token.vue';
+import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
+import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import IterationToken from '~/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import WeightToken from '~/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
 
 export const mockAuthor1 = {
   id: 1,
@@ -35,7 +40,7 @@ export const mockAuthor3 = {
 
 export const mockAuthors = [mockAuthor1, mockAuthor2, mockAuthor3];
 
-export const mockBranches = [{ name: 'Master' }, { name: 'v1.x' }, { name: 'my-Branch' }];
+export const mockBranches = [{ name: 'Main' }, { name: 'v1.x' }, { name: 'my-Branch' }];
 
 export const mockRegularMilestone = {
   id: 1,
@@ -59,13 +64,28 @@ export const mockMilestones = [
   mockEscapedMilestone,
 ];
 
+export const mockEpics = [
+  { iid: 1, id: 1, title: 'Foo', group_full_path: 'gitlab-org' },
+  { iid: 2, id: 2, title: 'Bar', group_full_path: 'gitlab-org/design' },
+];
+
+export const mockEmoji1 = {
+  name: 'thumbsup',
+};
+
+export const mockEmoji2 = {
+  name: 'star',
+};
+
+export const mockEmojis = [mockEmoji1, mockEmoji2];
+
 export const mockBranchToken = {
   type: 'source_branch',
   icon: 'branch',
   title: 'Source Branch',
   unique: true,
   token: BranchToken,
-  operators: [{ value: '=', description: 'is', default: 'true' }],
+  operators: OPERATOR_IS_ONLY,
   fetchBranches: Api.branches.bind(Api),
 };
 
@@ -76,9 +96,18 @@ export const mockAuthorToken = {
   unique: false,
   symbol: '@',
   token: AuthorToken,
-  operators: [{ value: '=', description: 'is', default: 'true' }],
+  operators: OPERATOR_IS_ONLY,
   fetchPath: 'gitlab-org/gitlab-test',
   fetchAuthors: Api.projectUsers.bind(Api),
+};
+
+export const mockIterationToken = {
+  type: 'iteration',
+  icon: 'iteration',
+  title: 'Iteration',
+  unique: true,
+  token: IterationToken,
+  fetchIterations: () => Promise.resolve(),
 };
 
 export const mockLabelToken = {
@@ -88,7 +117,7 @@ export const mockLabelToken = {
   unique: false,
   symbol: '~',
   token: LabelToken,
-  operators: [{ value: '=', description: 'is', default: 'true' }],
+  operators: OPERATOR_IS_ONLY,
   fetchLabels: () => Promise.resolve(mockLabels),
 };
 
@@ -99,8 +128,30 @@ export const mockMilestoneToken = {
   unique: true,
   symbol: '%',
   token: MilestoneToken,
-  operators: [{ value: '=', description: 'is', default: 'true' }],
+  operators: OPERATOR_IS_ONLY,
   fetchMilestones: () => Promise.resolve({ data: mockMilestones }),
+};
+
+export const mockEpicToken = {
+  type: 'epic_iid',
+  icon: 'clock',
+  title: 'Epic',
+  unique: true,
+  symbol: '&',
+  token: EpicToken,
+  operators: OPERATOR_IS_ONLY,
+  idProperty: 'iid',
+  fetchEpics: () => Promise.resolve({ data: mockEpics }),
+};
+
+export const mockReactionEmojiToken = {
+  type: 'my_reaction_emoji',
+  icon: 'thumb-up',
+  title: 'My-Reaction',
+  unique: true,
+  token: EmojiToken,
+  operators: OPERATOR_IS_ONLY,
+  fetchEmojis: () => Promise.resolve(mockEmojis),
 };
 
 export const mockMembershipToken = {
@@ -109,11 +160,19 @@ export const mockMembershipToken = {
   title: 'Membership',
   token: GlFilteredSearchToken,
   unique: true,
-  operators: [{ value: '=', description: 'is' }],
+  operators: OPERATOR_IS_ONLY,
   options: [
     { value: 'exclude', title: 'Direct' },
     { value: 'only', title: 'Inherited' },
   ],
+};
+
+export const mockWeightToken = {
+  type: 'weight',
+  icon: 'weight',
+  title: 'Weight',
+  unique: true,
+  token: WeightToken,
 };
 
 export const mockMembershipTokenOptionsWithoutTitles = {
@@ -166,6 +225,14 @@ export const tokenValueConfidential = {
 export const tokenValuePlain = {
   type: 'filtered-search-term',
   value: { data: 'foo' },
+};
+
+export const tokenValueEpic = {
+  type: 'epic_iid',
+  value: {
+    operator: '=',
+    data: '"foo"::&42',
+  },
 };
 
 export const mockHistoryItems = [

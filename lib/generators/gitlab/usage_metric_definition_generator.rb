@@ -5,6 +5,11 @@ require 'rails/generators'
 module Gitlab
   class UsageMetricDefinitionGenerator < Rails::Generators::Base
     Directory = Struct.new(:name, :time_frame, :value_type) do
+      def initialize(...)
+        super
+        freeze
+      end
+
       def match?(str)
         (name == str || time_frame == str) && str != 'none'
       end
@@ -17,6 +22,9 @@ module Gitlab
       Directory.new('settings',   'none', 'boolean'),
       Directory.new('license',    'none', 'string')
     ].freeze
+
+    TOP_LEVEL_DIR = 'config'
+    TOP_LEVEL_DIR_EE = 'ee'
 
     VALID_INPUT_DIRS = (TIME_FRAME_DIRS.flat_map { |d| [d.name, d.time_frame] } - %w(none)).freeze
 
@@ -45,22 +53,33 @@ module Gitlab
     end
 
     def distribution
-      value = ['ce']
-      value << 'ee' if ee?
-      value
+      (ee? ? ['- ee'] : ['- ce', '- ee']).join("\n")
+    end
+
+    def tier
+      (ee? ? ['#- premium', '- ultimate'] : ['- free', '- premium', '- ultimate']).join("\n")
+    end
+
+    def milestone
+      Gitlab::VERSION.match('(\d+\.\d+)').captures.first
     end
 
     private
 
+    def metric_name_suggestion
+      "\nname: \"#{Usage::Metrics::NamesSuggestions::Generator.generate(key_path)}\""
+    end
+
     def file_path
-      path = File.join('config', 'metrics', directory&.name, "#{file_name}.yml")
-      path = File.join('ee', path) if ee?
+      path = File.join(TOP_LEVEL_DIR, 'metrics', directory&.name, "#{file_name}.yml")
+      path = File.join(TOP_LEVEL_DIR_EE, path) if ee?
       path
     end
 
     def validate!
       raise "--dir option is required" unless input_dir.present?
       raise "Invalid dir #{input_dir}, allowed options are #{VALID_INPUT_DIRS.join(', ')}" unless directory.present?
+      raise "Metric definition with key path '#{key_path}' already exists" if metric_definition_exists?
     end
 
     def ee?
@@ -75,11 +94,23 @@ module Gitlab
     #
     # 20210201124931_g_project_management_issue_title_changed_weekly.yml
     def file_name
-      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{key_path.split('.').last}"
+      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{metric_name}"
     end
 
     def directory
       @directory ||= TIME_FRAME_DIRS.find { |d| d.match?(input_dir) }
+    end
+
+    def metric_name
+      key_path.split('.').last
+    end
+
+    def metric_definitions
+      @definitions ||= Gitlab::Usage::MetricDefinition.definitions(skip_validation: true)
+    end
+
+    def metric_definition_exists?
+      metric_definitions[key_path].present?
     end
   end
 end

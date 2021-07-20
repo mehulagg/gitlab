@@ -10,7 +10,6 @@ RSpec.describe Event do
     let_it_be(:reporter) { create(:user) }
     let_it_be(:author) { create(:author) }
     let_it_be(:admin) { create(:admin) }
-    let_it_be(:project) { create(:project) }
 
     let(:users) { [non_member, member, reporter, guest, author, admin] }
 
@@ -20,10 +19,6 @@ RSpec.describe Event do
 
     before do
       stub_licensed_features(epics: true)
-
-      project.add_developer(member)
-      project.add_guest(guest)
-      project.add_reporter(reporter)
 
       if defined?(group)
         group.add_developer(member)
@@ -75,9 +70,7 @@ RSpec.describe Event do
       end
 
       context 'when admin mode disabled' do
-        # Skipped because `Group#max_member_access_for_user` needs to be migrated to use admin mode
-        # See https://gitlab.com/gitlab-org/gitlab/-/issues/207950
-        xit 'is not visible to admin', :aggregate_failures do
+        it 'is not visible to admin', :aggregate_failures do
           expect(event).not_to be_visible_to(admin)
         end
       end

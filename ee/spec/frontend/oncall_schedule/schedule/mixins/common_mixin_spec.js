@@ -1,8 +1,13 @@
 import { shallowMount } from '@vue/test-utils';
-import { DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
+import {
+  PRESET_TYPES,
+  oneHourOffsetDayView,
+  oneDayOffsetWeekView,
+  oneHourOffsetWeekView,
+} from 'ee/oncall_schedules/constants';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { useFakeDate } from 'helpers/fake_date';
-import * as dateTimeUtility from '~/lib/utils/datetime_utility';
+import * as dateTimeUtility from '~/lib/utils/datetime/date_calculation_utility';
 
 describe('Schedule Common Mixins', () => {
   // January 3rd, 2018
@@ -81,11 +86,30 @@ describe('Schedule Common Mixins', () => {
   });
 
   describe('getIndicatorStyles', () => {
-    it('returns object containing `left` offset', () => {
-      const left = 100 / DAYS_IN_WEEK / 2;
-      expect(wrapper.vm.getIndicatorStyles()).toEqual(
+    it('returns object containing `left` offset for the weekly grid', () => {
+      const mockTimeframeInitialDate = new Date(2018, 0, 1);
+      const mockCurrentDate = new Date(2018, 0, 3);
+      const hourOffset = oneHourOffsetWeekView * mockCurrentDate.getHours();
+      const daysSinceShiftStart = dateTimeUtility.getDayDifference(
+        mockTimeframeInitialDate,
+        mockCurrentDate,
+      );
+      const leftOffset = oneDayOffsetWeekView * daysSinceShiftStart + hourOffset;
+      expect(wrapper.vm.getIndicatorStyles(PRESET_TYPES.WEEKS, mockTimeframeInitialDate)).toEqual(
         expect.objectContaining({
-          left: `${left}%`,
+          left: `${leftOffset}%`,
+        }),
+      );
+    });
+
+    it('returns object containing `left` offset for a single day grid', () => {
+      const currentDate = new Date(2018, 0, 8);
+      const hours = oneHourOffsetDayView * currentDate.getHours();
+      const minutes = oneHourOffsetDayView * (currentDate.getMinutes() / 60);
+
+      expect(wrapper.vm.getIndicatorStyles(PRESET_TYPES.DAYS)).toEqual(
+        expect.objectContaining({
+          left: `${hours + minutes}%`,
         }),
       );
     });

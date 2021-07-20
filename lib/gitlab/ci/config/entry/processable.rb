@@ -98,7 +98,6 @@ module Gitlab
           def validate_against_warnings
             # If rules are valid format and workflow rules are not specified
             return unless rules_value
-            return unless Gitlab::Ci::Features.raise_job_rules_without_workflow_rules_warning?
 
             last_rule = rules_value.last
 
@@ -124,7 +123,9 @@ module Gitlab
               stage: stage_value,
               extends: extends,
               rules: rules_value,
-              variables: root_and_job_variables_value,
+              variables: root_and_job_variables_value, # https://gitlab.com/gitlab-org/gitlab/-/issues/300581
+              job_variables: job_variables,
+              root_variables_inheritance: root_variables_inheritance,
               only: only_value,
               except: except_value,
               resource_group: resource_group }.compact
@@ -137,6 +138,14 @@ module Gitlab
             end
 
             root_variables.merge(variables_value.to_h)
+          end
+
+          def job_variables
+            variables_value.to_h
+          end
+
+          def root_variables_inheritance
+            inherit_entry&.variables_entry&.value
           end
 
           def manual_action?

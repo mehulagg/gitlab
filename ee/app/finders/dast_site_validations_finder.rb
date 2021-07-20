@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class DastSiteValidationsFinder
-  DEFAULT_SORT_VALUE = 'id'.freeze
-  DEFAULT_SORT_DIRECTION = 'desc'.freeze
+  DEFAULT_SORT_VALUE = 'id'
+  DEFAULT_SORT_DIRECTION = 'desc'
 
   def initialize(params = {})
     @params = params

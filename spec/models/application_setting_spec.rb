@@ -105,14 +105,14 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.not_to allow_value(false).for(:hashed_storage_enabled) }
 
-    it { is_expected.not_to allow_value(101).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value('90').for(:repository_storages_weighted_default) }
-    it { is_expected.not_to allow_value(-1).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(100).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(0).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(50).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(nil).for(:repository_storages_weighted_default) }
-    it { is_expected.not_to allow_value({ default: 100, shouldntexist: 50 }).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 0).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 50).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 100).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => '90').for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => nil).for(:repository_storages_weighted) }
+    it { is_expected.not_to allow_value('default' => -1).for(:repository_storages_weighted).with_message("value for 'default' must be between 0 and 100") }
+    it { is_expected.not_to allow_value('default' => 101).for(:repository_storages_weighted).with_message("value for 'default' must be between 0 and 100") }
+    it { is_expected.not_to allow_value('default' => 100, shouldntexist: 50).for(:repository_storages_weighted).with_message("can't include: shouldntexist") }
 
     it { is_expected.to allow_value(400).for(:notes_create_limit) }
     it { is_expected.not_to allow_value('two').for(:notes_create_limit) }
@@ -128,6 +128,19 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(many_usernames(101)).for(:notes_create_limit_allowlist) }
     it { is_expected.not_to allow_value(nil).for(:notes_create_limit_allowlist) }
     it { is_expected.to allow_value([]).for(:notes_create_limit_allowlist) }
+
+    it { is_expected.to allow_value('all_tiers').for(:whats_new_variant) }
+    it { is_expected.to allow_value('current_tier').for(:whats_new_variant) }
+    it { is_expected.to allow_value('disabled').for(:whats_new_variant) }
+    it { is_expected.not_to allow_value(nil).for(:whats_new_variant) }
+
+    it { is_expected.not_to allow_value(['']).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value(['OBVIOUSLY_WRONG']).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value(%w(project project)).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value([nil]).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value(nil).for(:valid_runner_registrars) }
+    it { is_expected.to allow_value([]).for(:valid_runner_registrars) }
+    it { is_expected.to allow_value(%w(project group)).for(:valid_runner_registrars) }
 
     context 'help_page_documentation_base_url validations' do
       it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
@@ -211,7 +224,8 @@ RSpec.describe ApplicationSetting do
           setting.spam_check_endpoint_enabled = true
         end
 
-        it { is_expected.to allow_value('https://example.org/spam_check').for(:spam_check_endpoint_url) }
+        it { is_expected.to allow_value('grpc://example.org/spam_check').for(:spam_check_endpoint_url) }
+        it { is_expected.not_to allow_value('https://example.org/spam_check').for(:spam_check_endpoint_url) }
         it { is_expected.not_to allow_value('nonsense').for(:spam_check_endpoint_url) }
         it { is_expected.not_to allow_value(nil).for(:spam_check_endpoint_url) }
         it { is_expected.not_to allow_value('').for(:spam_check_endpoint_url) }
@@ -222,7 +236,8 @@ RSpec.describe ApplicationSetting do
           setting.spam_check_endpoint_enabled = false
         end
 
-        it { is_expected.to allow_value('https://example.org/spam_check').for(:spam_check_endpoint_url) }
+        it { is_expected.to allow_value('grpc://example.org/spam_check').for(:spam_check_endpoint_url) }
+        it { is_expected.not_to allow_value('https://example.org/spam_check').for(:spam_check_endpoint_url) }
         it { is_expected.not_to allow_value('nonsense').for(:spam_check_endpoint_url) }
         it { is_expected.to allow_value(nil).for(:spam_check_endpoint_url) }
         it { is_expected.to allow_value('').for(:spam_check_endpoint_url) }
@@ -243,9 +258,24 @@ RSpec.describe ApplicationSetting do
       it { is_expected.to allow_value(nil).for(:snowplow_collector_hostname) }
     end
 
+    context 'when mailgun_events_enabled is enabled' do
+      before do
+        setting.mailgun_events_enabled = true
+      end
+
+      it { is_expected.to validate_presence_of(:mailgun_signing_key) }
+      it { is_expected.to validate_length_of(:mailgun_signing_key).is_at_most(255) }
+    end
+
+    context 'when mailgun_events_enabled is not enabled' do
+      it { is_expected.not_to validate_presence_of(:mailgun_signing_key) }
+    end
+
     context "when user accepted let's encrypt terms of service" do
       before do
-        setting.update(lets_encrypt_terms_of_service_accepted: true)
+        expect do
+          setting.update!(lets_encrypt_terms_of_service_accepted: true)
+        end.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Lets encrypt notification email can't be blank")
       end
 
       it { is_expected.not_to allow_value(nil).for(:lets_encrypt_notification_email) }
@@ -295,26 +325,30 @@ RSpec.describe ApplicationSetting do
 
     describe 'default_artifacts_expire_in' do
       it 'sets an error if it cannot parse' do
-        setting.update(default_artifacts_expire_in: 'a')
+        expect do
+          setting.update!(default_artifacts_expire_in: 'a')
+        end.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Default artifacts expire in is not a correct duration")
 
         expect_invalid
       end
 
       it 'sets an error if it is blank' do
-        setting.update(default_artifacts_expire_in: ' ')
+        expect do
+          setting.update!(default_artifacts_expire_in: ' ')
+        end.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Default artifacts expire in can't be blank")
 
         expect_invalid
       end
 
       it 'sets the value if it is valid' do
-        setting.update(default_artifacts_expire_in: '30 days')
+        setting.update!(default_artifacts_expire_in: '30 days')
 
         expect(setting).to be_valid
         expect(setting.default_artifacts_expire_in).to eq('30 days')
       end
 
       it 'sets the value if it is 0' do
-        setting.update(default_artifacts_expire_in: '0')
+        setting.update!(default_artifacts_expire_in: '0')
 
         expect(setting).to be_valid
         expect(setting.default_artifacts_expire_in).to eq('0')
@@ -350,6 +384,85 @@ RSpec.describe ApplicationSetting do
         .is_less_than(65536)
     end
 
+    describe 'usage_ping_enabled setting' do
+      shared_examples 'usage ping enabled' do
+        it do
+          expect(setting.usage_ping_enabled).to eq(true)
+          expect(setting.usage_ping_enabled?).to eq(true)
+        end
+      end
+
+      shared_examples 'usage ping disabled' do
+        it do
+          expect(setting.usage_ping_enabled).to eq(false)
+          expect(setting.usage_ping_enabled?).to eq(false)
+        end
+      end
+
+      context 'when setting is in database' do
+        context 'with usage_ping_enabled disabled' do
+          before do
+            setting.update!(usage_ping_enabled: false)
+          end
+
+          it_behaves_like 'usage ping disabled'
+        end
+
+        context 'with usage_ping_enabled enabled' do
+          before do
+            setting.update!(usage_ping_enabled: true)
+          end
+
+          it_behaves_like 'usage ping enabled'
+        end
+      end
+
+      context 'when setting is in GitLab config' do
+        context 'with usage_ping_enabled disabled' do
+          before do
+            allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(false)
+          end
+
+          it_behaves_like 'usage ping disabled'
+        end
+
+        context 'with usage_ping_enabled enabled' do
+          before do
+            allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(true)
+          end
+
+          it_behaves_like 'usage ping enabled'
+        end
+      end
+
+      context 'when setting in database false and setting in GitLab config true' do
+        before do
+          setting.update!(usage_ping_enabled: false)
+          allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(true)
+        end
+
+        it_behaves_like 'usage ping disabled'
+      end
+
+      context 'when setting database true and setting in GitLab config false' do
+        before do
+          setting.update!(usage_ping_enabled: true)
+          allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(false)
+        end
+
+        it_behaves_like 'usage ping disabled'
+      end
+
+      context 'when setting database true and setting in GitLab config true' do
+        before do
+          setting.update!(usage_ping_enabled: true)
+          allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(true)
+        end
+
+        it_behaves_like 'usage ping enabled'
+      end
+    end
+
     context 'key restrictions' do
       it 'supports all key types' do
         expect(described_class::SUPPORTED_KEY_TYPES).to contain_exactly(:rsa, :dsa, :ecdsa, :ed25519)
@@ -377,7 +490,7 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :abuse_notification_email do
+    it_behaves_like 'an object with email-formatted attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -393,18 +506,18 @@ RSpec.describe ApplicationSetting do
     context 'auto_devops_domain setting' do
       context 'when auto_devops_enabled? is true' do
         before do
-          setting.update(auto_devops_enabled: true)
+          setting.update!(auto_devops_enabled: true)
         end
 
         it 'can be blank' do
-          setting.update(auto_devops_domain: '')
+          setting.update!(auto_devops_domain: '')
 
           expect(setting).to be_valid
         end
 
         context 'with a valid value' do
           before do
-            setting.update(auto_devops_domain: 'domain.com')
+            setting.update!(auto_devops_domain: 'domain.com')
           end
 
           it 'is valid' do
@@ -414,7 +527,9 @@ RSpec.describe ApplicationSetting do
 
         context 'with an invalid value' do
           before do
-            setting.update(auto_devops_domain: 'definitelynotahostname')
+            expect do
+              setting.update!(auto_devops_domain: 'definitelynotahostname')
+            end.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Auto devops domain is not a fully qualified domain name")
           end
 
           it 'is invalid' do
@@ -650,6 +765,32 @@ RSpec.describe ApplicationSetting do
         end
       end
 
+      describe '#asset_proxy_whitelist' do
+        context 'when given an Array' do
+          it 'sets the domains and adds current running host' do
+            setting.asset_proxy_whitelist = ['example.com', 'assets.example.com']
+            expect(setting.asset_proxy_whitelist).to eq(['example.com', 'assets.example.com', 'localhost'])
+          end
+        end
+
+        context 'when given a String' do
+          it 'sets multiple domains with spaces' do
+            setting.asset_proxy_whitelist = 'example.com *.example.com'
+            expect(setting.asset_proxy_whitelist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+
+          it 'sets multiple domains with newlines and a space' do
+            setting.asset_proxy_whitelist = "example.com\n *.example.com"
+            expect(setting.asset_proxy_whitelist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+
+          it 'sets multiple domains with commas' do
+            setting.asset_proxy_whitelist = "example.com, *.example.com"
+            expect(setting.asset_proxy_whitelist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+        end
+      end
+
       describe '#asset_proxy_allowlist' do
         context 'when given an Array' do
           it 'sets the domains and adds current running host' do
@@ -759,6 +900,10 @@ RSpec.describe ApplicationSetting do
           throttle_authenticated_api_period_in_seconds
           throttle_authenticated_web_requests_per_period
           throttle_authenticated_web_period_in_seconds
+          throttle_unauthenticated_packages_api_requests_per_period
+          throttle_unauthenticated_packages_api_period_in_seconds
+          throttle_authenticated_packages_api_requests_per_period
+          throttle_authenticated_packages_api_period_in_seconds
         ]
       end
 
@@ -866,6 +1011,34 @@ RSpec.describe ApplicationSetting do
         end
       end
     end
+
+    describe '#diff_max_files' do
+      context 'validations' do
+        it { is_expected.to validate_presence_of(:diff_max_files) }
+
+        specify do
+          is_expected
+            .to validate_numericality_of(:diff_max_files)
+            .only_integer
+            .is_greater_than_or_equal_to(Commit::DEFAULT_MAX_DIFF_FILES_SETTING)
+            .is_less_than_or_equal_to(Commit::MAX_DIFF_FILES_SETTING_UPPER_BOUND)
+        end
+      end
+    end
+
+    describe '#diff_max_lines' do
+      context 'validations' do
+        it { is_expected.to validate_presence_of(:diff_max_lines) }
+
+        specify do
+          is_expected
+            .to validate_numericality_of(:diff_max_lines)
+            .only_integer
+            .is_greater_than_or_equal_to(Commit::DEFAULT_MAX_DIFF_LINES_SETTING)
+            .is_less_than_or_equal_to(Commit::MAX_DIFF_LINES_SETTING_UPPER_BOUND)
+        end
+      end
+    end
   end
 
   describe '#sourcegraph_url_is_com?' do
@@ -958,16 +1131,47 @@ RSpec.describe ApplicationSetting do
 
   it_behaves_like 'application settings examples'
 
-  describe 'repository_storages_weighted_attributes' do
-    it 'returns the keys for repository_storages_weighted' do
-      expect(subject.class.repository_storages_weighted_attributes).to eq([:repository_storages_weighted_default])
+  describe 'kroki_format_supported?' do
+    it 'returns true when Excalidraw is enabled' do
+      subject.kroki_formats_excalidraw = true
+      expect(subject.kroki_format_supported?('excalidraw')).to eq(true)
+    end
+
+    it 'returns true when BlockDiag is enabled' do
+      subject.kroki_formats_blockdiag = true
+      # format "blockdiag" aggregates multiple diagram types: actdiag, blockdiag, nwdiag...
+      expect(subject.kroki_format_supported?('actdiag')).to eq(true)
+      expect(subject.kroki_format_supported?('blockdiag')).to eq(true)
+    end
+
+    it 'returns false when BlockDiag is disabled' do
+      subject.kroki_formats_blockdiag = false
+      # format "blockdiag" aggregates multiple diagram types: actdiag, blockdiag, nwdiag...
+      expect(subject.kroki_format_supported?('actdiag')).to eq(false)
+      expect(subject.kroki_format_supported?('blockdiag')).to eq(false)
+    end
+
+    it 'returns false when the diagram type is optional and not enabled' do
+      expect(subject.kroki_format_supported?('bpmn')).to eq(false)
+    end
+
+    it 'returns true when the diagram type is enabled by default' do
+      expect(subject.kroki_format_supported?('vegalite')).to eq(true)
+      expect(subject.kroki_format_supported?('nomnoml')).to eq(true)
+      expect(subject.kroki_format_supported?('unknown-diagram-type')).to eq(false)
+    end
+
+    it 'returns false when the diagram type is unknown' do
+      expect(subject.kroki_format_supported?('unknown-diagram-type')).to eq(false)
     end
   end
 
-  it 'does not allow to set weight for non existing storage' do
-    setting.repository_storages_weighted = { invalid_storage: 100 }
-
-    expect(setting).not_to be_valid
-    expect(setting.errors.messages[:repository_storages_weighted]).to match_array(["can't include: invalid_storage"])
+  describe 'kroki_formats' do
+    it 'returns the value for kroki_formats' do
+      subject.kroki_formats = { blockdiag: true, bpmn: false, excalidraw: true }
+      expect(subject.kroki_formats_blockdiag).to eq(true)
+      expect(subject.kroki_formats_bpmn).to eq(false)
+      expect(subject.kroki_formats_excalidraw).to eq(true)
+    end
   end
 end

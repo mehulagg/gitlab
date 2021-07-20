@@ -6,9 +6,13 @@ import defaultState from 'ee/epic/store/state';
 import epicUtils from 'ee/epic/utils/epic_utils';
 
 import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import axios from '~/lib/utils/axios_utils';
 
 import { mockEpicMeta, mockEpicData } from '../mock_data';
+
+jest.mock('~/flash');
 
 describe('Epic Store Actions', () => {
   let state;
@@ -140,10 +144,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('requestEpicParticipantsFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('does not invoke any mutations or actions', (done) => {
       testAction(actions.requestEpicParticipantsFailure, {}, state, [], [], done);
     });
@@ -151,9 +151,9 @@ describe('Epic Store Actions', () => {
     it('shows flash error', () => {
       actions.requestEpicParticipantsFailure({ commit: () => {} });
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'There was an error getting the epic participants.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error getting the epic participants.',
+      });
     });
   });
 
@@ -184,10 +184,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('requestEpicStatusChangeFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('should set status change flag', (done) => {
       testAction(
         actions.requestEpicStatusChangeFailure,
@@ -202,9 +198,9 @@ describe('Epic Store Actions', () => {
     it('should show flash error', () => {
       actions.requestEpicStatusChangeFailure({ commit: () => {} });
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'Unable to update this epic at this time.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Unable to update this epic at this time.',
+      });
     });
   });
 
@@ -216,7 +212,7 @@ describe('Epic Store Actions', () => {
       actions.triggerIssuableEvent({}, data);
 
       expect(epicUtils.triggerDocumentEvent).toHaveBeenCalledWith(
-        'issuable_vue_app:change',
+        EVENT_ISSUABLE_VUE_APP_CHANGE,
         data.isEpicOpen,
       );
 
@@ -383,10 +379,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('requestEpicTodoToggleFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('Should set `state.epicTodoToggleInProgress` flag to `false`', (done) => {
       testAction(
         actions.requestEpicTodoToggleFailure,
@@ -407,9 +399,9 @@ describe('Epic Store Actions', () => {
         {},
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'There was an error deleting the To Do.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error deleting the To Do.',
+      });
     });
 
     it('Should show flash error with message "There was an error adding a To Do." when `state.todoExists` is `false`', () => {
@@ -421,9 +413,7 @@ describe('Epic Store Actions', () => {
         {},
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'There was an error adding a To Do.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({ message: 'There was an error adding a To Do.' });
     });
   });
 
@@ -644,10 +634,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('requestEpicDateSaveFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('should set `state.epicStartDateSaveInProgress` flag to `false` and set value of `startDateIsFixed` to that of param `dateTypeIsFixed` when called with `dateType` as `start`', (done) => {
       const data = {
         dateType: dateTypes.start,
@@ -698,9 +684,9 @@ describe('Epic Store Actions', () => {
         { dateType: dateTypes.start },
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'An error occurred while saving the start date',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while saving the start date',
+      });
     });
 
     it('should show flash error with message "An error occurred while saving the due date" when called with `dateType` as `due`', () => {
@@ -711,9 +697,9 @@ describe('Epic Store Actions', () => {
         { dateType: dateTypes.due },
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'An error occurred while saving the due date',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while saving the due date',
+      });
     });
   });
 
@@ -838,10 +824,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('receiveEpicLabelsSelectFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('should set `state.epicLabelsSelectInProgress` flag to `false`', (done) => {
       testAction(
         actions.receiveEpicLabelsSelectFailure,
@@ -861,9 +843,9 @@ describe('Epic Store Actions', () => {
         {},
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'An error occurred while updating labels.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while updating labels.',
+      });
     });
   });
 
@@ -967,10 +949,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('requestEpicSubscriptionToggleFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('should set `state.requestEpicSubscriptionToggleFailure` flag to `false`', (done) => {
       testAction(
         actions.requestEpicSubscriptionToggleFailure,
@@ -991,9 +969,9 @@ describe('Epic Store Actions', () => {
         {},
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'An error occurred while subscribing to notifications.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while subscribing to notifications.',
+      });
     });
 
     it('should show flash error with message "An error occurred while unsubscribing to notifications." when `state.subscribed` is `true`', () => {
@@ -1005,9 +983,9 @@ describe('Epic Store Actions', () => {
         {},
       );
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'An error occurred while unsubscribing to notifications.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while unsubscribing to notifications.',
+      });
     });
   });
 
@@ -1159,10 +1137,6 @@ describe('Epic Store Actions', () => {
   });
 
   describe('requestEpicCreateFailure', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it('should set `state.epicCreateInProgress` flag to `false`', (done) => {
       testAction(
         actions.requestEpicCreateFailure,
@@ -1179,9 +1153,7 @@ describe('Epic Store Actions', () => {
         commit: () => {},
       });
 
-      expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-        'Error creating epic',
-      );
+      expect(createFlash).toHaveBeenCalledWith({ message: 'Error creating epic' });
     });
   });
 
@@ -1246,61 +1218,16 @@ describe('Epic Store Actions', () => {
   });
 
   describe('updateConfidentialityOnIssuable', () => {
-    let mock;
-    const mockUpdateConfidentialMutationRes = {
-      updateEpic: {
-        clientMutationId: null,
-        errors: [],
-        __typename: 'UpdateEpicPayload',
-      },
-    };
-
-    const data = {
-      confidential: true,
-    };
-
-    beforeEach(() => {
-      mock = new MockAdapter(axios);
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
-
-    it('commits SET_EPIC_CONFIDENTIAL when request is successful', (done) => {
-      mock.onPut(/(.*)/).replyOnce(200, {});
-      jest.spyOn(epicUtils.gqClient, 'mutate').mockResolvedValue({
-        data: mockUpdateConfidentialMutationRes,
-      });
-
+    it('should commit `SET_EPIC_CONFIDENTIAL` mutation with param `sidebarCollapsed', (done) => {
+      const confidential = true;
       testAction(
         actions.updateConfidentialityOnIssuable,
-        { ...data },
+        confidential,
         state,
         [{ payload: true, type: 'SET_EPIC_CONFIDENTIAL' }],
         [],
         done,
       );
-    });
-
-    it("doesn't commit/dispatch and throws error when request fails", (done) => {
-      mock.onPut(/(.*)/).replyOnce(500, {});
-      const errors = ['bar'];
-
-      jest.spyOn(epicUtils.gqClient, 'mutate').mockResolvedValue({
-        data: {
-          updateEpic: {
-            ...mockUpdateConfidentialMutationRes,
-            errors,
-          },
-        },
-      });
-
-      testAction(actions.updateConfidentialityOnIssuable, { ...data }, state, [], [])
-        .catch((err) => {
-          expect(err).toEqual('bar');
-        })
-        .finally(done);
     });
   });
 });

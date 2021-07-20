@@ -14,17 +14,24 @@ RSpec.describe 'User views releases', :js do
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:guest) { create(:user) }
 
+  let_it_be(:internal_link) { create(:release_link, release: release_v1, name: 'An internal link', url: "#{project.web_url}/-/jobs/1/artifacts/download", filepath: nil) }
+  let_it_be(:internal_link_with_redirect) { create(:release_link, release: release_v1, name: 'An internal link with a redirect', url: "#{project.web_url}/-/jobs/2/artifacts/download", filepath: '/binaries/linux-amd64' ) }
+  let_it_be(:external_link) { create(:release_link, release: release_v1, name: 'An external link', url: "https://example.com/an/external/link", filepath: nil) }
+
   before do
     project.add_maintainer(maintainer)
     project.add_guest(guest)
+    stub_default_url_options(host: 'localhost')
   end
 
-  shared_examples 'releases page' do
+  shared_examples 'releases index page' do
     context('when the user is a maintainer') do
       before do
         sign_in(maintainer)
 
         visit project_releases_path(project)
+
+        wait_for_requests
       end
 
       it 'sees the release' do
@@ -35,38 +42,18 @@ RSpec.describe 'User views releases', :js do
         end
       end
 
-      context 'when there is a link as an asset' do
-        let!(:release_link) { create(:release_link, release: release_v1, url: url ) }
-        let(:url) { "#{project.web_url}/-/jobs/1/artifacts/download" }
-        let(:direct_asset_link) { Gitlab::Routing.url_helpers.project_release_url(project, release_v1) << "/downloads#{release_link.filepath}" }
+      it 'renders the correct links', :aggregate_failures do
+        page.within("##{release_v1.tag} .js-assets-list") do
+          external_link_indicator_selector = '[data-testid="external-link-indicator"]'
 
-        it 'sees the link' do
-          page.within("##{release_v1.tag} .js-assets-list") do
-            expect(page).to have_link release_link.name, href: direct_asset_link
-            expect(page).not_to have_css('[data-testid="external-link-indicator"]')
-          end
-        end
+          expect(page).to have_link internal_link.name, href: internal_link.url
+          expect(find_link(internal_link.name)).not_to have_css(external_link_indicator_selector)
 
-        context 'when there is a link redirect' do
-          let!(:release_link) { create(:release_link, release: release_v1, name: 'linux-amd64 binaries', filepath: '/binaries/linux-amd64', url: url) }
-          let(:url) { "#{project.web_url}/-/jobs/1/artifacts/download" }
+          expect(page).to have_link internal_link_with_redirect.name, href: Gitlab::Routing.url_helpers.project_release_url(project, release_v1) << "/downloads#{internal_link_with_redirect.filepath}"
+          expect(find_link(internal_link_with_redirect.name)).not_to have_css(external_link_indicator_selector)
 
-          it 'sees the link' do
-            page.within("##{release_v1.tag} .js-assets-list") do
-              expect(page).to have_link release_link.name, href: direct_asset_link
-              expect(page).not_to have_css('[data-testid="external-link-indicator"]')
-            end
-          end
-        end
-
-        context 'when url points to external resource' do
-          let(:url) { 'http://google.com/download' }
-
-          it 'sees that the link is external resource' do
-            page.within("##{release_v1.tag} .js-assets-list") do
-              expect(page).to have_css('[data-testid="external-link-indicator"]')
-            end
-          end
+          expect(page).to have_link external_link.name, href: external_link.url
+          expect(find_link(external_link.name)).to have_css(external_link_indicator_selector)
         end
       end
 
@@ -147,15 +134,19 @@ RSpec.describe 'User views releases', :js do
     end
   end
 
-  context 'when the graphql_releases_page feature flag is enabled' do
-    it_behaves_like 'releases page'
-  end
-
-  context 'when the graphql_releases_page feature flag is disabled' do
+  context 'when the releases_index_apollo_client feature flag is enabled' do
     before do
-      stub_feature_flags(graphql_releases_page: false)
+      stub_feature_flags(releases_index_apollo_client: true)
     end
 
-    it_behaves_like 'releases page'
+    it_behaves_like 'releases index page'
+  end
+
+  context 'when the releases_index_apollo_client feature flag is disabled' do
+    before do
+      stub_feature_flags(releases_index_apollo_client: false)
+    end
+
+    it_behaves_like 'releases index page'
   end
 end

@@ -10,8 +10,8 @@
     "state": { "type": "string" },
     "created_at": { "type": "string" },
     "updated_at": { "type": "string" },
-    "start_date": { "type": ["date", "null"] },
-    "due_date": { "type": ["date", "null"] },
+    "start_date": { "type": ["string", "null"], "format": "date-time" },
+    "due_date": { "type": ["string", "null"], "format": "date-time" },
     "expired": { "type": ["boolean", "null"] },
     "web_url": { "type": "string" }
   },

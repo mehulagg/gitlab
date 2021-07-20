@@ -1,8 +1,6 @@
 export default ({
   members,
-  sourceId,
-  currentUserId,
-  canManageMembers,
+  pagination,
   tableFields,
   tableAttrs,
   tableSortableFields,
@@ -11,9 +9,7 @@ export default ({
   filteredSearchBar,
 }) => ({
   members,
-  sourceId,
-  currentUserId,
-  canManageMembers,
+  pagination,
   tableFields,
   tableAttrs,
   tableSortableFields,

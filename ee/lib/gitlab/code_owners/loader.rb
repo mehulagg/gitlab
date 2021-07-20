@@ -5,8 +5,10 @@ module Gitlab
     class Loader
       include ::Gitlab::Utils::StrongMemoize
 
-      def initialize(project, ref, paths)
-        @project, @ref, @paths = project, ref, Array(paths)
+      def initialize(project, ref, paths = [])
+        @project = project
+        @ref = ref
+        @paths = Array(paths)
       end
 
       def entries
@@ -60,11 +62,7 @@ module Gitlab
       end
 
       def code_owners_file
-        if RequestStore.active?
-          RequestStore.fetch("project-#{@project.id}:code-owners:#{@ref}") do
-            load_code_owners_file
-          end
-        else
+        @code_owners_file ||= Gitlab::SafeRequestStore.fetch("project-#{@project.id}:code-owners:#{@ref}") do
           load_code_owners_file
         end
       end

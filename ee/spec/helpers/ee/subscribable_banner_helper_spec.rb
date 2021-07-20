@@ -3,6 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe EE::SubscribableBannerHelper do
+  describe '#renew_subscription_path' do
+    it 'does not raise error if available project is not persisted' do
+      assign(:project, Project.new)
+
+      expect { helper.renew_subscription_path }.not_to raise_error
+    end
+
+    it 'does not raise error if entity is not available' do
+      assign(:project, nil)
+      assign(:group, nil)
+
+      expect { helper.renew_subscription_path }.not_to raise_error
+    end
+  end
+
   describe '#gitlab_subscription_or_license' do
     subject { helper.gitlab_subscription_or_license }
 
@@ -16,60 +31,42 @@ RSpec.describe EE::SubscribableBannerHelper do
       end
     end
 
-    context 'when feature flag is enabled' do
-      let(:license) { double(:license) }
+    let(:license) { double(:license) }
 
+    context 'when instance variable true' do
       before do
-        stub_feature_flags(subscribable_banner: true)
+        assign(:display_subscription_banner, true)
       end
 
-      context 'when instance variable true' do
+      context 'when should_check_namespace_plan is true' do
         before do
-          assign(:display_subscription_banner, true)
-        end
-
-        context 'when should_check_namespace_plan is true' do
-          before do
-            allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
-          end
-
-          context 'when a project exists' do
-            let(:entity) { create(:project) }
-
-            before do
-              assign(:project, entity)
-            end
-
-            it_behaves_like 'when a subscription exists'
-          end
-
-          context 'when a group exists' do
-            let(:entity) { create(:group) }
-
-            before do
-              assign(:group, entity)
-            end
-
-            it_behaves_like 'when a subscription exists'
-          end
-        end
-
-        context 'when should_check_namespace_plan is false' do
-          before do
-            allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(false)
-          end
-
-          it 'returns the current license' do
-            expect(License).to receive(:current).and_return(license)
-            expect(subject).to eq(license)
-          end
-        end
-      end
-
-      context 'when instance variable false' do
-        before do
-          assign(:display_subscription_banner, false)
           allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+        end
+
+        context 'when a project exists' do
+          let(:entity) { create(:project) }
+
+          before do
+            assign(:project, entity)
+          end
+
+          it_behaves_like 'when a subscription exists'
+        end
+
+        context 'when a group exists' do
+          let(:entity) { create(:group) }
+
+          before do
+            assign(:group, entity)
+          end
+
+          it_behaves_like 'when a subscription exists'
+        end
+      end
+
+      context 'when should_check_namespace_plan is false' do
+        before do
+          allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(false)
         end
 
         it 'returns the current license' do
@@ -77,18 +74,30 @@ RSpec.describe EE::SubscribableBannerHelper do
           expect(subject).to eq(license)
         end
       end
+    end
 
-      context 'with a future dated license' do
-        let(:gl_license) { build(:gitlab_license, starts_at: Date.current + 1.month) }
+    context 'when instance variable false' do
+      before do
+        assign(:display_subscription_banner, false)
+        allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+      end
 
-        before do
-          allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
-        end
+      it 'returns the current license' do
+        expect(License).to receive(:current).and_return(license)
+        expect(subject).to eq(license)
+      end
+    end
 
-        it 'returns the current license' do
-          allow(License).to receive(:current).and_return(license)
-          expect(subject).to eq(license)
-        end
+    context 'with a future dated license' do
+      let(:gl_license) { build(:gitlab_license, starts_at: Date.current + 1.month) }
+
+      before do
+        allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+      end
+
+      it 'returns the current license' do
+        allow(License).to receive(:current).and_return(license)
+        expect(subject).to eq(license)
       end
     end
   end
@@ -98,9 +107,9 @@ RSpec.describe EE::SubscribableBannerHelper do
 
     let(:message) { double(:message) }
 
-    context 'when feature flag is enabled' do
+    context 'when subscribable_subscription_banner feature flag is enabled' do
       before do
-        stub_feature_flags(subscribable_banner: true)
+        stub_feature_flags(subscribable_subscription_banner: true)
       end
 
       context 'when instance variable true' do
@@ -122,7 +131,7 @@ RSpec.describe EE::SubscribableBannerHelper do
             it 'calls Gitlab::ExpiringSubscriptionMessage and SubscriptionPresenter if is Gitlab.com?' do
               allow(helper).to receive(:signed_in?).and_return(true)
               allow(helper).to receive(:current_user).and_return(user)
-              allow(helper).to receive(:can?).with(user, :owner_access, entity).and_return(true)
+              allow(helper).to receive(:can?).with(user, :owner_access, root_namespace).and_return(true)
 
               expect(SubscriptionPresenter).to receive(:new).with(gitlab_subscription).and_return(decorated_mock)
               expect(::Gitlab::ExpiringSubscriptionMessage).to receive(:new).with(
@@ -137,9 +146,11 @@ RSpec.describe EE::SubscribableBannerHelper do
             end
           end
 
+          let(:root_namespace) { create(:group_with_plan) }
+          let(:namespace) { create(:group, :nested, parent: root_namespace) }
+
           context 'when a project is present' do
             let(:entity) { create(:project, namespace: namespace) }
-            let(:namespace) { create(:namespace_with_plan) }
 
             before do
               assign(:project, entity)
@@ -149,8 +160,7 @@ RSpec.describe EE::SubscribableBannerHelper do
           end
 
           context 'when a group is present' do
-            let(:entity) { create(:group_with_plan) }
-            let(:namespace) { entity }
+            let(:entity) { namespace }
 
             before do
               assign(:project, nil)
@@ -178,7 +188,8 @@ RSpec.describe EE::SubscribableBannerHelper do
             expect(Gitlab::ExpiringSubscriptionMessage).to receive(:new).with(
               subscribable: license,
               signed_in: true,
-              is_admin: false
+              is_admin: false,
+              force_notification: false
             ).and_return(message_mock)
 
             expect(message_mock).to receive(:message)
@@ -198,6 +209,19 @@ RSpec.describe EE::SubscribableBannerHelper do
           expect(helper).to receive(:license_message).and_return(message)
           expect(subject).to eq(message)
         end
+      end
+    end
+
+    context 'when subscribable_subscription_banner feature flag is disabled' do
+      before do
+        stub_feature_flags(subscribable_subscription_banner: false)
+        assign(:display_subscription_banner, true)
+        allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+      end
+
+      it 'returns the license message' do
+        expect(helper).to receive(:license_message).and_return(message)
+        expect(subject).to eq(message)
       end
     end
   end

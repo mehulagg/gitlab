@@ -8,6 +8,7 @@ module Projects
     ValidationError = Class.new(StandardError)
 
     def execute
+      build_topics
       remove_unallowed_params
       validate!
 
@@ -49,11 +50,11 @@ module Projects
 
     def validate!
       unless valid_visibility_level_change?(project, params[:visibility_level])
-        raise ValidationError.new(s_('UpdateProject|New visibility level not allowed!'))
+        raise ValidationError, s_('UpdateProject|New visibility level not allowed!')
       end
 
       if renaming_project_with_container_registry_tags?
-        raise ValidationError.new(s_('UpdateProject|Cannot rename project because it contains container registry tags!'))
+        raise ValidationError, s_('UpdateProject|Cannot rename project because it contains container registry tags!')
       end
 
       validate_default_branch_change
@@ -65,9 +66,11 @@ module Projects
       previous_default_branch = project.default_branch
 
       if project.change_head(params[:default_branch])
+        params[:previous_default_branch] = previous_default_branch
+
         after_default_branch_change(previous_default_branch)
       else
-        raise ValidationError.new(s_("UpdateProject|Could not set the default branch"))
+        raise ValidationError, s_("UpdateProject|Could not set the default branch")
       end
     end
 
@@ -167,7 +170,15 @@ module Projects
         project.repository_storage != new_repository_storage &&
         can?(current_user, :change_repository_storage, project)
     end
+
+    def build_topics
+      topics = params.delete(:topics)
+      tag_list = params.delete(:tag_list)
+      topic_list = topics || tag_list
+
+      params[:topic_list] ||= topic_list if topic_list
+    end
   end
 end
 
-Projects::UpdateService.prepend_if_ee('EE::Projects::UpdateService')
+Projects::UpdateService.prepend_mod_with('Projects::UpdateService')

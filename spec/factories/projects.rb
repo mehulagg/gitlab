@@ -47,6 +47,7 @@ FactoryBot.define do
       import_last_error { nil }
       forward_deployment_enabled { nil }
       restrict_user_defined_variables { nil }
+      ci_job_token_scope_enabled { nil }
     end
 
     before(:create) do |project, evaluator|
@@ -88,6 +89,7 @@ FactoryBot.define do
       project.merge_trains_enabled = evaluator.merge_trains_enabled unless evaluator.merge_trains_enabled.nil?
       project.keep_latest_artifact = evaluator.keep_latest_artifact unless evaluator.keep_latest_artifact.nil?
       project.restrict_user_defined_variables = evaluator.restrict_user_defined_variables unless evaluator.restrict_user_defined_variables.nil?
+      project.ci_job_token_scope_enabled = evaluator.ci_job_token_scope_enabled unless evaluator.ci_job_token_scope_enabled.nil?
 
       if evaluator.import_status
         import_state = project.import_state || project.build_import_state
@@ -194,7 +196,7 @@ FactoryBot.define do
             filename,
             content,
             message: "Automatically created file #{filename}",
-            branch_name: 'master'
+            branch_name: project.default_branch || 'master'
           )
         end
       end
@@ -242,6 +244,8 @@ FactoryBot.define do
             branch_name: evaluator.create_branch)
 
         end
+
+        project.track_project_repository
       end
     end
 
@@ -392,24 +396,24 @@ FactoryBot.define do
   factory :redmine_project, parent: :project do
     has_external_issue_tracker { true }
 
-    redmine_service
+    redmine_integration
   end
 
   factory :youtrack_project, parent: :project do
     has_external_issue_tracker { true }
 
-    youtrack_service
+    youtrack_integration
   end
 
   factory :jira_project, parent: :project do
     has_external_issue_tracker { true }
 
-    jira_service
+    jira_integration
   end
 
   factory :prometheus_project, parent: :project do
     after :create do |project|
-      project.create_prometheus_service(
+      project.create_prometheus_integration(
         active: true,
         properties: {
           api_url: 'https://prometheus.example.com/',
@@ -422,7 +426,7 @@ FactoryBot.define do
   factory :ewm_project, parent: :project do
     has_external_issue_tracker { true }
 
-    ewm_service
+    ewm_integration
   end
 
   factory :project_with_design, parent: :project do

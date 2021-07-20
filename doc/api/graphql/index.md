@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Create
+group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -65,26 +65,54 @@ There are no plans to deprecate the REST API. To reduce the technical burden of
 supporting two APIs in parallel, they should share implementations as much as
 possible.
 
-### Deprecation process
+## Breaking changes
 
-Fields marked for removal from the GitLab GraphQL API are first **deprecated** but still available
-for at least six releases, and then **removed entirely**.
-Removals occur at X.0 and X.6 releases.
+The GitLab GraphQL API is [versionless](https://graphql.org/learn/best-practices/#versioning) and
+changes are made to the API in a way that maintains backwards-compatibility.
 
-For example, a field can be marked as deprecated (but still usable) in %12.7, but can be used until its removal in %13.6.
-When marked as deprecated, an alternative should be provided if there is one.
-That gives consumers of the GraphQL API a minimum of six months to update their GraphQL queries.
+Occasionally GitLab needs to change the GraphQL API in a way that is not backwards-compatible.
+These changes include the removal or renaming of fields, arguments or other parts of the schema.
 
-The process is as follows:
+In these situations, GitLab follows a [Deprecation and removal process](#deprecation-and-removal-process)
+where the deprecated part of the schema is supported for a period of time before being removed.
 
-1. The field is listed as deprecated in [GraphQL API Reference](reference/index.md).
-1. Removals are announced at least one release prior in the Deprecation Warnings section of the
-   release post (at or prior to X.11 and X.5 releases).
-1. Fields meeting criteria are removed in X.0 or X.6.
+There are some changes which are explicitly [not considered breaking](../../development/contributing/#breaking-changes).
+
+Clients should familiarize themselves with the process to avoid breaking changes affecting their integrations.
+
+WARNING:
+While GitLab will make all attempts to follow the [deprecation and removal process](#deprecation-and-removal-process),
+GitLab may on very rare occasions need to make immediate breaking changes to the GraphQL API to patch critical security or performance
+concerns and where the deprecation process would be considered to pose significant risk.
 
 NOTE:
 Fields behind a feature flag and disabled by default are exempt from the deprecation process,
 and can be removed at any time without notice.
+
+### Deprecation and Removal process
+
+Parts of the schema marked for removal from the GitLab GraphQL API are first **deprecated** but still available
+for at least six releases, and then **removed entirely**.
+Removals occur at `X.0` and `X.6` releases.
+
+The process is as follows:
+
+1. The item is marked as deprecated in the schema. It will be displayed as deprecated in the
+   [GraphQL API Reference](reference/index.md) and in introspection queries.
+1. Removals are announced at least one release prior in the [Deprecations](https://about.gitlab.com/handbook/marketing/blog/release-posts/#deprecations)
+   section of the release post (at or prior to `X.11` and `X.5` releases).
+1. Items meeting criteria are removed in `X.0` or `X.6` and added to:
+
+   - The [Removals](https://about.gitlab.com/handbook/marketing/blog/release-posts/#removals) section of the Release Post.
+   - The [Removed items page](removed_items.md).
+
+This gives consumers of the GraphQL API a minimum of six months to update their GraphQL queries.
+
+When an item is deprecated or removed, an alternative is provided if available.
+
+**Example:**
+
+A field marked as deprecated in `12.7` can be used until its removal in `13.6`.
 
 ### List of removed items
 
@@ -107,7 +135,7 @@ New associations and root level objects are constantly being added.
 See the [GraphQL API Reference](reference/index.md) for up-to-date information.
 
 Root-level queries are defined in
-[`app/graphql/types/query_type.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/graphql/types/query_type.rb).
+[`app/graphql/types/query_type.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/query_type.rb).
 
 ### Multiplex queries
 
@@ -138,7 +166,7 @@ The complexity of a single query is limited to a maximum of:
 - `200` for unauthenticated requests.
 - `250` for authenticated requests.
 
-There is no way to discover the complexity of a query except by exceeding the limit.
+The complexity score of a query and limit for the request [can be queried for](getting_started.md#query-complexity).
 
 If a query exceeds the complexity limit an error message response will
 be returned.
@@ -147,6 +175,7 @@ In general, each field in a query will add `1` to the complexity score, although
 this can be higher or lower for particular fields. Sometimes the addition of
 certain arguments may also increase the complexity of a query.
 
+NOTE:
 The complexity limits may be revised in future, and additionally, the complexity
 of a query may be altered.
 
@@ -154,16 +183,64 @@ of a query may be altered.
 
 Requests time out at 30 seconds.
 
+### Spam
+
+GraphQL mutations can be detected as spam. If this happens, a
+[GraphQL top-level error](https://spec.graphql.org/June2018/#sec-Errors) is raised. For example:
+
+```json
+{
+  "errors": [
+    {
+      "message": "Request denied. Spam detected",
+      "locations": [ { "line": 6, "column": 7 } ],
+      "path": [ "updateSnippet" ],
+      "extensions": {
+        "spam": true
+      }
+    }
+  ],
+  "data": {
+    "updateSnippet": {
+      "snippet": null
+    }
+  }
+}
+```
+
+If mutation is detected as potential spam and a CAPTCHA service is configured:
+
+- The `captchaSiteKey` should be used to obtain a CAPTCHA response value using the appropriate CAPTCHA API.
+  Only [Google reCAPTCHA v2](https://developers.google.com/recaptcha/docs/display) is supported.
+- The request can be resubmitted with the `X-GitLab-Captcha-Response` and `X-GitLab-Spam-Log-Id` headers set.
+
+```json
+{
+  "errors": [
+    {
+      "message": "Request denied. Solve CAPTCHA challenge and retry",
+      "locations": [ { "line": 6, "column": 7 } ],
+      "path": [ "updateSnippet" ],
+      "extensions": {
+        "needsCaptchaResponse": true,
+        "captchaSiteKey": "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+        "spamLogId": 67
+      }
+    }
+  ],
+  "data": {
+    "updateSnippet": {
+      "snippet": null,
+    }
+  }
+}
+```
+
 ## Reference
 
 The GitLab GraphQL reference [is available](reference/index.md).
 
 It is automatically generated from the GitLab GraphQL schema and embedded in a Markdown file.
-
-Machine-readable versions are also available:
-
-- [JSON format](reference/gitlab_schema.json)
-- [IDL format](reference/gitlab_schema.graphql)
 
 ## Generate updates for documentation
 

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { { group_id: group } }
 
   before do
@@ -84,6 +85,34 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
         expect(stage_response['title']).to eq('My Stage')
       end
 
+      context 'when using the new start and end event params format' do
+        let(:value_stream_params) do
+          {
+            name: 'test',
+            stages: [
+              {
+                name: 'My Stage',
+                start_event: {
+                  identifier: 'issue_created'
+                },
+                end_event: {
+                  identifier: 'issue_closed'
+                },
+                custom: true
+              }
+            ]
+          }
+        end
+
+        it 'succeeds' do
+          post :create, params: { group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:created)
+          stage_response = json_response['stages'].first
+          expect(stage_response['title']).to eq('My Stage')
+        end
+      end
+
       context 'when invalid stage is given' do
         before do
           value_stream_params[:stages].first[:name] = ''
@@ -111,6 +140,28 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
         expect(json_response['name']).to eq('new name')
       end
 
+      context 'when updating value stream with in-memory stages' do
+        let(:value_stream_params) do
+          {
+            name: 'updated name',
+            stages: [
+              {
+                id: 'issue', # in memory stage
+                name: 'issue',
+                custom: false
+              }
+            ]
+          }
+        end
+
+        it 'returns a successful 200 response' do
+          put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['name']).to eq('updated name')
+        end
+      end
+
       context 'with stages' do
         let!(:stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream, name: 'stage 1', custom: true) }
 
@@ -135,6 +186,50 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
           expect(json_response['id']).to eq(value_stream.id)
           expect(json_response['stages'].first['title']).to eq('updated stage name')
         end
+
+        context 'when using the new start and end event params format' do
+          let(:value_stream_params) do
+            {
+              name: 'test',
+              id: value_stream.id,
+              stages: [
+                {
+                  id: stage.id,
+                  name: 'updated stage name',
+                  start_event: {
+                    identifier: 'issue_created'
+                  },
+                  end_event: {
+                    identifier: 'issue_closed'
+                  },
+                  custom: true
+                }
+              ]
+            }
+          end
+
+          it 'succeeds' do
+            put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            start_event_identifier = json_response['stages'].first['start_event']['identifier']
+            end_event_identifier = json_response['stages'].first['end_event']['identifier']
+
+            expect(start_event_identifier).to eq('issue_created')
+            expect(end_event_identifier).to eq('issue_closed')
+          end
+        end
+
+        context 'when deleting the stage by excluding it from the stages array' do
+          let(:value_stream_params) { { name: 'no stages', stages: [] } }
+
+          it 'returns a successful 200 response' do
+            put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['stages']).to be_empty
+          end
+        end
       end
     end
   end
@@ -142,17 +237,6 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
   describe 'DELETE #destroy' do
     def destroy_value_stream
       delete :destroy, params: { group_id: group, id: value_stream }
-    end
-
-    context 'when it is a default value stream' do
-      let!(:value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'default') }
-
-      it 'returns an unprocessable entity 422 response without deleting the value stream' do
-        expect { destroy_value_stream }.not_to change { Analytics::CycleAnalytics::GroupValueStream.count }
-
-        expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(json_response["message"]).to eq('The Default Value Stream cannot be deleted')
-      end
     end
 
     context 'when it is a custom value stream' do

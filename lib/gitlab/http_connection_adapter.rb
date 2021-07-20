@@ -11,14 +11,11 @@
 # This option will take precedence over the global setting.
 module Gitlab
   class HTTPConnectionAdapter < HTTParty::ConnectionAdapter
+    extend ::Gitlab::Utils::Override
+
+    override :connection
     def connection
-      begin
-        @uri, hostname = Gitlab::UrlBlocker.validate!(uri, allow_local_network: allow_local_requests?,
-                                                           allow_localhost: allow_local_requests?,
-                                                           dns_rebind_protection: dns_rebind_protection?)
-      rescue Gitlab::UrlBlocker::BlockedUrlError => e
-        raise Gitlab::HTTP::BlockedUrlError, "URL '#{uri}' is blocked: #{e.message}"
-      end
+      @uri, hostname = validate_url!(uri)
 
       super.tap do |http|
         http.hostname_override = hostname if hostname
@@ -26,6 +23,14 @@ module Gitlab
     end
 
     private
+
+    def validate_url!(url)
+      Gitlab::UrlBlocker.validate!(url, allow_local_network: allow_local_requests?,
+                                        allow_localhost: allow_local_requests?,
+                                        dns_rebind_protection: dns_rebind_protection?)
+    rescue Gitlab::UrlBlocker::BlockedUrlError => e
+      raise Gitlab::HTTP::BlockedUrlError, "URL '#{url}' is blocked: #{e.message}"
+    end
 
     def allow_local_requests?
       options.fetch(:allow_local_requests, allow_settings_local_requests?)

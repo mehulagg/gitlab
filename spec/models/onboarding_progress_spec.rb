@@ -106,11 +106,27 @@ RSpec.describe OnboardingProgress do
     end
 
     context 'when not given a root namespace' do
-      let(:namespace) { create(:namespace, parent: build(:namespace)) }
+      let(:namespace) { create(:group, parent: build(:group)) }
 
       it 'does not add a record for the namespace' do
         expect { onboard }.not_to change(described_class, :count).from(0)
       end
+    end
+  end
+
+  describe '.onboarding?' do
+    subject(:onboarding?) { described_class.onboarding?(namespace) }
+
+    context 'when onboarded' do
+      before do
+        described_class.onboard(namespace)
+      end
+
+      it { is_expected.to eq true }
+    end
+
+    context 'when not onboarding' do
+      it { is_expected.to eq false }
     end
   end
 
@@ -166,9 +182,55 @@ RSpec.describe OnboardingProgress do
     end
   end
 
+  describe '.not_completed?' do
+    subject { described_class.not_completed?(namespace.id, action) }
+
+    context 'when the namespace has not yet been onboarded' do
+      it { is_expected.to be(false) }
+    end
+
+    context 'when the namespace has been onboarded but not registered the action yet' do
+      before do
+        described_class.onboard(namespace)
+      end
+
+      it { is_expected.to be(true) }
+
+      context 'when the action has been registered' do
+        before do
+          described_class.register(namespace, action)
+        end
+
+        it { is_expected.to be(false) }
+      end
+    end
+  end
+
   describe '.column_name' do
     subject { described_class.column_name(action) }
 
     it { is_expected.to eq(:subscription_created_at) }
+  end
+
+  describe '#number_of_completed_actions' do
+    subject { build(:onboarding_progress, actions.map { |x| { x => Time.current } }.inject(:merge)).number_of_completed_actions }
+
+    context '0 completed actions' do
+      let(:actions) { [:created_at, :updated_at] }
+
+      it { is_expected.to eq(0) }
+    end
+
+    context '1 completed action' do
+      let(:actions) { [:created_at, :subscription_created_at] }
+
+      it { is_expected.to eq(1) }
+    end
+
+    context '2 completed actions' do
+      let(:actions) { [:subscription_created_at, :git_write_at] }
+
+      it { is_expected.to eq(2) }
+    end
   end
 end

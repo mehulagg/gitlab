@@ -4,6 +4,7 @@ class GroupHook < WebHook
   include CustomModelNaming
   include TriggerableHooks
   include Limitable
+  extend ::Gitlab::Utils::Override
 
   self.limit_name = 'group_hooks'
   self.limit_scope = :group
@@ -31,5 +32,19 @@ class GroupHook < WebHook
 
   def pluralized_name
     _('Group Hooks')
+  end
+
+  def web_hooks_disable_failed?
+    Feature.enabled?(:web_hooks_disable_failed, group)
+  end
+
+  override :rate_limit
+  def rate_limit
+    group.actual_limits.limit_for(:web_hook_calls)
+  end
+
+  override :application_context
+  def application_context
+    super.merge(namespace: group)
   end
 end

@@ -9,17 +9,23 @@ module Avatarable
 
   ALLOWED_IMAGE_SCALER_WIDTHS = (USER_AVATAR_SIZES | PROJECT_AVATAR_SIZES | GROUP_AVATAR_SIZES).freeze
 
+  # This value must not be bigger than then: https://gitlab.com/gitlab-org/gitlab/-/blob/master/workhorse/config.toml.example#L20
+  #
+  # https://docs.gitlab.com/ee/development/image_scaling.html
+  MAXIMUM_FILE_SIZE = 200.kilobytes.to_i
+
   included do
     prepend ShadowMethods
     include ObjectStorage::BackgroundMove
     include Gitlab::Utils::StrongMemoize
 
     validate :avatar_type, if: ->(user) { user.avatar.present? && user.avatar_changed? }
-    validates :avatar, file_size: { maximum: 200.kilobytes.to_i }, if: :avatar_changed?
+    validates :avatar, file_size: { maximum: MAXIMUM_FILE_SIZE }, if: :avatar_changed?
 
     mount_uploader :avatar, AvatarUploader
 
     after_initialize :add_avatar_to_batch
+    after_commit :clear_avatar_caches
   end
 
   module ShadowMethods
@@ -126,5 +132,11 @@ module Avatarable
 
   def avatar_mounter
     strong_memoize(:avatar_mounter) { _mounter(:avatar) }
+  end
+
+  def clear_avatar_caches
+    return unless respond_to?(:verified_emails) && verified_emails.any? && avatar_changed?
+
+    Gitlab::AvatarCache.delete_by_email(*verified_emails)
   end
 end

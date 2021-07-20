@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Geo::Replication::BlobDownloader do
 
   let_it_be(:primary) { create(:geo_node, :primary) }
   let_it_be(:secondary) { create(:geo_node) }
+
   let(:model_record) { create(:package_file, :npm) }
   let(:replicator) { model_record.replicator }
 
@@ -54,30 +55,88 @@ RSpec.describe Gitlab::Geo::Replication::BlobDownloader do
       end
 
       context 'when the file is on Object Storage' do
+        let!(:secondary_object_storage) { create(:geo_node, sync_object_storage: sync_object_storage) }
+
         before do
           stub_package_file_object_storage(enabled: true, direct_upload: true)
+          stub_current_geo_node(secondary_object_storage)
         end
 
         let!(:model_record) { create(:package_file, :npm, :object_storage) }
 
         subject { described_class.new(replicator: model_record.replicator) }
 
-        context 'with object storage sync disabled' do
-          before do
-            secondary.update_column(:sync_object_storage, false)
+        context 'with object storage sync enabled' do
+          let(:sync_object_storage) { true }
+
+          context 'when the primary proxies remote storage' do
+            it 'returns success' do
+              content = replicator.carrierwave_uploader.file.read
+              size = content.bytesize
+              stub_request(:get, subject.resource_url)
+                .to_return(status: 200, body: content)
+
+              result = subject.execute
+
+              expect_blob_downloader_result(result, success: true, bytes_downloaded: size, primary_missing_file: false)
+            end
           end
 
-          it 'returns failure' do
-            result = subject.execute
+          context 'when the primary redirects to remote storage' do
+            let(:geo_internal_headers) { { 'Authorization' => 'Gl-Geo: abc123' } }
+            let(:content) { replicator.carrierwave_uploader.file.read }
+            let(:size) { content.bytesize }
+            let(:remote_url) { replicator.carrierwave_uploader.url }
 
-            expect(result.success).to be_falsey
+            before do
+              # Set up to ensure that our redirect follow implementation does
+              # not pass through all headers.
+              allow_next_instance_of(Gitlab::Geo::TransferRequest) do |request|
+                allow(request).to receive(:headers).and_return(geo_internal_headers)
+              end
+
+              stub_request(:get, subject.resource_url)
+                .to_return(status: 302, headers: { 'Location' => remote_url })
+
+              # This stub is intended to cause this test to fail when all
+              # headers are passed through (per HTTP.rb `follow` behavior) to
+              # the redirect location.
+              #
+              # Some S3-compatible storages respond with 400 Bad Request when
+              # there are unexpected headers. See
+              # https://gitlab.com/gitlab-org/gitlab/-/issues/201995
+              stub_request(:get, remote_url)
+                .to_return(status: 400, body: content, headers: geo_internal_headers)
+
+              stub_request(:get, remote_url)
+                .to_return(status: 200, body: content)
+            end
+
+            it 'returns success', :aggregate_failures do
+              result = subject.execute
+
+              expect_blob_downloader_result(result, success: true, bytes_downloaded: size, primary_missing_file: false)
+
+              # Expect that the redirect is followed
+              expect(WebMock).to have_requested(:get, remote_url)
+            end
+          end
+
+          context 'with object storage disabled' do
+            before do
+              stub_package_file_object_storage(enabled: false)
+            end
+
+            it 'returns failure' do
+              result = subject.execute
+
+              expect(result.success).to be_falsey
+            end
           end
         end
 
-        context 'with object storage disabled' do
-          before do
-            stub_package_file_object_storage(enabled: false)
-          end
+        context 'with object storage sync disabled' do
+          let(:sync_object_storage) { false }
 
           it 'returns failure' do
             result = subject.execute

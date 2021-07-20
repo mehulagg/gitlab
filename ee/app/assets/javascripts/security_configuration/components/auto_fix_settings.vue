@@ -1,9 +1,9 @@
 <script>
 import { GlIcon, GlLink, GlCard, GlFormCheckbox, GlSprintf } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as Sentry from '@sentry/browser';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
@@ -77,9 +77,11 @@ export default {
         })
         .catch((e) => {
           Sentry.captureException(e);
-          createFlash(
-            __('Something went wrong while toggling auto-fix settings, please try again later.'),
-          );
+          createFlash({
+            message: __(
+              'Something went wrong while toggling auto-fix settings, please try again later.',
+            ),
+          });
           this.isChecked = !enabled;
         })
         .finally(() => {

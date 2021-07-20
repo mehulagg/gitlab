@@ -1,3 +1,5 @@
+import { MEMBER_TYPES } from '~/members/constants';
+
 export const member = {
   requestedAt: null,
   canUpdate: false,
@@ -11,6 +13,7 @@ export const member = {
     fullName: 'Foo Bar',
     webUrl: 'https://gitlab.com/groups/foo-bar',
   },
+  type: 'GroupMember',
   user: {
     id: 123,
     name: 'Administrator',
@@ -19,6 +22,7 @@ export const member = {
     avatarUrl: 'https://www.gravatar.com/avatar/4816142ef496f956a277bedf1a40607b?s=80&d=identicon',
     blocked: false,
     twoFactorEnabled: false,
+    oncallSchedules: [{ name: 'schedule 1' }],
   },
   id: 238,
   createdAt: '2020-07-17T16:22:46.923Z',
@@ -26,6 +30,7 @@ export const member = {
   usingLicense: false,
   groupSso: false,
   groupManagedAccount: false,
+  provisionedByThisGroup: false,
   validRoles: {
     Guest: 10,
     Reporter: 20,
@@ -75,3 +80,32 @@ export const membersJsonString = JSON.stringify(members);
 
 export const directMember = { ...member, isDirectMember: true };
 export const inheritedMember = { ...member, isDirectMember: false };
+
+export const member2faEnabled = { ...member, user: { ...member.user, twoFactorEnabled: true } };
+
+export const paginationData = {
+  current_page: 1,
+  per_page: 5,
+  total_items: 10,
+  param_name: 'page',
+  params: { search_groups: null },
+};
+
+export const pagination = {
+  currentPage: 1,
+  perPage: 5,
+  totalItems: 10,
+  paramName: 'page',
+  params: { search_groups: null },
+};
+
+export const dataAttribute = JSON.stringify({
+  [MEMBER_TYPES.user]: {
+    members,
+    pagination: paginationData,
+    member_path: '/groups/foo-bar/-/group_members/:id',
+    ldap_override_path: '/groups/ldap-group/-/group_members/:id/override',
+  },
+  source_id: 234,
+  can_manage_members: true,
+});

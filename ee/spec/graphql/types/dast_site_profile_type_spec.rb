@@ -3,22 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['DastSiteProfile'] do
-  let_it_be(:dast_site_profile) { create(:dast_site_profile) }
-  let_it_be(:project) { dast_site_profile.project }
-  let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions normalizedTargetUrl] }
+  include GraphqlHelpers
+  include RepoHelpers
 
-  subject do
-    GitlabSchema.execute(
-      query,
-      context: {
-        current_user: user
-      },
-      variables: {
-        fullPath: project.full_path
-      }
-    ).as_json
-  end
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
+  let_it_be(:object, reload: true) { create(:dast_site_profile, project: project) }
+  let_it_be(:fields) { %i[id profileName targetUrl targetType editPath excludedUrls requestHeaders validationStatus userPermissions normalizedTargetUrl auth referencedInSecurityPolicies] }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -29,24 +20,113 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   specify { expect(described_class).to expose_permissions_using(Types::PermissionTypes::DastSiteProfile) }
 
   it { expect(described_class).to have_graphql_fields(fields) }
+  it { expect(described_class).to have_graphql_field(:referenced_in_security_policies, calls_gitaly?: true) }
+
+  describe 'id field' do
+    it 'is the global id' do
+      expect(resolve_field(:id, object, current_user: user)).to eq(object.to_global_id)
+    end
+  end
+
+  describe 'profileName field' do
+    it 'is the name' do
+      expect(resolve_field(:profile_name, object, current_user: user)).to eq(object.name)
+    end
+  end
+
+  describe 'targetUrl field' do
+    it 'is the url of the associated dast_site' do
+      expect(resolve_field(:target_url, object, current_user: user)).to eq(object.dast_site.url)
+    end
+  end
+
+  describe 'targetType field' do
+    it 'is the target type' do
+      expect(resolve_field(:target_type, object, current_user: user)).to eq('website')
+    end
+  end
+
+  describe 'editPath field' do
+    it 'is the relative path to edit the dast_site_profile' do
+      path = "/#{project.full_path}/-/security/configuration/dast_scans/dast_site_profiles/#{object.id}/edit"
+
+      expect(resolve_field(:edit_path, object, current_user: user)).to eq(path)
+    end
+  end
+
+  describe 'auth field' do
+    it 'is the dast_site_profile' do
+      expect(resolve_field(:auth, object, current_user: user)).to eq(object)
+    end
+  end
+
+  describe 'excludedUrls field' do
+    it 'is the excluded urls' do
+      expect(resolve_field(:excluded_urls, object, current_user: user)).to eq(object.excluded_urls)
+    end
+  end
+
+  describe 'requestHeaders field' do
+    context 'when there is no associated secret variable' do
+      it 'is nil' do
+        expect(resolve_field(:request_headers, object, current_user: user)).to be_nil
+      end
+    end
+
+    context 'when there an associated secret variable' do
+      it 'is redacted' do
+        create(:dast_site_profile_secret_variable, dast_site_profile: object, key: Dast::SiteProfileSecretVariable::REQUEST_HEADERS)
+
+        expect(resolve_field(:request_headers, object, current_user: user)).to eq('••••••••')
+      end
+    end
+  end
+
+  describe 'validation_status field' do
+    it 'is the validation status' do
+      expect(resolve_field(:validation_status, object, current_user: user)).to eq('none')
+    end
+  end
+
+  describe 'normalizedTargetUrl field' do
+    it 'is the normalized url of the associated dast_site' do
+      normalized_url = DastSiteValidation.get_normalized_url_base(object.dast_site.url)
+
+      expect(resolve_field(:normalized_target_url, object, current_user: user)).to eq(normalized_url)
+    end
+  end
+
+  describe 'referencedInSecurityPolicies field' do
+    it 'is the lazy aggregate that is resolved to policies', :aggregate_failures do
+      field_value = resolve_field(:referenced_in_security_policies, object, current_user: user)
+
+      expect(field_value).to be_a(GraphQL::Execution::Lazy)
+      expect(field_value.value).to eq(object.referenced_in_security_policies)
+    end
+  end
 
   describe 'dast_site_profiles' do
-    before do
-      project.add_developer(user)
+    subject(:response) do
+      GitlabSchema.execute(
+        query,
+        context: {
+          current_user: user
+        },
+        variables: {
+          fullPath: project.full_path
+        }
+      ).as_json
     end
 
     let(:query) do
       %(
         query project($fullPath: ID!) {
           project(fullPath: $fullPath) {
-            dastSiteProfiles(first: 1) {
+            dastSiteProfiles {
               nodes {
                 id
                 profileName
-                targetUrl
-                editPath
-                validationStatus
-                normalizedTargetUrl
+                referencedInSecurityPolicies
               }
             }
           }
@@ -54,57 +134,51 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
       )
     end
 
-    let(:first_dast_site_profile) do
-      subject.dig('data', 'project', 'dastSiteProfiles', 'nodes', 0)
-    end
+    context 'when security policies are enabled' do
+      let_it_be(:policies_project) { create(:project, :repository) }
+      let_it_be(:security_orchestration_policy_configuration) { create(:security_orchestration_policy_configuration, project: project, security_policy_management_project: policies_project) }
 
-    describe 'id field' do
-      it 'is a global id' do
-        expect(first_dast_site_profile['id']).to eq(dast_site_profile.to_global_id.to_s)
+      let_it_be(:policy_yml) do
+        <<-EOS
+        scan_execution_policy:
+        - name: Run DAST in every pipeline
+          description: This policy enforces to run DAST for every pipeline within the project
+          enabled: true
+          rules:
+          - type: pipeline
+            branches:
+            - "master"
+          actions:
+          - scan: dast
+            site_profile: Site Profile
+            scanner_profile: Scanner Profile
+          - scan: dast
+            site_profile: Site Profile 2
+            scanner_profile: Scanner Profile 2
+        - name: Run DAST in every pipeline 2
+          description: This policy enforces to run DAST for every pipeline within the project
+          enabled: true
+          rules:
+          - type: pipeline
+            branches:
+            - "master"
+          actions:
+          - scan: dast
+            site_profile: Site Profile 3
+            scanner_profile: Scanner Profile 3
+          - scan: dast
+            site_profile: Site Profile 4
+            scanner_profile: Scanner Profile 4
+        EOS
       end
-    end
 
-    describe 'profile_name field' do
-      it 'is the name' do
-        expect(first_dast_site_profile['profileName']).to eq(dast_site_profile.name)
+      before do
+        create_list(:dast_site_profile, 30, project: project)
+        create_file_in_repo(policies_project, 'master', 'master', Security::OrchestrationPolicyConfiguration::POLICY_PATH, policy_yml)
       end
-    end
 
-    describe 'target_url field' do
-      it 'is the url of the associated dast_site' do
-        expect(first_dast_site_profile['targetUrl']).to eq(dast_site_profile.dast_site.url)
-      end
-    end
-
-    describe 'edit_path field' do
-      it 'is the relative path to edit the dast_site_profile' do
-        path = "/#{project.full_path}/-/security/configuration/dast_profiles/dast_site_profiles/#{dast_site_profile.id}/edit"
-
-        expect(first_dast_site_profile['editPath']).to eq(path)
-      end
-    end
-
-    describe 'validation_status field' do
-      it 'is the validation status' do
-        expect(first_dast_site_profile['validationStatus']).to eq('NONE')
-      end
-    end
-
-    describe 'normalized_target_url field' do
-      it 'is the normalized url of the associated dast_site' do
-        normalized_url = DastSiteValidation.get_normalized_url_base(dast_site_profile.dast_site.url)
-
-        expect(first_dast_site_profile['normalizedTargetUrl']).to eq(normalized_url)
-      end
-    end
-
-    context 'when there are no dast_site_profiles' do
-      let(:project) { create(:project) }
-
-      it 'has no nodes' do
-        nodes = subject.dig('data', 'project', 'dastSiteProfiles', 'nodes')
-
-        expect(nodes).to be_empty
+      it 'only calls Gitaly twice when multiple profiles are present', :request_store do
+        expect { response }.to change { Gitlab::GitalyClient.get_request_count }.by(2)
       end
     end
   end

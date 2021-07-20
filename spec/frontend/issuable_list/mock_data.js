@@ -53,6 +53,10 @@ export const mockIssuable = {
   },
   assignees: [mockAuthor],
   userDiscussionsCount: 2,
+  taskCompletionStatus: {
+    count: 2,
+    completedCount: 1,
+  },
 };
 
 export const mockIssuables = [
@@ -131,7 +135,7 @@ export const mockTabs = [
 export const mockTabCounts = {
   opened: 5,
   closed: 0,
-  all: 5,
+  all: undefined,
 };
 
 export const mockIssuableListProps = {

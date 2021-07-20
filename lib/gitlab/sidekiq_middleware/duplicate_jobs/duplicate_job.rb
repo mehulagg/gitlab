@@ -19,6 +19,7 @@ module Gitlab
       class DuplicateJob
         DUPLICATE_KEY_TTL = 6.hours
         DEFAULT_STRATEGY = :until_executing
+        STRATEGY_NONE = :none
 
         attr_reader :existing_jid
 
@@ -50,6 +51,8 @@ module Gitlab
               read_jid = redis.get(idempotency_key)
             end
           end
+
+          job['idempotency_key'] = idempotency_key
 
           self.existing_jid = read_jid.value
         end
@@ -100,6 +103,7 @@ module Gitlab
         def strategy
           return DEFAULT_STRATEGY unless worker_klass
           return DEFAULT_STRATEGY unless worker_klass.respond_to?(:idempotent?)
+          return STRATEGY_NONE unless worker_klass.deduplication_enabled?
 
           worker_klass.get_deduplicate_strategy
         end
@@ -117,7 +121,7 @@ module Gitlab
         end
 
         def idempotency_key
-          @idempotency_key ||= "#{namespace}:#{idempotency_hash}"
+          @idempotency_key ||= job['idempotency_key'] || "#{namespace}:#{idempotency_hash}"
         end
 
         def idempotency_hash
@@ -129,7 +133,7 @@ module Gitlab
         end
 
         def idempotency_string
-          "#{worker_class_name}:#{arguments.join('-')}"
+          "#{worker_class_name}:#{Sidekiq.dump_json(arguments)}"
         end
       end
     end

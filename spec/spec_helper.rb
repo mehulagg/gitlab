@@ -15,6 +15,9 @@ Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
 require './spec/deprecation_toolkit_env'
 DeprecationToolkitEnv.configure!
 
+require './spec/knapsack_env'
+KnapsackEnv.configure!
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
 
@@ -25,7 +28,7 @@ ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'
 
-require File.expand_path('../config/environment', __dir__)
+require_relative '../config/environment'
 
 require 'rspec/mocks'
 require 'rspec/rails'
@@ -47,16 +50,12 @@ if rspec_profiling_is_configured && (!ENV.key?('CI') || branch_can_be_profiled)
   require 'rspec_profiling/rspec'
 end
 
-if ENV['CI'] && ENV['KNAPSACK_GENERATE_REPORT'] && !ENV['NO_KNAPSACK']
-  require 'knapsack'
-  Knapsack::Adapters::RSpecAdapter.bind
-end
-
 # require rainbow gem String monkeypatch, so we can test SystemChecks
 require 'rainbow/ext/string'
 Rainbow.enabled = false
 
 require_relative('../ee/spec/spec_helper') if Gitlab.ee?
+require_relative('../jh/spec/spec_helper') if Gitlab.jh?
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
@@ -72,14 +71,13 @@ Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| requir
 Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
+require_relative '../tooling/quality/test_level'
+
 quality_level = Quality::TestLevel.new
 
 RSpec.configure do |config|
-  config.filter_run focus: true
-  config.run_all_when_everything_filtered = true
-
   config.use_transactional_fixtures = true
-  config.use_instantiated_fixtures  = false
+  config.use_instantiated_fixtures = false
   config.fixture_path = Rails.root
 
   config.verbose_retry = true
@@ -92,7 +90,31 @@ RSpec.configure do |config|
     config.full_backtrace = true
   end
 
+  # Attempt to troubleshoot https://gitlab.com/gitlab-org/gitlab/-/issues/297359
+  if ENV['CI']
+    config.after do |example|
+      if example.exception.is_a?(GRPC::Unavailable)
+        warn "=== gRPC unavailable detected, process list:"
+        processes = `ps -ef | grep toml`
+        warn processes
+        warn "=== free memory"
+        warn `free -m`
+        warn "=== uptime"
+        warn `uptime`
+        warn "=== Prometheus metrics:"
+        warn `curl -s -o log/gitaly-metrics.log http://localhost:9236/metrics`
+        warn "=== Taking goroutine dump in log/goroutines.log..."
+        warn `curl -s -o log/goroutines.log http://localhost:9236/debug/pprof/goroutine?debug=2`
+      end
+    end
+  end
+
   unless ENV['CI']
+    # Allow running `:focus` examples locally,
+    # falling back to all tests when there is no `:focus` example.
+    config.filter_run focus: true
+    config.run_all_when_everything_filtered = true
+
     # Re-run failures locally with `--only-failures`
     config.example_status_persistence_file_path = './spec/examples.txt'
   end
@@ -170,6 +192,7 @@ RSpec.configure do |config|
   config.include RailsHelpers
   config.include SidekiqMiddleware
   config.include StubActionCableConnection, type: :channel
+  config.include StubSpamServices
 
   include StubFeatureFlags
 
@@ -180,6 +203,8 @@ RSpec.configure do |config|
   end
 
   if ENV['FLAKY_RSPEC_GENERATE_REPORT']
+    require_relative '../tooling/rspec_flaky/listener'
+
     config.reporter.register_listener(
       RspecFlaky::Listener.new,
       :example_passed,
@@ -208,6 +233,10 @@ RSpec.configure do |config|
     Gitlab::Database.set_open_transactions_baseline
   end
 
+  config.append_before do
+    Thread.current[:current_example_group] = ::RSpec.current_example.metadata[:example_group]
+  end
+
   config.append_after do
     Gitlab::Database.reset_open_transactions_baseline
   end
@@ -231,6 +260,10 @@ RSpec.configure do |config|
       # tests, until we introduce it in user settings
       stub_feature_flags(forti_token_cloud: false)
 
+      # These feature flag are by default disabled and used in disaster recovery mode
+      stub_feature_flags(ci_queueing_disaster_recovery_disable_fair_scheduling: false)
+      stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: false)
+
       enable_rugged = example.metadata[:enable_rugged].present?
 
       # Disable Rugged features by default
@@ -242,15 +275,36 @@ RSpec.configure do |config|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/33867
       stub_feature_flags(file_identifier_hash: false)
 
-      stub_feature_flags(unified_diff_components: false)
+      stub_feature_flags(diffs_virtual_scrolling: false)
+
+      # The following `vue_issues_list`/`vue_issuables_list` stubs can be removed
+      # once the Vue issues page has feature parity with the current Haml page
+      stub_feature_flags(vue_issues_list: false)
+      stub_feature_flags(vue_issuables_list: false)
+
+      # Disable `refactor_blob_viewer` as we refactor
+      # the blob viewer. See the follwing epic for more:
+      # https://gitlab.com/groups/gitlab-org/-/epics/5531
+      stub_feature_flags(refactor_blob_viewer: false)
+
+      # Disable `main_branch_over_master` as we migrate
+      # from `master` to `main` accross our codebase.
+      # It's done in order to preserve the concistency in tests
+      # As we're ready to change `master` usages to `main`, let's enable it
+      stub_feature_flags(main_branch_over_master: false)
+
+      stub_feature_flags(issue_boards_filtered_search: false)
+
+      # Disable issue respositioning to avoid heavy load on database when importing big projects.
+      # This is only turned on when app is handling heavy project imports.
+      # Can be removed when we find a better way to deal with the problem.
+      # For more information check https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4321
+      stub_feature_flags(block_issue_repositioning: false)
 
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
     end
-
-    # Enable Marginalia feature for all specs in the test suite.
-    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:
@@ -269,7 +323,7 @@ RSpec.configure do |config|
     Sidekiq::Worker.clear_all
 
     # Administrators have to re-authenticate in order to access administrative
-    # functionality when feature flag :user_mode_in_session is active. Any spec
+    # functionality when application setting admin_mode is active. Any spec
     # that requires administrative access can use the tag :enable_admin_mode
     # to avoid the second auth step (provided the user is already an admin):
     #
@@ -286,6 +340,9 @@ RSpec.configure do |config|
       end
     end
 
+    # Make sure specs test by default admin mode setting on, unless forced to the opposite
+    stub_application_setting(admin_mode: true) unless example.metadata[:do_not_mock_admin_mode_setting]
+
     allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_return(false)
   end
 
@@ -298,6 +355,15 @@ RSpec.configure do |config|
     Gitlab::WithRequestStore.with_request_store { example.run }
   end
 
+  # previous test runs may have left some resources throttled
+  config.before do
+    ::Gitlab::ExclusiveLease.reset_all!("el:throttle:*")
+  end
+
+  config.before(:example, :assume_throttled) do |example|
+    allow(::Gitlab::ExclusiveLease).to receive(:throttle).and_return(nil)
+  end
+
   config.before(:example, :request_store) do
     # Clear request store before actually starting the spec (the
     # `around` above will have the request store enabled for all
@@ -308,7 +374,7 @@ RSpec.configure do |config|
   config.around do |example|
     # Wrap each example in it's own context to make sure the contexts don't
     # leak
-    Labkit::Context.with_context { example.run }
+    Gitlab::ApplicationContext.with_raw_context { example.run }
   end
 
   config.around do |example|
@@ -331,6 +397,9 @@ RSpec.configure do |config|
 
     # Reset all feature flag stubs to default for testing
     stub_all_feature_flags
+
+    # Re-enable query limiting in case it was disabled
+    Gitlab::QueryLimiting.enable!
   end
 
   config.before(:example, :mailer) do
@@ -350,6 +419,15 @@ RSpec.configure do |config|
     allow(view).to receive(:can?) do |*args|
       Ability.allowed?(*args)
     end
+  end
+
+  # Allows stdout to be redirected to reduce noise
+  config.before(:each, :silence_stdout) do
+    $stdout = StringIO.new
+  end
+
+  config.after(:each, :silence_stdout) do
+    $stdout = STDOUT
   end
 
   config.disable_monkey_patching!

@@ -17,12 +17,12 @@ export default (containerId = 'js-billing-plans') => {
     namespaceId,
     namespaceName,
     addSeatsHref,
-    isGroup,
     planUpgradeHref,
     planRenewHref,
     customerPortalUrl,
     billableSeatsHref,
     planName,
+    freePersonalNamespace,
   } = containerEl.dataset;
 
   return new Vue({
@@ -32,12 +32,12 @@ export default (containerId = 'js-billing-plans') => {
       namespaceId,
       namespaceName,
       addSeatsHref,
-      isGroup: parseBoolean(isGroup),
       planUpgradeHref,
       planRenewHref,
       customerPortalUrl,
       billableSeatsHref,
       planName,
+      freePersonalNamespace: parseBoolean(freePersonalNamespace),
     },
     render(createElement) {
       return createElement(SubscriptionApp);

@@ -73,7 +73,7 @@ RSpec.describe Groups::CreateService, '#execute' do
 
         expect(group.shared_runners_minutes_limit).to eq(1000)
         expect(group.extra_shared_runners_minutes_limit).to eq(100)
-        expect(group.delayed_project_removal).to be true
+        expect(group.namespace_settings.delayed_project_removal).to be true
       end
     end
 
@@ -83,7 +83,7 @@ RSpec.describe Groups::CreateService, '#execute' do
 
         expect(group.shared_runners_minutes_limit).to be_nil
         expect(group.extra_shared_runners_minutes_limit).to be_nil
-        expect(group.delayed_project_removal).to be false
+        expect(group.namespace_settings.delayed_project_removal).to be false
       end
     end
   end

@@ -24,7 +24,8 @@ export default {
     },
     newMergeRequestUrl: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     emptyStateSvgPath: {
       type: String,

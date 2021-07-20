@@ -4,9 +4,14 @@ require 'spec_helper'
 
 RSpec.describe Epics::TransferService do
   describe '#execute' do
-    let_it_be(:user) { create(:admin) }
+    let_it_be(:user) { create(:user) }
     let_it_be(:new_group, refind: true) { create(:group) }
     let_it_be(:old_group, refind: true) { create(:group) }
+
+    before do
+      old_group.add_maintainer(user) if old_group
+    end
+
     subject(:service) { described_class.new(user, old_group, project) }
 
     context 'when old_group is present' do

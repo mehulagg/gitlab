@@ -36,24 +36,24 @@ module Gitlab
 
           def self.validate_ordering(relation, order_list)
             if order_list.empty?
-              raise ArgumentError.new('A minimum of 1 ordering field is required')
+              raise ArgumentError, 'A minimum of 1 ordering field is required'
             end
 
             if order_list.count > 2
               # Keep in mind an order clause for primary key is added if one is not present
               # lib/gitlab/graphql/pagination/keyset/connection.rb:97
-              raise ArgumentError.new('A maximum of 2 ordering fields are allowed')
+              raise ArgumentError, 'A maximum of 2 ordering fields are allowed'
             end
 
             # make sure the last ordering field is non-nullable
             attribute_name = order_list.last&.attribute_name
 
             if relation.columns_hash[attribute_name].null
-              raise ArgumentError.new("Column `#{attribute_name}` must not allow NULL")
+              raise ArgumentError, "Column `#{attribute_name}` must not allow NULL"
             end
 
             if order_list.last.attribute_name != relation.primary_key
-              raise ArgumentError.new("Last ordering field must be the primary key, `#{relation.primary_key}`")
+              raise ArgumentError, "Last ordering field must be the primary key, `#{relation.primary_key}`"
             end
           end
 
@@ -92,8 +92,6 @@ module Gitlab
           def extract_attribute_values(order_value)
             if ordering_by_lower?(order_value)
               [order_value.expr.expressions[0].name.to_s, order_value.direction, order_value.expr]
-            elsif ordering_by_similarity?(order_value)
-              ['similarity', order_value.direction, order_value.expr]
             elsif ordering_by_case?(order_value)
               ['case_order_value', order_value.direction, order_value.expr]
             elsif ordering_by_array_position?(order_value)
@@ -113,11 +111,6 @@ module Gitlab
             order_value.expr.is_a?(Arel::Nodes::NamedFunction) && order_value.expr&.name&.downcase == 'array_position'
           end
 
-          # determine if ordering using SIMILARITY scoring based on Gitlab::Database::SimilarityScore
-          def ordering_by_similarity?(order_value)
-            Gitlab::Database::SimilarityScore.order_by_similarity?(order_value)
-          end
-
           # determine if ordering using CASE
           def ordering_by_case?(order_value)
             order_value.expr.is_a?(Arel::Nodes::Case)
@@ -128,4 +121,4 @@ module Gitlab
   end
 end
 
-Gitlab::Graphql::Pagination::Keyset::OrderInfo.prepend_if_ee('EE::Gitlab::Graphql::Pagination::Keyset::OrderInfo')
+Gitlab::Graphql::Pagination::Keyset::OrderInfo.prepend_mod_with('Gitlab::Graphql::Pagination::Keyset::OrderInfo')

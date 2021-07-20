@@ -31,7 +31,7 @@ module Gitlab
           def ensure_test_cases_limited!(total_parsed, limit)
             return unless limit > 0 && total_parsed > limit
 
-            raise JunitParserError.new("number of test cases exceeded the limit of #{limit}")
+            raise JunitParserError, "number of test cases exceeded the limit of #{limit}"
           end
 
           def all_cases(root, parent = nil, &blk)
@@ -69,6 +69,7 @@ module Gitlab
             elsif data.key?('error')
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_ERROR
               system_output = data['error']
+              attachment = attachment_path(data['system_out'])
             elsif data.key?('skipped')
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_SKIPPED
               system_output = data['skipped']

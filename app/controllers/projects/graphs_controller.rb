@@ -2,14 +2,14 @@
 
 class Projects::GraphsController < Projects::ApplicationController
   include ExtractsPath
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
   # Authorize
   before_action :require_non_empty_project
   before_action :assign_ref_vars
   before_action :authorize_read_repository_graphs!
 
-  track_unique_visits :charts, target_id: 'p_analytics_repo'
+  track_redis_hll_event :charts, name: 'p_analytics_repo'
 
   feature_category :source_code_management
 
@@ -62,7 +62,7 @@ class Projects::GraphsController < Projects::ApplicationController
     return unless can?(current_user, :read_build_report_results, project)
 
     date_today = Date.current
-    report_window = Projects::Ci::DailyBuildGroupReportResultsController::REPORT_WINDOW
+    report_window = ::Ci::DailyBuildGroupReportResultsFinder::REPORT_WINDOW
 
     @daily_coverage_options = {
       base_params: {

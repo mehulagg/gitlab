@@ -1,0 +1,12 @@
+#import "./epic_board_list.fragment.graphql"
+
+mutation UpdateEpicBoardList($listId: BoardsEpicListID!, $position: Int, $collapsed: Boolean) {
+  updateBoardList: updateEpicBoardList(
+    input: { listId: $listId, position: $position, collapsed: $collapsed }
+  ) {
+    list {
+      ...EpicBoardListFragment
+    }
+    errors
+  }
+}

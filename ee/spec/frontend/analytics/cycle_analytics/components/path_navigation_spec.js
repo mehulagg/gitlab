@@ -1,29 +1,37 @@
-import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import Component from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
+import Component from '~/cycle_analytics/components/path_navigation.vue';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { transformedStagePathData, issueStage } from '../mock_data';
 
-describe('PathNavigation', () => {
+describe('Group PathNavigation', () => {
   let wrapper = null;
 
   const createComponent = (props) => {
-    return mount(Component, {
-      propsData: {
-        stages: transformedStagePathData,
-        selectedStage: issueStage,
-        loading: false,
-        ...props,
-      },
-    });
+    return extendedWrapper(
+      mount(Component, {
+        propsData: {
+          stages: transformedStagePathData,
+          selectedStage: issueStage,
+          loading: false,
+          ...props,
+        },
+      }),
+    );
   };
 
   const pathNavigationItems = () => {
-    return wrapper.findAll('.gl-path-button');
+    return wrapper.findByTestId('gl-path-nav').findAll('li');
   };
 
-  const clickItemAt = (index) => {
-    pathNavigationItems().at(index).trigger('click');
-  };
+  const pathItemContent = () => pathNavigationItems().wrappers.map(extendedWrapper);
+  const firstPopover = () => wrapper.findAllByTestId('stage-item-popover').at(0);
+  const findStageCountAtIndex = (index) => wrapper.findAllComponents(FormattedStageCount).at(index);
+
+  const stagesWithCounts = transformedStagePathData.filter(
+    (stage) => stage.id !== OVERVIEW_STAGE_ID,
+  );
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -34,59 +42,46 @@ describe('PathNavigation', () => {
     wrapper = null;
   });
 
-  describe('displays correctly', () => {
-    it('has the correct props', () => {
-      expect(wrapper.find(GlPath).props('items')).toMatchObject(transformedStagePathData);
+  describe('popovers', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ stages: transformedStagePathData });
     });
 
-    it('contains all the expected stages', () => {
-      const html = wrapper.find(GlPath).html();
+    it('renders popovers for all stages except for the overview stage', () => {
+      const [overviewStage, ...popoverStages] = pathItemContent();
 
-      transformedStagePathData.forEach((stage) => {
-        expect(html).toContain(stage.title);
+      expect(overviewStage.text()).toContain('Overview');
+      expect(overviewStage.findByTestId('stage-item-popover').exists()).toBe(false);
+
+      popoverStages.forEach((stage) => {
+        expect(stage.findByTestId('stage-item-popover').exists()).toBe(true);
       });
     });
 
-    describe('loading', () => {
-      describe('is false', () => {
-        it('displays the gl-path component', () => {
-          expect(wrapper.find(GlPath).exists()).toBe(true);
-        });
-
-        it('hides the gl-skeleton-loading component', () => {
-          expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
-        });
-      });
-
-      describe('is true', () => {
-        beforeEach(() => {
-          wrapper = createComponent({ loading: true });
-        });
-
-        it('hides the gl-path component', () => {
-          expect(wrapper.find(GlPath).exists()).toBe(false);
-        });
-
-        it('displays the gl-skeleton-loading component', () => {
-          expect(wrapper.find(GlSkeletonLoading).exists()).toBe(true);
-        });
-      });
+    it('shows the sanitized start event description for the first stage item', () => {
+      const expectedStartEventDescription = 'Issue created';
+      expect(firstPopover().text()).toContain(expectedStartEventDescription);
     });
-  });
 
-  describe('event handling', () => {
-    it('emits the selected event', () => {
-      expect(wrapper.emitted('selected')).toBeUndefined();
+    it('shows the sanitized end event description for the first stage item', () => {
+      const expectedStartEventDescription =
+        'Issue first associated with a milestone or issue first added to a board';
+      expect(firstPopover().text()).toContain(expectedStartEventDescription);
+    });
 
-      clickItemAt(0);
-      clickItemAt(1);
-      clickItemAt(2);
+    it('shows the median stage time for the first stage item', () => {
+      expect(firstPopover().text()).toContain('Stage time (median)');
+    });
 
-      expect(wrapper.emitted().selected).toEqual([
-        [transformedStagePathData[0]],
-        [transformedStagePathData[1]],
-        [transformedStagePathData[2]],
-      ]);
+    it('renders each stage with its stage count', () => {
+      const popoverStages = pathItemContent().slice(1); // skip the first stage, the overview does not have a popover
+      popoverStages.forEach((stage, index) => {
+        const content = stage.findByTestId('stage-item-popover').html();
+        expect(content).toContain('Items in stage');
+        expect(findStageCountAtIndex(index).props('stageCount')).toBe(
+          stagesWithCounts[index].stageCount,
+        );
+      });
     });
   });
 });

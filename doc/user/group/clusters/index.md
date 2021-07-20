@@ -17,12 +17,11 @@ your group, enabling you to use the same cluster across multiple projects.
 To view your group level Kubernetes clusters, navigate to your project and select
 **Kubernetes** from the left-hand menu.
 
-## Installing applications
+## Cluster management project
 
-GitLab can install and manage some applications in your group-level
-cluster. For more information on installing, upgrading, uninstalling,
-and troubleshooting applications for your group cluster, see
-[GitLab Managed Apps](../../clusters/applications.md).
+Attach a [cluster management project](../../clusters/management_project.md)
+to your cluster to manage shared resources requiring `cluster-admin` privileges for
+installation, such as an Ingress controller.
 
 ## RBAC compatibility
 
@@ -38,7 +37,7 @@ in the project namespace.
 If the project's cluster is available and not disabled, GitLab uses the
 project's cluster before using any cluster belonging to the group containing
 the project.
-In the case of sub-groups, GitLab uses the cluster of the closest ancestor group
+In the case of subgroups, GitLab uses the cluster of the closest ancestor group
 to the project, provided the cluster is not disabled.
 
 ## Multiple Kubernetes clusters
@@ -67,13 +66,10 @@ automatically. If you're using [Auto DevOps](../../../topics/autodevops/index.md
 for deployments with a cluster not managed by GitLab, you must ensure:
 
 - The project's deployment service account has permissions to deploy to
-  [`KUBE_NAMESPACE`](../../project/clusters/index.md#deployment-variables).
+  [`KUBE_NAMESPACE`](../../project/clusters/deploy_to_cluster.md#deployment-variables).
 - `KUBECONFIG` correctly reflects any changes to `KUBE_NAMESPACE`
   (this is [not automatic](https://gitlab.com/gitlab-org/gitlab/-/issues/31519)). Editing
   `KUBE_NAMESPACE` directly is discouraged.
-
-If you [install applications](#installing-applications) on your cluster, GitLab creates
-the resources required to run them, even if you choose to manage your own cluster.
 
 ### Clearing the cluster cache
 
@@ -86,7 +82,7 @@ your cluster, which can cause deployment jobs to fail.
 
 To clear the cache:
 
-1. Navigate to your group’s **Kubernetes** page,
+1. Navigate to your group's **Kubernetes** page,
    and select your cluster.
 1. Expand the **Advanced settings** section.
 1. Click **Clear cluster cache**.
@@ -100,14 +96,14 @@ per [multiple Kubernetes clusters](#multiple-kubernetes-clusters) When specifyin
 this is automatically set as an environment variable (`KUBE_INGRESS_BASE_DOMAIN`) during
 the [Auto DevOps](../../../topics/autodevops/index.md) stages.
 
-The domain should have a wildcard DNS configured to the Ingress IP address.
+The domain should have a wildcard DNS configured to the Ingress IP address. [More details](../../project/clusters/gitlab_managed_clusters.md#base-domain).
 
 ## Environment scopes **(PREMIUM)**
 
 When adding more than one Kubernetes cluster to your project, you need to differentiate
 them with an environment scope. The environment scope associates clusters with
 [environments](../../../ci/environments/index.md) similar to how the
-[environment-specific variables](../../../ci/variables/README.md#limit-the-environment-scopes-of-cicd-variables)
+[environment-specific CI/CD variables](../../../ci/variables/index.md#limit-the-environment-scope-of-a-cicd-variable)
 work.
 
 While evaluating which environment matches the environment scope of a
@@ -126,7 +122,7 @@ For example, if your project has the following Kubernetes clusters:
 | Test       | `test`              | Group     |
 | Development| `*`                 | Group     |
 
-And the following environments are set in [`.gitlab-ci.yml`](../../../ci/yaml/README.md):
+And the following environments are set in [`.gitlab-ci.yml`](../../../ci/yaml/index.md):
 
 ```yaml
 stages:
@@ -167,7 +163,7 @@ are deployed to the Kubernetes cluster, see the documentation for
 ## Security of runners
 
 For important information about securely configuring runners, see
-[Security of runners](../../project/clusters/add_remove_clusters.md#security-of-runners)
+[Security of runners](../../project/clusters/cluster_access.md#security-of-runners)
 documentation for project-level clusters.
 
 ## More information

@@ -5,13 +5,16 @@ module Gitlab
     VALID_OPTIONS = HashWithIndifferentAccess.new({
       merge_request: {
         keys: [
+          :assign,
           :create,
           :description,
           :label,
           :merge_when_pipeline_succeeds,
+          :milestone,
           :remove_source_branch,
           :target,
           :title,
+          :unassign,
           :unlabel
         ]
       },
@@ -23,7 +26,9 @@ module Gitlab
     MULTI_VALUE_OPTIONS = [
       %w[ci variable],
       %w[merge_request label],
-      %w[merge_request unlabel]
+      %w[merge_request unlabel],
+      %w[merge_request assign],
+      %w[merge_request unassign]
     ].freeze
 
     NAMESPACE_ALIASES = HashWithIndifferentAccess.new({

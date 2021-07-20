@@ -38,21 +38,13 @@ module Gitlab
 
           if from_address
             add_email_participant
-            send_thank_you_email!
+            send_thank_you_email
           end
-        end
-
-        def metrics_params
-          super.merge(project: project&.full_path)
         end
 
         def metrics_event
           :receive_email_service_desk
         end
-
-        private
-
-        attr_reader :project_id, :project_path, :service_desk_key
 
         def project
           strong_memoize(:project) do
@@ -62,13 +54,16 @@ module Gitlab
           end
         end
 
+        private
+
+        attr_reader :project_id, :project_path, :service_desk_key
+
         def project_from_key
           return unless match = service_desk_key.match(PROJECT_KEY_PATTERN)
 
-          project = Project.find_by_service_desk_project_key(match[:key])
-          return unless valid_project_key?(project, match[:slug])
-
-          project
+          Project.with_service_desk_key(match[:key]).find do |project|
+            valid_project_key?(project, match[:slug])
+          end
         end
 
         def valid_project_key?(project, slug)
@@ -77,12 +72,15 @@ module Gitlab
 
         def create_issue!
           @issue = Issues::CreateService.new(
-            project,
-            User.support_bot,
-            title: issue_title,
-            description: message_including_template,
-            confidential: true,
-            external_author: from_address
+            project: project,
+            current_user: User.support_bot,
+            params: {
+              title: mail.subject,
+              description: message_including_template,
+              confidential: true,
+              external_author: from_address
+            },
+            spam_params: nil
           ).execute
 
           raise InvalidIssueError unless @issue.persisted?
@@ -92,8 +90,9 @@ module Gitlab
           end
         end
 
-        def send_thank_you_email!
-          Notify.service_desk_thank_you_email(@issue.id).deliver_later!
+        def send_thank_you_email
+          Notify.service_desk_thank_you_email(@issue.id).deliver_later
+          Gitlab::Metrics::BackgroundTransaction.current&.add_event(:service_desk_thank_you_email)
         end
 
         def message_including_template
@@ -135,12 +134,6 @@ module Gitlab
 
         def from_address
           (mail.reply_to || []).first || mail.from.first || mail.sender
-        end
-
-        def issue_title
-          from = "(from #{from_address})" if from_address
-
-          "Service Desk #{from}: #{mail.subject}"
         end
 
         def can_handle_legacy_format?

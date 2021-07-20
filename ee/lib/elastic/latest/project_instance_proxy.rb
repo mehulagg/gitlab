@@ -12,7 +12,7 @@ module Elastic
       ).freeze
 
       def as_indexed_json(options = {})
-        # We don't use as_json(only: ...) because it calls all virtual and serialized attributtes
+        # We don't use as_json(only: ...) because it calls all virtual and serialized attributes
         # https://gitlab.com/gitlab-org/gitlab/issues/349
         data = {}
 
@@ -45,6 +45,8 @@ module Elastic
         TRACKED_FEATURE_SETTINGS.each do |feature|
           data[feature] = target.project_feature.public_send(feature) # rubocop:disable GitlabSecurity/PublicSend
         rescue NoMethodError => e
+          # Sentry is not receiving the extra fields provided so adding an additional logging statement
+          target.logger.debug(message: e.message, project_id: target.id, feature: feature)
           Gitlab::ErrorTracking.track_and_raise_exception(e, project_id: target.id, feature: feature)
         end
 

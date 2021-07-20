@@ -49,6 +49,8 @@ module Operations
     scope :enabled, -> { where(active: true) }
     scope :disabled, -> { where(active: false) }
 
+    scope :new_version_only, -> { where(version: :new_version_flag)}
+
     enum version: {
       legacy_flag: 1,
       new_version_flag: 2
@@ -78,7 +80,7 @@ module Operations
       end
 
       def link_reference_pattern
-        @link_reference_pattern ||= super("feature_flags", /(?<feature_flag>\d+)\/edit/)
+        @link_reference_pattern ||= super("feature_flags", %r{(?<feature_flag>\d+)/edit})
       end
 
       def reference_postfix
@@ -97,7 +99,7 @@ module Operations
       issues = ::Issue
         .select('issues.*, operations_feature_flags_issues.id AS link_id')
         .joins(:feature_flag_issues)
-        .where('operations_feature_flags_issues.feature_flag_id = ?', id)
+        .where(operations_feature_flags_issues: { feature_flag_id: id })
         .order('operations_feature_flags_issues.id ASC')
         .includes(preload)
 

@@ -16,7 +16,7 @@
       },
       "additionalProperties": false
     },
-    "updated_at": { "type": "date" },
-    "created_at": { "type": "date" }
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
   }
 }

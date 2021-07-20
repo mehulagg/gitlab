@@ -16,7 +16,7 @@ module Gitlab
       path_regex = /(\A(\.{1,2})\z|\A\.\.[\/\\]|[\/\\]\.\.\z|[\/\\]\.\.[\/\\]|\n)/
 
       if path.match?(path_regex)
-        raise PathTraversalAttackError.new('Invalid path')
+        raise PathTraversalAttackError, 'Invalid path'
       end
 
       path
@@ -99,6 +99,8 @@ module Gitlab
     end
 
     def to_boolean(value, default: nil)
+      value = value.to_s if [0, 1].include?(value)
+
       return value if [true, false].include?(value)
       return true if value =~ /^(true|t|yes|y|1|on)$/i
       return false if value =~ /^(false|f|no|n|0|off)$/i
@@ -167,6 +169,16 @@ module Gitlab
       end
     end
 
+    def deep_symbolized_access(data)
+      if data.is_a?(Array)
+        data.map(&method(:deep_symbolized_access))
+      elsif data.is_a?(Hash)
+        data.deep_symbolize_keys
+      else
+        data
+      end
+    end
+
     def string_to_ip_object(str)
       return unless str
 
@@ -193,6 +205,24 @@ module Gitlab
     def parse_url(uri_string)
       Addressable::URI.parse(uri_string)
     rescue Addressable::URI::InvalidURIError, TypeError
+    end
+
+    def removes_sensitive_data_from_url(uri_string)
+      uri = parse_url(uri_string)
+
+      return unless uri
+      return uri_string unless uri.fragment
+
+      stripped_params = CGI.parse(uri.fragment)
+      if stripped_params['access_token']
+        stripped_params['access_token'] = 'filtered'
+        filtered_query = Addressable::URI.new
+        filtered_query.query_values = stripped_params
+
+        uri.fragment = filtered_query.query
+      end
+
+      uri.to_s
     end
 
     # Invert a hash, collecting all keys that map to a given value in an array.

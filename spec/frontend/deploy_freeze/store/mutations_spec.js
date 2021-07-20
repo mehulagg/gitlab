@@ -27,13 +27,20 @@ describe('Deploy freeze mutations', () => {
 
   describe('RECEIVE_FREEZE_PERIODS_SUCCESS', () => {
     it('should set freeze periods and format timezones from identifiers to names', () => {
-      const timezoneNames = ['Berlin', 'UTC', 'Eastern Time (US & Canada)'];
+      const timezoneNames = {
+        'Europe/Berlin': 'Berlin',
+        'Etc/UTC': 'UTC',
+        'America/New_York': 'Eastern Time (US & Canada)',
+      };
 
       mutations[types.RECEIVE_FREEZE_PERIODS_SUCCESS](stateCopy, freezePeriodsFixture);
 
-      const expectedFreezePeriods = freezePeriodsFixture.map((freezePeriod, index) => ({
+      const expectedFreezePeriods = freezePeriodsFixture.map((freezePeriod) => ({
         ...convertObjectPropsToCamelCase(freezePeriod),
-        cronTimezone: timezoneNames[index],
+        cronTimezone: {
+          formattedTimezone: timezoneNames[freezePeriod.cron_timezone],
+          identifier: freezePeriod.cron_timezone,
+        },
       }));
 
       expect(stateCopy.freezePeriods).toMatchObject(expectedFreezePeriods);
@@ -62,11 +69,19 @@ describe('Deploy freeze mutations', () => {
     });
   });
 
-  describe('SET_FREEZE_ENDT_CRON', () => {
+  describe('SET_FREEZE_END_CRON', () => {
     it('should set freezeEndCron', () => {
       mutations[types.SET_FREEZE_END_CRON](stateCopy, '5 0 * 8 *');
 
       expect(stateCopy.freezeEndCron).toBe('5 0 * 8 *');
+    });
+  });
+
+  describe('SET_SELECTED_ID', () => {
+    it('should set selectedId', () => {
+      mutations[types.SET_SELECTED_ID](stateCopy, 5);
+
+      expect(stateCopy.selectedId).toBe(5);
     });
   });
 });

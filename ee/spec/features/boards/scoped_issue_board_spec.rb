@@ -6,26 +6,29 @@ RSpec.describe 'Scoped issue boards', :js do
   include FilteredSearchHelpers
   include MobileHelpers
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group, :public) }
-  let(:project) { create(:project, :public, namespace: group) }
-  let(:project_2) { create(:project, :public, namespace: group) }
-  let!(:project_label) { create(:label, project: project, name: 'Planning') }
-  let!(:group_label) { create(:group_label, group: group, name: 'Group Label') }
-  let!(:milestone) { create(:milestone, project: project) }
-  let!(:board) { create(:board, project: project, name: 'Project board') }
-  let!(:group_board) { create(:board, group: group, name: 'Group board') }
-  let!(:filtered_board) { create(:board, project: project_2, name: 'Filtered board', milestone: milestone, assignee: user, weight: 2) }
-  let!(:issue) { create(:issue, project: project) }
-  let!(:issue_milestone) { create(:closed_issue, project: project, milestone: milestone) }
-  let!(:assigned_issue) { create(:issue, project: project, assignees: [user]) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group, :public) }
+  let_it_be(:project) { create(:project, :public, namespace: group) }
+  let_it_be(:project_2) { create(:project, :public, namespace: group) }
+  let_it_be(:project_label) { create(:label, project: project, name: 'Planning') }
+  let_it_be(:group_label) { create(:group_label, group: group, name: 'Group Label') }
+  let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:board) { create(:board, project: project, name: 'Project board') }
+  let_it_be(:group_board) { create(:board, group: group, name: 'Group board') }
+  let_it_be(:filtered_board) { create(:board, project: project_2, name: 'Filtered board', milestone: milestone, assignee: user, weight: 2) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:issue_milestone) { create(:closed_issue, project: project, milestone: milestone) }
+  let_it_be(:assigned_issue) { create(:issue, project: project, assignees: [user]) }
 
   let(:edit_board) { find('.btn', text: 'Edit board') }
   let(:view_scope) { find('.btn', text: 'View scope') }
   let(:board_title) { find('.boards-selector-wrapper .dropdown-menu-toggle') }
 
   before do
-    allow_any_instance_of(ApplicationHelper).to receive(:collapsed_sidebar?).and_return(true)
+    allow_next_instance_of(ApplicationHelper) do |helper|
+      allow(helper).to receive(:collapsed_sidebar?).and_return(true)
+    end
+
     stub_licensed_features(scoped_issue_board: true)
   end
 
@@ -113,7 +116,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           page.within('.labels') do
             click_button 'Edit'
-            page.within('.dropdown') do
+            page.within('.labels-select-contents-list') do
               expect(page).to have_content(group_label.title)
               expect(page).not_to have_content(project_label.title)
             end
@@ -355,7 +358,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
             page.within('.labels') do
               click_button 'Edit'
-              page.within('.dropdown') do
+              page.within('.labels-select-contents-list') do
                 expect(page).to have_content(group_label.title)
                 expect(page).not_to have_content(project_label.title)
               end
@@ -417,25 +420,6 @@ RSpec.describe 'Scoped issue boards', :js do
             expect(page).not_to have_content('Weight')
           end
         end
-      end
-    end
-
-    context 'remove issue' do
-      let!(:issue) { create(:labeled_issue, project: project, labels: [project_label], milestone: milestone, assignees: [user]) }
-      let!(:list) { create(:list, board: board, label: project_label, position: 0) }
-
-      it 'removes issues milestone when removing from the board' do
-        board.update!(milestone: milestone, assignee: user)
-        visit project_boards_path(project)
-        wait_for_requests
-
-        find(".board-card[data-issue-id='#{issue.id}']").click
-
-        click_button 'Remove from board'
-        wait_for_requests
-
-        expect(issue.reload.milestone).to be_nil
-        expect(issue.reload.assignees).to be_empty
       end
     end
   end

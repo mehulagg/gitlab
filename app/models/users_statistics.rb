@@ -70,3 +70,5 @@ class UsersStatistics < ApplicationRecord
     end
   end
 end
+
+UsersStatistics.prepend_mod_with('UsersStatistics')

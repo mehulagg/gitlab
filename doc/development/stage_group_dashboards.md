@@ -18,7 +18,101 @@ The list of dashboards for each stage group is accessible at <https://dashboards
 
 The dashboards for stage groups are at a very early stage. All contributions are welcome. If you have any questions or suggestions, please submit an issue in the [Scalability Team issues tracker](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/new).
 
-## Usage
+## Dashboard content
+
+### Error budget
+
+Read more about how we are using error budgets overall in our
+[handbook](https://about.gitlab.com/handbook/engineering/error-budgets/).
+
+By default, the first row of panels on the dashboard will show the [error
+budget for the stage
+group](https://about.gitlab.com/handbook/engineering/error-budgets/#budget-spend-by-stage-group). This
+row shows how the features owned by
+the group are contributing to our [overall
+availability](https://about.gitlab.com/handbook/engineering/infrastructure/performance-indicators/#gitlabcom-availability).
+
+The budget is always aggregated over the 28 days before the [time
+selected on the dashboard](#time-range-controls).
+
+We're currently displaying the information in 2 formats:
+
+1. Availability: This number can be compared to GitLab.com's overall
+   availability target of 99.95% uptime.
+1. Budget Spent: This shows the time over the past 28 days that
+   features owned by the group have not been performing adequately.
+
+The budget is calculated based on indicators per component. Each
+component can have 2 indicators:
+
+1. [Apdex](https://en.wikipedia.org/wiki/Apdex): The rate of
+   operations that performed adequately.
+
+   The threshold for 'performed adequately' is stored in our [metrics
+   catalog](https://gitlab.com/gitlab-com/runbooks/-/tree/master/metrics-catalog)
+   and depends on the service in question. For the Puma (Rails)
+   component of the
+   [API](https://gitlab.com/gitlab-com/runbooks/-/blob/f22f40b2c2eab37d85e23ccac45e658b2c914445/metrics-catalog/services/api.jsonnet#L127),
+   [Git](https://gitlab.com/gitlab-com/runbooks/-/blob/f22f40b2c2eab37d85e23ccac45e658b2c914445/metrics-catalog/services/git.jsonnet#L216),
+   and
+   [Web](https://gitlab.com/gitlab-com/runbooks/-/blob/f22f40b2c2eab37d85e23ccac45e658b2c914445/metrics-catalog/services/web.jsonnet#L154)
+   services, that threshold is **1 second**.
+
+   For Sidekiq job execution, the threshold depends on the [job
+   urgency](sidekiq_style_guide.md#job-urgency). It is
+   [currently](https://gitlab.com/gitlab-com/runbooks/-/blob/f22f40b2c2eab37d85e23ccac45e658b2c914445/metrics-catalog/services/lib/sidekiq-helpers.libsonnet#L25-38)
+   **10 seconds** for high-urgency jobs and **5 minutes** for other
+   jobs.
+
+   Some stage groups may have more services than these, and the
+   thresholds for those will be in the metrics catalog as well.
+
+1. Error rate: The rate of operations that had errors.
+
+The calculation to a ratio then happens as follows:
+
+```math
+\frac {operations\_meeting\_apdex + (total\_operations - operations\_with\_errors)} {total\_apdex\_measurements + total\_operations}
+```
+
+### Check where budget is being spent
+
+The row below the error budget row is collapsed by default. Expanding
+it shows which component and violation type had the most offending
+operations in the past 28 days.
+
+![Error attribution](img/stage_group_dashboards_error_attribution.png)
+
+The first panel on the left shows a table with the number of errors per
+component. Digging into the first row in that table is going to have
+the biggest impact on the budget spent.
+
+Commonly, the components spending most of the budget are Sidekiq or Puma. The panel in
+the center explains what these violation types mean, and how to dig
+deeper in the logs.
+
+The panel on the right provides links to Kibana that should reveal
+which endpoints or Sidekiq jobs are causing the errors.
+
+To learn how to use these panels and logs for
+determining which Rails endpoints are slow,
+see the [Error Budget Attribution for Purchase group](https://youtu.be/M9u6unON7bU) video.
+
+Other components visible in the table come from
+[service level indicators](https://sre.google/sre-book/service-level-objectives/) (SLIs) defined
+in the [metrics
+catalog](https://gitlab.com/gitlab-com/runbooks/-/blob/master/metrics-catalog/README.md).
+
+For those types of failures, you can follow the link to the service
+dashboard linked from the `type` column. The service dashboard
+contains a row specifically for the SLI that is causing the budget
+spent, with useful links to the logs and a description of what the
+component means. For example, see the `server` component of the
+`web-pages` service:
+
+![web-pages-server-component SLI](img/stage_group_dashboards_service_sli_detail.png)
+
+## Usage of the dasbhoard
 
 Inside a stage group dashboard, there are some notable components. Let's take the [Source Code group's dashboard](https://dashboards.gitlab.net/d/stage-groups-source_code/stage-groups-group-dashboard-create-source-code?orgId=1) as an example.
 
@@ -94,14 +188,7 @@ stageGroupDashboards.dashboard('product_planning')
 .stageGroupDashboardTrailer()
 ```
 
-We provide basic customization to filter out the components essential to your group's activities. By default, all components `web`, `api`, `git`, and `sidekiq` are available in the dashboard. We can change this to only show `web` and `api`, or only show `sidekiq`:
-
-```jsonnet
-stageGroupDashboards.dashboard('product_planning', components=['web', 'api']).stageGroupDashboardTrailer()
-# Or
-stageGroupDashboards.dashboard('product_planning', components=['sidekiq']).stageGroupDashboardTrailer()
-
-```
+We provide basic customization to filter out the components essential to your group's activities. By default, only the `web`, `api`, and `sidekiq` components are available in the dashboard, while `git` is hidden. See [how to enable available components and optional graphs](#optional-graphs).
 
 You can also append further information or custom metrics to a dashboard. This is an example that adds some links and a total request rate on the top of the page:
 
@@ -117,7 +204,7 @@ stageGroupDashboards.dashboard('source_code')
     mode='markdown',
     content=|||
       Useful link for the Source Code Management group dashboard:
-      - [Issue list](https://gitlab.com/groups/gitlab-org/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name%5B%5D=repository)
+      - [Issue list](https://gitlab.com/groups/gitlab-org/-/issues?scope=all&state=opened&label_name%5B%5D=repository)
       - [Epic list](https://gitlab.com/groups/gitlab-org/-/epics?label_name[]=repository)
     |||,
   ),
@@ -150,3 +237,31 @@ If you want to see the workflow in action, we've recorded a pairing session on c
 available on [GitLab Unfiltered](https://youtu.be/shEd_eiUjdI).
 
 For deeper customization and more complicated metrics, visit the [Grafonnet lib](https://github.com/grafana/grafonnet-lib) project and the [GitLab Prometheus Metrics](../administration/monitoring/prometheus/gitlab_metrics.md#gitlab-prometheus-metrics) documentation.
+
+### Optional Graphs
+
+Some Graphs aren't relevant for all groups, so they aren't added to
+the dashboard by default. They can be added by customizing the
+dashboard.
+
+By default, only the `web`, `api`, and `sidekiq` metrics are
+shown. If you wish to see the metrics from the `git` fleet (or any
+other component that might be added in the future), this could be
+configured as follows:
+
+```jsonnet
+stageGroupDashboards
+.dashboard('source_code', components=stageGroupDashboards.supportedComponents)
+.stageGroupDashboardTrailer()
+```
+
+If your group is interested in Sidekiq job durations and their
+thresholds, these graphs can be added by calling the
+`.addSidekiqJobDurationByUrgency` function:
+
+```jsonnet
+stageGroupDashboards
+.dashboard('access')
+.addSidekiqJobDurationByUrgency()
+.stageGroupDashboardTrailer()
+```

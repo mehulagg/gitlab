@@ -2,6 +2,7 @@
 
 class Geo::SnippetRepositoryRegistry < Geo::BaseRegistry
   include Geo::ReplicableRegistry
+  include ::Geo::VerifiableRegistry
 
   MODEL_CLASS = ::SnippetRepository
   MODEL_FOREIGN_KEY = :snippet_repository_id

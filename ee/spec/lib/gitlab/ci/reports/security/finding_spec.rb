@@ -137,7 +137,8 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         scan: occurrence.scan,
         severity: occurrence.severity,
         uuid: occurrence.uuid,
-        details: occurrence.details
+        details: occurrence.details,
+        signatures: []
       })
     end
   end
@@ -197,87 +198,98 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
   end
 
   describe '#eql?' do
-    let(:identifier) { build(:ci_reports_security_identifier) }
-    let(:location) { build(:ci_reports_security_locations_sast) }
-    let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location) }
+    where(vulnerability_finding_signatures_enabled: [true, false])
+    with_them do
+      let(:identifier) { build(:ci_reports_security_identifier) }
+      let(:location) { build(:ci_reports_security_locations_sast) }
+      let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location, vulnerability_finding_signatures_enabled: vulnerability_finding_signatures_enabled) }
 
-    let(:report_type) { :secret_detection }
-    let(:identifier_external_id) { 'foo' }
-    let(:location_start_line) { 0 }
-    let(:other_identifier) { build(:ci_reports_security_identifier, external_id: identifier_external_id) }
-    let(:other_location) { build(:ci_reports_security_locations_sast, start_line: location_start_line) }
-    let(:other_finding) do
-      build(:ci_reports_security_finding,
-            severity: 'low',
-            report_type: report_type,
-            identifiers: [other_identifier],
-            location: other_location)
-    end
-
-    subject { finding.eql?(other_finding) }
-
-    context 'when the primary_identifier is nil' do
-      let(:identifier) { nil }
-
-      it 'does not raise an exception' do
-        expect { subject }.not_to raise_error
+      let(:report_type) { :secret_detection }
+      let(:identifier_external_id) { 'foo' }
+      let(:location_start_line) { 0 }
+      let(:other_identifier) { build(:ci_reports_security_identifier, external_id: identifier_external_id) }
+      let(:other_location) { build(:ci_reports_security_locations_sast, start_line: location_start_line) }
+      let(:other_finding) do
+        build(:ci_reports_security_finding,
+              severity: 'low',
+              report_type: report_type,
+              identifiers: [other_identifier],
+              location: other_location,
+              vulnerability_finding_signatures_enabled: vulnerability_finding_signatures_enabled)
       end
-    end
 
-    context 'when the other finding has same `report_type`' do
-      let(:report_type) { :sast }
+      let(:signature) { ::Gitlab::Ci::Reports::Security::FindingSignature.new(algorithm_type: 'location', signature_value: 'value1') }
 
-      context 'when the other finding has same primary identifier fingerprint' do
-        let(:identifier_external_id) { identifier.external_id }
+      subject { finding.eql?(other_finding) }
 
-        context 'when the other finding has same location fingerprint' do
-          let(:location_start_line) { location.start_line }
+      context 'when the primary_identifier is nil' do
+        let(:identifier) { nil }
 
-          it { is_expected.to be(true) }
-        end
-
-        context 'when the other finding does not have same location fingerprint' do
-          it { is_expected.to be(false) }
+        it 'does not raise an exception' do
+          expect { subject }.not_to raise_error
         end
       end
 
-      context 'when the other finding does not have same primary identifier fingerprint' do
-        context 'when the other finding has same location fingerprint' do
-          let(:location_start_line) { location.start_line }
+      context 'when the other finding has same `report_type`' do
+        let(:report_type) { :sast }
 
-          it { is_expected.to be(false) }
+        context 'when the other finding has same primary identifier fingerprint' do
+          let(:identifier_external_id) { identifier.external_id }
+
+          context 'when the other finding has same location signature' do
+            before do
+              finding.signatures << signature
+              other_finding.signatures << signature
+            end
+
+            let(:location_start_line) { location.start_line }
+
+            it { is_expected.to be(true) }
+          end
+
+          context 'when the other finding does not have same location signature' do
+            it { is_expected.to be(false) }
+          end
         end
 
-        context 'when the other finding does not have same location fingerprint' do
-          it { is_expected.to be(false) }
+        context 'when the other finding does not have same primary identifier fingerprint' do
+          context 'when the other finding has same location signature' do
+            let(:location_start_line) { location.start_line }
+
+            it { is_expected.to be(false) }
+          end
+
+          context 'when the other finding does not have same location signature' do
+            it { is_expected.to be(false) }
+          end
         end
       end
-    end
 
-    context 'when the other finding does not have same `report_type`' do
-      context 'when the other finding has same primary identifier fingerprint' do
-        let(:identifier_external_id) { identifier.external_id }
+      context 'when the other finding does not have same `report_type`' do
+        context 'when the other finding has same primary identifier fingerprint' do
+          let(:identifier_external_id) { identifier.external_id }
 
-        context 'when the other finding has same location fingerprint' do
-          let(:location_start_line) { location.start_line }
+          context 'when the other finding has same location signature' do
+            let(:location_start_line) { location.start_line }
 
-          it { is_expected.to be(false) }
+            it { is_expected.to be(false) }
+          end
+
+          context 'when the other finding does not have same location signature' do
+            it { is_expected.to be(false) }
+          end
         end
 
-        context 'when the other finding does not have same location fingerprint' do
-          it { is_expected.to be(false) }
-        end
-      end
+        context 'when the other finding does not have same primary identifier fingerprint' do
+          context 'when the other finding has same location signature' do
+            let(:location_start_line) { location.start_line }
 
-      context 'when the other finding does not have same primary identifier fingerprint' do
-        context 'when the other finding has same location fingerprint' do
-          let(:location_start_line) { location.start_line }
+            it { is_expected.to be(false) }
+          end
 
-          it { is_expected.to be(false) }
-        end
-
-        context 'when the other finding does not have same location fingerprint' do
-          it { is_expected.to be(false) }
+          context 'when the other finding does not have same location signature' do
+            it { is_expected.to be(false) }
+          end
         end
       end
     end
@@ -344,5 +356,108 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     subject { finding.keys }
 
     it { is_expected.to match_array(expected_keys) }
+  end
+
+  describe '#hash' do
+    let(:scanner) { build(:ci_reports_security_scanner) }
+    let(:identifiers) { [build(:ci_reports_security_identifier)] }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:uuid) { SecureRandom.uuid }
+
+    context 'with vulnerability_finding_signatures enabled' do
+      let(:finding) do
+        build(:ci_reports_security_finding,
+              scanner: scanner,
+              identifiers: identifiers,
+              location: location,
+              uuid: uuid,
+              compare_key: '',
+              vulnerability_finding_signatures_enabled: true)
+      end
+
+      let(:low_priority_signature) { ::Gitlab::Ci::Reports::Security::FindingSignature.new(algorithm_type: 'location', signature_value: 'value1') }
+      let(:high_priority_signature) { ::Gitlab::Ci::Reports::Security::FindingSignature.new(algorithm_type: 'scope_offset', signature_value: 'value2') }
+
+      it 'returns the expected hash with no signatures' do
+        expect(finding.signatures.length).to eq(0)
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_identifier_fingerprint.hash)
+      end
+
+      it 'returns the expected hash with signatures' do
+        finding.signatures << low_priority_signature
+        finding.signatures << high_priority_signature
+
+        expect(finding.signatures.length).to eq(2)
+        expect(finding.hash).to eq(finding.report_type.hash ^ high_priority_signature.signature_hex.hash ^ finding.primary_identifier_fingerprint.hash)
+      end
+    end
+
+    context 'without vulnerability_finding_signatures enabled' do
+      let(:finding) do
+        build(:ci_reports_security_finding,
+              scanner: scanner,
+              identifiers: identifiers,
+              location: location,
+              uuid: uuid,
+              compare_key: '',
+              vulnerability_finding_signatures_enabled: false)
+      end
+
+      it 'returns the expected hash' do
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_identifier_fingerprint.hash)
+      end
+    end
+  end
+
+  describe '#scanner_order_to' do
+    let(:scanner_1) { build(:ci_reports_security_scanner) }
+    let(:scanner_2) { build(:ci_reports_security_scanner) }
+    let(:finding_1) { build(:ci_reports_security_finding, scanner: scanner_1) }
+    let(:finding_2) { build(:ci_reports_security_finding, scanner: scanner_2) }
+
+    subject(:compare_based_on_scanners) { finding_1.scanner_order_to(finding_2) }
+
+    context 'when the scanner of the receiver is nil' do
+      let(:scanner_1) { nil }
+
+      context 'when the scanner of the other is nil' do
+        let(:scanner_2) { nil }
+
+        it { is_expected.to be(1) }
+      end
+
+      context 'when the scanner of the other is not nil' do
+        it { is_expected.to be(1) }
+      end
+    end
+
+    context 'when the scanner of the receiver is not nil' do
+      context 'when the scanner of the other is nil' do
+        let(:scanner_2) { nil }
+
+        it { is_expected.to be(-1) }
+      end
+
+      context 'when the scanner of the other is not nil' do
+        before do
+          allow(scanner_1).to receive(:<=>).and_return(0)
+        end
+
+        it 'compares two scanners' do
+          expect(compare_based_on_scanners).to be(0)
+          expect(scanner_1).to have_received(:<=>).with(scanner_2)
+        end
+      end
+    end
+  end
+
+  describe '#<=>' do
+    let(:finding_1) { build(:ci_reports_security_finding, severity: :critical, compare_key: 'b') }
+    let(:finding_2) { build(:ci_reports_security_finding, severity: :critical, compare_key: 'a') }
+    let(:finding_3) { build(:ci_reports_security_finding, severity: :high) }
+
+    subject { [finding_1, finding_2, finding_3].sort }
+
+    it { is_expected.to eq([finding_2, finding_1, finding_3]) }
   end
 end

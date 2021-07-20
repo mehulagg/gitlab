@@ -7,21 +7,16 @@ module EE
 
       class EpicAssignmentError < ::ArgumentError; end
 
-      def handle_epic(issue)
+      def filter_epic(issue)
         return unless epic_param_present?
 
         epic = epic_param(issue)
-        result = epic ? assign_epic(issue, epic) : unassign_epic(issue)
-        issue.reload_epic
 
-        if result[:status] == :error
-          raise EpicAssignmentError, result[:message]
-        end
+        params[:confidential] = true if !issue.persisted? && epic&.confidential
+        params[:epic] = epic
       end
 
       def assign_epic(issue, epic)
-        issue.confidential = true if !issue.persisted? && epic.confidential
-
         had_epic = issue.epic.present?
 
         link_params = { target_issuable: issue, skip_epic_dates_update: true }
@@ -85,6 +80,32 @@ module EE
           ::Iteration.for_projects_and_groups([project.id], groups).find_by_id(params[:sprint_id])
 
         params[:sprint_id] = '' unless iteration
+      end
+
+      override :handle_changes
+      def handle_changes(issue, options)
+        handle_epic_change(issue, options)
+      end
+
+      def handle_epic_change(issue, options)
+        return unless epic_param_present?
+
+        old_epic = issue.epic
+        epic = options.dig(:params, :epic)
+
+        return if !epic && !old_epic
+
+        result = if old_epic && !epic
+                   unassign_epic(issue)
+                 else
+                   assign_epic(issue, epic)
+                 end
+
+        issue.reload_epic
+
+        if result[:status] == :error
+          raise EpicAssignmentError, result[:message]
+        end
       end
     end
   end

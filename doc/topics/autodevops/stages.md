@@ -33,15 +33,24 @@ your own `Dockerfile`, you must either:
 - Override the default values by
   [customizing the Auto Deploy Helm chart](customize.md#custom-helm-chart).
 
-### Auto Build using Heroku buildpacks
+### Auto Build using Cloud Native Buildpacks
+
+> - Introduced in [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28165).
+> - Auto Build using Cloud Native Buildpacks by default was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63351) in GitLab 14.0.
 
 Auto Build builds an application using a project's `Dockerfile` if present. If no
-`Dockerfile` is present, it uses [Herokuish](https://github.com/gliderlabs/herokuish)
-and [Heroku buildpacks](https://devcenter.heroku.com/articles/buildpacks)
-to detect and build the application into a Docker image.
+`Dockerfile` is present, Auto Build builds your application using
+[Cloud Native Buildpacks](https://buildpacks.io) to detect and build the
+application into a Docker image. The feature uses the
+[`pack` command](https://github.com/buildpacks/pack).
+The default [builder](https://buildpacks.io/docs/concepts/components/builder/)
+is `heroku/buildpacks:18` but a different builder can be selected using
+the CI/CD variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`.
 
 Each buildpack requires your project's repository to contain certain files for
-Auto Build to build your application successfully. For example, your application's
+Auto Build to build your application successfully. The structure is
+specific to the builder and buildpacks you have selected.
+For example, when using the Heroku's builder (the default), your application's
 root directory must contain the appropriate file for your application's
 language:
 
@@ -52,39 +61,38 @@ For the requirements of other languages and frameworks, read the
 [Heroku buildpacks documentation](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks).
 
 NOTE:
+Auto Test still uses Herokuish, as test suite detection is not
+yet part of the Cloud Native Buildpack specification. For more information, see
+[this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212689).
+
+### Auto Build using Herokuish
+
+> [Replaced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63351) with Cloud Native Buildpacks in GitLab 14.0.
+
+Prior to GitLab 14.0, [Herokuish](https://github.com/gliderlabs/herokuish) was
+the default build method for projects without a `Dockerfile`. Herokuish can
+still be used by setting the CI/CD variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED`
+to `false`.
+
+NOTE:
 If Auto Build fails despite the project meeting the buildpack requirements, set
-a project variable `TRACE=true` to enable verbose logging, which may help you
+a project CI/CD variable `TRACE=true` to enable verbose logging, which may help you
 troubleshoot.
 
-### Auto Build using Cloud Native Buildpacks (beta)
-
-> Introduced in [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28165).
-
-Auto Build supports building your application using [Cloud Native Buildpacks](https://buildpacks.io)
-through the [`pack` command](https://github.com/buildpacks/pack). To use Cloud Native Buildpacks,
-set the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED` to a non-empty
-value. The default builder is `heroku/buildpacks:18` but a different builder
-can be selected using the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`.
-
-Cloud Native Buildpacks (CNBs) are an evolution of Heroku buildpacks, and
-GitLab expects them to eventually supersede Herokuish-based builds within Auto DevOps. For more
-information, see [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212692).
+### Moving from Herokuish to Cloud Native Buildpacks
 
 Builds using Cloud Native Buildpacks support the same options as builds using
-Heroku buildpacks, with the following caveats:
+Herokuish, with the following caveats:
 
 - The buildpack must be a Cloud Native Buildpack. A Heroku buildpack can be
   converted to a Cloud Native Buildpack using Heroku's
   [`cnb-shim`](https://github.com/heroku/cnb-shim).
-- `BUILDPACK_URL` must be in a form
+- `BUILDPACK_URL` must be in a format
   [supported by `pack`](https://buildpacks.io/docs/app-developer-guide/specific-buildpacks/).
-- The `/bin/herokuish` command is not present in the resulting image, and prefixing
+- The `/bin/herokuish` command is not present in the built image, and prefixing
   commands with `/bin/herokuish procfile exec` is no longer required (nor possible).
-
-NOTE:
-Auto Test still uses Herokuish, as test suite detection is not
-yet part of the Cloud Native Buildpack specification. For more information, see
-[this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212689).
+  Instead, custom commands should be prefixed with `/cnb/lifecycle/launcher`
+  to receive the correct execution environment.
 
 ## Auto Test
 
@@ -103,7 +111,9 @@ NOTE:
 Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
 Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689), *not*
 Cloud Native Buildpacks, and only buildpacks that implement the
+<!-- vale gitlab.Spelling = NO -->
 [Testpack API](https://devcenter.heroku.com/articles/testpack-api) are supported.
+<!-- vale gitlab.Spelling = YES -->
 
 ### Currently supported languages
 
@@ -135,8 +145,7 @@ might want to use a [custom buildpack](customize.md#custom-buildpacks).
 
 ## Auto Code Quality
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab](https://about.gitlab.com/pricing/) 9.3.
-> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) to GitLab Free in 13.2.
 
 Auto Code Quality uses the
 [Code Quality image](https://gitlab.com/gitlab-org/ci-cd/codequality) to run
@@ -163,7 +172,7 @@ see the documentation.
 
 ## Auto Secret Detection
 
-> - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - Introduced in GitLab Ultimate 13.1.
 > - [Select functionality made available in all tiers](../../user/application_security/secret_detection/#making-secret-detection-available-to-all-gitlab-tiers) in 13.3
 
 Secret Detection uses the
@@ -176,8 +185,6 @@ warnings on [Ultimate](https://about.gitlab.com/pricing/) licenses.
 To learn more, see [Secret Detection](../../user/application_security/secret_detection/index.md).
 
 ## Auto Dependency Scanning **(ULTIMATE)**
-
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.7.
 
 Dependency Scanning runs analysis on the project's dependencies and checks for potential security issues.
 The Auto Dependency Scanning stage is skipped on licenses other than
@@ -193,7 +200,7 @@ see the documentation.
 
 ## Auto License Compliance **(ULTIMATE)**
 
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.0.
+> Introduced in GitLab Ultimate 11.0.
 
 License Compliance uses the
 [License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
@@ -209,11 +216,9 @@ documentation.
 
 ## Auto Container Scanning **(ULTIMATE)**
 
-> Introduced in GitLab 10.4.
-
-Vulnerability Static Analysis for containers uses [Clair](https://github.com/quay/clair)
-to check for potential security issues on Docker images. The Auto Container Scanning
-stage is skipped on licenses other than [Ultimate](https://about.gitlab.com/pricing/).
+Vulnerability static analysis for containers uses [Trivy](https://aquasecurity.github.io/trivy/latest/)
+to check for potential security issues in Docker images. The Auto Container Scanning stage is
+skipped on licenses other than [Ultimate](https://about.gitlab.com/pricing/).
 
 After creating the report, it's uploaded as an artifact which you can later download and
 check out. The merge request displays any detected security issues.
@@ -245,7 +250,7 @@ such as after merging a merge request, the Review App is also deleted.
 Review apps are deployed using the
 [auto-deploy-app](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app) chart with
 Helm, which you can [customize](customize.md#custom-helm-chart). The application deploys
-into the [Kubernetes namespace](../../user/project/clusters/index.md#deployment-variables)
+into the [Kubernetes namespace](../../user/project/clusters/deploy_to_cluster.md#deployment-variables)
 for the environment.
 
 In GitLab 11.4 and later, [local Tiller](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22036) is
@@ -260,8 +265,6 @@ and want to undo it by deploying again, Helm may not detect that anything change
 in the first place, and thus not realize that it needs to re-apply the old configuration.
 
 ## Auto DAST **(ULTIMATE)**
-
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
 Dynamic Application Security Testing (DAST) uses the popular open source tool
 [OWASP ZAProxy](https://github.com/zaproxy/zaproxy) to analyze the current code
@@ -284,7 +287,7 @@ see the documentation.
 ### Overriding the DAST target
 
 To use a custom target instead of the auto-deployed review apps,
-set a `DAST_WEBSITE` environment variable to the URL for DAST to scan.
+set a `DAST_WEBSITE` CI/CD variable to the URL for DAST to scan.
 
 WARNING:
 If [DAST Full Scan](../../user/application_security/dast/index.md#full-scan) is
@@ -297,10 +300,10 @@ data loss or corruption.
 
 You can disable DAST:
 
-- On all branches by setting the `DAST_DISABLED` environment variable to `"true"`.
+- On all branches by setting the `DAST_DISABLED` CI/CD variable to `"true"`.
 - Only on the default branch by setting the `DAST_DISABLED_FOR_DEFAULT_BRANCH`
-  environment variable to `"true"`.
-- Only on feature branches by setting `REVIEW_DISABLED` environment variable to
+  variable to `"true"`.
+- Only on feature branches by setting `REVIEW_DISABLED` variable to
   `"true"`. This also disables the Review App.
 
 ## Auto Browser Performance Testing **(PREMIUM)**
@@ -336,34 +339,34 @@ uploads the report as an artifact.
 
 Some initial setup is required. A [k6](https://k6.io/) test needs to be
 written that's tailored to your specific application. The test also needs to be
-configured so it can pick up the environment's dynamic URL via an environment variable.
+configured so it can pick up the environment's dynamic URL via a CI/CD variable.
 
 Any load performance test result differences between the source and target branches are also
 [shown in the merge request widget](../../user/project/merge_requests/load_performance_testing.md).
 
 ## Auto Deploy
 
-This is an optional step, since many projects don't have a Kubernetes cluster
-available. If the [requirements](requirements.md) are not met, the job is skipped.
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216008) in GitLab 13.6, you have the choice to deploy to [Amazon Elastic Compute Cloud (Amazon EC2)](https://aws.amazon.com/ec2/) in addition to a Kubernetes cluster.
 
-After a branch or merge request is merged into the project's default branch (usually
-`master`), Auto Deploy deploys the application to a `production` environment in
+Auto Deploy is an optional step for Auto DevOps. If the [requirements](requirements.md) are not met, the job is skipped.
+
+After a branch or merge request is merged into the project's default branch, Auto Deploy deploys the application to a `production` environment in
 the Kubernetes cluster, with a namespace based on the project name and unique
 project ID, such as `project-4321`.
 
 Auto Deploy does not include deployments to staging or canary environments by
 default, but the
-[Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
+[Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
 contains job definitions for these tasks if you want to enable them.
 
-You can use [environment variables](customize.md#environment-variables) to automatically
+You can use [CI/CD variables](customize.md#cicd-variables) to automatically
 scale your pod replicas, and to apply custom arguments to the Auto DevOps `helm upgrade`
 commands. This is an easy way to
 [customize the Auto Deploy Helm chart](customize.md#custom-helm-chart).
 
 Helm uses the [auto-deploy-app](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app)
 chart to deploy the application into the
-[Kubernetes namespace](../../user/project/clusters/index.md#deployment-variables)
+[Kubernetes namespace](../../user/project/clusters/deploy_to_cluster.md#deployment-variables)
 for the environment.
 
 In GitLab 11.4 and later, a
@@ -419,10 +422,10 @@ including support for `Deployment` in the `extensions/v1beta1` version.
 
 To use Auto Deploy on a Kubernetes 1.16+ cluster:
 
-1. If you are deploying your application for the first time on GitLab 13.0 or
+1. If you are deploying your application for the first time in GitLab 13.0 or
    newer, no configuration should be required.
 
-1. On GitLab 12.10 or older, set the following in the [`.gitlab/auto-deploy-values.yaml` file](customize.md#customize-values-for-helm-chart):
+1. In GitLab 12.10 or older, set the following in the [`.gitlab/auto-deploy-values.yaml` file](customize.md#customize-values-for-helm-chart):
 
    ```yaml
    deploymentApiVersion: apps/v1
@@ -436,11 +439,11 @@ To use Auto Deploy on a Kubernetes 1.16+ cluster:
    GitLab 12.9 or 12.10, set `AUTO_DEVOPS_POSTGRES_CHANNEL` to `2`.
 
 WARNING:
-On GitLab 12.9 and 12.10, opting into
+In GitLab 12.9 and 12.10, opting into
 `AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes the version `1` PostgreSQL
 database. Follow the [guide to upgrading PostgreSQL](upgrading_postgresql.md)
 to back up and restore your database before opting into version `2` (On
-GitLab 13.0, an additional variable is required to trigger the database
+GitLab 13.0, an additional CI/CD variable is required to trigger the database
 deletion).
 
 ### Migrations
@@ -448,7 +451,7 @@ deletion).
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21955) in GitLab 11.4
 
 You can configure database initialization and migrations for PostgreSQL to run
-within the application pod by setting the project variables `DB_INITIALIZE` and
+within the application pod by setting the project CI/CD variables `DB_INITIALIZE` and
 `DB_MIGRATE` respectively.
 
 If present, `DB_INITIALIZE` is run as a shell command within an application pod
@@ -465,15 +468,16 @@ If present, `DB_MIGRATE` is run as a shell command within an application pod as
 a Helm pre-upgrade hook.
 
 For example, in a Rails application in an image built with
-[Herokuish](https://github.com/gliderlabs/herokuish):
+[Cloud Native Buildpacks](#auto-build-using-cloud-native-buildpacks):
 
-- `DB_INITIALIZE` can be set to `RAILS_ENV=production /bin/herokuish procfile exec bin/rails db:setup`
-- `DB_MIGRATE` can be set to `RAILS_ENV=production /bin/herokuish procfile exec bin/rails db:migrate`
+- `DB_INITIALIZE` can be set to `RAILS_ENV=production /cnb/lifecycle/launcher bin/rails db:setup`
+- `DB_MIGRATE` can be set to `RAILS_ENV=production /cnb/lifecycle/launcher bin/rails db:migrate`
 
 Unless your repository contains a `Dockerfile`, your image is built with
-Herokuish, and you must prefix commands run in these images with
-`/bin/herokuish procfile exec` (for Herokuish) or `/cnb/lifecycle/launcher`
-(for Cloud Native Buildpacks) to replicate the environment where your
+Cloud Native Buildpacks, and you must prefix commands run in these images with
+`/cnb/lifecycle/launcher`, (or `/bin/herokuish procfile exec` when
+using [Herokuish](#auto-build-using-herokuish))
+to replicate the environment where your
 application runs.
 
 ### Upgrade auto-deploy-app Chart
@@ -500,7 +504,7 @@ access to a Redis instance. Auto DevOps doesn't deploy this instance for you, so
 you must:
 
 - Maintain your own Redis instance.
-- Set a CI variable `K8S_SECRET_REDIS_URL`, which is the URL of this instance,
+- Set a CI/CD variable `K8S_SECRET_REDIS_URL`, which is the URL of this instance,
   to ensure it's passed into your deployments.
 
 After configuring your worker to respond to health checks, run a Sidekiq
@@ -512,14 +516,10 @@ workers:
   sidekiq:
     replicaCount: 1
     command:
-      - /bin/herokuish
-      - procfile
-      - exec
+      - /cnb/lifecycle/launcher
       - sidekiq
     preStopCommand:
-      - /bin/herokuish
-      - procfile
-      - exec
+      - /cnb/lifecycle/launcher
       - sidekiqctl
       - quiet
     terminationGracePeriodSeconds: 60
@@ -527,7 +527,8 @@ workers:
 
 ### Network Policy
 
-> [Introduced](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/30) in GitLab 12.7.
+- [Introduced](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/30) in GitLab 12.7.
+- [Deprecated](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/184) in GitLab 13.9.
 
 By default, all Kubernetes pods are
 [non-isolated](https://kubernetes.io/docs/concepts/services-networking/network-policies/#isolated-and-non-isolated-pods),
@@ -540,7 +541,7 @@ You must use a Kubernetes network plugin that implements support for
 `NetworkPolicy`. The default network plugin for Kubernetes (`kubenet`)
 [does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)
 support for it. The [Cilium](https://cilium.io/) network plugin can be
-installed as a [cluster application](../../user/clusters/applications.md#install-cilium-using-gitlab-cicd)
+installed as a [cluster application](../../user/project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium)
 to enable support for network policies.
 
 You can enable deployment of a network policy by setting the following
@@ -576,43 +577,76 @@ networkPolicy:
 ```
 
 For more information on installing Network Policies, see
-[Install Cilium using GitLab CI/CD](../../user/clusters/applications.md#install-cilium-using-gitlab-cicd).
+[Use the Cluster Management Template to Install Cilium](../../user/project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium).
 
-### Web Application Firewall (ModSecurity) customization
+### Cilium Network Policy
 
-> [Introduced](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/44) in GitLab 12.8.
+> [Introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/184) in GitLab 13.9.
 
-Customization on an [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
-or on a deployment base is available for clusters with
-[ModSecurity installed](../../user/clusters/applications.md#web-application-firewall-modsecurity).
+By default, all Kubernetes pods are
+[non-isolated](https://kubernetes.io/docs/concepts/services-networking/network-policies/#isolated-and-non-isolated-pods),
+and accept traffic to and from any source. You can use
+[CiliumNetworkPolicy](https://docs.cilium.io/en/v1.8/concepts/kubernetes/policy/#ciliumnetworkpolicy)
+to restrict connections to and from selected pods, namespaces, and the internet.
 
-To enable ModSecurity with Auto Deploy, you must create a `.gitlab/auto-deploy-values.yaml`
-file in your project with the following attributes.
+#### Requirements
 
-|Attribute | Description | Default |
------------|-------------|---------|
-|`enabled` | Enables custom configuration for ModSecurity, defaulting to the [Core Rule Set](https://coreruleset.org/) | `false` |
-|`secRuleEngine` | Configures the [rules engine](https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual-(v2.x)#secruleengine) | `DetectionOnly` |
-|`secRules` | Creates one or more additional [rule](https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual-(v2.x)#SecRule) | `nil` |
+As the default network plugin for Kubernetes (`kubenet`)
+[does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)
+support for it, you must have [Cilium](https://docs.cilium.io/en/v1.8/intro/) as your Kubernetes network plugin.
 
-In the following `auto-deploy-values.yaml` example, some custom settings
-are enabled for ModSecurity. Those include setting its engine to
-process rules instead of only logging them, while adding two specific
-header-based rules:
+The [Cilium](https://cilium.io/) network plugin can be
+installed with a [cluster management project template](../../user/project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium)
+to enable support for network policies.
+
+#### Configuration
+
+You can enable deployment of a network policy by setting the following
+in the `.gitlab/auto-deploy-values.yaml` file:
 
 ```yaml
-ingress:
-  modSecurity:
-    enabled: true
-    secRuleEngine: "On"
-    secRules:
-      - variable: "REQUEST_HEADERS:User-Agent"
-        operator: "printer"
-        action: "log,deny,id:'2010',status:403,msg:'printer is an invalid agent'"
-      - variable: "REQUEST_HEADERS:Content-Type"
-        operator: "text/plain"
-        action: "log,deny,id:'2011',status:403,msg:'Text is not supported as content type'"
+ciliumNetworkPolicy:
+  enabled: true
 ```
+
+The default policy deployed by the Auto Deploy pipeline allows
+traffic within a local namespace, and from the `gitlab-managed-apps`
+namespace. All other inbound connections are blocked. Outbound
+traffic (for example, to the internet) is not affected by the default policy.
+
+You can also provide a custom [policy specification](https://docs.cilium.io/en/v1.8/policy/language/#simple-ingress-allow)
+in the `.gitlab/auto-deploy-values.yaml` file, for example:
+
+```yaml
+ciliumNetworkPolicy:
+  enabled: true
+  spec:
+    endpointSelector:
+      matchLabels:
+        app.gitlab.com/env: staging
+    ingress:
+      - fromEndpoints:
+        - matchLabels:
+            app.gitlab.com/managed_by: gitlab
+```
+
+#### Enabling Alerts
+
+You can also enable alerts. Network policies with alerts are considered only if
+[GitLab Kubernetes Agent](../../user/clusters/agent/index.md)
+has been integrated.
+
+You can enable alerts as follows:
+
+```yaml
+ciliumNetworkPolicy:
+  enabled: true
+  alerts:
+    enabled: true
+```
+
+For more information on installing Network Policies, see
+[Use the Cluster Management Template to Install Cilium](../../user/project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium).
 
 ### Running commands in the container
 
@@ -656,16 +690,11 @@ The metrics include:
 - **Response Metrics:** latency, throughput, error rate
 - **System Metrics:** CPU utilization, memory utilization
 
-GitLab provides some initial alerts for you after you install Prometheus:
-
-- Ingress status code `500` > 0.1%
-- NGINX status code `500` > 0.1%
-
 To use Auto Monitoring:
 
 1. [Install and configure the Auto DevOps requirements](requirements.md).
-1. [Enable Auto DevOps](index.md#enablingdisabling-auto-devops), if you haven't done already.
-1. Navigate to your project's **{rocket}** **CI/CD > Pipelines** and click **Run Pipeline**.
+1. [Enable Auto DevOps](index.md#enable-or-disable-auto-devops), if you haven't done already.
+1. Navigate to your project's **{rocket}** **CI/CD > Pipelines** and click **Run pipeline**.
 1. After the pipeline finishes successfully, open the
    [monitoring dashboard for a deployed environment](../../ci/environments/index.md#monitoring-environments)
    to view the metrics of your deployed application. To view the metrics of the
@@ -686,5 +715,5 @@ You can follow the [code intelligence epic](https://gitlab.com/groups/gitlab-org
 for updates.
 
 This stage is enabled by default. You can disable it by adding the
-`CODE_INTELLIGENCE_DISABLED` environment variable. Read more about
+`CODE_INTELLIGENCE_DISABLED` CI/CD variable. Read more about
 [disabling Auto DevOps jobs](../../topics/autodevops/customize.md#disable-jobs).

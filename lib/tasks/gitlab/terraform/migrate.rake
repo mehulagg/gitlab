@@ -6,7 +6,7 @@ desc "GitLab | Terraform | Migrate Terraform states to remote storage"
 namespace :gitlab do
   namespace :terraform_states do
     task migrate: :environment do
-      logger = Logger.new(STDOUT)
+      logger = Logger.new($stdout)
       logger.info('Starting transfer of Terraform states to object storage')
 
       begin
@@ -15,7 +15,7 @@ namespace :gitlab do
 
           logger.info(message)
         end
-      rescue => e
+      rescue StandardError => e
         logger.error("Failed to migrate: #{e.message}")
       end
     end

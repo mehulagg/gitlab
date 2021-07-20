@@ -9,10 +9,12 @@ RSpec.describe ProjectPolicy do
 
   let(:project) { public_project }
 
+  let_it_be(:auditor) { create(:user, :auditor) }
+
   subject { described_class.new(current_user, project) }
 
   before do
-    stub_licensed_features(license_scanning: true)
+    stub_licensed_features(license_scanning: true, quality_management: true)
   end
 
   context 'basic permissions' do
@@ -23,7 +25,7 @@ RSpec.describe ProjectPolicy do
     let(:additional_developer_permissions) do
       %i[
         admin_vulnerability_feedback read_project_audit_events read_project_security_dashboard
-        read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
+        read_security_resource read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
         admin_vulnerability_issue_link admin_vulnerability_external_issue_link read_merge_train
       ]
     end
@@ -34,14 +36,14 @@ RSpec.describe ProjectPolicy do
 
     let(:auditor_permissions) do
       %i[
-        download_code download_wiki_code read_project read_board read_list
+        download_code download_wiki_code read_project read_issue_board read_issue_board_list
         read_project_for_iids read_issue_iid read_merge_request_iid read_wiki
         read_issue read_label read_issue_link read_milestone read_iteration
         read_snippet read_project_member read_note read_cycle_analytics
         read_pipeline read_build read_commit_status read_container_image
         read_environment read_deployment read_merge_request read_pages
         create_merge_request_in award_emoji
-        read_project_security_dashboard read_vulnerability read_vulnerability_scanner
+        read_project_security_dashboard read_security_resource read_vulnerability_scanner
         read_software_license_policy
         read_threat_monitoring read_merge_train
         read_release
@@ -58,7 +60,7 @@ RSpec.describe ProjectPolicy do
     it_behaves_like 'project policies as admin without admin mode'
 
     context 'auditor' do
-      let(:current_user) { create(:user, :auditor) }
+      let(:current_user) { auditor }
 
       before do
         stub_licensed_features(security_dashboard: true, license_scanning: true, threat_monitoring: true)
@@ -90,6 +92,45 @@ RSpec.describe ProjectPolicy do
 
       it_behaves_like 'project private features with read_all_resources ability' do
         let(:user) { current_user }
+      end
+
+      context 'with project feature related policies' do
+        using RSpec::Parameterized::TableSyntax
+
+        project_features = {
+          container_registry_access_level: [:read_container_image],
+          merge_requests_access_level: [:read_merge_request]
+        }
+
+        where(:project_visibility, :access_level, :allowed) do
+          :public   | ProjectFeature::ENABLED  | true
+          :public   | ProjectFeature::PRIVATE  | true
+          :public   | ProjectFeature::DISABLED | false
+          :internal | ProjectFeature::ENABLED  | true
+          :internal | ProjectFeature::PRIVATE  | true
+          :internal | ProjectFeature::DISABLED | false
+          :private  | ProjectFeature::ENABLED  | true
+          :private  | ProjectFeature::PRIVATE  | true
+          :private  | ProjectFeature::DISABLED | false
+        end
+
+        # For each project feature, check that an auditor is always allowed read
+        # permissions unless the feature is disabled.
+        project_features.each do |feature, permissions|
+          with_them do
+            let(:project) { send("#{project_visibility}_project") }
+
+            it 'always allows permissions except when feature disabled' do
+              project.project_feature.update!("#{feature}": access_level)
+
+              if allowed
+                expect_allowed(*permissions)
+              else
+                expect_disallowed(*permissions)
+              end
+            end
+          end
+        end
       end
     end
   end
@@ -190,7 +231,7 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'disables boards permissions' do
-        expect_disallowed :admin_board
+        expect_disallowed :admin_issue_board, :create_test_case
       end
     end
   end
@@ -439,6 +480,12 @@ RSpec.describe ProjectPolicy do
           context 'with admin disabled' do
             it { is_expected.to be_disallowed(:read_project) }
           end
+
+          context 'with auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it { is_expected.to be_allowed(:read_project) }
+          end
         end
       end
 
@@ -446,6 +493,28 @@ RSpec.describe ProjectPolicy do
         let(:project) { create(:project, :repository, namespace: current_user.namespace) }
 
         it { is_expected.to be_allowed(:read_project) }
+      end
+    end
+  end
+
+  describe 'access_security_and_compliance' do
+    context 'when the user is auditor' do
+      let(:current_user) { create(:user, :auditor) }
+
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: access_level)
+      end
+
+      context 'when the "Security & Compliance" is not enabled' do
+        let(:access_level) { Featurable::DISABLED }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'when the "Security & Compliance" is enabled' do
+        let(:access_level) { Featurable::PRIVATE }
+
+        it { is_expected.to be_allowed(:access_security_and_compliance) }
       end
     end
   end
@@ -515,92 +584,6 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'access_security_and_compliance' do
-    context 'when the "Security & Compliance" is enabled' do
-      before do
-        project.project_feature.update!(security_and_compliance_access_level: Featurable::PRIVATE)
-      end
-
-      %w[owner maintainer developer].each do |role|
-        context "when the role is #{role}" do
-          let(:current_user) { public_send(role) }
-
-          it { is_expected.to be_allowed(:access_security_and_compliance) }
-        end
-      end
-
-      context 'with admin' do
-        let(:current_user) { admin }
-
-        context 'when admin mode enabled', :enable_admin_mode do
-          it { is_expected.to be_allowed(:access_security_and_compliance) }
-        end
-
-        context 'when admin mode disabled' do
-          it { is_expected.to be_disallowed(:access_security_and_compliance) }
-        end
-      end
-
-      %w[reporter guest].each do |role|
-        context "when the role is #{role}" do
-          let(:current_user) { public_send(role) }
-
-          it { is_expected.to be_disallowed(:access_security_and_compliance) }
-        end
-      end
-
-      context 'with non member' do
-        let(:current_user) { non_member }
-
-        it { is_expected.to be_disallowed(:access_security_and_compliance) }
-      end
-
-      context 'with anonymous' do
-        let(:current_user) { anonymous }
-
-        it { is_expected.to be_disallowed(:access_security_and_compliance) }
-      end
-    end
-
-    context 'when the "Security & Compliance" is not enabled' do
-      before do
-        project.project_feature.update!(security_and_compliance_access_level: Featurable::DISABLED)
-      end
-
-      %w[owner maintainer developer reporter guest].each do |role|
-        context "when the role is #{role}" do
-          let(:current_user) { public_send(role) }
-
-          it { is_expected.to be_disallowed(:access_security_and_compliance) }
-        end
-      end
-
-      context 'with admin' do
-        let(:current_user) { admin }
-
-        context 'when admin mode enabled', :enable_admin_mode do
-          it { is_expected.to be_disallowed(:access_security_and_compliance) }
-        end
-
-        context 'when admin mode disabled' do
-          it { is_expected.to be_disallowed(:access_security_and_compliance) }
-        end
-      end
-
-      context 'with non member' do
-        let(:current_user) { non_member }
-
-        it { is_expected.to be_disallowed(:access_security_and_compliance) }
-      end
-
-      context 'with anonymous' do
-        let(:current_user) { anonymous }
-
-        it { is_expected.to be_disallowed(:access_security_and_compliance) }
-      end
-    end
-  end
-
   shared_context 'when security dashboard feature is not available' do
     before do
       stub_licensed_features(security_dashboard: false)
@@ -633,6 +616,7 @@ RSpec.describe ProjectPolicy do
 
   describe 'permissions for security bot' do
     let_it_be(:current_user) { create(:user, :security_bot) }
+
     let(:project) { private_project }
 
     let(:permissions) do
@@ -756,6 +740,34 @@ RSpec.describe ProjectPolicy do
       end
 
       it { is_expected.to be_disallowed(:read_threat_monitoring) }
+    end
+  end
+
+  describe 'security complience policy' do
+    before do
+      stub_licensed_features(security_orchestration_policies: true)
+    end
+
+    context 'with developer or maintainer role' do
+      where(role: %w[maintainer developer])
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to be_allowed(:security_orchestration_policies) }
+        it { is_expected.to be_disallowed(:update_security_orchestration_policy_project) }
+      end
+    end
+
+    context 'with owner role' do
+      where(role: %w[owner])
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to be_allowed(:security_orchestration_policies) }
+        it { is_expected.to be_allowed(:update_security_orchestration_policy_project) }
+      end
     end
   end
 
@@ -1148,7 +1160,6 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { public_send(role) if role }
 
         before do
-          stub_feature_flags(feature => true)
           stub_licensed_features(feature => true)
           enable_admin_mode!(current_user) if admin_mode
         end
@@ -1162,14 +1173,30 @@ RSpec.describe ProjectPolicy do
 
           it { is_expected.to be_disallowed(policy) }
         end
+      end
+    end
+  end
 
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(feature => false)
-          end
+  describe 'add_project_to_instance_security_dashboard' do
+    let(:policy) { :add_project_to_instance_security_dashboard }
 
-          it { is_expected.to be_disallowed(policy) }
-        end
+    context 'when user is auditor' do
+      let(:current_user) { create(:user, :auditor) }
+
+      it { is_expected.to be_allowed(policy) }
+    end
+
+    context 'when user is not auditor' do
+      context 'with developer access' do
+        let(:current_user) { developer }
+
+        it { is_expected.to be_allowed(policy) }
+      end
+
+      context 'without developer access' do
+        let(:current_user) { create(:user) }
+
+        it { is_expected.to be_disallowed(policy) }
       end
     end
   end
@@ -1198,6 +1225,13 @@ RSpec.describe ProjectPolicy do
       stub_licensed_features(commit_committer_check: true)
     end
 
+    context 'when the user is an admin', :enable_admin_mode do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:change_commit_committer_check) }
+      it { is_expected.to be_allowed(:read_commit_committer_check) }
+    end
+
     context 'the user is a maintainer' do
       let(:current_user) { maintainer }
 
@@ -1210,46 +1244,6 @@ RSpec.describe ProjectPolicy do
 
       it { is_expected.not_to be_allowed(:change_commit_committer_check) }
       it { is_expected.to be_allowed(:read_commit_committer_check) }
-    end
-
-    context 'it is enabled on global level' do
-      before do
-        create(:push_rule_sample, commit_committer_check: true)
-      end
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
-    end
-
-    context 'it is enabled on group level' do
-      let(:push_rule) { create(:push_rule, commit_committer_check: true) }
-      let(:group) { create(:group, push_rule: push_rule) }
-      let(:project) { create(:project, namespace_id: group.id) }
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
     end
   end
 
@@ -1269,6 +1263,13 @@ RSpec.describe ProjectPolicy do
       stub_licensed_features(reject_unsigned_commits: true)
     end
 
+    context 'when the user is an admin', :enable_admin_mode do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:change_reject_unsigned_commits) }
+      it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
+    end
+
     context 'when the user is a maintainer' do
       let(:current_user) { maintainer }
 
@@ -1282,130 +1283,26 @@ RSpec.describe ProjectPolicy do
       it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
       it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
     end
-
-    context 'it is enabled on global level' do
-      before do
-        create(:push_rule_sample, reject_unsigned_commits: true)
-      end
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-    end
-
-    context 'it is enabled on group level' do
-      let(:push_rule) { create(:push_rule_without_project, reject_unsigned_commits: true) }
-      let(:group) { create(:group, push_rule: push_rule) }
-      let(:project) { create(:project, namespace_id: group.id) }
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-    end
   end
 
-  context 'when timelogs report feature is enabled' do
-    before do
-      stub_licensed_features(group_timelogs: true)
-    end
-
-    context 'admin' do
-      let(:current_user) { admin }
-
-      context 'when admin mode enabled', :enable_admin_mode do
-        it { is_expected.to be_allowed(:read_group_timelogs) }
-      end
-
-      context 'when admin mode disabled' do
-        it { is_expected.to be_disallowed(:read_group_timelogs) }
-      end
-    end
-
-    context 'with owner' do
-      let(:current_user) { owner }
-
-      it { is_expected.to be_allowed(:read_group_timelogs) }
-    end
-
-    context 'with maintainer' do
-      let(:current_user) { maintainer }
-
-      it { is_expected.to be_allowed(:read_group_timelogs) }
-    end
-
-    context 'with reporter' do
-      let(:current_user) { reporter }
-
-      it { is_expected.to be_allowed(:read_group_timelogs) }
-    end
-
-    context 'with guest' do
-      let(:current_user) { guest }
-
-      it { is_expected.to be_disallowed(:read_group_timelogs) }
-    end
-
-    context 'with non member' do
-      let(:current_user) { non_member }
-
-      it { is_expected.to be_disallowed(:read_group_timelogs) }
-    end
-
-    context 'with anonymous' do
-      let(:current_user) { anonymous }
-
-      it { is_expected.to be_disallowed(:read_group_timelogs) }
-    end
-  end
-
-  context 'when timelogs report feature is disabled' do
-    let(:current_user) { admin }
-
-    before do
-      stub_licensed_features(group_timelogs: false)
-    end
-
-    it { is_expected.to be_disallowed(:read_group_timelogs) }
-  end
-
-  context 'when project activity analytics is available' do
+  context 'when dora4 analytics is available' do
     let(:current_user) { developer }
 
     before do
-      stub_licensed_features(project_activity_analytics: true)
+      stub_licensed_features(dora4_analytics: true)
     end
 
-    it { is_expected.to be_allowed(:read_project_activity_analytics) }
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
   end
 
-  context 'when project activity analytics is not available' do
+  context 'when dora4 analytics is not available' do
     let(:current_user) { developer }
 
     before do
-      stub_licensed_features(project_activity_analytics: false)
+      stub_licensed_features(dora4_analytics: false)
     end
 
-    it { is_expected.not_to be_allowed(:read_project_activity_analytics) }
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
   end
 
   describe ':read_code_review_analytics' do
@@ -1532,6 +1429,41 @@ RSpec.describe ProjectPolicy do
     let(:resource) { project }
   end
 
+  describe 'Quality Management test case' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :create_test_case }
+
+    where(:role, :admin_mode, :allowed) do
+      :guest      | nil   | false
+      :reporter   | nil   | true
+      :developer  | nil   | true
+      :maintainer | nil   | true
+      :owner      | nil   | true
+      :admin      | false | false
+      :admin      | true  | true
+    end
+
+    before do
+      stub_licensed_features(quality_management: true)
+      enable_admin_mode!(current_user) if admin_mode
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+      context 'with unavailable license' do
+        before do
+          stub_licensed_features(quality_management: false)
+        end
+
+        it { is_expected.to(be_disallowed(policy)) }
+      end
+    end
+  end
+
   describe ':compliance_framework_available' do
     using RSpec::Parameterized::TableSyntax
 
@@ -1543,9 +1475,8 @@ RSpec.describe ProjectPolicy do
       :reporter   | false | nil   | false
       :reporter   | true  | nil   | false
       :developer  | false | nil   | false
-      :developer  | true  | nil   | false
       :maintainer | false | nil   | false
-      :maintainer | true  | nil   | false
+      :maintainer | true  | nil   | true
       :owner      | false | nil   | false
       :owner      | true  | nil   | true
       :admin      | false | false | false
@@ -1618,14 +1549,6 @@ RSpec.describe ProjectPolicy do
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
 
-        context 'with disabled feature flag' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to(be_disallowed(policy)) }
-        end
-
         context 'with unavailable license' do
           before do
             stub_licensed_features(oncall_schedules: false)
@@ -1659,17 +1582,79 @@ RSpec.describe ProjectPolicy do
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
 
-        context 'with disabled feature flag' do
+        context 'with unavailable license' do
           before do
-            stub_feature_flags(oncall_schedules_mvc: false)
+            stub_licensed_features(oncall_schedules: false)
           end
 
           it { is_expected.to(be_disallowed(policy)) }
         end
+      end
+    end
+  end
 
-        context 'with unavailable license' do
+  describe 'Escalation Policies' do
+    using RSpec::Parameterized::TableSyntax
+
+    context ':read_incident_management_escalation_policy' do
+      let(:policy) { :read_incident_management_escalation_policy }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | true
+        :developer  | nil   | true
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with unavailable escalation policies' do
           before do
-            stub_licensed_features(oncall_schedules: false)
+            allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
+    end
+
+    context ':admin_incident_management_escalation_policy' do
+      let(:policy) { :admin_incident_management_escalation_policy }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | false
+        :developer  | nil   | false
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with unavailable escalation policies' do
+          before do
+            allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(false)
           end
 
           it { is_expected.to(be_disallowed(policy)) }
@@ -1688,7 +1673,7 @@ RSpec.describe ProjectPolicy do
     before do
       allow(project.root_namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
       allow(project).to receive(:design_management_enabled?).and_return(true)
-      stub_licensed_features(security_dashboard: true, license_scanning: true)
+      stub_licensed_features(security_dashboard: true, license_scanning: true, quality_management: true)
     end
 
     context 'when the group has exceeded its storage limit' do
@@ -1703,7 +1688,8 @@ RSpec.describe ProjectPolicy do
       # These are abilities that are not explicitly allowed by policies because most of them are not
       # real abilities.  They are prevented due to the use of create_update_admin helper method.
       let(:abilities_not_currently_enabled) do
-        %i[create_merge_request create_list update_list create_label update_label create_milestone
+        %i[create_merge_request create_issue_board_list create_issue_board update_issue_board
+           update_issue_board_list create_label update_label create_milestone
            update_milestone update_wiki update_design admin_design update_note
            update_pipeline_schedule admin_pipeline_schedule create_trigger update_trigger
            admin_trigger create_pages admin_release request_access create_board update_board
@@ -1727,24 +1713,73 @@ RSpec.describe ProjectPolicy do
         allow(::Gitlab).to receive(:com?).and_return(true)
       end
 
-      context 'with maintainer' do
+      context 'with maintainer access' do
         let(:current_user) { maintainer }
 
         before do
           project.add_maintainer(maintainer)
         end
 
-        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+        context 'create resource access tokens' do
+          it { is_expected.to be_allowed(:create_resource_access_tokens) }
+
+          context 'with a personal namespace project' do
+            let(:namespace) { create(:namespace_with_plan, plan: :bronze_plan) }
+            let(:project) { create(:project, namespace: namespace) }
+
+            it { is_expected.to be_allowed(:create_resource_access_tokens) }
+          end
+
+          context 'when resource access token creation is not allowed' do
+            before do
+              group.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+          end
+
+          context 'when parent group has resource access token creation disabled' do
+            let(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+            let(:group) { create(:group, parent: parent) }
+            let(:project) { create(:project, group: group) }
+
+            before do
+              parent.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            context 'cannot create resource access tokens' do
+              it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+            end
+          end
+        end
+
+        context 'read resource access tokens' do
+          it { is_expected.to be_allowed(:read_resource_access_tokens) }
+        end
+
+        context 'destroy resource access tokens' do
+          it { is_expected.to be_allowed(:destroy_resource_access_tokens) }
+        end
       end
 
-      context 'with developer' do
+      context 'with developer access' do
         let(:current_user) { developer }
 
         before do
           project.add_developer(developer)
         end
 
-        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+        context 'create resource access tokens' do
+          it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+        end
+
+        context 'read resource access tokens' do
+          it { is_expected.not_to be_allowed(:read_resource_access_tokens) }
+        end
+
+        context 'destroy resource access tokens' do
+          it { is_expected.not_to be_allowed(:destroy_resource_access_tokens) }
+        end
       end
     end
   end
@@ -1822,6 +1857,37 @@ RSpec.describe ProjectPolicy do
           it { is_expected.to be_allowed(:read_issue_analytics) }
         end
       end
+    end
+  end
+
+  describe ':build_read_project' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :build_read_project }
+
+    where(:role, :project_visibility, :allowed) do
+      :guest      | 'public'  | true
+      :reporter   | 'public'  | true
+      :developer  | 'public'  | true
+      :maintainer | 'public'  | true
+      :owner      | 'public'  | true
+      :admin      | 'public'  | true
+      :guest      | 'private' | false
+      :reporter   | 'private' | true
+      :developer  | 'private' | true
+      :maintainer | 'private' | true
+      :owner      | 'private' | true
+      :admin      | 'private' | false
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        project.update_column(:visibility_level, Gitlab::VisibilityLevel.level_value(project_visibility))
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
     end
   end
 end

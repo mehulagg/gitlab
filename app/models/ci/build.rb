@@ -14,8 +14,6 @@ module Ci
 
     BuildArchivedError = Class.new(StandardError)
 
-    ignore_columns :artifacts_file, :artifacts_file_store, :artifacts_metadata, :artifacts_metadata_store, :artifacts_size, :commands, remove_after: '2019-12-15', remove_with: '12.7'
-
     belongs_to :project, inverse_of: :builds
     belongs_to :runner
     belongs_to :trigger_request
@@ -35,9 +33,12 @@ module Ci
     }.freeze
 
     DEGRADATION_THRESHOLD_VARIABLE_NAME = 'DEGRADATION_THRESHOLD'
+    RUNNERS_STATUS_CACHE_EXPIRATION = 1.minute
 
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
+    has_one :queuing_entry, class_name: 'Ci::PendingBuild', foreign_key: :build_id
+    has_one :runtime_metadata, class_name: 'Ci::RunningBuild', foreign_key: :build_id
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
     has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
@@ -63,6 +64,9 @@ module Ci
     delegate :gitlab_deploy_token, to: :project
     delegate :trigger_short_token, to: :trigger_request, allow_nil: true
 
+    ignore_columns :id_convert_to_bigint, remove_with: '14.1', remove_after: '2021-07-22'
+    ignore_columns :stage_id_convert_to_bigint, remove_with: '14.1', remove_after: '2021-07-22'
+
     ##
     # Since Gitlab 11.5, deployments records started being created right after
     # `ci_builds` creation. We can look up a relevant `environment` through
@@ -75,7 +79,14 @@ module Ci
       return unless has_environment?
 
       strong_memoize(:persisted_environment) do
-        Environment.find_by(name: expanded_environment_name, project: project)
+        # This code path has caused N+1s in the past, since environments are only indirectly
+        # associated to builds and pipelines; see https://gitlab.com/gitlab-org/gitlab/-/issues/326445
+        # We therefore batch-load them to prevent dormant N+1s until we found a proper solution.
+        BatchLoader.for(expanded_environment_name).batch(key: project_id) do |names, loader, args|
+          Environment.where(name: names, project: args[:key]).find_each do |environment|
+            loader.call(environment.name, environment)
+          end
+        end
       end
     end
 
@@ -88,8 +99,7 @@ module Ci
     validates :ref, presence: true
 
     scope :not_interruptible, -> do
-      joins(:metadata).where('ci_builds_metadata.id NOT IN (?)',
-        Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
+      joins(:metadata).where.not('ci_builds_metadata.id' => Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
     end
 
     scope :unstarted, -> { where(runner_id: nil) }
@@ -125,6 +135,7 @@ module Ci
 
     scope :eager_load_job_artifacts, -> { includes(:job_artifacts) }
     scope :eager_load_job_artifacts_archive, -> { includes(:job_artifacts_archive) }
+    scope :eager_load_tags, -> { includes(:tags) }
 
     scope :eager_load_everything, -> do
       includes(
@@ -167,25 +178,6 @@ module Ci
       joins(:metadata).where("ci_builds_metadata.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
     end
 
-    scope :matches_tag_ids, -> (tag_ids) do
-      matcher = ::ActsAsTaggableOn::Tagging
-        .where(taggable_type: CommitStatus.name)
-        .where(context: 'tags')
-        .where('taggable_id = ci_builds.id')
-        .where.not(tag_id: tag_ids).select('1')
-
-      where("NOT EXISTS (?)", matcher)
-    end
-
-    scope :with_any_tags, -> do
-      matcher = ::ActsAsTaggableOn::Tagging
-        .where(taggable_type: CommitStatus.name)
-        .where(context: 'tags')
-        .where('taggable_id = ci_builds.id').select('1')
-
-      where("EXISTS (?)", matcher)
-    end
-
     scope :queued_before, ->(time) { where(arel_table[:queued_at].lt(time)) }
 
     scope :preload_project_and_pipeline_project, -> do
@@ -194,15 +186,19 @@ module Ci
     end
 
     scope :with_coverage, -> { where.not(coverage: nil) }
+    scope :without_coverage, -> { where(coverage: nil) }
+    scope :with_coverage_regex, -> { where.not(coverage_regex: nil) }
 
     scope :for_project, -> (project_id) { where(project_id: project_id) }
 
     acts_as_taggable
 
-    add_authentication_token_field :token, encrypted: :optional
+    add_authentication_token_field :token, encrypted: :required
 
     before_save :ensure_token
     before_destroy { unscoped_project }
+
+    after_save :stick_build_if_status_changed
 
     after_create unless: :importing? do |build|
       run_after_commit { BuildHooksWorker.perform_async(build.id) }
@@ -286,10 +282,33 @@ module Ci
         end
       end
 
-      after_transition any => [:pending] do |build|
+      # rubocop:disable CodeReuse/ServiceClass
+      after_transition any => [:pending] do |build, transition|
+        Ci::UpdateBuildQueueService.new.push(build, transition)
+
         build.run_after_commit do
           BuildQueueWorker.perform_async(id)
         end
+      end
+
+      after_transition pending: any do |build, transition|
+        Ci::UpdateBuildQueueService.new.pop(build, transition)
+      end
+
+      after_transition any => [:running] do |build, transition|
+        Ci::UpdateBuildQueueService.new.track(build, transition)
+      end
+
+      after_transition running: any do |build, transition|
+        Ci::UpdateBuildQueueService.new.untrack(build, transition)
+
+        Ci::BuildRunnerSession.where(build: build).delete_all
+      end
+
+      # rubocop:enable CodeReuse/ServiceClass
+      #
+      after_transition pending: :running do |build|
+        build.ensure_metadata.update_timeout_state
       end
 
       after_transition pending: :running do |build|
@@ -306,7 +325,11 @@ module Ci
         build.run_after_commit do
           build.run_status_commit_hooks!
 
-          BuildFinishedWorker.perform_async(id)
+          if Feature.enabled?(:ci_build_finished_worker_namespace_changed, build.project, default_enabled: :yaml)
+            Ci::BuildFinishedWorker.perform_async(id)
+          else
+            ::BuildFinishedWorker.perform_async(id)
+          end
         end
       end
 
@@ -319,13 +342,13 @@ module Ci
         end
       end
 
-      before_transition any => [:failed] do |build|
+      after_transition any => [:failed] do |build|
         next unless build.project
         next unless build.deployment
 
         begin
           build.deployment.drop!
-        rescue => e
+        rescue StandardError => e
           Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e, build_id: build.id)
         end
 
@@ -344,20 +367,39 @@ module Ci
         end
       end
 
-      after_transition pending: :running do |build|
-        build.ensure_metadata.update_timeout_state
-      end
-
-      after_transition running: any do |build|
-        Ci::BuildRunnerSession.where(build: build).delete_all
-      end
-
       after_transition any => [:skipped, :canceled] do |build, transition|
         if transition.to_name == :skipped
           build.deployment&.skip
         else
           build.deployment&.cancel
         end
+      end
+    end
+
+    def self.build_matchers(project)
+      unique_params = [
+        :protected,
+        Arel.sql("(#{arel_tag_names_array.to_sql})")
+      ]
+
+      group(*unique_params).pluck('array_agg(id)', *unique_params).map do |values|
+        Gitlab::Ci::Matching::BuildMatcher.new({
+          build_ids: values[0],
+          protected: values[1],
+          tag_list: values[2],
+          project: project
+        })
+      end
+    end
+
+    def build_matcher
+      strong_memoize(:build_matcher) do
+        Gitlab::Ci::Matching::BuildMatcher.new({
+          protected: protected?,
+          tag_list: tag_list,
+          build_ids: [id],
+          project: project
+        })
       end
     end
 
@@ -372,11 +414,11 @@ module Ci
     end
 
     def other_manual_actions
-      pipeline.manual_actions.where.not(name: name)
+      pipeline.manual_actions.reject { |action| action.name == self.name }
     end
 
     def other_scheduled_actions
-      pipeline.scheduled_actions.where.not(name: name)
+      pipeline.scheduled_actions.reject { |action| action.name == self.name }
     end
 
     def pages_generator?
@@ -424,7 +466,13 @@ module Ci
     end
 
     def retryable?
-      !archived? && (success? || failed? || canceled?)
+      if Feature.enabled?(:prevent_retry_of_retried_jobs, project, default_enabled: :yaml)
+        return false if retried? || archived?
+
+        success? || failed? || canceled?
+      else
+        !archived? && (success? || failed? || canceled?)
+      end
     end
 
     def retries_count
@@ -486,6 +534,10 @@ module Ci
       self.options.fetch(:environment, {}).fetch(:action, 'start') if self.options
     end
 
+    def environment_deployment_tier
+      self.options.dig(:environment, :deployment_tier) if self.options
+    end
+
     def outdated_deployment?
       success? && !deployment.try(:last?)
     end
@@ -510,7 +562,6 @@ module Ci
           .concat(scoped_variables)
           .concat(job_variables)
           .concat(persisted_environment_variables)
-          .to_runner_variables
       end
     end
 
@@ -523,6 +574,7 @@ module Ci
           .append(key: 'CI_JOB_ID', value: id.to_s)
           .append(key: 'CI_JOB_URL', value: Gitlab::Routing.url_helpers.project_job_url(project, self))
           .append(key: 'CI_JOB_TOKEN', value: token.to_s, public: false, masked: true)
+          .append(key: 'CI_JOB_STARTED_AT', value: started_at&.iso8601)
           .append(key: 'CI_BUILD_ID', value: id.to_s)
           .append(key: 'CI_BUILD_TOKEN', value: token.to_s, public: false, masked: true)
           .append(key: 'CI_REGISTRY_USER', value: ::Gitlab::Auth::CI_JOB_USER)
@@ -537,6 +589,8 @@ module Ci
         break variables unless persisted? && persisted_environment.present?
 
         variables.concat(persisted_environment.predefined_variables)
+
+        variables.append(key: 'CI_ENVIRONMENT_ACTION', value: environment_action)
 
         # Here we're passing unexpanded environment_url for runner to expand,
         # and we need to make sure that CI_ENVIRONMENT_NAME and
@@ -564,7 +618,10 @@ module Ci
     end
 
     def features
-      { trace_sections: true }
+      {
+        trace_sections: true,
+        failure_reasons: self.class.failure_reasons.keys
+      }
     end
 
     def merge_request
@@ -686,12 +743,28 @@ module Ci
       self.token && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
     end
 
+    def tag_list
+      if tags.loaded?
+        tags.map(&:name)
+      else
+        super
+      end
+    end
+
     def has_tags?
       tag_list.any?
     end
 
     def any_runners_online?
-      project.any_runners? { |runner| runner.active? && runner.online? && runner.can_pick?(self) }
+      cache_for_online_runners do
+        project.any_online_runners? { |runner| runner.match_build_if_online?(self) }
+      end
+    end
+
+    def any_runners_available?
+      cache_for_available_runners do
+        project.active_runners.exists?
+      end
     end
 
     def stuck?
@@ -702,7 +775,7 @@ module Ci
       return unless project
 
       project.execute_hooks(build_data.dup, :job_hooks) if project.has_active_hooks?(:job_hooks)
-      project.execute_services(build_data.dup, :job_hooks) if project.has_active_services?(:job_hooks)
+      project.execute_integrations(build_data.dup, :job_hooks) if project.has_active_integrations?(:job_hooks)
     end
 
     def browsable_artifacts?
@@ -810,14 +883,15 @@ module Ci
     end
 
     def cache
-      cache = options[:cache]
+      cache = Array.wrap(options[:cache])
 
-      if cache && project.jobs_cache_index
-        cache = cache.merge(
-          key: "#{cache[:key]}-#{project.jobs_cache_index}")
+      if project.jobs_cache_index
+        cache = cache.map do |single_cache|
+          single_cache.merge(key: "#{single_cache[:key]}-#{project.jobs_cache_index}")
+        end
       end
 
-      [cache]
+      cache
     end
 
     def credentials
@@ -858,8 +932,7 @@ module Ci
     end
 
     def supports_artifacts_exclude?
-      options&.dig(:artifacts, :exclude)&.any? &&
-        Gitlab::Ci::Features.artifacts_exclude_enabled?
+      options&.dig(:artifacts, :exclude)&.any?
     end
 
     def multi_build_steps?
@@ -983,7 +1056,7 @@ module Ci
       # TODO: Have `debug_mode?` check against data on sent back from runner
       # to capture all the ways that variables can be set.
       # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
-      variables.any? { |variable| variable[:key] == 'CI_DEBUG_TRACE' && variable[:value].casecmp('true') == 0 }
+      variables['CI_DEBUG_TRACE']&.value&.casecmp('true') == 0
     end
 
     def drop_with_exit_code!(failure_reason, exit_code)
@@ -997,6 +1070,28 @@ module Ci
       options.dig(:allow_failure_criteria, :exit_codes).present?
     end
 
+    def create_queuing_entry!
+      ::Ci::PendingBuild.upsert_from_build!(self)
+    end
+
+    ##
+    # We can have only one queuing entry or running build tracking entry,
+    # because there is a unique index on `build_id` in each table, but we need
+    # a relation to remove these entries more efficiently in a single statement
+    # without actually loading data.
+    #
+    def all_queuing_entries
+      ::Ci::PendingBuild.where(build_id: self.id)
+    end
+
+    def all_runtime_metadata
+      ::Ci::RunningBuild.where(build_id: self.id)
+    end
+
+    def shared_runner_build?
+      runner&.instance_type?
+    end
+
     protected
 
     def run_status_commit_hooks!
@@ -1006,6 +1101,13 @@ module Ci
     end
 
     private
+
+    def stick_build_if_status_changed
+      return unless saved_change_to_status?
+      return unless running?
+
+      ::Gitlab::Database::LoadBalancing::Sticking.stick(:build, id)
+    end
 
     def status_commit_hooks
       @status_commit_hooks ||= []
@@ -1018,7 +1120,7 @@ module Ci
     end
 
     def build_data
-      @build_data ||= Gitlab::DataBuilder::Build.build(self)
+      strong_memoize(:build_data) { Gitlab::DataBuilder::Build.build(self) }
     end
 
     def successful_deployment_status
@@ -1095,7 +1197,21 @@ module Ci
         .to_a
         .include?(exit_code)
     end
+
+    def cache_for_online_runners(&block)
+      Rails.cache.fetch(
+        ['has-online-runners', id],
+        expires_in: RUNNERS_STATUS_CACHE_EXPIRATION
+      ) { yield }
+    end
+
+    def cache_for_available_runners(&block)
+      Rails.cache.fetch(
+        ['has-available-runners', project.id],
+        expires_in: RUNNERS_STATUS_CACHE_EXPIRATION
+      ) { yield }
+    end
   end
 end
 
-Ci::Build.prepend_if_ee('EE::Ci::Build')
+Ci::Build.prepend_mod_with('Ci::Build')

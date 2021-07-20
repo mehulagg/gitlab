@@ -8,7 +8,9 @@ RSpec.describe Resolvers::ExternalIssueResolver do
   let_it_be(:current_user) { create(:user) }
 
   context 'when Jira issues are requested' do
-    let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:jira_integration) { create(:jira_integration, project: project) }
+    let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link, project: project) }
 
     let(:jira_issue) do
       double(
@@ -17,8 +19,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         created: Time.at(1606348800).utc,
         updated: Time.at(1606348800).utc,
         status: double(name: 'To Do'),
-        key: 'GV-1',
-        client: double(options: { site: 'http://jira.com/' })
+        key: 'GV-1'
       )
     end
 
@@ -28,7 +29,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         'created_at' => '2020-11-26T00:00:00.000Z',
         'updated_at' => '2020-11-26T00:00:00.000Z',
         'status' => 'To Do',
-        'web_url' => 'http://jira.com/browse/GV-1',
+        'web_url' => 'https://jira.example.com/browse/GV-1',
         'references' => {
           'relative' => 'GV-1'
         },
@@ -45,6 +46,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
       it 'sends request to Jira to fetch issues' do
         params = [vulnerability_external_issue_link.vulnerability.project, [vulnerability_external_issue_link.external_issue_key]]
+
         expect_next_instance_of(::Projects::Integrations::Jira::ByIdsFinder, *params) do |issues_finder|
           expect(issues_finder).to receive(:execute).and_return(nil)
         end
@@ -54,6 +56,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
       it 'returns nil' do
         result = batch_sync { resolve_external_issue({}) }
+
         expect(result).to be_nil
       end
     end
@@ -67,6 +70,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
       it 'sends request to Jira to fetch issues' do
         params = [vulnerability_external_issue_link.vulnerability.project, [vulnerability_external_issue_link.external_issue_key]]
+
         expect_next_instance_of(::Projects::Integrations::Jira::ByIdsFinder, *params) do |issues_finder|
           expect(issues_finder).to receive(:execute).and_return(issues: [jira_issue])
         end
@@ -76,6 +80,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
       it 'returns serialized Jira issues' do
         result = batch_sync { resolve_external_issue({}) }
+
         expect(result.as_json).to eq(expected_result)
       end
     end

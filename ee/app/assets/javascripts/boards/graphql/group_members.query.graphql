@@ -1,0 +1,14 @@
+query EpicUsers($fullPath: ID!, $search: String) {
+  group(fullPath: $fullPath) {
+    groupMembers(relations: [DIRECT, DESCENDANTS, INHERITED], search: $search) {
+      nodes {
+        user {
+          id
+          name
+          username
+          avatarUrl
+        }
+      }
+    }
+  }
+}

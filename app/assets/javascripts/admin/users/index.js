@@ -1,43 +1,88 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import csrf from '~/lib/utils/csrf';
 import AdminUsersApp from './components/app.vue';
-import UsagePingDisabled from './components/usage_ping_disabled.vue';
+import ModalManager from './components/modals/user_modal_manager.vue';
+import UserActions from './components/user_actions.vue';
+import {
+  CONFIRM_DELETE_BUTTON_SELECTOR,
+  MODAL_TEXTS_CONTAINER_SELECTOR,
+  MODAL_MANAGER_SELECTOR,
+} from './constants';
 
-export const initAdminUsersApp = (el = document.querySelector('#js-admin-users-app')) => {
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient({}, { assumeImmutableResults: true }),
+});
+
+const initApp = (el, component, userPropKey, props = {}) => {
   if (!el) {
     return false;
   }
 
-  const { users, paths } = el.dataset;
+  const { [userPropKey]: user, paths } = el.dataset;
 
   return new Vue({
     el,
+    apolloProvider,
     render: (createElement) =>
-      createElement(AdminUsersApp, {
+      createElement(component, {
         props: {
-          users: convertObjectPropsToCamelCase(JSON.parse(users), { deep: true }),
+          [userPropKey]: convertObjectPropsToCamelCase(JSON.parse(user), { deep: true }),
           paths: convertObjectPropsToCamelCase(JSON.parse(paths)),
+          ...props,
         },
       }),
   });
 };
 
-export const initCohortsEmptyState = (el = document.querySelector('#js-cohorts-empty-state')) => {
-  if (!el) {
-    return false;
+export const initAdminUsersApp = (el = document.querySelector('#js-admin-users-app')) =>
+  initApp(el, AdminUsersApp, 'users');
+
+export const initAdminUserActions = (el = document.querySelector('#js-admin-user-actions')) =>
+  initApp(el, UserActions, 'user', { showButtonLabels: true });
+
+export const initDeleteUserModals = () => {
+  const modalsMountElement = document.querySelector(MODAL_TEXTS_CONTAINER_SELECTOR);
+
+  if (!modalsMountElement) {
+    return;
   }
 
-  const { emptyStateSvgPath, enableUsagePingLink, docsLink } = el.dataset;
+  const modalConfiguration = Array.from(modalsMountElement.children).reduce((accumulator, node) => {
+    const { modal, ...config } = node.dataset;
 
-  return new Vue({
-    el,
-    provide: {
-      svgPath: emptyStateSvgPath,
-      primaryButtonPath: enableUsagePingLink,
-      docsLink,
+    return {
+      ...accumulator,
+      [modal]: {
+        title: node.dataset.title,
+        ...config,
+        content: node.innerHTML,
+      },
+    };
+  }, {});
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el: MODAL_MANAGER_SELECTOR,
+    functional: true,
+    methods: {
+      show(...args) {
+        this.$refs.manager.show(...args);
+      },
     },
     render(h) {
-      return h(UsagePingDisabled);
+      return h(ModalManager, {
+        ref: 'manager',
+        props: {
+          selector: CONFIRM_DELETE_BUTTON_SELECTOR,
+          modalConfiguration,
+          csrfToken: csrf.token,
+        },
+      });
     },
   });
 };

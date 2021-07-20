@@ -5,8 +5,7 @@ query epicChildEpics(
   $iid: ID!
   $state: EpicState
   $sort: EpicSort
-  $startDate: Time
-  $dueDate: Time
+  $timeframe: Timeframe
   $labelName: [String!] = []
   $authorUsername: String = ""
   $confidential: Boolean
@@ -22,12 +21,11 @@ query epicChildEpics(
       children(
         state: $state
         sort: $sort
-        startDate: $startDate
-        endDate: $dueDate
         labelName: $labelName
         authorUsername: $authorUsername
         confidential: $confidential
         search: $search
+        timeframe: $timeframe
       ) {
         edges {
           node {

@@ -2,6 +2,7 @@ import { GlDropdown, GlTabs } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
+import DastFailedSiteValidations from 'ee/security_configuration/dast_profiles/components/dast_failed_site_validations.vue';
 import DastProfiles from 'ee/security_configuration/dast_profiles/components/dast_profiles.vue';
 import setWindowLocation from 'helpers/set_window_location_helper';
 
@@ -50,7 +51,7 @@ describe('EE - DastProfiles', () => {
           mocks: defaultMocks,
           provide: {
             glFeatures: {
-              dastSavedScans: true,
+              dastFailedSiteValidations: true,
             },
           },
         },
@@ -76,6 +77,14 @@ describe('EE - DastProfiles', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  describe('failed validations', () => {
+    it('renders the failed site validations summary', () => {
+      createComponent();
+
+      expect(wrapper.findComponent(DastFailedSiteValidations).exists()).toBe(true);
+    });
   });
 
   describe('header', () => {
@@ -139,7 +148,7 @@ describe('EE - DastProfiles', () => {
 
     describe.each`
       tabName               | index | givenLocationHash
-      ${'Saved Scans'}      | ${0}  | ${'dast-profiles'}
+      ${'Saved Scans'}      | ${0}  | ${'saved-scans'}
       ${'Site Profiles'}    | ${1}  | ${'site-profiles'}
       ${'Scanner Profiles'} | ${2}  | ${'scanner-profiles'}
     `('with location hash set to "$givenLocationHash"', ({ tabName, index, givenLocationHash }) => {
@@ -241,32 +250,17 @@ describe('EE - DastProfiles', () => {
     });
   });
 
-  describe('dastSavedScans feature flag disabled', () => {
-    beforeEach(() => {
-      createFullComponent({
+  describe('dastFailedSiteValidations feature flag disabled', () => {
+    it('does not render the failed site validations summary', () => {
+      createComponent({
         provide: {
           glFeatures: {
-            dastSavedScans: false,
+            dastFailedSiteValidations: false,
           },
         },
       });
-    });
 
-    it('does not show a "DAST Scan" item in the dropdown', () => {
-      expect(getSiteProfilesDropdownItem('DAST Scan')).toBe(null);
-    });
-
-    it('shows only 2 tabs', () => {
-      expect(withinComponent().getAllByRole('tab')).toHaveLength(2);
-    });
-
-    it('"Site Profile" tab should be selected by default', () => {
-      const tab = getTab({
-        tabName: 'Site Profiles',
-        selected: true,
-      });
-
-      expect(tab).not.toBe(null);
+      expect(wrapper.findComponent(DastFailedSiteValidations).exists()).toBe(false);
     });
   });
 });

@@ -7,30 +7,11 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
 
   before do
     allow(Dir).to receive(:glob).with(Rails.root.join('data', 'whats_new', '*.yml')).and_return(fixture_dir_glob)
+    Gitlab::CurrentSettings.update!(whats_new_variant: ApplicationSetting.whats_new_variants[:all_tiers])
   end
 
   after do
     ReleaseHighlight.instance_variable_set(:@file_paths, nil)
-  end
-
-  describe '.for_version' do
-    subject { ReleaseHighlight.for_version(version: version) }
-
-    let(:version) { '1.1' }
-
-    context 'with version param that exists' do
-      it 'returns items from that version' do
-        expect(subject.items.first['title']).to eq("It's gonna be a bright")
-      end
-    end
-
-    context 'with version param that does NOT exist' do
-      let(:version) { '84.0' }
-
-      it 'returns nil' do
-        expect(subject).to be_nil
-      end
-    end
   end
 
   describe '.paginated' do
@@ -44,16 +25,16 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
       subject { ReleaseHighlight.paginated(page: page) }
 
       context 'when there is another page of results' do
-        let(:page) { 2 }
+        let(:page) { 3 }
 
         it 'responds with paginated results' do
           expect(subject[:items].first['title']).to eq('bright')
-          expect(subject[:next_page]).to eq(3)
+          expect(subject[:next_page]).to eq(4)
         end
       end
 
       context 'when there is NOT another page of results' do
-        let(:page) { 3 }
+        let(:page) { 4 }
 
         it 'responds with paginated results and no next_page' do
           expect(subject[:items].first['title']).to eq("It's gonna be a bright")
@@ -74,8 +55,8 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
       subject { ReleaseHighlight.paginated }
 
       it 'uses multiple levels of cache' do
-        expect(Rails.cache).to receive(:fetch).with("release_highlight:items:page-1:#{Gitlab.revision}", { expires_in: described_class::CACHE_DURATION }).and_call_original
-        expect(Rails.cache).to receive(:fetch).with("release_highlight:file_paths:#{Gitlab.revision}", { expires_in: described_class::CACHE_DURATION }).and_call_original
+        expect(Rails.cache).to receive(:fetch).with("release_highlight:all_tiers:items:page-1:#{Gitlab.revision}", { expires_in: described_class::CACHE_DURATION }).and_call_original
+        expect(Rails.cache).to receive(:fetch).with("release_highlight:all_tiers:file_paths:#{Gitlab.revision}", { expires_in: described_class::CACHE_DURATION }).and_call_original
 
         subject
       end
@@ -86,12 +67,12 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
         expect(subject[:next_page]).to eq(2)
       end
 
-      it 'parses the body as markdown and returns html' do
-        expect(subject[:items].first['body']).to match("<h2 id=\"bright-and-sunshinin-day\">bright and sunshinin’ day</h2>")
+      it 'parses the body as markdown and returns html, and links are target="_blank"' do
+        expect(subject[:items].first['body']).to match('<p data-sourcepos="1:1-1:62" dir="auto">bright and sunshinin\' <a href="https://en.wikipedia.org/wiki/Day" rel="nofollow noreferrer noopener" target="_blank">day</a></p>')
       end
 
       it 'logs an error if theres an error parsing markdown for an item, and skips it' do
-        allow(Kramdown::Document).to receive(:new).and_raise
+        allow(Banzai).to receive(:render).and_raise
 
         expect(Gitlab::ErrorTracking).to receive(:track_exception)
         expect(subject[:items]).to be_empty
@@ -121,7 +102,7 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
     subject { ReleaseHighlight.most_recent_item_count }
 
     it 'uses process memory cache' do
-      expect(Gitlab::ProcessMemoryCache.cache_backend).to receive(:fetch).with("release_highlight:recent_item_count:#{Gitlab.revision}", expires_in: described_class::CACHE_DURATION)
+      expect(Gitlab::ProcessMemoryCache.cache_backend).to receive(:fetch).with("release_highlight:all_tiers:recent_item_count:#{Gitlab.revision}", expires_in: described_class::CACHE_DURATION)
 
       subject
     end
@@ -143,28 +124,54 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
     end
   end
 
-  describe '.versions' do
-    subject { described_class.versions }
+  describe '.most_recent_version_digest' do
+    subject { ReleaseHighlight.most_recent_version_digest }
 
     it 'uses process memory cache' do
-      expect(Gitlab::ProcessMemoryCache.cache_backend).to receive(:fetch).with("release_highlight:versions:#{Gitlab.revision}", { expires_in: described_class::CACHE_DURATION })
+      expect(Gitlab::ProcessMemoryCache.cache_backend).to receive(:fetch).with("release_highlight:all_tiers:most_recent_version_digest:#{Gitlab.revision}", expires_in: described_class::CACHE_DURATION)
 
       subject
     end
 
-    it 'returns versions from the file paths' do
-      expect(subject).to eq(['1.5', '1.2', '1.1'])
+    context 'when recent release items exist' do
+      it 'returns a digest from the release of the first item of the most recent file' do
+        # this value is coming from fixture data
+        expect(subject).to eq(Digest::SHA256.hexdigest('01.05'))
+      end
     end
 
-    context 'when there are more than 12 versions' do
-      let(:file_paths) do
-        i = 0
-        Array.new(20) { "20201225_01_#{i += 1}.yml" }
+    context 'when recent release items do NOT exist' do
+      it 'returns nil' do
+        allow(ReleaseHighlight).to receive(:paginated).and_return(nil)
+
+        expect(subject).to be_nil
+      end
+    end
+  end
+
+  describe '.load_items' do
+    context 'whats new for all tiers' do
+      before do
+        Gitlab::CurrentSettings.update!(whats_new_variant: ApplicationSetting.whats_new_variants[:all_tiers])
       end
 
-      it 'limits to 12 versions' do
-        allow(ReleaseHighlight).to receive(:file_paths).and_return(file_paths)
-        expect(subject.count).to eq(12)
+      it 'returns all items' do
+        items = described_class.load_items(page: 2)
+
+        expect(items.count).to eq(3)
+      end
+    end
+
+    context 'whats new for current tier only' do
+      before do
+        Gitlab::CurrentSettings.update!(whats_new_variant: ApplicationSetting.whats_new_variants[:current_tier])
+      end
+
+      it 'returns items with package=Free' do
+        items = described_class.load_items(page: 2)
+
+        expect(items.count).to eq(1)
+        expect(items.first['title']).to eq("View epics on a board")
       end
     end
   end
@@ -176,6 +183,14 @@ RSpec.describe ReleaseHighlight, :clean_gitlab_redis_cache do
 
     it 'responds to map' do
       expect(subject.map(&:to_s)).to eq(items.map(&:to_s))
+    end
+  end
+
+  describe '.current_package' do
+    subject { described_class.current_package }
+
+    it 'returns Free' do
+      expect(subject).to eq('Free')
     end
   end
 end

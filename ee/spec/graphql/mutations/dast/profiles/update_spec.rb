@@ -5,19 +5,24 @@ require 'spec_helper'
 RSpec.describe Mutations::Dast::Profiles::Update do
   include GraphqlHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
+  let_it_be(:new_dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:new_dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
   let(:dast_profile_gid) { dast_profile.to_global_id }
+  let(:run_after_update) { false }
 
   let(:params) do
     {
       id: dast_profile_gid,
-      dast_site_profile_id: global_id_of(create(:dast_site_profile, project: project)),
-      dast_scanner_profile_id: global_id_of(create(:dast_scanner_profile, project: project)),
       name: SecureRandom.hex,
-      description: SecureRandom.hex
+      description: SecureRandom.hex,
+      branch_name: project.default_branch,
+      dast_site_profile_id: global_id_of(new_dast_site_profile),
+      dast_scanner_profile_id: global_id_of(new_dast_scanner_profile),
+      run_after_update: run_after_update
     }
   end
 
@@ -72,6 +77,21 @@ RSpec.describe Mutations::Dast::Profiles::Update do
             expect(global_id_of(updated_dast_profile.dast_scanner_profile)).to eq(params[:dast_scanner_profile_id])
             expect(updated_dast_profile.name).to eq(params[:name])
             expect(updated_dast_profile.description).to eq(params[:description])
+            expect(updated_dast_profile.branch_name).to eq(params[:branch_name])
+          end
+        end
+
+        context 'when run_after_update=true' do
+          let(:run_after_update) { true }
+
+          it_behaves_like 'it creates a DAST on-demand scan pipeline'
+
+          it_behaves_like 'it checks branch permissions before creating a DAST on-demand scan pipeline' do
+            let(:branch_name) { params[:branch_name] }
+          end
+
+          it_behaves_like 'it delegates scan creation to another service' do
+            let(:delegated_params) { hash_including(dast_profile: dast_profile) }
           end
         end
 
@@ -83,7 +103,7 @@ RSpec.describe Mutations::Dast::Profiles::Update do
 
         context 'when updating fails' do
           it 'returns an error' do
-            allow_next_instance_of(::Dast::Profiles::UpdateService) do |service|
+            allow_next_instance_of(::AppSec::Dast::Profiles::UpdateService) do |service|
               allow(service).to receive(:execute).and_return(
                 ServiceResponse.error(message: 'Profile failed to update')
               )
@@ -91,14 +111,6 @@ RSpec.describe Mutations::Dast::Profiles::Update do
 
             expect(subject[:errors]).to include('Profile failed to update')
           end
-        end
-
-        context 'when the feature is not enabled' do
-          before do
-            stub_feature_flags(dast_saved_scans: false)
-          end
-
-          it_behaves_like 'an unrecoverable failure'
         end
       end
     end

@@ -39,6 +39,34 @@ RSpec.describe Ci::Build do
   it { is_expected.to delegate_method(:merge_request_ref?).to(:pipeline) }
   it { is_expected.to delegate_method(:legacy_detached_merge_request_pipeline?).to(:pipeline) }
 
+  shared_examples 'calling proper BuildFinishedWorker' do
+    context 'when ci_build_finished_worker_namespace_changed feature flag enabled' do
+      before do
+        stub_feature_flags(ci_build_finished_worker_namespace_changed: build.project)
+      end
+
+      it 'calls Ci::BuildFinishedWorker' do
+        expect(Ci::BuildFinishedWorker).to receive(:perform_async)
+        expect(::BuildFinishedWorker).not_to receive(:perform_async)
+
+        subject
+      end
+    end
+
+    context 'when ci_build_finished_worker_namespace_changed feature flag disabled' do
+      before do
+        stub_feature_flags(ci_build_finished_worker_namespace_changed: false)
+      end
+
+      it 'calls ::BuildFinishedWorker' do
+        expect(::BuildFinishedWorker).to receive(:perform_async)
+        expect(Ci::BuildFinishedWorker).not_to receive(:perform_async)
+
+        subject
+      end
+    end
+  end
+
   describe 'associations' do
     it 'has a bidirectional relationship with projects' do
       expect(described_class.reflect_on_association(:project).has_inverse?).to eq(:builds)
@@ -110,10 +138,6 @@ RSpec.describe Ci::Build do
 
   describe '.with_downloadable_artifacts' do
     subject { described_class.with_downloadable_artifacts }
-
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
 
     context 'when job does not have a downloadable artifact' do
       let!(:job) { create(:ci_build) }
@@ -320,10 +344,22 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#stick_build_if_status_changed' do
+    it 'sticks the build if the status changed' do
+      job = create(:ci_build, :pending)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+        .and_return(true)
+
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
+        .with(:build, job.id)
+
+      job.update!(status: :running)
+    end
+  end
+
   describe '#enqueue' do
     let(:build) { create(:ci_build, :created) }
-
-    subject { build.enqueue }
 
     before do
       allow(build).to receive(:any_unmet_prerequisites?).and_return(has_prerequisites)
@@ -334,9 +370,15 @@ RSpec.describe Ci::Build do
       let(:has_prerequisites) { true }
 
       it 'transitions to preparing' do
-        subject
+        build.enqueue
 
         expect(build).to be_preparing
+      end
+
+      it 'does not push build to the queue' do
+        build.enqueue
+
+        expect(build.queuing_entry).not_to be_present
       end
     end
 
@@ -344,17 +386,57 @@ RSpec.describe Ci::Build do
       let(:has_prerequisites) { false }
 
       it 'transitions to pending' do
-        subject
+        build.enqueue
 
         expect(build).to be_pending
+      end
+
+      it 'pushes build to a queue' do
+        build.enqueue
+
+        expect(build.queuing_entry).to be_present
+      end
+
+      context 'when build status transition fails' do
+        before do
+          ::Ci::Build.find(build.id).update_column(:lock_version, 100)
+        end
+
+        it 'does not push build to a queue' do
+          expect { build.enqueue! }
+            .to raise_error(ActiveRecord::StaleObjectError)
+
+          expect(build.queuing_entry).not_to be_present
+        end
+      end
+
+      context 'when there is a queuing entry already present' do
+        before do
+          create(:ci_pending_build, build: build, project: build.project)
+        end
+
+        it 'does not raise an error' do
+          expect { build.enqueue! }.not_to raise_error
+          expect(build.reload.queuing_entry).to be_present
+        end
+      end
+
+      context 'when both failure scenario happen at the same time' do
+        before do
+          ::Ci::Build.find(build.id).update_column(:lock_version, 100)
+          create(:ci_pending_build, build: build, project: build.project)
+        end
+
+        it 'raises stale object error exception' do
+          expect { build.enqueue! }
+            .to raise_error(ActiveRecord::StaleObjectError)
+        end
       end
     end
   end
 
   describe '#enqueue_preparing' do
     let(:build) { create(:ci_build, :preparing) }
-
-    subject { build.enqueue_preparing }
 
     before do
       allow(build).to receive(:any_unmet_prerequisites?).and_return(has_unmet_prerequisites)
@@ -364,9 +446,10 @@ RSpec.describe Ci::Build do
       let(:has_unmet_prerequisites) { false }
 
       it 'transitions to pending' do
-        subject
+        build.enqueue_preparing
 
         expect(build).to be_pending
+        expect(build.queuing_entry).to be_present
       end
     end
 
@@ -374,9 +457,10 @@ RSpec.describe Ci::Build do
       let(:has_unmet_prerequisites) { true }
 
       it 'remains in preparing' do
-        subject
+        build.enqueue_preparing
 
         expect(build).to be_preparing
+        expect(build.queuing_entry).not_to be_present
       end
     end
   end
@@ -401,6 +485,64 @@ RSpec.describe Ci::Build do
       it 'does not change build status' do
         expect(build.actionize).to be false
         expect(build.reload).to be_pending
+      end
+    end
+  end
+
+  describe '#run' do
+    context 'when build has been just created' do
+      let(:build) { create(:ci_build, :created) }
+
+      it 'creates queuing entry and then removes it' do
+        build.enqueue!
+        expect(build.queuing_entry).to be_present
+
+        build.run!
+        expect(build.reload.queuing_entry).not_to be_present
+      end
+    end
+
+    context 'when build status transition fails' do
+      let(:build) { create(:ci_build, :pending) }
+
+      before do
+        create(:ci_pending_build, build: build, project: build.project)
+        ::Ci::Build.find(build.id).update_column(:lock_version, 100)
+      end
+
+      it 'does not remove build from a queue' do
+        expect { build.run! }
+          .to raise_error(ActiveRecord::StaleObjectError)
+
+        expect(build.queuing_entry).to be_present
+      end
+    end
+
+    context 'when build has been picked by a shared runner' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'creates runtime metadata entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+
+        expect(build.reload.runtime_metadata).to be_present
+      end
+    end
+  end
+
+  describe '#drop' do
+    context 'when has a runtime tracking entry' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'removes runtime tracking entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+        expect(build.reload.runtime_metadata).to be_present
+
+        build.drop!
+        expect(build.reload.runtime_metadata).not_to be_present
       end
     end
   end
@@ -581,9 +723,35 @@ RSpec.describe Ci::Build do
       end
 
       it 'that cannot handle build' do
-        expect_any_instance_of(Ci::Runner).to receive(:can_pick?).and_return(false)
+        expect_any_instance_of(Ci::Runner).to receive(:matches_build?).with(build).and_return(false)
         is_expected.to be_falsey
       end
+    end
+
+    it 'caches the result in Redis' do
+      expect(Rails.cache).to receive(:fetch).with(['has-online-runners', build.id], expires_in: 1.minute)
+
+      build.any_runners_online?
+    end
+  end
+
+  describe '#any_runners_available?' do
+    subject { build.any_runners_available? }
+
+    context 'when no runners' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when there are runners' do
+      let!(:runner) { create(:ci_runner, :project, projects: [build.project]) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    it 'caches the result in Redis' do
+      expect(Rails.cache).to receive(:fetch).with(['has-available-runners', build.project.id], expires_in: 1.minute)
+
+      build.any_runners_available?
     end
   end
 
@@ -817,13 +985,30 @@ RSpec.describe Ci::Build do
   end
 
   describe '#cache' do
-    let(:options) { { cache: { key: "key", paths: ["public"], policy: "pull-push" } } }
+    let(:options) do
+      { cache: [{ key: "key", paths: ["public"], policy: "pull-push" }] }
+    end
 
     subject { build.cache }
 
     context 'when build has cache' do
       before do
         allow(build).to receive(:options).and_return(options)
+      end
+
+      context 'when build has multiple caches' do
+        let(:options) do
+          { cache: [
+            { key: "key", paths: ["public"], policy: "pull-push" },
+            { key: "key2", paths: ["public"], policy: "pull-push" }
+          ] }
+        end
+
+        before do
+          allow_any_instance_of(Project).to receive(:jobs_cache_index).and_return(1)
+        end
+
+        it { is_expected.to match([a_hash_including(key: "key-1"), a_hash_including(key: "key2-1")]) }
       end
 
       context 'when project has jobs_cache_index' do
@@ -839,7 +1024,7 @@ RSpec.describe Ci::Build do
           allow_any_instance_of(Project).to receive(:jobs_cache_index).and_return(nil)
         end
 
-        it { is_expected.to eq([options[:cache]]) }
+        it { is_expected.to eq(options[:cache]) }
       end
     end
 
@@ -848,7 +1033,7 @@ RSpec.describe Ci::Build do
         allow(build).to receive(:options).and_return({})
       end
 
-      it { is_expected.to eq([nil]) }
+      it { is_expected.to be_empty }
     end
   end
 
@@ -1053,7 +1238,7 @@ RSpec.describe Ci::Build do
       it "executes UPDATE query" do
         recorded = ActiveRecord::QueryRecorder.new { subject }
 
-        expect(recorded.log.select { |l| l.match?(/UPDATE.*ci_builds/) }.count).to eq(1)
+        expect(recorded.log.count { |l| l.match?(/UPDATE.*ci_builds/) }).to eq(1)
       end
     end
 
@@ -1061,7 +1246,7 @@ RSpec.describe Ci::Build do
       it 'does not execute UPDATE query' do
         recorded = ActiveRecord::QueryRecorder.new { subject }
 
-        expect(recorded.log.select { |l| l.match?(/UPDATE.*ci_builds/) }.count).to eq(0)
+        expect(recorded.log.count { |l| l.match?(/UPDATE.*ci_builds/) }).to eq(0)
       end
     end
   end
@@ -1118,13 +1303,15 @@ RSpec.describe Ci::Build do
   end
 
   describe 'state transition as a deployable' do
+    subject { build.send(event) }
+
     let!(:build) { create(:ci_build, :with_deployment, :start_review_app, project: project, pipeline: pipeline) }
     let(:deployment) { build.deployment }
     let(:environment) { deployment.environment }
 
     before do
       allow(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
-      allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
+      allow(Deployments::HooksWorker).to receive(:perform_async)
     end
 
     it 'has deployments record with created status' do
@@ -1132,54 +1319,81 @@ RSpec.describe Ci::Build do
       expect(environment.name).to eq('review/master')
     end
 
-    context 'when transits to running' do
-      before do
-        build.run!
+    shared_examples_for 'avoid deadlock' do
+      it 'executes UPDATE in the right order' do
+        recorded = ActiveRecord::QueryRecorder.new { subject }
+
+        index_for_build = recorded.log.index { |l| l.include?("UPDATE \"ci_builds\"") }
+        index_for_deployment = recorded.log.index { |l| l.include?("UPDATE \"deployments\"") }
+
+        expect(index_for_build).to be < index_for_deployment
       end
+    end
+
+    context 'when transits to running' do
+      let(:event) { :run! }
+
+      it_behaves_like 'avoid deadlock'
 
       it 'transits deployment status to running' do
+        subject
+
         expect(deployment).to be_running
       end
     end
 
     context 'when transits to success' do
+      let(:event) { :success! }
+
       before do
         allow(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
-        allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
-        build.success!
+        allow(Deployments::HooksWorker).to receive(:perform_async)
       end
 
+      it_behaves_like 'avoid deadlock'
+      it_behaves_like 'calling proper BuildFinishedWorker'
+
       it 'transits deployment status to success' do
+        subject
+
         expect(deployment).to be_success
       end
     end
 
     context 'when transits to failed' do
-      before do
-        build.drop!
-      end
+      let(:event) { :drop! }
+
+      it_behaves_like 'avoid deadlock'
+      it_behaves_like 'calling proper BuildFinishedWorker'
 
       it 'transits deployment status to failed' do
+        subject
+
         expect(deployment).to be_failed
       end
     end
 
     context 'when transits to skipped' do
-      before do
-        build.skip!
-      end
+      let(:event) { :skip! }
+
+      it_behaves_like 'avoid deadlock'
 
       it 'transits deployment status to skipped' do
+        subject
+
         expect(deployment).to be_skipped
       end
     end
 
     context 'when transits to canceled' do
-      before do
-        build.cancel!
-      end
+      let(:event) { :cancel! }
+
+      it_behaves_like 'avoid deadlock'
+      it_behaves_like 'calling proper BuildFinishedWorker'
 
       it 'transits deployment status to canceled' do
+        subject
+
         expect(deployment).to be_canceled
       end
     end
@@ -1202,6 +1416,21 @@ RSpec.describe Ci::Build do
       it 'returns nil' do
         is_expected.to be_nil
       end
+    end
+  end
+
+  describe '#environment_deployment_tier' do
+    subject { build.environment_deployment_tier }
+
+    let(:build) { described_class.new(options: options) }
+    let(:options) { { environment: { deployment_tier: 'production' } } }
+
+    it { is_expected.to eq('production') }
+
+    context 'when options does not include deployment_tier' do
+      let(:options) { { environment: { name: 'production' } } }
+
+      it { is_expected.to be_nil }
     end
   end
 
@@ -1530,8 +1759,6 @@ RSpec.describe Ci::Build do
     subject { build.erase_erasable_artifacts! }
 
     before do
-      stub_feature_flags(drop_license_management_artifact: false)
-
       Ci::JobArtifact.file_types.keys.each do |file_type|
         create(:ci_job_artifact, job: build, file_type: file_type, file_format: Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS[file_type.to_sym])
       end
@@ -1720,6 +1947,26 @@ RSpec.describe Ci::Build do
 
           it { is_expected.not_to be_retryable }
         end
+
+        context 'when a canceled build has been retried already' do
+          before do
+            project.add_developer(user)
+            build.cancel!
+            described_class.retry(build, user)
+          end
+
+          context 'when prevent_retry_of_retried_jobs feature flag is enabled' do
+            it { is_expected.not_to be_retryable }
+          end
+
+          context 'when prevent_retry_of_retried_jobs feature flag is disabled' do
+            before do
+              stub_feature_flags(prevent_retry_of_retried_jobs: false)
+            end
+
+            it { is_expected.to be_retryable }
+          end
+        end
       end
     end
 
@@ -1747,6 +1994,23 @@ RSpec.describe Ci::Build do
 
         it { is_expected.to be_falsey }
       end
+    end
+  end
+
+  describe '#tag_list' do
+    let_it_be(:build) { create(:ci_build, tag_list: ['tag']) }
+
+    context 'when tags are preloaded' do
+      it 'does not trigger queries' do
+        build_with_tags = described_class.eager_load_tags.id_in([build]).to_a.first
+
+        expect { build_with_tags.tag_list }.not_to exceed_all_query_limit(0)
+        expect(build_with_tags.tag_list).to eq(['tag'])
+      end
+    end
+
+    context 'when tags are not preloaded' do
+      it { expect(described_class.find(build.id).tag_list).to eq(['tag']) }
     end
   end
 
@@ -1939,45 +2203,23 @@ RSpec.describe Ci::Build do
     end
 
     it 'contains options' do
-      expect(build.options).to eq(options.stringify_keys)
+      expect(build.options).to eq(options.symbolize_keys)
     end
 
-    it 'allows to access with keys' do
+    it 'allows to access with symbolized keys' do
       expect(build.options[:image]).to eq('ruby:2.7')
     end
 
-    it 'allows to access with strings' do
-      expect(build.options['image']).to eq('ruby:2.7')
+    it 'rejects access with string keys' do
+      expect(build.options['image']).to be_nil
     end
 
-    context 'when ci_build_metadata_config is set' do
-      before do
-        stub_feature_flags(ci_build_metadata_config: true)
-      end
-
-      it 'persist data in build metadata' do
-        expect(build.metadata.read_attribute(:config_options)).to eq(options.stringify_keys)
-      end
-
-      it 'does not persist data in build' do
-        expect(build.read_attribute(:options)).to be_nil
-      end
+    it 'persist data in build metadata' do
+      expect(build.metadata.read_attribute(:config_options)).to eq(options.symbolize_keys)
     end
 
-    context 'when ci_build_metadata_config is disabled' do
-      let(:build) { create(:ci_build, pipeline: pipeline) }
-
-      before do
-        stub_feature_flags(ci_build_metadata_config: false)
-      end
-
-      it 'persist data in build' do
-        expect(build.read_attribute(:options)).to eq(options.symbolize_keys)
-      end
-
-      it 'does not persist data in build metadata' do
-        expect(build.metadata.read_attribute(:config_options)).to be_nil
-      end
+    it 'does not persist data in build' do
+      expect(build.read_attribute(:options)).to be_nil
     end
 
     context 'when options include artifacts:expose_as' do
@@ -2367,6 +2609,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_JOB_ID', value: build.id.to_s, public: true, masked: false },
           { key: 'CI_JOB_URL', value: project.web_url + "/-/jobs/#{build.id}", public: true, masked: false },
           { key: 'CI_JOB_TOKEN', value: 'my-token', public: false, masked: true },
+          { key: 'CI_JOB_STARTED_AT', value: build.started_at&.iso8601, public: true, masked: false },
           { key: 'CI_BUILD_ID', value: build.id.to_s, public: true, masked: false },
           { key: 'CI_BUILD_TOKEN', value: 'my-token', public: false, masked: true },
           { key: 'CI_REGISTRY_USER', value: 'gitlab-ci-token', public: true, masked: false },
@@ -2404,18 +2647,18 @@ RSpec.describe Ci::Build do
           { key: 'CI_PROJECT_VISIBILITY', value: 'private', public: true, masked: false },
           { key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: project.repository_languages.map(&:name).join(',').downcase, public: true, masked: false },
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
-          { key: 'CI_PROJECT_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
+          { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
-          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}", public: true, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port, public: true, masked: false },
           { key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-            value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{project.namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}",
+            value: "#{Gitlab.host_with_port}/#{project.namespace.root_ancestor.path.downcase}#{DependencyProxy::URL_SUFFIX}",
             public: true,
             masked: false },
           { key: 'CI_API_V4_URL', value: 'http://localhost/api/v4', public: true, masked: false },
           { key: 'CI_PIPELINE_IID', value: pipeline.iid.to_s, public: true, masked: false },
           { key: 'CI_PIPELINE_SOURCE', value: pipeline.source, public: true, masked: false },
-          { key: 'CI_CONFIG_PATH', value: pipeline.config_path, public: true, masked: false },
+          { key: 'CI_PIPELINE_CREATED_AT', value: pipeline.created_at.iso8601, public: true, masked: false },
           { key: 'CI_COMMIT_SHA', value: build.sha, public: true, masked: false },
           { key: 'CI_COMMIT_SHORT_SHA', value: build.short_sha, public: true, masked: false },
           { key: 'CI_COMMIT_BEFORE_SHA', value: build.before_sha, public: true, masked: false },
@@ -2427,6 +2670,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_COMMIT_DESCRIPTION', value: pipeline.git_commit_description, public: true, masked: false },
           { key: 'CI_COMMIT_REF_PROTECTED', value: (!!pipeline.protected_ref?).to_s, public: true, masked: false },
           { key: 'CI_COMMIT_TIMESTAMP', value: pipeline.git_commit_timestamp, public: true, masked: false },
+          { key: 'CI_COMMIT_AUTHOR', value: pipeline.git_author_full_text, public: true, masked: false },
           { key: 'CI_BUILD_REF', value: build.sha, public: true, masked: false },
           { key: 'CI_BUILD_BEFORE_SHA', value: build.before_sha, public: true, masked: false },
           { key: 'CI_BUILD_REF_NAME', value: build.ref, public: true, masked: false },
@@ -2440,7 +2684,19 @@ RSpec.describe Ci::Build do
         build.yaml_variables = []
       end
 
-      it { is_expected.to eq(predefined_variables) }
+      it { is_expected.to be_instance_of(Gitlab::Ci::Variables::Collection) }
+      it { expect(subject.to_runner_variables).to eq(predefined_variables) }
+
+      it 'excludes variables that require an environment or user' do
+        environment_based_variables_collection = subject.filter do |variable|
+          %w[
+            YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
+            CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL
+          ].include?(variable[:key])
+        end
+
+        expect(environment_based_variables_collection).to be_empty
+      end
 
       context 'when ci_job_jwt feature flag is disabled' do
         before do
@@ -2495,7 +2751,7 @@ RSpec.describe Ci::Build do
           end
 
           it 'returns variables in order depending on resource hierarchy' do
-            is_expected.to eq(
+            expect(subject.to_runner_variables).to eq(
               [dependency_proxy_var,
                job_jwt_var,
                build_pre_var,
@@ -2511,7 +2767,7 @@ RSpec.describe Ci::Build do
           let(:expected_variables) do
             predefined_variables.map { |variable| variable.fetch(:key) } +
               %w[YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
-                 CI_ENVIRONMENT_URL]
+                 CI_ENVIRONMENT_TIER CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
           end
 
           before do
@@ -2525,9 +2781,53 @@ RSpec.describe Ci::Build do
           end
 
           it 'matches explicit variables ordering' do
-            received_variables = subject.map { |variable| variable.fetch(:key) }
+            received_variables = subject.map { |variable| variable[:key] }
 
             expect(received_variables).to eq expected_variables
+          end
+
+          describe 'CI_ENVIRONMENT_ACTION' do
+            let(:enviroment_action_variable) { subject.find { |variable| variable[:key] == 'CI_ENVIRONMENT_ACTION' } }
+
+            shared_examples 'defaults value' do
+              it 'value matches start' do
+                expect(enviroment_action_variable[:value]).to eq('start')
+              end
+            end
+
+            it_behaves_like 'defaults value'
+
+            context 'when options is set' do
+              before do
+                build.update!(options: options)
+              end
+
+              context 'when options is empty' do
+                let(:options) { {} }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options is nil' do
+                let(:options) { nil }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options environment is specified' do
+                let(:options) { { environment: {} } }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options environment action specified' do
+                let(:options) { { environment: { action: 'stop' } } }
+
+                it 'matches the specified action' do
+                  expect(enviroment_action_variable[:value]).to eq('stop')
+                end
+              end
+            end
           end
         end
       end
@@ -2567,7 +2867,8 @@ RSpec.describe Ci::Build do
       let(:environment_variables) do
         [
           { key: 'CI_ENVIRONMENT_NAME', value: 'production', public: true, masked: false },
-          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false }
+          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false },
+          { key: 'CI_ENVIRONMENT_TIER', value: 'production', public: true, masked: false }
         ]
       end
 
@@ -2576,6 +2877,7 @@ RSpec.describe Ci::Build do
                project: build.project,
                name: 'production',
                slug: 'prod-slug',
+               tier: 'production',
                external_url: '')
       end
 
@@ -2584,14 +2886,14 @@ RSpec.describe Ci::Build do
       end
 
       shared_examples 'containing environment variables' do
-        it { environment_variables.each { |v| is_expected.to include(v) } }
+        it { is_expected.to include(*environment_variables) }
       end
 
       context 'when no URL was set' do
         it_behaves_like 'containing environment variables'
 
         it 'does not have CI_ENVIRONMENT_URL' do
-          keys = subject.map { |var| var[:key] }
+          keys = subject.pluck(:key)
 
           expect(keys).not_to include('CI_ENVIRONMENT_URL')
         end
@@ -2618,7 +2920,7 @@ RSpec.describe Ci::Build do
             it_behaves_like 'containing environment variables'
 
             it 'puts $CI_ENVIRONMENT_URL in the last so all other variables are available to be used when runners are trying to expand it' do
-              expect(subject.last).to eq(environment_variables.last)
+              expect(subject.to_runner_variables.last).to eq(environment_variables.last)
             end
           end
         end
@@ -2951,7 +3253,7 @@ RSpec.describe Ci::Build do
       end
 
       it 'overrides YAML variable using a pipeline variable' do
-        variables = subject.reverse.uniq { |variable| variable[:key] }.reverse
+        variables = subject.to_runner_variables.reverse.uniq { |variable| variable[:key] }.reverse
 
         expect(variables)
           .not_to include(key: 'MYVAR', value: 'myvar', public: true, masked: false)
@@ -3248,47 +3550,6 @@ RSpec.describe Ci::Build do
     end
   end
 
-  describe '#scoped_variables_hash' do
-    context 'when overriding CI variables' do
-      before do
-        project.variables.create!(key: 'MY_VAR', value: 'my value 1')
-        pipeline.variables.create!(key: 'MY_VAR', value: 'my value 2')
-      end
-
-      it 'returns a regular hash created using valid ordering' do
-        expect(build.scoped_variables_hash).to include('MY_VAR': 'my value 2')
-        expect(build.scoped_variables_hash).not_to include('MY_VAR': 'my value 1')
-      end
-    end
-
-    context 'when overriding user-provided variables' do
-      let(:build) do
-        create(:ci_build, pipeline: pipeline, yaml_variables: [{ key: 'MY_VAR', value: 'myvar', public: true }])
-      end
-
-      before do
-        pipeline.variables.build(key: 'MY_VAR', value: 'pipeline value')
-      end
-
-      it 'returns a hash including variable with higher precedence' do
-        expect(build.scoped_variables_hash).to include('MY_VAR': 'pipeline value')
-        expect(build.scoped_variables_hash).not_to include('MY_VAR': 'myvar')
-      end
-    end
-
-    context 'when overriding CI instance variables' do
-      before do
-        create(:ci_instance_variable, key: 'MY_VAR', value: 'my value 1')
-        group.variables.create!(key: 'MY_VAR', value: 'my value 2')
-      end
-
-      it 'returns a regular hash created using valid ordering' do
-        expect(build.scoped_variables_hash).to include('MY_VAR': 'my value 2')
-        expect(build.scoped_variables_hash).not_to include('MY_VAR': 'my value 1')
-      end
-    end
-  end
-
   describe '#any_unmet_prerequisites?' do
     let(:build) { create(:ci_build, :created) }
 
@@ -3330,36 +3591,14 @@ RSpec.describe Ci::Build do
       end
     end
 
-    context 'when ci_build_metadata_config is set' do
-      before do
-        stub_feature_flags(ci_build_metadata_config: true)
-      end
+    it_behaves_like 'having consistent representation'
 
-      it_behaves_like 'having consistent representation'
-
-      it 'persist data in build metadata' do
-        expect(build.metadata.read_attribute(:config_variables)).not_to be_nil
-      end
-
-      it 'does not persist data in build' do
-        expect(build.read_attribute(:yaml_variables)).to be_nil
-      end
+    it 'persist data in build metadata' do
+      expect(build.metadata.read_attribute(:config_variables)).not_to be_nil
     end
 
-    context 'when ci_build_metadata_config is disabled' do
-      before do
-        stub_feature_flags(ci_build_metadata_config: false)
-      end
-
-      it_behaves_like 'having consistent representation'
-
-      it 'persist data in build' do
-        expect(build.read_attribute(:yaml_variables)).not_to be_nil
-      end
-
-      it 'does not persist data in build metadata' do
-        expect(build.metadata.read_attribute(:config_variables)).to be_nil
-      end
+    it 'does not persist data in build' do
+      expect(build.read_attribute(:yaml_variables)).to be_nil
     end
   end
 
@@ -3548,49 +3787,32 @@ RSpec.describe Ci::Build do
     end
 
     let!(:job) { create(:ci_build, :pending, pipeline: pipeline, stage_idx: 1, options: options) }
+    let!(:pre_stage_job) { create(:ci_build, :success, pipeline: pipeline, name: 'test', stage_idx: 0) }
 
-    context 'when validates for dependencies is enabled' do
-      before do
-        stub_feature_flags(ci_validate_build_dependencies_override: false)
-      end
+    context 'when "dependencies" keyword is not defined' do
+      let(:options) { {} }
 
-      let!(:pre_stage_job) { create(:ci_build, :success, pipeline: pipeline, name: 'test', stage_idx: 0) }
-
-      context 'when "dependencies" keyword is not defined' do
-        let(:options) { {} }
-
-        it { expect(job).to have_valid_build_dependencies }
-      end
-
-      context 'when "dependencies" keyword is empty' do
-        let(:options) { { dependencies: [] } }
-
-        it { expect(job).to have_valid_build_dependencies }
-      end
-
-      context 'when "dependencies" keyword is specified' do
-        let(:options) { { dependencies: ['test'] } }
-
-        it_behaves_like 'validation is active'
-      end
+      it { expect(job).to have_valid_build_dependencies }
     end
 
-    context 'when validates for dependencies is disabled' do
+    context 'when "dependencies" keyword is empty' do
+      let(:options) { { dependencies: [] } }
+
+      it { expect(job).to have_valid_build_dependencies }
+    end
+
+    context 'when "dependencies" keyword is specified' do
       let(:options) { { dependencies: ['test'] } }
 
-      before do
-        stub_feature_flags(ci_validate_build_dependencies_override: true)
-      end
-
-      it_behaves_like 'validation is not active'
+      it_behaves_like 'validation is active'
     end
   end
 
   describe 'state transition when build fails' do
-    let(:service) { MergeRequests::AddTodoWhenBuildFailsService.new(project, user) }
+    let(:service) { ::MergeRequests::AddTodoWhenBuildFailsService.new(project: project, current_user: user) }
 
     before do
-      allow(MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
+      allow(::MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
       allow(service).to receive(:close)
     end
 
@@ -3675,7 +3897,7 @@ RSpec.describe Ci::Build do
         subject.drop!
       end
 
-      it 'creates a todo' do
+      it 'creates a todo async', :sidekiq_inline do
         project.add_developer(user)
 
         expect_next_instance_of(TodoService) do |todo_service|
@@ -3708,6 +3930,7 @@ RSpec.describe Ci::Build do
 
   describe '.matches_tag_ids' do
     let_it_be(:build, reload: true) { create(:ci_build, project: project, user: user) }
+
     let(:tag_ids) { ::ActsAsTaggableOn::Tag.named_any(tag_list).ids }
 
     subject { described_class.where(id: build).matches_tag_ids(tag_ids) }
@@ -4159,6 +4382,7 @@ RSpec.describe Ci::Build do
 
   describe '#artifacts_metadata_entry' do
     let_it_be(:build) { create(:ci_build, project: project) }
+
     let(:path) { 'other_artifacts_0.1.2/another-subdirectory/banana_sample.gif' }
 
     around do |example|
@@ -4256,26 +4480,12 @@ RSpec.describe Ci::Build do
       it { is_expected.to include(:upload_multiple_artifacts) }
     end
 
-    context 'when artifacts exclude is defined and the is feature enabled' do
+    context 'when artifacts exclude is defined' do
       let(:options) do
         { artifacts: { exclude: %w[something] } }
       end
 
-      context 'when a feature flag is enabled' do
-        before do
-          stub_feature_flags(ci_artifacts_exclude: true)
-        end
-
-        it { is_expected.to include(:artifacts_exclude) }
-      end
-
-      context 'when a feature flag is disabled' do
-        before do
-          stub_feature_flags(ci_artifacts_exclude: false)
-        end
-
-        it { is_expected.not_to include(:artifacts_exclude) }
-      end
+      it { is_expected.to include(:artifacts_exclude) }
     end
   end
 
@@ -4492,9 +4702,9 @@ RSpec.describe Ci::Build do
 
   describe '#read_metadata_attribute' do
     let(:build) { create(:ci_build, :degenerated) }
-    let(:build_options) { { "key" => "build" } }
-    let(:metadata_options) { { "key" => "metadata" } }
-    let(:default_options) { { "key" => "default" } }
+    let(:build_options) { { key: "build" } }
+    let(:metadata_options) { { key: "metadata" } }
+    let(:default_options) { { key: "default" } }
 
     subject { build.send(:read_metadata_attribute, :options, :config_options, default_options) }
 
@@ -4529,56 +4739,26 @@ RSpec.describe Ci::Build do
 
   describe '#write_metadata_attribute' do
     let(:build) { create(:ci_build, :degenerated) }
-    let(:options) { { "key" => "new options" } }
-    let(:existing_options) { { "key" => "existing options" } }
+    let(:options) { { key: "new options" } }
+    let(:existing_options) { { key: "existing options" } }
 
     subject { build.send(:write_metadata_attribute, :options, :config_options, options) }
 
-    context 'when ci_build_metadata_config is set' do
+    context 'when data in build is already set' do
       before do
-        stub_feature_flags(ci_build_metadata_config: true)
+        build.write_attribute(:options, existing_options)
       end
 
-      context 'when data in build is already set' do
-        before do
-          build.write_attribute(:options, existing_options)
-        end
+      it 'does set metadata options' do
+        subject
 
-        it 'does set metadata options' do
-          subject
-
-          expect(build.metadata.read_attribute(:config_options)).to eq(options)
-        end
-
-        it 'does reset build options' do
-          subject
-
-          expect(build.read_attribute(:options)).to be_nil
-        end
-      end
-    end
-
-    context 'when ci_build_metadata_config is disabled' do
-      before do
-        stub_feature_flags(ci_build_metadata_config: false)
+        expect(build.metadata.read_attribute(:config_options)).to eq(options)
       end
 
-      context 'when data in build metadata is already set' do
-        before do
-          build.ensure_metadata.write_attribute(:config_options, existing_options)
-        end
+      it 'does reset build options' do
+        subject
 
-        it 'does set metadata options' do
-          subject
-
-          expect(build.read_attribute(:options)).to eq(options)
-        end
-
-        it 'does reset build options' do
-          subject
-
-          expect(build.metadata.read_attribute(:config_options)).to be_nil
-        end
+        expect(build.read_attribute(:options)).to be_nil
       end
     end
   end
@@ -4594,25 +4774,30 @@ RSpec.describe Ci::Build do
   end
 
   describe '#execute_hooks' do
+    before do
+      build.clear_memoization(:build_data)
+    end
+
     context 'with project hooks' do
+      let(:build_data) { double(:BuildData, dup: double(:DupedData)) }
+
       before do
         create(:project_hook, project: project, job_events: true)
       end
 
-      it 'execute hooks' do
-        expect_any_instance_of(ProjectHook).to receive(:async_execute)
+      it 'calls project.execute_hooks(build_data, :job_hooks)' do
+        expect(::Gitlab::DataBuilder::Build)
+          .to receive(:build).with(build).and_return(build_data)
+        expect(build.project)
+          .to receive(:execute_hooks).with(build_data.dup, :job_hooks)
 
         build.execute_hooks
       end
     end
 
-    context 'without relevant project hooks' do
-      before do
-        create(:project_hook, project: project, job_events: false)
-      end
-
-      it 'does not execute a hook' do
-        expect_any_instance_of(ProjectHook).not_to receive(:async_execute)
+    context 'without project hooks' do
+      it 'does not call project.execute_hooks' do
+        expect(build.project).not_to receive(:execute_hooks)
 
         build.execute_hooks
       end
@@ -4620,11 +4805,13 @@ RSpec.describe Ci::Build do
 
     context 'with project services' do
       before do
-        create(:service, active: true, job_events: true, project: project)
+        create(:integration, active: true, job_events: true, project: project)
       end
 
-      it 'execute services' do
-        expect_any_instance_of(Service).to receive(:async_execute)
+      it 'executes services' do
+        allow_next_found_instance_of(Integration) do |integration|
+          expect(integration).to receive(:async_execute)
+        end
 
         build.execute_hooks
       end
@@ -4632,11 +4819,13 @@ RSpec.describe Ci::Build do
 
     context 'without relevant project services' do
       before do
-        create(:service, active: true, job_events: false, project: project)
+        create(:integration, active: true, job_events: false, project: project)
       end
 
-      it 'execute services' do
-        expect_any_instance_of(Service).not_to receive(:async_execute)
+      it 'does not execute services' do
+        allow_next_found_instance_of(Integration) do |integration|
+          expect(integration).not_to receive(:async_execute)
+        end
 
         build.execute_hooks
       end
@@ -4908,6 +5097,115 @@ RSpec.describe Ci::Build do
       end
 
       it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '.build_matchers' do
+    let_it_be(:pipeline) { create(:ci_pipeline, :protected) }
+
+    subject(:matchers) { pipeline.builds.build_matchers(pipeline.project) }
+
+    context 'when the pipeline is empty' do
+      it 'does not throw errors' do
+        is_expected.to eq([])
+      end
+    end
+
+    context 'when the pipeline has builds' do
+      let_it_be(:build_without_tags) do
+        create(:ci_build, pipeline: pipeline)
+      end
+
+      let_it_be(:build_with_tags) do
+        create(:ci_build, pipeline: pipeline, tag_list: %w[tag1 tag2])
+      end
+
+      let_it_be(:other_build_with_tags) do
+        create(:ci_build, pipeline: pipeline, tag_list: %w[tag2 tag1])
+      end
+
+      it { expect(matchers.size).to eq(2) }
+
+      it 'groups build ids' do
+        expect(matchers.map(&:build_ids)).to match_array([
+          [build_without_tags.id],
+          match_array([build_with_tags.id, other_build_with_tags.id])
+        ])
+      end
+
+      it { expect(matchers.map(&:tag_list)).to match_array([[], %w[tag1 tag2]]) }
+
+      it { expect(matchers.map(&:protected?)).to all be_falsey }
+
+      context 'when the builds are protected' do
+        before do
+          pipeline.builds.update_all(protected: true)
+        end
+
+        it { expect(matchers).to all be_protected }
+      end
+    end
+  end
+
+  describe '#build_matcher' do
+    let_it_be(:build) do
+      build_stubbed(:ci_build, tag_list: %w[tag1 tag2])
+    end
+
+    subject(:matcher) { build.build_matcher }
+
+    it { expect(matcher.build_ids).to eq([build.id]) }
+
+    it { expect(matcher.tag_list).to match_array(%w[tag1 tag2]) }
+
+    it { expect(matcher.protected?).to eq(build.protected?) }
+
+    it { expect(matcher.project).to eq(build.project) }
+  end
+
+  describe '#shared_runner_build?' do
+    context 'when build does not have a runner assigned' do
+      it 'is not a shared runner build' do
+        expect(build.runner).to be_nil
+
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has a project runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :project)
+      end
+
+      it 'is not a shared runner build' do
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has an instance runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :instance_type)
+      end
+
+      it 'is a shared runner build' do
+        expect(build).to be_shared_runner_build
+      end
+    end
+  end
+
+  describe '.without_coverage' do
+    let!(:build_with_coverage) { create(:ci_build, pipeline: pipeline, coverage: 100.0) }
+
+    it 'returns builds without coverage values' do
+      expect(described_class.without_coverage).to eq([build])
+    end
+  end
+
+  describe '.with_coverage_regex' do
+    let!(:build_with_coverage_regex) { create(:ci_build, pipeline: pipeline, coverage_regex: '\d') }
+
+    it 'returns builds with coverage regex values' do
+      expect(described_class.with_coverage_regex).to eq([build_with_coverage_regex])
     end
   end
 end

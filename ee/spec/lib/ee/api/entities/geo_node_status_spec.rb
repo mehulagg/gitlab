@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe EE::API::Entities::GeoNodeStatus do
   include ::EE::GeoHelpers
 
-  let(:geo_node_status) { build(:geo_node_status) }
+  let!(:geo_node_status) { build(:geo_node_status) }
   let(:entity) { described_class.new(geo_node_status, request: double) }
   let(:error) { 'Could not connect to Geo database' }
 
@@ -62,16 +62,6 @@ RSpec.describe EE::API::Entities::GeoNodeStatus do
                                         attachments_synced_count: 141)
 
       expect(subject[:attachments_synced_in_percentage]).to eq '42.86%'
-    end
-  end
-
-  describe '#lfs_objects_synced_in_percentage' do
-    it 'formats as percentage' do
-      geo_node_status.assign_attributes(lfs_objects_count: 256,
-                                        lfs_objects_failed_count: 12,
-                                        lfs_objects_synced_count: 123)
-
-      expect(subject[:lfs_objects_synced_in_percentage]).to eq '48.05%'
     end
   end
 

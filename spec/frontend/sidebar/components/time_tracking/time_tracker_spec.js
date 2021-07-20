@@ -1,7 +1,11 @@
 import { mount } from '@vue/test-utils';
+
 import { stubTransition } from 'helpers/stub_transition';
 import { createMockDirective } from 'helpers/vue_mock_directive';
 import TimeTracker from '~/sidebar/components/time_tracking/time_tracker.vue';
+import SidebarEventHub from '~/sidebar/event_hub';
+
+import { issuableTimeTrackingResponse } from '../../mock_data';
 
 describe('Issuable Time Tracker', () => {
   let wrapper;
@@ -10,23 +14,43 @@ describe('Issuable Time Tracker', () => {
   const findComparisonMeter = () => findByTestId('compareMeter').attributes('title');
   const findCollapsedState = () => findByTestId('collapsedState');
   const findTimeRemainingProgress = () => findByTestId('timeRemainingProgress');
+  const findReportLink = () => findByTestId('reportLink');
 
   const defaultProps = {
-    timeEstimate: 10_000, // 2h 46m
-    timeSpent: 5_000, // 1h 23m
-    humanTimeEstimate: '2h 46m',
-    humanTimeSpent: '1h 23m',
     limitToHours: false,
+    fullPath: 'gitlab-org/gitlab-test',
+    issuableId: '1',
+    issuableIid: '1',
+    initialTimeTracking: {
+      ...issuableTimeTrackingResponse.data.workspace.issuable,
+    },
   };
 
-  const mountComponent = ({ props = {} } = {}) =>
-    mount(TimeTracker, {
+  const issuableTimeTrackingRefetchSpy = jest.fn();
+
+  const mountComponent = ({ props = {}, issuableType = 'issue', loading = false } = {}) => {
+    return mount(TimeTracker, {
       propsData: { ...defaultProps, ...props },
       directives: { GlTooltip: createMockDirective() },
       stubs: {
         transition: stubTransition(),
       },
+      provide: {
+        issuableType,
+      },
+      mocks: {
+        $apollo: {
+          queries: {
+            issuableTimeTracking: {
+              loading,
+              refetch: issuableTimeTrackingRefetchSpy,
+              query: jest.fn().mockResolvedValue(issuableTimeTrackingResponse),
+            },
+          },
+        },
+      },
     });
+  };
 
   afterEach(() => {
     wrapper.destroy();
@@ -43,13 +67,13 @@ describe('Issuable Time Tracker', () => {
 
     it('should correctly render timeEstimate', () => {
       expect(findByTestId('timeTrackingComparisonPane').html()).toContain(
-        defaultProps.humanTimeEstimate,
+        defaultProps.initialTimeTracking.humanTimeEstimate,
       );
     });
 
-    it('should correctly render time_spent', () => {
+    it('should correctly render totalTimeSpent', () => {
       expect(findByTestId('timeTrackingComparisonPane').html()).toContain(
-        defaultProps.humanTimeSpent,
+        defaultProps.initialTimeTracking.humanTotalTimeSpent,
       );
     });
   });
@@ -77,10 +101,12 @@ describe('Issuable Time Tracker', () => {
       beforeEach(() => {
         wrapper = mountComponent({
           props: {
-            timeEstimate: 100_000, // 1d 3h
-            timeSpent: 5_000, // 1h 23m
-            humanTimeEstimate: '1d 3h',
-            humanTimeSpent: '1h 23m',
+            initialTimeTracking: {
+              timeEstimate: 100_000, // 1d 3h
+              totalTimeSpent: 5_000, // 1h 23m
+              humanTimeEstimate: '1d 3h',
+              humanTotalTimeSpent: '1h 23m',
+            },
           },
         });
       });
@@ -107,8 +133,11 @@ describe('Issuable Time Tracker', () => {
         it('should display the remaining meter with the correct background color when over estimate', () => {
           wrapper = mountComponent({
             props: {
-              timeEstimate: 10_000, // 2h 46m
-              timeSpent: 20_000_000, // 231 days
+              initialTimeTracking: {
+                ...defaultProps.initialTimeTracking,
+                timeEstimate: 10_000, // 2h 46m
+                totalTimeSpent: 20_000_000, // 231 days
+              },
             },
           });
 
@@ -121,8 +150,11 @@ describe('Issuable Time Tracker', () => {
       beforeEach(async () => {
         wrapper = mountComponent({
           props: {
-            timeEstimate: 100_000, // 1d 3h
             limitToHours: true,
+            initialTimeTracking: {
+              ...defaultProps.initialTimeTracking,
+              timeEstimate: 100_000, // 1d 3h
+            },
           },
         });
       });
@@ -139,10 +171,12 @@ describe('Issuable Time Tracker', () => {
       beforeEach(async () => {
         wrapper = mountComponent({
           props: {
-            timeEstimate: 10_000, // 2h 46m
-            timeSpent: 0,
-            timeEstimateHumanReadable: '2h 46m',
-            timeSpentHumanReadable: '',
+            initialTimeTracking: {
+              timeEstimate: 10_000, // 2h 46m
+              totalTimeSpent: 0,
+              humanTimeEstimate: '2h 46m',
+              humanTotalTimeSpent: '',
+            },
           },
         });
         await wrapper.vm.$nextTick();
@@ -158,10 +192,12 @@ describe('Issuable Time Tracker', () => {
       beforeEach(() => {
         wrapper = mountComponent({
           props: {
-            timeEstimate: 0,
-            timeSpent: 5_000, // 1h 23m
-            timeEstimateHumanReadable: '2h 46m',
-            timeSpentHumanReadable: '1h 23m',
+            initialTimeTracking: {
+              timeEstimate: 0,
+              totalTimeSpent: 5_000, // 1h 23m
+              humanTimeEstimate: '2h 46m',
+              humanTotalTimeSpent: '1h 23m',
+            },
           },
         });
       });
@@ -176,10 +212,12 @@ describe('Issuable Time Tracker', () => {
       beforeEach(() => {
         wrapper = mountComponent({
           props: {
-            timeEstimate: 0,
-            timeSpent: 0,
-            timeEstimateHumanReadable: '',
-            timeSpentHumanReadable: '',
+            initialTimeTracking: {
+              timeEstimate: 0,
+              totalTimeSpent: 0,
+              humanTimeEstimate: '',
+              humanTotalTimeSpent: '',
+            },
           },
         });
       });
@@ -192,12 +230,58 @@ describe('Issuable Time Tracker', () => {
       });
     });
 
+    describe('Time tracking report', () => {
+      describe('When no time spent', () => {
+        beforeEach(() => {
+          wrapper = mountComponent({
+            props: {
+              initialTimeTracking: {
+                ...defaultProps.initialTimeTracking,
+                totalTimeSpent: 0,
+                humanTotalTimeSpent: '',
+              },
+            },
+          });
+        });
+
+        it('link should not appear', () => {
+          expect(findReportLink().exists()).toBe(false);
+        });
+      });
+
+      describe('When time spent', () => {
+        it('link should appear on issue', () => {
+          wrapper = mountComponent();
+          expect(findReportLink().exists()).toBe(true);
+        });
+
+        it('link should appear on merge request', () => {
+          wrapper = mountComponent({ issuableType: 'merge_request' });
+          expect(findReportLink().exists()).toBe(true);
+        });
+
+        it('link should not appear on milestone', () => {
+          wrapper = mountComponent({ issuableType: 'milestone' });
+          expect(findReportLink().exists()).toBe(false);
+        });
+      });
+    });
+
     describe('Help pane', () => {
       const findHelpButton = () => findByTestId('helpButton');
       const findCloseHelpButton = () => findByTestId('closeHelpButton');
 
       beforeEach(async () => {
-        wrapper = mountComponent({ props: { timeEstimate: 0, timeSpent: 0 } });
+        wrapper = mountComponent({
+          props: {
+            initialTimeTracking: {
+              timeEstimate: 0,
+              totalTimeSpent: 0,
+              humanTimeEstimate: '',
+              humanTotalTimeSpent: '',
+            },
+          },
+        });
         await wrapper.vm.$nextTick();
       });
 
@@ -224,6 +308,16 @@ describe('Issuable Time Tracker', () => {
 
         expect(findByTestId('helpPane').exists()).toBe(false);
       });
+    });
+  });
+
+  describe('Event listeners', () => {
+    it('refetches issuableTimeTracking query when eventHub emits `timeTracker:refresh` event', async () => {
+      SidebarEventHub.$emit('timeTracker:refresh');
+
+      await wrapper.vm.$nextTick();
+
+      expect(issuableTimeTrackingRefetchSpy).toHaveBeenCalled();
     });
   });
 });

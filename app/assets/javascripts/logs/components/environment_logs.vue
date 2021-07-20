@@ -5,7 +5,6 @@ import {
   GlDropdown,
   GlDropdownSectionHeader,
   GlDropdownItem,
-  GlDropdownDivider,
   GlInfiniteScroll,
 } from '@gitlab/ui';
 import { throttle } from 'lodash';
@@ -25,14 +24,10 @@ export default {
     GlDropdown,
     GlDropdownSectionHeader,
     GlDropdownItem,
-    GlDropdownDivider,
     GlInfiniteScroll,
     LogSimpleFilters,
     LogAdvancedFilters,
     LogControlButtons,
-  },
-  filters: {
-    formatDate,
   },
   props: {
     environmentName: {
@@ -66,7 +61,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('environmentLogs', ['environments', 'timeRange', 'logs', 'pods', 'managedApps']),
+    ...mapState('environmentLogs', ['environments', 'timeRange', 'logs', 'pods']),
     ...mapGetters('environmentLogs', ['trace', 'showAdvancedFilters']),
 
     showLoader() {
@@ -88,15 +83,12 @@ export default {
     });
 
     this.fetchEnvironments(this.environmentsPath);
-    this.fetchManagedApps(this.clustersPath);
   },
   methods: {
     ...mapActions('environmentLogs', [
       'setInitData',
       'showEnvironment',
-      'showManagedApp',
       'fetchEnvironments',
-      'fetchManagedApps',
       'refreshPodLogs',
       'fetchMoreLogsPrepend',
       'dismissRequestEnvironmentsError',
@@ -106,9 +98,6 @@ export default {
 
     isCurrentEnvironment(envName) {
       return envName === this.environments.current;
-    },
-    isCurrentManagedApp(appName) {
-      return appName === this.managedApps.current;
     },
     topReached() {
       if (!this.logs.isLoading) {
@@ -122,6 +111,7 @@ export default {
       const { scrollTop = 0, clientHeight = 0, scrollHeight = 0 } = target;
       this.scrollDownButtonDisabled = scrollTop + clientHeight === scrollHeight;
     }, 200),
+    formatDate,
   },
 };
 </script>
@@ -173,7 +163,7 @@ export default {
       <div class="flex-grow-0">
         <gl-dropdown
           id="environments-dropdown"
-          :text="environments.current || managedApps.current"
+          :text="environments.current"
           :disabled="environments.isLoading"
           class="gl-mr-3 gl-mb-3 gl-display-flex gl-md-display-block js-environments-dropdown"
         >
@@ -188,19 +178,6 @@ export default {
             @click="showEnvironment(env.name)"
           >
             {{ env.name }}
-          </gl-dropdown-item>
-          <gl-dropdown-divider />
-          <gl-dropdown-section-header>
-            {{ s__('Environments|Managed apps') }}
-          </gl-dropdown-section-header>
-          <gl-dropdown-item
-            v-for="app in managedApps.options"
-            :key="app.id"
-            :is-check-item="true"
-            :is-checked="isCurrentManagedApp(app.name)"
-            @click="showManagedApp(app.name)"
-          >
-            {{ app.name }}
           </gl-dropdown-item>
         </gl-dropdown>
       </div>
@@ -250,8 +227,8 @@ export default {
 
     <div ref="logFooter" class="py-2 px-3 text-white bg-secondary-900">
       <gl-sprintf :message="s__('Environments|Logs from %{start} to %{end}.')">
-        <template #start>{{ timeRange.current.start | formatDate }}</template>
-        <template #end>{{ timeRange.current.end | formatDate }}</template>
+        <template #start>{{ formatDate(timeRange.current.start) }}</template>
+        <template #end>{{ formatDate(timeRange.current.end) }}</template>
       </gl-sprintf>
       <gl-sprintf
         v-if="!logs.isComplete"

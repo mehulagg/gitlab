@@ -1,0 +1,10 @@
+query getCorpuses($projectPath: ID!) {
+  mockedPackages(projectPath: $projectPath) @client {
+    data
+    totalSize
+  }
+  uploadState(projectPath: $projectPath) @client {
+    isUploading
+    progress
+  }
+}

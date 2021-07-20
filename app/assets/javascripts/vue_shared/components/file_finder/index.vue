@@ -3,6 +3,7 @@ import { GlIcon } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import Mousetrap from 'mousetrap';
 import VirtualList from 'vue-virtual-scroll-list';
+import { keysFor, MR_GO_TO_FILE } from '~/behaviors/shortcuts/keybindings';
 import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/utils/keycodes';
 import Item from './item.vue';
 
@@ -102,6 +103,9 @@ export default {
     focusedIndex() {
       if (!this.mouseOver) {
         this.$nextTick(() => {
+          if (!this.$refs.virtualScrollList?.$el) {
+            return;
+          }
           const el = this.$refs.virtualScrollList.$el;
           const scrollTop = this.focusedIndex * FILE_FINDER_ROW_HEIGHT;
           const bottom = this.listShowCount * FILE_FINDER_ROW_HEIGHT;
@@ -128,7 +132,7 @@ export default {
       this.focusedIndex = 0;
     }
 
-    Mousetrap.bind(['t', 'mod+p'], (e) => {
+    Mousetrap.bind(keysFor(MR_GO_TO_FILE), (e) => {
       if (e.preventDefault) {
         e.preventDefault();
       }
@@ -217,7 +221,7 @@ export default {
 </script>
 
 <template>
-  <div class="file-finder-overlay" @mousedown.self="toggle(false)">
+  <div v-if="visible" class="file-finder-overlay" @mousedown.self="toggle(false)">
     <div class="dropdown-menu diff-file-changes file-finder show">
       <div :class="{ 'has-value': showClearInputButton }" class="dropdown-input">
         <input

@@ -7,6 +7,7 @@ RSpec.describe Projects::Alerting::NotifyService do
 
   describe '#execute' do
     let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+
     let(:service) { described_class.new(project, payload) }
     let(:token) { integration.token }
     let(:payload) do
@@ -68,14 +69,65 @@ RSpec.describe Projects::Alerting::NotifyService do
       let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
       let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
       let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let(:notification_args) do
-        [
-          [participant.user],
-          having_attributes(class: AlertManagement::Alert, title: payload['title'])
-        ]
+      let_it_be(:fingerprint) { 'fingerprint' }
+      let_it_be(:gitlab_fingerprint) { Digest::SHA1.hexdigest(fingerprint) }
+
+      let(:payload) { { 'fingerprint' => fingerprint } }
+      let(:users) { [participant.user] }
+
+      before do
+        stub_licensed_features(oncall_schedules: project)
       end
 
-      it_behaves_like 'Alert Notification Service sends notification email to on-call users'
+      include_examples 'oncall users are correctly notified of firing alert'
+
+      context 'with resolving payload' do
+        let(:payload) do
+          {
+            'fingerprint' => fingerprint,
+            'end_time' => Time.current.iso8601
+          }
+        end
+
+        include_examples 'oncall users are correctly notified of recovery alert'
+      end
+
+      context 'with escalation policies ready' do
+        let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
+
+        before do
+          stub_licensed_features(oncall_schedules: project, escalation_policies: true)
+        end
+
+        it_behaves_like 'does not send on-call notification'
+        include_examples 'creates an escalation'
+
+        context 'existing alert with same payload fingerprint' do
+          let_it_be(:alert) { create(:alert_management_alert, fingerprint: gitlab_fingerprint, project: project) }
+          let_it_be(:pending_escalation) { create(:incident_management_pending_alert_escalation, alert: alert) }
+
+          it 'does not create an escalation' do
+            expect { subject }.not_to change { alert.pending_escalations.count }
+          end
+
+          context 'with resolving payload' do
+            let(:payload) do
+              {
+                'fingerprint' => fingerprint,
+                'end_time' => Time.current.iso8601
+              }
+            end
+
+            context 'with existing alert escalation' do
+              let_it_be(:pending_escalation) { create(:incident_management_pending_alert_escalation, alert: alert) }
+
+              let(:target) { alert }
+
+              include_examples "deletes the target's escalations"
+            end
+          end
+        end
+      end
     end
   end
 end

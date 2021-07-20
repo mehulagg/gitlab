@@ -5,7 +5,6 @@ FactoryBot.define do
     association :elastic_reindexing_task, in_progress: false, state: :success
     sequence(:index_name_from) { |n| "old_index_name_#{n}" }
     sequence(:index_name_to) { |n| "new_index_name_#{n}" }
-    sequence(:elastic_task) { |n| "elastic_task_#{n}" }
     sequence(:alias_name) { |n| "alias_name_#{n}" }
   end
 end

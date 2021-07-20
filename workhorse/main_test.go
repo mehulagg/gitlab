@@ -23,7 +23,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/gitlab-org/gitaly/proto/go/gitalypb"
+	"gitlab.com/gitlab-org/gitaly/v14/proto/go/gitalypb"
 	"gitlab.com/gitlab-org/labkit/log"
 
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/api"
@@ -222,12 +222,15 @@ func TestDeniedPublicUploadsFile(t *testing.T) {
 	for _, resource := range []string{
 		"/uploads/static.txt",
 		"/uploads%2Fstatic.txt",
+		"/foobar%2F%2E%2E%2Fuploads/static.txt",
 	} {
-		resp, body := httpGet(t, ws.URL+resource, nil)
+		t.Run(resource, func(t *testing.T) {
+			resp, body := httpGet(t, ws.URL+resource, nil)
 
-		require.Equal(t, 404, resp.StatusCode, "GET %q: status code", resource)
-		require.Equal(t, "", body, "GET %q: response body", resource)
-		require.True(t, proxied, "GET %q: never made it to backend", resource)
+			require.Equal(t, 404, resp.StatusCode, "GET %q: status code", resource)
+			require.Equal(t, "", body, "GET %q: response body", resource)
+			require.True(t, proxied, "GET %q: never made it to backend", resource)
+		})
 	}
 }
 
@@ -533,7 +536,11 @@ func TestApiContentTypeBlock(t *testing.T) {
 func TestAPIFalsePositivesAreProxied(t *testing.T) {
 	goodResponse := []byte(`<html></html>`)
 	ts := testhelper.TestServerWithHandler(regexp.MustCompile(`.`), func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get(secret.RequestHeader) != "" && r.Method != "GET" {
+		url := r.URL.String()
+		if url[len(url)-1] == '/' {
+			w.WriteHeader(500)
+			w.Write([]byte("PreAuthorize request included a trailing slash"))
+		} else if r.Header.Get(secret.RequestHeader) != "" && r.Method != "GET" {
 			w.WriteHeader(500)
 			w.Write([]byte("non-GET request went through PreAuthorize handler"))
 		} else {
@@ -693,6 +700,12 @@ func newBranch() string {
 func testAuthServer(t *testing.T, url *regexp.Regexp, params url.Values, code int, body interface{}) *httptest.Server {
 	return testhelper.TestServerWithHandler(url, func(w http.ResponseWriter, r *http.Request) {
 		require.NotEmpty(t, r.Header.Get("X-Request-Id"))
+
+		// return a 204 No Content response if we don't receive the JWT header
+		if r.Header.Get(secret.RequestHeader) == "" {
+			w.WriteHeader(204)
+			return
+		}
 
 		w.Header().Set("Content-Type", api.ResponseContentType)
 

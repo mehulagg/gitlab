@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Resolvers::EpicIssuesResolver do
-  include ::Gitlab::Graphql::Laziness
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }

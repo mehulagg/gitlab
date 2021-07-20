@@ -10,15 +10,28 @@ module EE
       def execute
         return super unless use_elasticsearch? && default_branch?
 
-        ::Gitlab::Elastic::ProjectSearchResults.new(
-          current_user,
-          params[:search],
-          project: project,
-          repository_ref: repository_ref,
-          order_by: params[:order_by],
-          sort: params[:sort],
-          filters: { confidential: params[:confidential], state: params[:state] }
-        )
+        if project.is_a?(Array)
+          project_ids = Array(project).map(&:id)
+          ::Gitlab::Elastic::SearchResults.new(
+            current_user,
+            params[:search],
+            project_ids,
+            public_and_internal_projects: false,
+            order_by: params[:order_by],
+            sort: params[:sort],
+            filters: { confidential: params[:confidential], state: params[:state] }
+          )
+        else
+          ::Gitlab::Elastic::ProjectSearchResults.new(
+            current_user,
+            params[:search],
+            project: project,
+            repository_ref: repository_ref,
+            order_by: params[:order_by],
+            sort: params[:sort],
+            filters: { confidential: params[:confidential], state: params[:state] }
+          )
+        end
       end
 
       def repository_ref

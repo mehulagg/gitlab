@@ -3,8 +3,8 @@
 # Search for iterations
 #
 # params - Hash
-#   project_ids: Array of project ids or single project id or ActiveRecord relation.
-#   group_ids: Array of group ids or single group id or ActiveRecord relation.
+#   parent - The group in which to look-up iterations.
+#   include_ancestors - whether to look-up iterations in group ancestors.
 #   order - Orders by field default due date asc.
 #   title - Filter by title.
 #   state - Filters by state.
@@ -15,84 +15,37 @@ class IterationsFinder
 
   attr_reader :params, :current_user
 
-  class << self
-    def params_for_parent(parent, include_ancestors: false)
-      case parent
-      when Group
-        if include_ancestors
-          { group_ids: parent.self_and_ancestors.select(:id) }
-        else
-          { group_ids: parent.id }
-        end
-      when Project
-        if include_ancestors && parent.parent_id.present?
-          { group_ids: parent.parent.self_and_ancestors.select(:id), project_ids: parent.id }
-        else
-          { project_ids: parent.id }
-        end
-      else
-        raise ArgumentError, 'Invalid parent class. Only Project and Group are supported.'
-      end
-    end
-  end
-
   def initialize(current_user, params = {})
     @params = params
     @current_user = current_user
   end
 
   def execute
-    filter_permissions
-
     items = Iteration.all
     items = by_id(items)
     items = by_iid(items)
-    items = by_groups_and_projects(items)
+    items = by_groups(items)
     items = by_title(items)
     items = by_search_title(items)
     items = by_state(items)
     items = by_timeframe(items)
+    items = by_iteration_cadences(items)
 
     order(items)
   end
 
   private
 
-  def filter_permissions
-    filter_allowed_projects
-    filter_allowed_groups
+  def by_groups(items)
+    return Iteration.none unless Ability.allowed?(current_user, :read_iteration, params[:parent])
 
-    # Only allow either one project_id or one group_id when filtering by `iid`
-    if params[:iid] && params.slice(:project_ids, :group_ids).keys.count > 1
-      raise ArgumentError, 'You can specify only one scope if you use iid filter'
-    end
-  end
-
-  def filter_allowed_projects
-    return unless params[:project_ids].present?
-
-    projects = Project.id_in(params[:project_ids])
-    params[:project_ids] = Project.projects_user_can(projects, current_user, :read_iteration)
-  end
-
-  def filter_allowed_groups
-    return unless params[:group_ids].present?
-
-    groups = Group.id_in(params[:group_ids])
-
-    params[:group_ids] = Group.groups_user_can(groups, current_user, :read_iteration)
-  end
-
-  def by_groups_and_projects(items)
-    items.for_projects_and_groups(params[:project_ids], params[:group_ids])
+    items.of_groups(groups)
   end
 
   def by_id(items)
-    if params[:id]
-      items.id_in(params[:id])
-    else
-      items
-    end
+    return items unless params[:id].present?
+
+    items.id_in(params[:id])
   end
 
   def by_iid(items)
@@ -100,25 +53,31 @@ class IterationsFinder
   end
 
   def by_title(items)
-    if params[:title]
-      items.with_title(params[:title])
-    else
-      items
-    end
+    return items unless params[:title].present?
+
+    items.with_title(params[:title])
   end
 
   def by_search_title(items)
-    if params[:search_title].present?
-      items.search_title(params[:search_title])
-    else
-      items
-    end
+    return items unless params[:search_title].present?
+
+    items.search_title(params[:search_title])
   end
 
   def by_state(items)
     return items unless params[:state].present?
 
+    # `started` was deprecated in 14.1 in favor of `current`. Support for `started`
+    # will be removed in 14.6 https://gitlab.com/gitlab-org/gitlab/-/issues/334018
+    params[:state] = 'current' if params[:state] == 'started'
+
     Iteration.filter_by_state(items, params[:state])
+  end
+
+  def by_iteration_cadences(items)
+    return items unless params[:iteration_cadence_ids].present?
+
+    items.by_iteration_cadence_ids(params[:iteration_cadence_ids])
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -127,4 +86,19 @@ class IterationsFinder
     items.reorder(order_statement).order(:title)
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def groups
+    parent = params[:parent]
+
+    group = case parent
+            when Group
+              parent
+            when Project
+              parent.parent
+            else
+              raise ArgumentError, 'Invalid parent class. Only Project and Group are supported.'
+            end
+
+    params[:include_ancestors] ? group.self_and_ancestors : group
+  end
 end

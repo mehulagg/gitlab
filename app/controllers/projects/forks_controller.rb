@@ -7,7 +7,7 @@ class Projects::ForksController < Projects::ApplicationController
   include Gitlab::Utils::StrongMemoize
 
   # Authorize
-  before_action :whitelist_query_limiting, only: [:create]
+  before_action :disable_query_limiting, only: [:create]
   before_action :require_non_empty_project
   before_action :authorize_download_code!
   before_action :authenticate_user!, only: [:new, :create]
@@ -15,6 +15,10 @@ class Projects::ForksController < Projects::ApplicationController
   before_action :authorize_fork_namespace!, only: [:create]
 
   feature_category :source_code_management
+
+  before_action do
+    push_frontend_feature_flag(:fork_project_form, @project, default_enabled: :yaml)
+  end
 
   def index
     @total_forks_count    = project.forks.size
@@ -40,15 +44,25 @@ class Projects::ForksController < Projects::ApplicationController
   def new
     respond_to do |format|
       format.html do
-        @own_namespace = current_user.namespace if fork_service.valid_fork_targets.include?(current_user.namespace)
+        @own_namespace = current_user.namespace if can_fork_to?(current_user.namespace)
         @project = project
       end
 
       format.json do
         namespaces = load_namespaces_with_associations - [project.namespace]
 
+        namespaces = [current_user.namespace] + namespaces if
+          Feature.enabled?(:fork_project_form, project, default_enabled: :yaml) &&
+          can_fork_to?(current_user.namespace)
+
         render json: {
-          namespaces: ForkNamespaceSerializer.new.represent(namespaces, project: project, current_user: current_user, memberships: memberships_hash)
+          namespaces: ForkNamespaceSerializer.new.represent(
+            namespaces,
+            project: project,
+            current_user: current_user,
+            memberships: memberships_hash,
+            forked_projects: forked_projects_by_namespace(namespaces)
+          )
         }
       end
     end
@@ -73,6 +87,10 @@ class Projects::ForksController < Projects::ApplicationController
   end
 
   private
+
+  def can_fork_to?(namespace)
+    ForkTargetsFinder.new(@project, current_user).execute.id_in(current_user.namespace).any?
+  end
 
   def load_forks
     forks = ForkProjectsFinder.new(
@@ -106,8 +124,8 @@ class Projects::ForksController < Projects::ApplicationController
     access_denied! unless fork_namespace && fork_service.valid_fork_target?
   end
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42335')
+  def disable_query_limiting
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20783')
   end
 
   def load_namespaces_with_associations
@@ -117,6 +135,10 @@ class Projects::ForksController < Projects::ApplicationController
   def memberships_hash
     current_user.members.where(source: load_namespaces_with_associations).index_by(&:source_id)
   end
+
+  def forked_projects_by_namespace(namespaces)
+    project.forks.where(namespace: namespaces).includes(:namespace).index_by(&:namespace_id)
+  end
 end
 
-Projects::ForksController.prepend_if_ee('EE::Projects::ForksController')
+Projects::ForksController.prepend_mod_with('Projects::ForksController')

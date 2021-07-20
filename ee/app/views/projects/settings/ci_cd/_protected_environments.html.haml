@@ -1,10 +1,10 @@
 - expanded = expanded_by_default?
 - can_admin_project = can?(current_user, :admin_project, @project)
 
-- if protected_environments_enabled?(@project)
+- if @project.licensed_feature_available?(:protected_environments)
   %section.protected-environments-settings.settings.no-animate#js-protected-environments-settings{ class: ('expanded' if expanded) }
     .settings-header
-      %h4
+      %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
         = _('Protected environments')
       %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
         = expanded ? _('Collapse') : _('Expand')

@@ -30,7 +30,11 @@ module Types
     markdown_field :description_html, null: true
 
     field :tag_list, GraphQL::STRING_TYPE, null: true,
+          deprecated: { reason: 'Use `topics`', milestone: '13.12' },
           description: 'List of project topics (not Git tags).'
+
+    field :topics, [GraphQL::STRING_TYPE], null: true,
+          description: 'List of project topics.'
 
     field :ssh_url_to_repo, GraphQL::STRING_TYPE, null: true,
           description: 'URL to connect to the project via SSH.'
@@ -55,8 +59,6 @@ module Types
     field :visibility, GraphQL::STRING_TYPE, null: true,
           description: 'Visibility of the project.'
 
-    field :container_registry_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-          description: 'Indicates if the project stores Docker container images in a container registry.'
     field :shared_runners_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if shared runners are enabled for the project.'
     field :lfs_enabled, GraphQL::BOOLEAN_TYPE, null: true,
@@ -73,9 +75,15 @@ module Types
     field :avatar_url, GraphQL::STRING_TYPE, null: true, calls_gitaly: true,
           description: 'URL to avatar image file of the project.'
 
-    %i[issues merge_requests wiki snippets].each do |feature|
+    {
+      issues: "Issues are",
+      merge_requests: "Merge Requests are",
+      wiki: 'Wikis are',
+      snippets: 'Snippets are',
+      container_registry: 'Container Registry is'
+    }.each do |feature, name_string|
       field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true,
-            description: "Indicates if #{feature.to_s.titleize.pluralize} are enabled for the current user"
+            description: "Indicates if #{name_string} enabled for the current user"
 
       define_method "#{feature}_enabled" do
         object.feature_available?(feature, context[:current_user])
@@ -180,8 +188,15 @@ module Types
           resolver: Resolvers::IssuesResolver.single
 
     field :packages,
-         description: 'Packages of the project.',
-         resolver: Resolvers::PackagesResolver
+          description: 'Packages of the project.',
+          resolver: Resolvers::ProjectPackagesResolver
+
+    field :jobs,
+          type: Types::Ci::JobType.connection_type,
+          null: true,
+          authorize: :read_commit_status,
+          description: 'Jobs of a project. This field can only be resolved for one project in any single request.',
+          resolver: Resolvers::ProjectJobsResolver
 
     field :pipelines,
           null: true,
@@ -273,6 +288,12 @@ module Types
           description: 'Integrations which can receive alerts for the project.',
           resolver: Resolvers::AlertManagement::IntegrationsResolver
 
+    field :alert_management_http_integrations,
+          Types::AlertManagement::HttpIntegrationType.connection_type,
+          null: true,
+          description: 'HTTP Integrations which can receive alerts for the project.',
+          resolver: Resolvers::AlertManagement::HttpIntegrationsResolver
+
     field :releases,
           Types::ReleaseType.connection_type,
           null: true,
@@ -325,6 +346,14 @@ module Types
           description: 'Pipeline analytics.',
           resolver: Resolvers::ProjectPipelineStatisticsResolver
 
+    field :ci_template, Types::Ci::TemplateType, null: true,
+          description: 'Find a single CI/CD template by name.',
+          resolver: Resolvers::Ci::TemplateResolver
+
+    field :ci_job_token_scope, Types::Ci::JobTokenScopeType, null: true,
+          description: 'The CI Job Tokens scope of access.',
+          resolver: Resolvers::Ci::JobTokenScopeResolver
+
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
         LabelsFinder
@@ -366,6 +395,10 @@ module Types
       ::Security::CiConfiguration::SastParserService.new(object).configuration
     end
 
+    def tag_list
+      object.topic_list
+    end
+
     private
 
     def project
@@ -374,4 +407,4 @@ module Types
   end
 end
 
-Types::ProjectType.prepend_if_ee('::EE::Types::ProjectType')
+Types::ProjectType.prepend_mod_with('Types::ProjectType')

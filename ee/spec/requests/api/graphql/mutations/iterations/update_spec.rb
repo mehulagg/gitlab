@@ -84,14 +84,41 @@ RSpec.describe 'Updating an Iteration' do
         expect(iteration.due_date).to eq(end_date.to_date)
       end
 
-      context 'when there are ActiveRecord validation errors' do
-        let(:attributes) { { start_date: 1.month.ago.strftime('%F') } }
+      context 'when updating dates' do
+        let_it_be(:start_date) { 1.month.ago }
+        let_it_be(:end_date) { 1.month.ago + 1.day }
+        let_it_be(:attributes) { { start_date: start_date.strftime('%F') } }
 
-        it_behaves_like 'a mutation that returns errors in the response',
-                        errors: ["Start date cannot be in the past"]
+        it 'updates the iteration with date in the past', :aggregate_failures do
+          post_graphql_mutation(mutation, current_user: current_user)
 
-        it 'does not update the iteration' do
+          # Let's check that the mutation response is good
+          iteration_hash = mutation_response['iteration']
+          expect(iteration_hash['startDate'].to_date).to eq(start_date.to_date)
+
+          # Let's also check that the object was updated properly
+          iteration.reload
+          expect(iteration.start_date).to eq(start_date.to_date)
+        end
+
+        it 'does not update the iteration title' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(iteration, :title)
+        end
+
+        context 'when another iteration with given dates overlap' do
+          let_it_be(:another_iteration) { create(:iteration, group: group, start_date: start_date.strftime('%F'), due_date: end_date.strftime('%F') ) }
+
+          it_behaves_like 'a mutation that returns errors in the response',
+                          errors: ["Dates cannot overlap with other existing Iterations within this iterations cadence"]
+
+          context 'with iterations_cadences FF disabled' do
+            before do
+              stub_feature_flags(iteration_cadences: false)
+            end
+
+            it_behaves_like 'a mutation that returns errors in the response',
+              errors: ["Dates cannot overlap with other existing Iterations within this group"]
+          end
         end
       end
 

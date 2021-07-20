@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlFormInput, GlFormGroup, GlSprintf } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { getParameterByName } from '~/lib/utils/common_utils';
+import { isSameOriginUrl, getParameterByName } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import MilestoneCombobox from '~/milestones/components/milestone_combobox.vue';
 import { BACK_URL_PARAM } from '~/releases/constants';
@@ -22,7 +22,7 @@ export default {
     TagField,
   },
   computed: {
-    ...mapState('detail', [
+    ...mapState('editNew', [
       'isFetchingRelease',
       'isUpdatingRelease',
       'fetchError',
@@ -36,13 +36,13 @@ export default {
       'groupId',
       'groupMilestonesAvailable',
     ]),
-    ...mapGetters('detail', ['isValid', 'isExistingRelease']),
+    ...mapGetters('editNew', ['isValid', 'isExistingRelease']),
     showForm() {
       return Boolean(!this.isFetchingRelease && !this.fetchError && this.release);
     },
     releaseTitle: {
       get() {
-        return this.$store.state.detail.release.name;
+        return this.$store.state.editNew.release.name;
       },
       set(title) {
         this.updateReleaseTitle(title);
@@ -50,7 +50,7 @@ export default {
     },
     releaseNotes: {
       get() {
-        return this.$store.state.detail.release.description;
+        return this.$store.state.editNew.release.description;
       },
       set(notes) {
         this.updateReleaseNotes(notes);
@@ -58,14 +58,20 @@ export default {
     },
     releaseMilestones: {
       get() {
-        return this.$store.state.detail.release.milestones;
+        return this.$store.state.editNew.release.milestones;
       },
       set(milestones) {
         this.updateReleaseMilestones(milestones);
       },
     },
     cancelPath() {
-      return getParameterByName(BACK_URL_PARAM) || this.releasesPagePath;
+      const backUrl = getParameterByName(BACK_URL_PARAM);
+
+      if (isSameOriginUrl(backUrl)) {
+        return backUrl;
+      }
+
+      return this.releasesPagePath;
     },
     saveButtonLabel() {
       return this.isExistingRelease ? __('Save changes') : __('Create release');
@@ -86,15 +92,14 @@ export default {
       ];
     },
   },
-  mounted() {
-    // eslint-disable-next-line promise/catch-or-return
-    this.initializeRelease().then(() => {
-      // Focus the first non-disabled input element
-      this.$el.querySelector('input:enabled').focus();
-    });
+  async mounted() {
+    await this.initializeRelease();
+
+    // Focus the first non-disabled input or button element
+    this.$el.querySelector('input:enabled, button:enabled').focus();
   },
   methods: {
-    ...mapActions('detail', [
+    ...mapActions('editNew', [
       'initializeRelease',
       'saveRelease',
       'updateReleaseTitle',
@@ -115,7 +120,7 @@ export default {
       <gl-sprintf
         :message="
           __(
-            'Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}.',
+            'Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0.0%{codeEnd}, %{codeStart}v2.1.0-pre%{codeEnd}.',
           )
         "
       >

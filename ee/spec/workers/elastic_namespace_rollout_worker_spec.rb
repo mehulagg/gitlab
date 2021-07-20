@@ -10,7 +10,7 @@ RSpec.describe ElasticNamespaceRolloutWorker do
 
   Plan::PAID_HOSTED_PLANS.each do |plan|
     plan_factory = "#{plan}_plan"
-    let_it_be(plan_factory) { create(plan_factory) }
+    let_it_be(plan_factory) { create(plan_factory) } # rubocop:disable Rails/SaveBang
   end
 
   before_all do
@@ -20,10 +20,10 @@ RSpec.describe ElasticNamespaceRolloutWorker do
   end
 
   def expect_percentage_to_result_in_records(percentage, record_count, mode)
-    subject.perform('gold', percentage, mode)
+    subject.perform('ultimate', percentage, mode)
 
     namespace_ids = GitlabSubscription
-      .with_hosted_plan('gold')
+      .with_hosted_plan('ultimate')
       .order(id: :asc)
       .pluck(:namespace_id)
 
@@ -55,24 +55,24 @@ RSpec.describe ElasticNamespaceRolloutWorker do
 
   it 'distinguishes different plans' do
     # Rollout
-    subject.perform('gold', 50, ROLLOUT)
-    subject.perform('silver', 25, ROLLOUT)
+    subject.perform('ultimate', 50, ROLLOUT)
+    subject.perform('premium', 25, ROLLOUT)
 
     expect(
       ElasticsearchIndexedNamespace.pluck(:namespace_id)
     ).to contain_exactly(
-      *get_namespace_ids(:gold, 2),
-      *get_namespace_ids(:silver, 1)
+      *get_namespace_ids(:ultimate, 2),
+      *get_namespace_ids(:premium, 1)
     )
 
     # Rollback
-    subject.perform('gold', 25, ROLLBACK)
-    subject.perform('silver', 0, ROLLBACK)
+    subject.perform('ultimate', 25, ROLLBACK)
+    subject.perform('premium', 0, ROLLBACK)
 
     expect(
       ElasticsearchIndexedNamespace.pluck(:namespace_id)
     ).to contain_exactly(
-      *get_namespace_ids(:gold, 1)
+      *get_namespace_ids(:ultimate, 1)
     )
   end
 
@@ -85,11 +85,11 @@ RSpec.describe ElasticNamespaceRolloutWorker do
         changes: 3,
         expected_count: 3,
         current_count: 0,
-        plan: 'gold'
+        plan: 'ultimate'
       )
     ).and_call_original
 
-    subject.perform('gold', 75, ROLLOUT)
+    subject.perform('ultimate', 75, ROLLOUT)
 
     expect(logger).to receive(:info).with(
       hash_including(
@@ -97,10 +97,10 @@ RSpec.describe ElasticNamespaceRolloutWorker do
         changes: 2,
         expected_count: 1,
         current_count: 3,
-        plan: 'gold'
+        plan: 'ultimate'
       )
     ).and_call_original
 
-    subject.perform('gold', 25, ROLLBACK)
+    subject.perform('ultimate', 25, ROLLBACK)
   end
 end

@@ -42,17 +42,6 @@ RSpec.describe EE::PersonalAccessTokens::RevokeService do
         end
       end
 
-      context 'when feature flag is disabled' do
-        let_it_be(:current_user) { group_owner }
-        let_it_be(:token) { create(:personal_access_token, user: managed_user) }
-
-        before do
-          stub_feature_flags(revoke_managed_users_token: false)
-        end
-
-        it_behaves_like 'an unsuccessfully revoked token'
-      end
-
       context 'when current user is a group owner of a different managed group' do
         let_it_be(:group) { create(:group_with_managed_accounts) }
         let_it_be(:group_owner2) { create(:user) }

@@ -112,7 +112,7 @@ module EE
               return dn unless dn.present?
 
               dn.force_encoding('UTF-8')
-            rescue
+            rescue StandardError
               dn
             end
 

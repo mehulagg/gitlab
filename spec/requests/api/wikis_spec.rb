@@ -14,9 +14,21 @@ require 'spec_helper'
 
 RSpec.describe API::Wikis do
   include WorkhorseHelpers
+  include AfterNextHelpers
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group).tap { |g| g.add_owner(user) } }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group).tap { |g| g.add_owner(user) } }
+  let_it_be(:group_project) { create(:project, :wiki_repo, namespace: group) }
+
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:maintainer) { create(:user) }
+  let_it_be(:project_wiki_disabled) do
+    create(:project, :wiki_repo, :wiki_disabled).tap do |project|
+      project.add_developer(developer)
+      project.add_maintainer(maintainer)
+    end
+  end
+
   let(:project_wiki) { create(:project_wiki, project: project, user: user) }
   let(:payload) { { content: 'content', format: 'rdoc', title: 'title' } }
   let(:expected_keys_with_content) { %w(content format slug title) }
@@ -31,7 +43,7 @@ RSpec.describe API::Wikis do
     let(:url) { "/projects/#{project.id}/wikis" }
 
     context 'when wiki is disabled' do
-      let(:project) { create(:project, :wiki_repo, :wiki_disabled) }
+      let(:project) { project_wiki_disabled }
 
       context 'when user is guest' do
         before do
@@ -43,9 +55,7 @@ RSpec.describe API::Wikis do
 
       context 'when user is developer' do
         before do
-          project.add_developer(user)
-
-          get api(url, user)
+          get api(url, developer)
         end
 
         include_examples 'wiki API 403 Forbidden'
@@ -53,9 +63,7 @@ RSpec.describe API::Wikis do
 
       context 'when user is maintainer' do
         before do
-          project.add_maintainer(user)
-
-          get api(url, user)
+          get api(url, maintainer)
         end
 
         include_examples 'wiki API 403 Forbidden'
@@ -124,7 +132,7 @@ RSpec.describe API::Wikis do
     let(:url) { "/projects/#{project.id}/wikis/#{page.slug}" }
 
     context 'when wiki is disabled' do
-      let(:project) { create(:project, :wiki_repo, :wiki_disabled) }
+      let(:project) { project_wiki_disabled }
 
       context 'when user is guest' do
         before do
@@ -136,9 +144,7 @@ RSpec.describe API::Wikis do
 
       context 'when user is developer' do
         before do
-          project.add_developer(user)
-
-          get api(url, user)
+          get api(url, developer)
         end
 
         include_examples 'wiki API 403 Forbidden'
@@ -146,9 +152,7 @@ RSpec.describe API::Wikis do
 
       context 'when user is maintainer' do
         before do
-          project.add_maintainer(user)
-
-          get api(url, user)
+          get api(url, maintainer)
         end
 
         include_examples 'wiki API 403 Forbidden'
@@ -248,7 +252,7 @@ RSpec.describe API::Wikis do
     let(:url) { "/projects/#{project.id}/wikis" }
 
     context 'when wiki is disabled' do
-      let(:project) { create(:project, :wiki_disabled, :wiki_repo) }
+      let(:project) { project_wiki_disabled }
 
       context 'when user is guest' do
         before do
@@ -260,8 +264,7 @@ RSpec.describe API::Wikis do
 
       context 'when user is developer' do
         before do
-          project.add_developer(user)
-          post(api(url, user), params: payload)
+          post(api(url, developer), params: payload)
         end
 
         include_examples 'wiki API 403 Forbidden'
@@ -269,8 +272,7 @@ RSpec.describe API::Wikis do
 
       context 'when user is maintainer' do
         before do
-          project.add_maintainer(user)
-          post(api(url, user), params: payload)
+          post(api(url, maintainer), params: payload)
         end
 
         include_examples 'wiki API 403 Forbidden'
@@ -468,7 +470,7 @@ RSpec.describe API::Wikis do
     end
 
     context 'when wiki belongs to a group project' do
-      let(:project) { create(:project, :wiki_repo, namespace: group) }
+      let(:project) { group_project }
 
       include_examples 'wikis API updates wiki page'
     end
@@ -578,6 +580,20 @@ RSpec.describe API::Wikis do
           include_examples 'wiki API 404 Wiki Page Not Found'
         end
       end
+
+      context 'when there is an error deleting the page' do
+        it 'returns 422' do
+          project.add_maintainer(user)
+
+          allow_next(WikiPages::DestroyService, current_user: user, container: project)
+            .to receive(:execute).and_return(ServiceResponse.error(message: 'foo'))
+
+          delete(api(url, user))
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+          expect(json_response['message']).to eq 'foo'
+        end
+      end
     end
 
     context 'when wiki belongs to a group project' do
@@ -595,11 +611,12 @@ RSpec.describe API::Wikis do
     let(:payload) { { file: fixture_file_upload('spec/fixtures/dk.png') } }
     let(:url) { "/projects/#{project.id}/wikis/attachments" }
     let(:file_path) { "#{Wikis::CreateAttachmentService::ATTACHMENT_PATH}/fixed_hex/dk.png" }
+    let(:branch) { wiki.default_branch }
     let(:result_hash) do
       {
         file_name: 'dk.png',
         file_path: file_path,
-        branch: 'master',
+        branch: branch,
         link: {
           url: file_path,
           markdown: "![dk](#{file_path})"

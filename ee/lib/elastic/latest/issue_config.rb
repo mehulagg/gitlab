@@ -10,7 +10,12 @@ module Elastic
       self.document_type = 'doc'
       self.index_name = [Rails.application.class.module_parent_name.downcase, Rails.env, 'issues'].join('-')
 
-      settings Elastic::Latest::Config.settings.to_hash
+      settings Elastic::Latest::Config.settings.to_hash.deep_merge(
+        index: {
+          number_of_shards: Elastic::AsJSON.new { Elastic::IndexSetting[self.index_name].number_of_shards },
+          number_of_replicas: Elastic::AsJSON.new { Elastic::IndexSetting[self.index_name].number_of_replicas }
+        }
+      )
 
       mappings dynamic: 'strict' do
         indexes :type, type: :keyword
@@ -30,6 +35,7 @@ module Elastic
 
         indexes :visibility_level, type: :integer
         indexes :issues_access_level, type: :integer
+        indexes :upvotes, type: :integer
       end
     end
   end

@@ -8,15 +8,16 @@ module EE
       override :execute
       def execute(request)
         super.tap do |application|
-          audit_event_service(request.remote_ip).for_user(full_path: application.name, entity_id: application.id).security_event
+          entity = application.owner || current_user
+          audit_event_service(entity, request.remote_ip).for_user(full_path: application.name, entity_id: application.id).security_event
         end
       end
 
-      def audit_event_service(ip_address)
+      def audit_event_service(entity, ip_address)
         ::AuditEventService.new(current_user,
-                                current_user,
+                                entity,
                                 action: :custom,
-                                custom_message: 'OAuth access granted',
+                                custom_message: 'OAuth application added',
                                 ip_address: ip_address)
       end
     end

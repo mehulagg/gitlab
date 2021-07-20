@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
@@ -11,7 +12,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { visitUrl } from '~/lib/utils/url_utility';
 
-import * as Sentry from '~/sentry/wrapper';
 import {
   validFetchOneResponse,
   emptyFetchResponse,
@@ -104,6 +104,7 @@ describe('EditForm', () => {
         name: frameworkFoundResponse.name,
         pipelineConfigurationFullPath: frameworkFoundResponse.pipelineConfigurationFullPath,
         pipelineConfigurationFullPathEnabled: true,
+        submitButtonText: 'Save changes',
       });
       expect(findForm().exists()).toBe(true);
     });
@@ -183,7 +184,7 @@ describe('EditForm', () => {
       expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentrySaveError);
     });
 
-    it('saves inputted values and redirects', async () => {
+    it('saves inputted values, redirects and continues to show loading while redirecting', async () => {
       wrapper = createComponent([
         [getComplianceFrameworkQuery, fetchOne],
         [updateComplianceFrameworkMutation, update],
@@ -192,7 +193,7 @@ describe('EditForm', () => {
       await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(update).toHaveBeenCalledWith(updateProps);
-      expect(findFormStatus().props('loading')).toBe(false);
+      expect(findFormStatus().props('loading')).toBe(true);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
     });
   });

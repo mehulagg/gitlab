@@ -1,0 +1,10 @@
+#import "ee_else_ce/runner/graphql/runner_details.fragment.graphql"
+
+mutation runnerUpdate($input: RunnerUpdateInput!) {
+  runnerUpdate(input: $input) {
+    runner {
+      ...RunnerDetails
+    }
+    errors
+  }
+}

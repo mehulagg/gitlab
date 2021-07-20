@@ -3,63 +3,80 @@
 module Gitlab
   module ErrorTracking
     module Processor
-      class GrpcErrorProcessor < ::Raven::Processor
+      module GrpcErrorProcessor
         DEBUG_ERROR_STRING_REGEX = RE2('(.*) debug_error_string:(.*)')
 
-        def process(value)
-          process_first_exception_value(value)
-          process_custom_fingerprint(value)
+        class << self
+          def call(event)
+            process_first_exception_value(event)
+            process_custom_fingerprint(event)
 
-          value
-        end
+            event
+          end
 
-        # Sentry can report multiple exceptions in an event. Sanitize
-        # only the first one since that's what is used for grouping.
-        def process_first_exception_value(value)
-          exceptions = value.dig(:exception, :values)
+          # Sentry can report multiple exceptions in an event. Sanitize
+          # only the first one since that's what is used for grouping.
+          def process_first_exception_value(event)
+            # Better in new version, will be event.exception.values
+            exceptions = event.instance_variable_get(:@interfaces)[:exception]&.values
 
-          return unless exceptions.is_a?(Array)
+            return unless exceptions.is_a?(Array)
 
-          entry = exceptions.first
+            exception = exceptions.first
 
-          return unless entry.is_a?(Hash)
+            return unless valid_exception?(exception)
 
-          exception_type = entry[:type]
-          raw_message = entry[:value]
+            raw_message = exception.value
 
-          return unless exception_type&.start_with?('GRPC::')
-          return unless raw_message.present?
+            return unless exception.type&.start_with?('GRPC::')
+            return unless raw_message.present?
 
-          message, debug_str = split_debug_error_string(raw_message)
+            message, debug_str = split_debug_error_string(raw_message)
 
-          entry[:value] = message if message
-          extra = value[:extra] || {}
-          extra[:grpc_debug_error_string] = debug_str if debug_str
-        end
+            # Worse in new version, no setter! Have to poke at the
+            # instance variable
+            if message.present?
+              exceptions.each do |exception|
+                exception.value = message if valid_exception?(exception)
+              end
+            end
 
-        def process_custom_fingerprint(value)
-          fingerprint = value[:fingerprint]
+            event.extra[:grpc_debug_error_string] = debug_str if debug_str
+          end
 
-          return value unless custom_grpc_fingerprint?(fingerprint)
+          def process_custom_fingerprint(event)
+            fingerprint = event.fingerprint
 
-          message, _ = split_debug_error_string(fingerprint[1])
-          fingerprint[1] = message if message
-        end
+            return event unless custom_grpc_fingerprint?(fingerprint)
 
-        private
+            message, _ = split_debug_error_string(fingerprint[1])
+            fingerprint[1] = message if message
+          end
 
-        def custom_grpc_fingerprint?(fingerprint)
-          fingerprint.is_a?(Array) && fingerprint.length == 2 && fingerprint[0].start_with?('GRPC::')
-        end
+          private
 
-        def split_debug_error_string(message)
-          return unless message
+          def custom_grpc_fingerprint?(fingerprint)
+            fingerprint.is_a?(Array) && fingerprint.length == 2 && fingerprint[0].start_with?('GRPC::')
+          end
 
-          match = DEBUG_ERROR_STRING_REGEX.match(message)
+          def split_debug_error_string(message)
+            return unless message
 
-          return unless match
+            match = DEBUG_ERROR_STRING_REGEX.match(message)
 
-          [match[1], match[2]]
+            return unless match
+
+            [match[1], match[2]]
+          end
+
+          def valid_exception?(exception)
+            case exception
+            when Raven::SingleExceptionInterface
+              exception&.value
+            else
+              false
+            end
+          end
         end
       end
     end

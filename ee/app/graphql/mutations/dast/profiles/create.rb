@@ -29,6 +29,10 @@ module Mutations
                  description: 'The description of the profile. Defaults to an empty string.',
                  default_value: ''
 
+        argument :branch_name, GraphQL::STRING_TYPE,
+                 required: false,
+                 description: 'The associated branch.'
+
         argument :dast_site_profile_id, ::Types::GlobalIDType[::DastSiteProfile],
                  required: true,
                  description: 'ID of the site profile to be associated.'
@@ -44,7 +48,7 @@ module Mutations
 
         authorize :create_on_demand_dast_scan
 
-        def resolve(full_path:, name:, description: '', dast_site_profile_id:, dast_scanner_profile_id:, run_after_create: false)
+        def resolve(full_path:, name:, description: '', branch_name: nil, dast_site_profile_id:, dast_scanner_profile_id:, run_after_create: false)
           project = authorized_find!(full_path)
           raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
 
@@ -56,13 +60,14 @@ module Mutations
           dast_site_profile = project.dast_site_profiles.find(site_profile_id.model_id)
           dast_scanner_profile = project.dast_scanner_profiles.find(scanner_profile_id.model_id)
 
-          response = ::Dast::Profiles::CreateService.new(
+          response = ::AppSec::Dast::Profiles::CreateService.new(
             container: project,
             current_user: current_user,
             params: {
               project: project,
               name: name,
               description: description,
+              branch_name: branch_name,
               dast_site_profile: dast_site_profile,
               dast_scanner_profile: dast_scanner_profile,
               run_after_create: run_after_create
@@ -77,8 +82,7 @@ module Mutations
         private
 
         def allowed?(project)
-          project.feature_available?(:security_on_demand_scans) &&
-            Feature.enabled?(:dast_saved_scans, project, default_enabled: :yaml)
+          project.feature_available?(:security_on_demand_scans)
         end
       end
     end

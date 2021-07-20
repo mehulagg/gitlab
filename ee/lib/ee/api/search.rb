@@ -11,6 +11,11 @@ module EE
 
           ELASTICSEARCH_SCOPES = %w(wiki_blobs blobs commits notes).freeze
 
+          override :scope_preload_method
+          def scope_preload_method
+            super.merge(blobs: :with_api_commit_entity_associations).freeze
+          end
+
           override :verify_search_scope!
           def verify_search_scope!(resource:)
             if ELASTICSEARCH_SCOPES.include?(params[:scope]) && !use_elasticsearch?(resource)

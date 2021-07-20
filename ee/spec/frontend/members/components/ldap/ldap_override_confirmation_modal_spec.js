@@ -7,6 +7,7 @@ import LdapOverrideConfirmationModal from 'ee/members/components/ldap/ldap_overr
 import { LDAP_OVERRIDE_CONFIRMATION_MODAL_ID } from 'ee/members/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { member } from 'jest/members/mock_data';
+import { MEMBER_TYPES } from '~/members/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -31,12 +32,17 @@ describe('LdapOverrideConfirmationModal', () => {
     };
 
     return new Vuex.Store({
-      state: {
-        memberToOverride: member,
-        ldapOverrideConfirmationModalVisible: true,
-        ...state,
+      modules: {
+        [MEMBER_TYPES.user]: {
+          namespaced: true,
+          state: {
+            memberToOverride: member,
+            ldapOverrideConfirmationModalVisible: true,
+            ...state,
+          },
+          actions,
+        },
       },
-      actions,
     });
   };
 
@@ -44,6 +50,9 @@ describe('LdapOverrideConfirmationModal', () => {
     wrapper = mount(LdapOverrideConfirmationModal, {
       localVue,
       store: createStore(state),
+      provide: {
+        namespace: MEMBER_TYPES.user,
+      },
       attrs: {
         static: true,
       },
@@ -129,6 +138,6 @@ describe('LdapOverrideConfirmationModal', () => {
   it('modal does not show when `ldapOverrideConfirmationModalVisible` is `false`', () => {
     createComponent({ ldapOverrideConfirmationModalVisible: false });
 
-    expect(findModal().vm.$attrs.visible).toBe(false);
+    expect(findModal().props().visible).toBe(false);
   });
 });

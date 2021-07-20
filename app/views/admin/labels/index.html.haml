@@ -1,17 +1,18 @@
 - page_title _("Labels")
 
 %div
-  = link_to new_admin_label_path, class: "float-right btn gl-button btn-success" do
+  = link_to new_admin_label_path, class: "float-right btn gl-button btn-confirm" do
     = _('New label')
   %h3.page-title
     = _('Labels')
 %hr
 
-.labels.labels-container.admin-labels
+.labels.labels-container.admin-labels.gl-bg-gray-10.gl-border-solid.gl-border-1.gl-border-gray-100
   - if @labels.present?
     %ul.manage-labels-list
       = render @labels
 
     = paginate @labels, theme: 'gitlab'
-  - else
-    .nothing-here-block= _('There are no labels yet')
+
+  .nothing-here-block{ class: ('hidden' if @labels.present?) }
+    = _('There are no labels yet')

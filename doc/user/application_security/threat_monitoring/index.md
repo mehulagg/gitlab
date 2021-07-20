@@ -16,33 +16,7 @@ Monitoring** page.
 
 GitLab supports statistics for the following security features:
 
-- [Web Application Firewall](../../clusters/applications.md#web-application-firewall-modsecurity)
 - [Container Network Policies](../../../topics/autodevops/stages.md#network-policy)
-
-## Web Application Firewall
-
-The Web Application Firewall section provides metrics for the NGINX
-Ingress controller and ModSecurity firewall. This section has the
-following prerequisites:
-
-- Project has to have at least one [environment](../../../ci/environments/index.md).
-- [Web Application Firewall](../../clusters/applications.md#web-application-firewall-modsecurity) has to be enabled.
-- [Elastic Stack](../../clusters/applications.md#web-application-firewall-modsecurity) has to be installed.
-
-If you are using custom Helm values for the Elastic Stack you have to
-configure Filebeat similarly to the [vendored values](https://gitlab.com/gitlab-org/gitlab/-/blob/f610a080b1ccc106270f588a50cb3c07c08bdd5a/vendor/elastic_stack/values.yaml).
-
-The **Web Application Firewall** section displays the following information
-about your Ingress traffic:
-
-- The total amount of requests to your application
-- The proportion of traffic that is considered anomalous according to
-  the configured rules
-- The request breakdown graph for the selected time interval
-
-If a significant percentage of traffic is anomalous, you should
-investigate it for potential threats by
-[examining the Web Application Firewall logs](../../clusters/applications.md#web-application-firewall-modsecurity).
 
 ## Container Network Policy
 
@@ -53,20 +27,19 @@ your application's Kubernetes namespace. This section has the following
 prerequisites:
 
 - Your project contains at least one [environment](../../../ci/environments/index.md)
-- You've [installed Cilium](../../clusters/applications.md#install-cilium-using-gitlab-cicd)
+- You've [installed Cilium](../../project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium)
 - You've configured the [Prometheus service](../../project/integrations/prometheus.md#enabling-prometheus-integration)
 
 If you're using custom Helm values for Cilium, you must enable Hubble
 with flow metrics for each namespace by adding the following lines to
-your [Cilium values](../../clusters/applications.md#install-cilium-using-gitlab-cicd):
+your [Cilium values](../../project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium):
 
 ```yaml
-global:
-  hubble:
-    enabled: true
-    metrics:
-      enabled:
-        - 'flow:sourceContext=namespace;destinationContext=namespace'
+hubble:
+  enabled: true
+  metrics:
+    enabled:
+      - 'flow:sourceContext=namespace;destinationContext=namespace'
 ```
 
 The **Container Network Policy** section displays the following information
@@ -80,7 +53,11 @@ about your packet flow:
 
 If a significant percentage of packets is dropped, you should
 investigate it for potential threats by
-[examining the Cilium logs](../../clusters/applications.md#install-cilium-using-gitlab-cicd).
+examining the Cilium logs:
+
+```shell
+kubectl -n gitlab-managed-apps logs -l k8s-app=cilium -c cilium-monitor
+```
 
 ## Container Network Policy management
 
@@ -88,17 +65,16 @@ investigate it for potential threats by
 
 The **Threat Monitoring** page's **Policy** tab displays deployed
 network policies for all available environments. You can check a
-network policy's `yaml` manifest, toggle the policy's enforcement
+network policy's `yaml` manifest, its enforcement
 status, and create and edit deployed policies. This section has the
 following prerequisites:
 
 - Your project contains at least one [environment](../../../ci/environments/index.md)
-- You've [installed Cilium](../../clusters/applications.md#install-cilium-using-gitlab-cicd)
+- You've [installed Cilium](../../project/clusters/protect/container_network_security/quick_start_guide.md#use-the-cluster-management-template-to-install-cilium)
 
 Network policies are fetched directly from the selected environment's
 deployment platform. Changes performed outside of this tab are
-reflected upon refresh. Enforcement status changes are deployed
-directly to a deployment namespace of the selected environment.
+reflected upon refresh.
 
 By default, the network policy list contains predefined policies in a
 disabled state. Once enabled, a predefined policy deploys to the
@@ -115,8 +91,9 @@ users must make changes by following the
 To change a network policy's enforcement status:
 
 - Click the network policy you want to update.
-- Click the **Enforcement status** toggle to update the selected policy.
-- Click the **Apply changes** button to deploy network policy changes.
+- Click the **Edit policy** button.
+- Click the **Policy status** toggle to update the selected policy.
+- Click the **Save changes** button to deploy network policy changes.
 
 Disabled network policies have the `network-policy.gitlab.com/disabled_by: gitlab` selector inside
 the `podSelector` block. This narrows the scope of such a policy and as a result it doesn't affect
@@ -126,14 +103,13 @@ any pods. The policy itself is still deployed to the corresponding deployment na
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3403) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.4.
 
-The policy editor allows you to create, edit, and delete policies. To
-create a new policy click the **New policy** button located in the
-**Policy** tab's header. To edit an existing policy, click**Edit
-policy** in the selected policy drawer.
+You can use the policy editor to create, edit, and delete policies.
 
-Note that the policy editor only supports the
-[CiliumNetworkPolicy](https://docs.cilium.io/en/v1.8/policy/)specification. Regular Kubernetes
-[NetworkPolicy](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#networkpolicy-v1-networking-k8s-io)
+- To create a new policy, click the **New policy** button located in the **Policy** tab's header.
+- To edit an existing policy, click **Edit policy** in the selected policy drawer.
+
+The policy editor only supports the [CiliumNetworkPolicy](https://docs.cilium.io/en/v1.8/policy/)
+specification. Regular Kubernetes [NetworkPolicy](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#networkpolicy-v1-networking-k8s-io)
 resources aren't supported.
 
 The policy editor has two modes:
@@ -163,3 +139,56 @@ Once your policy is complete, save it by pressing the **Save policy**
 button at the bottom of the editor. Existing policies can also be
 removed from the editor interface by clicking the **Delete policy**
 button at the bottom of the editor.
+
+### Configuring Network Policy Alerts
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) and [enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/287676) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+> - The feature flag was removed and the Threat Monitoring Alerts Project was [made generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/287676) in GitLab 14.0.
+
+You can use policy alerts to track your policy's impact. Alerts are only available if you've
+[installed](../../clusters/agent/repository.md)
+and [configured](../../clusters/agent/index.md#create-an-agent-record-in-gitlab)
+a Kubernetes Agent for this project.
+
+There are two ways to create policy alerts:
+
+- In the [policy editor UI](#container-network-policy-editor),
+  by clicking **Add alert**.
+- In the policy editor's YAML mode, through the `metadata.annotations` property:
+
+  ```yaml
+  metadata:
+    annotations:
+      app.gitlab.com/alert: 'true'
+  ```
+
+Once added, the UI updates and displays a warning about the dangers of too many alerts.
+
+### Container Network Policy Alert list
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+
+The policy alert list displays your policy's alert activity. You can sort the list by these columns:
+
+- Date and time
+- Events
+- Status
+
+You can filter the list with the **Policy Name** filter and the **Status** filter at the top. Use
+the selector menu in the **Status** column to set the status for each alert:
+
+- Unreviewed
+- In review
+- Resolved
+- Dismissed
+
+By default, the list doesn't display resolved or dismissed alerts.
+
+![Policy Alert List](img/threat_monitoring_policy_alert_list_v13_12.png)
+
+Clicking an alert's row opens the alert drawer, which shows more information about the alert. A user
+can also create an incident from the alert and update the alert status in the alert drawer.
+
+Clicking an alert's name takes the user to the [alert details page](../../../operations/incident_management/alerts.md#alert-details-page).
+
+For information on work in progress for the alerts dashboard, see [this epic](https://gitlab.com/groups/gitlab-org/-/epics/5041).

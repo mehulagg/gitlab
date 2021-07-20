@@ -7,8 +7,9 @@ module API
       expose :name
       expose :push_access_levels, using: Entities::ProtectedRefAccess
       expose :merge_access_levels, using: Entities::ProtectedRefAccess
+      expose :allow_force_push
     end
   end
 end
 
-API::Entities::ProtectedBranch.prepend_if_ee('EE::API::Entities::ProtectedBranch')
+API::Entities::ProtectedBranch.prepend_mod_with('API::Entities::ProtectedBranch')

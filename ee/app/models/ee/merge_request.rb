@@ -19,6 +19,7 @@ module EE
       has_many :approvers, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+      has_many :status_check_responses, class_name: 'MergeRequests::StatusCheckResponse', inverse_of: :merge_request
       has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
         def applicable_to_branch(branch)
           ActiveRecord::Associations::Preloader.new.preload(
@@ -52,8 +53,6 @@ module EE
 
       delegate :sha, to: :head_pipeline, prefix: :head_pipeline, allow_nil: true
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
-      delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
-      delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -71,12 +70,20 @@ module EE
       scope :including_merge_train, -> do
         includes(:merge_train)
       end
+
+      def merge_requests_author_approval?
+        !!target_project&.merge_requests_author_approval?
+      end
+
+      def merge_requests_disable_committers_approval?
+        !!target_project&.merge_requests_disable_committers_approval?
+      end
     end
 
     class_methods do
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
-        super.preload(:blocking_merge_requests)
+        super.preload(:blocking_merge_requests, target_project: [group: :saml_provider])
       end
 
       def sort_by_attribute(method, *args, **kwargs)
@@ -96,6 +103,16 @@ module EE
         grouping_columns << ::MergeRequest::Metrics.review_time_field if sort.to_s == 'review_time_desc'
         grouping_columns
       end
+
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
+      end
+    end
+
+    override :predefined_variables
+    def predefined_variables
+      super.concat(merge_request_approval_variables)
     end
 
     override :mergeable?
@@ -149,11 +166,22 @@ module EE
     end
 
     def has_denied_policies?
+      return false unless project.feature_available?(:license_scanning)
+
       return false unless has_license_scanning_reports?
 
       return false if has_approved_license_check?
 
-      actual_head_pipeline.license_scanning_report.violates?(project.software_license_policies)
+      report_diff = compare_reports(::Ci::CompareLicenseScanningReportsService)
+
+      licenses = report_diff.dig(:data, 'new_licenses')
+
+      return false if licenses.nil? || licenses.empty?
+
+      licenses.any? do |l|
+        status = l.dig('classification', 'approval_status')
+        %w(blacklisted denied).include?(status)
+      end
     end
 
     def enabled_reports
@@ -264,11 +292,25 @@ module EE
       end
     end
 
+    def security_reports_up_to_date?
+      project.security_reports_up_to_date_for_ref?(target_branch)
+    end
+
     private
 
     def has_approved_license_check?
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
+      end
+    end
+
+    def merge_request_approval_variables
+      return unless approval_feature_available?
+
+      strong_memoize(:merge_request_approval_variables) do
+        ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(key: 'CI_MERGE_REQUEST_APPROVED', value: approved?.to_s) if approved?
+        end
       end
     end
   end

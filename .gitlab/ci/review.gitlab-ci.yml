@@ -2,7 +2,7 @@ review-cleanup:
   extends:
     - .default-retry
     - .review:rules:review-cleanup
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-helm3-kubectl1.14
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-helm3.5-kubectl1.17
   stage: prepare
   environment:
     name: review/auto-cleanup
@@ -25,30 +25,25 @@ review-build-cng:
   extends:
     - .default-retry
     - .review:rules:review-build-cng
-  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7-alpine
+  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7-alpine3.13
   stage: review-prepare
   before_script:
     - source ./scripts/utils.sh
-    - install_api_client_dependencies_with_apk
     - install_gitlab_gem
   needs:
     - job: compile-production-assets
       artifacts: false
   script:
-    - BUILD_TRIGGER_TOKEN=$REVIEW_APPS_BUILD_TRIGGER_TOKEN ./scripts/trigger-build cng
-    # When the job is manual, review-deploy is also manual and we don't want people
-    # to have to manually start the jobs in sequence, so we do it for them.
-    - '[ -z $CI_JOB_MANUAL ] || scripts/api/play_job.rb --job-name "review-deploy"'
+    - ./scripts/trigger-build cng
 
 .review-workflow-base:
   extends:
     - .default-retry
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-helm3-kubectl1.14
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-helm3.5-kubectl1.17
   variables:
     HOST_SUFFIX: "${CI_ENVIRONMENT_SLUG}"
-    REVIEW_APPS_DOMAIN: "temp.gitlab-review.app"  # FIXME: using temporary domain
     DOMAIN: "-${CI_ENVIRONMENT_SLUG}.${REVIEW_APPS_DOMAIN}"
-    GITLAB_HELM_CHART_REF: "v4.6.3"
+    GITLAB_HELM_CHART_REF: "v4.12.0"
   environment:
     name: review/${CI_COMMIT_REF_SLUG}${FREQUENCY}
     url: https://gitlab-${CI_ENVIRONMENT_SLUG}.${REVIEW_APPS_DOMAIN}
@@ -60,7 +55,7 @@ review-deploy:
     - .review-workflow-base
     - .review:rules:review-deploy
   stage: review
-  dependencies: []
+  needs: ["review-build-cng"]
   resource_group: "review/${CI_COMMIT_REF_NAME}"
   before_script:
     - export GITLAB_SHELL_VERSION=$(<GITLAB_SHELL_VERSION)
@@ -70,22 +65,19 @@ review-deploy:
     - *base-before_script
   script:
     - check_kube_domain
-    - ensure_namespace
-    - install_external_dns
     - download_chart
     - date
     - deploy || (display_deployment_debug && exit 1)
+    - verify_deploy || exit 1
     - disable_sign_ups || (delete_release && exit 1)
-    # When the job is manual, review-qa-smoke is also manual and we don't want people
-    # to have to manually start the jobs in sequence, so we do it for them.
-    - '[ -z $CI_JOB_MANUAL ] || scripts/api/play_job.rb --job-name "review-qa-smoke"'
-    - '[ -z $CI_JOB_MANUAL ] || scripts/api/play_job.rb --job-name "review-performance"'
   after_script:
     # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
     # Set DAST_RUN to true when jobs are manually scheduled.
     - if [ "$DAST_RUN" == "true" ]; then source scripts/review_apps/seed-dast-test-data.sh; TRACE=1 trigger_proj_user_creation; fi
   artifacts:
-    paths: [environment_url.txt]
+    paths:
+      - environment_url.txt
+      - curl_output.txt
     expire_in: 7 days
     when: always
 
@@ -102,13 +94,13 @@ review-deploy:
   before_script:
     - *base-before_script
 
-review-stop-failed-deployment:
+review-delete-deployment:
   extends:
     - .review-stop-base
-    - .review:rules:review-stop-failed-deployment
+    - .review:rules:review-delete-deployment
   stage: prepare
   script:
-    - delete_failed_release
+    - delete_release
 
 review-stop:
   extends:
@@ -116,21 +108,20 @@ review-stop:
     - .review:rules:review-stop
   stage: post-qa
   script:
-    - delete_release
+    - delete_k8s_release_namespace
 
 .review-qa-base:
   extends:
-    - .default-retry
     - .use-docker-in-docker
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-qa-alpine-ruby-2.7
+  image:
+    name: ${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}
+    entrypoint: [""]
   stage: qa
-  # This is needed so that manual jobs with needs don't block the pipeline.
-  # See https://gitlab.com/gitlab-org/gitlab/-/issues/199979.
-  dependencies: ["review-deploy"]
+  needs: ["build-qa-image", "review-deploy"]
   variables:
-    QA_ARTIFACTS_DIR: "${CI_PROJECT_DIR}/qa"
-    QA_CAN_TEST_GIT_PROTOCOL_V2: "false"
     QA_DEBUG: "true"
+    QA_CAN_TEST_GIT_PROTOCOL_V2: "false"
+    QA_GENERATE_ALLURE_REPORT: "true"
     GITLAB_USERNAME: "root"
     GITLAB_PASSWORD: "${REVIEW_APPS_ROOT_PASSWORD}"
     GITLAB_ADMIN_USERNAME: "root"
@@ -139,34 +130,64 @@ review-stop:
     EE_LICENSE: "${REVIEW_APPS_EE_LICENSE}"
     SIGNUP_DISABLED: "true"
   before_script:
-    - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
+    # Use $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA so that GitLab image built in omnibus-gitlab-mirror and QA image are in sync.
+    - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
+        git checkout -f ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA};
+      fi
     - export CI_ENVIRONMENT_URL="$(cat environment_url.txt)"
     - echo "${CI_ENVIRONMENT_URL}"
-    - echo "${QA_IMAGE}"
-    - *base-before_script
-    - gem install gitlab-qa --no-document ${GITLAB_QA_VERSION:+ --version ${GITLAB_QA_VERSION}}
+    - cd qa
   artifacts:
     paths:
-      - ./qa/gitlab-qa-run-*
+      - qa/tmp
     expire_in: 7 days
     when: always
+
+.allure-report-base:
+  image:
+    name: ${GITLAB_DEPENDENCY_PROXY}andrcuns/allure-report-publisher:0.3.4
+    entrypoint: [""]
+  stage: post-qa
+  variables:
+    GIT_STRATEGY: none
+    STORAGE_CREDENTIALS: $QA_ALLURE_REPORT_GCS_CREDENTIALS
+    GITLAB_AUTH_TOKEN: $GITLAB_QA_MR_ALLURE_REPORT_TOKEN
+  allow_failure: true
+  script:
+    - |
+      allure-report-publisher upload gcs \
+        --results-glob="qa/tmp/allure-results/*" \
+        --bucket="gitlab-qa-allure-reports" \
+        --prefix="$ALLURE_REPORT_PATH_PREFIX/$CI_COMMIT_REF_SLUG" \
+        --update-pr="comment" \
+        --copy-latest \
+        --ignore-missing-results \
+        --color
 
 review-qa-smoke:
   extends:
     - .review-qa-base
     - .review:rules:review-qa-smoke
+  retry: 1  # This is confusing but this means "2 runs at max".
   script:
-    - gitlab-qa Test::Instance::Smoke "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}"
+    - bin/test Test::Instance::Smoke "${CI_ENVIRONMENT_URL}"
 
 review-qa-all:
   extends:
     - .review-qa-base
-    - .review:rules:mr-only-manual
+    - .review:rules:review-qa-all
   parallel: 5
   script:
     - export KNAPSACK_REPORT_PATH=knapsack/master_report.json
     - export KNAPSACK_TEST_FILE_PATTERN=qa/specs/features/**/*_spec.rb
-    - gitlab-qa Test::Instance::Any "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}" -- --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml --format html --out tmp/rspec.htm --color --format documentation
+    - |
+      bin/test Test::Instance::All "${CI_ENVIRONMENT_URL}" \
+        -- \
+        --color --format documentation \
+        --format RspecJunitFormatter --out tmp/rspec.xml
+  artifacts:
+    reports:
+      junit: qa/tmp/rspec.xml
 
 review-performance:
   extends:
@@ -176,9 +197,7 @@ review-performance:
     name: sitespeedio/sitespeed.io
     entrypoint: [""]
   stage: qa
-  # This is needed so that manual jobs with needs don't block the pipeline.
-  # See https://gitlab.com/gitlab-org/gitlab/-/issues/199979.
-  dependencies: ["review-deploy"]
+  needs: ["review-deploy"]
   before_script:
     - export CI_ENVIRONMENT_URL="$(cat environment_url.txt)"
     - echo "${CI_ENVIRONMENT_URL}"
@@ -196,41 +215,46 @@ review-performance:
       performance: performance.json
     expire_in: 31d
 
-parallel-spec-reports:
+allure-report-qa-smoke:
   extends:
-    - .review:rules:mr-only-manual
-  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7-alpine
-  stage: post-qa
-  dependencies: ["review-qa-all"]
+    - .allure-report-base
+    - .review:rules:review-qa-smoke-report
+  needs: ["review-qa-smoke"]
   variables:
-    NEW_PARALLEL_SPECS_REPORT: qa/report-new.html
-    BASE_ARTIFACT_URL: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/qa/"
-  script:
-    - apk add --update build-base libxml2-dev libxslt-dev && rm -rf /var/cache/apk/*
-    - gem install nokogiri --no-document
-    - cd qa/gitlab-qa-run-*/gitlab-*
-    - ARTIFACT_DIRS=$(pwd |rev| awk -F / '{print $1,$2}' | rev | sed s_\ _/_)
-    - cd -
-    - '[[ -f $NEW_PARALLEL_SPECS_REPORT ]] || echo "{}" > ${NEW_PARALLEL_SPECS_REPORT}'
-    - scripts/merge-html-reports ${NEW_PARALLEL_SPECS_REPORT} ${BASE_ARTIFACT_URL}${ARTIFACT_DIRS} qa/gitlab-qa-run-*/**/rspec.htm
-  artifacts:
-    when: always
-    paths:
-      - qa/report-new.html
-      - qa/gitlab-qa-run-*
-    reports:
-      junit: qa/gitlab-qa-run-*/**/rspec-*.xml
-    expire_in: 31d
+    ALLURE_REPORT_PATH_PREFIX: gitlab-review-smoke
+    ALLURE_JOB_NAME: review-qa-smoke
+
+allure-report-qa-all:
+  extends:
+    - .allure-report-base
+    - .review:rules:review-qa-all-report
+  needs: ["review-qa-all"]
+  variables:
+    ALLURE_REPORT_PATH_PREFIX: gitlab-review-all
+    ALLURE_JOB_NAME: review-qa-all
 
 danger-review:
   extends:
     - .default-retry
-    - .yarn-cache
+    - .danger-review-cache
     - .review:rules:danger
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:danger
   stage: test
   needs: []
-  script:
-    - source ./scripts/utils.sh
+  before_script:
+    - source scripts/utils.sh
+    - bundle_install_script "--with danger"
     - run_timed_command "retry yarn install --frozen-lockfile"
-    - danger --fail-on-errors=true --verbose
+  script:
+    - >
+      if [ -z "$DANGER_GITLAB_API_TOKEN" ]; then
+        run_timed_command danger_as_local
+      else
+        run_timed_command "bundle exec danger --fail-on-errors=true --verbose"
+      fi
+
+danger-review-local:
+  extends:
+    - danger-review
+    - .review:rules:danger-local
+  script:
+    - run_timed_command danger_as_local

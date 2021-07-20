@@ -3,7 +3,7 @@
 module Resolvers
   module IncidentManagement
     class OncallShiftsResolver < BaseResolver
-      alias_method :rotation, :synchronized_object
+      alias_method :rotation, :object
 
       type Types::IncidentManagement::OncallShiftType.connection_type, null: true
 
@@ -28,6 +28,11 @@ module Resolvers
         raise Gitlab::Graphql::Errors::ResourceNotAvailable, result.errors.join(', ') if result.error?
 
         result.payload[:shifts]
+      end
+
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/324421
+      def self.complexity_multiplier(args)
+        0.005
       end
     end
   end

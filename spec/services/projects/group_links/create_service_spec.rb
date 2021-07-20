@@ -6,6 +6,7 @@ RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
   let_it_be(:user) { create :user }
   let_it_be(:group) { create :group }
   let_it_be(:project) { create :project }
+
   let(:group_access) { Gitlab::Access::DEVELOPER }
   let(:opts) do
     {
@@ -38,7 +39,7 @@ RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
     expect { subject.execute(create(:group)) }.not_to change { project.project_group_links.count }
   end
 
-  context 'with specialized_project_authorization_workers' do
+  context 'with specialized project_authorization workers' do
     let_it_be(:other_user) { create(:user) }
 
     before do
@@ -49,12 +50,12 @@ RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
       expect(AuthorizedProjectsWorker).not_to(
         receive(:bulk_perform_async)
       )
-      expect(AuthorizedProjectUpdate::ProjectGroupLinkCreateWorker).to(
+      expect(AuthorizedProjectUpdate::ProjectRecalculateWorker).to(
         receive(:perform_async)
-          .with(project.id, group.id, group_access)
+          .with(project.id)
           .and_call_original
       )
-      expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).to(
+      expect(AuthorizedProjectUpdate::UserRefreshFromReplicaWorker).to(
         receive(:bulk_perform_in)
           .with(1.hour,
                 array_including([user.id], [other_user.id]),
@@ -63,26 +64,6 @@ RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
       )
 
       subject.execute(group)
-    end
-
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(specialized_project_authorization_project_share_worker: false)
-      end
-
-      it 'uses AuthorizedProjectsWorker' do
-        expect(AuthorizedProjectsWorker).to(
-          receive(:bulk_perform_async).with(array_including([user.id], [other_user.id])).and_call_original
-        )
-        expect(AuthorizedProjectUpdate::ProjectCreateWorker).not_to(
-          receive(:perform_async)
-        )
-        expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).not_to(
-          receive(:bulk_perform_in)
-        )
-
-        subject.execute(group)
-      end
     end
   end
 end

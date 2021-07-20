@@ -12,7 +12,7 @@ import {
 import RecentSearchesStorageKeys from 'ee_else_ce/filtered_search/recent_searches_storage_keys';
 import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
 import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 
 import { SortDirection } from './constants';
@@ -58,7 +58,7 @@ export default {
       type: String,
       required: false,
       default: '',
-      validator: (value) => value === '' || /(_desc)|(_asc)/g.test(value),
+      validator: (value) => value === '' || /(_desc)|(_asc)/gi.test(value),
     },
     showCheckbox: {
       type: Boolean,
@@ -93,9 +93,9 @@ export default {
             sortBy.sortDirection.descending === this.initialSortBy,
         )
         .pop();
-      selectedSortDirection = this.initialSortBy.endsWith('_desc')
-        ? SortDirection.descending
-        : SortDirection.ascending;
+      selectedSortDirection = Object.keys(selectedSortOption.sortDirection).find(
+        (key) => selectedSortOption.sortDirection[key] === this.initialSortBy,
+      );
     }
 
     return {
@@ -211,7 +211,9 @@ export default {
         .catch((error) => {
           if (error.name === 'RecentSearchesServiceError') return undefined;
 
-          createFlash(__('An error occurred while parsing recent searches'));
+          createFlash({
+            message: __('An error occurred while parsing recent searches'),
+          });
 
           // Gracefully fail to empty array
           return [];
@@ -324,7 +326,9 @@ export default {
       class="gl-align-self-center"
       :checked="checkboxChecked"
       @input="$emit('checked-input', $event)"
-    />
+    >
+      <span class="gl-sr-only">{{ __('Select all') }}</span>
+    </gl-form-checkbox>
     <gl-filtered-search
       ref="filteredSearchInput"
       v-model="filterValue"
@@ -363,6 +367,7 @@ export default {
       <gl-button
         v-gl-tooltip
         :title="sortDirectionTooltip"
+        :aria-label="sortDirectionTooltip"
         :icon="sortDirectionIcon"
         class="flex-shrink-1"
         @click="handleSortDirectionClick"

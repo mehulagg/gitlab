@@ -7,14 +7,15 @@ RSpec.describe 'Project navbar' do
 
   include_context 'project navbar structure'
 
-  let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
 
-  before do
-    insert_package_nav(_('Operations'))
+  let(:user) { project.owner }
 
-    project.add_maintainer(user)
+  before do
     sign_in(user)
+
+    insert_package_nav(_('Infrastructure'))
+    insert_infrastructure_registry_nav
   end
 
   context 'when issue analytics is available' do
@@ -22,7 +23,7 @@ RSpec.describe 'Project navbar' do
       stub_licensed_features(issues_analytics: true)
 
       insert_after_sub_nav_item(
-        _('Code Review'),
+        _('Code review'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Issue')
       )
@@ -41,8 +42,8 @@ RSpec.describe 'Project navbar' do
           _('Security Dashboard'),
           _('Vulnerability Report'),
           s_('OnDemandScans|On-demand Scans'),
-          _('Configuration'),
-          _('Audit Events')
+          _('Audit Events'),
+          _('Configuration')
         ]
       }
     end
@@ -59,18 +60,18 @@ RSpec.describe 'Project navbar' do
   context 'when packages are available' do
     before do
       stub_config(packages: { enabled: true }, registry: { enabled: false })
-
-      visit project_path(project)
     end
 
     context 'when container registry is available' do
       before do
         stub_config(registry: { enabled: true })
 
+        insert_container_nav
+
         insert_after_sub_nav_item(
-          _('Package Registry'),
-          within: _('Packages & Registries'),
-          new_sub_nav_item_name: _('Container Registry')
+          _('Monitor'),
+          within: _('Settings'),
+          new_sub_nav_item_name: _('Packages & Registries')
         )
 
         visit project_path(project)
@@ -83,12 +84,11 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-
       insert_after_nav_item(
-        _('Merge Requests'),
+        _('Merge requests'),
         new_nav_item: {
           nav_item: _('Requirements'),
-          nav_sub_items: [_('List')]
+          nav_sub_items: []
         }
       )
 

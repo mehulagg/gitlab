@@ -8,6 +8,8 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   let(:project) { create(:project, :repository) }
   let(:environment) { create(:environment, project: project) }
 
+  it { is_expected.to have_many(:dora_daily_metrics) }
+
   describe '.deployed_to_cluster' do
     let!(:environment) { create(:environment) }
 
@@ -87,27 +89,86 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
   end
 
-  describe '#protected_deployable_by_user?' do
+  describe '#protected_from?' do
     let(:user) { create(:user) }
     let(:protected_environment) { create(:protected_environment, :maintainers_can_deploy, name: environment.name, project: project) }
 
-    subject { environment.protected_deployable_by_user?(user) }
+    subject { environment.protected_from?(user) }
 
     before do
-      stub_licensed_features(protected_environments: true)
+      stub_licensed_features(protected_environments: feature_available)
     end
 
     context 'when Protected Environments feature is not available on the project' do
       let(:feature_available) { false }
 
-      it { is_expected.to be_truthy }
+      it { is_expected.to be_falsy }
     end
 
     context 'when Protected Environments feature is available on the project' do
       let(:feature_available) { true }
 
       context 'when the environment is not protected' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the user is nil' do
+        let(:user) { }
+
         it { is_expected.to be_truthy }
+      end
+
+      context 'when environment is protected and user dont have access to it' do
+        before do
+          protected_environment
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when environment is protected and user have access to it' do
+        before do
+          protected_environment.deploy_access_levels.create!(user: user)
+        end
+
+        it { is_expected.to be_falsy }
+
+        it 'caches result', :request_store do
+          environment.protected_from?(user)
+
+          expect { environment.protected_from?(user) }.not_to exceed_query_limit(0)
+        end
+      end
+    end
+  end
+
+  describe '#protected_by?' do
+    let(:user) { create(:user) }
+    let(:protected_environment) { create(:protected_environment, :maintainers_can_deploy, name: environment.name, project: project) }
+
+    subject { environment.protected_by?(user) }
+
+    before do
+      stub_licensed_features(protected_environments: feature_available)
+    end
+
+    context 'when Protected Environments feature is not available on the project' do
+      let(:feature_available) { false }
+
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when Protected Environments feature is available on the project' do
+      let(:feature_available) { true }
+
+      context 'when the environment is not protected' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the user is nil' do
+        let(:user) { }
+
+        it { is_expected.to be_falsy }
       end
 
       context 'when environment is protected and user dont have access to it' do
@@ -120,7 +181,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
       context 'when environment is protected and user have access to it' do
         before do
-          protected_environment.deploy_access_levels.create(user: user)
+          protected_environment.deploy_access_levels.create!(user: user)
         end
 
         it { is_expected.to be_truthy }

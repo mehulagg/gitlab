@@ -5,6 +5,8 @@ require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200910131218_remove_duplicated_cs_findings.rb')
 
 RSpec.describe RemoveDuplicatedCsFindings, :migration do
+  include MigrationHelpers::VulnerabilitiesFindingsHelper
+
   let(:migration) { 'RemoveDuplicateCsFindings'}
   let(:namespaces) { table(:namespaces) }
   let(:notes) { table(:notes) }
@@ -16,7 +18,7 @@ RSpec.describe RemoveDuplicatedCsFindings, :migration do
   let(:identifiers) { table(:vulnerability_identifiers) }
   let!(:project) { projects.create!(id: 12058473, namespace_id: group.id, name: 'gitlab', path: 'gitlab') }
   let!(:scanner) do
-    scanners.create!(id: 6, project_id: project.id, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: project.id, external_id: 'trivy', name: 'Security Scanner')
   end
 
   before do
@@ -90,21 +92,16 @@ RSpec.describe RemoveDuplicatedCsFindings, :migration do
   end
 
   def finding_params(primary_identifier_id, project_id)
-    attrs = attributes_for(:vulnerabilities_finding) # rubocop: disable RSpec/FactoriesInMigrationSpecs
-    {
+    attrs = attributes_for_vulnerabilities_finding
+    custom_attrs = {
       severity: 0,
       confidence: 5,
       report_type: 2,
       project_id: project_id,
       scanner_id: 6,
-      primary_identifier_id: primary_identifier_id,
-      project_fingerprint: attrs[:project_fingerprint],
-      location_fingerprint: Digest::SHA1.hexdigest(SecureRandom.hex(10)),
-      uuid: attrs[:uuid],
-      name: attrs[:name],
-      metadata_version: '1.3',
-      raw_metadata: attrs[:raw_metadata]
+      primary_identifier_id: primary_identifier_id
     }
+    attrs.merge(custom_attrs)
   end
 
   def create_identifier(number_of)

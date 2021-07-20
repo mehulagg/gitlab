@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Adding to the library
 
-We strive to support the 2-4 most important metrics for each common system service that supports Prometheus. If you are looking for support for a particular exporter which has not yet been added to the library, additions can be made [to the `common_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/config/prometheus/common_metrics.yml) file.
+We strive to support the 2-4 most important metrics for each common system service that supports Prometheus. If you are looking for support for a particular exporter which has not yet been added to the library, additions can be made [to the `common_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/prometheus/common_metrics.yml) file.
 
 ### Query identifier
 
@@ -38,8 +38,6 @@ Or, you can create a database migration:
 ```ruby
 class ImportCommonMetrics < ActiveRecord::Migration[4.2]
   include Gitlab::Database::MigrationHelpers
-
-  DOWNTIME = false
 
   def up
     ::Gitlab::DatabaseImporters::CommonMetrics::Importer.new.execute

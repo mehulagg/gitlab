@@ -9,9 +9,9 @@ namespace :gitlab do
       logger.info('Starting to migrate legacy pages storage to zip deployments')
 
       result = ::Pages::MigrateFromLegacyStorageService.new(logger,
-                                                            migration_threads: migration_threads,
-                                                            batch_size: batch_size,
-                                                            ignore_invalid_entries: ignore_invalid_entries).execute
+                                                            ignore_invalid_entries: ignore_invalid_entries,
+                                                            mark_projects_as_not_deployed: mark_projects_as_not_deployed)
+                 .execute_with_threads(threads: migration_threads, batch_size: batch_size)
 
       logger.info("A total of #{result[:migrated] + result[:errored]} projects were processed.")
       logger.info("- The #{result[:migrated]} projects migrated successfully")
@@ -35,7 +35,7 @@ namespace :gitlab do
     end
 
     def logger
-      @logger ||= Logger.new(STDOUT)
+      @logger ||= Logger.new($stdout)
     end
 
     def migration_threads
@@ -50,6 +50,38 @@ namespace :gitlab do
       Gitlab::Utils.to_boolean(
         ENV.fetch('PAGES_MIGRATION_IGNORE_INVALID_ENTRIES', 'false')
       )
+    end
+
+    def mark_projects_as_not_deployed
+      Gitlab::Utils.to_boolean(
+        ENV.fetch('PAGES_MIGRATION_MARK_PROJECTS_AS_NOT_DEPLOYED', 'false')
+      )
+    end
+
+    namespace :deployments do
+      task migrate_to_object_storage: :gitlab_environment do
+        logger = Logger.new($stdout)
+
+        helper = Gitlab::LocalAndRemoteStorageMigration::PagesDeploymentMigrater.new(logger)
+
+        begin
+          helper.migrate_to_remote_storage
+        rescue StandardError => e
+          logger.error(e.message)
+        end
+      end
+
+      task migrate_to_local: :gitlab_environment do
+        logger = Logger.new($stdout)
+
+        helper = Gitlab::LocalAndRemoteStorageMigration::PagesDeploymentMigrater.new(logger)
+
+        begin
+          helper.migrate_to_local_storage
+        rescue StandardError => e
+          logger.error(e.message)
+        end
+      end
     end
   end
 end

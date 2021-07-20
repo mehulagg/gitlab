@@ -31,7 +31,7 @@ module Gitlab
           @refs.group_by(&:klass).each do |klass, group|
             ids = group.map(&:db_id)
 
-            records = klass.id_in(ids)
+            records = klass.id_in(ids).preload_indexing_data
             records_by_id = records.each_with_object({}) { |record, hash| hash[record.id] = record }
 
             group.each do |ref|
@@ -58,7 +58,7 @@ module Gitlab
           when Array
             serialize_array(anything)
           else
-            raise InvalidError.new("Don't know how to serialize #{anything.class}")
+            raise InvalidError, "Don't know how to serialize #{anything.class}"
           end
         end
 
@@ -85,7 +85,7 @@ module Gitlab
         private
 
         def test_array!(array)
-          raise InvalidError.new("Bad array representation: #{array.inspect}") unless
+          raise InvalidError, "Bad array representation: #{array.inspect}" unless
             (3..4).cover?(array.size)
         end
       end
@@ -112,7 +112,6 @@ module Gitlab
         klass.to_s
       end
 
-      # TODO: return a promise for batch loading: https://gitlab.com/gitlab-org/gitlab/issues/207280
       def database_record
         strong_memoize(:database_record) { klass.find_by_id(db_id) }
       end

@@ -4,25 +4,29 @@ require 'spec_helper'
 
 RSpec.describe Issues::UpdateService do
   let_it_be(:group) { create(:group) }
-  let(:project) { create(:project, group: group) }
-  let(:issue) { create(:issue, project: project) }
-  let(:user) { issue.author }
+  let_it_be_with_reload(:project) { create(:project, group: group) }
+  let_it_be_with_reload(:issue) { create(:issue, project: project) }
+  let_it_be(:epic) { create(:epic, group: group) }
+
+  let(:author) { issue.author }
+  let(:user) { author }
 
   describe 'execute' do
     before do
-      project.add_reporter(user)
+      project.add_reporter(author)
     end
 
     def update_issue(opts)
-      described_class.new(project, user, opts).execute(issue)
+      described_class.new(project: project, current_user: user, params: opts).execute(issue)
     end
 
     context 'refresh epic dates' do
-      let_it_be(:epic) { create(:epic) }
-      let(:issue) { create(:issue, epic: epic, project: project) }
+      before do
+        issue.update!(epic: epic)
+      end
 
       context 'updating milestone' do
-        let(:milestone) { create(:milestone, project: project) }
+        let_it_be(:milestone) { create(:milestone, project: project) }
 
         it 'calls UpdateDatesService' do
           expect(Epics::UpdateDatesService).to receive(:new).with([epic]).and_call_original.twice
@@ -33,7 +37,7 @@ RSpec.describe Issues::UpdateService do
       end
 
       context 'updating iteration' do
-        let(:iteration) { create(:iteration, group: group) }
+        let_it_be(:iteration) { create(:iteration, group: group) }
 
         context 'when issue does not already have an iteration' do
           it 'calls NotificationService#changed_iteration_issue' do
@@ -46,7 +50,7 @@ RSpec.describe Issues::UpdateService do
         end
 
         context 'when issue already has an iteration' do
-          let(:old_iteration) { create(:iteration, group: group) }
+          let_it_be(:old_iteration) { create(:iteration, group: group) }
 
           before do
             update_issue(iteration: old_iteration)
@@ -93,7 +97,7 @@ RSpec.describe Issues::UpdateService do
       context 'updating weight' do
         before do
           project.add_maintainer(user)
-          issue.update(weight: 3)
+          issue.update!(weight: 3)
         end
 
         context 'when weight is integer' do
@@ -155,15 +159,72 @@ RSpec.describe Issues::UpdateService do
       end
 
       context 'group iterations' do
-        let(:iteration) { create(:iteration, group: group) }
+        let_it_be(:iteration) { create(:iteration, group: group) }
 
         it_behaves_like 'creates iteration resource event'
       end
 
       context 'project iterations' do
-        let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
+        let_it_be(:iteration) { create(:iteration, :skip_project_validation, project: project) }
 
         it_behaves_like 'creates iteration resource event'
+      end
+    end
+
+    context 'changing issue_type' do
+      let_it_be(:sla_setting) { create(:project_incident_management_setting, :sla_enabled, project: project) }
+
+      before do
+        stub_licensed_features(incident_sla: true, quality_management: true)
+      end
+
+      context 'from issue to incident' do
+        it 'creates an SLA' do
+          expect { update_issue(issue_type: 'incident') }.to change(IssuableSla, :count).by(1)
+          expect(issue.reload).to be_incident
+          expect(issue.reload.issuable_sla).to be_present
+        end
+      end
+
+      context 'from incident to issue' do
+        let_it_be(:issue) { create(:incident, project: project) }
+        let_it_be(:sla) { create(:issuable_sla, issue: issue) }
+
+        it 'does not remove the SLA or create a new one' do
+          expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
+          expect(issue.reload.issue_type).to eq('issue')
+          expect(issue.reload.issuable_sla).to be_present
+        end
+      end
+
+      context 'from issue to restricted issue types' do
+        context 'with permissions' do
+          it 'changes the type' do
+            expect { update_issue(issue_type: 'test_case') }
+              .to change { issue.reload.issue_type }
+              .from('issue')
+              .to('test_case')
+          end
+
+          it 'does not create or remove an SLA' do
+            expect { update_issue(issue_type: 'test_case') }.not_to change(IssuableSla, :count)
+            expect(issue.issuable_sla).to be_nil
+          end
+        end
+
+        context 'without sufficient permissions' do
+          let_it_be(:guest) { create(:user) }
+
+          let(:user) { guest }
+
+          before do
+            project.add_guest(guest)
+          end
+
+          it 'excludes the issue type param' do
+            expect { update_issue(issue_type: 'test_case') }.not_to change { issue.reload.issue_type }
+          end
+        end
       end
     end
 
@@ -172,9 +233,9 @@ RSpec.describe Issues::UpdateService do
         stub_licensed_features(epics: true)
       end
 
-      let(:epic) { create(:epic, group: group) }
+      let(:params) { { epic: epic } }
 
-      subject { update_issue(epic: epic) }
+      subject { update_issue(params) }
 
       context 'when a user does not have permissions to assign an epic' do
         it 'raises an exception' do
@@ -224,7 +285,7 @@ RSpec.describe Issues::UpdateService do
         end
 
         context 'when issue belongs to another epic' do
-          let(:epic2) { create(:epic, group: group) }
+          let_it_be(:epic2) { create(:epic, group: group) }
 
           before do
             issue.update!(epic: epic2)
@@ -250,6 +311,52 @@ RSpec.describe Issues::UpdateService do
             subject
           end
         end
+
+        context 'when updating issue epic and milestone and assignee attributes' do
+          let_it_be(:milestone) { create(:milestone, project: project) }
+          let_it_be(:assignee_user1) { create(:user) }
+
+          let(:params) { { epic: epic, milestone: milestone, assignees: [assignee_user1] } }
+
+          before do
+            project.add_guest(assignee_user1)
+          end
+
+          it 'assigns the issue passed to the provided epic', :sidekiq_inline do
+            expect do
+              subject
+              issue.reload
+            end.to change { issue.epic }.from(nil).to(epic)
+                   .and(change { issue.milestone }.from(nil).to(milestone))
+                   .and(change(ResourceMilestoneEvent, :count).by(1))
+                   .and(change(Note, :count).by(3))
+          end
+
+          context 'when milestone and epic attributes are changed from description' do
+            let(:params) { { description: %(/epic #{epic.to_reference}\n/milestone #{milestone.to_reference}\n/assign #{assignee_user1.to_reference}) } }
+
+            it 'assigns the issue passed to the provided epic', :sidekiq_inline do
+              expect do
+                subject
+                issue.reload
+              end.to change { issue.epic }.from(nil).to(epic)
+                     .and(change { issue.assignees }.from([]).to([assignee_user1]))
+                     .and(change { issue.milestone }.from(nil).to(milestone))
+                     .and(change(ResourceMilestoneEvent, :count).by(1))
+                     .and(change(Note, :count).by(4))
+            end
+          end
+
+          context 'when assigning epic raises an exception' do
+            let(:mock_service) { double('service', execute: { status: :error, message: 'failed to assign epic' }) }
+
+            it 'assigns the issue passed to the provided epic' do
+              expect(EpicIssues::CreateService).to receive(:new).and_return(mock_service)
+
+              expect { subject }.to raise_error(EE::Issues::BaseService::EpicAssignmentError, 'failed to assign epic')
+            end
+          end
+        end
       end
     end
 
@@ -257,8 +364,6 @@ RSpec.describe Issues::UpdateService do
       before do
         stub_licensed_features(epics: true)
       end
-
-      let(:epic) { create(:epic, group: group) }
 
       subject { update_issue(epic: nil) }
 
@@ -280,7 +385,9 @@ RSpec.describe Issues::UpdateService do
         end
 
         context 'when issue belongs to an epic' do
-          let!(:epic_issue) { create(:epic_issue, issue: issue, epic: epic)}
+          before do
+            issue.update!(epic: epic)
+          end
 
           it 'unassigns the epic' do
             expect { subject }.to change { issue.reload.epic }.from(epic).to(nil)
@@ -288,8 +395,7 @@ RSpec.describe Issues::UpdateService do
 
           it 'calls EpicIssues::DestroyService' do
             link_sevice = double
-            expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
-              .and_return(link_sevice)
+            expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user).and_return(link_sevice)
             expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
             subject
@@ -304,10 +410,8 @@ RSpec.describe Issues::UpdateService do
           context 'but EpicIssues::DestroyService returns failure', :aggregate_failures do
             it 'does not send usage data for removed epic action' do
               link_sevice = double
-              expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
-                                                      .and_return(link_sevice)
+              expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user).and_return(link_sevice)
               expect(link_sevice).to receive(:execute).and_return({ status: :failure })
-
               expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_removed_from_epic_action)
 
               subject
@@ -323,18 +427,17 @@ RSpec.describe Issues::UpdateService do
     end
 
     it_behaves_like 'issue with epic_id parameter' do
-      let(:execute) { described_class.new(project, user, params).execute(issue) }
-      let(:epic) { create(:epic, group: group) }
+      let(:execute) { described_class.new(project: project, current_user: user, params: params).execute(issue) }
     end
 
     context 'when epic_id is nil' do
       before do
         stub_licensed_features(epics: true)
         group.add_maintainer(user)
+        issue.update!(epic: epic)
       end
 
-      let(:epic) { create(:epic, group: group) }
-      let!(:epic_issue) { create(:epic_issue, epic: epic, issue: issue) }
+      let(:epic_issue) { issue.epic_issue }
       let(:params) { { epic_id: nil } }
 
       subject { update_issue(params) }
@@ -345,8 +448,7 @@ RSpec.describe Issues::UpdateService do
 
       it 'calls EpicIssues::DestroyService' do
         link_sevice = double
-        expect(EpicIssues::DestroyService).to receive(:new).with(epic_issue, user)
-          .and_return(link_sevice)
+        expect(EpicIssues::DestroyService).to receive(:new).with(epic_issue, user).and_return(link_sevice)
         expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
         subject

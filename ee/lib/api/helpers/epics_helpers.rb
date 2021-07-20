@@ -4,11 +4,11 @@ module API
   module Helpers
     module EpicsHelpers
       def authorize_epics_feature!
-        forbidden! unless user_group.feature_available?(:epics)
+        forbidden! unless user_group.licensed_feature_available?(:epics)
       end
 
       def authorize_subepics_feature!
-        forbidden! unless user_group.feature_available?(:subepics)
+        forbidden! unless user_group.licensed_feature_available?(:subepics)
       end
 
       def authorize_can_read!

@@ -1,10 +1,13 @@
 export const tableItems = (state) => {
-  if (state.members.length) {
-    return state.members.map(({ name, username, avatar_url, web_url, email }) => {
-      const formattedUserName = `@${username}`;
+  return (state.members ?? []).map(({ email, ...member }) => ({
+    user: {
+      ...member,
+      username: `@${member.username}`,
+    },
+    email,
+  }));
+};
 
-      return { user: { name, username: formattedUserName, avatar_url, web_url }, email };
-    });
-  }
-  return [];
+export const membershipsById = (state) => (memberId) => {
+  return state.userDetails[memberId] || { isLoading: true, items: [] };
 };

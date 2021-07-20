@@ -3,6 +3,8 @@
 class MergeRequestResetApprovalsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :source_code_management
   urgency :high
   worker_resource_boundary :cpu
@@ -16,7 +18,7 @@ class MergeRequestResetApprovalsWorker # rubocop:disable Scalability/IdempotentW
     user = User.find_by(id: user_id)
     return unless user
 
-    EE::MergeRequests::ResetApprovalsService.new(project, user).execute(ref, newrev)
+    MergeRequests::ResetApprovalsService.new(project: project, current_user: user).execute(ref, newrev)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

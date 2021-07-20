@@ -15,7 +15,9 @@ module Banzai
       def call
         return doc if context[:system_note]
 
-        linkable_attributes.each do |attr|
+        # We exclude processed upload links from the linkable attributes to
+        # prevent further modifications by RepositoryLinkFilter
+        linkable_attributes.reject! do |attr|
           process_link_to_upload_attr(attr)
         end
 
@@ -43,18 +45,35 @@ module Banzai
           return
         end
 
-        html_attr.value =
+        path =
           if context[:only_path]
             path
           else
             Addressable::URI.join(Gitlab.config.gitlab.base_url, path).to_s
           end
 
+        replace_html_attr_value(html_attr, path)
+
         if html_attr.name == 'href'
           html_attr.parent.set_attribute('data-link', 'true')
         end
 
         html_attr.parent.add_class('gfm')
+      end
+
+      def replace_html_attr_value(html_attr, path)
+        if path != html_attr.value
+          preserve_original_link(html_attr, html_attr.parent)
+        end
+
+        html_attr.value = path
+      end
+
+      def preserve_original_link(html_attr, node)
+        return if html_attr.blank?
+        return if node.value?('data-canonical-src')
+
+        node.set_attribute('data-canonical-src', html_attr.value)
       end
 
       def group

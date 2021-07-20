@@ -1,9 +1,10 @@
 <script>
-import { GlModal } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import { GlModal, GlAlert } from '@gitlab/ui';
+import { mapGetters, mapActions, mapState } from 'vuex';
+import ListLabel from '~/boards/models/label';
+import { TYPE_ITERATION, TYPE_MILESTONE, TYPE_USER } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
-import { getParameterByName } from '~/lib/utils/common_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { getParameterByName, visitUrl } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import { fullLabelId, fullBoardId } from '../boards_util';
 import { formType } from '../constants';
@@ -43,6 +44,7 @@ export default {
     BoardScope: () => import('ee_component/boards/components/board_scope.vue'),
     GlModal,
     BoardConfigurationOptions,
+    GlAlert,
   },
   inject: {
     fullPath: {
@@ -106,6 +108,8 @@ export default {
     };
   },
   computed: {
+    ...mapState(['error']),
+    ...mapGetters(['isIssueBoard', 'isGroupBoard', 'isProjectBoard']),
     isNewForm() {
       return this.currentPage === formType.new;
     },
@@ -125,7 +129,7 @@ export default {
       if (this.isDeleteForm) {
         return 'danger';
       }
-      return 'info';
+      return 'confirm';
     },
     title() {
       if (this.readonly) {
@@ -161,41 +165,54 @@ export default {
     currentMutation() {
       return this.board.id ? updateBoardMutation : createBoardMutation;
     },
-    mutationVariables() {
+    deleteMutation() {
+      return destroyBoardMutation;
+    },
+    baseMutationVariables() {
       const { board } = this;
-      /* eslint-disable @gitlab/require-i18n-strings */
-      let baseMutationVariables = {
+      const variables = {
         name: board.name,
         hideBacklogList: board.hide_backlog_list,
         hideClosedList: board.hide_closed_list,
       };
 
-      if (this.scopedIssueBoardFeatureEnabled) {
-        baseMutationVariables = {
-          ...baseMutationVariables,
-          weight: board.weight,
-          assigneeId: board.assignee?.id ? convertToGraphQLId('User', board.assignee.id) : null,
-          milestoneId:
-            board.milestone?.id || board.milestone?.id === 0
-              ? convertToGraphQLId('Milestone', board.milestone.id)
-              : null,
-          labelIds: board.labels.map(fullLabelId),
-          iterationId: board.iteration_id
-            ? convertToGraphQLId('Iteration', board.iteration_id)
-            : null,
-        };
-      }
-      /* eslint-enable @gitlab/require-i18n-strings */
       return board.id
         ? {
-            ...baseMutationVariables,
+            ...variables,
             id: fullBoardId(board.id),
           }
         : {
-            ...baseMutationVariables,
-            projectPath: this.projectId ? this.fullPath : null,
-            groupPath: this.groupId ? this.fullPath : null,
+            ...variables,
+            projectPath: this.isProjectBoard ? this.fullPath : undefined,
+            groupPath: this.isGroupBoard ? this.fullPath : undefined,
           };
+    },
+    issueBoardScopeMutationVariables() {
+      return {
+        weight: this.board.weight,
+        assigneeId: this.board.assignee?.id
+          ? convertToGraphQLId(TYPE_USER, this.board.assignee.id)
+          : null,
+        milestoneId:
+          this.board.milestone?.id || this.board.milestone?.id === 0
+            ? convertToGraphQLId(TYPE_MILESTONE, this.board.milestone.id)
+            : null,
+        iterationId: this.board.iteration_id
+          ? convertToGraphQLId(TYPE_ITERATION, this.board.iteration_id)
+          : null,
+      };
+    },
+    boardScopeMutationVariables() {
+      return {
+        labelIds: this.board.labels.map(fullLabelId),
+        ...(this.isIssueBoard && this.issueBoardScopeMutationVariables),
+      };
+    },
+    mutationVariables() {
+      return {
+        ...this.baseMutationVariables,
+        ...(this.scopedIssueBoardFeatureEnabled ? this.boardScopeMutationVariables : {}),
+      };
     },
   },
   mounted() {
@@ -205,8 +222,19 @@ export default {
     }
   },
   methods: {
-    setIteration(iterationId) {
-      this.board.iteration_id = iterationId;
+    ...mapActions(['setError', 'unsetError']),
+    boardCreateResponse(data) {
+      return data.createBoard.board.webPath;
+    },
+    boardUpdateResponse(data) {
+      const path = data.updateBoard.board.webPath;
+      const param = getParameterByName('group_by')
+        ? `?group_by=${getParameterByName('group_by')}`
+        : '';
+      return `${path}${param}`;
+    },
+    cancel() {
+      this.$emit('cancel');
     },
     async createOrUpdateBoard() {
       const response = await this.$apollo.mutate({
@@ -215,29 +243,28 @@ export default {
       });
 
       if (!this.board.id) {
-        return response.data.createBoard.board.webPath;
+        return this.boardCreateResponse(response.data);
       }
 
-      const path = response.data.updateBoard.board.webPath;
-      const param = getParameterByName('group_by')
-        ? `?group_by=${getParameterByName('group_by')}`
-        : '';
-      return `${path}${param}`;
+      return this.boardUpdateResponse(response.data);
+    },
+    async deleteBoard() {
+      await this.$apollo.mutate({
+        mutation: this.deleteMutation,
+        variables: {
+          id: fullBoardId(this.board.id),
+        },
+      });
     },
     async submit() {
       if (this.board.name.length === 0) return;
       this.isLoading = true;
       if (this.isDeleteForm) {
         try {
-          await this.$apollo.mutate({
-            mutation: destroyBoardMutation,
-            variables: {
-              id: fullBoardId(this.board.id),
-            },
-          });
+          await this.deleteBoard();
           visitUrl(this.rootPath);
         } catch {
-          Flash(this.$options.i18n.deleteErrorMessage);
+          this.setError({ message: this.$options.i18n.deleteErrorMessage });
         } finally {
           this.isLoading = false;
         }
@@ -246,14 +273,11 @@ export default {
           const url = await this.createOrUpdateBoard();
           visitUrl(url);
         } catch {
-          Flash(this.$options.i18n.saveErrorMessage);
+          this.setError({ message: this.$options.i18n.saveErrorMessage });
         } finally {
           this.isLoading = false;
         }
       }
-    },
-    cancel() {
-      this.$emit('cancel');
     },
     resetFormState() {
       if (this.isNewForm) {
@@ -262,6 +286,25 @@ export default {
       } else if (this.currentBoard && Object.keys(this.currentBoard).length) {
         this.board = { ...boardDefaults, ...this.currentBoard };
       }
+    },
+    setIteration(iterationId) {
+      this.board.iteration_id = iterationId;
+    },
+    setBoardLabels(labels) {
+      labels.forEach((label) => {
+        if (label.set && !this.board.labels.find((l) => l.id === label.id)) {
+          this.board.labels.push(
+            new ListLabel({
+              id: label.id,
+              title: label.title,
+              color: label.color,
+              textColor: label.text_color,
+            }),
+          );
+        } else if (!label.set) {
+          this.board.labels = this.board.labels.filter((selected) => selected.id !== label.id);
+        }
+      });
     },
   },
 };
@@ -282,6 +325,15 @@ export default {
     @close="cancel"
     @hide.prevent
   >
+    <gl-alert
+      v-if="error"
+      class="gl-mb-3"
+      variant="danger"
+      :dismissible="true"
+      @dismiss="unsetError"
+    >
+      {{ error }}
+    </gl-alert>
     <p v-if="isDeleteForm" data-testid="delete-confirmation-message">
       {{ $options.i18n.deleteConfirmationMessage }}
     </p>
@@ -320,6 +372,7 @@ export default {
         :group-id="groupId"
         :weights="weights"
         @set-iteration="setIteration"
+        @set-board-labels="setBoardLabels"
       />
     </form>
   </gl-modal>

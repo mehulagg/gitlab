@@ -5,41 +5,23 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        condition(:deployable_by_user) { deployable_by_user? }
-
-        condition(:protected_environment_access) do
-          project = @subject.project
-          environment = @subject.environment
-
-          if environment && project.protected_environments_feature_available?
-            protected_environment = project.protected_environment_by_name(environment)
-
-            !!protected_environment&.accessible_to?(user)
-          else
-            false
-          end
+        # overriding
+        condition(:protected_environment) do
+          @subject.persisted_environment.try(:protected_from?, user)
         end
 
-        rule { ~deployable_by_user & ~protected_environment_access}.policy do
-          prevent :update_build
+        condition(:reporter_has_access_to_protected_environment) do
+          @subject.persisted_environment.try(:protected_by?, user) &&
+            can?(:reporter_access, @subject.project)
         end
 
-        rule { protected_environment_access }.policy do
+        # If a reporter has an access to the protected environment,
+        # the user can jailbreak from the fundamental CI permissions and execute the deployment job.
+        # See https://gitlab.com/gitlab-org/gitlab/-/issues/225482
+        rule { reporter_has_access_to_protected_environment }.policy do
+          enable :jailbreak
           enable :update_commit_status
           enable :update_build
-        end
-
-        private
-
-        alias_method :current_user, :user
-        alias_method :build, :subject
-
-        def deployable_by_user?
-          # We need to check if Protected Environments feature is available,
-          # as evaluating `build.expanded_environment_name` is expensive.
-          return true unless build.project.protected_environments_feature_available?
-
-          build.project.protected_environment_accessible_to?(build.persisted_environment&.name, user)
         end
       end
     end

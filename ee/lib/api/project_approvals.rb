@@ -58,24 +58,6 @@ module API
           end
         end
       end
-
-      desc 'Update approvers and approver groups' do
-        detail 'This feature was introduced in 10.6'
-        success EE::API::Entities::ApprovalSettings
-      end
-      params do
-        requires :approver_ids, type: Array[Integer], coerce_with: Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of User IDs to set as approvers.'
-        requires :approver_group_ids, type: Array[Integer], coerce_with: Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of Group IDs to set as approvers.'
-      end
-      put ':id/approvers' do
-        result = ::Projects::UpdateService.new(user_project, current_user, declared(params, include_parent_namespaces: false).merge(remove_old_approvers: true)).execute
-
-        if result[:status] == :success
-          present user_project.present(current_user: current_user), with: EE::API::Entities::ApprovalSettings
-        else
-          render_validation_error!(user_project)
-        end
-      end
     end
   end
 end

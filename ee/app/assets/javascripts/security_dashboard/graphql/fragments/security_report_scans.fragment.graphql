@@ -1,0 +1,8 @@
+fragment SecurityReportSummaryScans on SecurityReportSummarySection {
+  scans {
+    nodes {
+      name
+      errors
+    }
+  }
+}

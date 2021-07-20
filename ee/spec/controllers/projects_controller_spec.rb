@@ -496,7 +496,7 @@ RSpec.describe ProjectsController do
 
             project.reload
 
-            expect(project[setting]).to eq(final_value)
+            expect(project[setting]).to eq(final_value.nil? ? setting_default_value : final_value)
           end
         end
       end
@@ -505,6 +505,7 @@ RSpec.describe ProjectsController do
         it_behaves_like 'merge request approvers rules' do
           let(:rule_name) { :modify_approvers_rules }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
+          let(:setting_default_value) { nil }
         end
       end
 
@@ -512,6 +513,7 @@ RSpec.describe ProjectsController do
         it_behaves_like 'merge request approvers rules' do
           let(:rule_name) { :modify_merge_request_author_setting }
           let(:setting) { :merge_requests_author_approval }
+          let(:setting_default_value) { false }
         end
       end
 
@@ -519,6 +521,7 @@ RSpec.describe ProjectsController do
         it_behaves_like 'merge request approvers rules' do
           let(:rule_name) { :modify_merge_request_committer_setting }
           let(:setting) { :merge_requests_disable_committers_approval }
+          let(:setting_default_value) { nil }
         end
       end
     end
@@ -547,17 +550,6 @@ RSpec.describe ProjectsController do
         end
 
         it_behaves_like 'no compliance framework is set'
-
-        context 'custom frameworks are disabled' do
-          let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
-          let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
-
-          before do
-            stub_feature_flags(ff_custom_compliance_frameworks: false)
-          end
-
-          it_behaves_like 'no compliance framework is set'
-        end
       end
 
       context 'when licensed' do
@@ -584,41 +576,35 @@ RSpec.describe ProjectsController do
 
             expect(project.compliance_framework_setting.compliance_management_framework).to eq(framework)
           end
+        end
+      end
+    end
 
-          context 'custom frameworks are disabled' do
-            let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
-            let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
+    context 'cve_id_request_button feature flag' do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+        end
 
-            before do
-              stub_feature_flags(ff_custom_compliance_frameworks: false)
-            end
+        it 'handles setting cve_id_request_enabled' do
+          project.project_setting.cve_id_request_enabled = false
+          project.project_setting.save!
 
-            it 'sets the compliance framework based on the framework identifier' do
-              put :update,
-                  params: {
-                    namespace_id: project.namespace,
-                    id: project,
-                    project: params
-                  }
-              project.reload
+          params = {
+            project_setting_attributes: {
+              cve_id_request_enabled: true
+            }
+          }
+          put :update,
+              params: {
+                namespace_id: project.namespace,
+                id: project,
+                project: params
+              }
+          project.reload
 
-              expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
-            end
-
-            it 'raises an error when using framework IDs for custom frameworks' do
-              framework = create(:compliance_framework, namespace: project.namespace.root_ancestor)
-              params = { compliance_framework_setting_attributes: { framework: framework.id } }
-
-              expect do
-                put :update,
-                    params: {
-                      namespace_id: project.namespace,
-                      id: project,
-                      project: params
-                    }
-              end.to raise_error(KeyError)
-            end
-          end
+          expect(project.project_setting.cve_id_request_enabled).to eq(feature_flag_enabled)
         end
       end
     end
@@ -735,7 +721,7 @@ RSpec.describe ProjectsController do
 
       context 'when feature is enabled for group' do
         before do
-          allow(group).to receive(:delayed_project_removal?).and_return(true)
+          allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(true)
         end
 
         it_behaves_like 'marks project for deletion'
@@ -763,11 +749,39 @@ RSpec.describe ProjectsController do
             expect(response).to redirect_to(dashboard_projects_path)
           end
         end
+
+        context 'when project is already marked for deletion' do
+          let(:project) { create(:project, group: group, marked_for_deletion_at: Date.current) }
+
+          context 'when permanently_delete param is set' do
+            it 'deletes project right away' do
+              expect(ProjectDestroyWorker).to receive(:perform_async)
+
+              delete :destroy, params: { namespace_id: project.namespace, id: project, permanently_delete: true }
+
+              expect(project.reload.pending_delete).to eq(true)
+              expect(response).to have_gitlab_http_status(:found)
+              expect(response).to redirect_to(dashboard_projects_path)
+            end
+          end
+
+          context 'when permanently_delete param is not set' do
+            it 'does nothing' do
+              expect(ProjectDestroyWorker).not_to receive(:perform_async)
+
+              delete :destroy, params: { namespace_id: project.namespace, id: project }
+
+              expect(project.reload.pending_delete).to eq(false)
+              expect(response).to have_gitlab_http_status(:found)
+              expect(response).to redirect_to(project_path(project))
+            end
+          end
+        end
       end
 
       context 'when feature is disabled for group' do
         before do
-          allow(group).to receive(:delayed_project_removal).and_return(false)
+          allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(false)
         end
 
         it_behaves_like 'deletes project right away'

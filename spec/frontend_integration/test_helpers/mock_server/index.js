@@ -1,21 +1,25 @@
 import { Server, Model, RestSerializer } from 'miragejs';
+import setupRoutes from 'ee_else_ce_test_helpers/mock_server/routes';
 import {
   getProject,
   getEmptyProject,
   getBranch,
   getMergeRequests,
+  getMergeRequestWithChanges,
+  getMergeRequestVersions,
   getRepositoryFiles,
   getBlobReadme,
   getBlobImage,
   getBlobZip,
 } from 'test_helpers/fixtures';
-import setupRoutes from './routes';
 
 export const createMockServerOptions = () => ({
   models: {
     project: Model,
     branch: Model,
     mergeRequest: Model,
+    mergeRequestChange: Model,
+    mergeRequestVersion: Model,
     file: Model,
     userPermission: Model,
   },
@@ -30,6 +34,8 @@ export const createMockServerOptions = () => ({
       projects: [getProject(), getEmptyProject()],
       branches: [getBranch()],
       mergeRequests: getMergeRequests(),
+      mergeRequestChanges: [getMergeRequestWithChanges()],
+      mergeRequestVersions: getMergeRequestVersions(),
       filesRaw: [
         {
           raw: getBlobReadme(),

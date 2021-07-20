@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Terraform state administration (alpha) **(FREE)**
+# Terraform state administration **(FREE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2673) in GitLab 12.10.
 
@@ -19,6 +19,33 @@ The storage location of these files defaults to:
 These locations can be configured using the options described below.
 
 Use [external object storage](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer-terraform-state-dependency-proxy) configuration for [GitLab Helm chart](https://docs.gitlab.com/charts/) installations.
+
+## Disabling Terraform state
+
+To disable terraform state site-wide, follow the steps below.
+A GitLab administrator may want to disable Terraform state to reduce disk space or if Terraform is not used in your instance.
+To do so, follow the steps below according to your installation's type.
+
+**In Omnibus installations:**
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following line:
+
+   ```ruby
+   gitlab_rails['terraform_state_enabled'] = false
+   ```
+
+1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+**In installations from source:**
+
+1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
+
+   ```yaml
+   terraform_state:
+     enabled: false
+   ```
+
+1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
 
 ## Using local storage
 
@@ -69,6 +96,39 @@ The following settings are:
 | `enabled` | Enable/disable object storage | `false` |
 | `remote_directory` | The bucket name where Terraform state files are stored | |
 | `connection` | Various connection options described below | |
+
+### Migrate to object storage
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247042) in GitLab 13.9.
+
+To migrate Terraform state files to object storage, follow the instructions below.
+
+- For Omnibus package installations:
+
+  ```shell
+  gitlab-rake gitlab:terraform_states:migrate
+  ```
+
+- For source installations:
+
+  ```shell
+  sudo -u git -H bundle exec rake gitlab:terraform_states:migrate RAILS_ENV=production
+  ```
+
+For GitLab 13.8 and earlier versions, you can use a workaround for the Rake task:
+
+1. Open the GitLab [Rails console](operations/rails_console.md).
+1. Run the following commands:
+
+   ```ruby
+   Terraform::StateUploader.alias_method(:upload, :model)
+
+   Terraform::StateVersion.where(file_store: ::ObjectStorage::Store::LOCAL).   find_each(batch_size: 10) do |terraform_state_version|
+     puts "Migrating: #{terraform_state_version.inspect}"
+
+     terraform_state_version.file.migrate!(::ObjectStorage::Store::REMOTE)
+   end
+   ```
 
 ### S3-compatible connection settings
 
@@ -121,7 +181,7 @@ See [the available connection settings for different providers](object_storage.m
        remote_directory: "terraform" # The bucket name
        connection:
          provider: AWS # Only AWS supported at the moment
-         aws_access_key_id: AWS_ACESS_KEY_ID
+         aws_access_key_id: AWS_ACCESS_KEY_ID
          aws_secret_access_key: AWS_SECRET_ACCESS_KEY
          region: eu-central-1
    ```

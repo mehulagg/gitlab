@@ -16,6 +16,8 @@ RSpec.describe ClustersHelper do
 
     context 'with premium license' do
       before do
+        allow(Gitlab).to receive(:com?).and_return(false)
+
         stub_licensed_features(cluster_agents: true)
       end
 
@@ -27,16 +29,6 @@ RSpec.describe ClustersHelper do
 
       context 'when clusterable is a group' do
         let(:clusterable) { build(:group) }
-
-        it 'does not allows agents to display' do
-          expect(subject).to be_falsey
-        end
-      end
-
-      context 'when cluster_agent_list feature flag is disabled' do
-        before do
-          stub_feature_flags(cluster_agent_list: false)
-        end
 
         it 'does not allows agents to display' do
           expect(subject).to be_falsey

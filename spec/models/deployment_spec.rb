@@ -72,6 +72,36 @@ RSpec.describe Deployment do
     end
   end
 
+  describe '.for_environment_name' do
+    subject { described_class.for_environment_name(project, environment_name) }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:production) { create(:environment, :production, project: project) }
+    let_it_be(:staging) { create(:environment, :staging, project: project) }
+    let_it_be(:other_project) { create(:project, :repository) }
+    let_it_be(:other_production) { create(:environment, :production, project: other_project) }
+
+    let(:environment_name) { production.name }
+
+    context 'when deployment belongs to the environment' do
+      let!(:deployment) { create(:deployment, project: project, environment: production) }
+
+      it { is_expected.to eq([deployment]) }
+    end
+
+    context 'when deployment belongs to the same project but different environment name' do
+      let!(:deployment) { create(:deployment, project: project, environment: staging) }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when deployment belongs to the same environment name but different project' do
+      let!(:deployment) { create(:deployment, project: other_project, environment: other_production) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
   describe '.success' do
     subject { described_class.success }
 
@@ -107,11 +137,13 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
-        expect(Deployments::ExecuteHooksWorker)
-            .to receive(:perform_async).with(deployment.id)
+      it 'executes Deployments::HooksWorker asynchronously' do
+        freeze_time do
+          expect(Deployments::HooksWorker)
+            .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
-        deployment.run!
+          deployment.run!
+        end
       end
 
       it 'executes Deployments::DropOlderDeploymentsWorker asynchronously' do
@@ -141,11 +173,13 @@ RSpec.describe Deployment do
         deployment.succeed!
       end
 
-      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
-        expect(Deployments::ExecuteHooksWorker)
-          .to receive(:perform_async).with(deployment.id)
+      it 'executes Deployments::HooksWorker asynchronously' do
+        freeze_time do
+          expect(Deployments::HooksWorker)
+          .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
-        deployment.succeed!
+          deployment.succeed!
+        end
       end
     end
 
@@ -161,18 +195,20 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+      it 'does not execute Deployments::LinkMergeRequestWorker' do
         expect(Deployments::LinkMergeRequestWorker)
-          .to receive(:perform_async).with(deployment.id)
+          .not_to receive(:perform_async).with(deployment.id)
 
         deployment.drop!
       end
 
-      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
-        expect(Deployments::ExecuteHooksWorker)
-            .to receive(:perform_async).with(deployment.id)
+      it 'executes Deployments::HooksWorker asynchronously' do
+        freeze_time do
+          expect(Deployments::HooksWorker)
+            .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
-        deployment.drop!
+          deployment.drop!
+        end
       end
     end
 
@@ -188,18 +224,20 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+      it 'does not execute Deployments::LinkMergeRequestWorker' do
         expect(Deployments::LinkMergeRequestWorker)
-          .to receive(:perform_async).with(deployment.id)
+          .not_to receive(:perform_async).with(deployment.id)
 
         deployment.cancel!
       end
 
-      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
-        expect(Deployments::ExecuteHooksWorker)
-            .to receive(:perform_async).with(deployment.id)
+      it 'executes Deployments::HooksWorker asynchronously' do
+        freeze_time do
+          expect(Deployments::HooksWorker)
+            .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
-        deployment.cancel!
+          deployment.cancel!
+        end
       end
     end
 
@@ -220,11 +258,13 @@ RSpec.describe Deployment do
         deployment.skip!
       end
 
-      it 'does not execute Deployments::ExecuteHooksWorker' do
-        expect(Deployments::ExecuteHooksWorker)
-            .not_to receive(:perform_async).with(deployment.id)
+      it 'does not execute Deployments::HooksWorker' do
+        freeze_time do
+          expect(Deployments::HooksWorker)
+            .not_to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
-        deployment.skip!
+          deployment.skip!
+        end
       end
     end
 
@@ -396,6 +436,26 @@ RSpec.describe Deployment do
       end
     end
 
+    describe '.finished_before' do
+      let!(:deployment1) { create(:deployment, finished_at: 1.day.ago) }
+      let!(:deployment2) { create(:deployment, finished_at: Time.current) }
+
+      it 'filters deployments by finished_at' do
+        expect(described_class.finished_before(1.hour.ago))
+          .to eq([deployment1])
+      end
+    end
+
+    describe '.finished_after' do
+      let!(:deployment1) { create(:deployment, finished_at: 1.day.ago) }
+      let!(:deployment2) { create(:deployment, finished_at: Time.current) }
+
+      it 'filters deployments by finished_at' do
+        expect(described_class.finished_after(1.hour.ago))
+          .to eq([deployment2])
+      end
+    end
+
     describe 'with_deployable' do
       subject { described_class.with_deployable }
 
@@ -405,22 +465,6 @@ RSpec.describe Deployment do
         create(:deployment, deployable_type: 'CommitStatus', deployable_id: non_existing_record_id)
 
         is_expected.to contain_exactly(with_deployable)
-      end
-    end
-
-    describe 'finished_between' do
-      subject { described_class.finished_between(start_time, end_time) }
-
-      let_it_be(:start_time) { DateTime.new(2017) }
-      let_it_be(:end_time) { DateTime.new(2019) }
-      let_it_be(:deployment_2016) { create(:deployment, finished_at: DateTime.new(2016)) }
-      let_it_be(:deployment_2017) { create(:deployment, finished_at: DateTime.new(2017)) }
-      let_it_be(:deployment_2018) { create(:deployment, finished_at: DateTime.new(2018)) }
-      let_it_be(:deployment_2019) { create(:deployment, finished_at: DateTime.new(2019)) }
-      let_it_be(:deployment_2020) { create(:deployment, finished_at: DateTime.new(2020)) }
-
-      it 'retrieves deployments that finished between the specified times' do
-        is_expected.to contain_exactly(deployment_2017, deployment_2018)
       end
     end
 
@@ -445,6 +489,7 @@ RSpec.describe Deployment do
     let_it_be(:project) { create(:project, :repository) }
     let_it_be(:commits) { project.repository.commits('master', limit: 2) }
     let_it_be(:deployments) { commits.reverse.map { |commit| create(:deployment, project: project, sha: commit.id) } }
+
     let(:sha) { commits.map(&:id) }
 
     it 'finds the latest deployment with sha' do
@@ -493,7 +538,7 @@ RSpec.describe Deployment do
 
     context 'when the SHA for the deployment does not exist in the repo' do
       it 'returns false' do
-        deployment.update(sha: Gitlab::Git::BLANK_SHA)
+        deployment.update!(sha: Gitlab::Git::BLANK_SHA)
         commit = project.commit
 
         expect(deployment.includes_commit?(commit)).to be false
@@ -569,15 +614,39 @@ RSpec.describe Deployment do
   end
 
   describe '#previous_deployment' do
-    it 'returns the previous deployment' do
-      deploy1 = create(:deployment)
-      deploy2 = create(
-        :deployment,
-        project: deploy1.project,
-        environment: deploy1.environment
-      )
+    using RSpec::Parameterized::TableSyntax
 
-      expect(deploy2.previous_deployment).to eq(deploy1)
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:production) { create(:environment, :production, project: project) }
+    let_it_be(:staging) { create(:environment, :staging, project: project) }
+    let_it_be(:production_deployment_1) { create(:deployment, :success, project: project, environment: production) }
+    let_it_be(:production_deployment_2) { create(:deployment, :success, project: project, environment: production) }
+    let_it_be(:production_deployment_3) { create(:deployment, :failed, project: project, environment: production) }
+    let_it_be(:production_deployment_4) { create(:deployment, :canceled, project: project, environment: production) }
+    let_it_be(:staging_deployment_1)    { create(:deployment, :failed, project: project, environment: staging) }
+    let_it_be(:staging_deployment_2)    { create(:deployment, :success, project: project, environment: staging) }
+    let_it_be(:production_deployment_5) { create(:deployment, :success, project: project, environment: production) }
+    let_it_be(:staging_deployment_3)    { create(:deployment, :success, project: project, environment: staging) }
+
+    where(:pointer, :expected_previous_deployment) do
+      'production_deployment_1'   | nil
+      'production_deployment_2'   | 'production_deployment_1'
+      'production_deployment_3'   | 'production_deployment_2'
+      'production_deployment_4'   | 'production_deployment_2'
+      'staging_deployment_1'      | nil
+      'staging_deployment_2'      | nil
+      'production_deployment_5'   | 'production_deployment_2'
+      'staging_deployment_3'      | 'staging_deployment_2'
+    end
+
+    with_them do
+      it 'returns the previous deployment' do
+        if expected_previous_deployment.nil?
+          expect(send(pointer).previous_deployment).to eq(expected_previous_deployment)
+        else
+          expect(send(pointer).previous_deployment).to eq(send(expected_previous_deployment))
+        end
+      end
     end
   end
 
@@ -624,45 +693,6 @@ RSpec.describe Deployment do
       deploy.link_merge_requests(deploy.project.merge_requests)
 
       expect(deploy.merge_requests).to include(mr1, mr2)
-    end
-  end
-
-  describe '#previous_environment_deployment' do
-    it 'returns the previous deployment of the same environment' do
-      deploy1 = create(:deployment, :success)
-      deploy2 = create(
-        :deployment,
-        :success,
-        project: deploy1.project,
-        environment: deploy1.environment
-      )
-
-      expect(deploy2.previous_environment_deployment).to eq(deploy1)
-    end
-
-    it 'ignores deployments that were not successful' do
-      deploy1 = create(:deployment, :failed)
-      deploy2 = create(
-        :deployment,
-        :success,
-        project: deploy1.project,
-        environment: deploy1.environment
-      )
-
-      expect(deploy2.previous_environment_deployment).to be_nil
-    end
-
-    it 'ignores deployments for different environments' do
-      deploy1 = create(:deployment, :success)
-      preprod = create(:environment, project: deploy1.project, name: 'preprod')
-      deploy2 = create(
-        :deployment,
-        :success,
-        project: deploy1.project,
-        environment: preprod
-      )
-
-      expect(deploy2.previous_environment_deployment).to be_nil
     end
   end
 
@@ -725,7 +755,7 @@ RSpec.describe Deployment do
     it 'schedules workers when finishing a deploy' do
       expect(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
       expect(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
-      expect(Deployments::ExecuteHooksWorker).to receive(:perform_async)
+      expect(Deployments::HooksWorker).to receive(:perform_async)
 
       deploy.update_status('success')
     end
@@ -789,6 +819,33 @@ RSpec.describe Deployment do
 
       other_deployments.each do |deployment|
         expect(project.commit(deployment.ref_path)).not_to be_nil
+      end
+    end
+  end
+
+  describe '#update_merge_request_metrics!' do
+    let_it_be(:project) { create(:project, :repository) }
+
+    let(:environment) { build(:environment, environment_tier, project: project) }
+    let!(:deployment) { create(:deployment, :success, project: project, environment: environment) }
+    let!(:merge_request) { create(:merge_request, :simple, :merged_last_month, project: project) }
+
+    context 'with production environment' do
+      let(:environment_tier) { :production }
+
+      it 'updates merge request metrics for production-grade environment' do
+        expect { deployment.update_merge_request_metrics! }
+          .to change { merge_request.reload.metrics.first_deployed_to_production_at }
+          .from(nil).to(deployment.reload.finished_at)
+      end
+    end
+
+    context 'with staging environment' do
+      let(:environment_tier) { :staging }
+
+      it 'updates merge request metrics for production-grade environment' do
+        expect { deployment.update_merge_request_metrics! }
+          .not_to change { merge_request.reload.metrics.first_deployed_to_production_at }
       end
     end
   end

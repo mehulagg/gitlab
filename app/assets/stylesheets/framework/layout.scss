@@ -8,9 +8,8 @@ html {
 
 body {
   // Improves readability for dyslexic users; supported only in Chrome/Safari so far
-  // scss-lint:disable PropertySpelling
   text-decoration-skip: ink;
-  // scss-lint:enable PropertySpelling
+
   &.navless {
     background-color: $white !important;
   }
@@ -39,8 +38,11 @@ body {
   }
 }
 
-.content-wrapper {
+.content-wrapper-margin {
   margin-top: $header-height;
+}
+
+.content-wrapper {
   padding-bottom: 100px;
 }
 
@@ -167,15 +169,8 @@ body {
   }
 
   .content-wrapper {
-    margin-top: 0;
     padding-bottom: 0;
     flex: 1;
     min-height: 0;
-  }
-
-  &.flash-shown {
-    .content-wrapper {
-      margin-top: 0;
-    }
   }
 }

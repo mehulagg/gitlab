@@ -1,58 +1,45 @@
-import Vue from 'vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
-import component from '~/cycle_analytics/components/total_time_component.vue';
+import { mount } from '@vue/test-utils';
+import TotalTimeComponent from '~/cycle_analytics/components/total_time_component.vue';
 
-describe('Total time component', () => {
-  let vm;
-  let Component;
+describe('TotalTimeComponent', () => {
+  let wrapper = null;
 
-  beforeEach(() => {
-    Component = Vue.extend(component);
-  });
+  const createComponent = (propsData) => {
+    return mount(TotalTimeComponent, {
+      propsData,
+    });
+  };
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
   });
 
-  describe('With data', () => {
-    it('should render information for days and hours', () => {
-      vm = mountComponent(Component, {
-        time: {
-          days: 3,
-          hours: 4,
-        },
+  describe('with a valid time object', () => {
+    it.each`
+      time
+      ${{ seconds: 35 }}
+      ${{ mins: 47, seconds: 3 }}
+      ${{ days: 3, mins: 47, seconds: 3 }}
+      ${{ hours: 23, mins: 10 }}
+      ${{ hours: 7, mins: 20, seconds: 10 }}
+    `('with $time', ({ time }) => {
+      wrapper = createComponent({
+        time,
       });
 
-      expect(vm.$el.textContent.trim().replace(/\s\s+/g, ' ')).toEqual('3 days 4 hrs');
-    });
-
-    it('should render information for hours and minutes', () => {
-      vm = mountComponent(Component, {
-        time: {
-          hours: 4,
-          mins: 35,
-        },
-      });
-
-      expect(vm.$el.textContent.trim().replace(/\s\s+/g, ' ')).toEqual('4 hrs 35 mins');
-    });
-
-    it('should render information for seconds', () => {
-      vm = mountComponent(Component, {
-        time: {
-          seconds: 45,
-        },
-      });
-
-      expect(vm.$el.textContent.trim().replace(/\s\s+/g, ' ')).toEqual('45 s');
+      expect(wrapper.html()).toMatchSnapshot();
     });
   });
 
-  describe('Without data', () => {
-    it('should render no information', () => {
-      vm = mountComponent(Component);
+  describe('with a blank object', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        time: {},
+      });
+    });
 
-      expect(vm.$el.textContent.trim()).toEqual('--');
+    it('should render --', () => {
+      expect(wrapper.html()).toMatchSnapshot();
     });
   });
 });

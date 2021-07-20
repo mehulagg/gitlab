@@ -18,7 +18,7 @@ RSpec.describe API::Releases do
     project.add_developer(developer)
   end
 
-  describe 'GET /projects/:id/releases' do
+  describe 'GET /projects/:id/releases', :use_clean_rails_redis_caching do
     context 'when there are two releases' do
       let!(:release_1) do
         create(:release,
@@ -48,6 +48,12 @@ RSpec.describe API::Releases do
         expect(json_response.count).to eq(2)
         expect(json_response.first['tag_name']).to eq(release_2.tag)
         expect(json_response.second['tag_name']).to eq(release_1.tag)
+      end
+
+      it 'does not include description_html' do
+        get api("/projects/#{project.id}/releases", maintainer)
+
+        expect(json_response.map { |h| h['description_html'] }).to contain_exactly(nil, nil)
       end
 
       RSpec.shared_examples 'release sorting' do |order_by|
@@ -107,6 +113,15 @@ RSpec.describe API::Releases do
         expect(json_response.second['commit_path']).to eq("/#{release_1.project.full_path}/-/commit/#{release_1.commit.id}")
         expect(json_response.second['tag_path']).to eq("/#{release_1.project.full_path}/-/tags/#{release_1.tag}")
       end
+
+      context 'when include_html_description option is true' do
+        it 'includes description_html field' do
+          get api("/projects/#{project.id}/releases", maintainer), params: { include_html_description: true }
+
+          expect(json_response.map { |h| h['description_html'] })
+            .to contain_exactly(instance_of(String), instance_of(String))
+        end
+      end
     end
 
     it 'returns an upcoming_release status for a future release' do
@@ -129,19 +144,60 @@ RSpec.describe API::Releases do
       expect(json_response.first['upcoming_release']).to eq(false)
     end
 
-    it 'avoids N+1 queries' do
+    it 'avoids N+1 queries', :use_sql_query_cache do
       create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create(:release_link, release: project.releases.first)
 
-      control_count = ActiveRecord::QueryRecorder.new do
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
         get api("/projects/#{project.id}/releases", maintainer)
       end.count
 
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, project: project)
+      create_list(:release_link, 2, release: project.releases.first)
+      create_list(:release_link, 2, release: project.releases.last)
 
       expect do
         get api("/projects/#{project.id}/releases", maintainer)
-      end.not_to exceed_query_limit(control_count)
+      end.not_to exceed_all_query_limit(control_count)
+    end
+
+    it 'serializes releases for the first time and read cached data from the second time' do
+      create_list(:release, 2, project: project)
+
+      expect(API::Entities::Release)
+        .to receive(:represent).with(instance_of(Release), any_args)
+        .twice
+
+      5.times { get api("/projects/#{project.id}/releases", maintainer) }
+    end
+
+    it 'increments the cache key when link is updated' do
+      releases = create_list(:release, 2, project: project)
+
+      expect(API::Entities::Release)
+        .to receive(:represent).with(instance_of(Release), any_args)
+        .exactly(4).times
+
+      2.times { get api("/projects/#{project.id}/releases", maintainer) }
+
+      releases.each { |release| create(:release_link, release: release) }
+
+      3.times { get api("/projects/#{project.id}/releases", maintainer) }
+    end
+
+    it 'increments the cache key when evidence is updated' do
+      releases = create_list(:release, 2, project: project)
+
+      expect(API::Entities::Release)
+        .to receive(:represent).with(instance_of(Release), any_args)
+        .exactly(4).times
+
+      2.times { get api("/projects/#{project.id}/releases", maintainer) }
+
+      releases.each { |release| create(:evidence, release: release) }
+
+      3.times { get api("/projects/#{project.id}/releases", maintainer) }
     end
 
     context 'when tag does not exist in git repository' do
@@ -227,6 +283,20 @@ RSpec.describe API::Releases do
         end
       end
     end
+
+    context 'when releases are public and request user is absent' do
+      let(:project) { create(:project, :repository, :public) }
+
+      it 'returns the releases' do
+        create(:release, project: project, tag: 'v0.1')
+
+        get api("/projects/#{project.id}/releases")
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.count).to eq(1)
+        expect(json_response.first['tag_name']).to eq('v0.1')
+      end
+    end
   end
 
   describe 'GET /projects/:id/releases/:tag_name' do
@@ -271,6 +341,12 @@ RSpec.describe API::Releases do
           .to match_array(release.sources.map(&:format))
         expect(json_response['assets']['sources'].map { |h| h['url'] })
           .to match_array(release.sources.map(&:url))
+      end
+
+      it 'does not include description_html' do
+        get api("/projects/#{project.id}/releases/v0.1", maintainer)
+
+        expect(json_response['description_html']).to eq(nil)
       end
 
       context 'with evidence' do
@@ -348,6 +424,14 @@ RSpec.describe API::Releases do
         end
       end
 
+      context 'when include_html_description option is true' do
+        it 'includes description_html field' do
+          get api("/projects/#{project.id}/releases/v0.1", maintainer), params: { include_html_description: true }
+
+          expect(json_response['description_html']).to be_instance_of(String)
+        end
+      end
+
       context 'when user is a guest' do
         it 'responds 403 Forbidden' do
           get api("/projects/#{project.id}/releases/v0.1", guest)
@@ -379,8 +463,22 @@ RSpec.describe API::Releases do
     end
 
     context 'when specified tag is not found in the project' do
-      it 'cannot find the release entry' do
+      it 'returns 404 for maintater' do
         get api("/projects/#{project.id}/releases/non_exist_tag", maintainer)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Not Found')
+      end
+
+      it 'returns project not found for no user' do
+        get api("/projects/#{project.id}/releases/non_exist_tag", nil)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Project Not Found')
+      end
+
+      it 'returns forbidden for guest' do
+        get api("/projects/#{project.id}/releases/non_existing_tag", guest)
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
@@ -578,6 +676,28 @@ RSpec.describe API::Releases do
       end.not_to change { Project.find_by_id(project.id).repository.tag_count }
     end
 
+    context 'with protected tag' do
+      context 'when user has access to the protected tag' do
+        let!(:protected_tag) { create(:protected_tag, :developers_can_create, name: '*', project: project) }
+
+        it 'accepts the request' do
+          post api("/projects/#{project.id}/releases", developer), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when user does not have access to the protected tag' do
+        let!(:protected_tag) { create(:protected_tag, :maintainers_can_create, name: '*', project: project) }
+
+        it 'forbids the request' do
+          post api("/projects/#{project.id}/releases", developer), params: params
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+
     context 'when user is a reporter' do
       it 'forbids the request' do
         post api("/projects/#{project.id}/releases", reporter), params: params
@@ -691,7 +811,7 @@ RSpec.describe API::Releases do
     end
 
     context 'when using JOB-TOKEN auth' do
-      let(:job) { create(:ci_build, user: maintainer) }
+      let(:job) { create(:ci_build, user: maintainer, project: project) }
       let(:params) do
         {
           name: 'Another release',
@@ -916,6 +1036,28 @@ RSpec.describe API::Releases do
       expect(project.releases.last.released_at).to eq('2015-10-10T05:00:00Z')
     end
 
+    context 'with protected tag' do
+      context 'when user has access to the protected tag' do
+        let!(:protected_tag) { create(:protected_tag, :developers_can_create, name: '*', project: project) }
+
+        it 'accepts the request' do
+          put api("/projects/#{project.id}/releases/v0.1", developer), params: params
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      context 'when user does not have access to the protected tag' do
+        let!(:protected_tag) { create(:protected_tag, :maintainers_can_create, name: '*', project: project) }
+
+        it 'forbids the request' do
+          put api("/projects/#{project.id}/releases/v0.1", developer), params: params
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+
     context 'when user tries to update sha' do
       let(:params) { { sha: 'xxx' } }
 
@@ -1096,6 +1238,28 @@ RSpec.describe API::Releases do
       expect(response).to match_response_schema('public_api/v4/release')
     end
 
+    context 'with protected tag' do
+      context 'when user has access to the protected tag' do
+        let!(:protected_tag) { create(:protected_tag, :developers_can_create, name: '*', project: project) }
+
+        it 'accepts the request' do
+          delete api("/projects/#{project.id}/releases/v0.1", developer)
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      context 'when user does not have access to the protected tag' do
+        let!(:protected_tag) { create(:protected_tag, :maintainers_can_create, name: '*', project: project) }
+
+        it 'forbids the request' do
+          delete api("/projects/#{project.id}/releases/v0.1", developer)
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+
     context 'when there are no corresponding releases' do
       let!(:release) { }
 
@@ -1133,8 +1297,33 @@ RSpec.describe API::Releases do
     end
   end
 
+  describe 'Track API events', :snowplow do
+    context 'when tracking event with labels from User-Agent' do
+      it 'adds the tracked User-Agent to the label of the tracked event' do
+        get api("/projects/#{project.id}/releases", maintainer), headers: { 'User-Agent' => described_class::RELEASE_CLI_USER_AGENT }
+
+        assert_snowplow_event('get_releases', true)
+      end
+
+      it 'skips label when User-Agent is invalid' do
+        get api("/projects/#{project.id}/releases", maintainer), headers: { 'User-Agent' => 'invalid_user_agent' }
+        assert_snowplow_event('get_releases', false)
+      end
+    end
+  end
+
   def initialize_tags
     project.repository.add_tag(maintainer, 'v0.1', commit.id)
     project.repository.add_tag(maintainer, 'v0.2', commit.id)
+  end
+
+  def assert_snowplow_event(action, release_cli, user = maintainer)
+    expect_snowplow_event(
+      category: described_class.name,
+      action: action,
+      project: project,
+      user: user,
+      release_cli: release_cli
+    )
   end
 end

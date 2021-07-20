@@ -13,6 +13,11 @@ export default {
       type: [Date, Object],
       required: true,
     },
+    timelineWidth: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
   },
   computed: {
     isVisible() {
@@ -32,7 +37,7 @@ export default {
 <template>
   <span
     v-if="isVisible"
-    :style="getIndicatorStyles(presetType)"
+    :style="getIndicatorStyles(presetType, timeframeItem, timelineWidth)"
     data-testid="current-day-indicator"
     class="current-day-indicator"
   ></span>

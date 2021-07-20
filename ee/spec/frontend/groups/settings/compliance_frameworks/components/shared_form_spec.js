@@ -10,7 +10,11 @@ import { GlFormGroup, GlFormInput } from '../stubs';
 
 describe('SharedForm', () => {
   let wrapper;
-  const defaultPropsData = { groupEditPath: 'group-1', pipelineConfigurationFullPathEnabled: true };
+  const defaultPropsData = {
+    groupEditPath: 'group-1',
+    pipelineConfigurationFullPathEnabled: true,
+    submitButtonText: 'Save changes',
+  };
 
   const findForm = () => wrapper.findComponent(GlForm);
   const findNameGroup = () => wrapper.find('[data-testid="name-input-group"]');
@@ -63,6 +67,12 @@ describe('SharedForm', () => {
       wrapper = createComponent();
 
       expect(findNameGroup().text()).toContain('Use :: to create a scoped set (eg. SOX::AWS)');
+    });
+
+    it('sets the submit button text from the property', () => {
+      wrapper = createComponent();
+
+      expect(findSubmitBtn().text()).toBe(defaultPropsData.submitButtonText);
     });
 
     it.each([true, false])(
@@ -212,6 +222,26 @@ describe('SharedForm', () => {
       await findForm().vm.$emit('submit', { preventDefault: () => {} });
 
       expect(wrapper.emitted('submit')).toHaveLength(1);
+    });
+  });
+
+  describe('On pipeline configuration path input', () => {
+    it('updates the pipelineConfigurationFullPath value and validates the path', async () => {
+      jest.spyOn(Utils, 'fetchPipelineConfigurationFileExists').mockResolvedValue(true);
+
+      wrapper = createComponent();
+
+      await findPipelineConfigurationInput().vm.$emit('input', 'foo.yaml@bar/baz');
+
+      expect(wrapper.emitted('update:pipelineConfigurationFullPath')[0][0]).toBe(
+        'foo.yaml@bar/baz',
+      );
+      /* TODO: Test that debounce is called. Right now this isn't possible
+       * because the lodash debounce function is mocked. We need to update the
+       * mock to enable us to assert that a method is debounced.
+       * https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56013#note_524874122
+       */
+      expect(Utils.fetchPipelineConfigurationFileExists).toHaveBeenCalledWith('foo.yaml@bar/baz');
     });
   });
 });

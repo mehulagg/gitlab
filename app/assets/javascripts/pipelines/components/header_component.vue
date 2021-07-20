@@ -8,6 +8,7 @@ import cancelPipelineMutation from '../graphql/mutations/cancel_pipeline.mutatio
 import deletePipelineMutation from '../graphql/mutations/delete_pipeline.mutation.graphql';
 import retryPipelineMutation from '../graphql/mutations/retry_pipeline.mutation.graphql';
 import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
+import { getQueryHeaders } from './graph/utils';
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 const POLL_INTERVAL = 10000;
@@ -34,7 +35,9 @@ export default {
     [DEFAULT]: __('An unknown error occurred.'),
   },
   inject: {
-    // Receive `fullProject` and `pipelinesPath`
+    graphqlResourceEtag: {
+      default: '',
+    },
     paths: {
       default: {},
     },
@@ -47,6 +50,9 @@ export default {
   },
   apollo: {
     pipeline: {
+      context() {
+        return getQueryHeaders(this.graphqlResourceEtag);
+      },
       query: getPipelineQuery,
       variables() {
         return {
@@ -125,6 +131,16 @@ export default {
             variant: 'danger',
           };
       }
+    },
+    canRetryPipeline() {
+      const { retryable, userPermissions } = this.pipeline;
+
+      return retryable && userPermissions.updatePipeline;
+    },
+    canCancelPipeline() {
+      const { cancelable, userPermissions } = this.pipeline;
+
+      return cancelable && userPermissions.updatePipeline;
     },
   },
   watch: {
@@ -213,7 +229,7 @@ export default {
       item-name="Pipeline"
     >
       <gl-button
-        v-if="pipeline.retryable"
+        v-if="canRetryPipeline"
         :loading="isRetrying"
         :disabled="isRetrying"
         category="secondary"
@@ -226,7 +242,7 @@ export default {
       </gl-button>
 
       <gl-button
-        v-if="pipeline.cancelable"
+        v-if="canCancelPipeline"
         :loading="isCanceling"
         :disabled="isCanceling"
         class="gl-ml-3"

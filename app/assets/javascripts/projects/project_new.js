@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import DEFAULT_PROJECT_TEMPLATES from 'ee_else_ce/projects/default_project_templates';
-import { addSelectOnFocusBehaviour } from '../lib/utils/common_utils';
 import {
   convertToTitleCase,
   humanize,
@@ -75,13 +74,13 @@ const deriveProjectPathFromUrl = ($projectImportUrl) => {
 const bindEvents = () => {
   const $newProjectForm = $('#new_project');
   const $projectImportUrl = $('#project_import_url');
+  const $projectImportUrlWarning = $('.js-import-url-warning');
   const $projectPath = $('.tab-pane.active #project_path');
   const $useTemplateBtn = $('.template-button > input');
   const $projectFieldsForm = $('.project-fields-form');
   const $selectedTemplateText = $('.selected-template');
   const $changeTemplateBtn = $('.change-template');
   const $selectedIcon = $('.selected-icon');
-  const $pushNewProjectTipTrigger = $('.push-new-project-tip');
   const $projectTemplateButtons = $('.project-templates-buttons');
   const $projectName = $('.tab-pane.active #project_name');
 
@@ -107,39 +106,6 @@ const bindEvents = () => {
       ).val()}&name=${$projectName.val()}&path=${$projectPath.val()}`,
     );
   });
-
-  if ($pushNewProjectTipTrigger) {
-    $pushNewProjectTipTrigger
-      .removeAttr('rel')
-      .removeAttr('target')
-      .on('click', (e) => {
-        e.preventDefault();
-      })
-      .popover({
-        title: $pushNewProjectTipTrigger.data('title'),
-        placement: 'bottom',
-        html: true,
-        content: $('.push-new-project-tip-template').html(),
-      })
-      .on('shown.bs.popover', () => {
-        $(document).on('click.popover touchstart.popover', (event) => {
-          if ($(event.target).closest('.popover').length === 0) {
-            $pushNewProjectTipTrigger.trigger('click');
-          }
-        });
-
-        const target = $(`#${$pushNewProjectTipTrigger.attr('aria-describedby')}`).find(
-          '.js-select-on-focus',
-        );
-        addSelectOnFocusBehaviour(target);
-
-        target.focus();
-      })
-      .on('hide.bs.popover', () => {
-        // eslint-disable-next-line @gitlab/no-global-event-off
-        $(document).off('click.popover touchstart.popover');
-      });
-  }
 
   function chooseTemplate() {
     $projectTemplateButtons.addClass('hidden');
@@ -169,7 +135,25 @@ const bindEvents = () => {
     $projectPath.val($projectPath.val().trim());
   });
 
-  $projectImportUrl.keyup(() => deriveProjectPathFromUrl($projectImportUrl));
+  function updateUrlPathWarningVisibility() {
+    const url = $projectImportUrl.val();
+    const URL_PATTERN = /(?:git|https?):\/\/.*\/.*\.git$/;
+    const isUrlValid = URL_PATTERN.test(url);
+    $projectImportUrlWarning.toggleClass('hide', isUrlValid);
+  }
+
+  let isProjectImportUrlDirty = false;
+  $projectImportUrl.on('blur', () => {
+    isProjectImportUrlDirty = true;
+    updateUrlPathWarningVisibility();
+  });
+  $projectImportUrl.on('keyup', () => {
+    deriveProjectPathFromUrl($projectImportUrl);
+    // defer error message till first input blur
+    if (isProjectImportUrlDirty) {
+      updateUrlPathWarningVisibility();
+    }
+  });
 
   $('.js-import-git-toggle-button').on('click', () => {
     const $projectMirror = $('#project_mirror');

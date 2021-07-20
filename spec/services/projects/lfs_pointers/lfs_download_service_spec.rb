@@ -106,6 +106,26 @@ RSpec.describe Projects::LfsPointers::LfsDownloadService do
       end
     end
 
+    context 'when file download returns a redirect' do
+      let(:redirect_link) { 'http://external-link' }
+
+      before do
+        stub_full_request(download_link).to_return(status: 301, body: 'You are being redirected', headers: { 'Location' => redirect_link } )
+        stub_full_request(redirect_link).to_return(body: lfs_content)
+      end
+
+      it_behaves_like 'lfs object is created'
+
+      it 'correctly stores lfs object' do
+        subject.execute
+
+        new_lfs_object = LfsObject.first
+
+        expect(new_lfs_object).to have_attributes(oid: oid, size: size)
+        expect(File.binread(new_lfs_object.file.file.file)).to eq lfs_content
+      end
+    end
+
     context 'when downloaded lfs file has a different size' do
       let(:size) { 1 }
 
@@ -155,13 +175,24 @@ RSpec.describe Projects::LfsPointers::LfsDownloadService do
     context 'when credentials present' do
       let(:download_link_with_credentials) { "http://user:password@gitlab.com/#{oid}" }
       let(:lfs_object) { LfsDownloadObject.new(oid: oid, size: size, link: download_link_with_credentials) }
-
-      before do
-        stub_full_request(download_link).with(headers: { 'Authorization' => 'Basic dXNlcjpwYXNzd29yZA==' }).to_return(body: lfs_content)
-      end
+      let!(:request_stub) { stub_full_request(download_link).with(headers: { 'Authorization' => 'Basic dXNlcjpwYXNzd29yZA==' }).to_return(body: lfs_content) }
 
       it 'the request adds authorization headers' do
-        subject
+        subject.execute
+
+        expect(request_stub).to have_been_requested
+      end
+
+      context 'when Authorization header is present' do
+        let(:auth_header) { { 'Authorization' => 'Basic 12345' } }
+        let(:lfs_object) { LfsDownloadObject.new(oid: oid, size: size, link: download_link_with_credentials, headers: auth_header) }
+        let!(:request_stub) { stub_full_request(download_link).with(headers: auth_header).to_return(body: lfs_content) }
+
+        it 'request uses the header auth' do
+          subject.execute
+
+          expect(request_stub).to have_been_requested
+        end
       end
     end
 
@@ -240,6 +271,18 @@ RSpec.describe Projects::LfsPointers::LfsDownloadService do
 
       context 'and first fragments are the same' do
         let(:lfs_content) { existing_lfs_object.file.read }
+
+        context 'when lfs_link_existing_object feature flag disabled' do
+          before do
+            stub_feature_flags(lfs_link_existing_object: false)
+          end
+
+          it 'does not call link_existing_lfs_object!' do
+            expect(subject).not_to receive(:link_existing_lfs_object!)
+
+            subject.execute
+          end
+        end
 
         it 'returns success' do
           expect(subject.execute).to eq({ status: :success })

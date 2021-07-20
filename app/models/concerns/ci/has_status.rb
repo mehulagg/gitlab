@@ -16,13 +16,28 @@ module Ci
     STATUSES_ENUM = { created: 0, pending: 1, running: 2, success: 3,
                       failed: 4, canceled: 5, skipped: 6, manual: 7,
                       scheduled: 8, preparing: 9, waiting_for_resource: 10 }.freeze
+    STATUSES_DESCRIPTION = {
+      created: 'Pipeline has been created',
+      waiting_for_resource: 'A resource (for example, a runner) that the pipeline requires to run is unavailable',
+      preparing: 'Pipeline is preparing to run',
+      pending: 'Pipeline has not started running yet',
+      running: 'Pipeline is running',
+      failed: 'At least one stage of the pipeline failed',
+      success: 'Pipeline completed successfully',
+      canceled: 'Pipeline was canceled before completion',
+      skipped: 'Pipeline was skipped',
+      manual: 'Pipeline needs to be manually started',
+      scheduled: 'Pipeline is scheduled to run'
+    }.freeze
 
     UnknownStatusError = Class.new(StandardError)
 
     class_methods do
-      def composite_status
+      # The parameter `project` is only used for the feature flag check, and will be removed with
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/321972
+      def composite_status(project: nil)
         Gitlab::Ci::Status::Composite
-          .new(all, with_allow_failure: columns_hash.key?('allow_failure'))
+          .new(all, with_allow_failure: columns_hash.key?('allow_failure'), project: project)
           .status
       end
 
@@ -107,12 +122,10 @@ module Ci
 
     private
 
-    def calculate_duration
-      if started_at && finished_at
-        finished_at - started_at
-      elsif started_at
-        Time.current - started_at
-      end
+    def calculate_duration(start_time, end_time)
+      return unless start_time
+
+      (end_time || Time.current) - start_time
     end
   end
 end

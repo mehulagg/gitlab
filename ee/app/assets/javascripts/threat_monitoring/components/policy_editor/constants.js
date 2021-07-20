@@ -1,37 +1,38 @@
-export const EditorModeRule = 'rule';
-export const EditorModeYAML = 'yaml';
+import { s__, __ } from '~/locale';
 
-export const RuleTypeNetwork = 'network';
+export const EDITOR_MODE_RULE = 'rule';
+export const EDITOR_MODE_YAML = 'yaml';
 
-export const RuleActionTypeAllow = 'allow';
+export const PARSING_ERROR_MESSAGE = s__(
+  'NetworkPolicies|Rule mode is unavailable for this policy. In some cases, we cannot parse the YAML file back into the rules editor.',
+);
 
-export const RuleDirectionInbound = 'ingress';
-export const RuleDirectionOutbound = 'egress';
+export const EDITOR_MODES = [
+  { value: EDITOR_MODE_RULE, text: s__('NetworkPolicies|Rule mode') },
+  { value: EDITOR_MODE_YAML, text: s__('NetworkPolicies|.yaml mode') },
+];
 
-export const EndpointMatchModeAny = 'any';
-export const EndpointMatchModeLabel = 'label';
-
-export const RuleTypeEndpoint = 'NetworkPolicyRuleEndpoint';
-export const RuleTypeEntity = 'NetworkPolicyRuleEntity';
-export const RuleTypeCIDR = 'NetworkPolicyRuleCIDR';
-export const RuleTypeFQDN = 'NetworkPolicyRuleFQDN';
-
-export const EntityTypes = {
-  ALL: 'all',
-  HOST: 'host',
-  REMOTE_NODE: 'remote-node',
-  CLUSTER: 'cluster',
-  INIT: 'init',
-  HEALTH: 'health',
-  UNMANAGED: 'unmanaged',
-  WORLD: 'world',
+export const POLICY_KIND_OPTIONS = {
+  network: {
+    value: 'network',
+    text: s__('NetworkPolicies|Network'),
+    component: 'network-policy-editor',
+    shouldShowEnvironmentPicker: true,
+  },
+  scanExecution: {
+    value: 'scanExecution',
+    text: s__('NetworkPolicies|Scan Execution'),
+    component: 'scan-execution-policy-editor',
+  },
 };
 
-export const PortMatchModeAny = 'any';
-export const PortMatchModePortProtocol = 'port/protocol';
-
-export const DisabledByLabel = 'network-policy.gitlab.com/disabled_by';
-
-export const CiliumNetworkPolicyKind = 'CiliumNetworkPolicy';
-
-export const ProjectIdLabel = 'app.gitlab.com/proj';
+export const DELETE_MODAL_CONFIG = {
+  id: 'delete-modal',
+  secondary: {
+    text: s__('NetworkPolicies|Delete policy'),
+    attributes: { variant: 'danger' },
+  },
+  cancel: {
+    text: __('Cancel'),
+  },
+};

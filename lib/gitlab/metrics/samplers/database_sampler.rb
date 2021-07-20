@@ -32,9 +32,9 @@ module Gitlab
         private
 
         def init_metrics
-          METRIC_DESCRIPTIONS.map do |name, description|
+          METRIC_DESCRIPTIONS.to_h do |name, description|
             [name, ::Gitlab::Metrics.gauge(:"#{METRIC_PREFIX}#{name}", description)]
-          end.to_h
+          end
         end
 
         def host_stats
@@ -45,8 +45,8 @@ module Gitlab
 
         def labels_for_class(klass)
           {
-            host: klass.connection_config[:host],
-            port: klass.connection_config[:port],
+            host: klass.connection_db_config.host,
+            port: klass.connection_db_config.configuration_hash[:port],
             class: klass.to_s
           }
         end
@@ -55,4 +55,4 @@ module Gitlab
   end
 end
 
-Gitlab::Metrics::Samplers::DatabaseSampler.prepend_if_ee('EE::Gitlab::Metrics::Samplers::DatabaseSampler')
+Gitlab::Metrics::Samplers::DatabaseSampler.prepend_mod_with('Gitlab::Metrics::Samplers::DatabaseSampler')

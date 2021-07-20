@@ -6,6 +6,7 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
+
   let(:user) { create(:user) }
 
   shared_examples 'on-demand scans page' do
@@ -107,6 +108,7 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
             id: global_id_of(dast_profile),
             name: dast_profile.name,
             description: dast_profile.description,
+            branch: { name: dast_profile.branch_name },
             site_profile_id: global_id_of(DastSiteProfile.new(id: dast_profile.dast_site_profile_id)),
             scanner_profile_id: global_id_of(DastScannerProfile.new(id: dast_profile.dast_scanner_profile_id))
           }.to_json

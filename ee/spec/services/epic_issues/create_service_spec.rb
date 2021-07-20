@@ -41,36 +41,44 @@ RSpec.describe EpicIssues::CreateService do
         expect(subject).to eq(status: :success)
       end
 
-      it 'creates 1 system note for epic and 1 system note for issue' do
-        expect { subject }.to change { Note.count }.by(2)
-      end
+      describe 'async actions', :sidekiq_inline do
+        it 'creates 1 system note for epic and 1 system note for issue' do
+          expect { subject }.to change { Note.count }.by(2)
+        end
 
-      it 'creates a note for epic correctly' do
-        subject
-        note = Note.where(noteable_id: epic.id, noteable_type: 'Epic').last
+        it 'creates a note for epic correctly' do
+          subject
+          note = Note.where(noteable_id: epic.id, noteable_type: 'Epic').last
 
-        expect(note.note).to eq("added issue #{issue.to_reference(epic.group)}")
-        expect(note.author).to eq(user)
-        expect(note.project).to be_nil
-        expect(note.noteable_type).to eq('Epic')
-        expect(note.system_note_metadata.action).to eq('epic_issue_added')
-      end
+          expect(note.note).to eq("added issue #{issue.to_reference(epic.group)}")
+          expect(note.author).to eq(user)
+          expect(note.project).to be_nil
+          expect(note.noteable_type).to eq('Epic')
+          expect(note.system_note_metadata.action).to eq('epic_issue_added')
+        end
 
-      it 'creates a note for issue correctly' do
-        subject
-        note = Note.find_by(noteable_id: issue.id, noteable_type: 'Issue')
+        it 'creates a note for issue correctly' do
+          subject
+          note = Note.find_by(noteable_id: issue.id, noteable_type: 'Issue')
 
-        expect(note.note).to eq("added to epic #{epic.to_reference(issue.project)}")
-        expect(note.author).to eq(user)
-        expect(note.project).to eq(issue.project)
-        expect(note.noteable_type).to eq('Issue')
-        expect(note.system_note_metadata.action).to eq('issue_added_to_epic')
+          expect(note.note).to eq("added to epic #{epic.to_reference(issue.project)}")
+          expect(note.author).to eq(user)
+          expect(note.project).to eq(issue.project)
+          expect(note.noteable_type).to eq('Issue')
+          expect(note.system_note_metadata.action).to eq('issue_added_to_epic')
+        end
+
+        it 'records action on usage ping' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_issue_added).with(author: user)
+
+          subject
+        end
       end
     end
 
     shared_examples 'returns an error' do
       it 'returns an error' do
-        expect(subject).to eq(message: 'No Issue found for given params', status: :error, http_status: 404)
+        expect(subject).to eq(message: 'No matching issue found. Make sure that you are adding a valid issue URL.', status: :error, http_status: 404)
       end
 
       it 'no relationship is created' do
@@ -116,7 +124,7 @@ RSpec.describe EpicIssues::CreateService do
 
             include_examples 'returns success'
 
-            it 'does not perofrm N + 1 queries' do
+            it 'does not perform N + 1 queries' do
               allow(SystemNoteService).to receive(:epic_issue)
               allow(SystemNoteService).to receive(:issue_on_epic)
 
@@ -124,9 +132,9 @@ RSpec.describe EpicIssues::CreateService do
               extractor = double
               allow(Gitlab::ReferenceExtractor).to receive(:new).and_return(extractor)
               allow(extractor).to receive(:reset_memoized_values)
-              allow(extractor).to receive(:mentioned_users)
-              allow(extractor).to receive(:mentioned_groups)
-              allow(extractor).to receive(:mentioned_projects)
+              allow(extractor).to receive(:mentioned_user_ids)
+              allow(extractor).to receive(:mentioned_group_ids)
+              allow(extractor).to receive(:mentioned_project_ids)
               allow(extractor).to receive(:analyze)
               allow(extractor).to receive(:issues).and_return([issue])
 
@@ -148,7 +156,7 @@ RSpec.describe EpicIssues::CreateService do
               # and we insert 5 issues instead of 1 which we do for control count
               expect { described_class.new(epic, user, params).execute }
                 .not_to exceed_query_limit(control_count)
-                .with_threshold(28)
+                .with_threshold(29)
             end
           end
 
@@ -201,7 +209,7 @@ RSpec.describe EpicIssues::CreateService do
               expect(subject).to eq(status: :success)
             end
 
-            it 'creates 2 system notes for each issue' do
+            it 'creates 2 system notes for each issue', :sidekiq_inline do
               expect { subject }.to change { Note.count }.from(0).to(4)
             end
           end
@@ -278,7 +286,7 @@ RSpec.describe EpicIssues::CreateService do
         end
       end
 
-      context 'when an issue is already assigned to another epic' do
+      context 'when an issue is already assigned to another epic', :sidekiq_inline do
         before do
           group.add_developer(user)
           create(:epic_issue, epic: epic, issue: issue)
@@ -305,7 +313,7 @@ RSpec.describe EpicIssues::CreateService do
           is_expected.to eq(status: :success)
         end
 
-        it 'creates 3 system notes' do
+        it 'creates 3 system notes', :sidekiq_inline do
           expect { subject }.to change { Note.count }.by(3)
         end
 

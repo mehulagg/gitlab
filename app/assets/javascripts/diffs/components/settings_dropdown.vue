@@ -1,13 +1,19 @@
 <script>
-import { GlButtonGroup, GlButton, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
+import {
+  GlButtonGroup,
+  GlButton,
+  GlDropdown,
+  GlFormCheckbox,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-
-import { EVT_VIEW_FILE_BY_FILE } from '../constants';
-import eventHub from '../event_hub';
 import { SETTINGS_DROPDOWN } from '../i18n';
 
 export default {
   i18n: SETTINGS_DROPDOWN,
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   components: {
     GlButtonGroup,
     GlButton,
@@ -24,9 +30,13 @@ export default {
       'setParallelDiffViewType',
       'setRenderTreeList',
       'setShowWhitespace',
+      'setFileByFile',
     ]),
     toggleFileByFile() {
-      eventHub.$emit(EVT_VIEW_FILE_BY_FILE, { setting: !this.viewDiffsFileByFile });
+      this.setFileByFile({ fileByFile: !this.viewDiffsFileByFile });
+    },
+    toggleWhitespace(updatedSetting) {
+      this.setShowWhitespace({ showWhitespace: updatedSetting });
     },
   },
 };
@@ -34,9 +44,13 @@ export default {
 
 <template>
   <gl-dropdown
+    v-gl-tooltip
     icon="settings"
-    :text="__('Diff view settings')"
+    :title="$options.i18n.preferences"
+    :text="$options.i18n.preferences"
     :text-sr-only="true"
+    :aria-label="$options.i18n.preferences"
+    :header-text="$options.i18n.preferences"
     toggle-class="js-show-diff-settings"
     right
   >
@@ -82,26 +96,21 @@ export default {
         </gl-button>
       </gl-button-group>
     </div>
-    <div class="gl-mt-3 gl-px-3">
-      <label class="gl-mb-0">
-        <input
-          id="show-whitespace"
-          type="checkbox"
-          :checked="showWhitespace"
-          @change="setShowWhitespace({ showWhitespace: $event.target.checked, pushState: true })"
-        />
-        {{ __('Show whitespace changes') }}
-      </label>
-    </div>
-    <div class="gl-mt-3 gl-px-3">
-      <gl-form-checkbox
-        data-testid="file-by-file"
-        class="gl-mb-0"
-        :checked="viewDiffsFileByFile"
-        @input="toggleFileByFile"
-      >
-        {{ $options.i18n.fileByFile }}
-      </gl-form-checkbox>
-    </div>
+    <gl-form-checkbox
+      data-testid="show-whitespace"
+      class="gl-mt-3 gl-ml-3"
+      :checked="showWhitespace"
+      @input="toggleWhitespace"
+    >
+      {{ $options.i18n.whitespace }}
+    </gl-form-checkbox>
+    <gl-form-checkbox
+      data-testid="file-by-file"
+      class="gl-ml-3 gl-mb-0"
+      :checked="viewDiffsFileByFile"
+      @input="toggleFileByFile"
+    >
+      {{ $options.i18n.fileByFile }}
+    </gl-form-checkbox>
   </gl-dropdown>
 </template>

@@ -36,9 +36,13 @@ module API
       get ':id/deployments' do
         authorize! :read_deployment, user_project
 
-        deployments = DeploymentsFinder.new(params.merge(project: user_project)).execute
+        deployments =
+          DeploymentsFinder.new(params.merge(project: user_project))
+            .execute.with_api_entity_associations
 
         present paginate(deployments), with: Entities::Deployment
+      rescue DeploymentsFinder::InefficientQueryError => e
+        bad_request!(e.message)
       end
 
       desc 'Gets a specific deployment' do

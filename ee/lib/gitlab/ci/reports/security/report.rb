@@ -6,7 +6,7 @@ module Gitlab
       module Security
         class Report
           attr_reader :created_at, :type, :pipeline, :findings, :scanners, :identifiers
-          attr_accessor :scan, :scanned_resources, :error
+          attr_accessor :scan, :scanned_resources, :errors, :analyzer, :version
 
           delegate :project_id, to: :pipeline
 
@@ -18,14 +18,19 @@ module Gitlab
             @scanners = {}
             @identifiers = {}
             @scanned_resources = []
+            @errors = []
           end
 
           def commit_sha
             pipeline.sha
           end
 
+          def add_error(type, message = 'An unexpected error happened!')
+            errors << { type: type, message: message }
+          end
+
           def errored?
-            error.present?
+            errors.present?
           end
 
           def add_scanner(scanner)
@@ -56,6 +61,13 @@ module Gitlab
 
           def primary_scanner
             scanners.first&.second
+          end
+
+          def primary_scanner_order_to(other)
+            return 1 unless primary_scanner
+            return -1 unless other.primary_scanner
+
+            primary_scanner <=> other.primary_scanner
           end
         end
       end

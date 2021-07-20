@@ -42,6 +42,7 @@ RSpec.describe Gitlab::Ci::Jwt do
         expect(payload[:user_email]).to eq(user.email)
         expect(payload[:user_login]).to eq(user.username)
         expect(payload[:pipeline_id]).to eq(pipeline.id.to_s)
+        expect(payload[:pipeline_source]).to eq(pipeline.source.to_s)
         expect(payload[:job_id]).to eq(build.id.to_s)
         expect(payload[:ref]).to eq(pipeline.source_ref)
         expect(payload[:ref_protected]).to eq(build.protected.to_s)
@@ -113,17 +114,6 @@ RSpec.describe Gitlab::Ci::Jwt do
       it 'has correct values for environment attributes' do
         expect(payload[:environment]).to eq('production')
         expect(payload[:environment_protected]).to eq('false')
-      end
-
-      context ':ci_jwt_include_environment feature flag is disabled' do
-        before do
-          stub_feature_flags(ci_jwt_include_environment: false)
-        end
-
-        it 'does not include environment attributes' do
-          expect(payload).not_to have_key(:environment)
-          expect(payload).not_to have_key(:environment_protected)
-        end
       end
     end
   end

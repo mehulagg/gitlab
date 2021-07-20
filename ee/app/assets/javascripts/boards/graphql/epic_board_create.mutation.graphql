@@ -1,0 +1,9 @@
+mutation createEpicBoard($input: EpicBoardCreateInput!) {
+  epicBoardCreate(input: $input) {
+    epicBoard {
+      id
+      webPath
+    }
+    errors
+  }
+}

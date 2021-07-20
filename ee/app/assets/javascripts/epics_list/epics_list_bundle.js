@@ -3,11 +3,9 @@ import VueApollo from 'vue-apollo';
 
 import { IssuableStates } from '~/issuable_list/constants';
 import createDefaultClient from '~/lib/graphql';
-import {
-  urlParamsToObject,
-  parseBoolean,
-  convertObjectPropsToCamelCase,
-} from '~/lib/utils/common_utils';
+import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 
 import EpicsListApp from './components/epics_list_root.vue';
 
@@ -36,12 +34,15 @@ export default function initEpicsList({ mountPointSelector }) {
     epicsCountClosed,
     epicsCountAll,
     epicNewPath,
+    listEpicsPath,
     groupFullPath,
     groupLabelsPath,
     groupMilestonesPath,
     emptyStatePath,
+    isSignedIn,
   } = mountPointEl.dataset;
 
+  // eslint-disable-next-line import/no-deprecated
   const rawFilterParams = urlParamsToObject(window.location.search);
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {
@@ -71,10 +72,12 @@ export default function initEpicsList({ mountPointSelector }) {
         [IssuableStates.All]: parseInt(epicsCountAll, 10),
       },
       epicNewPath,
+      listEpicsPath,
       groupFullPath,
       groupLabelsPath,
       groupMilestonesPath,
       emptyStatePath,
+      isSignedIn: parseBoolean(isSignedIn),
     },
     render: (createElement) =>
       createElement(EpicsListApp, {

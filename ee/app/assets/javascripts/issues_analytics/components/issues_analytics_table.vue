@@ -12,7 +12,7 @@ import {
   GlLabel,
 } from '@gitlab/ui';
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { getDayDifference } from '~/lib/utils/datetime_utility';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
@@ -120,7 +120,9 @@ export default {
           this.isLoading = false;
         })
         .catch(() => {
-          createFlash(s__('IssueAnalytics|Failed to load issues. Please try again.'));
+          createFlash({
+            message: s__('IssueAnalytics|Failed to load issues. Please try again.'),
+          });
           this.isLoading = false;
         });
     },
@@ -171,7 +173,6 @@ export default {
             <gl-popover
               :target="`${item.id}-labels`"
               placement="top"
-              triggers="hover"
               :css-classes="['issue-labels-popover']"
             >
               <div class="gl-display-flex gl-justify-content-start gl-flex-wrap gl-mr-1">

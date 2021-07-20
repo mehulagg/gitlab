@@ -16,13 +16,14 @@ gitlab:
   gitaly:
     resources:
       requests:
-        cpu: 1200m
-        memory: 245M
+        cpu: 2400m
+        memory: 1000M
       limits:
-        cpu: 1800m
-        memory: 367M
+        cpu: 3600m
+        memory: 1500M
     persistence:
       size: 10G
+      storageClass: ssd
   gitlab-exporter:
     enabled: false
   mailroom:
@@ -38,10 +39,10 @@ gitlab:
     resources:
       requests:
         cpu: 500m
-        memory: 25M
+        memory: 100M
       limits:
         cpu: 750m
-        memory: 37.5M
+        memory: 150M
     maxReplicas: 3
     hpa:
       targetAverageValue: 500m
@@ -52,10 +53,10 @@ gitlab:
     resources:
       requests:
         cpu: 855m
-        memory: 1285M
+        memory: 1927M
       limits:
         cpu: 1282m
-        memory: 1927M
+        memory: 2890M
     hpa:
       targetAverageValue: 650m
   task-runner:
@@ -70,10 +71,10 @@ gitlab:
     resources:
       requests:
         cpu: 746m
-        memory: 1873M
+        memory: 2809M
       limits:
         cpu: 1119m
-        memory: 2809M
+        memory: 4214M
     deployment:
       readinessProbe:
         initialDelaySeconds: 5  # Default is 0
@@ -83,10 +84,10 @@ gitlab:
       resources:
         requests:
           cpu: 400m
-          memory: 50M
+          memory: 75M
         limits:
           cpu: 600m
-          memory: 75M
+          memory: 113M
       readinessProbe:
         initialDelaySeconds: 5  # Default is 0
         periodSeconds: 15  # Default is 10
@@ -113,10 +114,10 @@ nginx-ingress:
       ssl-ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4
     resources:
       requests:
-        cpu: 100m
+        cpu: 300m
         memory: 450M
       limits:
-        cpu: 200m
+        cpu: 600m
         memory: 675M
     service:
       enableHttp: false
@@ -137,11 +138,11 @@ postgresql:
     enabled: false
   resources:
     requests:
-      cpu: 550m
-      memory: 250M
+      cpu: 600m
+      memory: 1000M
     limits:
-      cpu: 825m
-      memory: 375M
+      cpu: 1300m
+      memory: 1500M
 prometheus:
   install: false
 redis:

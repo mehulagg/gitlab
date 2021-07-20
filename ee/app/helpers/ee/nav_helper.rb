@@ -25,10 +25,20 @@ module EE
       controllers = %w(issues_analytics#show)
 
       if @group&.feature_available?(:iterations)
-        controllers = %w(iterations#index)
+        controllers = iterations_sub_menu_controllers
       end
 
       super.concat(controllers)
+    end
+
+    def iterations_sub_menu_controllers
+      paths = ['iterations#index', 'iterations#show']
+
+      if ::Feature.enabled?(:iteration_cadences, @group, default_enabled: :yaml)
+        paths << 'iteration_cadences#index'
+      end
+
+      paths
     end
   end
 end

@@ -2,7 +2,9 @@
 /* eslint-disable vue/no-v-html */
 import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { groupBy } from 'lodash';
+import EmojiPicker from '~/emoji/components/picker.vue';
 import { __, sprintf } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { glEmojiTag } from '../../emoji';
 
 // Internal constant, specific to this component, used when no `currentUserId` is given
@@ -12,10 +14,12 @@ export default {
   components: {
     GlButton,
     GlIcon,
+    EmojiPicker,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     awards: {
       type: Array,
@@ -40,6 +44,16 @@ export default {
       required: false,
       default: () => [],
     },
+    selectedClass: {
+      type: String,
+      required: false,
+      default: 'selected',
+    },
+  },
+  data() {
+    return {
+      isMenuOpen: false,
+    };
   },
   computed: {
     groupedDefaultAwards() {
@@ -64,7 +78,7 @@ export default {
   methods: {
     getAwardClassBindings(awardList) {
       return {
-        selected: this.hasReactionByCurrentUser(awardList),
+        [this.selectedClass]: this.hasReactionByCurrentUser(awardList),
         disabled: this.currentUserId === NO_USER_ID,
       };
     },
@@ -79,12 +93,12 @@ export default {
       return {
         name,
         list,
-        title: this.getAwardListTitle(list),
+        title: this.getAwardListTitle(list, name),
         classes: this.getAwardClassBindings(list),
         html: glEmojiTag(name),
       };
     },
-    getAwardListTitle(awardsList) {
+    getAwardListTitle(awardsList, name) {
       if (!awardsList.length) {
         return '';
       }
@@ -114,7 +128,7 @@ export default {
       // We have 10+ awarded user, join them with comma and add `and x more`.
       if (remainingAwardList.length) {
         title = sprintf(
-          __(`%{listToShow}, and %{awardsListLength} more.`),
+          __(`%{listToShow}, and %{awardsListLength} more`),
           {
             listToShow: namesToShow.join(', '),
             awardsListLength: remainingAwardList.length,
@@ -132,7 +146,7 @@ export default {
         title = namesToShow.join(__(' and '));
       }
 
-      return title;
+      return title + sprintf(__(' reacted with :%{name}:'), { name });
     },
     handleAward(awardName) {
       if (!this.canAwardEmoji) {
@@ -143,6 +157,11 @@ export default {
       const parsedName = /^[0-9]+$/.test(awardName) ? Number(awardName) : awardName;
 
       this.$emit('award', parsedName);
+
+      if (document.activeElement) document.activeElement.blur();
+    },
+    setIsMenuOpen(menuOpen) {
+      this.isMenuOpen = menuOpen;
     },
   },
 };
@@ -154,7 +173,7 @@ export default {
       v-for="awardList in groupedAwards"
       :key="awardList.name"
       v-gl-tooltip.viewport
-      class="gl-mr-3"
+      class="gl-mr-3 gl-my-2"
       :class="awardList.classes"
       :title="awardList.title"
       data-testid="award-button"
@@ -165,8 +184,28 @@ export default {
       </template>
       <span class="js-counter">{{ awardList.list.length }}</span>
     </gl-button>
-    <div v-if="canAwardEmoji" class="award-menu-holder">
+    <div v-if="canAwardEmoji" class="award-menu-holder gl-my-2">
+      <emoji-picker
+        v-if="glFeatures.improvedEmojiPicker"
+        :toggle-class="['add-reaction-button btn-icon gl-relative!', { 'is-active': isMenuOpen }]"
+        @click="handleAward"
+        @shown="setIsMenuOpen(true)"
+        @hidden="setIsMenuOpen(false)"
+      >
+        <template #button-content>
+          <span class="reaction-control-icon reaction-control-icon-neutral">
+            <gl-icon name="slight-smile" />
+          </span>
+          <span class="reaction-control-icon reaction-control-icon-positive">
+            <gl-icon name="smiley" />
+          </span>
+          <span class="reaction-control-icon reaction-control-icon-super-positive">
+            <gl-icon name="smile" />
+          </span>
+        </template>
+      </emoji-picker>
       <gl-button
+        v-else
         v-gl-tooltip.viewport
         :class="addButtonClass"
         class="add-reaction-button js-add-award"

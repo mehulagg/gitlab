@@ -13,7 +13,7 @@ To get started with Vue, read through [their documentation](https://vuejs.org/v2
 What is described in the following sections can be found in these examples:
 
 - [Web IDE](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets/javascripts/ide/stores)
-- [Security products](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports)
+- [Security products](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/app/assets/javascripts/vue_shared/security_reports)
 - [Registry](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets/javascripts/registry/stores)
 
 ## Vue architecture
@@ -98,6 +98,86 @@ return new Vue({
 
 > When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique
 across the codebase.
+
+#### Providing Rails form fields to Vue applications
+
+When composing a form with Rails, the `name`, `id`, and `value` attributes of form inputs are generated
+to match the backend. It can be helpful to have access to these generated attributes when converting
+a Rails form to Vue, or when [integrating components (datepicker, project selector, etc)](https://gitlab.com/gitlab-org/gitlab/-/blob/8956ad767d522f37a96e03840595c767de030968/app/assets/javascripts/access_tokens/index.js#L15) into it.
+The [`parseRailsFormFields`](https://gitlab.com/gitlab-org/gitlab/-/blob/fe88797f682c7ff0b13f2c2223a3ff45ada751c1/app/assets/javascripts/lib/utils/forms.js#L107) utility can be used to parse the generated form input attributes so they can be passed to the Vue application.
+This allows us to easily integrate Vue components without changing how the form submits.
+
+```haml
+-# form.html.haml
+= form_for user do |form|
+  .js-user-form
+    = form.text_field :name, class: 'form-control gl-form-input', data: { js_name: 'name' }
+    = form.text_field :email, class: 'form-control gl-form-input', data: { js_name: 'email' }
+```
+
+> The `js_name` data attribute is used as the key in the resulting JavaScript object.
+For example `= form.text_field :email, data: { js_name: 'fooBarBaz' }` would be translated
+to `{ fooBarBaz: { name: 'user[email]', id: 'user_email', value: '' } }`
+
+```javascript
+// index.js
+import Vue from 'vue';
+import { parseRailsFormFields } from '~/lib/utils/forms';
+import UserForm from './components/user_form.vue';
+
+export const initUserForm = () => {
+  const el = document.querySelector('.js-user-form');
+
+  if (!el) {
+    return null;
+  }
+
+  const fields = parseRailsFormFields(el);
+
+  return new Vue({
+    el,
+    render(h) {
+      return h(UserForm, {
+        props: {
+          fields,
+        },
+      });
+    },
+  });
+};
+```
+
+```vue
+<script>
+// user_form.vue
+import { GlButton, GlFormGroup, GlFormInput } from '@gitlab/ui';
+
+export default {
+  name: 'UserForm',
+  components: { GlButton, GlFormGroup, GlFormInput },
+  props: {
+    fields: {
+      type: Object,
+      required: true,
+    },
+  },
+};
+</script>
+
+<template>
+  <div>
+    <gl-form-group :label-for="fields.name.id" :label="__('Name')">
+      <gl-form-input v-bind="fields.name" size="lg" />
+    </gl-form-group>
+
+    <gl-form-group :label-for="fields.email.id" :label="__('Email')">
+      <gl-form-input v-bind="fields.email" type="email" size="lg" />
+    </gl-form-group>
+
+    <gl-button type="submit" category="primary" variant="confirm">{{ __('Update') }}</gl-button>
+  </div>
+</template>
+```
 
 #### Accessing the `gl` object
 
@@ -197,7 +277,7 @@ Check this [page](vuex.md) for more details.
 In the [Vue documentation](https://vuejs.org/v2/api/#Options-Data) the Data function/object is defined as follows:
 
 > The data object for the Vue instance. Vue recursively converts its properties into getter/setters
-to make it “reactive”. The object must be plain: native objects such as browser API objects and
+to make it "reactive". The object must be plain: native objects such as browser API objects and
 prototype properties are ignored. A rule of thumb is that data should just be data - it is not
 recommended to observe objects with their own stateful behavior.
 
@@ -237,20 +317,19 @@ Each Vue component has a unique output. This output is always present in the ren
 Although each method of a Vue component can be tested individually, our goal is to test the output
 of the render function, which represents the state at all times.
 
+Visit the [Vue testing guide](https://vuejs.org/v2/guide/testing.html#Unit-Testing) for help
+testing the rendered output.
+
 Here's an example of a well structured unit test for [this Vue component](#appendix---vue-component-subject-under-test):
 
 ```javascript
-import { shallowMount } from '@vue/test-utils';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { GlLoadingIcon } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import axios from '~/lib/utils/axios_utils';
 import App from '~/todos/app.vue';
 
-const TEST_TODOS = [
-  { text: 'Lorem ipsum test text' },
-  { text: 'Lorem ipsum 2' },
-];
+const TEST_TODOS = [{ text: 'Lorem ipsum test text' }, { text: 'Lorem ipsum 2' }];
 const TEST_NEW_TODO = 'New todo title';
 const TEST_TODO_PATH = '/todos';
 
@@ -268,28 +347,27 @@ describe('~/todos/app.vue', () => {
   afterEach(() => {
     // IMPORTANT: Clean up the component instance and axios mock adapter
     wrapper.destroy();
-    wrapper = null;
-
     mock.restore();
   });
 
   // It is very helpful to separate setting up the component from
   // its collaborators (for example, Vuex and axios).
   const createWrapper = (props = {}) => {
-    wrapper = extendedWrapper(
-      shallowMount(App, {
-        propsData: {
-          path: TEST_TODO_PATH,
-          ...props,
-        },
-      })
-    );
+    wrapper = shallowMountExtended(App, {
+      propsData: {
+        path: TEST_TODO_PATH,
+        ...props,
+      },
+    });
   };
   // Helper methods greatly help test maintainability and readability.
-  const findLoader = () => wrapper.find(GlLoadingIcon);
+  const findLoader = () => wrapper.findComponent(GlLoadingIcon);
   const findAddButton = () => wrapper.findByTestId('add-button');
   const findTextInput = () => wrapper.findByTestId('text-input');
-  const findTodoData = () => wrapper.findAll('[data-testid="todo-item"]').wrappers.map(wrapper => ({ text: wrapper.text() }));
+  const findTodoData = () =>
+    wrapper
+      .findAllByTestId('todo-item')
+      .wrappers.map((item) => ({ text: item.text() }));
 
   describe('when mounted and loading', () => {
     beforeEach(() => {
@@ -318,23 +396,17 @@ describe('~/todos/app.vue', () => {
       expect(findTodoData()).toEqual(TEST_TODOS);
     });
 
-    it('when todo is added, should post new todo', () => {
-      findTextInput().vm.$emit('update', TEST_NEW_TODO)
+    it('when todo is added, should post new todo', async () => {
+      findTextInput().vm.$emit('update', TEST_NEW_TODO);
       findAddButton().vm.$emit('click');
 
-      return wrapper.vm.$nextTick()
-        .then(() => {
-          expect(mock.history.post.map(x => JSON.parse(x.data))).toEqual([{ text: TEST_NEW_TODO }]);
-        });
+      await wrapper.vm.$nextTick();
+
+      expect(mock.history.post.map((x) => JSON.parse(x.data))).toEqual([{ text: TEST_NEW_TODO }]);
     });
   });
 });
 ```
-
-### Test the component's output
-
-The main return value of a Vue component is the rendered output. In order to test the component we
-need to test the rendered output. Visit the [Vue testing guide](https://vuejs.org/v2/guide/testing.html#Unit-Testing).
 
 ### Child components
 

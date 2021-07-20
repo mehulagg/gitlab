@@ -51,6 +51,9 @@ export default {
     };
   },
   computed: {
+    totalEntries() {
+      return Object.values(this.entries).flat().length;
+    },
     tableCaption() {
       if (this.isLoading) {
         return sprintf(
@@ -67,7 +70,7 @@ export default {
       );
     },
     showParentRow() {
-      return !this.isLoading && ['', '/'].indexOf(this.path) === -1;
+      return ['', '/'].indexOf(this.path) === -1;
     },
   },
   methods: {
@@ -111,6 +114,7 @@ export default {
               :submodule-tree-url="entry.treeUrl"
               :lfs-oid="entry.lfsOid"
               :loading-path="loadingPath"
+              :total-entries="totalEntries"
             />
           </template>
           <template v-if="isLoading">

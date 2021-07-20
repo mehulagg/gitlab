@@ -1,3 +1,8 @@
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Maven.gitlab-ci.yml
+
 # Build JAVA applications using Apache Maven (http://maven.apache.org)
 # For docker image tags see https://hub.docker.com/_/maven/
 #
@@ -33,7 +38,8 @@ cache:
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
   except:
-    - master
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 # Verify merge requests using JDK8
 verify:jdk8:
@@ -51,4 +57,5 @@ deploy:jdk8:
       fi
     - 'mvn $MAVEN_CLI_OPTS deploy -s ci_settings.xml'
   only:
-    - master
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

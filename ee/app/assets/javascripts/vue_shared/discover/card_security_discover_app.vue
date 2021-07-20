@@ -52,14 +52,16 @@ export default {
       default: '',
     },
   },
-  data: () => ({
-    slide: 0,
-    carouselImages: [
-      securityDependencyImageUrl,
-      securityScanningImageUrl,
-      securityDashboardImageUrl,
-    ],
-  }),
+  data() {
+    return {
+      slide: 0,
+      carouselImages: [
+        securityDependencyImageUrl,
+        securityScanningImageUrl,
+        securityDashboardImageUrl,
+      ],
+    };
+  },
   computed: {
     discoverButtonProps() {
       return {
@@ -99,7 +101,7 @@ export default {
       ),
     ],
     discoverPlanCaption: s__(
-      'Discover|See the other features of the %{linkStart}gold plan%{linkEnd}',
+      'Discover|See the other features of the %{linkStart}ultimate plan%{linkEnd}',
     ),
   },
 };
@@ -182,6 +184,7 @@ export default {
       <gl-button
         v-gl-tooltip:tooltipcontainer.left
         :title="$options.i18n.discoverFeedbackLabel"
+        :aria-label="$options.i18n.discoverFeedbackLabel"
         icon="slight-smile"
         size="medium"
         class="discover-feedback-icon"

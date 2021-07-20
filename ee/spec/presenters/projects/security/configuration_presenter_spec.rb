@@ -17,6 +17,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
   before do
     project.add_maintainer(current_user)
+    stub_licensed_features(licensed_scan_types.to_h { |type| [type, true] })
   end
 
   describe '#to_h' do
@@ -32,10 +33,6 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
       expect(auto_fix['dependency_scanning']).to be_truthy
       expect(auto_fix['container_scanning']).to be_truthy
-    end
-
-    it 'includes the path to create a SAST merge request' do
-      expect(subject[:create_sast_merge_request_path]).to eq(project_security_configuration_sast_path(project))
     end
 
     it 'includes the path to gitlab_ci history' do
@@ -84,15 +81,16 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
       it 'reports that all scanners are configured for which latest pipeline has builds' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
-          security_scan(:dast, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:dast_profiles, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:sast, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:container_scanning, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:dependency_scanning, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:license_scanning, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:secret_detection, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:api_fuzzing, configured: false, auto_dev_ops_enabled: true)
+          security_scan(:dast, configured: true),
+          security_scan(:sast, configured: true),
+          security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
+          security_scan(:dependency_scanning, configured: false),
+          security_scan(:license_scanning, configured: false),
+          security_scan(:secret_detection, configured: true),
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false),
+          security_scan(:dast_profiles, configured: true)
         )
       end
     end
@@ -109,14 +107,15 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       it 'reports all security jobs as unconfigured' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: false),
-          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: false),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
           security_scan(:coverage_fuzzing, configured: false),
-          security_scan(:api_fuzzing, configured: false)
+          security_scan(:api_fuzzing, configured: false),
+          security_scan(:dast_profiles, configured: true)
         )
       end
     end
@@ -143,6 +142,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: true),
@@ -151,28 +151,9 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
         )
       end
 
-      it 'works with both legacy and current job formats' do
-        stub_feature_flags(ci_build_metadata_config: false)
-
-        create(:ci_build, :sast, pipeline: pipeline)
-
-        expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
-          security_scan(:dast, configured: false),
-          security_scan(:dast_profiles, configured: true),
-          security_scan(:sast, configured: true),
-          security_scan(:container_scanning, configured: false),
-          security_scan(:dependency_scanning, configured: false),
-          security_scan(:license_scanning, configured: false),
-          security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false),
-          security_scan(:api_fuzzing, configured: false)
-        )
-      end
-
       it 'detects security jobs even when the job has more than one report' do
         config = { artifacts: { reports: { other_job: ['gl-other-report.json'], sast: ['gl-sast-report.json'] } } }
-        complicated_metadata = double(:complicated_metadata, config_options: config)
-        complicated_job = double(:complicated_job, metadata: complicated_metadata)
+        complicated_job = build_stubbed(:ci_build, options: config)
 
         allow_next_instance_of(::Security::SecurityJobsFinder) do |finder|
           allow(finder).to receive(:execute).and_return([complicated_job])
@@ -185,6 +166,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
@@ -201,6 +183,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: true),
           security_scan(:secret_detection, configured: true),
@@ -218,8 +201,9 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           expect(subject[:gitlab_ci_present]).to eq(true)
         end
 
-        it 'expects the gitlab_ci_presence to be false if the file is absent' do
-          allow_any_instance_of(described_class).to receive(:latest_pipeline).and_return(nil)
+        it 'expects the gitlab_ci_presence to be false if the file is customized' do
+          allow(project).to receive(:ci_config_path).and_return('.other-gitlab-ci.yml')
+
           expect(subject[:gitlab_ci_present]).to eq(false)
         end
       end
@@ -257,39 +241,27 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
     end
   end
 
-  def security_scan(type, configured:, auto_dev_ops_enabled: false)
+  def security_scan(type, configured:)
     configuration_path = configuration_path(type)
-
-    status_str = scan_status(type, configured, auto_dev_ops_enabled)
 
     {
       "type" => type.to_s,
       "configured" => configured,
-      "status" => status_str,
-      "description" => described_class.localized_scan_descriptions[type],
-      "link" => help_page_path(described_class::SCAN_DOCS[type]),
       "configuration_path" => configuration_path,
-      "name" => described_class.localized_scan_names[type]
+      "available" => licensed_scan_types.include?(type)
     }
   end
 
   def configuration_path(type)
     {
-      dast_profiles: project_security_configuration_dast_profiles_path(project),
+      dast: project_security_configuration_dast_path(project),
+      dast_profiles: project_security_configuration_dast_scans_path(project),
       sast: project_security_configuration_sast_path(project),
       api_fuzzing: project_security_configuration_api_fuzzing_path(project)
     }[type]
   end
 
-  def scan_status(type, configured, auto_dev_ops_enabled)
-    if type == :dast_profiles
-      "Available for on-demand DAST"
-    elsif configured && auto_dev_ops_enabled
-      "Enabled with Auto DevOps"
-    elsif configured
-      "Enabled"
-    else
-      "Not enabled"
-    end
+  def licensed_scan_types
+    ::Security::SecurityJobsFinder.allowed_job_types + ::Security::LicenseComplianceJobsFinder.allowed_job_types - [:cluster_image_scanning]
   end
 end

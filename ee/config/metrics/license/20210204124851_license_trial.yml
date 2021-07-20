@@ -1,0 +1,17 @@
+---
+key_path: license_trial
+description: Whether this is a trial license or not
+product_section: fulfillment
+product_stage: fulfillment
+product_group: group::license
+product_category: license
+value_type: boolean
+status: data_available
+time_frame: none
+data_source: license
+data_category: Subscription
+distribution:
+- ee
+tier:
+- premium
+- ultimate

@@ -14,7 +14,8 @@ module API
               package,
               current_user,
               project,
-              conan_package_reference: params[:conan_package_reference]
+              conan_package_reference: params[:conan_package_reference],
+              id: params[:id]
             )
 
             render_api_error!("No recipe manifest found", 404) if yield(presenter).empty?
@@ -31,19 +32,15 @@ module API
           end
 
           def recipe_upload_urls
-            { upload_urls: Hash[
-              file_names.select(&method(:recipe_file?)).map do |file_name|
-                [file_name, build_recipe_file_upload_url(file_name)]
-              end
-            ] }
+            { upload_urls: file_names.select(&method(:recipe_file?)).to_h do |file_name|
+                             [file_name, build_recipe_file_upload_url(file_name)]
+                           end }
           end
 
           def package_upload_urls
-            { upload_urls: Hash[
-              file_names.select(&method(:package_file?)).map do |file_name|
-                [file_name, build_package_file_upload_url(file_name)]
-              end
-            ] }
+            { upload_urls: file_names.select(&method(:package_file?)).to_h do |file_name|
+                             [file_name, build_package_file_upload_url(file_name)]
+                           end }
           end
 
           def recipe_file?(file_name)
@@ -158,7 +155,7 @@ module API
                 conan_package_reference: params[:conan_package_reference]
               ).execute!
 
-            track_package_event('pull_package', :conan, category: 'API::ConanPackages') if params[:file_name] == ::Packages::Conan::FileMetadatum::PACKAGE_BINARY
+            track_package_event('pull_package', :conan, category: 'API::ConanPackages', user: current_user, project: project, namespace: project.namespace) if params[:file_name] == ::Packages::Conan::FileMetadatum::PACKAGE_BINARY
 
             present_carrierwave_file!(package_file.file)
           end
@@ -173,7 +170,7 @@ module API
 
           def track_push_package_event
             if params[:file_name] == ::Packages::Conan::FileMetadatum::PACKAGE_BINARY && params[:file].size > 0 # rubocop: disable Style/ZeroLengthPredicate
-              track_package_event('push_package', :conan, category: 'API::ConanPackages')
+              track_package_event('push_package', :conan, category: 'API::ConanPackages', user: current_user, project: project, namespace: project.namespace)
             end
           end
 
@@ -212,16 +209,14 @@ module API
           end
 
           def find_personal_access_token
-            personal_access_token = find_personal_access_token_from_conan_jwt ||
+            find_personal_access_token_from_conan_jwt ||
               find_personal_access_token_from_http_basic_auth
-
-            personal_access_token
           end
 
           def find_user_from_job_token
             return unless route_authentication_setting[:job_token_allowed]
 
-            job = find_job_from_token || raise(::Gitlab::Auth::UnauthorizedError)
+            job = find_job_from_token || return
             @current_authenticated_job = job # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
             job.user

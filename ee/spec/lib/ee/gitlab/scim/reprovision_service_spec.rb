@@ -38,5 +38,16 @@ RSpec.describe ::EE::Gitlab::Scim::ReprovisionService do
 
       expect { service.execute }.not_to change { group.members.count }
     end
+
+    context 'with minimal access user' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, group: group, user: user, access_level: ::Gitlab::Access::MINIMAL_ACCESS)
+      end
+
+      it 'does not change group membership when the user is already a member' do
+        expect { service.execute }.not_to change { group.all_group_members.count }
+      end
+    end
   end
 end

@@ -22,7 +22,7 @@ module WikiHelper
   end
 
   def wiki_sidebar_toggle_button
-    content_tag :button, class: 'btn btn-default sidebar-toggle js-sidebar-wiki-toggle', role: 'button', type: 'button' do
+    content_tag :button, class: 'gl-button btn btn-default btn-icon sidebar-toggle js-sidebar-wiki-toggle', role: 'button', type: 'button' do
       sprite_icon('chevron-double-lg-left')
     end
   end
@@ -50,24 +50,6 @@ module WikiHelper
       end
   end
 
-  def wiki_page_errors(error)
-    return unless error
-
-    content_tag(:div, class: 'alert alert-danger') do
-      case error
-      when WikiPage::PageChangedError
-        page_link = link_to s_("WikiPageConflictMessage|the page"), wiki_page_path(@wiki, @page), target: "_blank"
-        concat(
-          (s_("WikiPageConflictMessage|Someone edited the page the same time you did. Please check out %{page_link} and make sure your changes will not unintentionally remove theirs.") % { page_link: page_link }).html_safe
-        )
-      when WikiPage::PageRenameError
-        s_("WikiEdit|There is already a page with the same title in that path.")
-      else
-        error.message
-      end
-    end
-  end
-
   def wiki_attachment_upload_url
     case @wiki.container
     when Project
@@ -79,7 +61,7 @@ module WikiHelper
 
   def wiki_sort_controls(wiki, sort, direction)
     sort ||= Wiki::TITLE_ORDER
-    link_class = 'btn btn-default has-tooltip reverse-sort-btn qa-reverse-sort rspec-reverse-sort'
+    link_class = 'gl-button btn btn-default btn-icon has-tooltip reverse-sort-btn qa-reverse-sort rspec-reverse-sort'
     reversed_direction = direction == 'desc' ? 'asc' : 'desc'
     icon_class = direction == 'desc' ? 'highest' : 'lowest'
 
@@ -154,4 +136,4 @@ module WikiHelper
   end
 end
 
-WikiHelper.prepend_if_ee('EE::WikiHelper')
+WikiHelper.prepend_mod_with('WikiHelper')

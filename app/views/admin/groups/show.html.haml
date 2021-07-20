@@ -1,3 +1,4 @@
+- add_page_specific_style 'page_bundles/members'
 - add_to_breadcrumbs _("Groups"), admin_groups_path
 - breadcrumb_title @group.name
 - page_title @group.name, _("Groups")
@@ -61,6 +62,7 @@
             = link_to sprite_icon('question-o'), help_page_path('topics/git/lfs/index')
 
         = render_if_exists 'namespaces/shared_runner_status', namespace: @group
+        = render_if_exists 'namespaces/additional_minutes_status', namespace: @group
 
     = render 'shared/custom_attributes', custom_attributes: @group.custom_attributes
 
@@ -102,6 +104,8 @@
                 %span.monospace= project.full_path + '.git'
 
   .col-md-6
+    = render 'shared/admin/admin_note'
+
     - if can?(current_user, :admin_group_member, @group)
       .card
         .card-header
@@ -117,23 +121,19 @@
             .gl-mt-3
               = select_tag :access_level, options_for_select(@group.access_level_roles), class: "project-access-select select2"
             %hr
-            = button_tag _('Add users to group'), class: "gl-button btn btn-success"
+            = button_tag _('Add users to group'), class: "gl-button btn btn-confirm"
       = render 'shared/members/requests', membership_source: @group, group: @group, requesters: @requesters, force_mobile_view: true
 
     .card
       .card-header
         = html_escape(_("%{group_name} group members")) % { group_name: "<strong>#{html_escape(@group.name)}</strong>".html_safe }
-        %span.badge.badge-pill= @group.members.size
-        .float-right
-          = link_to group_group_members_path(@group), class: 'btn btn-default gl-button btn-sm' do
-            = sprite_icon('pencil-square', css_class: 'gl-icon')
-            = _('Manage access')
+        %span.badge.badge-pill= @group.users_count
+        = render 'shared/members/manage_access_button', path: group_group_members_path(@group)
       %ul.content-list.group-users-list.content-list.members-list
         = render partial: 'shared/members/member',
                  collection: @members, as: :member,
                  locals: { membership_source: @group,
                            group: @group,
-                           show_controls: false,
                            current_user_is_group_owner: current_user_is_group_owner }
       - unless @members.size < Kaminari.config.default_per_page
         .card-footer

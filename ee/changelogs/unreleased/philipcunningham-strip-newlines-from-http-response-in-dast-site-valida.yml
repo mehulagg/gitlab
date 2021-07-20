@@ -1,5 +1,0 @@
----
-title: Strip trailing whitespace from DAST site validation HTTP response body
-merge_request: 53951
-author:
-type: changed

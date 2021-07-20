@@ -1,23 +1,24 @@
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Secure-Binaries.gitlab-ci.yml
+
 # This template should be used when Security Products (https://about.gitlab.com/handbook/engineering/development/secure/#security-products)
 # have to be downloaded and stored locally.
 #
 # Usage:
 #
-# ```
-#   include:
-#     - template: Secure-Binaries.gitlab-ci.yml
-# ```
+# include:
+#   - template: Secure-Binaries.gitlab-ci.yml
 #
 # Docs: https://docs.gitlab.com/ee/topics/airgap/
 
-
 variables:
   SECURE_BINARIES_ANALYZERS: >-
-    bandit, brakeman, gosec, spotbugs, flawfinder, phpcs-security-audit, security-code-scan, nodejs-scan, eslint, secrets, sobelow, pmd-apex, kubesec,
+    bandit, brakeman, gosec, spotbugs, flawfinder, phpcs-security-audit, security-code-scan, nodejs-scan, eslint, secrets, sobelow, pmd-apex, kubesec, semgrep,
     bundler-audit, retire.js, gemnasium, gemnasium-maven, gemnasium-python,
-    klar, clair-vulnerabilities-db,
     license-finder,
-    dast
+    dast, api-fuzzing
 
   SECURE_BINARIES_DOWNLOAD_IMAGES: "true"
   SECURE_BINARIES_PUSH_IMAGES: "true"
@@ -78,6 +79,8 @@ brakeman:
 
 gosec:
   extends: .download_images
+  variables:
+    SECURE_BINARIES_ANALYZER_VERSION: "3"
   only:
     variables:
       - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
@@ -134,6 +137,13 @@ secrets:
   variables:
     SECURE_BINARIES_ANALYZER_VERSION: "3"
 
+semgrep:
+  extends: .download_images
+  only:
+    variables:
+      - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
+          $SECURE_BINARIES_ANALYZERS =~ /\bsemgrep\b/
+
 sobelow:
   extends: .download_images
   only:
@@ -154,28 +164,6 @@ kubesec:
     variables:
       - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
           $SECURE_BINARIES_ANALYZERS =~ /\bkubesec\b/
-#
-# Container Scanning jobs
-#
-
-klar:
-  extends: .download_images
-  only:
-    variables:
-      - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
-          $SECURE_BINARIES_ANALYZERS =~ /\bklar\b/
-  variables:
-    SECURE_BINARIES_ANALYZER_VERSION: "3"
-
-clair-vulnerabilities-db:
-  extends: .download_images
-  only:
-    variables:
-      - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
-          $SECURE_BINARIES_ANALYZERS =~ /\bclair-vulnerabilities-db\b/
-  variables:
-    SECURE_BINARIES_IMAGE: arminc/clair-db
-    SECURE_BINARIES_ANALYZER_VERSION: latest
 
 #
 # Dependency Scanning jobs
@@ -236,8 +224,17 @@ license-finder:
 dast:
   extends: .download_images
   variables:
-    SECURE_BINARIES_ANALYZER_VERSION: "1"
+    SECURE_BINARIES_ANALYZER_VERSION: "2"
   only:
     variables:
       - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
           $SECURE_BINARIES_ANALYZERS =~ /\bdast\b/
+
+api-fuzzing:
+  extends: .download_images
+  variables:
+    SECURE_BINARIES_ANALYZER_VERSION: "1"
+  only:
+    variables:
+      - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
+          $SECURE_BINARIES_ANALYZERS =~ /\bapi-fuzzing\b/

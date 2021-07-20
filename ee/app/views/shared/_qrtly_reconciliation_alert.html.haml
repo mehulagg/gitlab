@@ -1,0 +1,6 @@
+- group = local_assigns.fetch(:group, nil)
+- return unless display_upcoming_reconciliation_alert?(group)
+
+= content_for :page_level_alert do
+  .container-fluid.container-limited{ class: "gl-pb-2! gl-pt-6! #{@content_class}" }
+    #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash(group) }

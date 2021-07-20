@@ -30,7 +30,7 @@ module Gitlab
         Sidekiq.logger.warn log_job_done(job, started_time, base_payload, job_exception.cause || job_exception)
 
         raise
-      rescue => job_exception
+      rescue StandardError => job_exception
         Sidekiq.logger.warn log_job_done(job, started_time, base_payload, job_exception)
 
         raise
@@ -39,9 +39,7 @@ module Gitlab
       private
 
       def add_instrumentation_keys!(job, output_payload)
-        instrumentation_values = job.slice(*::Gitlab::InstrumentationHelper.keys).stringify_keys
-
-        output_payload.merge!(instrumentation_values)
+        output_payload.merge!(job[:instrumentation].stringify_keys) if job[:instrumentation]
       end
 
       def add_logging_extras!(job, output_payload)
@@ -57,8 +55,6 @@ module Gitlab
         scheduling_latency_s = ::Gitlab::InstrumentationHelper.queue_duration_for_job(payload)
         payload['scheduling_latency_s'] = scheduling_latency_s if scheduling_latency_s
 
-        payload['job_size_bytes'] = Sidekiq.dump_json(job).bytesize
-
         payload
       end
 
@@ -71,6 +67,8 @@ module Gitlab
         add_time_keys!(elapsed_time, payload)
 
         message = base_message(payload)
+
+        payload['load_balancing_strategy'] = job['load_balancing_strategy'] if job['load_balancing_strategy']
 
         if job_exception
           payload['message'] = "#{message}: fail: #{payload['duration_s']} sec"

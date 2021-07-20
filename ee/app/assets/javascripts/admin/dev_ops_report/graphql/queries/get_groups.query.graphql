@@ -1,3 +1,0 @@
-query getGroups($search: String, $nextPage: String) {
-  groups(search: $search, nextPage: $nextPage) @client
-}

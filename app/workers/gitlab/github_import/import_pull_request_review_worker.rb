@@ -5,6 +5,8 @@ module Gitlab
     class ImportPullRequestReviewWorker # rubocop:disable Scalability/IdempotentWorker
       include ObjectImporter
 
+      tags :exclude_from_kubernetes
+
       def representation_class
         Gitlab::GithubImport::Representation::PullRequestReview
       end
@@ -13,12 +15,8 @@ module Gitlab
         Importer::PullRequestReviewImporter
       end
 
-      def counter_name
-        :github_importer_imported_pull_request_reviews
-      end
-
-      def counter_description
-        'The number of imported GitHub pull request reviews'
+      def object_type
+        :pull_request_review
       end
     end
   end

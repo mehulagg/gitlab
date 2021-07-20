@@ -39,6 +39,26 @@ module ElasticsearchHelpers
     es_helper.refresh_index(index_name: es_helper.migrations_index_name)
   end
 
+  def set_elasticsearch_migration_to(name_or_version, including: true)
+    version = if name_or_version.is_a?(Numeric)
+                name_or_version
+              else
+                Elastic::DataMigrationService.find_by_name!(name_or_version).version
+              end
+
+    Elastic::DataMigrationService.migrations.each do |migration|
+      return_value = if including
+                       migration.version <= version
+                     else
+                       migration.version < version
+                     end
+
+      allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+        .with(migration.name_for_key.to_sym)
+        .and_return(return_value)
+    end
+  end
+
   def warm_elasticsearch_migrations_cache!
     ::Elastic::DataMigrationService.migrations.each do |migration|
       ::Elastic::DataMigrationService.migration_has_finished?(migration.name.underscore.to_sym)

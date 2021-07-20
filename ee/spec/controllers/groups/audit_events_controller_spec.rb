@@ -134,7 +134,9 @@ RSpec.describe Groups::AuditEventsController do
 
             expect_snowplow_event(
               category: 'Groups::AuditEventsController',
-              action: 'search_audit_event'
+              action: 'search_audit_event',
+              user: owner,
+              namespace: group
             )
           end
         end

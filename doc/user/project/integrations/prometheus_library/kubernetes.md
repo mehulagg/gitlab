@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -33,14 +33,14 @@ integration services must be enabled.
 
 Prometheus needs to be deployed into the cluster and configured properly in order to gather Kubernetes metrics. GitLab supports two methods for doing so:
 
-- GitLab [integrates with Kubernetes](../../clusters/index.md), and can [deploy Prometheus into a connected cluster](../prometheus.md#managed-prometheus-on-kubernetes). It is automatically configured to collect Kubernetes metrics.
+- GitLab [integrates with Kubernetes](../../clusters/index.md), and can [query a Prometheus in a connected cluster](../../../clusters/integrations.md#prometheus-cluster-integration). The in-cluster Prometheus can be configured to automatically collect application metrics from your cluster.
 - To configure your own Prometheus server, you can follow the [Prometheus documentation](https://prometheus.io/docs/introduction/overview/).
 
 ## Specifying the Environment
 
 In order to isolate and only display relevant CPU and Memory metrics for a given environment, GitLab needs a method to detect which containers it is running. Because these metrics are tracked at the container level, traditional Kubernetes labels are not available.
 
-Instead, the [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) or [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) name should begin with [CI_ENVIRONMENT_SLUG](../../../../ci/variables/README.md#predefined-cicd-variables). It can be followed by a `-` and additional content if desired. For example, a deployment name of `review-homepage-5620p5` would match the `review/homepage` environment.
+Instead, the [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) or [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) name should begin with [CI_ENVIRONMENT_SLUG](../../../../ci/variables/index.md#predefined-cicd-variables). It can be followed by a `-` and additional content if desired. For example, a deployment name of `review-homepage-5620p5` would match the `review/homepage` environment.
 
 ## Displaying Canary metrics **(PREMIUM)**
 

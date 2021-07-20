@@ -6,7 +6,7 @@ RSpec.describe MergeRequests::MergeToRefService do
   let(:user) { create(:user) }
   let(:merge_request) { create(:merge_request, :simple) }
   let(:project) { merge_request.project }
-  let(:service) { described_class.new(project, user, commit_message: 'Awesome message') }
+  let(:service) { described_class.new(project: project, current_user: user, params: { commit_message: 'Awesome message' }) }
 
   before do
     project.add_maintainer(user)
@@ -26,7 +26,7 @@ RSpec.describe MergeRequests::MergeToRefService do
         create(:push_rule, :commit_message, project: project)
       end
 
-      let(:service) { described_class.new(project, user) }
+      let(:service) { described_class.new(project: project, current_user: user) }
 
       it 'uses the default commit message' do
         result = service.execute(merge_request)

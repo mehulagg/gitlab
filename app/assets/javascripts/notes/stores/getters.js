@@ -1,8 +1,26 @@
 import { flattenDeep, clone } from 'lodash';
+import { statusBoxState } from '~/issuable/components/status_box.vue';
+import { isInMRPage } from '~/lib/utils/common_utils';
 import * as constants from '../constants';
 import { collapseSystemNotes } from './collapse_utils';
 
-export const discussions = (state) => {
+const getDraftComments = (state) => {
+  if (!state.batchComments) {
+    return [];
+  }
+
+  return state.batchComments.drafts
+    .filter((draft) => !draft.file_path && !draft.discussion_id)
+    .map((x) => ({
+      ...x,
+      // Treat a top-level draft note as individual_note so it's not included in
+      // expand/collapse threads
+      individual_note: true,
+    }))
+    .sort((a, b) => a.id - b.id);
+};
+
+export const discussions = (state, getters, rootState) => {
   let discussionsInState = clone(state.discussions);
   // NOTE: not testing bc will be removed when backend is finished.
 
@@ -22,11 +40,15 @@ export const discussions = (state) => {
       .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   }
 
+  discussionsInState = collapseSystemNotes(discussionsInState);
+
+  discussionsInState = discussionsInState.concat(getDraftComments(rootState));
+
   if (state.discussionSortOrder === constants.DESC) {
     discussionsInState = discussionsInState.reverse();
   }
 
-  return collapseSystemNotes(discussionsInState);
+  return discussionsInState;
 };
 
 export const convertedDisscussionIds = (state) => state.convertedDisscussionIds;
@@ -62,7 +84,8 @@ export const getBlockedByIssues = (state) => state.noteableData.blocked_by_issue
 
 export const userCanReply = (state) => Boolean(state.noteableData.current_user.can_create_note);
 
-export const openState = (state) => state.noteableData.state;
+export const openState = (state) =>
+  isInMRPage() ? statusBoxState.state : state.noteableData.state;
 
 export const getUserData = (state) => state.userData || {};
 
@@ -256,4 +279,7 @@ export const getDiscussion = (state) => (discussionId) =>
 export const commentsDisabled = (state) => state.commentsDisabled;
 
 export const suggestionsCount = (state, getters) =>
-  Object.values(getters.notesById).filter((n) => n.suggestions.length).length;
+  Object.values(getters.notesById).filter((n) => n.suggestions?.length).length;
+
+export const hasDrafts = (state, getters, rootState, rootGetters) =>
+  Boolean(rootGetters['batchComments/hasDrafts']);

@@ -18,7 +18,7 @@
       %span
         = s_('GroupSAML|SAML Group Links')
 
-- if @group.feature_available?(:group_webhooks) || show_promotions?
+- if @group.licensed_feature_available?(:group_webhooks) || show_promotions?
   = nav_link(path: 'hooks#index') do
     = link_to group_hooks_path(@group), title: 'Webhooks' do
       %span
@@ -32,6 +32,6 @@
 
 - if show_billing_in_sidebar? && administration_nav_item_disabled
   = nav_link(path: 'billings#index') do
-    = link_to group_billings_path(@group), title: _('Billing') do
+    = link_to group_billings_path(@group), title: _('Billing'), data: { qa_selector: 'billing_link' } do
       %span
         = _('Billing')

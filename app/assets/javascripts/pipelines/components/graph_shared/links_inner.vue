@@ -1,8 +1,8 @@
 <script>
 import { isEmpty } from 'lodash';
 import { DRAW_FAILURE } from '../../constants';
-import { createJobsHash, generateJobNeedsDict } from '../../utils';
-import { parseData } from '../parsing_utils';
+import { createJobsHash, generateJobNeedsDict, reportToSentry } from '../../utils';
+import { STAGE_VIEW } from '../graph/constants';
 import { generateLinksData } from './drawing_utils';
 
 export default {
@@ -14,6 +14,10 @@ export default {
       required: true,
     },
     containerMeasurements: {
+      type: Object,
+      required: true,
+    },
+    parsedData: {
       type: Object,
       required: true,
     },
@@ -34,6 +38,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    viewType: {
+      type: String,
+      required: false,
+      default: STAGE_VIEW,
     },
   },
   data() {
@@ -86,23 +95,37 @@ export default {
     highlightedJobs(jobs) {
       this.$emit('highlightedJobsChange', jobs);
     },
+    parsedData() {
+      this.calculateLinkData();
+    },
+    viewType() {
+      /*
+        We need to wait a tick so that the layout reflows
+        before the links refresh.
+      */
+      this.$nextTick(() => {
+        this.calculateLinkData();
+      });
+    },
+  },
+  errorCaptured(err, _vm, info) {
+    reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    if (!isEmpty(this.pipelineData)) {
-      this.prepareLinkData();
+    if (!isEmpty(this.parsedData)) {
+      this.calculateLinkData();
     }
   },
   methods: {
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);
     },
-    prepareLinkData() {
+    calculateLinkData() {
       try {
-        const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
-        const parsedData = parseData(arrayOfJobs);
-        this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
-      } catch {
-        this.$emit('error', DRAW_FAILURE);
+        this.links = generateLinksData(this.parsedData, this.containerId, `-${this.pipelineId}`);
+      } catch (err) {
+        this.$emit('error', { type: DRAW_FAILURE, reportToSentry: false });
+        reportToSentry(this.$options.name, err);
       }
     },
     getLinkClasses(link) {

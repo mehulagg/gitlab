@@ -2,9 +2,11 @@
 
 class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  feature_category :license_compliance
+  feature_category :utilization
   worker_resource_boundary :cpu
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -16,14 +18,11 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
       tuples = []
 
       subscriptions.each do |subscription|
-        unless subscription.namespace
-          track_error(subscription)
-          next
-        end
-
         subscription.refresh_seat_attributes!
 
         tuples << [subscription.id, subscription.max_seats_used, subscription.seats_in_use, subscription.seats_owed]
+      rescue ActiveRecord::QueryCanceled => e
+        track_error(e, subscription)
       end
 
       if tuples.present?
@@ -45,9 +44,9 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
 
   private
 
-  def track_error(subscription)
+  def track_error(error, subscription)
     Gitlab::ErrorTracking.track_exception(
-      StandardError.new('Namespace absent'),
+      error,
       gitlab_subscription_id: subscription.id,
       namespace_id: subscription.namespace_id
     )

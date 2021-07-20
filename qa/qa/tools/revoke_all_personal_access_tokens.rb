@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../qa'
-require 'net/protocol.rb'
+require 'net/protocol'
 # This script revokes all personal access tokens with the name of 'api-test-token' on the host specified by GITLAB_ADDRESS
 # Required environment variables: GITLAB_USERNAME, GITLAB_PASSWORD and GITLAB_ADDRESS
 # Run `rake revoke_personal_access_tokens`
@@ -12,7 +12,7 @@ module QA
       def run
         do_run
       rescue Net::ReadTimeout
-        STDOUT.puts 'Net::ReadTimeout during run. Trying again'
+        $stdout.puts 'Net::ReadTimeout during run. Trying again'
         run
       end
 
@@ -23,7 +23,7 @@ module QA
         raise ArgumentError, "Please provide GITLAB_PASSWORD" unless ENV['GITLAB_PASSWORD']
         raise ArgumentError, "Please provide GITLAB_ADDRESS" unless ENV['GITLAB_ADDRESS']
 
-        STDOUT.puts 'Running...'
+        $stdout.puts 'Running...'
 
         Runtime::Browser.visit(ENV['GITLAB_ADDRESS'], Page::Main::Login)
         Page::Main::Login.perform(&:sign_in_using_credentials)

@@ -9,6 +9,9 @@ class EpicEntity < IssuableEntity
   expose :group_full_name do |epic|
     epic.group.full_name
   end
+  expose :group_full_path do |epic|
+    epic.group.full_path
+  end
 
   expose :start_date
   expose :start_date_is_fixed?, as: :start_date_is_fixed

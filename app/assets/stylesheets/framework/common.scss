@@ -93,6 +93,9 @@
 
 .tab-content {
   overflow: visible;
+  @include media-breakpoint-down(sm) {
+    isolation: isolate;
+  }
 }
 
 pre {
@@ -119,10 +122,6 @@ hr {
 
   &-30 {
     @include str-truncated(30%);
-  }
-
-  &-60 {
-    @include str-truncated(60%);
   }
 
   &-100 {
@@ -270,12 +269,6 @@ img.emoji {
   height: 220px;
 }
 
-.description-block {
-  @extend .light-well;
-  @extend .light;
-  margin-bottom: 10px;
-}
-
 .footer-links {
   margin-bottom: 20px;
 
@@ -290,11 +283,6 @@ img.emoji {
   hr {
     border-color: $gray-darker;
   }
-}
-
-.search_box {
-  @extend .card.card-body;
-  text-align: center;
 }
 
 .dropzone .dz-preview .dz-progress {
@@ -426,7 +414,6 @@ img.emoji {
 .mw-460 { max-width: 460px; }
 .mw-6em { max-width: 6em; }
 .mw-70p { max-width: 70%; }
-.mw-90p { max-width: 90%; }
 
 // By default flex items don't shrink below their minimum content size.
 // To change this, these clases set a min-width or min-height

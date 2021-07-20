@@ -1,5 +1,0 @@
----
-title: Fix Jira issue list links when Jira runs on a subpath
-merge_request: 51797
-author:
-type: fixed

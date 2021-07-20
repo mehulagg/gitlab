@@ -14,15 +14,16 @@ module QualityManagement
       end
 
       def execute
-        return error(_('Test cases are not available for this project')) unless can_create_test_cases?
-
         issue = Issues::CreateService.new(
-          project,
-          current_user,
-          issue_type: ISSUE_TYPE,
-          title: title,
-          description: description,
-          label_ids: label_ids
+          project: project,
+          current_user: current_user,
+          params: {
+            issue_type: ISSUE_TYPE,
+            title: title,
+            description: description,
+            label_ids: label_ids
+          },
+          spam_params: nil
         ).execute
 
         return error(issue.errors.full_messages.to_sentence, issue) unless issue.valid?
@@ -40,10 +41,6 @@ module QualityManagement
 
       def error(message, issue = nil)
         ServiceResponse.error(payload: { issue: issue }, message: message)
-      end
-
-      def can_create_test_cases?
-        project.feature_available?(:quality_management)
       end
     end
   end

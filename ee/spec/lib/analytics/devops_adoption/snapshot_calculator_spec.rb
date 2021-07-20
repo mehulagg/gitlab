@@ -4,13 +4,13 @@ require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   let_it_be(:group1) { create(:group) }
-  let_it_be(:segment) { create(:devops_adoption_segment, namespace: group1) }
+  let_it_be(:enabled_namespace) { create(:devops_adoption_enabled_namespace, namespace: group1) }
   let_it_be(:subgroup) { create(:group, parent: group1) }
   let_it_be(:project) { create(:project, group: group1) }
   let_it_be(:subproject) { create(:project, group: subgroup) }
   let_it_be(:range_end) { Time.zone.parse('2020-12-01').end_of_month }
 
-  subject(:data) { described_class.new(segment: segment, range_end: range_end).calculate }
+  subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end).calculate }
 
   describe 'end_time' do
     it 'equals to range_end' do
@@ -98,7 +98,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     let!(:deployment) { create(:deployment, :success, updated_at: deployed_at) }
     let(:deployed_at) { 100.days.ago(range_end) }
 
-    let(:segment) { create(:devops_adoption_segment, namespace: group) }
+    let(:enabled_namespace) { create(:devops_adoption_enabled_namespace, namespace: group) }
     let!(:group) do
       create(:group).tap do |g|
         g.projects << deployment.project
@@ -117,30 +117,120 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   describe 'security_scan_succeeded' do
     subject { data[:security_scan_succeeded] }
 
-    let!(:old_security_scan) { create :security_scan, build: create(:ci_build, project: project), created_at: 100.days.ago(range_end) }
+    it 'is always false' do
+      is_expected.to eq false
+    end
+  end
 
-    context 'with successful security scan within month' do
-      let!(:fresh_security_scan) { create :security_scan, build: create(:ci_build, project: project), created_at: 10.days.ago(range_end) }
+  describe 'total_projects_count' do
+    subject { data[:total_projects_count] }
 
-      it { is_expected.to eq true }
+    it { is_expected.to eq 2 }
+  end
+
+  describe 'code_owners_used_count' do
+    let!(:project_with_code_owners) { create(:project, :repository, group: subgroup) }
+
+    subject { data[:code_owners_used_count] }
+
+    before do
+      allow_any_instance_of(Project).to receive(:default_branch).and_return('with-codeowners') # rubocop:disable RSpec/AnyInstanceOf
     end
 
-    it { is_expected.to eq false }
+    it { is_expected.to eq 1 }
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(analytics_devops_adoption_codeowners: false)
+      end
+
+      it { is_expected.to eq nil }
+    end
+
+    context 'when there is no default branch' do
+      before do
+        allow_any_instance_of(Project).to receive(:default_branch).and_return(nil) # rubocop:disable RSpec/AnyInstanceOf
+      end
+
+      it 'uses HEAD as default value' do
+        expect(Gitlab::CodeOwners::Loader).to receive(:new).with(kind_of(Project), 'HEAD').thrice.and_call_original
+
+        expect(subject).to eq 0
+      end
+    end
+  end
+
+  shared_examples 'calculates artifact type count' do |type|
+    before do
+      create(:ee_ci_job_artifact, type, project: project, created_at: 1.year.before(range_end))
+      create(:ee_ci_job_artifact, type, project: project, created_at: 1.day.before(range_end))
+      create(:ee_ci_job_artifact, type, project: subproject, created_at: 1.week.before(range_end))
+      create(:ee_ci_job_artifact, type, created_at: 1.week.before(range_end))
+    end
+
+    it "returns number of projects with at least 1 #{type} CI artifact created in given period" do
+      expect(subject).to eq 2
+    end
+  end
+
+  describe 'sast_enabled_count' do
+    subject { data[:sast_enabled_count] }
+
+    include_examples 'calculates artifact type count', :sast
+  end
+
+  describe 'dast_enabled_count' do
+    subject { data[:dast_enabled_count] }
+
+    include_examples 'calculates artifact type count', :dast
+  end
+
+  describe 'dependency_scanning_enabled_count' do
+    subject { data[:dependency_scanning_enabled_count] }
+
+    include_examples 'calculates artifact type count', :dependency_scanning
+  end
+
+  describe 'coverage_fuzzing_enabled_count' do
+    subject { data[:coverage_fuzzing_enabled_count] }
+
+    include_examples 'calculates artifact type count', :coverage_fuzzing
+  end
+
+  describe 'vulnerability_management_used_count' do
+    subject { data[:vulnerability_management_used_count] }
+
+    it 'returns number of projects with at least 1 vulnerability acted upon' do
+      create :vulnerability, :resolved, project: project, created_at: 1.week.before(range_end)
+      create :vulnerability, :resolved, project: subproject, created_at: 1.year.before(range_end)
+      create :vulnerability, :detected, project: subproject, created_at: 1.week.before(range_end)
+      create :vulnerability, :resolved, created_at: 1.week.before(range_end)
+
+      expect(subject).to eq 1
+    end
   end
 
   context 'when snapshot already exists' do
-    let_it_be(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false }
+    subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end, snapshot: snapshot).calculate }
 
-    subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
+    let(:snapshot) { create :devops_adoption_snapshot, namespace: enabled_namespace.namespace, issue_opened: true, merge_request_opened: false, total_projects_count: 1 }
 
-    let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }
+    context 'for boolean metrics' do
+      let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }
 
-    it 'calculates metrics which are not true yet' do
-      expect(data[:merge_request_opened]).to eq true
+      it 'calculates metrics which are not true yet' do
+        expect(data[:merge_request_opened]).to eq true
+      end
+
+      it "doesn't change metrics which are true already" do
+        expect(data[:issue_opened]).to eq true
+      end
     end
 
-    it "doesn't change metrics which are true already" do
-      expect(data[:issue_opened]).to eq true
+    context 'for numeric metrics' do
+      it 'always recalculates metric' do
+        expect(data[:total_projects_count]).to eq 2
+      end
     end
   end
 end

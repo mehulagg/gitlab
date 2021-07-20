@@ -264,7 +264,7 @@ RSpec.describe PostReceiveService do
 
     context "project path matches" do
       before do
-        allow(project).to receive(:full_path).and_return("/company/sekrit-project")
+        allow(project).to receive(:full_path).and_return("company/sekrit-project")
       end
 
       it "does output the latest scoped broadcast message" do
@@ -283,7 +283,7 @@ RSpec.describe PostReceiveService do
 
   context 'with a redirected data' do
     it 'returns redirected message on the response' do
-      project_moved = Gitlab::Checks::ProjectMoved.new(project.repository, user, 'http', 'foo/baz')
+      project_moved = Gitlab::Checks::ContainerMoved.new(project.repository, user, 'http', 'foo/baz')
       project_moved.add_message
 
       expect(subject).to include(build_basic_message(project_moved.message))

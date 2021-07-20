@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import CreateItemDropdown from '~/create_item_dropdown';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import AccessorUtilities from '~/lib/utils/accessor';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
@@ -15,15 +15,21 @@ export default class ProtectedBranchCreate {
     this.isLocalStorageAvailable = AccessorUtilities.isLocalStorageAccessSafe();
     this.currentProjectUserDefaults = {};
     this.buildDropdowns();
+    this.$forcePushToggle = this.$form.find('.js-force-push-toggle');
     this.$codeOwnerToggle = this.$form.find('.js-code-owner-toggle');
     this.bindEvents();
   }
 
   bindEvents() {
+    this.$forcePushToggle.on('click', this.onForcePushToggleClick.bind(this));
     if (this.hasLicense) {
       this.$codeOwnerToggle.on('click', this.onCodeOwnerToggleClick.bind(this));
     }
     this.$form.on('submit', this.onFormSubmit.bind(this));
+  }
+
+  onForcePushToggleClick() {
+    this.$forcePushToggle.toggleClass('is-checked');
   }
 
   onCodeOwnerToggleClick() {
@@ -86,6 +92,7 @@ export default class ProtectedBranchCreate {
       authenticity_token: this.$form.find('input[name="authenticity_token"]').val(),
       protected_branch: {
         name: this.$form.find('input[name="protected_branch[name]"]').val(),
+        allow_force_push: this.$forcePushToggle.hasClass('is-checked'),
         code_owner_approval_required: this.$codeOwnerToggle.hasClass('is-checked'),
       },
     };
@@ -128,6 +135,10 @@ export default class ProtectedBranchCreate {
       .then(() => {
         window.location.reload();
       })
-      .catch(() => Flash(__('Failed to protect the branch')));
+      .catch(() =>
+        createFlash({
+          message: __('Failed to protect the branch'),
+        }),
+      );
   }
 }

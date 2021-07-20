@@ -44,19 +44,12 @@ RSpec.describe ApplicationSettings::UpdateService do
       context 'index creation' do
         let(:opts) { { elasticsearch_indexing: true } }
 
-        context 'when index exists' do
-          it 'skips creating a new index' do
-            expect(helper).to(receive(:index_exists?)).and_return(true)
-            expect(helper).not_to(receive(:create_empty_index))
-
-            service.execute
-          end
-        end
-
         context 'when index does not exist' do
           it 'creates a new index' do
-            expect(helper).to(receive(:index_exists?)).and_return(false)
-            expect(helper).to(receive(:create_empty_index))
+            expect(helper).to receive(:create_empty_index).with(options: { skip_if_exists: true })
+            expect(helper).to receive(:create_standalone_indices).with(options: { skip_if_exists: true })
+            expect(helper).to receive(:migrations_index_exists?).and_return(false)
+            expect(helper).to receive(:create_migrations_index)
 
             service.execute
           end
@@ -65,9 +58,19 @@ RSpec.describe ApplicationSettings::UpdateService do
         context 'when ES service is not reachable' do
           it 'does not throw exception' do
             expect(helper).to receive(:index_exists?).and_raise(Faraday::ConnectionFailed, nil)
-            expect(helper).not_to receive(:create_empty_index)
+            expect(helper).not_to receive(:create_standalone_indices)
 
             expect { service.execute }.not_to raise_error
+          end
+        end
+
+        context 'when modifying a non Advanced Search setting' do
+          let(:opts) { { repository_size_limit: '100' } }
+
+          it 'does not check index_exists' do
+            expect(helper).not_to receive(:create_empty_index)
+
+            service.execute
           end
         end
       end
@@ -174,6 +177,31 @@ RSpec.describe ApplicationSettings::UpdateService do
               end.to change { ElasticsearchIndexedProject.count }.from(1).to(2)
 
               expect(ElasticsearchIndexedProject.pluck(:project_id)).to eq([projects.first.id, projects.second.id])
+            end
+          end
+        end
+
+        context 'setting number_of_shards and number_of_replicas' do
+          let(:alias_name) { 'alias-name' }
+
+          it 'accepts hash values' do
+            opts = { elasticsearch_shards: { alias_name => 10 }, elasticsearch_replicas: { alias_name => 2 } }
+
+            described_class.new(setting, user, opts).execute
+
+            setting = Elastic::IndexSetting[alias_name]
+            expect(setting.number_of_shards).to eq(10)
+            expect(setting.number_of_replicas).to eq(2)
+          end
+
+          it 'accepts legacy (integer) values' do
+            opts = { elasticsearch_shards: 32, elasticsearch_replicas: 3 }
+
+            described_class.new(setting, user, opts).execute
+
+            Elastic::IndexSetting.every_alias do |setting|
+              expect(setting.number_of_shards).to eq(32)
+              expect(setting.number_of_replicas).to eq(3)
             end
           end
         end

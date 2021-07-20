@@ -37,17 +37,7 @@ Since use of the group-managed account requires the use of SSO, users of group-m
 - The user is unable to access the group (their credentials no longer work on the identity provider when prompted to use SSO).
 - Contributions in the group (for example, issues and merge requests) remains intact.
 
-## Assertions
-
-When using group-managed accounts, the following user details need to be passed to GitLab as SAML
-assertions to be able to create a user.
-
-| Field           | Supported keys |
-|-----------------|----------------|
-| Email (required)| `email`, `mail` |
-| Full Name       | `name` |
-| First Name      | `first_name`, `firstname`, `firstName` |
-| Last Name       | `last_name`, `lastname`, `lastName` |
+Please refer to our [SAML SSO for Groups page](../index.md) for information on how to configure SAML.
 
 ## Feature flag **(PREMIUM SELF)**
 
@@ -94,6 +84,16 @@ To access the Credentials inventory of a group, navigate to **{shield}** **Secur
 
 This feature is similar to the [Credentials inventory for self-managed instances](../../admin_area/credentials_inventory.md).
 
+### Revoke a group-managed account's personal access token
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214811) in GitLab 13.5.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267184) in GitLab 13.10.
+
+Group owners can revoke the personal access tokens of accounts in their group. To do so, select
+the Personal Access Tokens tab, and select Revoke.
+
+When a personal access token is revoked, the group-managed account user is notified by email.
+
 ## Limiting lifetime of personal access tokens of users in Group-managed accounts **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118893) in GitLab 12.10.
@@ -104,9 +104,11 @@ This expiration date is not a requirement, and can be set to any arbitrary date.
 
 Since personal access tokens are the only token needed for programmatic access to GitLab, organizations with security requirements may want to enforce more protection to require regular rotation of these tokens.
 
-### Setting a limit
+### Set a limit
 
-Only a GitLab administrator or an owner of a group-managed account can set a limit. When this field is left empty, the [instance-level restriction](../../admin_area/settings/account_and_limit_settings.md#limiting-lifetime-of-personal-access-tokens) on the lifetime of personal access tokens apply.
+Only a GitLab administrator or an owner of a group-managed account can set a limit. When this field
+is left empty, the [instance-level restriction](../../admin_area/settings/account_and_limit_settings.md#limit-the-lifetime-of-personal-access-tokens)
+on the lifetime of personal access tokens apply.
 
 To set a limit on how long personal access tokens are valid for users in a group managed account:
 

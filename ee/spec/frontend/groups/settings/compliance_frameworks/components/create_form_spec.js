@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
@@ -10,7 +11,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { visitUrl } from '~/lib/utils/url_utility';
 
-import * as Sentry from '~/sentry/wrapper';
 import { validCreateResponse, errorCreateResponse } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -67,6 +67,16 @@ describe('CreateForm', () => {
     wrapper.destroy();
   });
 
+  describe('initialized', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('sets the submit button text on the form', () => {
+      expect(findForm().props('submitButtonText')).toBe('Add framework');
+    });
+  });
+
   describe('loading', () => {
     beforeEach(() => {
       wrapper = createComponent();
@@ -95,7 +105,7 @@ describe('CreateForm', () => {
     };
 
     it('passes the error to the form status when saving causes an exception and does not redirect', async () => {
-      jest.spyOn(Sentry, 'captureException');
+      const captureExceptionSpy = jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([[createComplianceFrameworkMutation, createWithNetworkErrors]]);
 
       await submitForm(name, description, pipelineConfigurationFullPath, color);
@@ -104,11 +114,11 @@ describe('CreateForm', () => {
       expect(findFormStatus().props('loading')).toBe(false);
       expect(visitUrl).not.toHaveBeenCalled();
       expect(findFormStatus().props('error')).toBe(SAVE_ERROR);
-      expect(Sentry.captureException.mock.calls[0][0].networkError).toStrictEqual(sentryError);
+      expect(captureExceptionSpy.mock.calls[0][0].networkError).toStrictEqual(sentryError);
     });
 
     it('passes the errors to the form status when saving fails and does not redirect', async () => {
-      jest.spyOn(Sentry, 'captureException');
+      const captureExceptionSpy = jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([[createComplianceFrameworkMutation, createWithErrors]]);
 
       await submitForm(name, description, pipelineConfigurationFullPath, color);
@@ -117,16 +127,16 @@ describe('CreateForm', () => {
       expect(findFormStatus().props('loading')).toBe(false);
       expect(visitUrl).not.toHaveBeenCalled();
       expect(findFormStatus().props('error')).toBe('Invalid values given');
-      expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentrySaveError);
+      expect(captureExceptionSpy).toHaveBeenCalledWith(sentrySaveError);
     });
 
-    it('saves inputted values and redirects', async () => {
+    it('saves inputted values, redirects and continues to show loading while redirecting', async () => {
       wrapper = createComponent([[createComplianceFrameworkMutation, create]]);
 
       await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(create).toHaveBeenCalledWith(creationProps);
-      expect(findFormStatus().props('loading')).toBe(false);
+      expect(findFormStatus().props('loading')).toBe(true);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
     });
   });

@@ -65,7 +65,7 @@ module API
         result = Gitlab::Redis::SharedState.with { |redis| redis.ping }
 
         result == 'PONG'
-      rescue => e
+      rescue StandardError => e
         Gitlab::AppLogger.warn("GitLab: An unexpected error occurred in pinging to Redis: #{e}")
         false
       end
@@ -124,7 +124,7 @@ module API
           repository: repository.gitaly_repository.to_h,
           address: Gitlab::GitalyClient.address(repository.shard),
           token: Gitlab::GitalyClient.token(repository.shard),
-          features: Feature::Gitaly.server_feature_flags
+          features: Feature::Gitaly.server_feature_flags(repository.project)
         }
       end
     end

@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Project integration management
+# Project integration management **(FREE)**
 
 Project integrations can be configured and enabled by project administrators. As a GitLab instance
 administrator, you can set default configuration parameters for a given integration that all projects
@@ -22,7 +22,8 @@ Only the complete settings for an integration can be inherited. Per-field inheri
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2137) in GitLab 13.3 for project-level integrations.
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2543) in GitLab 13.6 for group-level integrations.
 
-1. Navigate to **Admin Area > Settings > Integrations**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > Integrations**.
 1. Select an integration.
 1. Enter configuration details and click **Save changes**.
 
@@ -40,7 +41,7 @@ If this is the first time you are setting up instance-level settings for an inte
 When you make further changes to the instance defaults:
 
 - They are immediately applied to all groups and projects that have the integration set to use default settings.
-- They are immediately applied to newer groups and projects, created since you last saved defaults for the
+- They are immediately applied to newer groups and projects, created after you last saved defaults for the
   integration. If your instance-level default setting has the **Enable integration** toggle turned
   on, the integration is automatically enabled for all such groups and projects.
 - Groups and projects with custom settings selected for the integration are not immediately affected and may
@@ -53,7 +54,8 @@ integration on all non-configured groups and projects by default.
 
 ### Remove an instance-level default setting
 
-1. Navigate to **Admin Area > Settings > Integrations**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > Integrations**.
 1. Select an integration.
 1. Click **Reset** and confirm.
 
@@ -82,7 +84,7 @@ When you make further changes to the group defaults:
 
 - They are immediately applied to all subgroups and projects belonging to the group that have the integration
   set to use default settings.
-- They are immediately applied to newer subgroups and projects, created since you last saved defaults for the
+- They are immediately applied to newer subgroups and projects, even those created after you last saved defaults for the
   integration. If your group-level default setting has the **Enable integration** toggle turned on,
   the integration is automatically enabled for all such subgroups and projects.
 

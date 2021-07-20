@@ -29,18 +29,11 @@ export default {
     GlKeysetPagination,
     GlLoadingIcon,
   },
+  inject: ['projectPath'],
   props: {
-    emptyStateImage: {
-      required: true,
-      type: String,
-    },
     defaultBranchName: {
       default: '.noBranch',
       required: false,
-      type: String,
-    },
-    projectPath: {
-      required: true,
       type: String,
     },
   },
@@ -77,6 +70,9 @@ export default {
     },
     treePageInfo() {
       return this.agents?.project?.repository?.tree?.trees?.pageInfo || {};
+    },
+    hasConfigurations() {
+      return Boolean(this.agents?.project?.repository?.tree?.trees?.nodes?.length);
     },
   },
   methods: {
@@ -121,7 +117,7 @@ export default {
       </div>
     </div>
 
-    <AgentEmptyState v-else :image="emptyStateImage" />
+    <AgentEmptyState v-else :has-configurations="hasConfigurations" />
   </section>
 
   <gl-alert v-else variant="danger" :dismissible="false">

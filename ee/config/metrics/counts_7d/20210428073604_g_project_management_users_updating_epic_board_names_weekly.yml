@@ -1,0 +1,21 @@
+# Name of this metric contains g_project_management prefix
+data_category: Optional
+# because we are using the same slot from issue_tracking to
+# allow data aggregation.
+key_path: redis_hll_counters.epic_boards_usage.g_project_management_users_updating_epic_board_names_weekly
+description: Count of WAU updating epic board names
+product_section: dev
+product_stage: plan
+product_group: group::product planning
+product_category: epics_boards_usage
+value_type: number
+status: data_available
+milestone: "13.12"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60357
+time_frame: 7d
+data_source: redis_hll
+distribution:
+- ee
+tier:
+- premium
+- ultimate

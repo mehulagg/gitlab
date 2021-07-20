@@ -23,6 +23,9 @@ class Issue < ApplicationRecord
   include IssueAvailableFeatures
   include Todoable
   include FromUnion
+  include EachBatch
+
+  extend ::Gitlab::Utils::Override
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -77,6 +80,7 @@ class Issue < ApplicationRecord
   has_and_belongs_to_many :prometheus_alert_events, join_table: :issues_prometheus_alert_events # rubocop: disable Rails/HasAndBelongsToMany
   has_many :prometheus_alerts, through: :prometheus_alert_events
 
+  accepts_nested_attributes_for :issuable_severity, update_only: true
   accepts_nested_attributes_for :sentry_issue
 
   validates :project, presence: true
@@ -85,10 +89,10 @@ class Issue < ApplicationRecord
   enum issue_type: {
     issue: 0,
     incident: 1,
-    test_case: 2 ## EE-only
+    test_case: 2, ## EE-only
+    requirement: 3 ## EE-only
   }
 
-  alias_attribute :parent_ids, :project_id
   alias_method :issuing_parent, :project
 
   alias_attribute :external_author, :service_desk_reply_to
@@ -107,20 +111,21 @@ class Issue < ApplicationRecord
   scope :order_due_date_desc, -> { reorder(::Gitlab::Database.nulls_last_order('due_date', 'DESC')) }
   scope :order_closest_future_date, -> { reorder(Arel.sql('CASE WHEN issues.due_date >= CURRENT_DATE THEN 0 ELSE 1 END ASC, ABS(CURRENT_DATE - issues.due_date) ASC')) }
   scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
+  scope :order_relative_position_desc, -> { reorder(::Gitlab::Database.nulls_first_order('relative_position', 'DESC')) }
   scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
   scope :order_severity_asc, -> { includes(:issuable_severity).order('issuable_severities.severity ASC NULLS FIRST') }
   scope :order_severity_desc, -> { includes(:issuable_severity).order('issuable_severities.severity DESC NULLS LAST') }
 
   scope :preload_associated_models, -> { preload(:assignees, :labels, project: :namespace) }
-  scope :with_web_entity_associations, -> { preload(:author, :project) }
-  scope :with_api_entity_associations, -> { preload(:timelogs, :assignees, :author, :notes, :labels, project: [:route, { namespace: :route }] ) }
+  scope :with_web_entity_associations, -> { preload(:author, project: [:project_feature, :route, namespace: :route]) }
+  scope :preload_awardable, -> { preload(:award_emoji) }
   scope :with_label_attributes, ->(label_attributes) { joins(:labels).where(labels: label_attributes) }
   scope :with_alert_management_alerts, -> { joins(:alert_management_alert) }
   scope :with_prometheus_alert_events, -> { joins(:issues_prometheus_alert_events) }
   scope :with_self_managed_prometheus_alert_events, -> { joins(:issues_self_managed_prometheus_alert_events) }
   scope :with_api_entity_associations, -> {
-    preload(:timelogs, :closed_by, :assignees, :author, :notes, :labels,
+    preload(:timelogs, :closed_by, :assignees, :author, :labels,
       milestone: { project: [:route, { namespace: :route }] },
       project: [:route, { namespace: :route }])
   }
@@ -173,8 +178,16 @@ class Issue < ApplicationRecord
     state :opened, value: Issue.available_states[:opened]
     state :closed, value: Issue.available_states[:closed]
 
-    before_transition any => :closed do |issue|
+    before_transition any => :closed do |issue, transition|
+      args = transition.args
+
       issue.closed_at = issue.system_note_timestamp
+
+      next if args.empty?
+
+      next unless args.first.is_a?(User)
+
+      issue.closed_by = args.first
     end
 
     before_transition closed: :opened do |issue|
@@ -183,15 +196,28 @@ class Issue < ApplicationRecord
     end
   end
 
-  # Alias to state machine .with_state_id method
-  # This needs to be defined after the state machine block to avoid errors
   class << self
+    extend ::Gitlab::Utils::Override
+
+    # Alias to state machine .with_state_id method
+    # This needs to be defined after the state machine block to avoid errors
     alias_method :with_state, :with_state_id
     alias_method :with_states, :with_state_ids
+
+    override :order_upvotes_desc
+    def order_upvotes_desc
+      reorder(upvotes_count: :desc)
+    end
+
+    override :order_upvotes_asc
+    def order_upvotes_asc
+      reorder(upvotes_count: :asc)
+    end
   end
 
   def self.relative_positioning_query_base(issue)
-    in_projects(issue.parent_ids)
+    projects = issue.project.group&.root_ancestor&.all_projects || issue.project
+    in_projects(projects)
   end
 
   def self.relative_positioning_parent_column
@@ -254,10 +280,53 @@ class Issue < ApplicationRecord
   # `with_cte` argument allows sorting when using CTE queries and prevents
   # errors in postgres when using CTE search optimisation
   def self.order_by_position_and_priority(with_cte: false)
+    order = Gitlab::Pagination::Keyset::Order.build([column_order_relative_position, column_order_highest_priority, column_order_id_desc])
+
     order_labels_priority(with_cte: with_cte)
-      .reorder(Gitlab::Database.nulls_last_order('relative_position', 'ASC'),
-              Gitlab::Database.nulls_last_order('highest_priority', 'ASC'),
-              "id DESC")
+      .reorder(order)
+  end
+
+  def self.column_order_relative_position
+    Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+      attribute_name: 'relative_position',
+      column_expression: arel_table[:relative_position],
+      order_expression: Gitlab::Database.nulls_last_order('issues.relative_position', 'ASC'),
+      reversed_order_expression: Gitlab::Database.nulls_last_order('issues.relative_position', 'DESC'),
+      order_direction: :asc,
+      nullable: :nulls_last,
+      distinct: false
+    )
+  end
+
+  def self.column_order_highest_priority
+    Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+      attribute_name: 'highest_priority',
+      column_expression: Arel.sql('highest_priorities.label_priority'),
+      order_expression: Gitlab::Database.nulls_last_order('highest_priorities.label_priority', 'ASC'),
+      reversed_order_expression: Gitlab::Database.nulls_last_order('highest_priorities.label_priority', 'DESC'),
+      order_direction: :asc,
+      nullable: :nulls_last,
+      distinct: false
+    )
+  end
+
+  def self.column_order_id_desc
+    Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+      attribute_name: 'id',
+      order_expression: arel_table[:id].desc
+    )
+  end
+
+  # Temporary disable moving null elements because of performance problems
+  # For more information check https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4321
+  def check_repositioning_allowed!
+    if blocked_for_repositioning?
+      raise ::Gitlab::RelativePositioning::IssuePositioningDisabled, "Issue relative position changes temporarily disabled."
+    end
+  end
+
+  def blocked_for_repositioning?
+    resource_parent.root_namespace&.issue_repositioning_disabled?
   end
 
   def hook_attrs
@@ -342,6 +411,8 @@ class Issue < ApplicationRecord
                        .preload(preload)
                        .reorder('issue_link_id')
 
+    related_issues = yield related_issues if block_given?
+
     cross_project_filter = -> (issues) { issues.where(project: project) }
     Ability.issues_readable_by_user(related_issues,
       current_user,
@@ -366,9 +437,16 @@ class Issue < ApplicationRecord
         user, project.external_authorization_classification_label)
   end
 
-  def check_for_spam?
-    publicly_visible? &&
-      (title_changed? || description_changed? || confidential_changed?)
+  def check_for_spam?(user:)
+    # content created via support bots is always checked for spam, EVEN if
+    # the issue is not publicly visible and/or confidential
+    return true if user.support_bot? && spammable_attribute_changed?
+
+    # Only check for spam on issues which are publicly visible (and thus indexed in search engines)
+    return false unless publicly_visible?
+
+    # Only check for spam if certain attributes have changed
+    spammable_attribute_changed?
   end
 
   def as_json(options = {})
@@ -438,10 +516,45 @@ class Issue < ApplicationRecord
     issue_type_supports?(:assignee)
   end
 
+  def supports_time_tracking?
+    issue_type_supports?(:time_tracking)
+  end
+
+  def email_participants_emails
+    issue_email_participants.pluck(:email)
+  end
+
+  def email_participants_emails_downcase
+    issue_email_participants.pluck(IssueEmailParticipant.arel_table[:email].lower)
+  end
+
+  def issue_assignee_user_ids
+    issue_assignees.pluck(:user_id)
+  end
+
+  def update_upvotes_count
+    self.lock!
+    self.update_column(:upvotes_count, self.upvotes)
+  end
+
   private
 
+  def spammable_attribute_changed?
+    title_changed? ||
+      description_changed? ||
+      # NOTE: We need to check them for spam when issues are made non-confidential, because spam
+      # may have been added while they were confidential and thus not being checked for spam.
+      confidential_changed?(from: true, to: false)
+  end
+
+  # Ensure that the metrics association is safely created and respecting the unique constraint on issue_id
+  override :ensure_metrics
   def ensure_metrics
-    super
+    if !association(:metrics).loaded? || metrics.blank?
+      metrics_record = Issue::Metrics.safe_find_or_create_by(issue: self)
+      self.metrics = metrics_record
+    end
+
     metrics.record!
   end
 
@@ -480,8 +593,8 @@ class Issue < ApplicationRecord
 
   def could_not_move(exception)
     # Symptom of running out of space - schedule rebalancing
-    IssueRebalancingWorker.perform_async(nil, project_id)
+    IssueRebalancingWorker.perform_async(nil, *project.self_or_root_group_ids)
   end
 end
 
-Issue.prepend_if_ee('EE::Issue')
+Issue.prepend_mod_with('Issue')

@@ -6,6 +6,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Destroy do
   include GraphqlHelpers
 
   let_it_be(:framework) { create(:compliance_framework) }
+
   let(:user) { framework.namespace.owner }
   let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
@@ -35,19 +36,9 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Destroy do
     it_behaves_like 'a compliance framework that cannot be found'
   end
 
-  context 'feature is disabled but is licensed' do
-    before do
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
-      stub_licensed_features(custom_compliance_frameworks: true)
-    end
-
-    it_behaves_like 'a compliance framework that cannot be found'
-  end
-
-  context 'feature is enabled and licensed' do
+  context 'feature is licensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     context 'current_user is namespace owner' do

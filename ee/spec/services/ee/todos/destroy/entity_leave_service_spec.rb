@@ -9,6 +9,7 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
 
   let_it_be(:epic1) { create(:epic, confidential: true, group: subgroup) }
   let_it_be(:epic2) { create(:epic, group: subgroup) }
+
   let!(:todo1) { create(:todo, target: epic1, user: user, group: subgroup) }
   let!(:todo2) { create(:todo, target: epic2, user: user, group: subgroup) }
 

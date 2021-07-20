@@ -16,7 +16,7 @@ RSpec.describe Issuable do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:author) }
     it { is_expected.to have_many(:notes).dependent(:destroy) }
-    it { is_expected.to have_many(:todos).dependent(:destroy) }
+    it { is_expected.to have_many(:todos) }
     it { is_expected.to have_many(:labels) }
     it { is_expected.to have_many(:note_authors).through(:notes) }
 
@@ -65,6 +65,23 @@ RSpec.describe Issuable do
     it { expect(issuable_class).to respond_to(:opened) }
     it { expect(issuable_class).to respond_to(:closed) }
     it { expect(issuable_class).to respond_to(:assigned) }
+
+    describe '.includes_for_bulk_update' do
+      before do
+        stub_const('Example', Class.new(ActiveRecord::Base))
+
+        Example.class_eval do
+          include Issuable # adds :labels and :metrics, among others
+
+          belongs_to :author
+          has_many :assignees
+        end
+      end
+
+      it 'includes available associations' do
+        expect(Example.includes_for_bulk_update.includes_values).to eq([:author, :assignees, :labels, :metrics])
+      end
+    end
   end
 
   describe 'author_name' do
@@ -380,7 +397,7 @@ RSpec.describe Issuable do
 
     context 'user is a participant in the issue' do
       before do
-        allow(issue).to receive(:participants).with(user).and_return([user])
+        allow(issue).to receive(:participant?).with(user).and_return(true)
       end
 
       it 'returns false when no subcription exists' do
@@ -516,6 +533,26 @@ RSpec.describe Issuable do
           ))
 
         merge_request.to_hook_data(user, old_associations: { assignees: [user] })
+      end
+    end
+
+    context 'incident severity is updated' do
+      let(:issue) { create(:incident) }
+
+      before do
+        issue.update!(issuable_severity_attributes: { severity: 'low' })
+        expect(Gitlab::HookData::IssuableBuilder)
+          .to receive(:new).with(issue).and_return(builder)
+      end
+
+      it 'delegates to Gitlab::HookData::IssuableBuilder#build' do
+        expect(builder).to receive(:build).with(
+          user: user,
+          changes: hash_including(
+            'severity' => %w(unknown low)
+          ))
+
+        issue.to_hook_data(user, old_associations: { severity: 'unknown' })
       end
     end
   end
@@ -698,6 +735,12 @@ RSpec.describe Issuable do
         expect(issue.total_time_spent).to eq(1800)
       end
 
+      it 'stores the time change' do
+        spend_time(1800)
+
+        expect(issue.time_change).to eq(1800)
+      end
+
       it 'updates issues updated_at' do
         issue
 
@@ -716,6 +759,12 @@ RSpec.describe Issuable do
         spend_time(-900)
 
         expect(issue.total_time_spent).to eq(900)
+      end
+
+      it 'stores negative time change' do
+        spend_time(-900)
+
+        expect(issue.time_change).to eq(-900)
       end
 
       context 'when time to subtract exceeds the total time spent' do

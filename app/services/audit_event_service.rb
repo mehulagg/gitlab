@@ -16,7 +16,7 @@ class AuditEventService
     @author = build_author(author)
     @entity = entity
     @details = details
-    @ip_address = resolve_ip_address(@details, @author)
+    @ip_address = resolve_ip_address(@author)
   end
 
   # Builds the @details attribute for authentication
@@ -64,9 +64,8 @@ class AuditEventService
     end
   end
 
-  def resolve_ip_address(details, author)
-    details[:ip_address].presence ||
-      Gitlab::RequestContext.instance.client_ip ||
+  def resolve_ip_address(author)
+    Gitlab::RequestContext.instance.client_ip ||
       author.current_sign_in_ip
   end
 
@@ -131,9 +130,9 @@ class AuditEventService
 
   def save_or_track(event)
     event.save!
-  rescue => e
+  rescue StandardError => e
     Gitlab::ErrorTracking.track_exception(e, audit_event_type: event.class.to_s)
   end
 end
 
-AuditEventService.prepend_if_ee('EE::AuditEventService')
+AuditEventService.prepend_mod_with('AuditEventService')

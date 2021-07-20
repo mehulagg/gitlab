@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe HistoricalData do
   before do
     (1..12).each do |i|
-      described_class.create!(recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+      create(:historical_data, recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
     end
   end
 
@@ -40,156 +40,41 @@ RSpec.describe HistoricalData do
   end
 
   describe '.max_historical_user_count' do
-    let(:current_license) { create(:license, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month) }
+    subject(:max_historical_user_count) { described_class.max_historical_user_count(from: from, to: to) }
 
-    before do
-      # stub current license to cover a shorter period (one month ago until a date in the future) than the one
-      # set for the whole test suite (1970-01-01 to a date in the future)
-      allow(License).to receive(:load_license).and_return(current_license)
-      allow(License).to receive(:current).and_return(current_license)
+    let(:from) { (Date.current - 1.month).beginning_of_day }
+    let(:to) { (Date.current + 1.month).end_of_day }
+
+    context 'with data outside of the given period' do
+      context 'with stats before the given period' do
+        before do
+          create(:historical_data, recorded_at: from - 2.days, active_user_count: 10)
+        end
+
+        it 'ignores those records' do
+          expect(max_historical_user_count).to eq(0)
+        end
+      end
+
+      context 'with stats after the given period' do
+        before do
+          create(:historical_data, recorded_at: to + 2.days, active_user_count: 10)
+        end
+
+        it 'ignores those records' do
+          expect(max_historical_user_count).to eq(0)
+        end
+      end
     end
 
-    context 'with multiple historical data points for the current license' do
+    context 'with data inside of the given period' do
       before do
-        (1..3).each do |i|
-          described_class.create!(recorded_at: Time.current - i.days, active_user_count: i * 100)
-        end
-
-        described_class.create!(recorded_at: Time.current - 1.year, active_user_count: 400)
+        create(:historical_data, recorded_at: from + 2.days, active_user_count: 10)
+        create(:historical_data, recorded_at: from + 5.days, active_user_count: 15)
       end
 
-      it 'returns max user count for the duration of the current license' do
-        expect(described_class.max_historical_user_count).to eq(300)
-      end
-
-      context 'when there is no current license' do
-        let(:current_license) { nil }
-
-        it 'returns max user count for the past year as a fallback' do
-          expect(described_class.max_historical_user_count).to eq(400)
-        end
-      end
-    end
-
-    context 'using parameters' do
-      let!(:license) do
-        create(
-          :license,
-          starts_at: Date.new(2014, 1, 1),
-          expires_at: Date.new(2014, 12, 1)
-        )
-      end
-
-      it 'returns max user count for the given license' do
-        expect(described_class.max_historical_user_count(license: license)).to eq(1200)
-      end
-
-      it 'returns max user count for the time range' do
-        from = Date.new(2014, 6, 1)
-        to = Date.new(2014, 9, 1)
-
-        expect(described_class.max_historical_user_count(from: from, to: to)).to eq(900)
-      end
-    end
-
-    context 'with different plans' do
-      using RSpec::Parameterized::TableSyntax
-
-      before do
-        create(:group_member, :guest)
-        create(:group_member, :reporter)
-
-        described_class.track!
-      end
-
-      where(:gl_plan, :expected_count) do
-        ::License::STARTER_PLAN  | 2
-        ::License::PREMIUM_PLAN  | 2
-        ::License::ULTIMATE_PLAN | 1
-      end
-
-      with_them do
-        let(:plan) { gl_plan }
-        let(:current_license) do
-          create(:license, plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
-        end
-
-        it 'does not count guest users' do
-          expect(described_class.max_historical_user_count).to eq(expected_count)
-        end
-      end
-    end
-
-    context 'with data outside of the license period' do
-      context 'with stats before the license period' do
-        before do
-          described_class.create!(recorded_at: current_license.starts_at.ago(2.days), active_user_count: 10)
-        end
-
-        it 'ignore those records' do
-          expect(described_class.max_historical_user_count).to eq(0)
-        end
-      end
-
-      context 'with stats after the license period' do
-        before do
-          described_class.create!(recorded_at: current_license.expires_at.in(2.days), active_user_count: 10)
-        end
-
-        it 'ignore those records' do
-          expect(described_class.max_historical_user_count).to eq(0)
-        end
-      end
-
-      context 'with stats inside license period' do
-        before do
-          described_class.create!(recorded_at: current_license.starts_at.in(2.days), active_user_count: 10)
-          described_class.create!(recorded_at: current_license.starts_at.in(5.days), active_user_count: 15)
-        end
-
-        it 'returns max value for active_user_count' do
-          expect(described_class.max_historical_user_count).to eq(15)
-        end
-      end
-    end
-  end
-
-  describe '.in_license_term' do
-    let_it_be(:now) { DateTime.new(2014, 12, 15) }
-    let_it_be(:license) do
-      create_current_license(
-        starts_at: Date.new(2014, 7, 1),
-        expires_at: Date.new(2014, 12, 31)
-      )
-    end
-
-    before_all do
-      described_class.create!(recorded_at: license.starts_at - 1.day, active_user_count: 1)
-      described_class.create!(recorded_at: license.expires_at + 1.day, active_user_count: 2)
-      described_class.create!(recorded_at: now - 1.year - 1.day, active_user_count: 3)
-      described_class.create!(recorded_at: now + 1.day, active_user_count: 4)
-    end
-
-    around do |example|
-      travel_to(now) { example.run }
-    end
-
-    context 'with a license that has a start and end date' do
-      it 'returns correct number of records within the license range' do
-        expect(described_class.in_license_term(license).count).to eq(7)
-      end
-    end
-
-    context 'with a license that has no end date' do
-      let_it_be(:license) do
-        create_current_license(
-          starts_at: Date.new(2014, 7, 1),
-          expires_at: nil
-        )
-      end
-
-      it 'returns correct number of records within the past year' do
-        expect(described_class.in_license_term(license).count).to eq(6)
+      it 'returns max value for active_user_count' do
+        expect(max_historical_user_count).to eq(15)
       end
     end
   end

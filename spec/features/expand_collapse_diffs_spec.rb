@@ -17,7 +17,6 @@ RSpec.describe 'Expand and collapse diffs', :js do
     # Ensure that undiffable.md is in .gitattributes
     project.repository.copy_gitattributes(branch)
     visit project_commit_path(project, project.commit(branch))
-    execute_script('window.ajaxUris = []; $(document).ajaxSend(function(event, xhr, settings) { ajaxUris.push(settings.url) });')
   end
 
   def file_container(filename)
@@ -191,10 +190,6 @@ RSpec.describe 'Expand and collapse diffs', :js do
           expect(small_diff).to have_selector('.code')
           expect(small_diff).not_to have_selector('.nothing-here-block')
         end
-
-        it 'does not make a new HTTP request' do
-          expect(evaluate_script('ajaxUris')).not_to include(a_string_matching('small_diff.md'))
-        end
       end
     end
 
@@ -258,13 +253,12 @@ RSpec.describe 'Expand and collapse diffs', :js do
       click_link('Expand all')
 
       # Wait for elements to appear to ensure full page reload
-      expect(page).to have_content('This diff was suppressed by a .gitattributes entry')
+      expect(page).to have_content("File suppressed by a .gitattributes entry or the file's encoding is unsupported.")
       expect(page).to have_content('This source diff could not be displayed because it is too large.')
       expect(page).to have_content('too_large_image.jpg')
       find('.note-textarea')
 
       wait_for_requests
-      execute_script('window.ajaxUris = []; $(document).ajaxSend(function(event, xhr, settings) { ajaxUris.push(settings.url) });')
     end
 
     it 'reloads the page with all diffs expanded' do
@@ -299,10 +293,6 @@ RSpec.describe 'Expand and collapse diffs', :js do
         it 'shows the diff content' do
           expect(small_diff).to have_selector('.code')
           expect(small_diff).not_to have_selector('.nothing-here-block')
-        end
-
-        it 'does not make a new HTTP request' do
-          expect(evaluate_script('ajaxUris')).not_to include(a_string_matching('small_diff.md'))
         end
       end
     end

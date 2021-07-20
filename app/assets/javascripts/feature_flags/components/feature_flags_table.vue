@@ -1,15 +1,18 @@
 <script>
-import { GlBadge, GlButton, GlTooltipDirective, GlModal, GlToggle, GlIcon } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
+import { GlBadge, GlButton, GlTooltipDirective, GlModal, GlToggle } from '@gitlab/ui';
+import { __, s__, sprintf } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { ROLLOUT_STRATEGY_PERCENT_ROLLOUT, NEW_VERSION_FLAG, LEGACY_FLAG } from '../constants';
 import { labelForStrategy } from '../utils';
 
 export default {
+  i18n: {
+    deleteLabel: __('Delete'),
+    editLabel: __('Edit'),
+    toggleLabel: __('Feature flag status'),
+  },
   components: {
     GlBadge,
     GlButton,
-    GlIcon,
     GlModal,
     GlToggle,
   },
@@ -30,13 +33,7 @@ export default {
       deleteFeatureFlagName: null,
     };
   },
-  translations: {
-    legacyFlagReadOnlyAlert: s__('FeatureFlags|Flag is read-only'),
-  },
   computed: {
-    permissions() {
-      return this.glFeatures.featureFlagPermissions;
-    },
     modalTitle() {
       return sprintf(s__('FeatureFlags|Delete %{name}?'), {
         name: this.deleteFeatureFlagName,
@@ -52,34 +49,12 @@ export default {
     },
   },
   methods: {
-    isLegacyFlag(flag) {
-      return flag.version !== NEW_VERSION_FLAG;
-    },
-    statusToggleDisabled(flag) {
-      return flag.version === LEGACY_FLAG;
-    },
     scopeTooltipText(scope) {
       return !scope.active
         ? sprintf(s__('FeatureFlags|Inactive flag for %{scope}'), {
             scope: scope.environmentScope,
           })
         : '';
-    },
-    badgeText(scope) {
-      const displayName =
-        scope.environmentScope === '*'
-          ? s__('FeatureFlags|* (All environments)')
-          : scope.environmentScope;
-
-      const displayPercentage =
-        scope.rolloutStrategy === ROLLOUT_STRATEGY_PERCENT_ROLLOUT
-          ? `: ${scope.rolloutPercentage}%`
-          : '';
-
-      return `${displayName}${displayPercentage}`;
-    },
-    badgeVariant(scope) {
-      return scope.active ? 'info' : 'muted';
     },
     strategyBadgeText(strategy) {
       return labelForStrategy(strategy);
@@ -137,7 +112,8 @@ export default {
             <gl-toggle
               v-if="featureFlag.update_path"
               :value="featureFlag.active"
-              :disabled="statusToggleDisabled(featureFlag)"
+              :label="$options.i18n.toggleLabel"
+              label-position="hidden"
               data-testid="feature-flag-status-toggle"
               data-track-event="click_button"
               data-track-label="feature_flag_toggle"
@@ -162,12 +138,6 @@ export default {
               <div class="feature-flag-name text-monospace text-truncate">
                 {{ featureFlag.name }}
               </div>
-              <gl-icon
-                v-if="isLegacyFlag(featureFlag)"
-                v-gl-tooltip.hover="$options.translations.legacyFlagReadOnlyAlert"
-                class="gl-ml-3"
-                name="information-o"
-              />
             </div>
             <div class="feature-flag-description text-secondary text-truncate">
               {{ featureFlag.description }}
@@ -182,27 +152,14 @@ export default {
           <div
             class="table-mobile-content d-flex flex-wrap justify-content-end justify-content-md-start js-feature-flag-environments"
           >
-            <template v-if="isLegacyFlag(featureFlag)">
-              <gl-badge
-                v-for="scope in featureFlag.scopes"
-                :key="scope.id"
-                v-gl-tooltip.hover="scopeTooltipText(scope)"
-                :variant="badgeVariant(scope)"
-                :data-qa-selector="`feature-flag-scope-${badgeVariant(scope)}-badge`"
-                class="gl-mr-3 gl-mt-2"
-                >{{ badgeText(scope) }}</gl-badge
-              >
-            </template>
-            <template v-else>
-              <gl-badge
-                v-for="strategy in featureFlag.strategies"
-                :key="strategy.id"
-                data-testid="strategy-badge"
-                variant="info"
-                class="gl-mr-3 gl-mt-2 gl-white-space-normal gl-text-left gl-px-5"
-                >{{ strategyBadgeText(strategy) }}</gl-badge
-              >
-            </template>
+            <gl-badge
+              v-for="strategy in featureFlag.strategies"
+              :key="strategy.id"
+              data-testid="strategy-badge"
+              variant="info"
+              class="gl-mr-3 gl-mt-2 gl-white-space-normal gl-text-left gl-px-5"
+              >{{ strategyBadgeText(strategy) }}</gl-badge
+            >
           </div>
         </div>
 
@@ -210,19 +167,21 @@ export default {
           <div class="table-action-buttons btn-group">
             <template v-if="featureFlag.edit_path">
               <gl-button
-                v-gl-tooltip.hover.bottom="__('Edit')"
+                v-gl-tooltip.hover.bottom="$options.i18n.editLabel"
                 class="js-feature-flag-edit-button"
                 icon="pencil"
+                :aria-label="$options.i18n.editLabel"
                 :href="featureFlag.edit_path"
               />
             </template>
             <template v-if="featureFlag.destroy_path">
               <gl-button
-                v-gl-tooltip.hover.bottom="__('Delete')"
+                v-gl-tooltip.hover.bottom="$options.i18n.deleteLabel"
                 class="js-feature-flag-delete-button"
                 variant="danger"
                 icon="remove"
                 :disabled="!canDeleteFlag(featureFlag)"
+                :aria-label="$options.i18n.deleteLabel"
                 @click="setDeleteModalData(featureFlag)"
               />
             </template>

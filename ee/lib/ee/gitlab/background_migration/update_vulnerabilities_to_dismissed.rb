@@ -49,7 +49,7 @@ module EE
               AND vulnerability_occurrences.project_id = #{project_id};
           SQL
           connection.execute(update_vulnerability_to_dismissed_sql)
-        rescue => e
+        rescue StandardError => e
           logger.warn(
             message: 'update_vulnerability_to_dismissed errored out',
             project_id: project_id,

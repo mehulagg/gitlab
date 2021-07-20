@@ -1,3 +1,4 @@
+import { TEST_HOST } from 'helpers/test_constants';
 import * as urlUtils from '~/lib/utils/url_utility';
 
 const shas = {
@@ -23,6 +24,16 @@ const setWindowLocation = (value) => {
 };
 
 describe('URL utility', () => {
+  let originalLocation;
+
+  beforeAll(() => {
+    originalLocation = window.location;
+  });
+
+  afterAll(() => {
+    window.location = originalLocation;
+  });
+
   describe('webIDEUrl', () => {
     afterEach(() => {
       gon.relative_url_root = '';
@@ -318,19 +329,17 @@ describe('URL utility', () => {
   });
 
   describe('doesHashExistInUrl', () => {
-    it('should return true when the given string exists in the URL hash', () => {
+    beforeEach(() => {
       setWindowLocation({
-        href: 'https://gitlab.com/gitlab-org/gitlab-test/issues/1#note_1',
+        hash: 'https://gitlab.com/gitlab-org/gitlab-test/issues/1#note_1',
       });
+    });
 
+    it('should return true when the given string exists in the URL hash', () => {
       expect(urlUtils.doesHashExistInUrl('note_')).toBe(true);
     });
 
     it('should return false when the given string does not exist in the URL hash', () => {
-      setWindowLocation({
-        href: 'https://gitlab.com/gitlab-org/gitlab-test/issues/1#note_1',
-      });
-
       expect(urlUtils.doesHashExistInUrl('doesnotexist')).toBe(false);
     });
   });
@@ -471,6 +480,7 @@ describe('URL utility', () => {
       ${'notaurl'}                              | ${false}
       ${'../relative_url'}                      | ${false}
       ${'<a></a>'}                              | ${false}
+      ${'//other-host.test'}                    | ${false}
     `('returns $valid for $url', ({ url, valid }) => {
       expect(urlUtils.isRootRelative(url)).toBe(valid);
     });
@@ -649,46 +659,107 @@ describe('URL utility', () => {
     });
   });
 
+  describe('urlParamsToArray', () => {
+    it('returns empty array for empty querystring', () => {
+      expect(urlUtils.urlParamsToArray('')).toEqual([]);
+    });
+
+    it('should decode params', () => {
+      expect(urlUtils.urlParamsToArray('?label_name%5B%5D=test')[0]).toBe('label_name[]=test');
+    });
+
+    it('should remove the question mark from the search params', () => {
+      const paramsArray = urlUtils.urlParamsToArray('?test=thing');
+
+      expect(paramsArray[0][0]).not.toBe('?');
+    });
+  });
+
+  describe('urlParamsToObject', () => {
+    it('parses path for label with trailing +', () => {
+      // eslint-disable-next-line import/no-deprecated
+      expect(urlUtils.urlParamsToObject('label_name[]=label%2B', {})).toEqual({
+        label_name: ['label+'],
+      });
+    });
+
+    it('parses path for milestone with trailing +', () => {
+      // eslint-disable-next-line import/no-deprecated
+      expect(urlUtils.urlParamsToObject('milestone_title=A%2B', {})).toEqual({
+        milestone_title: 'A+',
+      });
+    });
+
+    it('parses path for search terms with spaces', () => {
+      // eslint-disable-next-line import/no-deprecated
+      expect(urlUtils.urlParamsToObject('search=two+words', {})).toEqual({
+        search: 'two words',
+      });
+    });
+  });
+
   describe('queryToObject', () => {
-    it('converts search query into an object', () => {
-      const searchQuery = '?one=1&two=2';
+    it.each`
+      case                                                                      | query                             | options                                             | result
+      ${'converts query'}                                                       | ${'?one=1&two=2'}                 | ${undefined}                                        | ${{ one: '1', two: '2' }}
+      ${'converts query without ?'}                                             | ${'one=1&two=2'}                  | ${undefined}                                        | ${{ one: '1', two: '2' }}
+      ${'removes undefined values'}                                             | ${'?one=1&two=2&three'}           | ${undefined}                                        | ${{ one: '1', two: '2' }}
+      ${'overwrites values with same key and does not change key'}              | ${'?one[]=1&one[]=2&two=2&two=3'} | ${undefined}                                        | ${{ 'one[]': '2', two: '3' }}
+      ${'gathers values with the same array-key, strips `[]` from key'}         | ${'?one[]=1&one[]=2&two=2&two=3'} | ${{ gatherArrays: true }}                           | ${{ one: ['1', '2'], two: '3' }}
+      ${'overwrites values with the same array-key name'}                       | ${'?one=1&one[]=2&two=2&two=3'}   | ${{ gatherArrays: true }}                           | ${{ one: ['2'], two: '3' }}
+      ${'overwrites values with the same key name'}                             | ${'?one[]=1&one=2&two=2&two=3'}   | ${{ gatherArrays: true }}                           | ${{ one: '2', two: '3' }}
+      ${'ignores plus symbols'}                                                 | ${'?search=a+b'}                  | ${{ legacySpacesDecode: true }}                     | ${{ search: 'a+b' }}
+      ${'ignores plus symbols in keys'}                                         | ${'?search+term=a'}               | ${{ legacySpacesDecode: true }}                     | ${{ 'search+term': 'a' }}
+      ${'ignores plus symbols when gathering arrays'}                           | ${'?search[]=a+b'}                | ${{ gatherArrays: true, legacySpacesDecode: true }} | ${{ search: ['a+b'] }}
+      ${'replaces plus symbols with spaces'}                                    | ${'?search=a+b'}                  | ${undefined}                                        | ${{ search: 'a b' }}
+      ${'replaces plus symbols in keys with spaces'}                            | ${'?search+term=a'}               | ${undefined}                                        | ${{ 'search term': 'a' }}
+      ${'replaces plus symbols when gathering arrays'}                          | ${'?search[]=a+b'}                | ${{ gatherArrays: true }}                           | ${{ search: ['a b'] }}
+      ${'replaces plus symbols when gathering arrays for values with same key'} | ${'?search[]=a+b&search[]=c+d'}   | ${{ gatherArrays: true }}                           | ${{ search: ['a b', 'c d'] }}
+    `('$case', ({ query, options, result }) => {
+      expect(urlUtils.queryToObject(query, options)).toEqual(result);
+    });
+  });
 
-      expect(urlUtils.queryToObject(searchQuery)).toEqual({ one: '1', two: '2' });
+  describe('getParameterByName', () => {
+    const { getParameterByName } = urlUtils;
+
+    it('should return valid parameter', () => {
+      setWindowLocation({ search: '?scope=all&p=2' });
+
+      expect(getParameterByName('p')).toEqual('2');
+      expect(getParameterByName('scope')).toBe('all');
     });
 
-    it('removes undefined values from the search query', () => {
-      const searchQuery = '?one=1&two=2&three';
+    it('should return invalid parameter', () => {
+      setWindowLocation({ search: '?scope=all&p=2' });
 
-      expect(urlUtils.queryToObject(searchQuery)).toEqual({ one: '1', two: '2' });
+      expect(getParameterByName('fakeParameter')).toBe(null);
     });
 
-    describe('with gatherArrays=false', () => {
-      it('overwrites values with the same array-key and does not change the key', () => {
-        const searchQuery = '?one[]=1&one[]=2&two=2&two=3';
+    it('should return a parameter with spaces', () => {
+      setWindowLocation({ search: '?search=my terms' });
 
-        expect(urlUtils.queryToObject(searchQuery)).toEqual({ 'one[]': '2', two: '3' });
-      });
+      expect(getParameterByName('search')).toBe('my terms');
     });
 
-    describe('with gatherArrays=true', () => {
-      const options = { gatherArrays: true };
-      it('gathers only values with the same array-key and strips `[]` from the key', () => {
-        const searchQuery = '?one[]=1&one[]=2&two=2&two=3';
+    it('should return a parameter with encoded spaces', () => {
+      setWindowLocation({ search: '?search=my%20terms' });
 
-        expect(urlUtils.queryToObject(searchQuery, options)).toEqual({ one: ['1', '2'], two: '3' });
-      });
+      expect(getParameterByName('search')).toBe('my terms');
+    });
 
-      it('overwrites values with the same array-key name', () => {
-        const searchQuery = '?one=1&one[]=2&two=2&two=3';
+    it('should return a parameter with plus signs as spaces', () => {
+      setWindowLocation({ search: '?search=my+terms' });
 
-        expect(urlUtils.queryToObject(searchQuery, options)).toEqual({ one: ['2'], two: '3' });
-      });
+      expect(getParameterByName('search')).toBe('my terms');
+    });
 
-      it('overwrites values with the same key name', () => {
-        const searchQuery = '?one[]=1&one=2&two=2&two=3';
+    it('should return valid parameters if search is provided', () => {
+      expect(getParameterByName('foo', 'foo=bar')).toBe('bar');
+      expect(getParameterByName('foo', '?foo=bar')).toBe('bar');
 
-        expect(urlUtils.queryToObject(searchQuery, options)).toEqual({ one: '2', two: '3' });
-      });
+      expect(getParameterByName('manan', 'foo=bar&manan=canchu')).toBe('canchu');
+      expect(getParameterByName('manan', '?foo=bar&manan=canchu')).toBe('canchu');
     });
   });
 
@@ -697,6 +768,19 @@ describe('URL utility', () => {
       const searchQueryObject = { one: '1', two: '2' };
 
       expect(urlUtils.objectToQuery(searchQueryObject)).toEqual('one=1&two=2');
+    });
+
+    it('returns empty string when `params` is undefined, null or empty string', () => {
+      expect(urlUtils.objectToQuery()).toBe('');
+      expect(urlUtils.objectToQuery('')).toBe('');
+    });
+
+    it('returns query string with values of `params`', () => {
+      const singleQueryParams = { foo: true };
+      const multipleQueryParams = { foo: true, bar: true };
+
+      expect(urlUtils.objectToQuery(singleQueryParams)).toBe('foo=true');
+      expect(urlUtils.objectToQuery(multipleQueryParams)).toBe('foo=true&bar=true');
     });
   });
 
@@ -798,19 +882,49 @@ describe('URL utility', () => {
       );
     });
 
-    it('handles arrays properly', () => {
+    it('adds parameters from arrays', () => {
       const url = 'https://gitlab.com/test';
 
-      expect(urlUtils.setUrlParams({ label_name: ['foo', 'bar'] }, url)).toEqual(
-        'https://gitlab.com/test?label_name=foo&label_name=bar',
+      expect(urlUtils.setUrlParams({ labels: ['foo', 'bar'] }, url)).toEqual(
+        'https://gitlab.com/test?labels=foo&labels=bar',
       );
     });
 
-    it('handles arrays properly when railsArraySyntax=true', () => {
+    it('removes parameters from empty arrays', () => {
+      const url = 'https://gitlab.com/test?labels=foo&labels=bar';
+
+      expect(urlUtils.setUrlParams({ labels: [] }, url)).toEqual('https://gitlab.com/test');
+    });
+
+    it('removes parameters from empty arrays while keeping other parameters', () => {
+      const url = 'https://gitlab.com/test?labels=foo&labels=bar&unrelated=unrelated';
+
+      expect(urlUtils.setUrlParams({ labels: [] }, url)).toEqual(
+        'https://gitlab.com/test?unrelated=unrelated',
+      );
+    });
+
+    it('adds parameters from arrays when railsArraySyntax=true', () => {
       const url = 'https://gitlab.com/test';
 
       expect(urlUtils.setUrlParams({ labels: ['foo', 'bar'] }, url, false, true)).toEqual(
         'https://gitlab.com/test?labels%5B%5D=foo&labels%5B%5D=bar',
+      );
+    });
+
+    it('removes parameters from empty arrays when railsArraySyntax=true', () => {
+      const url = 'https://gitlab.com/test?labels%5B%5D=foo&labels%5B%5D=bar';
+
+      expect(urlUtils.setUrlParams({ labels: [] }, url, false, true)).toEqual(
+        'https://gitlab.com/test',
+      );
+    });
+
+    it('decodes URI when decodeURI=true', () => {
+      const url = 'https://gitlab.com/test';
+
+      expect(urlUtils.setUrlParams({ labels: ['foo', 'bar'] }, url, false, true, true)).toEqual(
+        'https://gitlab.com/test?labels[]=foo&labels[]=bar',
       );
     });
 
@@ -878,6 +992,72 @@ describe('URL utility', () => {
       ${'https://foo.bar/foo/bar'} | ${'https://foo.bar'}
     `('returns correct origin for $url', ({ url, expectation }) => {
       expect(urlUtils.getURLOrigin(url)).toBe(expectation);
+    });
+  });
+
+  describe('encodeSaferUrl', () => {
+    it.each`
+      character | input                 | output
+      ${' '}    | ${'/url/hello 1.jpg'} | ${'/url/hello%201.jpg'}
+      ${'#'}    | ${'/url/hello#1.jpg'} | ${'/url/hello%231.jpg'}
+      ${'!'}    | ${'/url/hello!.jpg'}  | ${'/url/hello%21.jpg'}
+      ${'~'}    | ${'/url/hello~.jpg'}  | ${'/url/hello%7E.jpg'}
+      ${'*'}    | ${'/url/hello*.jpg'}  | ${'/url/hello%2A.jpg'}
+      ${"'"}    | ${"/url/hello'.jpg"}  | ${'/url/hello%27.jpg'}
+      ${'('}    | ${'/url/hello(.jpg'}  | ${'/url/hello%28.jpg'}
+      ${')'}    | ${'/url/hello).jpg'}  | ${'/url/hello%29.jpg'}
+      ${'?'}    | ${'/url/hello?.jpg'}  | ${'/url/hello%3F.jpg'}
+      ${'='}    | ${'/url/hello=.jpg'}  | ${'/url/hello%3D.jpg'}
+      ${'+'}    | ${'/url/hello+.jpg'}  | ${'/url/hello%2B.jpg'}
+      ${'&'}    | ${'/url/hello&.jpg'}  | ${'/url/hello%26.jpg'}
+    `(
+      'properly escapes `$character` characters while retaining the integrity of the URL',
+      ({ input, output }) => {
+        expect(urlUtils.encodeSaferUrl(input)).toBe(output);
+      },
+    );
+
+    it.each`
+      character | input
+      ${'/, .'} | ${'/url/hello.png'}
+      ${'\\d'}  | ${'/url/hello123.png'}
+      ${'-'}    | ${'/url/hello-123.png'}
+      ${'_'}    | ${'/url/hello_123.png'}
+    `('makes no changes to unproblematic characters ($character)', ({ input }) => {
+      expect(urlUtils.encodeSaferUrl(input)).toBe(input);
+    });
+  });
+
+  describe('isSameOriginUrl', () => {
+    // eslint-disable-next-line no-script-url
+    const javascriptUrl = 'javascript:alert(1)';
+
+    beforeEach(() => {
+      setWindowLocation({ origin: TEST_HOST });
+    });
+
+    it.each`
+      url                                | expected
+      ${TEST_HOST}                       | ${true}
+      ${`${TEST_HOST}/a/path`}           | ${true}
+      ${'//test.host/no-protocol'}       | ${true}
+      ${'/a/root/relative/path'}         | ${true}
+      ${'a/relative/path'}               | ${true}
+      ${'#hash'}                         | ${true}
+      ${'?param=foo'}                    | ${true}
+      ${''}                              | ${true}
+      ${'../../../'}                     | ${true}
+      ${`${TEST_HOST}:8080/wrong-port`}  | ${false}
+      ${'ws://test.host/wrong-protocol'} | ${false}
+      ${'http://phishing.test'}          | ${false}
+      ${'//phishing.test'}               | ${false}
+      ${'//invalid:url'}                 | ${false}
+      ${javascriptUrl}                   | ${false}
+      ${'data:,Hello%2C%20World%21'}     | ${false}
+      ${null}                            | ${false}
+      ${undefined}                       | ${false}
+    `('returns $expected given $url', ({ url, expected }) => {
+      expect(urlUtils.isSameOriginUrl(url)).toBe(expected);
     });
   });
 });

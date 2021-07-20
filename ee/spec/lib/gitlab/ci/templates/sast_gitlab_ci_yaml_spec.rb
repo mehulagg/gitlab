@@ -10,13 +10,15 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
     let(:files) { { 'README.txt' => '' } }
     let(:project) { create(:project, :custom_repo, files: files) }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
-    let(:pipeline) { service.execute!(:push) }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master') }
+    let(:pipeline) { service.execute!(:push).payload }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
       stub_ci_pipeline_yaml_file(template.content)
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -45,12 +47,20 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
 
       context 'by default' do
         describe 'language detection' do
+          sast_experimental_features = { 'SAST_EXPERIMENTAL_FEATURES' => 'true' }
+          android = 'Android'
+          ios = 'iOS'
+          mobsf_android_build = %w(mobsf-android-sast)
+          mobsf_ios_build = %w(mobsf-ios-sast)
+
           using RSpec::Parameterized::TableSyntax
 
           where(:case_name, :files, :variables, :include_build_names) do
-            'Android'              | { 'AndroidManifest.xml' => '', 'a.java' => '' } | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
-            'Android'              | { 'app/src/main/AndroidManifest.xml' => '' }    | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
-            'Android'              | { 'a/b/AndroidManifest.xml' => '' }             | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
+            android                | { 'AndroidManifest.xml' => '', 'a.java' => '' } | sast_experimental_features                 | mobsf_android_build
+            android                | { 'app/src/main/AndroidManifest.xml' => '' }    | sast_experimental_features                 | mobsf_android_build
+            android                | { 'a/b/AndroidManifest.xml' => '' }             | sast_experimental_features                 | mobsf_android_build
+            android                | { 'a/b/android.apk' => '' }                     | sast_experimental_features                 | mobsf_android_build
+            android                | { 'android.apk' => '' }                         | sast_experimental_features                 | mobsf_android_build
             'Apex'                 | { 'app.cls' => '' }                             | {}                                         | %w(pmd-apex-sast)
             'C'                    | { 'app.c' => '' }                               | {}                                         | %w(flawfinder-sast)
             'C++'                  | { 'app.cpp' => '' }                             | {}                                         | %w(flawfinder-sast)
@@ -58,22 +68,23 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
             'Elixir'               | { 'mix.exs' => '' }                             | {}                                         | %w(sobelow-sast)
             'Golang'               | { 'main.go' => '' }                             | {}                                         | %w(gosec-sast)
             'Groovy'               | { 'app.groovy' => '' }                          | {}                                         | %w(spotbugs-sast)
-            'iOS'                  | { 'a.xcodeproj/x.pbxproj' => '' }               | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-ios-sast)
+            ios                    | { 'a.xcodeproj/x.pbxproj' => '' }               | sast_experimental_features                 | mobsf_ios_build
+            ios                    | { 'a/b/ios.ipa' => '' }                         | sast_experimental_features                 | mobsf_ios_build
             'Java'                 | { 'app.java' => '' }                            | {}                                         | %w(spotbugs-sast)
-            'Java with MobSF'      | { 'app.java' => '' }                            | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(spotbugs-sast)
+            'Java with MobSF'      | { 'app.java' => '' }                            | sast_experimental_features                 | %w(spotbugs-sast)
             'Java without MobSF'   | { 'AndroidManifest.xml' => '', 'a.java' => '' } | {}                                         | %w(spotbugs-sast)
-            'Javascript'           | { 'app.js' => '' }                              | {}                                         | %w(eslint-sast)
-            'JSX'                  | { 'app.jsx' => '' }                             | {}                                         | %w(eslint-sast)
+            'Javascript'           | { 'app.js' => '' }                              | {}                                         | %w(eslint-sast semgrep-sast)
+            'JSX'                  | { 'app.jsx' => '' }                             | {}                                         | %w(eslint-sast semgrep-sast)
             'Javascript Node'      | { 'package.json' => '' }                        | {}                                         | %w(nodejs-scan-sast)
             'HTML'                 | { 'index.html' => '' }                          | {}                                         | %w(eslint-sast)
             'Kubernetes Manifests' | { 'Chart.yaml' => '' }                          | { 'SCAN_KUBERNETES_MANIFESTS' => 'true' }  | %w(kubesec-sast)
             'Multiple languages'   | { 'app.java' => '', 'app.js' => '' }            | {}                                         | %w(eslint-sast spotbugs-sast)
             'PHP'                  | { 'app.php' => '' }                             | {}                                         | %w(phpcs-security-audit-sast)
-            'Python'               | { 'app.py' => '' }                              | {}                                         | %w(bandit-sast)
+            'Python'               | { 'app.py' => '' }                              | {}                                         | %w(bandit-sast semgrep-sast)
             'Ruby'                 | { 'config/routes.rb' => '' }                    | {}                                         | %w(brakeman-sast)
             'Scala'                | { 'app.scala' => '' }                           | {}                                         | %w(spotbugs-sast)
-            'Typescript'           | { 'app.ts' => '' }                              | {}                                         | %w(eslint-sast)
-            'Typescript JSX'       | { 'app.tsx' => '' }                             | {}                                         | %w(eslint-sast)
+            'Typescript'           | { 'app.ts' => '' }                              | {}                                         | %w(eslint-sast semgrep-sast)
+            'Typescript JSX'       | { 'app.tsx' => '' }                             | {}                                         | %w(eslint-sast semgrep-sast)
             'Visual Basic'         | { 'app.vbproj' => '' }                          | {}                                         | %w(security-code-scan-sast)
           end
 

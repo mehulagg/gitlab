@@ -1,7 +1,8 @@
 ---
-stage: none
-group: unassigned
+stage: Create
+group: Gitaly
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+type: reference
 ---
 
 # How Git object deduplication works in GitLab
@@ -34,9 +35,9 @@ to work, it is of course critical that **no objects ever get deleted from
 B** because A might need them.
 
 WARNING:
-Do not run `git prune` or `git gc` in pool repositories! This can
-cause data loss in "real" repositories that depend on the pool in
-question.
+Do not run `git prune` or `git gc` in object pool repositories, which are
+stored in the `@pools` directory. This can cause data loss in the regular
+repositories that depend on the object pool.
 
 The danger lies in `git prune`, and `git gc` calls `git prune`. The
 problem is that `git prune`, when running in a pool repository, cannot
@@ -44,8 +45,8 @@ reliable decide if an object is no longer needed.
 
 ### Git alternates in GitLab: pool repositories
 
-GitLab organizes this object borrowing by creating special **pool
-repositories** which are hidden from the user. We then use Git
+GitLab organizes this object borrowing by [creating special **pool
+repositories**](../administration/repository_storage_types.md) which are hidden from the user. We then use Git
 alternates to let a collection of project repositories borrow from a
 single pool repository. We call such a collection of project
 repositories a pool. Pools form star-shaped networks of repositories
@@ -162,7 +163,7 @@ repository and a pool.
 
 ### Pool existence
 
-If GitLab thinks a pool repository exists (i.e. it exists according to
+If GitLab thinks a pool repository exists (that is, it exists according to
 SQL), but it does not on the Gitaly server, then it is created on
 the fly by Gitaly.
 

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe RequirementsManagement::ImportRequirementsCsvWorker do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
+
   let(:upload) { create(:upload, :with_file) }
 
   subject { described_class.new.perform(user.id, project.id, upload.id) }

@@ -40,7 +40,7 @@ module Resolvers
 
         # We can't query other nodes' tracking databases
         def geo_node_is_current?
-          geo_node&.current?
+          GeoNode.current?(geo_node)
         end
 
         def geo_node

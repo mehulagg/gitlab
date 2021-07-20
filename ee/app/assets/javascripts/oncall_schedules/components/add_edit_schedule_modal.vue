@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
 import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
 import updateOncallScheduleMutation from '../graphql/mutations/update_oncall_schedule.mutation.graphql';
-import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreOnScheduleCreate, updateStoreAfterScheduleEdit } from '../utils/cache_updates';
 import { isNameFieldValid } from '../utils/common_utils';
 import AddEditScheduleForm from './add_edit_schedule_form.vue';
@@ -13,6 +13,7 @@ export const i18n = {
   cancel: __('Cancel'),
   addSchedule: s__('OnCallSchedules|Add schedule'),
   editSchedule: s__('OnCallSchedules|Edit schedule'),
+  saveChanges: __('Save changes'),
   addErrorMsg: s__('OnCallSchedules|Failed to edit schedule'),
   editErrorMsg: s__('OnCallSchedules|Failed to add schedule'),
 };
@@ -60,7 +61,7 @@ export default {
     actionsProps() {
       return {
         primary: {
-          text: this.title,
+          text: this.primaryBtnText,
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
@@ -90,6 +91,9 @@ export default {
     title() {
       return this.isEditMode ? i18n.editSchedule : i18n.addSchedule;
     },
+    primaryBtnText() {
+      return this.isEditMode ? i18n.saveChanges : i18n.addSchedule;
+    },
   },
   methods: {
     createSchedule() {
@@ -106,8 +110,8 @@ export default {
               timezone: this.form.timezone.identifier,
             },
           },
-          update(store, { data: { oncallScheduleCreate } }) {
-            updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, oncallScheduleCreate, {
+          update(store, { data }) {
+            updateStoreOnScheduleCreate(store, getOncallSchedulesWithRotationsQuery, data, {
               projectPath,
             });
           },
@@ -125,6 +129,7 @@ export default {
             }
             this.$refs.addUpdateScheduleModal.hide();
             this.$emit('scheduleCreated');
+            this.clearScheduleForm();
           },
         )
         .catch((error) => {
@@ -135,7 +140,10 @@ export default {
         });
     },
     editSchedule() {
-      const { projectPath } = this;
+      const {
+        projectPath,
+        form: { timezone },
+      } = this;
       this.loading = true;
 
       this.$apollo
@@ -143,7 +151,9 @@ export default {
           mutation: updateOncallScheduleMutation,
           variables: this.editScheduleVariables,
           update(store, { data }) {
-            updateStoreAfterScheduleEdit(store, getOncallSchedulesQuery, data, { projectPath });
+            updateStoreAfterScheduleEdit(store, getOncallSchedulesWithRotationsQuery, data, {
+              projectPath,
+            });
           },
         })
         .then(
@@ -165,6 +175,9 @@ export default {
         })
         .finally(() => {
           this.loading = false;
+          if (timezone !== this.schedule.timezone) {
+            window.location.reload();
+          }
         });
     },
     hideErrorAlert() {
@@ -180,6 +193,11 @@ export default {
       } else if (key === 'timezone') {
         this.validationState.timezone = !isEmpty(this.form.timezone);
       }
+    },
+    clearScheduleForm() {
+      this.form.name = '';
+      this.form.description = '';
+      this.form.timezone = {};
     },
   },
 };
@@ -201,7 +219,6 @@ export default {
     <add-edit-schedule-form
       :validation-state="validationState"
       :form="form"
-      :schedule="schedule"
       @update-schedule-form="updateScheduleForm"
     />
   </gl-modal>

@@ -49,6 +49,8 @@ module EE
       end
 
       def code_owners_updated?
+        return unless push.branch_updated?
+
         push.modified_paths.find { |path| ::Gitlab::CodeOwners::FILE_PATHS.include?(path) }
       end
 

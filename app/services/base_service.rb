@@ -6,16 +6,22 @@
 # and existing service will use these one by one.
 # After all are migrated, we can remove this class.
 #
-# TODO: New services should consider inheriting from
-#       BaseContainerService, or create new base class:
-#       https://gitlab.com/gitlab-org/gitlab/-/issues/216672
+# New services should consider inheriting from:
+#
+# - BaseContainerService for services scoped by container (project or group)
+# - BaseProjectService for services scoped to projects
+#
+# or, create a new base class and update this comment.
 class BaseService
   include BaseServiceUtility
+  include Gitlab::Experiment::Dsl
 
   attr_accessor :project, :current_user, :params
 
   def initialize(project, user = nil, params = {})
-    @project, @current_user, @params = project, user, params.dup
+    @project = project
+    @current_user = user
+    @params = params.dup
   end
 
   delegate :repository, to: :project

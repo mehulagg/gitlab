@@ -1,20 +1,17 @@
 - breadcrumb_title s_("ThreatMonitoring|Threat Monitoring")
 - page_title s_("ThreatMonitoring|Threat Monitoring")
+- @content_wrapper_class = 'js-threat-monitoring-container-wrapper'
+- content_for :prefetch_asset_tags do
+  - webpack_preload_asset_tag('monaco', prefetch: true)
 
 - default_environment_id = @project.default_environment&.id || -1
 
 #js-threat-monitoring-app{ data: { documentation_path: 'https://docs.gitlab.com/ee/user/application_security/threat_monitoring/',
   empty_state_svg_path: image_path('illustrations/monitoring/unable_to_connect.svg'),
-  waf_no_data_svg_path: image_path('illustrations/firewall-not-detected-sm.svg'),
   network_policy_no_data_svg_path: image_path('illustrations/network-policies-not-detected-sm.svg'),
-  waf_statistics_endpoint: summary_project_security_waf_anomalies_path(@project, format: :json),
   network_policy_statistics_endpoint: summary_project_security_network_policies_path(@project, format: :json),
   environments_endpoint: project_environments_path(@project),
-  network_policies_endpoint: project_security_network_policies_path(@project),
   new_policy_path: new_project_threat_monitoring_policy_path(@project),
   default_environment_id: default_environment_id,
   project_path: @project.full_path,
-  user_callouts_path: user_callouts_path,
-  user_callout_id: UserCalloutsHelper::THREAT_MONITORING_INFO,
-  show_user_callout: false,
 } }

@@ -2,10 +2,10 @@
 - default_ref = params[:ref] || @project.default_branch
 
 - if @error
-  .gl-alert.gl-alert-danger
-    = sprite_icon('error', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-    %button.js-close.gl-alert-dismiss{ type: 'button', 'aria-label' => _('Dismiss') }
-      = sprite_icon('close', size: 16, css_class: 'gl-icon')
+  = render 'shared/global_alert',
+    variant: :danger,
+    close_button_class: 'js-close',
+    is_contained: true do
     .gl-alert-body
       = @error
 %h3.page-title
@@ -29,6 +29,6 @@
         = render 'shared/ref_dropdown', dropdown_class: 'wide'
       .form-text.text-muted Existing branch name, tag, or commit SHA
   .form-actions
-    = button_tag 'Create branch', class: 'gl-button btn btn-success'
-    = link_to 'Cancel', project_branches_path(@project), class: 'gl-button btn btn-cancel'
+    = button_tag 'Create branch', class: 'gl-button btn btn-confirm'
+    = link_to 'Cancel', project_branches_path(@project), class: 'gl-button btn btn-default btn-cancel'
 %script#availableRefs{ type: "application/json" }= @project.repository.ref_names.to_json.html_safe

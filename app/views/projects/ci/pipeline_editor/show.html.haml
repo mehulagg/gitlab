@@ -1,12 +1,5 @@
 - page_title s_('Pipelines|Pipeline Editor')
+- content_for :prefetch_asset_tags do
+  - webpack_preload_asset_tag('monaco')
 
-#js-pipeline-editor{ data: { "ci-config-path": @project.ci_config_path_or_default,
-  "project-path" => @project.path,
-  "project-full-path" => @project.full_path,
-  "project-namespace" => @project.namespace.full_path,
-  "default-branch" => @project.default_branch,
-  "commit-sha" => @project.commit ? @project.commit.sha : '',
-  "new-merge-request-path" => namespace_project_new_merge_request_path,
-  "lint-help-page-path" => help_page_path('ci/lint', anchor: 'validate-basic-logic-and-syntax'),
-  "yml-help-page-path" => help_page_path('ci/yaml/README'),
-} }
+#js-pipeline-editor{ data: js_pipeline_editor_data(@project) }

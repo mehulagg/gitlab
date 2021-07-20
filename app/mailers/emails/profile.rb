@@ -26,6 +26,14 @@ module Emails
         subject: subject(_("GitLab account request rejected")))
     end
 
+    def user_deactivated_email(name, email)
+      @name = name
+
+      profile_email_with_layout(
+        to: email,
+        subject: subject(_('Your account has been deactivated')))
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def new_ssh_key_email(key_id)
       @key = Key.find_by(id: key_id)
@@ -50,15 +58,16 @@ module Emails
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    def access_token_about_to_expire_email(user)
+    def access_token_about_to_expire_email(user, token_names)
       return unless user
 
       @user = user
+      @token_names = token_names
       @target_url = profile_personal_access_tokens_url
       @days_to_expire = PersonalAccessToken::DAYS_TO_EXPIRE
 
       Gitlab::I18n.with_locale(@user.preferred_language) do
-        mail(to: @user.notification_email, subject: subject(_("Your Personal Access Tokens will expire in %{days_to_expire} days or less") % { days_to_expire: @days_to_expire }))
+        mail(to: @user.notification_email, subject: subject(_("Your personal access tokens will expire in %{days_to_expire} days or less") % { days_to_expire: @days_to_expire }))
       end
     end
 
@@ -70,6 +79,30 @@ module Emails
 
       Gitlab::I18n.with_locale(@user.preferred_language) do
         mail(to: @user.notification_email, subject: subject(_("Your personal access token has expired")))
+      end
+    end
+
+    def ssh_key_expired_email(user, fingerprints)
+      return unless user&.active?
+
+      @user = user
+      @fingerprints = fingerprints
+      @target_url = profile_keys_url
+
+      Gitlab::I18n.with_locale(@user.preferred_language) do
+        mail(to: @user.notification_email, subject: subject(_("Your SSH key has expired")))
+      end
+    end
+
+    def ssh_key_expiring_soon_email(user, fingerprints)
+      return unless user&.active?
+
+      @user = user
+      @fingerprints = fingerprints
+      @target_url = profile_keys_url
+
+      Gitlab::I18n.with_locale(@user.preferred_language) do
+        mail(to: @user.notification_email, subject: subject(_("Your SSH key is expiring soon.")))
       end
     end
 
@@ -107,4 +140,4 @@ module Emails
   end
 end
 
-Emails::Profile.prepend_if_ee('EE::Emails::Profile')
+Emails::Profile.prepend_mod_with('Emails::Profile')

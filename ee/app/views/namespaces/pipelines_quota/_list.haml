@@ -9,7 +9,7 @@
         = link_to s_('UsageQuota|Buy additional minutes'),
         EE::SUBSCRIPTIONS_MORE_MINUTES_URL,
         target: '_blank',
-        class: 'gl-button btn btn-success float-right',
+        class: 'gl-button btn btn-confirm float-right',
         data: { track_event: 'click_buy_ci_minutes', track_label: namespace.actual_plan_name, track_property: 'pipeline_quota_page' }
 
   .row
@@ -51,7 +51,7 @@
       %tr
         %td{ colspan: 2 }
           .nothing-here-block
-            - runners_doc_path = help_page_path('ci/runners/README.md')
+            - runners_doc_path = help_page_path('ci/runners/index.md')
             - help_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: runners_doc_path }
             = s_('UsageQuota|%{help_link_start}Shared runners%{help_link_end} are disabled, so there are no limits set on pipeline usage').html_safe % { help_link_start: help_link_start, help_link_end: '</a>'.html_safe }
     - else

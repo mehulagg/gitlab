@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Database::MigrationHelpers do
   include Database::TableSchemaHelpers
+  include Database::TriggerHelpers
 
   let(:model) do
     ActiveRecord::Migration.new.extend(described_class)
@@ -180,6 +181,32 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         end
       end
 
+      context 'when with_lock_retries re-runs the block' do
+        it 'only creates constraint for unique definitions' do
+          expected_sql = <<~SQL
+            ALTER TABLE "#{table_name}"\nADD CONSTRAINT "check_cda6f69506" CHECK (char_length("name") <= 255)
+          SQL
+
+          expect(model).to receive(:create_table).twice.and_call_original
+
+          expect(model).to receive(:execute).with(expected_sql).and_raise(ActiveRecord::LockWaitTimeout)
+          expect(model).to receive(:execute).with(expected_sql).and_call_original
+
+          model.create_table_with_constraints table_name do |t|
+            t.timestamps_with_timezone
+            t.integer :some_id, null: false
+            t.boolean :active, null: false, default: true
+            t.text :name
+
+            t.text_limit :name, 255
+          end
+
+          expect_table_columns_to_match(column_attributes, table_name)
+
+          expect_check_constraint(table_name, 'check_cda6f69506', 'char_length(name) <= 255')
+        end
+      end
+
       context 'when constraints are given invalid names' do
         let(:expected_max_length) { described_class::MAX_IDENTIFIER_NAME_LENGTH }
         let(:expected_error_message) { "The maximum allowed constraint name is #{expected_max_length} characters" }
@@ -352,6 +379,37 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         allow(model).to receive(:transaction_open?).and_return(false)
       end
 
+      context 'target column' do
+        it 'defaults to (id) when no custom target column is provided' do
+          expect(model).to receive(:with_lock_retries).and_call_original
+          expect(model).to receive(:disable_statement_timeout).and_call_original
+          expect(model).to receive(:statement_timeout_disabled?).and_return(false)
+          expect(model).to receive(:execute).with(/statement_timeout/)
+          expect(model).to receive(:execute).ordered.with(/VALIDATE CONSTRAINT/)
+          expect(model).to receive(:execute).ordered.with(/RESET ALL/)
+
+          expect(model).to receive(:execute).with(/REFERENCES users \(id\)/)
+
+          model.add_concurrent_foreign_key(:projects, :users,
+                                           column: :user_id)
+        end
+
+        it 'references the custom taget column when provided' do
+          expect(model).to receive(:with_lock_retries).and_call_original
+          expect(model).to receive(:disable_statement_timeout).and_call_original
+          expect(model).to receive(:statement_timeout_disabled?).and_return(false)
+          expect(model).to receive(:execute).with(/statement_timeout/)
+          expect(model).to receive(:execute).ordered.with(/VALIDATE CONSTRAINT/)
+          expect(model).to receive(:execute).ordered.with(/RESET ALL/)
+
+          expect(model).to receive(:execute).with(/REFERENCES users \(id_convert_to_bigint\)/)
+
+          model.add_concurrent_foreign_key(:projects, :users,
+                                           column: :user_id,
+                                           target_column: :id_convert_to_bigint)
+        end
+      end
+
       context 'ON DELETE statements' do
         context 'on_delete: :nullify' do
           it 'appends ON DELETE SET NULL statement' do
@@ -423,7 +481,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           expect(model).to receive(:foreign_key_exists?).with(:projects, :users,
                                                               column: :user_id,
                                                               on_delete: :cascade,
-                                                              name: name).and_return(true)
+                                                              name: name,
+                                                             primary_key: :id).and_return(true)
 
           expect(model).not_to receive(:execute).with(/ADD CONSTRAINT/)
           expect(model).to receive(:execute).with(/VALIDATE CONSTRAINT/)
@@ -452,6 +511,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
             it 'does not create a new foreign key' do
               expect(model).to receive(:foreign_key_exists?).with(:projects, :users,
                                                                   name: :foo,
+                                                                  primary_key: :id,
                                                                   on_delete: :cascade,
                                                                   column: :user_id).and_return(true)
 
@@ -556,7 +616,15 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
   describe '#foreign_key_exists?' do
     before do
-      key = ActiveRecord::ConnectionAdapters::ForeignKeyDefinition.new(:projects, :users, { column: :non_standard_id, name: :fk_projects_users_non_standard_id, on_delete: :cascade })
+      key = ActiveRecord::ConnectionAdapters::ForeignKeyDefinition.new(
+        :projects, :users,
+        {
+          column: :non_standard_id,
+          name: :fk_projects_users_non_standard_id,
+          on_delete: :cascade,
+          primary_key: :id
+        }
+      )
       allow(model).to receive(:foreign_keys).with(:projects).and_return([key])
     end
 
@@ -583,6 +651,11 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       it 'compares by column name if given' do
         expect(model.foreign_key_exists?(:projects, target_table, column: :user_id)).to be_falsey
+      end
+
+      it 'compares by target column name if given' do
+        expect(model.foreign_key_exists?(:projects, target_table, primary_key: :user_id)).to be_falsey
+        expect(model.foreign_key_exists?(:projects, target_table, primary_key: :id)).to be_truthy
       end
 
       it 'compares by foreign key name if given' do
@@ -808,8 +881,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         it 'renames a column concurrently' do
           expect(model).to receive(:check_trigger_permissions!).with(:users)
 
-          expect(model).to receive(:install_rename_triggers_for_postgresql)
-            .with(trigger_name, '"users"', '"old"', '"new"')
+          expect(model).to receive(:install_rename_triggers)
+            .with(:users, :old, :new)
 
           expect(model).to receive(:add_column)
             .with(:users, :new, :integer,
@@ -834,14 +907,18 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         context 'with existing records and type casting' do
           let(:trigger_name) { model.rename_trigger_name(:users, :id, :new) }
           let(:user) { create(:user) }
+          let(:copy_trigger) { double('copy trigger') }
+
+          before do
+            expect(Gitlab::Database::UnidirectionalCopyTrigger).to receive(:on_table)
+              .with(:users).and_return(copy_trigger)
+          end
 
           it 'copies the value to the new column using the type_cast_function', :aggregate_failures do
             expect(model).to receive(:copy_indexes).with(:users, :id, :new)
             expect(model).to receive(:add_not_null_constraint).with(:users, :new)
             expect(model).to receive(:execute).with("UPDATE \"users\" SET \"new\" = cast_to_jsonb_with_default(\"users\".\"id\") WHERE \"users\".\"id\" >= #{user.id}")
-            expect(model).to receive(:execute).with("DROP TRIGGER IF EXISTS #{trigger_name}\nON \"users\"\n")
-            expect(model).to receive(:execute).with("CREATE TRIGGER #{trigger_name}\nBEFORE INSERT OR UPDATE\nON \"users\"\nFOR EACH ROW\nEXECUTE FUNCTION #{trigger_name}()\n")
-            expect(model).to receive(:execute).with("CREATE OR REPLACE FUNCTION #{trigger_name}()\nRETURNS trigger AS\n$BODY$\nBEGIN\n  NEW.\"new\" := NEW.\"id\";\n  RETURN NEW;\nEND;\n$BODY$\nLANGUAGE 'plpgsql'\nVOLATILE\n")
+            expect(copy_trigger).to receive(:create).with(:id, :new, trigger_name: nil)
 
             model.rename_column_concurrently(:users, :id, :new, type_cast_function: 'cast_to_jsonb_with_default')
           end
@@ -916,7 +993,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     it 'reverses the operations of rename_column_concurrently' do
       expect(model).to receive(:check_trigger_permissions!).with(:users)
 
-      expect(model).to receive(:remove_rename_triggers_for_postgresql)
+      expect(model).to receive(:remove_rename_triggers)
         .with(:users, /trigger_.{12}/)
 
       expect(model).to receive(:remove_column).with(:users, :new)
@@ -929,7 +1006,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     it 'cleans up the renaming procedure' do
       expect(model).to receive(:check_trigger_permissions!).with(:users)
 
-      expect(model).to receive(:remove_rename_triggers_for_postgresql)
+      expect(model).to receive(:remove_rename_triggers)
         .with(:users, /trigger_.{12}/)
 
       expect(model).to receive(:remove_column).with(:users, :old)
@@ -969,8 +1046,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       it 'reverses the operations of cleanup_concurrent_column_rename' do
         expect(model).to receive(:check_trigger_permissions!).with(:users)
 
-        expect(model).to receive(:install_rename_triggers_for_postgresql)
-          .with(trigger_name, '"users"', '"old"', '"new"')
+        expect(model).to receive(:install_rename_triggers)
+          .with(:users, :old, :new)
 
         expect(model).to receive(:add_column)
           .with(:users, :old, :integer,
@@ -1064,7 +1141,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     it 'reverses the operations of change_column_type_concurrently' do
       expect(model).to receive(:check_trigger_permissions!).with(:users)
 
-      expect(model).to receive(:remove_rename_triggers_for_postgresql)
+      expect(model).to receive(:remove_rename_triggers)
         .with(:users, /trigger_.{12}/)
 
       expect(model).to receive(:remove_column).with(:users, "old_for_type_change")
@@ -1129,8 +1206,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect(model).to receive(:rename_column)
           .with(:users, temp_undo_cleanup_column, :old)
 
-        expect(model).to receive(:install_rename_triggers_for_postgresql)
-          .with(trigger_name, '"users"', '"old"', '"old_for_type_change"')
+        expect(model).to receive(:install_rename_triggers)
+          .with(:users, :old, 'old_for_type_change')
 
         model.undo_cleanup_concurrent_column_type_change(:users, :old, :string)
       end
@@ -1155,8 +1232,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect(model).to receive(:rename_column)
           .with(:users, temp_undo_cleanup_column, :old)
 
-        expect(model).to receive(:install_rename_triggers_for_postgresql)
-          .with(trigger_name, '"users"', '"old"', '"old_for_type_change"')
+        expect(model).to receive(:install_rename_triggers)
+          .with(:users, :old, 'old_for_type_change')
 
         model.undo_cleanup_concurrent_column_type_change(
           :users,
@@ -1176,32 +1253,29 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
-  describe '#install_rename_triggers_for_postgresql' do
-    it 'installs the triggers for PostgreSQL' do
-      expect(model).to receive(:execute)
-        .with(/CREATE OR REPLACE FUNCTION foo()/m)
+  describe '#install_rename_triggers' do
+    it 'installs the triggers' do
+      copy_trigger = double('copy trigger')
 
-      expect(model).to receive(:execute)
-        .with(/DROP TRIGGER IF EXISTS foo/m)
+      expect(Gitlab::Database::UnidirectionalCopyTrigger).to receive(:on_table)
+        .with(:users).and_return(copy_trigger)
 
-      expect(model).to receive(:execute)
-        .with(/CREATE TRIGGER foo/m)
+      expect(copy_trigger).to receive(:create).with(:old, :new, trigger_name: 'foo')
 
-      model.install_rename_triggers_for_postgresql('foo', :users, :old, :new)
-    end
-
-    it 'does not fail if trigger already exists' do
-      model.install_rename_triggers_for_postgresql('foo', :users, :old, :new)
-      model.install_rename_triggers_for_postgresql('foo', :users, :old, :new)
+      model.install_rename_triggers(:users, :old, :new, trigger_name: 'foo')
     end
   end
 
-  describe '#remove_rename_triggers_for_postgresql' do
+  describe '#remove_rename_triggers' do
     it 'removes the function and trigger' do
-      expect(model).to receive(:execute).with('DROP TRIGGER IF EXISTS foo ON bar')
-      expect(model).to receive(:execute).with('DROP FUNCTION IF EXISTS foo()')
+      copy_trigger = double('copy trigger')
 
-      model.remove_rename_triggers_for_postgresql('bar', 'foo')
+      expect(Gitlab::Database::UnidirectionalCopyTrigger).to receive(:on_table)
+        .with('bar').and_return(copy_trigger)
+
+      expect(copy_trigger).to receive(:drop).with('foo')
+
+      model.remove_rename_triggers('bar', 'foo')
     end
   end
 
@@ -1675,66 +1749,345 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#convert_to_bigint_column' do
+    it 'returns the name of the temporary column used to convert to bigint' do
+      expect(model.convert_to_bigint_column(:id)).to eq('id_convert_to_bigint')
+    end
+  end
+
   describe '#initialize_conversion_of_integer_to_bigint' do
-    let(:user) { create(:user) }
-    let(:project) { create(:project, :repository) }
-    let(:issue) { create(:issue, project: project) }
-    let!(:event) do
-      create(:event, :created, project: project, target: issue, author: user)
-    end
+    let(:table) { :test_table }
+    let(:column) { :id }
+    let(:tmp_column) { model.convert_to_bigint_column(column) }
 
-    context 'in a transaction' do
-      it 'raises RuntimeError' do
-        allow(model).to receive(:transaction_open?).and_return(true)
-
-        expect { model.initialize_conversion_of_integer_to_bigint(:events, :id) }
-          .to raise_error(RuntimeError)
+    before do
+      model.create_table table, id: false do |t|
+        t.integer :id, primary_key: true
+        t.integer :non_nullable_column, null: false
+        t.integer :nullable_column
+        t.timestamps
       end
     end
 
-    context 'outside a transaction' do
+    context 'when the target table does not exist' do
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(:this_table_is_not_real, column) }
+          .to raise_error('Table this_table_is_not_real does not exist')
+      end
+    end
+
+    context 'when the primary key does not exist' do
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(table, column, primary_key: :foobar) }
+          .to raise_error("Column foobar does not exist on #{table}")
+      end
+    end
+
+    context 'when the column to migrate does not exist' do
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(table, :this_column_is_not_real) }
+          .to raise_error(ArgumentError, "Column this_column_is_not_real does not exist on #{table}")
+      end
+    end
+
+    context 'when the column to convert is the primary key' do
+      it 'creates a not-null bigint column and installs triggers' do
+        expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)
+
+        expect(model).to receive(:install_rename_triggers).with(table, [column], [tmp_column])
+
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+
+    context 'when the column to convert is not the primary key, but non-nullable' do
+      let(:column) { :non_nullable_column }
+
+      it 'creates a not-null bigint column and installs triggers' do
+        expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)
+
+        expect(model).to receive(:install_rename_triggers).with(table, [column], [tmp_column])
+
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+
+    context 'when the column to convert is not the primary key, but nullable' do
+      let(:column)  { :nullable_column }
+
+      it 'creates a nullable bigint column and installs triggers' do
+        expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: nil)
+
+        expect(model).to receive(:install_rename_triggers).with(table, [column], [tmp_column])
+
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+
+    context 'when multiple columns are given' do
+      it 'creates the correct columns and installs the trigger' do
+        columns_to_convert = %i[id non_nullable_column nullable_column]
+        temporary_columns = columns_to_convert.map { |column| model.convert_to_bigint_column(column) }
+
+        expect(model).to receive(:add_column).with(table, temporary_columns[0], :bigint, default: 0, null: false)
+        expect(model).to receive(:add_column).with(table, temporary_columns[1], :bigint, default: 0, null: false)
+        expect(model).to receive(:add_column).with(table, temporary_columns[2], :bigint, default: nil)
+
+        expect(model).to receive(:install_rename_triggers).with(table, columns_to_convert, temporary_columns)
+
+        model.initialize_conversion_of_integer_to_bigint(table, columns_to_convert)
+      end
+    end
+  end
+
+  describe '#revert_initialize_conversion_of_integer_to_bigint' do
+    let(:table) { :test_table }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer :id, primary_key: true
+        t.integer :other_id
+      end
+
+      model.initialize_conversion_of_integer_to_bigint(table, columns)
+    end
+
+    context 'when single column is given' do
+      let(:columns) { :id }
+
+      it 'removes column, trigger, and function' do
+        temporary_column = model.convert_to_bigint_column(:id)
+        trigger_name = model.rename_trigger_name(table, :id, temporary_column)
+
+        model.revert_initialize_conversion_of_integer_to_bigint(table, columns)
+
+        expect(model.column_exists?(table, temporary_column)).to eq(false)
+        expect_trigger_not_to_exist(table, trigger_name)
+        expect_function_not_to_exist(trigger_name)
+      end
+    end
+
+    context 'when multiple columns are given' do
+      let(:columns) { [:id, :other_id] }
+
+      it 'removes column, trigger, and function' do
+        temporary_columns = columns.map { |column| model.convert_to_bigint_column(column) }
+        trigger_name = model.rename_trigger_name(table, columns, temporary_columns)
+
+        model.revert_initialize_conversion_of_integer_to_bigint(table, columns)
+
+        temporary_columns.each do |column|
+          expect(model.column_exists?(table, column)).to eq(false)
+        end
+        expect_trigger_not_to_exist(table, trigger_name)
+        expect_function_not_to_exist(trigger_name)
+      end
+    end
+  end
+
+  describe '#backfill_conversion_of_integer_to_bigint' do
+    let(:table) { :_test_backfill_table }
+    let(:column) { :id }
+    let(:tmp_column) { model.convert_to_bigint_column(column) }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer :id, primary_key: true
+        t.text :message, null: false
+        t.integer :other_id
+        t.timestamps
+      end
+
+      allow(model).to receive(:perform_background_migration_inline?).and_return(false)
+    end
+
+    context 'when the target table does not exist' do
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(:this_table_is_not_real, column) }
+          .to raise_error('Table this_table_is_not_real does not exist')
+      end
+    end
+
+    context 'when the primary key does not exist' do
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(table, column, primary_key: :foobar) }
+          .to raise_error("Column foobar does not exist on #{table}")
+      end
+    end
+
+    context 'when the column to convert does not exist' do
+      let(:column) { :foobar }
+
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
+          .to raise_error(ArgumentError, "Column #{column} does not exist on #{table}")
+      end
+    end
+
+    context 'when the temporary column does not exist' do
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
+          .to raise_error(ArgumentError, "Column #{tmp_column} does not exist on #{table}")
+      end
+    end
+
+    context 'when the conversion is properly initialized' do
+      let(:model_class) do
+        Class.new(ActiveRecord::Base) do
+          self.table_name = :_test_backfill_table
+        end
+      end
+
+      let(:migration_relation) { Gitlab::Database::BackgroundMigration::BatchedMigration.active }
+
       before do
-        allow(model).to receive(:transaction_open?).and_return(false)
+        model.initialize_conversion_of_integer_to_bigint(table, columns)
+
+        model_class.create!(message: 'hello')
+        model_class.create!(message: 'so long')
       end
 
-      it 'creates a bigint column and starts backfilling it' do
-        expect(model)
-          .to receive(:add_column)
-          .with(
-            :events,
-            'id_convert_to_bigint',
-            :bigint,
-            default: 0,
-            null: false
+      context 'when a single column is being converted' do
+        let(:columns) { column }
+
+        it 'creates the batched migration tracking record' do
+          last_record = model_class.create!(message: 'goodbye')
+
+          expect do
+            model.backfill_conversion_of_integer_to_bigint(table, column, batch_size: 2, sub_batch_size: 1)
+          end.to change { migration_relation.count }.by(1)
+
+          expect(migration_relation.last).to have_attributes(
+            job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+            table_name: table.to_s,
+            column_name: column.to_s,
+            min_value: 1,
+            max_value: last_record.id,
+            interval: 120,
+            batch_size: 2,
+            sub_batch_size: 1,
+            job_arguments: [[column.to_s], [model.convert_to_bigint_column(column)]]
           )
-
-        expect(model)
-          .to receive(:install_rename_triggers)
-          .with(:events, :id, 'id_convert_to_bigint')
-
-        expect(model).to receive(:queue_background_migration_jobs_by_range_at_intervals).and_call_original
-
-        expect(BackgroundMigrationWorker)
-          .to receive(:perform_in)
-          .ordered
-          .with(
-            2.minutes,
-            'CopyColumnUsingBackgroundMigrationJob',
-            [event.id, event.id, :events, :id, :id, 'id_convert_to_bigint', 100]
-          )
-
-        expect(Gitlab::BackgroundMigration)
-          .to receive(:steal)
-          .ordered
-          .with('CopyColumnUsingBackgroundMigrationJob')
-
-        model.initialize_conversion_of_integer_to_bigint(
-          :events,
-          :id,
-          batch_size: 300,
-          sub_batch_size: 100
-        )
+        end
       end
+
+      context 'when multiple columns are being converted' do
+        let(:other_column) { :other_id }
+        let(:other_tmp_column) { model.convert_to_bigint_column(other_column) }
+        let(:columns) { [column, other_column] }
+
+        it 'creates the batched migration tracking record' do
+          last_record = model_class.create!(message: 'goodbye', other_id: 50)
+
+          expect do
+            model.backfill_conversion_of_integer_to_bigint(table, columns, batch_size: 2, sub_batch_size: 1)
+          end.to change { migration_relation.count }.by(1)
+
+          expect(migration_relation.last).to have_attributes(
+            job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+            table_name: table.to_s,
+            column_name: column.to_s,
+            min_value: 1,
+            max_value: last_record.id,
+            interval: 120,
+            batch_size: 2,
+            sub_batch_size: 1,
+            job_arguments: [[column.to_s, other_column.to_s], [tmp_column, other_tmp_column]]
+          )
+        end
+      end
+    end
+  end
+
+  describe '#revert_backfill_conversion_of_integer_to_bigint' do
+    let(:table) { :_test_backfill_table }
+    let(:primary_key) { :id }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer primary_key, primary_key: true
+        t.text :message, null: false
+        t.integer :other_id
+        t.timestamps
+      end
+
+      model.initialize_conversion_of_integer_to_bigint(table, columns, primary_key: primary_key)
+      model.backfill_conversion_of_integer_to_bigint(table, columns, primary_key: primary_key)
+    end
+
+    context 'when a single column is being converted' do
+      let(:columns) { :id }
+
+      it 'deletes the batched migration tracking record' do
+        expect do
+          model.revert_backfill_conversion_of_integer_to_bigint(table, columns)
+        end.to change { Gitlab::Database::BackgroundMigration::BatchedMigration.count }.by(-1)
+      end
+    end
+
+    context 'when a multiple columns are being converted' do
+      let(:columns) { [:id, :other_id] }
+
+      it 'deletes the batched migration tracking record' do
+        expect do
+          model.revert_backfill_conversion_of_integer_to_bigint(table, columns)
+        end.to change { Gitlab::Database::BackgroundMigration::BatchedMigration.count }.by(-1)
+      end
+    end
+
+    context 'when primary key column has custom name' do
+      let(:primary_key) { :other_pk }
+      let(:columns) { :other_id }
+
+      it 'deletes the batched migration tracking record' do
+        expect do
+          model.revert_backfill_conversion_of_integer_to_bigint(table, columns, primary_key: primary_key)
+        end.to change { Gitlab::Database::BackgroundMigration::BatchedMigration.count }.by(-1)
+      end
+    end
+  end
+
+  describe '#ensure_batched_background_migration_is_finished' do
+    let(:configuration) do
+      {
+        job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+        table_name: :events,
+        column_name: :id,
+        job_arguments: [["id"], ["id_convert_to_bigint"]]
+      }
+    end
+
+    subject(:ensure_batched_background_migration_is_finished) { model.ensure_batched_background_migration_is_finished(**configuration) }
+
+    it 'raises an error when migration exists and is not marked as finished' do
+      create(:batched_background_migration, configuration.merge(status: :active))
+
+      expect { ensure_batched_background_migration_is_finished }
+        .to raise_error "Expected batched background migration for the given configuration to be marked as 'finished', but it is 'active':" \
+            "\t#{configuration}" \
+            "\n\n" \
+            "Finalize it manualy by running" \
+            "\n\n" \
+            "\tsudo gitlab-rake gitlab:background_migrations:finalize[CopyColumnUsingBackgroundMigrationJob,events,id,'[[\"id\"]\\, [\"id_convert_to_bigint\"]]']" \
+            "\n\n" \
+            "For more information, check the documentation" \
+            "\n\n" \
+            "\thttps://docs.gitlab.com/ee/user/admin_area/monitoring/background_migrations.html#database-migrations-failing-because-of-batched-background-migration-not-finished"
+    end
+
+    it 'does not raise error when migration exists and is marked as finished' do
+      create(:batched_background_migration, configuration.merge(status: :finished))
+
+      expect { ensure_batched_background_migration_is_finished }
+        .not_to raise_error
+    end
+
+    it 'logs a warning when migration does not exist' do
+      expect(Gitlab::AppLogger).to receive(:warn)
+        .with("Could not find batched background migration for the given configuration: #{configuration}")
+
+      expect { ensure_batched_background_migration_is_finished }
+        .not_to raise_error
     end
   end
 
@@ -1855,21 +2208,41 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       buffer.rewind
       expect(buffer.read).to include("\"class\":\"#{model.class}\"")
     end
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(raise_on_exhaustion: [true, false])
+
+    with_them do
+      it 'sets raise_on_exhaustion as requested' do
+        with_lock_retries = double
+        expect(Gitlab::Database::WithLockRetries).to receive(:new).and_return(with_lock_retries)
+        expect(with_lock_retries).to receive(:run).with(raise_on_exhaustion: raise_on_exhaustion)
+
+        model.with_lock_retries(env: env, logger: in_memory_logger, raise_on_exhaustion: raise_on_exhaustion) { }
+      end
+    end
+
+    it 'does not raise on exhaustion by default' do
+      with_lock_retries = double
+      expect(Gitlab::Database::WithLockRetries).to receive(:new).and_return(with_lock_retries)
+      expect(with_lock_retries).to receive(:run).with(raise_on_exhaustion: false)
+
+      model.with_lock_retries(env: env, logger: in_memory_logger) { }
+    end
   end
 
   describe '#backfill_iids' do
     include MigrationsHelpers
 
-    before do
-      stub_const('Issue', Class.new(ActiveRecord::Base))
-
-      Issue.class_eval do
+    let(:issue_class) do
+      Class.new(ActiveRecord::Base) do
         include AtomicInternalId
 
         self.table_name = 'issues'
         self.inheritance_column = :_type_disabled
 
-        belongs_to :project, class_name: "::Project"
+        belongs_to :project, class_name: "::Project", inverse_of: nil
 
         has_internal_id :iid,
           scope: :project,
@@ -1884,9 +2257,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
     def setup
       namespace = namespaces.create!(name: 'foo', path: 'foo')
-      project = projects.create!(namespace_id: namespace.id)
-
-      project
+      projects.create!(namespace_id: namespace.id)
     end
 
     it 'generates iids properly for models created after the migration' do
@@ -1894,7 +2265,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       model.backfill_iids('issues')
 
-      issue = Issue.create!(project_id: project.id)
+      issue = issue_class.create!(project_id: project.id)
 
       expect(issue.iid).to eq(1)
     end
@@ -1905,7 +2276,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       model.backfill_iids('issues')
 
-      issue_b = Issue.create!(project_id: project.id)
+      issue_b = issue_class.create!(project_id: project.id)
 
       expect(issue_a.reload.iid).to eq(1)
       expect(issue_b.iid).to eq(2)
@@ -1920,8 +2291,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       model.backfill_iids('issues')
 
-      issue_a = Issue.create!(project_id: project_a.id)
-      issue_b = Issue.create!(project_id: project_b.id)
+      issue_a = issue_class.create!(project_id: project_a.id)
+      issue_b = issue_class.create!(project_id: project_b.id)
 
       expect(issue_a.iid).to eq(2)
       expect(issue_b.iid).to eq(3)
@@ -1935,7 +2306,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
         model.backfill_iids('issues')
 
-        issue_b = Issue.create!(project_id: project_b.id)
+        issue_b = issue_class.create!(project_id: project_b.id)
 
         expect(issue_a.reload.iid).to eq(1)
         expect(issue_b.reload.iid).to eq(1)
@@ -2653,6 +3024,14 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       it 'prints an error message' do
         expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
       end
+    end
+  end
+
+  describe '#rename_constraint' do
+    it "executes the statement to rename constraint" do
+      expect(model).to receive(:execute).with /ALTER TABLE "test_table"\nRENAME CONSTRAINT "fk_old_name" TO "fk_new_name"/
+
+      model.rename_constraint(:test_table, :fk_old_name, :fk_new_name)
     end
   end
 end

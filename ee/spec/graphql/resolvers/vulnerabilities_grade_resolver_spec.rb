@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe Resolvers::VulnerabilitiesGradeResolver do
   include GraphqlHelpers
-  include ::Gitlab::Graphql::Laziness
 
   subject do
     force(resolve(described_class, obj: group, args: args, ctx: { current_user: user }))

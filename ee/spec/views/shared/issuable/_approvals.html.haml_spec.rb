@@ -66,4 +66,42 @@ RSpec.describe 'shared/issuable/_approvals.html.haml' do
       end
     end
   end
+
+  context 'when running the highlight paid features experiment', :experiment do
+    let(:group) { create(:group) }
+    let(:project) { create(:project, :repository, namespace: group) }
+
+    before do
+      create(:gitlab_subscription, :active_trial, namespace: group)
+      group.add_maintainer(user)
+      stub_application_setting(check_namespace_plan: true)
+      stub_feature_flags(mr_collapsed_approval_rules: false)
+      stub_experiments(highlight_paid_features_during_active_trial: variant)
+      render 'shared/issuable/approvals', form: form, issuable: merge_request, project: project, presenter: presenter
+    end
+
+    context 'when user is in the control' do
+      let(:variant) { :control }
+
+      it 'does not render the paid feature badge' do
+        expect(rendered).not_to have_css('#js-paid-feature-badge')
+      end
+
+      it 'does not render the paid feature popover' do
+        expect(rendered).not_to have_css('#js-paid-feature-popover')
+      end
+    end
+
+    context 'when user is in the candidate' do
+      let(:variant) { :candidate }
+
+      it 'renders the paid feature badge' do
+        expect(rendered).to have_css('#js-paid-feature-badge')
+      end
+
+      it 'renders the paid feature popover' do
+        expect(rendered).to have_css('#js-paid-feature-popover')
+      end
+    end
+  end
 end

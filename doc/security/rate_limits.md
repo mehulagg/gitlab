@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Rate limits
+# Rate limits **(FREE SELF)**
 
 NOTE:
 For GitLab.com, please see
@@ -33,6 +33,7 @@ These are rate limits you can set in the Admin Area of your instance:
 - [Protected paths](../user/admin_area/settings/protected_paths.md)
 - [Raw endpoints rate limits](../user/admin_area/settings/rate_limits_on_raw_endpoints.md)
 - [User and IP rate limits](../user/admin_area/settings/user_and_ip_rate_limits.md)
+- [Package registry rate limits](../user/admin_area/settings/package_registry_rate_limits.md)
 
 ## Non-configurable limits
 

@@ -54,53 +54,18 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
         end
       end
 
-      context 'with different cache values' do
-        let(:public_count_key) { subject.cache_key(described_class::PUBLIC_COUNT_KEY) }
-        let(:under_threshold) { described_class::CACHED_COUNT_THRESHOLD - 1 }
-        let(:over_threshold) { described_class::CACHED_COUNT_THRESHOLD + 1 }
+      it_behaves_like 'a counter caching service with threshold'
+    end
+  end
 
-        context 'when cache is empty' do
-          before do
-            Rails.cache.delete(public_count_key)
-          end
+  describe '#clear_all_cache_keys' do
+    it 'calls `Rails.cache.delete` with the correct keys' do
+      expect(Rails.cache).to receive(:delete)
+        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::PUBLIC_COUNT_KEY])
+      expect(Rails.cache).to receive(:delete)
+        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::TOTAL_COUNT_KEY])
 
-          it 'refreshes cache if value over threshold' do
-            allow(subject).to receive(:uncached_count).and_return(over_threshold)
-
-            expect(subject.count).to eq(over_threshold)
-            expect(Rails.cache.read(public_count_key)).to eq(over_threshold)
-          end
-
-          it 'does not refresh cache if value under threshold' do
-            allow(subject).to receive(:uncached_count).and_return(under_threshold)
-
-            expect(subject.count).to eq(under_threshold)
-            expect(Rails.cache.read(public_count_key)).to be_nil
-          end
-        end
-
-        context 'when cached count is under the threshold value' do
-          before do
-            Rails.cache.write(public_count_key, under_threshold)
-          end
-
-          it 'does not refresh cache' do
-            expect(Rails.cache).not_to receive(:write)
-            expect(subject.count).to eq(under_threshold)
-          end
-        end
-
-        context 'when cached count is over the threshold value' do
-          before do
-            Rails.cache.write(public_count_key, over_threshold)
-          end
-
-          it 'does not refresh cache' do
-            expect(Rails.cache).not_to receive(:write)
-            expect(subject.count).to eq(over_threshold)
-          end
-        end
-      end
+      subject.clear_all_cache_keys
     end
   end
 end

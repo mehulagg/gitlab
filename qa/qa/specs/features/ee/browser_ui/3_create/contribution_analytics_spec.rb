@@ -43,7 +43,7 @@ module QA
 
       it 'tests contributions', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/527' do
         EE::Page::Group::ContributionAnalytics.perform do |contribution_analytics|
-          expect(contribution_analytics).to have_push_element('3 pushes, more than 4.0 commits by 1 person contributors.')
+          expect(contribution_analytics).to have_push_element('3 pushes, more than 4 commits by 1 person contributors.')
           expect(contribution_analytics).to have_mr_element('1 created, 1 merged.')
           expect(contribution_analytics).to have_issue_element('1 created, 1 closed.')
         end

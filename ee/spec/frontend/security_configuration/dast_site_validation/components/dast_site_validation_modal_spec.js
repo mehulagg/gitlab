@@ -40,6 +40,8 @@ describe('DastSiteValidationModal', () => {
   let wrapper;
   let requestHandlers;
 
+  const pendingHandler = jest.fn(() => new Promise(() => {}));
+
   const componentFactory = (mountFn = shallowMount) => ({
     mountOptions = {},
     handlers = {},
@@ -109,7 +111,11 @@ describe('DastSiteValidationModal', () => {
   describe('rendering', () => {
     describe('loading', () => {
       beforeEach(() => {
-        createFullComponent();
+        createFullComponent({
+          handlers: {
+            dastSiteTokenCreate: pendingHandler,
+          },
+        });
       });
 
       it('renders a skeleton loader, no alert and no form group while token is being created', () => {

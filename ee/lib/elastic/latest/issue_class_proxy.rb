@@ -17,7 +17,7 @@ module Elastic
           end
 
         options[:features] = 'issues'
-        options[:no_join_project] = Elastic::DataMigrationService.migration_has_finished?(:add_new_data_to_issues_documents)
+        options[:no_join_project] = true
         context.name(:issue) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
@@ -28,7 +28,33 @@ module Elastic
         search(query_hash, options)
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(:issue_assignees, project: [:project_feature])
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       private
+
+      # override
+      def apply_sort(query_hash, options)
+        case ::Gitlab::Search::SortOptions.sort_and_direction(options[:order_by], options[:sort])
+        when :popularity_asc
+          query_hash.merge(sort: {
+            upvotes: {
+              order: 'asc'
+            }
+          })
+        when :popularity_desc
+          query_hash.merge(sort: {
+            upvotes: {
+              order: 'desc'
+            }
+          })
+        else
+          super
+        end
+      end
 
       # Builds an elasticsearch query that will select documents from a
       # set of projects for Group and Project searches, taking user access

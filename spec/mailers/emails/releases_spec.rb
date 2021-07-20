@@ -10,6 +10,7 @@ RSpec.describe Emails::Releases do
   describe '#new_release_email' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project) }
+
     let(:release) { create(:release, project: project) }
 
     subject { Notify.new_release_email(user.id, release) }
@@ -55,7 +56,7 @@ RSpec.describe Emails::Releases do
       let(:release) { create(:release, project: project, description: "Attachment: [Test file](#{upload_path})") }
 
       it 'renders absolute links' do
-        is_expected.to have_body_text(%Q(<a href="#{project.web_url}#{upload_path}" data-link="true" class="gfm">Test file</a>))
+        is_expected.to have_body_text(%Q(<a href="#{project.web_url}#{upload_path}" data-canonical-src="#{upload_path}" data-link="true" class="gfm">Test file</a>))
       end
     end
   end

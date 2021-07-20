@@ -42,6 +42,16 @@ FactoryBot.define do
       end
     end
 
+    trait :dast_14_0_2 do
+      file_format { :raw }
+      file_type { :dast }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-report-14.0.2.json'), 'application/json')
+      end
+    end
+
     trait :dast_feature_branch do
       file_format { :raw }
       file_type { :dast }
@@ -189,18 +199,6 @@ FactoryBot.define do
       end
     end
 
-    trait :license_management do
-      to_create { |instance| instance.save!(validate: false) }
-
-      file_type { :license_management }
-      file_format { :raw }
-
-      after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
-          Rails.root.join('ee/spec/fixtures/security_reports/deprecated/gl-license-management-report.json'), 'application/json')
-      end
-    end
-
     trait :license_scanning do
       file_type { :license_scanning }
       file_format { :raw }
@@ -311,6 +309,16 @@ FactoryBot.define do
       end
     end
 
+    trait :cluster_image_scanning do
+      file_format { :raw }
+      file_type { :cluster_image_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-cluster-image-scanning-report.json'), 'application/json')
+      end
+    end
+
     trait :common_security_report do
       file_format { :raw }
       file_type { :dependency_scanning }
@@ -344,6 +352,26 @@ FactoryBot.define do
     trait :corrupted_container_scanning_report do
       file_format { :raw }
       file_type { :container_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('spec/fixtures/trace/sample_trace'), 'application/json')
+      end
+    end
+
+    trait :cluster_image_scanning_feature_branch do
+      file_format { :raw }
+      file_type { :cluster_image_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-cluster-image-scanning-report.json'), 'application/json')
+      end
+    end
+
+    trait :corrupted_cluster_image_scanning_report do
+      file_format { :raw }
+      file_type { :cluster_image_scanning }
 
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(

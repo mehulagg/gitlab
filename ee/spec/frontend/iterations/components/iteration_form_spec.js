@@ -1,55 +1,83 @@
-import { GlForm } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
-import { ApolloMutation } from 'vue-apollo';
+import { mount } from '@vue/test-utils';
+import Vue, { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
-import createIteration from 'ee/iterations/queries/create_iteration.mutation.graphql';
+import readIteration from 'ee/iterations/queries/iteration.query.graphql';
+import createIteration from 'ee/iterations/queries/iteration_create.mutation.graphql';
 import updateIteration from 'ee/iterations/queries/update_iteration.mutation.graphql';
-import { TEST_HOST } from 'helpers/test_constants';
+import createRouter from 'ee/iterations/router';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 
-jest.mock('~/lib/utils/url_utility');
+const baseUrl = '/cadences/';
+
+function createMockApolloProvider(requestHandlers) {
+  Vue.use(VueApollo);
+
+  return createMockApollo(requestHandlers);
+}
 
 describe('Iteration Form', () => {
   let wrapper;
+  let router;
   const groupPath = 'gitlab-org';
-  const id = 72;
+  const iterationId = 72;
+  const cadenceId = 2;
   const iteration = {
-    id: `gid://gitlab/Iteration/${id}`,
+    id: `gid://gitlab/Iteration/${iterationId}`,
+    iid: 70,
     title: 'An iteration',
+    state: 'opened',
+    webPath: '/test',
     description: 'The words',
+    descriptionHtml: '<p>The words</p>',
     startDate: '2020-06-28',
     dueDate: '2020-07-05',
   };
 
-  const createMutationSuccess = { data: { createIteration: { iteration, errors: [] } } };
+  const readMutationSuccess = {
+    data: { group: { iterations: { nodes: [iteration] }, errors: [] } },
+  };
+  const createMutationSuccess = { data: { iterationCreate: { iteration, errors: [] } } };
   const createMutationFailure = {
-    data: { createIteration: { iteration, errors: ['alas, your data is unchanged'] } },
+    data: { iterationCreate: { iteration, errors: ['alas, your data is unchanged'] } },
   };
   const updateMutationSuccess = { data: { updateIteration: { iteration, errors: [] } } };
-  const updateMutationFailure = {
-    data: { updateIteration: { iteration: {}, errors: ['alas, your data is unchanged'] } },
-  };
-  const defaultProps = { groupPath, iterationsListPath: TEST_HOST };
 
-  function createComponent({ mutationResult = createMutationSuccess, props = defaultProps } = {}) {
-    wrapper = shallowMount(IterationForm, {
-      propsData: props,
-      stubs: {
-        ApolloMutation,
-        MarkdownField: { template: '<div><slot name="textarea"></slot></div>' },
-      },
-      mocks: {
-        $apollo: {
-          mutate: jest.fn().mockResolvedValue(mutationResult),
+  function createComponent({
+    mutationQuery = createIteration,
+    mutationResult = createMutationSuccess,
+    query = readIteration,
+    result = readMutationSuccess,
+    resolverMock = jest.fn().mockResolvedValue(mutationResult),
+  } = {}) {
+    const apolloProvider = createMockApolloProvider([
+      [query, jest.fn().mockResolvedValue(result)],
+      [mutationQuery, resolverMock],
+    ]);
+    wrapper = extendedWrapper(
+      mount(IterationForm, {
+        provide: {
+          fullPath: groupPath,
+          previewMarkdownPath: '',
         },
-      },
-    });
+        apolloProvider,
+        router,
+      }),
+    );
   }
+
+  beforeEach(() => {
+    router = createRouter({
+      base: baseUrl,
+      permissions: { canCreateIteration: true, canEditIteration: true },
+    });
+  });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findPageTitle = () => wrapper.find({ ref: 'pageTitle' });
@@ -57,30 +85,28 @@ describe('Iteration Form', () => {
   const findDescription = () => wrapper.find('#iteration-description');
   const findStartDate = () => wrapper.find('#iteration-start-date');
   const findDueDate = () => wrapper.find('#iteration-due-date');
-  const findSaveButton = () => wrapper.find('[data-testid="save-iteration"]');
-  const findCancelButton = () => wrapper.find('[data-testid="cancel-iteration"]');
-  const clickSave = () => findSaveButton().vm.$emit('click');
-  const clickCancel = () => findCancelButton().vm.$emit('click');
-  const nextTick = () => wrapper.vm.$nextTick();
-
-  it('renders a form', () => {
-    createComponent();
-    expect(wrapper.find(GlForm).exists()).toBe(true);
-  });
+  const findSaveButton = () => wrapper.findByTestId('save-iteration');
+  const findCancelButton = () => wrapper.findByTestId('cancel-iteration');
+  const clickSave = () => findSaveButton().trigger('click');
 
   describe('New iteration', () => {
+    const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
+
     beforeEach(() => {
-      createComponent();
+      router.replace({ name: 'newIteration', params: { cadenceId, iterationId: undefined } });
+      createComponent({ resolverMock });
+    });
+
+    afterEach(() => {
+      router.replace({ name: 'index' });
     });
 
     it('cancel button links to list page', () => {
-      clickCancel();
-
-      expect(visitUrl).toHaveBeenCalledWith(TEST_HOST);
+      expect(findCancelButton().attributes('href')).toBe(baseUrl);
     });
 
     describe('save', () => {
-      it('triggers mutation with form data', () => {
+      it('triggers mutation with form data', async () => {
         const title = 'Iteration 5';
         const description = 'The fifth iteration';
         const startDate = '2020-05-05';
@@ -91,30 +117,33 @@ describe('Iteration Form', () => {
         findStartDate().vm.$emit('input', startDate);
         findDueDate().vm.$emit('input', dueDate);
 
-        clickSave();
+        await clickSave();
 
-        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-          mutation: createIteration,
-          variables: {
-            input: {
-              groupPath,
-              title,
-              description,
-              startDate,
-              dueDate,
-            },
+        expect(resolverMock).toHaveBeenCalledWith({
+          input: {
+            groupPath,
+            title,
+            description,
+            iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', cadenceId),
+            startDate,
+            dueDate,
           },
         });
       });
 
-      it('redirects to Iteration page on success', () => {
+      it('redirects to Iteration page on success', async () => {
         createComponent();
 
-        clickSave();
+        await clickSave();
 
-        return nextTick().then(() => {
-          expect(findSaveButton().props('loading')).toBe(true);
-          expect(visitUrl).toHaveBeenCalled();
+        expect(findSaveButton().props('loading')).toBe(true);
+
+        await waitForPromises();
+
+        expect(router.currentRoute.name).toBe('iteration');
+        expect(router.currentRoute.params).toEqual({
+          cadenceId,
+          iterationId,
         });
       });
 
@@ -131,43 +160,40 @@ describe('Iteration Form', () => {
   });
 
   describe('Edit iteration', () => {
-    const propsWithIteration = {
-      groupPath,
-      isEditing: true,
-      iteration,
-    };
+    beforeEach(() => {
+      router.replace({ name: 'editIteration', params: { cadenceId, iterationId } });
+    });
+
+    afterEach(() => {
+      router.replace({ name: 'index' });
+    });
 
     it('shows update text title', () => {
-      createComponent({
-        props: propsWithIteration,
-      });
+      createComponent();
 
       expect(findPageTitle().text()).toBe('Edit iteration');
     });
 
-    it('prefills form fields', () => {
-      createComponent({
-        props: propsWithIteration,
-      });
+    it('prefills form fields', async () => {
+      createComponent();
 
-      expect(findTitle().attributes('value')).toBe(iteration.title);
+      await waitForPromises();
+
+      expect(findTitle().element.value).toBe(iteration.title);
       expect(findDescription().element.value).toBe(iteration.description);
-      expect(findStartDate().attributes('value')).toBe(iteration.startDate);
-      expect(findDueDate().attributes('value')).toBe(iteration.dueDate);
+      expect(findStartDate().element.value).toBe(iteration.startDate);
+      expect(findDueDate().element.value).toBe(iteration.dueDate);
     });
 
     it('shows update text on submit button', () => {
-      createComponent({
-        props: propsWithIteration,
-      });
+      createComponent();
 
       expect(findSaveButton().text()).toBe('Update iteration');
     });
 
     it('triggers mutation with form data', () => {
-      createComponent({
-        props: propsWithIteration,
-      });
+      const resolverMock = jest.fn().mockResolvedValue(updateMutationSuccess);
+      createComponent({ mutationQuery: updateIteration, resolverMock });
 
       const title = 'Updated title';
       const description = 'Updated description';
@@ -181,58 +207,39 @@ describe('Iteration Form', () => {
 
       clickSave();
 
-      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-        mutation: updateIteration,
-        variables: {
-          input: {
-            groupPath,
-            id: iteration.id,
-            title,
-            description,
-            startDate,
-            dueDate,
-          },
+      expect(resolverMock).toHaveBeenCalledWith({
+        input: {
+          groupPath,
+          id: iterationId,
+          title,
+          description,
+          startDate,
+          dueDate,
         },
       });
     });
 
-    it('emits updated event after successful mutation', () => {
+    it('calls update mutation', async () => {
+      const resolverMock = jest.fn().mockResolvedValue(updateMutationSuccess);
       createComponent({
-        props: propsWithIteration,
-        mutationResult: updateMutationSuccess,
+        mutationQuery: updateIteration,
+        resolverMock,
       });
 
       clickSave();
 
-      return nextTick().then(() => {
-        expect(findSaveButton().props('loading')).toBe(true);
-        expect(wrapper.emitted('updated')).toHaveLength(1);
-      });
-    });
+      await nextTick();
 
-    it('emits updated event after failed mutation', () => {
-      createComponent({
-        props: propsWithIteration,
-        mutationResult: updateMutationFailure,
-      });
-
-      clickSave();
-
-      return nextTick().then(() => {
-        expect(wrapper.emitted('updated')).toBeUndefined();
-      });
-    });
-
-    it('emits cancel when cancel clicked', () => {
-      createComponent({
-        props: propsWithIteration,
-        mutationResult: updateMutationSuccess,
-      });
-
-      clickCancel();
-
-      return nextTick().then(() => {
-        expect(wrapper.emitted('cancel')).toHaveLength(1);
+      expect(findSaveButton().props('loading')).toBe(true);
+      expect(resolverMock).toHaveBeenCalledWith({
+        input: {
+          groupPath,
+          id: iterationId,
+          startDate: '',
+          dueDate: '',
+          title: '',
+          description: '',
+        },
       });
     });
   });

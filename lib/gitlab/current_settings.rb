@@ -3,6 +3,14 @@
 module Gitlab
   module CurrentSettings
     class << self
+      def signup_disabled?
+        !signup_enabled?
+      end
+
+      def signup_limited?
+        domain_allowlist.present? || email_restrictions_enabled? || require_admin_approval_after_user_signup?
+      end
+
       def current_application_settings
         Gitlab::SafeRequestStore.fetch(:current_application_settings) { ensure_application_settings! }
       end
@@ -39,7 +47,7 @@ module Gitlab
 
         begin
           ::ApplicationSetting.cached
-        rescue
+        rescue StandardError
           # In case Redis isn't running
           # or the Redis UNIX socket file is not available
           # or the DB is not running (we use migrations in the cache key)

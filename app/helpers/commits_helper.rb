@@ -105,33 +105,74 @@ module CommitsHelper
       tooltip = _("Browse Directory")
     end
 
-    link_to url, class: "btn gl-button btn-default has-tooltip", title: tooltip, data: { container: "body" } do
+    link_to url, class: "btn gl-button btn-default btn-icon has-tooltip", title: tooltip, data: { container: "body" } do
       sprite_icon('folder-open')
     end
   end
 
-  def revert_commit_link
-    return unless current_user
+  def commit_options_dropdown_data(project, commit)
+    can_collaborate = current_user && can_collaborate_with_project?(project)
 
-    tag(:div, data: { display_text: 'Revert' }, class: "js-revert-commit-trigger")
-  end
-
-  def cherry_pick_commit_link
-    return unless current_user
-
-    tag(:div, data: { display_text: 'Cherry-pick' }, class: "js-cherry-pick-commit-trigger")
+    {
+      new_project_tag_path: new_project_tag_path(project, ref: commit),
+      email_patches_path: project_commit_path(project, commit, format: :patch),
+      plain_diff_path: project_commit_path(project, commit, format: :diff),
+      can_revert: "#{can_collaborate && !commit.has_been_reverted?(current_user)}",
+      can_cherry_pick: can_collaborate.to_s,
+      can_tag: can?(current_user, :push_code, project).to_s,
+      can_email_patches: (commit.parents.length < 2).to_s
+    }
   end
 
   def commit_signature_badge_classes(additional_classes)
     %w(btn gpg-status-box) + Array(additional_classes)
   end
 
-  def conditionally_paginate_diff_files(diffs, paginate:, per: Projects::CommitController::COMMIT_DIFFS_PER_PAGE)
-    if paginate && Feature.enabled?(:paginate_commit_view, @project, type: :development)
+  def conditionally_paginate_diff_files(diffs, paginate:, per:)
+    if paginate
       Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page]).per(per)
     else
       diffs.diff_files
     end
+  end
+
+  def cherry_pick_projects_data(project)
+    [project, project.forked_from_project].compact.map do |project|
+      {
+        id: project.id.to_s,
+        name: project.full_path,
+        refsUrl: refs_project_path(project)
+      }
+    end
+  end
+
+  # This is used to calculate a cache key for the app/views/projects/commits/_commit.html.haml
+  # partial. It takes some of the same parameters as used in the partial and will hash the
+  # current pipeline status.
+  #
+  # This includes a keyed hash for values that can be nil, to prevent invalid cache entries
+  # being served if the order should change in future.
+  def commit_partial_cache_key(commit, ref:, merge_request:, request:)
+    [
+      commit,
+      commit.author,
+      ref,
+      {
+        merge_request: merge_request&.cache_key,
+        pipeline_status: commit.status_for(ref)&.cache_key,
+        xhr: request.xhr?,
+        controller: controller.controller_path,
+        path: @path # referred to in #link_to_browse_code
+      }
+    ]
+  end
+
+  DEFAULT_SHA = '0000000'
+
+  # Returns the template path for commit resources
+  # to be utilized by the client applications.
+  def commit_path_template(project)
+    project_commit_path(project, DEFAULT_SHA).sub("/#{DEFAULT_SHA}", '/$COMMIT_SHA')
   end
 
   protected

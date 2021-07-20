@@ -17,7 +17,7 @@ module Mutations
             null: true,
             description: 'The board after mutation.'
 
-      authorize :admin_board
+      authorize :admin_issue_board
 
       def resolve(id:, **args)
         board = authorized_find!(id: id)
@@ -42,4 +42,4 @@ module Mutations
   end
 end
 
-Mutations::Boards::Update.prepend_if_ee('::EE::Mutations::Boards::Update')
+Mutations::Boards::Update.prepend_mod_with('Mutations::Boards::Update')

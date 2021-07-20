@@ -7,6 +7,7 @@ RSpec.describe DependencyEntity do
     subject { described_class.represent(dependency, request: request).as_json }
 
     let_it_be(:user) { create(:user) }
+
     let(:project) { create(:project, :repository, :private) }
     let(:request) { double('request') }
     let(:dependency) { build(:dependency, :with_vulnerabilities, :with_licenses, :indirect) }

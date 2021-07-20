@@ -1,8 +1,12 @@
 <script>
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
-import { camelCase } from 'lodash';
 import { mapState, mapActions } from 'vuex';
-import { LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME, JOB_TYPES } from 'ee/approvals/constants';
+import {
+  LICENSE_CHECK_NAME,
+  VULNERABILITY_CHECK_NAME,
+  LICENSE_SCANNING,
+  COVERAGE_CHECK_NAME,
+} from 'ee/approvals/constants';
 import { s__ } from '~/locale';
 import UnconfiguredSecurityRule from './unconfigured_security_rule.vue';
 
@@ -13,23 +17,14 @@ export default {
   },
   inject: {
     vulnerabilityCheckHelpPagePath: {
-      from: 'vulnerabilityCheckHelpPagePath',
       default: '',
     },
     licenseCheckHelpPagePath: {
-      from: 'licenseCheckHelpPagePath',
       default: '',
     },
-  },
-  featureTypes: {
-    vulnerabilityCheck: [
-      JOB_TYPES.SAST,
-      JOB_TYPES.DAST,
-      JOB_TYPES.DEPENDENCY_SCANNING,
-      JOB_TYPES.SECRET_DETECTION,
-      JOB_TYPES.COVERAGE_FUZZING,
-    ],
-    licenseCheck: [JOB_TYPES.LICENSE_SCANNING],
+    coverageCheckHelpPagePath: {
+      default: '',
+    },
   },
   computed: {
     ...mapState('securityConfiguration', ['configuration']),
@@ -63,6 +58,16 @@ export default {
           ),
           docsPath: this.licenseCheckHelpPagePath,
         },
+        {
+          name: COVERAGE_CHECK_NAME,
+          description: s__(
+            'SecurityApprovals|Test coverage must be enabled. %{linkStart}Learn more%{linkEnd}.',
+          ),
+          enableDescription: s__(
+            'SecurityApprovals|Requires approval for decreases in test coverage. %{linkStart}More information%{linkEnd}',
+          ),
+          docsPath: this.coverageCheckHelpPagePath,
+        },
       ];
     },
     unconfiguredRules() {
@@ -90,11 +95,12 @@ export default {
     },
     hasConfiguredJob(matchRule) {
       const { features = [] } = this.configuration;
-      return this.$options.featureTypes[camelCase(matchRule.name)].some((featureType) => {
-        return features.some((feature) => {
-          return feature.type === featureType && feature.configured;
-        });
-      });
+      return (
+        matchRule.name !== LICENSE_CHECK_NAME ||
+        features.some((feature) => {
+          return feature.type === LICENSE_SCANNING && feature.configured;
+        })
+      );
     },
   },
 };

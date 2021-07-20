@@ -80,22 +80,6 @@ namespace :gitlab do
       end
     end
 
-    desc 'GitLab | DB | Checks if migrations require downtime or not'
-    task :downtime_check, [:ref] => :environment do |_, args|
-      abort 'You must specify a Git reference to compare with' unless args[:ref]
-
-      require 'shellwords'
-
-      ref = Shellwords.escape(args[:ref])
-
-      migrations = `git diff #{ref}.. --diff-filter=A --name-only -- db/migrate`.lines
-        .map { |file| Rails.root.join(file.strip).to_s }
-        .select { |file| File.file?(file) }
-        .select { |file| /\A[0-9]+.*\.rb\z/ =~ File.basename(file) }
-
-      Gitlab::DowntimeCheck.new.check_and_print(migrations)
-    end
-
     desc 'GitLab | DB | Sets up EE specific database functionality'
 
     if Gitlab.ee?
@@ -106,58 +90,35 @@ namespace :gitlab do
 
     desc 'This adjusts and cleans db/structure.sql - it runs after db:structure:dump'
     task :clean_structure_sql do |task_name|
-      structure_file = 'db/structure.sql'
-      schema = File.read(structure_file)
+      ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env).each do |db_config|
+        structure_file = ActiveRecord::Tasks::DatabaseTasks.dump_filename(db_config.name)
 
-      File.open(structure_file, 'wb+') do |io|
-        Gitlab::Database::SchemaCleaner.new(schema).clean(io)
+        schema = File.read(structure_file)
+
+        File.open(structure_file, 'wb+') do |io|
+          Gitlab::Database::SchemaCleaner.new(schema).clean(io)
+        end
       end
 
       # Allow this task to be called multiple times, as happens when running db:migrate:redo
       Rake::Task[task_name].reenable
-    end
-
-    desc 'This dumps GitLab specific database details - it runs after db:structure:dump'
-    task :dump_custom_structure do |task_name|
-      Gitlab::Database::CustomStructure.new.dump
-
-      # Allow this task to be called multiple times, as happens when running db:migrate:redo
-      Rake::Task[task_name].reenable
-    end
-
-    desc 'This loads GitLab specific database details - runs after db:structure:dump'
-    task :load_custom_structure do
-      configuration = Rails.application.config_for(:database)
-
-      ENV['PGHOST']     = configuration['host']          if configuration['host']
-      ENV['PGPORT']     = configuration['port'].to_s     if configuration['port']
-      ENV['PGPASSWORD'] = configuration['password'].to_s if configuration['password']
-      ENV['PGUSER']     = configuration['username'].to_s if configuration['username']
-
-      command = 'psql'
-      dump_filepath = Gitlab::Database::CustomStructure.custom_dump_filepath.to_path
-      args = ['-v', 'ON_ERROR_STOP=1', '-q', '-X', '-f', dump_filepath, configuration['database']]
-
-      unless Kernel.system(command, *args)
-        raise "failed to execute:\n#{command} #{args.join(' ')}\n\n" \
-          "Please ensure `#{command}` is installed in your PATH and has proper permissions.\n\n"
-      end
     end
 
     # Inform Rake that custom tasks should be run every time rake db:structure:dump is run
+    #
+    # Rails 6.1 deprecates db:structure:dump in favor of db:schema:dump
     Rake::Task['db:structure:dump'].enhance do
       Rake::Task['gitlab:db:clean_structure_sql'].invoke
-      Rake::Task['gitlab:db:dump_custom_structure'].invoke
     end
 
-    # Inform Rake that custom tasks should be run every time rake db:structure:load is run
-    Rake::Task['db:structure:load'].enhance do
-      Rake::Task['gitlab:db:load_custom_structure'].invoke
+    # Inform Rake that custom tasks should be run every time rake db:schema:dump is run
+    Rake::Task['db:schema:dump'].enhance do
+      Rake::Task['gitlab:db:clean_structure_sql'].invoke
     end
 
     desc 'Create missing dynamic database partitions'
-    task :create_dynamic_partitions do
-      Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+    task create_dynamic_partitions: :environment do
+      Gitlab::Database::Partitioning::PartitionManager.new.sync_partitions
     end
 
     # This is targeted towards deploys and upgrades of GitLab.
@@ -175,7 +136,13 @@ namespace :gitlab do
     #
     # Other than that it's helpful to create partitions early when bootstrapping
     # a new installation.
+    #
+    # Rails 6.1 deprecates db:structure:load in favor of db:schema:load
     Rake::Task['db:structure:load'].enhance do
+      Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
+    end
+
+    Rake::Task['db:schema:load'].enhance do
       Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
     end
 
@@ -187,7 +154,7 @@ namespace :gitlab do
       Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
     end
 
-    desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
+    desc 'reindex a regular index without downtime to eliminate bloat'
     task :reindex, [:index_name] => :environment do |_, args|
       unless Feature.enabled?(:database_reindexing, type: :ops)
         puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
@@ -204,10 +171,10 @@ namespace :gitlab do
         raise "Index not found or not supported: #{args[:index_name]}" if indexes.empty?
       end
 
-      ActiveRecord::Base.logger = Logger.new(STDOUT) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
+      ActiveRecord::Base.logger = Logger.new($stdout) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
 
       Gitlab::Database::Reindexing.perform(indexes)
-    rescue => e
+    rescue StandardError => e
       Gitlab::AppLogger.error(e)
       raise
     end
@@ -233,11 +200,12 @@ namespace :gitlab do
     end
 
     desc 'Run migrations with instrumentation'
-    task :migration_testing, [:result_file] => :environment do |_, args|
-      result_file = args[:result_file] || raise("Please specify result_file argument")
-      raise "File exists already, won't overwrite: #{result_file}" if File.exist?(result_file)
+    task migration_testing: :environment do
+      result_dir = Gitlab::Database::Migrations::Instrumentation::RESULT_DIR
+      FileUtils.mkdir_p(result_dir)
 
-      verbose_was, ActiveRecord::Migration.verbose = ActiveRecord::Migration.verbose, true
+      verbose_was = ActiveRecord::Migration.verbose
+      ActiveRecord::Migration.verbose = true
 
       ctx = ActiveRecord::Base.connection.migration_context
       existing_versions = ctx.get_all_versions.to_set
@@ -255,13 +223,27 @@ namespace :gitlab do
       end
     ensure
       if instrumentation
-        File.open(result_file, 'wb+') do |io|
+        File.open(File.join(result_dir, Gitlab::Database::Migrations::Instrumentation::STATS_FILENAME), 'wb+') do |io|
           io << instrumentation.observations.to_json
         end
       end
 
       ActiveRecord::Base.clear_cache!
       ActiveRecord::Migration.verbose = verbose_was
+    end
+
+    desc 'Run all pending batched migrations'
+    task execute_batched_migrations: :environment do
+      Gitlab::Database::BackgroundMigration::BatchedMigration.active.queue_order.each do |migration|
+        Gitlab::AppLogger.info("Executing batched migration #{migration.id} inline")
+        Gitlab::Database::BackgroundMigration::BatchedMigrationRunner.new.run_entire_migration(migration)
+      end
+    end
+
+    # Only for development environments,
+    # we execute pending data migrations inline for convenience.
+    Rake::Task['db:migrate'].enhance do
+      Rake::Task['gitlab:db:execute_batched_migrations'].invoke if Rails.env.development?
     end
   end
 end

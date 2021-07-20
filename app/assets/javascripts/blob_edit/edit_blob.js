@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import EditorLite from '~/editor/editor_lite';
-import { FileTemplateExtension } from '~/editor/extensions/editor_file_template_ext';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { FileTemplateExtension } from '~/editor/extensions/source_editor_file_template_ext';
+import SourceEditor from '~/editor/source_editor';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { addEditorMarkdownListeners } from '~/lib/utils/text_markdown';
 import { insertFinalNewline } from '~/lib/utils/text_utility';
@@ -16,12 +16,16 @@ export default class EditBlob {
     this.configureMonacoEditor();
 
     if (this.options.isMarkdown) {
-      import('~/editor/extensions/editor_markdown_ext')
+      import('~/editor/extensions/source_editor_markdown_ext')
         .then(({ EditorMarkdownExtension: MarkdownExtension } = {}) => {
           this.editor.use(new MarkdownExtension());
           addEditorMarkdownListeners(this.editor);
         })
-        .catch((e) => createFlash(`${BLOB_EDITOR_ERROR}: ${e}`));
+        .catch((e) =>
+          createFlash({
+            message: `${BLOB_EDITOR_ERROR}: ${e}`,
+          }),
+        );
     }
 
     this.initModePanesAndLinks();
@@ -36,14 +40,14 @@ export default class EditBlob {
     const fileContentEl = document.getElementById('file-content');
     const form = document.querySelector('.js-edit-blob-form');
 
-    const rootEditor = new EditorLite();
+    const rootEditor = new SourceEditor();
 
     this.editor = rootEditor.createInstance({
       el: editorEl,
       blobPath: fileNameEl.value,
       blobContent: editorEl.innerText,
     });
-    this.editor.use(new FileTemplateExtension());
+    this.editor.use(new FileTemplateExtension({ instance: this.editor }));
 
     fileNameEl.addEventListener('change', () => {
       this.editor.updateModelLanguage(fileNameEl.value);
@@ -82,7 +86,7 @@ export default class EditBlob {
 
     this.$editModePanes.hide();
 
-    currentPane.fadeIn(200);
+    currentPane.show();
 
     if (paneId === '#preview') {
       this.$toggleButton.hide();
@@ -94,7 +98,11 @@ export default class EditBlob {
           currentPane.empty().append(data);
           currentPane.renderGFM();
         })
-        .catch(() => createFlash(BLOB_PREVIEW_ERROR));
+        .catch(() =>
+          createFlash({
+            message: BLOB_PREVIEW_ERROR,
+          }),
+        );
     }
 
     this.$toggleButton.show();

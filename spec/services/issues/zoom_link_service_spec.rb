@@ -7,7 +7,7 @@ RSpec.describe Issues::ZoomLinkService do
   let_it_be(:issue) { create(:issue) }
 
   let(:project) { issue.project }
-  let(:service) { described_class.new(issue, user) }
+  let(:service) { described_class.new(project: project, current_user: user, params: { issue: issue }) }
   let(:zoom_link) { 'https://zoom.us/j/123456789' }
 
   before do
@@ -53,7 +53,10 @@ RSpec.describe Issues::ZoomLinkService do
           category: 'IncidentManagement::ZoomIntegration',
           action: 'add_zoom_meeting',
           label: 'Issue ID',
-          value: issue.id
+          value: issue.id,
+          user: user,
+          project: project,
+          namespace: project.namespace
         )
       end
 
@@ -192,7 +195,10 @@ RSpec.describe Issues::ZoomLinkService do
           category: 'IncidentManagement::ZoomIntegration',
           action: 'remove_zoom_meeting',
           label: 'Issue ID',
-          value: issue.id
+          value: issue.id,
+          user: user,
+          project: project,
+          namespace: project.namespace
         )
       end
     end

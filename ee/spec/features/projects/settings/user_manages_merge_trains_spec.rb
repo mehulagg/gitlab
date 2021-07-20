@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'User manages merge trains option', :js do
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:user) { create(:user) }
 
   before do
@@ -26,7 +26,7 @@ RSpec.describe 'User manages merge trains option', :js do
       visit edit_project_path(project)
       wait_for_requests
 
-      check('Enable merge trains.')
+      check('Enable merge trains')
     end
 
     it 'sees enabled merge trains checkbox' do

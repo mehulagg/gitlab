@@ -11,9 +11,12 @@ describe('whats new actions', () => {
     useLocalStorageSpy();
 
     it('should commit openDrawer', () => {
-      testAction(actions.openDrawer, 'storage-key', {}, [{ type: types.OPEN_DRAWER }]);
+      testAction(actions.openDrawer, 'digest-hash', {}, [{ type: types.OPEN_DRAWER }]);
 
-      expect(window.localStorage.setItem).toHaveBeenCalledWith('storage-key', 'false');
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        'display-whats-new-notification',
+        'digest-hash',
+      );
     });
   });
 
@@ -41,16 +44,33 @@ describe('whats new actions', () => {
       axiosMock.restore();
     });
 
-    it('passes arguments', () => {
+    it("doesn't require arguments", () => {
       axiosMock.reset();
 
       axiosMock
-        .onGet('/-/whats_new', { params: { page: 8, version: 40 } })
+        .onGet('/-/whats_new', { params: { page: undefined, v: undefined } })
         .replyOnce(200, [{ title: 'GitLab Stories' }]);
 
       testAction(
         actions.fetchItems,
-        { page: 8, version: 40 },
+        {},
+        {},
+        expect.arrayContaining([
+          { type: types.ADD_FEATURES, payload: [{ title: 'GitLab Stories' }] },
+        ]),
+      );
+    });
+
+    it('passes arguments', () => {
+      axiosMock.reset();
+
+      axiosMock
+        .onGet('/-/whats_new', { params: { page: 8, v: 42 } })
+        .replyOnce(200, [{ title: 'GitLab Stories' }]);
+
+      testAction(
+        actions.fetchItems,
+        { page: 8, versionDigest: 42 },
         {},
         expect.arrayContaining([
           { type: types.ADD_FEATURES, payload: [{ title: 'GitLab Stories' }] },

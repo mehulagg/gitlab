@@ -23,6 +23,14 @@ module Emails
       mail_answer_thread(@merge_request, merge_request_thread_options(updated_by_user_id, recipient_id, reason))
     end
 
+    def change_in_merge_request_draft_status_email(recipient_id, merge_request_id, updated_by_user_id, reason = nil)
+      setup_merge_request_mail(merge_request_id, recipient_id)
+
+      @updated_by_user = User.find(updated_by_user_id)
+
+      mail_answer_thread(@merge_request, merge_request_thread_options(updated_by_user_id, recipient_id, reason))
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def reassigned_merge_request_email(recipient_id, merge_request_id, previous_assignee_ids, updated_by_user_id, reason = nil)
       setup_merge_request_mail(merge_request_id, recipient_id)
@@ -159,4 +167,4 @@ module Emails
   end
 end
 
-Emails::MergeRequests.prepend_if_ee('EE::Emails::MergeRequests')
+Emails::MergeRequests.prepend_mod_with('Emails::MergeRequests')

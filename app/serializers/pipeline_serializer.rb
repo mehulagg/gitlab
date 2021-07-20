@@ -41,20 +41,14 @@ class PipelineSerializer < BaseSerializer
   def preloaded_relations
     [
       :cancelable_statuses,
-      :latest_statuses_ordered_by_stage,
-      :latest_builds_report_results,
-      :manual_actions,
       :retryable_builds,
-      :scheduled_actions,
       :stages,
       :latest_statuses,
       :trigger_requests,
       :user,
       {
-        downloadable_artifacts: {
-          project: [:route, { namespace: :route }],
-          job: []
-        },
+        manual_actions: :metadata,
+        scheduled_actions: :metadata,
         failed_builds: %i(project metadata),
         merge_request: {
           source_project: [:route, { namespace: :route }],
@@ -76,4 +70,4 @@ class PipelineSerializer < BaseSerializer
   end
 end
 
-PipelineSerializer.prepend_if_ee('EE::PipelineSerializer')
+PipelineSerializer.prepend_mod_with('PipelineSerializer')

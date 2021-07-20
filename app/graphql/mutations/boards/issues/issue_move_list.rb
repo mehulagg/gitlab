@@ -5,35 +5,38 @@ module Mutations
     module Issues
       class IssueMoveList < Mutations::Issues::Base
         graphql_name 'IssueMoveList'
+        BoardGID = ::Types::GlobalIDType[::Board]
+        ListID = ::GraphQL::ID_TYPE
+        IssueID = ::GraphQL::ID_TYPE
 
-        argument :board_id, GraphQL::ID_TYPE,
-                  required: true,
-                  loads: Types::BoardType,
-                  description: 'Global ID of the board that the issue is in.'
+        argument :board_id, BoardGID,
+                 required: true,
+                 loads: Types::BoardType,
+                 description: 'Global ID of the board that the issue is in.'
 
         argument :project_path, GraphQL::ID_TYPE,
-                  required: true,
-                  description: 'Project the issue to mutate is in.'
+                 required: true,
+                 description: 'Project the issue to mutate is in.'
 
         argument :iid, GraphQL::STRING_TYPE,
-                  required: true,
-                  description: 'IID of the issue to mutate.'
+                 required: true,
+                 description: 'IID of the issue to mutate.'
 
-        argument :from_list_id, GraphQL::ID_TYPE,
-                  required: false,
-                  description: 'ID of the board list that the issue will be moved from.'
+        argument :from_list_id, ListID,
+                 required: false,
+                 description: 'ID of the board list that the issue will be moved from.'
 
-        argument :to_list_id, GraphQL::ID_TYPE,
-                  required: false,
-                  description: 'ID of the board list that the issue will be moved to.'
+        argument :to_list_id, ListID,
+                 required: false,
+                 description: 'ID of the board list that the issue will be moved to.'
 
-        argument :move_before_id, GraphQL::ID_TYPE,
-                  required: false,
-                  description: 'ID of issue that should be placed before the current issue.'
+        argument :move_before_id, IssueID,
+                 required: false,
+                 description: 'ID of issue that should be placed before the current issue.'
 
-        argument :move_after_id, GraphQL::ID_TYPE,
-                  required: false,
-                  description: 'ID of issue that should be placed after the current issue.'
+        argument :move_after_id, IssueID,
+                 required: false,
+                 description: 'ID of issue that should be placed after the current issue.'
 
         def ready?(**args)
           if move_arguments(args).blank?
@@ -49,13 +52,8 @@ module Mutations
           super
         end
 
-        def resolve(board:, **args)
-          Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/247861')
-
-          raise_resource_not_available_error! unless board
-          authorize_board!(board)
-
-          issue = authorized_find!(project_path: args[:project_path], iid: args[:iid])
+        def resolve(board:, project_path:, iid:, **args)
+          issue = authorized_find!(project_path: project_path, iid: iid)
           move_params = { id: issue.id, board_id: board.id }.merge(move_arguments(args))
 
           move_issue(board, issue, move_params)
@@ -81,15 +79,9 @@ module Mutations
         def move_arguments(args)
           args.slice(:from_list_id, :to_list_id, :move_after_id, :move_before_id)
         end
-
-        def authorize_board!(board)
-          return if Ability.allowed?(current_user, :read_board, board.resource_parent)
-
-          raise_resource_not_available_error!
-        end
       end
     end
   end
 end
 
-Mutations::Boards::Issues::IssueMoveList.prepend_if_ee('EE::Mutations::Boards::Issues::IssueMoveList')
+Mutations::Boards::Issues::IssueMoveList.prepend_mod_with('Mutations::Boards::Issues::IssueMoveList')

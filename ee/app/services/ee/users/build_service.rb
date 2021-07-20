@@ -18,11 +18,11 @@ module EE
       end
 
       override :execute
-      def execute(skip_authorization: false)
-        user = super
+      def execute
+        super
 
-        build_smartcard_identity(user, params) if ::Gitlab::Auth::Smartcard.enabled?
-        set_pending_approval_state(user)
+        build_smartcard_identity if ::Gitlab::Auth::Smartcard.enabled?
+        set_pending_approval_state
 
         user
       end
@@ -56,10 +56,10 @@ module EE
       end
 
       override :build_identity
-      def build_identity(user)
+      def build_identity
         return super unless params[:provider] == GROUP_SCIM_PROVIDER
 
-        build_scim_identity(user)
+        build_scim_identity
         identity_params[:provider] = GROUP_SAML_PROVIDER
 
         user.provisioned_by_group_id = params[:group_id]
@@ -87,23 +87,23 @@ module EE
         end
       end
 
-      def build_smartcard_identity(user, params)
+      def build_smartcard_identity
         smartcard_identity_attrs = params.slice(:certificate_subject, :certificate_issuer)
 
-        unless smartcard_identity_attrs.empty?
-          user.smartcard_identities.build(subject: params[:certificate_subject],
-                                          issuer: params[:certificate_issuer])
-        end
+        return if smartcard_identity_attrs.empty?
+
+        user.smartcard_identities.build(subject: params[:certificate_subject], issuer: params[:certificate_issuer])
       end
 
-      def build_scim_identity(user)
+      def build_scim_identity
         scim_identity_params = params.slice(*scim_identity_attributes)
 
         user.scim_identities.build(scim_identity_params.merge(active: true))
       end
 
-      def set_pending_approval_state(user)
+      def set_pending_approval_state
         return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+        return unless user.human?
 
         user.state = ::User::BLOCKED_PENDING_APPROVAL_STATE
       end

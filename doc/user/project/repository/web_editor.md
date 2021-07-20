@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# GitLab Web Editor
+# GitLab Web Editor **(FREE)**
 
 Sometimes it's easier to make quick changes directly from the GitLab interface
 than to clone the project and use the Git command-line tool. In this feature
@@ -55,6 +55,27 @@ has already been created, which creates a link to the license itself.
 NOTE:
 The **Set up CI/CD** button does not appear on an empty repository. For the button
 to display, add a file to your repository.
+
+## Highlight lines
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56159) in GitLab 13.10 for GitLab SaaS instances.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56159) in GitLab 13.11 for self-managed instances.
+
+Web Editor enables you to highlight a single line by adding specially formatted
+hash information to the URL's file path segment. For example, the file path segment
+`MY_FILE.js#L3` instructs the Web Editor to highlight line 3.
+
+The Web Editor also enables you to highlight multiple lines using a similar pattern. In
+this case, the file path segment `MY_FILE.js#L3-10` instructs the Web Editor to
+highlight lines 3 to 10 of the file.
+
+You don't need to construct these lines manually. Instead, you can:
+
+1. Hover over the number of a line you want to be highlighted when sharing.
+1. Right-click the number with your mouse.
+1. Click **Copy Link Address** in the context menu.
+
+   ![Link to a line](img/web_editor_line_link_v13_10.png)
 
 ## Upload a file
 
@@ -108,7 +129,7 @@ You can see a **Create merge request** dropdown below the issue description.
 The **Create merge request** button doesn't display if:
 
 - A branch with the same name already exists.
-- The branch already has a referenced merge request.
+- A merge request already exists for this branch.
 - Your project has an active fork relationship.
 
 To make this button appear, one possible workaround is to
@@ -123,7 +144,7 @@ This dropdown contains the options **Create merge request and branch** and **Cre
 ![New Branch Button](img/web_editor_new_branch_from_issue_v_12_6.png)
 
 After selecting one of these options, a new branch or branch and merge request
-is created based on your project's default branch. By default, this branch is `master`.
+is created based on your project's [default branch](branches/default.md).
 The branch name is based on an internal ID, and the issue title. The example
 screenshot above creates a branch named
 `2-make-static-site-auto-deploy-and-serve`.
@@ -131,7 +152,7 @@ screenshot above creates a branch named
 When you click the **Create branch** button in an empty
 repository project, GitLab performs these actions:
 
-- Creates a `master` branch.
+- Creates a default branch.
 - Commits a blank `README.md` file to it.
 - Creates and redirects you to a new branch based on the issue title.
 - _If your project is [configured with a deployment service](../integrations/overview.md) like Kubernetes,_
@@ -162,7 +183,7 @@ request, you can create a new branch upfront.
    ![New branch page](img/web_editor_new_branch_page.png)
 
 You can now make changes to any files, as needed. When you're ready to merge
-the changes back to `master`, you can use the widget at the top of the screen.
+the changes back to your [default branch](branches/default.md), you can use the widget at the top of the screen.
 This widget only appears for a period of time after you create the branch or
 modify files.
 
@@ -190,7 +211,7 @@ SHA:
 ## Tips
 
 When creating or uploading a new file or creating a new directory, you can
-trigger a new merge request rather than committing directly to `master`:
+trigger a new merge request rather than committing directly to your default branch:
 
 1. Enter a new branch name in the **Target branch** field.
 1. GitLab displays the **Start a new merge request with these changes** check box.

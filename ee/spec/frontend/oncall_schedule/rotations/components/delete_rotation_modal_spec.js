@@ -13,7 +13,6 @@ import {
   getOncallSchedulesQueryResponse,
   destroyRotationResponse,
   destroyRotationResponseWithErrors,
-  scheduleIid,
 } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 
@@ -22,15 +21,17 @@ const projectPath = 'group/project';
 const mutate = jest.fn();
 const mockHideModal = jest.fn();
 const rotation = mockRotations[0];
+const schedule =
+  getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
 describe('DeleteRotationModal', () => {
   let wrapper;
   let fakeApollo;
   let destroyRotationHandler;
 
-  const findModal = () => wrapper.find(GlModal);
-  const findModalText = () => wrapper.find(GlSprintf);
-  const findAlert = () => wrapper.find(GlAlert);
+  const findModal = () => wrapper.findComponent(GlModal);
+  const findModalText = () => wrapper.findComponent(GlSprintf);
+  const findAlert = () => wrapper.findComponent(GlAlert);
 
   async function awaitApolloDomMock() {
     await wrapper.vm.$nextTick(); // kick off the DOM update
@@ -39,7 +40,7 @@ describe('DeleteRotationModal', () => {
   }
 
   async function destroyRotation(localWrapper) {
-    localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
+    localWrapper.findComponent(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
   const createComponent = ({ data = {}, props = {} } = {}) => {
@@ -51,7 +52,7 @@ describe('DeleteRotationModal', () => {
       },
       propsData: {
         modalId: deleteRotationModalId,
-        scheduleIid,
+        schedule,
         rotation,
         ...props,
       },
@@ -95,7 +96,7 @@ describe('DeleteRotationModal', () => {
       propsData: {
         rotation,
         modalId: deleteRotationModalId,
-        scheduleIid,
+        schedule,
       },
       provide: {
         projectPath,
@@ -128,7 +129,7 @@ describe('DeleteRotationModal', () => {
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
         update: expect.anything(),
-        variables: { id: rotation.id, projectPath, scheduleIid },
+        variables: { id: rotation.id, projectPath, scheduleIid: schedule.iid },
       });
     });
 
@@ -161,9 +162,7 @@ describe('DeleteRotationModal', () => {
       expect(findModal().attributes('data-testid')).toBe(`delete-rotation-modal-${rotation.id}`);
     });
 
-    // Fix is coming in: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52773/
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('calls a mutation with correct parameters and destroys a rotation', async () => {
+    it('calls a mutation with correct parameters and destroys a rotation', async () => {
       createComponentWithApollo();
 
       await destroyRotation(wrapper);
@@ -171,9 +170,7 @@ describe('DeleteRotationModal', () => {
       expect(destroyRotationHandler).toHaveBeenCalled();
     });
 
-    // Fix is coming in: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52773/
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('displays alert if mutation had a recoverable error', async () => {
+    it('displays alert if mutation had a recoverable error', async () => {
       createComponentWithApollo({
         destroyHandler: jest.fn().mockResolvedValue(destroyRotationResponseWithErrors),
       });

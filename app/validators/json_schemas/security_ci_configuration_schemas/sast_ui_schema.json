@@ -1,4 +1,5 @@
 {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "global": [
         {
             "field" : "SECURE_ANALYZERS_PREFIX",
@@ -17,15 +18,6 @@
             "value": "",
             "size": "MEDIUM",
             "description": "Comma-separated list of paths to be excluded from analyzer output. Patterns can be globs, file paths, or folder paths."
-        },
-        {
-            "field" : "SAST_ANALYZER_IMAGE_TAG",
-            "label" : "Image tag",
-            "type": "string",
-            "default_value": "",
-            "value": "",
-            "size": "SMALL",
-            "description": "Analyzer image's tag"
         }
     ],
     "pipeline": [
@@ -50,23 +42,6 @@
     ],
     "analyzers": [
         {
-            "name": "brakeman",
-            "label": "Brakeman",
-            "enabled" : true,
-            "description": "Ruby on Rails",
-            "variables": [
-                {
-                    "field" : "SAST_BRAKEMAN_LEVEL",
-                    "label" : "Brakeman confidence level.",
-                    "type": "string",
-                    "default_value": "1",
-                    "value": "",
-                    "size": "SMALL",
-                    "description": "Ignore Brakeman vulnerabilities under given confidence level. Integer, 1=Low, 2=Medium, 3=High."
-                }
-            ]
-        },
-        {
             "name": "bandit",
             "label": "Bandit",
             "enabled" : true,
@@ -74,12 +49,29 @@
             "variables": [
                 {
                     "field" : "SAST_BANDIT_EXCLUDED_PATHS",
-                    "label" : "Paths to exclude from scan.",
+                    "label" : "Paths to exclude from scan",
                     "type": "string",
                     "default_value": "",
                     "value": "",
                     "size": "SMALL",
                     "description": "Comma-separated list of paths to exclude from scan. Uses Python’s 'fnmatch' syntax; For example: '*/tests/*, */venv/*'"
+                }
+            ]
+        },
+        {
+            "name": "brakeman",
+            "label": "Brakeman",
+            "enabled" : true,
+            "description": "Ruby on Rails",
+            "variables": [
+                {
+                    "field" : "SAST_BRAKEMAN_LEVEL",
+                    "label" : "Brakeman confidence level",
+                    "type": "string",
+                    "default_value": "1",
+                    "value": "",
+                    "size": "SMALL",
+                    "description": "Ignore Brakeman vulnerabilities under given confidence level. Integer, 1=Low, 2=Medium, 3=High."
                 }
             ]
         },
@@ -108,22 +100,8 @@
             ]
         },
         {
-            "name": "kubesec",
-            "label": "kubesec",
-            "enabled" : true,
-            "description": "Kubernetes manifests, Helm Charts",
-            "variables": []
-        },
-        {
-            "name": "nodejs-scan",
-            "label": "Node.js Scan",
-            "enabled" : true,
-            "description": "Node.js",
-            "variables": []
-        },
-        {
             "name": "gosec",
-            "label": "Golang Security Checker",
+            "label": "Gosec",
             "enabled" : true,
             "description": "Go",
             "variables": [
@@ -137,6 +115,20 @@
                     "description": "Ignore Gosec vulnerabilities under given confidence level. Integer, 0=Undefined, 1=Low, 2=Medium, 3=High."
                 }
             ]
+        },
+        {
+            "name": "kubesec",
+            "label": "Kubesec",
+            "enabled" : true,
+            "description": "Kubernetes manifests, Helm Charts",
+            "variables": []
+        },
+        {
+            "name": "nodejs-scan",
+            "label": "Node.js Scan",
+            "enabled" : true,
+            "description": "Node.js",
+            "variables": []
         },
         {
             "name": "phpcs-security-audit",
@@ -157,6 +149,13 @@
             "label": "Security Code Scan",
             "enabled" : true,
             "description": ".NET Core, .NET Framework",
+            "variables": []
+        },
+        {
+            "name": "semgrep",
+            "label": "Semgrep",
+            "enabled": true,
+            "description": "Multi-language scanning",
             "variables": []
         },
         {

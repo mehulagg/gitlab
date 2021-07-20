@@ -40,7 +40,7 @@ describe('MergeRequestTable component', () => {
     wrapper.destroy();
   });
 
-  const findTable = () => wrapper.find(GlTable);
+  const findTable = () => wrapper.findComponent(GlTable);
   const findTableRow = (index) => findTable().findAll('tbody tr').at(index);
   const findReviewTimeCol = (rowIndex) => findTableRow(rowIndex).findAll('td').at(1);
 

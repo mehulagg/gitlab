@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Get a single avatar URL
 
-Get a single [avatar](../user/profile/index.md#user-settings) URL for a user with the given email address.
+Get a single [avatar](../user/profile/index.md#access-your-user-settings) URL for a user with the given email address.
 
 If:
 

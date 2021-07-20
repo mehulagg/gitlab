@@ -24,11 +24,7 @@ module EE
     end
 
     def trial_selection_intro_text
-      if any_trial_user_namespaces? && any_trial_group_namespaces?
-        s_('Trials|You can apply your trial to a new group, an existing group, or your personal account.')
-      elsif any_trial_user_namespaces?
-        s_('Trials|You can apply your trial to a new group or your personal account.')
-      elsif any_trial_group_namespaces?
+      if any_trial_group_namespaces?
         s_('Trials|You can apply your trial to a new group or an existing group.')
       else
         s_('Trials|Create a new group to start your GitLab Ultimate trial.')
@@ -36,14 +32,13 @@ module EE
     end
 
     def show_trial_namespace_select?
-      any_trial_group_namespaces? || any_trial_user_namespaces?
+      any_trial_group_namespaces?
     end
 
     def namespace_options_for_select(selected = nil)
       grouped_options = {
         'New' => [[_('Create group'), 0]],
-        'Groups' => trial_group_namespaces.map { |n| [n.name, n.id] },
-        'Users' => trial_user_namespaces.map { |n| [n.name, n.id] }
+        'Groups' => trial_group_namespaces.map { |n| [n.name, n.id] }
       }
 
       grouped_options_for_select(grouped_options, selected, prompt: _('Please select'))
@@ -57,6 +52,28 @@ module EE
       namespace&.errors&.full_messages&.to_sentence&.presence || service_result&.dig(:errors)&.presence
     end
 
+    def show_extend_reactivate_trial_button?(namespace)
+      return false unless ::Feature.enabled?(:allow_extend_reactivate_trial, default_enabled: :yaml)
+
+      namespace.can_extend_trial? || namespace.can_reactivate_trial?
+    end
+
+    def extend_reactivate_trial_button_data(namespace)
+      action = if namespace.can_extend_trial?
+                 'extend'
+               elsif namespace.can_reactivate_trial?
+                 'reactivate'
+               else
+                 nil
+               end
+
+      {
+        namespace_id: namespace.id,
+        plan_name: namespace.actual_plan_name.titleize,
+        action: action
+      }
+    end
+
     private
 
     def trial_group_namespaces
@@ -65,21 +82,8 @@ module EE
       end
     end
 
-    def trial_user_namespaces
-      return [] if experiment_enabled?(:group_only_trials)
-
-      strong_memoize(:trial_user_namespaces) do
-        user_namespace = current_user.namespace
-        user_namespace.eligible_for_trial? ? [user_namespace] : []
-      end
-    end
-
     def any_trial_group_namespaces?
       trial_group_namespaces.any?
-    end
-
-    def any_trial_user_namespaces?
-      trial_user_namespaces.any?
     end
   end
 end

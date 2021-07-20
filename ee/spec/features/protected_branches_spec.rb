@@ -9,7 +9,6 @@ RSpec.describe 'Protected Branches', :js do
   let(:user) { project.owner }
 
   before do
-    stub_feature_flags(deploy_keys_on_protected_branches: false)
     sign_in(user)
   end
 
@@ -194,7 +193,7 @@ RSpec.describe 'Protected Branches', :js do
       stub_licensed_features(protected_refs_for_users: true)
     end
 
-    include_examples 'when the deploy_keys_on_protected_branches FF is turned on' do
+    include_examples 'Deploy keys with protected branches' do
       let(:all_dropdown_sections) { %w(Roles Users Deploy\ Keys) }
     end
   end

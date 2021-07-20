@@ -7,11 +7,11 @@ module API
 
       content_type :txt, 'text/plain'
 
-      feature_category :continuous_integration
+      feature_category :runner
 
       resource :runners do
         desc 'Registers a new Runner' do
-          success Entities::RunnerRegistrationDetails
+          success Entities::Ci::RunnerRegistrationDetails
           http_codes [[201, 'Runner was created'], [403, 'Forbidden']]
         end
         params do
@@ -34,22 +34,22 @@ module API
             if runner_registration_token_valid?
               # Create shared runner. Requires admin access
               attributes.merge(runner_type: :instance_type)
-            elsif project = Project.find_by_runners_token(params[:token])
+            elsif runner_registrar_valid?('project') && @project = Project.find_by_runners_token(params[:token])
               # Create a specific runner for the project
-              attributes.merge(runner_type: :project_type, projects: [project])
-            elsif group = Group.find_by_runners_token(params[:token])
+              attributes.merge(runner_type: :project_type, projects: [@project])
+            elsif runner_registrar_valid?('group') && @group = Group.find_by_runners_token(params[:token])
               # Create a specific runner for the group
-              attributes.merge(runner_type: :group_type, groups: [group])
+              attributes.merge(runner_type: :group_type, groups: [@group])
             else
               forbidden!
             end
 
-          runner = ::Ci::Runner.create(attributes)
+          @runner = ::Ci::Runner.create(attributes)
 
-          if runner.persisted?
-            present runner, with: Entities::RunnerRegistrationDetails
+          if @runner.persisted?
+            present @runner, with: Entities::Ci::RunnerRegistrationDetails
           else
-            render_validation_error!(runner)
+            render_validation_error!(@runner)
           end
         end
 
@@ -62,9 +62,7 @@ module API
         delete '/' do
           authenticate_runner!
 
-          runner = ::Ci::Runner.find_by_token(params[:token])
-
-          destroy_conditionally!(runner)
+          destroy_conditionally!(current_runner)
         end
 
         desc 'Validates authentication credentials' do
@@ -81,15 +79,10 @@ module API
       end
 
       resource :jobs do
-        before do
-          Gitlab::ApplicationContext.push(
-            user: -> { current_job&.user },
-            project: -> { current_job&.project }
-          )
-        end
+        before { set_application_context }
 
         desc 'Request a job' do
-          success Entities::JobRequest::Response
+          success Entities::Ci::JobRequest::Response
           http_codes [[201, 'Job was scheduled'],
                       [204, 'No job for Runner'],
                       [403, 'Forbidden']]
@@ -105,6 +98,9 @@ module API
             optional :architecture, type: String, desc: %q(Runner's architecture)
             optional :executor, type: String, desc: %q(Runner's executor)
             optional :features, type: Hash, desc: %q(Runner's features)
+            optional :config, type: Hash, desc: %q(Runner's config) do
+              optional :gpus, type: String, desc: %q(GPUs enabled)
+            end
           end
           optional :session, type: Hash, desc: %q(Runner's session data) do
             optional :url, type: String, desc: %q(Session's url)
@@ -172,7 +168,6 @@ module API
         params do
           requires :token, type: String, desc: %q(Runners's authentication token)
           requires :id, type: Integer, desc: %q(Job's ID)
-          optional :trace, type: String, desc: %q(Job's full trace)
           optional :state, type: String, desc: %q(Job's status: success, failed)
           optional :checksum, type: String, desc: %q(Job's trace CRC32 checksum)
           optional :failure_reason, type: String, desc: %q(Job's failure_reason)
@@ -191,6 +186,8 @@ module API
             .new(job, declared_params(include_missing: false))
 
           service.execute.then do |result|
+            track_ci_minutes_usage!(job, current_runner)
+
             header 'X-GitLab-Trace-Update-Interval', result.backoff
             status result.status
             body result.status.to_s
@@ -217,9 +214,15 @@ module API
             .new(job, content_range: content_range)
             .execute(request.body.read)
 
+          if result.status == 403
+            break error!('403 Forbidden', 403)
+          end
+
           if result.status == 416
             break error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{result.stream_size}" })
           end
+
+          track_ci_minutes_usage!(job, current_runner)
 
           status result.status
           header 'Job-Status', job.status
@@ -252,7 +255,7 @@ module API
 
           job = authenticate_job!
 
-          result = ::Ci::CreateJobArtifactsService.new(job).authorize(artifact_type: params[:artifact_type], filesize: params[:filesize])
+          result = ::Ci::JobArtifacts::CreateService.new(job).authorize(artifact_type: params[:artifact_type], filesize: params[:filesize])
 
           if result[:status] == :success
             content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
@@ -264,7 +267,7 @@ module API
         end
 
         desc 'Upload artifacts for job' do
-          success Entities::JobRequest::Response
+          success Entities::Ci::JobRequest::Response
           http_codes [[201, 'Artifact uploaded'],
                       [400, 'Bad request'],
                       [403, 'Forbidden'],
@@ -291,7 +294,7 @@ module API
           artifacts = params[:file]
           metadata = params[:metadata]
 
-          result = ::Ci::CreateJobArtifactsService.new(job).execute(artifacts, params, metadata_file: metadata)
+          result = ::Ci::JobArtifacts::CreateService.new(job).execute(artifacts, params, metadata_file: metadata)
 
           if result[:status] == :success
             status :created

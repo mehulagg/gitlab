@@ -1,11 +1,11 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Pipeline Efficiency
+# Pipeline efficiency **(FREE)**
 
 [CI/CD Pipelines](index.md) are the fundamental building blocks for [GitLab CI/CD](../README.md).
 Making pipelines more efficient helps you save developer time, which:
@@ -33,7 +33,7 @@ heavily influenced by the:
 - The ["critical path"](#directed-acyclic-graphs-dag-visualization), which represents
   the minimum and maximum pipeline duration.
 
-Additional points to pay attention relate to [GitLab Runners](../runners/README.md):
+Additional points to pay attention relate to [GitLab Runners](../runners/index.md):
 
 - Availability of the runners and the resources they are provisioned with.
 - Build dependencies and their installation time.
@@ -62,7 +62,7 @@ It's important to understand and document the pipeline workflows, and discuss po
 actions and changes. Refactoring pipelines may need careful interaction between teams
 in the DevSecOps lifecycle.
 
-Pipeline analysis can help identify issues with cost efficiency. For example, [runners](../runners/README.md)
+Pipeline analysis can help identify issues with cost efficiency. For example, [runners](../runners/index.md)
 hosted with a paid cloud service may be provisioned with:
 
 - More resources than needed for CI/CD pipelines, wasting money.
@@ -100,7 +100,7 @@ representation of pipeline health.
 
 Instance administrators have access to additional [performance metrics and self-monitoring](../../administration/monitoring/index.md).
 
-You can fetch specific pipeline health metrics from the [API](../../api/README.md).
+You can fetch specific pipeline health metrics from the [API](../../api/index.md).
 External monitoring tools can poll the API and verify pipeline health or collect
 metrics for long term SLA analytics.
 
@@ -109,6 +109,8 @@ for Prometheus fetches metrics from the API and pipeline events. It can check br
 and get the pipeline status and duration. In combination with a Grafana dashboard,
 this helps build an actionable view for your operations team. Metric graphs can also
 be embedded into incidents making problem resolving easier. Additionally, it can also export metrics about jobs and environments.
+
+If you use the GitLab CI Pipelines Exporter, you should start with the [example configuration](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md).
 
 ![Grafana Dashboard for GitLab CI Pipelines Prometheus Exporter](img/ci_efficiency_pipeline_health_grafana_dashboard.png)
 
@@ -144,7 +146,7 @@ with embedded metric charts and all valuable details to analyze the problem.
 
 Review the storage use of the following to help analyze costs and efficiency:
 
-- [Job artifacts](job_artifacts.md) and their [`expire_in`](../yaml/README.md#artifactsexpire_in)
+- [Job artifacts](job_artifacts.md) and their [`expire_in`](../yaml/index.md#artifactsexpire_in)
   configuration. If kept for too long, storage usage grows and could slow pipelines down.
 - [Container registry](../../user/packages/container_registry/index.md) usage.
 - [Package registry](../../user/packages/package_registry/index.md) usage.
@@ -160,9 +162,9 @@ make pipelines run faster and more efficiently.
 Try to find which jobs don't need to run in all situations, and use pipeline configuration
 to stop them from running:
 
-- Use the [`interruptible`](../yaml/README.md#interruptible) keyword to stop old pipelines
+- Use the [`interruptible`](../yaml/index.md#interruptible) keyword to stop old pipelines
   when they are superseded by a newer pipeline.
-- Use [`rules`](../yaml/README.md#rules) to skip tests that aren't needed. For example,
+- Use [`rules`](../yaml/index.md#rules) to skip tests that aren't needed. For example,
   skip backend tests when only the frontend code is changed.
 - Run non-essential [scheduled pipelines](schedules.md) less frequently.
 
@@ -184,7 +186,7 @@ shouldn't run, saving pipeline resources.
 In a basic configuration, jobs always wait for all other jobs in earlier stages to complete
 before running. This is the simplest configuration, but it's also the slowest in most
 cases. [Directed Acyclic Graphs](../directed_acyclic_graph/index.md) and
-[parent/child pipelines](../parent_child_pipelines.md) are more flexible and can
+[parent/child pipelines](parent_child_pipelines.md) are more flexible and can
 be more efficient, but can also make pipelines harder to understand and analyze.
 
 ### Caching
@@ -193,7 +195,7 @@ Another optimization method is to [cache](../caching/index.md) dependencies. If 
 dependencies change rarely, like [NodeJS `/node_modules`](../caching/index.md#cache-nodejs-dependencies),
 caching can make pipeline execution much faster.
 
-You can use [`cache:when`](../yaml/README.md#cachewhen) to cache downloaded dependencies
+You can use [`cache:when`](../yaml/index.md#cachewhen) to cache downloaded dependencies
 even when a job fails.
 
 ### Docker Images

@@ -43,12 +43,10 @@ describe('Incidents List', () => {
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findTimeAgo = () => wrapper.findAll(TimeAgoTooltip);
   const findAssignees = () => wrapper.findAll('[data-testid="incident-assignees"]');
-  const findIncidentSlaHeader = () => wrapper.find('[data-testid="incident-management-sla"]');
   const findCreateIncidentBtn = () => wrapper.find('[data-testid="createIncidentBtn"]');
   const findClosedIcon = () => wrapper.findAll("[data-testid='incident-closed']");
   const findEmptyState = () => wrapper.find(GlEmptyState);
   const findSeverity = () => wrapper.findAll(SeverityToken);
-  const findIncidentSla = () => wrapper.findAll("[data-testid='incident-sla']");
 
   function mountComponent({ data = {}, loading = false, provide = {} } = {}) {
     wrapper = mount(IncidentsList, {
@@ -188,35 +186,6 @@ describe('Incidents List', () => {
         joinPaths(`/project/issues/incident`, mockIncidents[0].iid),
       );
     });
-
-    describe('Incident SLA field', () => {
-      it('displays the column when the feature is available', () => {
-        mountComponent({
-          data: { incidents: { list: mockIncidents } },
-          provide: { slaFeatureAvailable: true },
-        });
-
-        expect(findIncidentSlaHeader().text()).toContain('Time to SLA');
-      });
-
-      it('does not display the column when the feature is not available', () => {
-        mountComponent({
-          data: { incidents: { list: mockIncidents } },
-          provide: { slaFeatureAvailable: false },
-        });
-
-        expect(findIncidentSlaHeader().exists()).toBe(false);
-      });
-
-      it('renders an SLA for each incident', () => {
-        mountComponent({
-          data: { incidents: { list: mockIncidents } },
-          provide: { slaFeatureAvailable: true },
-        });
-
-        expect(findIncidentSla().length).toBe(mockIncidents.length);
-      });
-    });
   });
 
   describe('Create Incident', () => {
@@ -270,22 +239,25 @@ describe('Incidents List', () => {
     const noneSort = 'none';
 
     it.each`
-      selector                   | initialSort | firstSort   | nextSort
-      ${TH_CREATED_AT_TEST_ID}   | ${descSort} | ${ascSort}  | ${descSort}
-      ${TH_SEVERITY_TEST_ID}     | ${noneSort} | ${descSort} | ${ascSort}
-      ${TH_PUBLISHED_TEST_ID}    | ${noneSort} | ${descSort} | ${ascSort}
-      ${TH_INCIDENT_SLA_TEST_ID} | ${noneSort} | ${ascSort}  | ${descSort}
-    `('updates sort with new direction', async ({ selector, initialSort, firstSort, nextSort }) => {
-      const [[attr, value]] = Object.entries(selector);
-      const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);
-      expect(columnHeader().attributes('aria-sort')).toBe(initialSort);
-      columnHeader().trigger('click');
-      await wrapper.vm.$nextTick();
-      expect(columnHeader().attributes('aria-sort')).toBe(firstSort);
-      columnHeader().trigger('click');
-      await wrapper.vm.$nextTick();
-      expect(columnHeader().attributes('aria-sort')).toBe(nextSort);
-    });
+      description        | selector                   | initialSort | firstSort   | nextSort
+      ${'creation date'} | ${TH_CREATED_AT_TEST_ID}   | ${descSort} | ${ascSort}  | ${descSort}
+      ${'severity'}      | ${TH_SEVERITY_TEST_ID}     | ${noneSort} | ${descSort} | ${ascSort}
+      ${'publish date'}  | ${TH_PUBLISHED_TEST_ID}    | ${noneSort} | ${descSort} | ${ascSort}
+      ${'due date'}      | ${TH_INCIDENT_SLA_TEST_ID} | ${noneSort} | ${ascSort}  | ${descSort}
+    `(
+      'updates sort with new direction when sorting by $description',
+      async ({ selector, initialSort, firstSort, nextSort }) => {
+        const [[attr, value]] = Object.entries(selector);
+        const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);
+        expect(columnHeader().attributes('aria-sort')).toBe(initialSort);
+        columnHeader().trigger('click');
+        await wrapper.vm.$nextTick();
+        expect(columnHeader().attributes('aria-sort')).toBe(firstSort);
+        columnHeader().trigger('click');
+        await wrapper.vm.$nextTick();
+        expect(columnHeader().attributes('aria-sort')).toBe(nextSort);
+      },
+    );
   });
 
   describe('Snowplow tracking', () => {

@@ -1,6 +1,6 @@
 - return unless can?(current_user, :remove_project, project)
 - adjourned_deletion = project.adjourned_deletion?
-- adjourned_date = adjourned_deletion ? permanent_deletion_date(Time.now.utc).to_s : nil;
+- adjourned_date = adjourned_deletion ? permanent_deletion_date(Time.now.utc).to_s : nil
 - admin_help_path = help_page_path('user/admin_area/settings/visibility_and_access_controls', anchor: 'default-deletion-delay')
 - recovery_help_path = help_page_path('user/project/settings/index', anchor: 'delete-a-project')
 
@@ -22,4 +22,5 @@
       #js-project-delete-button{ data: { form_path: project_path(project), confirm_phrase: project.path } }
 - else
   = render 'projects/settings/restore', project: project
+  = render 'projects/settings/permanently_delete', project: project
 

@@ -108,16 +108,18 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
     issues.pop(5).each do |issue|
       Timecop.travel(issue.created_at + random_duration_in_hours.hours)
       Issues::UpdateService.new(
-        project,
-        user,
-        label_ids: [in_dev_label.id]
+        project: project,
+        current_user: user,
+        params: { label_ids: [in_dev_label.id] },
+        spam_params: nil
       ).execute(issue)
 
       Timecop.travel(random_duration_in_hours.hours.from_now)
       Issues::UpdateService.new(
-        project,
-        user,
-        label_ids: [in_review_label.id]
+        project: project,
+        current_user: user,
+        params: { label_ids: [in_review_label.id] },
+        spam_params: nil
       ).execute(issue)
     end
   end
@@ -153,7 +155,7 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
         assignees: [project.team.users.sample]
       }
 
-      Issues::CreateService.new(@project, project.team.users.sample, issue_params).execute
+      Issues::CreateService.new(project: @project, current_user: project.team.users.sample, params: issue_params, spam_params: nil).execute
     end
   end
 
@@ -168,7 +170,7 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
 
       begin
         developer = project.team.developers.sample
-        MergeRequests::CreateService.new(project, developer, opts).execute
+        MergeRequests::CreateService.new(project: project, current_user: developer, params: opts).execute
       rescue Gitlab::Access::AccessDeniedError
         nil
       end

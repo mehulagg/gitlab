@@ -1,12 +1,12 @@
 import { GlButton } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const TEST_RULE = { id: 10 };
 
@@ -19,11 +19,10 @@ describe('EE Approvals RuleControls', () => {
   let actions;
 
   const factory = () => {
-    wrapper = shallowMount(localVue.extend(RuleControls), {
+    wrapper = shallowMount(RuleControls, {
       propsData: {
         rule: TEST_RULE,
       },
-      localVue,
       store: new Vuex.Store(store),
     });
   };

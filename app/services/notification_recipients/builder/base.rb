@@ -100,20 +100,45 @@ module NotificationRecipients
       # Get project/group users with CUSTOM notification level
       # rubocop: disable CodeReuse/ActiveRecord
       def add_custom_notifications
-        user_ids = []
+        notification_by_sources = related_notification_settings_sources(:custom)
 
-        # Users with a notification setting on group or project
-        user_ids += user_ids_notifiable_on(project, :custom)
-        user_ids += user_ids_notifiable_on(group, :custom)
+        return if notification_by_sources.blank?
 
-        # Users with global level custom
-        user_ids_with_project_level_global = user_ids_notifiable_on(project, :global)
-        user_ids_with_group_level_global   = user_ids_notifiable_on(group, :global)
-
-        global_users_ids = user_ids_with_project_level_global.concat(user_ids_with_group_level_global)
-        user_ids += user_ids_with_global_level_custom(global_users_ids, custom_action)
+        user_ids = NotificationSetting.from_union(notification_by_sources).select(:user_id)
 
         add_recipients(user_scope.where(id: user_ids), :custom, nil)
+      end
+
+      def related_notification_settings_sources(level)
+        sources = [project, group].compact
+
+        sources.map do |source|
+          source
+            .notification_settings
+            .where(source_or_global_setting_by_level_query(level)).select(:user_id)
+        end
+      end
+
+      def global_setting_by_level_query(level)
+        table = NotificationSetting.arel_table
+        aliased_table = table.alias
+
+        table
+          .project('true')
+          .from(aliased_table)
+          .where(
+            aliased_table[:user_id].eq(table[:user_id])
+              .and(aliased_table[:source_id].eq(nil))
+              .and(aliased_table[:source_type].eq(nil))
+              .and(aliased_table[:level].eq(level))
+          ).exists
+      end
+
+      def source_or_global_setting_by_level_query(level)
+        table = NotificationSetting.arel_table
+        table.grouping(
+          table[:level].eq(:global).and(global_setting_by_level_query(level))
+        ).or(table[:level].eq(level))
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -128,27 +153,25 @@ module NotificationRecipients
       # Get project users with WATCH notification level
       # rubocop: disable CodeReuse/ActiveRecord
       def project_watchers
-        project_members_ids = user_ids_notifiable_on(project)
+        notification_by_sources = related_notification_settings_sources(:watch)
 
-        user_ids_with_project_global = user_ids_notifiable_on(project, :global)
-        user_ids_with_group_global   = user_ids_notifiable_on(project.group, :global)
+        return if notification_by_sources.blank?
 
-        user_ids = user_ids_with_global_level_watch((user_ids_with_project_global + user_ids_with_group_global).uniq)
+        user_ids = NotificationSetting.from_union(notification_by_sources).select(:user_id)
 
-        user_ids_with_project_setting = select_project_members_ids(user_ids_with_project_global, user_ids)
-        user_ids_with_group_setting = select_group_members_ids(project.group, project_members_ids, user_ids_with_group_global, user_ids)
-
-        user_scope.where(id: user_ids_with_project_setting.concat(user_ids_with_group_setting).uniq)
+        user_scope.where(id: user_ids)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       # rubocop: disable CodeReuse/ActiveRecord
       def group_watchers
-        user_ids_with_group_global = user_ids_notifiable_on(group, :global)
-        user_ids = user_ids_with_global_level_watch(user_ids_with_group_global)
-        user_ids_with_group_setting = select_group_members_ids(group, [], user_ids_with_group_global, user_ids)
+        return [] unless group
 
-        user_scope.where(id: user_ids_with_group_setting)
+        user_ids = group
+          .notification_settings
+          .where(source_or_global_setting_by_level_query(:watch)).select(:user_id)
+
+        user_scope.where(id: user_ids)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

@@ -12,6 +12,7 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
 
   let(:email_raw) { email_fixture('emails/service_desk.eml') }
   let_it_be(:group) { create(:group, :private, name: "email") }
+
   let(:expected_description) do
     "Service desk stuff!\n\n```\na = b\n```\n\n`/label ~label1`\n`/assign @user1`\n`/close`\n![image](uploads/image.png)"
   end
@@ -36,7 +37,7 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
         expect(new_issue.author).to eql(User.support_bot)
         expect(new_issue.confidential?).to be true
         expect(new_issue.all_references.all).to be_empty
-        expect(new_issue.title).to eq("Service Desk (from jake@adventuretime.ooo): The message subject! @all")
+        expect(new_issue.title).to eq("The message subject! @all")
         expect(new_issue.description).to eq(expected_description.strip)
       end
 
@@ -49,6 +50,15 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
 
       it 'sends thank you email' do
         expect { receiver.execute }.to have_enqueued_job.on_queue('mailers')
+      end
+
+      it 'adds metric events for incoming and reply emails' do
+        metric_transaction = double('Gitlab::Metrics::WebTransaction', increment: true, observe: true)
+        allow(::Gitlab::Metrics::BackgroundTransaction).to receive(:current).and_return(metric_transaction)
+        expect(metric_transaction).to receive(:add_event).with(:receive_email_service_desk, { handler: 'Gitlab::Email::Handler::ServiceDeskHandler' })
+        expect(metric_transaction).to receive(:add_event).with(:service_desk_thank_you_email)
+
+        receiver.execute
       end
     end
 
@@ -90,11 +100,6 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
           context 'when quick actions are present' do
             let(:label) { create(:label, project: project, title: 'label1') }
             let(:milestone) { create(:milestone, project: project) }
-            let!(:user) { create(:user, username: 'user1') }
-
-            before do
-              project.add_developer(user)
-            end
 
             it 'applies quick action commands present on templates' do
               file_content = %(Text from template \n/label ~#{label.title} \n/milestone %"#{milestone.name}"")
@@ -173,12 +178,17 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
       end
 
       context 'when using service desk key' do
-        let_it_be(:service_desk_settings) { create(:service_desk_setting, project: project, project_key: 'mykey') }
+        let_it_be(:service_desk_key) { 'mykey' }
+
         let(:email_raw) { service_desk_fixture('emails/service_desk_custom_address.eml') }
         let(:receiver) { Gitlab::Email::ServiceDeskReceiver.new(email_raw) }
 
         before do
           stub_service_desk_email_setting(enabled: true, address: 'support+%{key}@example.com')
+        end
+
+        before_all do
+          create(:service_desk_setting, project: project, project_key: service_desk_key)
         end
 
         it_behaves_like 'a new issue request'
@@ -196,6 +206,21 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
 
           it 'bounces the email' do
             expect { receiver.execute }.to raise_error(Gitlab::Email::ProjectNotFound)
+          end
+        end
+
+        context 'when there are multiple projects with same key' do
+          let_it_be(:project_with_same_key) { create(:project, group: group, service_desk_enabled: true) }
+
+          let(:email_raw) { service_desk_fixture('emails/service_desk_custom_address.eml', slug: project_with_same_key.full_path_slug.to_s) }
+
+          before do
+            create(:service_desk_setting, project: project_with_same_key, project_key: service_desk_key)
+          end
+
+          it 'process email for project with matching slug' do
+            expect { receiver.execute }.to change { Issue.count }.by(1)
+            expect(Issue.last.project).to eq(project_with_same_key)
           end
         end
       end

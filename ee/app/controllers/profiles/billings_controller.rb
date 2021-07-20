@@ -6,10 +6,16 @@ class Profiles::BillingsController < Profiles::ApplicationController
   feature_category :purchase
 
   def index
-    @plans_data = FetchSubscriptionPlansService
+    @hide_search_settings = true
+    @plans_data = GitlabSubscriptions::FetchSubscriptionPlansService
       .new(plan: current_user.namespace.plan_name_for_upgrading, namespace_id: current_user.namespace_id)
       .execute
-    track_experiment_event(:contact_sales_btn_in_app, 'page_view:billing_plans:profile')
-    record_experiment_user(:contact_sales_btn_in_app)
+
+    if @plans_data
+      track_experiment_event(:contact_sales_btn_in_app, 'page_view:billing_plans:profile')
+      record_experiment_user(:contact_sales_btn_in_app)
+    else
+      render 'shared/billings/customers_dot_unavailable'
+    end
   end
 end

@@ -30,6 +30,7 @@ module API
       success Entities::ApplicationSetting
     end
     params do
+      optional :admin_mode, type: Boolean, desc: 'Require admin users to re-authenticate for administrative (i.e. potentially dangerous) operations'
       optional :admin_notification_email, type: String, desc: 'Deprecated: Use :abuse_notification_email instead. Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :abuse_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :after_sign_up_text, type: String, desc: 'Text shown after sign up'
@@ -45,7 +46,7 @@ module API
       optional :asset_proxy_allowlist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically allowed.'
       optional :container_registry_token_expire_delay, type: Integer, desc: 'Authorization token duration (minutes)'
       optional :default_artifacts_expire_in, type: String, desc: "Set the default expiration time for each job's artifacts"
-      optional :default_ci_config_path, type: String, desc: 'The instance default CI configuration path for new projects'
+      optional :default_ci_config_path, type: String, desc: 'The instance default CI/CD configuration file and path for new projects'
       optional :default_project_creation, type: Integer, values: ::Gitlab::Access.project_creation_values, desc: 'Determine if developers can create projects in the group'
       optional :default_branch_protection, type: Integer, values: ::Gitlab::Access.protection_values, desc: 'Determine if developers can push to master'
       optional :default_group_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default group visibility'
@@ -91,6 +92,7 @@ module API
       optional :import_sources, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce,
                                 values: %w[github bitbucket bitbucket_server gitlab google_code fogbugz git gitlab_project gitea manifest phabricator],
                                 desc: 'Enabled sources for code import during project creation. OmniAuth must be configured for GitHub, Bitbucket, and GitLab.com'
+      optional :in_product_marketing_emails_enabled, type: Boolean, desc: 'By default, in-product marketing emails are enabled. To disable these emails, disable this option.'
       optional :invisible_captcha_enabled, type: Boolean, desc: 'Enable Invisible Captcha spam detection during signup.'
       optional :max_artifacts_size, type: Integer, desc: "Set the maximum file size for each job's artifacts"
       optional :max_attachment_size, type: Integer, desc: 'Maximum attachment size in MB'
@@ -152,11 +154,16 @@ module API
       optional :spam_check_endpoint_enabled, type: Boolean, desc: 'Enable Spam Check via external API endpoint'
       given spam_check_endpoint_enabled: ->(val) { val } do
         requires :spam_check_endpoint_url, type: String, desc: 'The URL of the external Spam Check service endpoint'
+        requires :spam_check_api_key, type: String, desc: 'The API key used by GitLab for accessing the Spam Check service endpoint'
       end
       optional :terminal_max_session_time, type: Integer, desc: 'Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time.'
       optional :usage_ping_enabled, type: Boolean, desc: 'Every week GitLab will report license usage back to GitLab, Inc.'
       optional :local_markdown_version, type: Integer, desc: 'Local markdown version, increase this value when any cached markdown should be invalidated'
       optional :allow_local_requests_from_hooks_and_services, type: Boolean, desc: 'Deprecated: Use :allow_local_requests_from_web_hooks_and_services instead. Allow requests to the local network from hooks and services.' # support legacy names, can be removed in v5
+      optional :mailgun_events_enabled, type: Grape::API::Boolean, desc: 'Enable Mailgun event receiver'
+      given mailgun_events_enabled: ->(val) { val } do
+        requires :mailgun_signing_key, type: String, desc: 'The Mailgun HTTP webhook signing key for receiving events from webhook'
+      end
       optional :snowplow_enabled, type: Grape::API::Boolean, desc: 'Enable Snowplow tracking'
       given snowplow_enabled: ->(val) { val } do
         requires :snowplow_collector_hostname, type: String, desc: 'The Snowplow collector hostname'
@@ -167,6 +174,8 @@ module API
       optional :raw_blob_request_limit, type: Integer, desc: "Maximum number of requests per minute for each raw path. Set to 0 for unlimited requests per minute."
       optional :wiki_page_max_content_bytes, type: Integer, desc: "Maximum wiki page content size in bytes"
       optional :require_admin_approval_after_user_signup, type: Boolean, desc: 'Require explicit admin approval for new signups'
+      optional :whats_new_variant, type: String, values: ApplicationSetting.whats_new_variants.keys, desc: "What's new variant, possible values: `all_tiers`, `current_tier`, and `disabled`."
+      optional :floc_enabled, type: Grape::API::Boolean, desc: 'Enable FloC (Federated Learning of Cohorts)'
 
       ApplicationSetting::SUPPORTED_KEY_TYPES.each do |type|
         optional :"#{type}_key_restriction",
@@ -230,4 +239,4 @@ module API
   end
 end
 
-API::Settings.prepend_if_ee('EE::API::Settings')
+API::Settings.prepend_mod_with('API::Settings')

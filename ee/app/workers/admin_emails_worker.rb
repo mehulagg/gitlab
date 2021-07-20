@@ -3,6 +3,8 @@
 class AdminEmailsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :issue_tracking
 
   # rubocop: disable CodeReuse/ActiveRecord

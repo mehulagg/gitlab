@@ -16,6 +16,7 @@ RSpec.describe 'layouts/header/_current_user_dropdown' do
       allow(view).to receive(:show_buy_pipeline_minutes?).and_return(need_minutes)
       allow(view).to receive(:show_pipeline_minutes_notification_dot?).and_return(show_notification_dot)
       allow(view).to receive(:show_buy_pipeline_with_subtext?).and_return(show_subtext)
+      allow(view).to receive(:root_ancestor_namespace).and_return(user.namespace)
 
       render
     end

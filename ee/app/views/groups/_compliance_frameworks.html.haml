@@ -1,6 +1,6 @@
 - expanded = expanded_by_default?
 
-- if show_compliance_frameworks?
+- if show_compliance_frameworks?(@group)
   %section.settings.no-animate#js-compliance-frameworks-settings{ class: ('expanded' if expanded) }
     .settings-header
       %h4
@@ -10,4 +10,4 @@
       %p
         = s_('GroupSettings|Configure frameworks to apply enforceable rules to projects.')
     .settings-content
-      #js-compliance-frameworks-list{ data: compliance_frameworks_list_data }
+      #js-compliance-frameworks-list{ data: compliance_frameworks_list_data(@group) }

@@ -8,6 +8,8 @@ RSpec.describe 'User edit profile' do
   let(:user) { create(:user) }
 
   before do
+    stub_feature_flags(improved_emoji_picker: false)
+
     sign_in(user)
     visit(profile_path)
   end
@@ -199,14 +201,37 @@ RSpec.describe 'User edit profile' do
         expect(busy_status.checked?).to eq(true)
       end
 
-      context 'with set_user_availability_status feature flag disabled' do
+      context 'with user status set to busy' do
+        let(:project) { create(:project, :public) }
+        let(:issue) { create(:issue, project: project, author: user) }
+
         before do
-          stub_feature_flags(set_user_availability_status: false)
-          visit root_path(user)
+          toggle_busy_status
+          submit_settings
+
+          project.add_developer(user)
+          visit project_issue_path(project, issue)
         end
 
-        it 'does not display the availability checkbox' do
-          expect(page).not_to have_css('[data-testid="user-availability-checkbox"]')
+        it 'shows author as busy in the assignee dropdown' do
+          page.within('.assignee') do
+            click_button('Edit')
+            wait_for_requests
+          end
+
+          page.within '.dropdown-menu-user' do
+            expect(page).to have_content("#{user.name} (Busy)")
+          end
+        end
+
+        it 'displays the assignee busy status' do
+          click_button 'assign yourself'
+          wait_for_requests
+
+          visit project_issue_path(project, issue)
+          wait_for_requests
+
+          expect(page.find('.issuable-assignees')).to have_content("#{user.name} (Busy)")
         end
       end
     end
@@ -451,19 +476,6 @@ RSpec.describe 'User edit profile' do
           first_note = page.find_all(".main-notes-list .timeline-entry").first
 
           expect(first_note).not_to have_css('.user-status-emoji')
-        end
-      end
-
-      context 'with set_user_availability_status feature flag disabled' do
-        before do
-          stub_feature_flags(set_user_availability_status: false)
-          visit root_path(user)
-        end
-
-        it 'does not display the availability checkbox' do
-          open_user_status_modal
-
-          expect(page).not_to have_css('[data-testid="user-availability-checkbox"]')
         end
       end
     end

@@ -31,7 +31,7 @@ If you are new to GitLab development (or web development in general), see the
 some potentially easy issues.
 
 To start developing GitLab, download the [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit)
-and see the [Development section](../../README.md) for the required guidelines.
+and see the [Development section](../../index.md) for the required guidelines.
 
 ## Merge request guidelines
 
@@ -44,9 +44,9 @@ request is as follows:
 
 1. [Fork](../../user/project/repository/forking_workflow.md) the project into
    your personal namespace (or group) on GitLab.com.
-1. Create a feature branch in your fork (don't work off `master`).
+1. Create a feature branch in your fork (don't work off your [default branch](../../user/project/repository/branches/default.md)).
 1. Write [tests](../rake_tasks.md#run-tests) and code.
-1. [Generate a changelog entry with `bin/changelog`](../changelog.md)
+1. [Ensure a changelog is created](../changelog.md).
 1. If you are writing documentation, make sure to follow the
    [documentation guidelines](../documentation/index.md).
 1. Follow the [commit messages guidelines](#commit-messages-guidelines).
@@ -54,7 +54,7 @@ request is as follows:
    commits by [squashing them](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History#_squashing),
    but do not change the commit history if you're working on shared branches though.
 1. Push the commit(s) to your working branch in your fork.
-1. Submit a merge request (MR) to the `master` branch in the main GitLab project.
+1. Submit a merge request (MR) to the `main` branch in the main GitLab project.
    1. Your merge request needs at least 1 approval, but depending on your changes
       you might need additional approvals. Refer to the [Approval guidelines](../code_review.md#approval-guidelines).
    1. You don't have to select any specific approvers, but you can if you really want
@@ -68,17 +68,17 @@ request is as follows:
    1. Use the syntax `Solves #XXX`, `Closes #XXX`, or `Refs #XXX` to mention the issue(s) your merge
       request addresses. Referenced issues do not [close automatically](../../user/project/issues/managing_issues.md#closing-issues-automatically).
       You must close them manually once the merge request is merged.
+   1. The MR must include *Before* and *After* screenshots if UI changes are made.
+   1. Include any steps or setup required to ensure reviewers can view the changes you've made (e.g. include any information about feature flags).
 1. If you're allowed to, set a relevant milestone and [labels](issue_workflow.md).
 1. UI changes should use available components from the GitLab Design System,
-   [Pajamas](https://design.gitlab.com/). The MR must include *Before* and
-   *After* screenshots.
+   [Pajamas](https://design.gitlab.com/).
 1. If the MR changes CSS classes, please include the list of affected pages, which
    can be found by running `grep css-class ./app -R`.
 1. If your MR touches code that executes shell commands, reads or opens files, or
    handles paths to files on disk, make sure it adheres to the
    [shell command guidelines](../shell_commands.md)
-1. If your code creates new files on disk please read the
-   [shared files guidelines](../shared_files.md).
+1. If your code needs to handle file storage, see the [uploads documentation](../uploads.md).
 1. If your merge request adds one or more migrations, make sure to execute all
    migrations on a fresh database before the MR is reviewed. If the review leads
    to large changes in the MR, execute the migrations again once the review is complete.
@@ -130,9 +130,9 @@ Commit messages should follow the guidelines below, for reasons explained by Chr
 - The commit subject must not be longer than 72 characters.
 - The commit subject must not end with a period.
 - The commit body must not contain more than 72 characters per line.
-- Commits that change 30 or more lines across at least 3 files must
-  describe these changes in the commit body.
 - The commit subject or body must not contain Emojis.
+- Commits that change 30 or more lines across at least 3 files should
+  describe these changes in the commit body.
 - Use issues and merge requests' full URLs instead of short references,
   as they are displayed as plain text outside of GitLab.
 - The merge request should not contain more than 10 commit messages.
@@ -140,7 +140,7 @@ Commit messages should follow the guidelines below, for reasons explained by Chr
 
 **Important notes:**
 
-- If the guidelines are not met, the MR may not pass the [Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
+- If the guidelines are not met, the MR may not pass the [Danger checks](https://gitlab.com/gitlab-org/gitlab/-/blob/master/danger/commit_messages/Dangerfile).
 - Consider enabling [Squash and merge](../../user/project/merge_requests/squash_and_merge.md#squash-and-merge)
   if your merge request includes "Applied suggestion to X files" commits, so that Danger can ignore those.
 - The prefixes in the form of `[prefix]` and `prefix:` are allowed (they can be all lowercase, as long
@@ -158,8 +158,8 @@ Commit messages should follow the guidelines below, for reasons explained by Chr
 Example commit message template that can be used on your machine that embodies the above (guide for [how to apply template](https://codeinthehole.com/tips/a-useful-template-for-commit-messages/)):
 
 ```plaintext
-# (If applied, this commit will...) <subject> (Max 50 char)
-# |<----  Using a Maximum Of 50 Characters  ---->|
+# (If applied, this commit will...) <subject>        (Max 72 characters)
+# |<----          Using a Maximum Of 72 Characters                ---->|
 
 
 # Explain why this change is being made
@@ -177,7 +177,7 @@ Example commit message template that can be used on your machine that embodies t
 #    Do not end the subject line with a period
 #    Subject must contain at least 3 words
 #    Separate subject from body with a blank line
-#    Commits that change 30 or more lines across at least 3 files must
+#    Commits that change 30 or more lines across at least 3 files should
 #    describe these changes in the commit body
 #    Do not use Emojis
 #    Use the body to explain what and why vs. how
@@ -196,12 +196,12 @@ the contribution acceptance criteria below:
    exposing a bug in existing code). Every new class should have corresponding
    unit tests, even if the class is exercised at a higher level, such as a feature test.
    - If a failing CI build seems to be unrelated to your contribution, you can try
-     restarting the failing CI job, rebasing from `master` to bring in updates that
+     restarting the failing CI job, rebasing from `main` to bring in updates that
      may resolve the failure, or if it has not been fixed yet, ask a developer to
      help you fix the test.
 1. The MR initially contains a few logically organized commits.
 1. The changes can merge without problems. If not, you should rebase if you're the
-   only one working on your feature branch, otherwise merge `master`.
+   only one working on your feature branch, otherwise merge `main`.
 1. Only one specific issue is fixed or one specific feature is implemented. Do not
    combine things; send separate merge requests for each issue or feature.
 1. Migrations should do only one thing (e.g., create a table, move data to a new
@@ -248,6 +248,9 @@ requirements.
 1. [Black-box tests/end-to-end tests](../testing_guide/testing_levels.md#black-box-tests-at-the-system-level-aka-end-to-end-tests)
    added if required. Please contact [the quality team](https://about.gitlab.com/handbook/engineering/quality/#teams)
    with any questions.
+1. The new feature does not degrade the user experience of the product.
+
+Contributions do not require approval from the [Product team](https://about.gitlab.com/handbook/product/product-processes/#gitlab-pms-arent-the-arbiters-of-community-contributions).
 
 ## Dependencies
 
@@ -260,7 +263,7 @@ request:
 1. [The upgrade guide](../../update/upgrading_from_source.md).
 1. The [GitLab Installation Guide](../../install/installation.md#1-packages-and-dependencies).
 1. The [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit).
-1. The [CI environment preparation](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/prepare_build.sh).
+1. The [CI environment preparation](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/prepare_build.sh).
 1. The [Omnibus package creator](https://gitlab.com/gitlab-org/omnibus-gitlab).
 1. The [Cloud Native GitLab Dockerfiles](https://gitlab.com/gitlab-org/build/CNG)
 

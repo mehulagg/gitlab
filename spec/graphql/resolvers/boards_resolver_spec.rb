@@ -9,11 +9,11 @@ RSpec.describe Resolvers::BoardsResolver do
 
   shared_examples_for 'group and project boards resolver' do
     it 'does not create a default board' do
-      expect(resolve_boards).to eq []
+      expect(resolve_boards).to be_empty
     end
 
-    it 'calls Boards::ListService' do
-      expect_next_instance_of(Boards::ListService) do |service|
+    it 'calls Boards::BoardsFinder' do
+      expect_next_instance_of(Boards::BoardsFinder) do |service|
         expect(service).to receive(:execute)
       end
 
@@ -54,7 +54,7 @@ RSpec.describe Resolvers::BoardsResolver do
       end
 
       it 'returns nil if board not found' do
-        outside_parent = create(board_parent.class.underscore.to_sym)
+        outside_parent = create(board_parent.class.underscore.to_sym) # rubocop:disable Rails/SaveBang
         outside_board  = create(:board, name: 'outside board', resource_parent: outside_parent)
 
         expect(resolve_boards(args: { id: global_id_of(outside_board) })).to eq Board.none

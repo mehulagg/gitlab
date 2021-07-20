@@ -14,14 +14,14 @@ module Gitlab
     end
 
     def drop_jobs!(search_metadata, timeout:)
-      start_time = Gitlab::Metrics::System.monotonic_time
+      start_time = monotonic_time
       completed = true
       deleted_jobs = 0
 
       job_search_metadata =
         search_metadata
           .stringify_keys
-          .slice(*Labkit::Context::KNOWN_KEYS)
+          .slice(*Gitlab::ApplicationContext::KNOWN_KEYS)
           .transform_keys { |key| "meta.#{key}" }
           .compact
 
@@ -62,7 +62,11 @@ module Gitlab
     end
 
     def timeout_exceeded?(start_time, timeout)
-      (Gitlab::Metrics::System.monotonic_time - start_time) > timeout
+      (monotonic_time - start_time) > timeout
+    end
+
+    def monotonic_time
+      Gitlab::Metrics::System.monotonic_time
     end
   end
 end

@@ -5,15 +5,22 @@ import {
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
+  GlDropdownDivider,
+  GlDropdownSectionHeader,
 } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
 
-import { mockInitialConfig, mockParentItem } from '../mock_data';
+import {
+  mockInitialConfig,
+  mockParentItem,
+  mockFrequentlyUsedProjects,
+  mockMixedFrequentlyUsedProjects,
+} from '../mock_data';
 
 const mockProjects = getJSONFixture('static/projects.json');
 
@@ -32,15 +39,29 @@ const createComponent = () => {
   });
 };
 
+const getLocalstorageKey = () => {
+  return 'root/frequent-projects';
+};
+
+const setLocalstorageFrequentItems = (json = mockFrequentlyUsedProjects) => {
+  localStorage.setItem(getLocalstorageKey(), JSON.stringify(json));
+};
+
+const removeLocalstorageFrequentItems = () => {
+  localStorage.removeItem(getLocalstorageKey());
+};
+
 describe('CreateIssueForm', () => {
   let wrapper;
 
   beforeEach(() => {
     wrapper = createComponent();
+    gon.current_username = 'root';
   });
 
   afterEach(() => {
     wrapper.destroy();
+    delete gon.current_username;
   });
 
   describe('data', () => {
@@ -53,7 +74,7 @@ describe('CreateIssueForm', () => {
 
   describe('computed', () => {
     describe('dropdownToggleText', () => {
-      it('returns project name with namespace when `selectedProject` is not empty', () => {
+      it('returns project name with name_with_namespace when `selectedProject` is not empty', () => {
         wrapper.setData({
           selectedProject: mockProjects[0],
         });
@@ -61,6 +82,16 @@ describe('CreateIssueForm', () => {
         return wrapper.vm.$nextTick(() => {
           expect(wrapper.vm.dropdownToggleText).toBe(mockProjects[0].name_with_namespace);
         });
+      });
+      it('returns project name with namespace when `selectedProject` is not empty and dont have name_with_namespace', async () => {
+        const project = { ...mockProjects[0], name_with_namespace: undefined, namespace: 'foo' };
+        wrapper.setData({
+          selectedProject: project,
+        });
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.dropdownToggleText).toBe(project.namespace);
       });
     });
   });
@@ -140,10 +171,54 @@ describe('CreateIssueForm', () => {
         expect(projectsDropdownButton.findComponent(GlSearchBoxByType).exists()).toBe(true);
         expect(projectsDropdownButton.findComponent(GlLoadingIcon).exists()).toBe(true);
         expect(dropdownItems).toHaveLength(mockProjects.length);
-        expect(dropdownItem.text()).toBe(mockProjects[0].name);
-        expect(dropdownItem.attributes('secondarytext')).toBe(mockProjects[0].namespace.name);
+        expect(dropdownItem.text()).toContain(mockProjects[0].name);
+        expect(dropdownItem.text()).toContain(mockProjects[0].namespace.name);
         expect(dropdownItem.findComponent(ProjectAvatar).exists()).toBe(true);
       });
+    });
+
+    it('renders dropdown contents without recent items when `recentItems` are empty', () => {
+      const projectsDropdownButton = wrapper.findComponent(GlDropdown);
+      expect(projectsDropdownButton.findComponent(GlDropdownSectionHeader).exists()).toBe(false);
+      expect(projectsDropdownButton.findComponent(GlDropdownDivider).exists()).toBe(false);
+      expect(projectsDropdownButton.find('[data-testid="recent-items-content"]').exists()).toBe(
+        false,
+      );
+    });
+
+    it('renders recent items when localStorage has recent items', async () => {
+      setLocalstorageFrequentItems();
+
+      wrapper.vm.setRecentItems();
+
+      await wrapper.vm.$nextTick();
+
+      const projectsDropdownButton = wrapper.findComponent(GlDropdown);
+
+      expect(projectsDropdownButton.findComponent(GlDropdownSectionHeader).exists()).toBe(true);
+      expect(projectsDropdownButton.findComponent(GlDropdownDivider).exists()).toBe(true);
+
+      const content = projectsDropdownButton.find('[data-testid="recent-items-content"]');
+      expect(content.exists()).toBe(true);
+      expect(content.findAll(GlDropdownItem)).toHaveLength(mockFrequentlyUsedProjects.length);
+
+      removeLocalstorageFrequentItems();
+    });
+
+    it('renders recent items from the group when localStorage has recent items with mixed groups', async () => {
+      setLocalstorageFrequentItems(mockMixedFrequentlyUsedProjects);
+
+      wrapper.vm.setRecentItems();
+
+      await wrapper.vm.$nextTick();
+
+      const projectsDropdownButton = wrapper.findComponent(GlDropdown);
+
+      expect(
+        projectsDropdownButton.find('[data-testid="recent-items-content"]').findAll(GlDropdownItem),
+      ).toHaveLength(mockMixedFrequentlyUsedProjects.length - 1);
+
+      removeLocalstorageFrequentItems();
     });
 
     it('renders Projects dropdown contents containing only matching project when searchKey is provided', () => {
@@ -204,6 +279,20 @@ describe('CreateIssueForm', () => {
         expect(createIssueButton.exists()).toBe(true);
         expect(createIssueButton.props('disabled')).toBe(true);
         expect(createIssueButton.props('loading')).toBe(true);
+      });
+    });
+
+    it('renders loading icon within `Create issue` button when `recentItemFetchInProgress` is true', () => {
+      wrapper.vm.recentItemFetchInProgress = true;
+
+      return wrapper.vm.$nextTick(() => {
+        const createIssueButton = wrapper.findAllComponents(GlButton).at(0);
+
+        expect(createIssueButton.exists()).toBe(true);
+        expect(createIssueButton.props()).toMatchObject({
+          disabled: true,
+          loading: true,
+        });
       });
     });
 

@@ -2,6 +2,8 @@
 
 class NewIssueWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include NewIssuable
 
   feature_category :issue_tracking
@@ -14,7 +16,12 @@ class NewIssueWorker # rubocop:disable Scalability/IdempotentWorker
 
     ::EventCreateService.new.open_issue(issuable, user)
     ::NotificationService.new.new_issue(issuable, user)
+
     issuable.create_cross_references!(user)
+
+    Issues::AfterCreateService
+      .new(project: issuable.project, current_user: user)
+      .execute(issuable)
   end
 
   def issuable_class

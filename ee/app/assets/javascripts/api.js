@@ -1,10 +1,12 @@
-import Api from '~/api';
+import Api, { DEFAULT_PER_PAGE } from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 
 export default {
   ...Api,
+  geoNodePath: '/api/:version/geo_nodes/:id',
   geoNodesPath: '/api/:version/geo_nodes',
+  geoNodesStatusPath: '/api/:version/geo_nodes/status',
   geoReplicationPath: '/api/:version/geo_replication/:replicable',
   ldapGroupsPath: '/api/:version/ldap/:provider/groups.json',
   subscriptionPath: '/api/:version/namespaces/:id/gitlab_subscription',
@@ -20,14 +22,8 @@ export default {
   cycleAnalyticsValueStreamsPath: '/groups/:id/-/analytics/value_stream_analytics/value_streams',
   cycleAnalyticsValueStreamPath:
     '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id',
-  cycleAnalyticsStageEventsPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/records',
-  cycleAnalyticsStageMedianPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/median',
   cycleAnalyticsStagePath:
     '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id',
-  cycleAnalyticsDurationChartPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/duration_chart',
   cycleAnalyticsGroupLabelsPath: '/groups/:namespace_path/-/labels.json',
   codeReviewAnalyticsPath: '/api/:version/analytics/code_review',
   groupActivityIssuesPath: '/api/:version/analytics/group_activity/issues_count',
@@ -45,10 +41,13 @@ export default {
   descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
   projectDeploymentFrequencyAnalyticsPath:
     '/api/:version/projects/:id/analytics/deployment_frequency',
+  projectGroupsPath: '/api/:version/projects/:id/groups.json',
   issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
   billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
+  billableGroupMemberMembershipsPath:
+    '/api/:version/groups/:group_id/billable_members/:member_id/memberships',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -62,7 +61,7 @@ export default {
       .get(url, {
         params: {
           search: query,
-          per_page: Api.DEFAULT_PER_PAGE,
+          per_page: DEFAULT_PER_PAGE,
           active: true,
         },
       })
@@ -165,29 +164,15 @@ export default {
   },
 
   cycleAnalyticsStageEvents({ groupId, valueStreamId, stageId, params = {} }) {
-    const url = Api.buildUrl(this.cycleAnalyticsStageEventsPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId)
-      .replace(':stage_id', stageId);
-
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/records`;
     return axios.get(url, { params });
   },
 
-  cycleAnalyticsStageMedian({ groupId, valueStreamId, stageId, params = {} }) {
-    const url = Api.buildUrl(this.cycleAnalyticsStageMedianPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId)
-      .replace(':stage_id', stageId);
-
+  cycleAnalyticsStageCount({ groupId, valueStreamId, stageId, params = {} }) {
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/count`;
     return axios.get(url, { params });
-  },
-
-  cycleAnalyticsCreateStage({ groupId, valueStreamId, data }) {
-    const url = Api.buildUrl(this.cycleAnalyticsGroupStagesAndEventsPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId);
-
-    return axios.post(url, data);
   },
 
   cycleAnalyticsCreateValueStream(groupId, data) {
@@ -221,27 +206,10 @@ export default {
       .replace(':stage_id', stageId);
   },
 
-  cycleAnalyticsUpdateStage({ groupId, valueStreamId, stageId, data }) {
-    const url = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
-
-    return axios.put(url, data);
-  },
-
-  cycleAnalyticsRemoveStage({ groupId, valueStreamId, stageId }) {
-    const url = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
-
-    return axios.delete(url);
-  },
-
   cycleAnalyticsDurationChart({ groupId, valueStreamId, stageId, params = {} }) {
-    const url = Api.buildUrl(this.cycleAnalyticsDurationChartPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId)
-      .replace(':stage_id', stageId);
-
-    return axios.get(url, {
-      params,
-    });
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/average_duration_chart`;
+    return axios.get(url, { params });
   },
 
   cycleAnalyticsGroupLabels(groupId, params = { search: null }) {
@@ -325,6 +293,16 @@ export default {
     return axios.post(url);
   },
 
+  getGeoNodes() {
+    const url = Api.buildUrl(this.geoNodesPath);
+    return axios.get(url);
+  },
+
+  getGeoNodesStatus() {
+    const url = Api.buildUrl(this.geoNodesStatusPath);
+    return axios.get(url);
+  },
+
   createGeoNode(node) {
     const url = Api.buildUrl(this.geoNodesPath);
     return axios.post(url, node);
@@ -333,6 +311,11 @@ export default {
   updateGeoNode(node) {
     const url = Api.buildUrl(this.geoNodesPath);
     return axios.put(`${url}/${node.id}`, node);
+  },
+
+  removeGeoNode(id) {
+    const url = Api.buildUrl(this.geoNodePath).replace(':id', encodeURIComponent(id));
+    return axios.delete(url);
   },
 
   getApplicationSettings() {
@@ -390,7 +373,7 @@ export default {
   fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
     const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
     const defaults = {
-      per_page: Api.DEFAULT_PER_PAGE,
+      per_page: DEFAULT_PER_PAGE,
       page: 1,
     };
 
@@ -411,6 +394,28 @@ export default {
       .then(({ data, headers }) => {
         callback(data);
         return { data, headers };
+      });
+  },
+
+  fetchBillableGroupMemberMemberships(namespaceId, memberId) {
+    const url = Api.buildUrl(this.billableGroupMemberMembershipsPath)
+      .replace(':group_id', namespaceId)
+      .replace(':member_id', memberId);
+
+    return axios.get(url);
+  },
+
+  projectGroups(id, options) {
+    const url = Api.buildUrl(this.projectGroupsPath).replace(':id', encodeURIComponent(id));
+
+    return axios
+      .get(url, {
+        params: {
+          ...options,
+        },
+      })
+      .then(({ data }) => {
+        return data;
       });
   },
 };

@@ -10,6 +10,10 @@ module EE
       before_action :log_archive_audit_event, only: [:archive]
       before_action :log_unarchive_audit_event, only: [:unarchive]
 
+      before_action only: :show do
+        push_frontend_feature_flag(:cve_id_request_button, project)
+      end
+
       feature_category :projects, [:restore]
     end
 
@@ -32,6 +36,8 @@ module EE
     override :destroy
     def destroy
       return super unless project.adjourned_deletion?
+      return super if project.marked_for_deletion? && params[:permanently_delete].present?
+
       return access_denied! unless can?(current_user, :remove_project, project)
 
       result = ::Projects::MarkForDeletionService.new(project, current_user, {}).execute
@@ -49,7 +55,7 @@ module EE
 
     override :project_feature_attributes
     def project_feature_attributes
-      super + [:requirements_access_level, :security_and_compliance_access_level]
+      super + [:requirements_access_level]
     end
 
     override :project_params_attributes
@@ -75,7 +81,13 @@ module EE
 
     override :project_setting_attributes
     def project_setting_attributes
-      super + [:prevent_merge_without_jira_issue]
+      proj_setting_attrs = super + [:prevent_merge_without_jira_issue]
+
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        proj_setting_attrs << :cve_id_request_enabled
+      end
+
+      proj_setting_attrs
     end
 
     def project_params_ee

@@ -4,8 +4,14 @@ module EE
   module ProjectFeature
     extend ActiveSupport::Concern
 
-    EE_FEATURES = %i(requirements security_and_compliance).freeze
-    NOTES_PERMISSION_TRACKED_FIELDS = %w(issues_access_level repository_access_level merge_requests_access_level snippets_access_level).freeze
+    # When updating this array, make sure to update rubocop/cop/gitlab/feature_available_usage.rb as well.
+    EE_FEATURES = %i(requirements).freeze
+    NOTES_PERMISSION_TRACKED_FIELDS = %w(
+      issues_access_level
+      repository_access_level
+      merge_requests_access_level
+      snippets_access_level
+    ).freeze
 
     prepended do
       set_available_features(EE_FEATURES)
@@ -17,6 +23,7 @@ module EE
 
           associations_to_update = []
           associations_to_update << 'issues' if elasticsearch_project_issues_need_updating?
+          associations_to_update << 'merge_requests' if elasticsearch_project_merge_requests_need_updating?
           associations_to_update << 'notes' if elasticsearch_project_notes_need_updating?
 
           ElasticAssociationIndexerWorker.perform_async(self.project.class.name, project_id, associations_to_update) if associations_to_update.any?
@@ -24,7 +31,6 @@ module EE
       end
 
       default_value_for :requirements_access_level, value: Featurable::ENABLED, allows_nil: false
-      default_value_for :security_and_compliance_access_level, value: Featurable::PRIVATE, allows_nil: false
 
       private
 
@@ -34,6 +40,10 @@ module EE
 
       def elasticsearch_project_issues_need_updating?
         self.previous_changes.key?(:issues_access_level)
+      end
+
+      def elasticsearch_project_merge_requests_need_updating?
+        self.previous_changes.key?(:merge_requests_access_level)
       end
     end
   end

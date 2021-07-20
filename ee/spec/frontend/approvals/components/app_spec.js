@@ -1,5 +1,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import App from 'ee/approvals/components/app.vue';
 import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
@@ -10,8 +11,7 @@ import showToast from '~/vue_shared/plugins/global_toast';
 
 jest.mock('~/vue_shared/plugins/global_toast');
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const TEST_RULES_CLASS = 'js-fake-rules';
 const APP_PREFIX = 'lorem-ipsum';
@@ -23,8 +23,7 @@ describe('EE Approvals App', () => {
 
   const targetBranchName = 'development';
   const factory = () => {
-    wrapper = shallowMount(localVue.extend(App), {
-      localVue,
+    wrapper = shallowMount(App, {
       slots,
       store: new Vuex.Store(store),
     });

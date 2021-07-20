@@ -1,6 +1,0 @@
-mutation dastOnDemandScanCreate($input: DastOnDemandScanCreateInput!) {
-  dastOnDemandScanCreate(input: $input) {
-    pipelineUrl
-    errors
-  }
-}

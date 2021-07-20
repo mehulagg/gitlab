@@ -1,7 +1,10 @@
+export const mockGroupPath = 'gitlab-org';
+export const mockProjectPath = `${mockGroupPath}/some-project`;
+
 export const mockIssue = {
-  projectPath: 'gitlab-org/some-project',
+  projectPath: mockProjectPath,
   iid: '1',
-  groupPath: 'gitlab-org',
+  groupPath: mockGroupPath,
 };
 
 export const mockIssueId = 'gid://gitlab/Issue/1';
@@ -22,9 +25,25 @@ export const mockIteration2 = {
   state: 'opened',
 };
 
-export const mockIterationsResponse = {
+export const mockEpic1 = {
+  __typename: 'Epic',
+  id: 'gid://gitlab/Epic/1',
+  title: 'Foobar Epic',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/-/epics/1',
+  state: 'opened',
+};
+
+export const mockEpic2 = {
+  __typename: 'Epic',
+  id: 'gid://gitlab/Epic/2',
+  title: 'Awesome Epic',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/-/epics/2',
+  state: 'opened',
+};
+
+export const mockGroupIterationsResponse = {
   data: {
-    group: {
+    workspace: {
       iterations: {
         nodes: [mockIteration1, mockIteration2],
       },
@@ -34,9 +53,21 @@ export const mockIterationsResponse = {
   },
 };
 
-export const emptyIterationsResponse = {
+export const mockGroupEpicsResponse = {
   data: {
-    group: {
+    workspace: {
+      attributes: {
+        nodes: [mockEpic1, mockEpic2],
+      },
+      __typename: 'EpicConnection',
+    },
+    __typename: 'Group',
+  },
+};
+
+export const emptyGroupIterationsResponse = {
+  data: {
+    workspace: {
       iterations: {
         nodes: [],
       },
@@ -46,21 +77,42 @@ export const emptyIterationsResponse = {
   },
 };
 
+export const emptyGroupEpicsResponse = {
+  data: {
+    workspace: {
+      attributes: {
+        nodes: [],
+      },
+      __typename: 'EpicConnection',
+    },
+    __typename: 'Group',
+  },
+};
+
 export const noCurrentIterationResponse = {
   data: {
-    project: {
-      issue: { id: mockIssueId, iteration: null, __typename: 'Issue' },
+    workspace: {
+      issuable: { id: mockIssueId, iteration: null, __typename: 'Issue' },
       __typename: 'Project',
     },
   },
 };
 
-export const mockMutationResponse = {
+export const noCurrentEpicResponse = {
   data: {
-    issueSetIteration: {
+    workspace: {
+      issuable: { id: mockIssueId, attribute: null, __typename: 'Issue' },
+      __typename: 'Project',
+    },
+  },
+};
+
+export const mockIterationMutationResponse = {
+  data: {
+    issuableSetIteration: {
       errors: [],
-      issue: {
-        id: mockIssueId,
+      issuable: {
+        id: 'gid://gitlab/Issue/1',
         iteration: {
           id: 'gid://gitlab/Iteration/2',
           title: 'Awesome Iteration',
@@ -73,3 +125,62 @@ export const mockMutationResponse = {
     },
   },
 };
+
+export const mockEpicMutationResponse = {
+  data: {
+    issuableSetAttribute: {
+      errors: [],
+      issuable: {
+        id: 'gid://gitlab/Issue/1',
+        attribute: {
+          id: 'gid://gitlab/Epic/2',
+          title: 'Awesome Epic',
+          state: 'opened',
+          __typename: 'Epic',
+        },
+        __typename: 'Issue',
+      },
+      __typename: 'IssueSetEpicPayload',
+    },
+  },
+};
+
+export const epicAncestorsResponse = () => ({
+  data: {
+    workspace: {
+      __typename: 'Group',
+      issuable: {
+        __typename: 'Epic',
+        id: 'gid://gitlab/Epic/4',
+        ancestors: {
+          nodes: [
+            {
+              id: 'gid://gitlab/Epic/2',
+              title: 'Ancestor epic',
+              url: 'http://gdk.test:3000/groups/gitlab-org/-/epics/2',
+              state: 'opened',
+            },
+          ],
+        },
+      },
+    },
+  },
+});
+
+export const issueNoWeightResponse = () => ({
+  data: {
+    workspace: {
+      issuable: { id: mockIssueId, weight: null, __typename: 'Issue' },
+      __typename: 'Project',
+    },
+  },
+});
+
+export const issueWeightResponse = () => ({
+  data: {
+    workspace: {
+      issuable: { id: mockIssueId, weight: 0, __typename: 'Issue' },
+      __typename: 'Project',
+    },
+  },
+});

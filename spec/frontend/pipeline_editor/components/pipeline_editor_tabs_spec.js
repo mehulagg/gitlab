@@ -4,8 +4,15 @@ import { nextTick } from 'vue';
 import CiConfigMergedPreview from '~/pipeline_editor/components/editor/ci_config_merged_preview.vue';
 import CiLint from '~/pipeline_editor/components/lint/ci_lint.vue';
 import PipelineEditorTabs from '~/pipeline_editor/components/pipeline_editor_tabs.vue';
+import EditorTab from '~/pipeline_editor/components/ui/editor_tab.vue';
+import {
+  EDITOR_APP_STATUS_EMPTY,
+  EDITOR_APP_STATUS_ERROR,
+  EDITOR_APP_STATUS_LOADING,
+  EDITOR_APP_STATUS_INVALID,
+  EDITOR_APP_STATUS_VALID,
+} from '~/pipeline_editor/constants';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
-
 import { mockLintResponse, mockCiYml } from '../mock_data';
 
 describe('Pipeline editor tabs component', () => {
@@ -13,24 +20,28 @@ describe('Pipeline editor tabs component', () => {
   const MockTextEditor = {
     template: '<div />',
   };
-  const mockProvide = {
-    glFeatures: {
-      ciConfigVisualizationTab: true,
-      ciConfigMergedTab: true,
-    },
-  };
 
-  const createComponent = ({ props = {}, provide = {}, mountFn = shallowMount } = {}) => {
+  const createComponent = ({
+    props = {},
+    provide = {},
+    appStatus = EDITOR_APP_STATUS_VALID,
+    mountFn = shallowMount,
+  } = {}) => {
     wrapper = mountFn(PipelineEditorTabs, {
       propsData: {
         ciConfigData: mockLintResponse,
         ciFileContent: mockCiYml,
-        isCiConfigDataLoading: false,
         ...props,
       },
-      provide: { ...mockProvide, ...provide },
+      data() {
+        return {
+          appStatus,
+        };
+      },
+      provide: { ...provide },
       stubs: {
         TextEditor: MockTextEditor,
+        EditorTab,
       },
     });
   };
@@ -49,7 +60,6 @@ describe('Pipeline editor tabs component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('editor tab', () => {
@@ -66,41 +76,24 @@ describe('Pipeline editor tabs component', () => {
   });
 
   describe('visualization tab', () => {
-    describe('with feature flag on', () => {
-      describe('while loading', () => {
-        beforeEach(() => {
-          createComponent({ props: { isCiConfigDataLoading: true } });
-        });
-
-        it('displays a loading icon if the lint query is loading', () => {
-          expect(findLoadingIcon().exists()).toBe(true);
-          expect(findPipelineGraph().exists()).toBe(false);
-        });
+    describe('while loading', () => {
+      beforeEach(() => {
+        createComponent({ appStatus: EDITOR_APP_STATUS_LOADING });
       });
-      describe('after loading', () => {
-        beforeEach(() => {
-          createComponent();
-        });
 
-        it('display the tab and visualization', () => {
-          expect(findVisualizationTab().exists()).toBe(true);
-          expect(findPipelineGraph().exists()).toBe(true);
-        });
+      it('displays a loading icon if the lint query is loading', () => {
+        expect(findLoadingIcon().exists()).toBe(true);
+        expect(findPipelineGraph().exists()).toBe(false);
       });
     });
-
-    describe('with feature flag off', () => {
+    describe('after loading', () => {
       beforeEach(() => {
-        createComponent({
-          provide: {
-            glFeatures: { ciConfigVisualizationTab: false },
-          },
-        });
+        createComponent();
       });
 
-      it('does not display the tab or component', () => {
-        expect(findVisualizationTab().exists()).toBe(false);
-        expect(findPipelineGraph().exists()).toBe(false);
+      it('display the tab and visualization', () => {
+        expect(findVisualizationTab().exists()).toBe(true);
+        expect(findPipelineGraph().exists()).toBe(true);
       });
     });
   });
@@ -108,7 +101,7 @@ describe('Pipeline editor tabs component', () => {
   describe('lint tab', () => {
     describe('while loading', () => {
       beforeEach(() => {
-        createComponent({ props: { isCiConfigDataLoading: true } });
+        createComponent({ appStatus: EDITOR_APP_STATUS_LOADING });
       });
 
       it('displays a loading icon if the lint query is loading', () => {
@@ -132,52 +125,60 @@ describe('Pipeline editor tabs component', () => {
   });
 
   describe('merged tab', () => {
-    describe('with feature flag on', () => {
-      describe('while loading', () => {
-        beforeEach(() => {
-          createComponent({ props: { isCiConfigDataLoading: true } });
-        });
-
-        it('displays a loading icon if the lint query is loading', () => {
-          expect(findLoadingIcon().exists()).toBe(true);
-        });
+    describe('while loading', () => {
+      beforeEach(() => {
+        createComponent({ appStatus: EDITOR_APP_STATUS_LOADING });
       });
 
-      describe('when `mergedYaml` is undefined', () => {
-        beforeEach(() => {
-          createComponent({ props: { ciConfigData: {} } });
-        });
-
-        it('show an error message', () => {
-          expect(findAlert().exists()).toBe(true);
-          expect(findAlert().text()).toBe(wrapper.vm.$options.errorTexts.loadMergedYaml);
-        });
-
-        it('does not render the `meged_preview` component', () => {
-          expect(findMergedPreview().exists()).toBe(false);
-        });
-      });
-
-      describe('after loading', () => {
-        beforeEach(() => {
-          createComponent();
-        });
-
-        it('display the tab and the merged preview component', () => {
-          expect(findMergedTab().exists()).toBe(true);
-          expect(findMergedPreview().exists()).toBe(true);
-        });
+      it('displays a loading icon if the lint query is loading', () => {
+        expect(findLoadingIcon().exists()).toBe(true);
       });
     });
-    describe('with feature flag off', () => {
+
+    describe('when there is a fetch error', () => {
       beforeEach(() => {
-        createComponent({ provide: { glFeatures: { ciConfigMergedTab: false } } });
+        createComponent({ appStatus: EDITOR_APP_STATUS_ERROR });
       });
 
-      it('does not display the merged tab', () => {
-        expect(findMergedTab().exists()).toBe(false);
+      it('show an error message', () => {
+        expect(findAlert().exists()).toBe(true);
+        expect(findAlert().text()).toBe(wrapper.vm.$options.errorTexts.loadMergedYaml);
+      });
+
+      it('does not render the `merged_preview` component', () => {
         expect(findMergedPreview().exists()).toBe(false);
       });
     });
+
+    describe('after loading', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
+      it('display the tab and the merged preview component', () => {
+        expect(findMergedTab().exists()).toBe(true);
+        expect(findMergedPreview().exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('show tab content based on status', () => {
+    it.each`
+      appStatus                    | editor  | viz      | lint     | merged
+      ${undefined}                 | ${true} | ${true}  | ${true}  | ${true}
+      ${EDITOR_APP_STATUS_EMPTY}   | ${true} | ${false} | ${false} | ${false}
+      ${EDITOR_APP_STATUS_INVALID} | ${true} | ${false} | ${true}  | ${false}
+      ${EDITOR_APP_STATUS_VALID}   | ${true} | ${true}  | ${true}  | ${true}
+    `(
+      'when status is $appStatus, we show - editor:$editor | viz:$viz | lint:$lint | merged:$merged ',
+      ({ appStatus, editor, viz, lint, merged }) => {
+        createComponent({ appStatus });
+
+        expect(findTextEditor().exists()).toBe(editor);
+        expect(findPipelineGraph().exists()).toBe(viz);
+        expect(findCiLint().exists()).toBe(lint);
+        expect(findMergedPreview().exists()).toBe(merged);
+      },
+    );
   });
 });

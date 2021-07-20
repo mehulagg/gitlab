@@ -4,20 +4,6 @@ module Gitlab
   module I18n
     extend self
 
-    # Languages with less then 2% of available translations will not
-    # be available in the UI.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/221012
-    NOT_AVAILABLE_IN_UI = %w[
-      fil_PH
-      pl_PL
-      nl_NL
-      id_ID
-      cs_CZ
-      bg
-      eo
-      gl_ES
-    ].freeze
-
     AVAILABLE_LANGUAGES = {
       'bg' => 'Bulgarian - български',
       'cs_CZ' => 'Czech - čeština',
@@ -42,9 +28,49 @@ module Gitlab
       'zh_HK' => 'Chinese, Traditional (Hong Kong) - 繁體中文 (香港)',
       'zh_TW' => 'Chinese, Traditional (Taiwan) - 繁體中文 (台灣)'
     }.freeze
+    private_constant :AVAILABLE_LANGUAGES
+
+    # Languages with less then MINIMUM_TRANSLATION_LEVEL% of available translations will not
+    # be available in the UI.
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/221012
+    MINIMUM_TRANSLATION_LEVEL = 2
+
+    # Currently monthly updated manually by ~group::import PM.
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/18923
+    TRANSLATION_LEVELS = {
+      'bg' => 1,
+      'cs_CZ' => 1,
+      'de' => 17,
+      'en' => 100,
+      'eo' => 1,
+      'es' => 38,
+      'fil_PH' => 1,
+      'fr' => 12,
+      'gl_ES' => 1,
+      'id_ID' => 0,
+      'it' => 2,
+      'ja' => 42,
+      'ko' => 13,
+      'nl_NL' => 1,
+      'pl_PL' => 5,
+      'pt_BR' => 21,
+      'ru' => 29,
+      'tr_TR' => 16,
+      'uk' => 41,
+      'zh_CN' => 67,
+      'zh_HK' => 2,
+      'zh_TW' => 3
+    }.freeze
+    private_constant :TRANSLATION_LEVELS
 
     def selectable_locales
-      AVAILABLE_LANGUAGES.reject { |key, _value| NOT_AVAILABLE_IN_UI.include? key }
+      AVAILABLE_LANGUAGES.reject do |code, _name|
+        percentage_translated_for(code) < MINIMUM_TRANSLATION_LEVEL
+      end
+    end
+
+    def percentage_translated_for(code)
+      TRANSLATION_LEVELS.fetch(code, 0)
     end
 
     def available_locales

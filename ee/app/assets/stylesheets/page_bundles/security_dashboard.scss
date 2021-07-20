@@ -1,7 +1,9 @@
 @import 'page_bundles/mixins_and_variables_and_functions';
+@import '../components/generic_vulnerability_report';
 
 $security-filter-height: 90px;
-$selection-summary-height: 68px;
+$selection-summary-height: 66px;
+$selection-summary-with-error-height: 118px;
 
 @mixin sticky-top-positioning($extra: 0) {
   top: $header-height + $extra;
@@ -42,7 +44,7 @@ $selection-summary-height: 68px;
 
 .security-dashboard-accordion > ul {
   @include gl-display-flex;
-  @include gl-flex-fill-1;
+  @include gl-flex-grow-1;
 }
 
 .security-charts > section {
@@ -94,7 +96,7 @@ $selection-summary-height: 68px;
 
   // Due to position: sticky not being supported on Chrome (https://caniuse.com/#feat=css-sticky),
   // the property is assigned to the th element as a workaround
-  .card,
+  .selection-summary,
   thead th {
     position: -webkit-sticky;
     position: sticky;
@@ -108,5 +110,13 @@ $selection-summary-height: 68px;
 
   thead.below-selection-summary th {
     @include sticky-top-positioning($security-filter-height + $selection-summary-height);
+  }
+
+  tr:hover .vulnerability-title {
+    text-decoration: underline;
+  }
+
+  .card.with-error + table thead.below-selection-summary th {
+    @include sticky-top-positioning($security-filter-height + $selection-summary-with-error-height);
   }
 }

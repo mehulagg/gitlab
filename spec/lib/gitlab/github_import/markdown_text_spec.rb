@@ -20,9 +20,30 @@ RSpec.describe Gitlab::GithubImport::MarkdownText do
       expect(text.to_s).to eq('Hello')
     end
 
+    it 'returns the text when the author has no login' do
+      author = double(:author, login: nil)
+      text = described_class.new('Hello', author, true)
+
+      expect(text.to_s).to eq('Hello')
+    end
+
+    it 'returns empty text when it receives nil' do
+      author = double(:author, login: nil)
+      text = described_class.new(nil, author, true)
+
+      expect(text.to_s).to eq('')
+    end
+
     it 'returns the text with an extra header when the author was not found' do
       author = double(:author, login: 'Alice')
       text = described_class.new('Hello', author)
+
+      expect(text.to_s).to eq("*Created by: Alice*\n\nHello")
+    end
+
+    it 'cleans invalid chars' do
+      author = double(:author, login: 'Alice')
+      text = described_class.format("\u0000Hello", author)
 
       expect(text.to_s).to eq("*Created by: Alice*\n\nHello")
     end

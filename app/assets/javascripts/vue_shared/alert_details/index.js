@@ -20,7 +20,6 @@ export default (selector) => {
       toggleSidebarStatus: (_, __, { cache }) => {
         const sourceData = cache.readQuery({ query: sidebarStatusQuery });
         const data = produce(sourceData, (draftData) => {
-          // eslint-disable-next-line no-param-reassign
           draftData.sidebarStatus = !draftData.sidebarStatus;
         });
         cache.writeQuery({ query: sidebarStatusQuery, data });
@@ -43,7 +42,8 @@ export default (selector) => {
     }),
   });
 
-  apolloProvider.clients.defaultClient.cache.writeData({
+  apolloProvider.clients.defaultClient.cache.writeQuery({
+    query: sidebarStatusQuery,
     data: {
       sidebarStatus: false,
     },
@@ -55,6 +55,7 @@ export default (selector) => {
     page,
     projectIssuesPath,
     projectId,
+    statuses: PAGE_CONFIG[page].STATUSES,
   };
 
   if (page === PAGE_CONFIG.OPERATIONS.TITLE) {

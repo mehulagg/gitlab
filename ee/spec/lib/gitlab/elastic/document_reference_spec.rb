@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Elastic::DocumentReference do
   let_it_be(:issue) { create(:issue) }
+
   let(:project) { issue.project }
 
   let(:issue_as_array) { [Issue, issue.id, issue.es_id, issue.es_parent] }
@@ -200,22 +201,28 @@ RSpec.describe Gitlab::Elastic::DocumentReference do
       let(:note_ref2) { described_class.new(Note, note2.id, note2.es_id, note2.es_parent) }
       let(:note_ref_deleted) { described_class.new(Note, note_deleted.id, note_deleted.es_id, note_deleted.es_parent) }
 
-      it 'preloads database records in one query per type' do
+      it 'preloads database records to avoid N+1 queries' do
         collection = described_class::Collection.new
         collection.deserialize_and_add(issue_ref1.serialize)
-        collection.deserialize_and_add(issue_ref2.serialize)
         collection.deserialize_and_add(note_ref1.serialize)
+
+        control = ActiveRecord::QueryRecorder.new { collection.preload_database_records.map(&:database_record) }
+
+        collection = described_class::Collection.new
+        collection.deserialize_and_add(issue_ref1.serialize)
+        collection.deserialize_and_add(note_ref1.serialize)
+        collection.deserialize_and_add(issue_ref2.serialize)
         collection.deserialize_and_add(note_ref2.serialize)
         collection.deserialize_and_add(note_ref_deleted.serialize)
 
         database_records = nil
         expect do
           database_records = collection.preload_database_records.map { |ref| ref.database_record }
-        end.not_to exceed_query_limit(2)
+        end.not_to exceed_query_limit(control)
 
         expect(database_records[0]).to eq(issue1)
-        expect(database_records[1]).to eq(issue2)
-        expect(database_records[2]).to eq(note1)
+        expect(database_records[1]).to eq(note1)
+        expect(database_records[2]).to eq(issue2)
         expect(database_records[3]).to eq(note2)
         expect(database_records[4]).to eq(nil) # Deleted database record will be nil
       end

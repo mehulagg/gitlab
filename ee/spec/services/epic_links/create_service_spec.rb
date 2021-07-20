@@ -15,10 +15,6 @@ RSpec.describe EpicLinks::CreateService do
 
     let(:valid_reference) { epic_to_add.to_reference(full: true) }
 
-    before do
-      stub_const('Epic', ::Epic, transfer_nested_constants: true)
-    end
-
     shared_examples 'system notes created' do
       it 'creates system notes' do
         expect { subject }.to change { Note.system.count }.from(0).to(2)

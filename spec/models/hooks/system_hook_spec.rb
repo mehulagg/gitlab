@@ -56,7 +56,7 @@ RSpec.describe SystemHook do
     end
 
     it "user_destroy hook" do
-      user.destroy
+      user.destroy!
 
       expect(WebMock).to have_requested(:post, system_hook.url).with(
         body: /user_destroy/,
@@ -102,7 +102,7 @@ RSpec.describe SystemHook do
     end
 
     it 'group destroy hook' do
-      group.destroy
+      group.destroy!
 
       expect(WebMock).to have_requested(:post, system_hook.url).with(
         body: /group_destroy/,
@@ -167,6 +167,24 @@ RSpec.describe SystemHook do
       expect_any_instance_of(WebHookService).to receive(:async_execute)
 
       hook.async_execute(data, hook_name)
+    end
+  end
+
+  describe '#rate_limit' do
+    let(:hook) { build(:system_hook) }
+
+    it 'returns nil' do
+      expect(hook.rate_limit).to be_nil
+    end
+  end
+
+  describe '#application_context' do
+    let(:hook) { build(:system_hook) }
+
+    it 'includes the type' do
+      expect(hook.application_context).to eq(
+        related_class: 'SystemHook'
+      )
     end
   end
 end

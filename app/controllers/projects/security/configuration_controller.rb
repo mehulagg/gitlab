@@ -3,21 +3,19 @@
 module Projects
   module Security
     class ConfigurationController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       feature_category :static_application_security_testing
 
-      def show
-        return render_404 unless feature_enabled?
-
-        render_403 unless can?(current_user, :read_security_configuration, project)
+      before_action only: [:show] do
+        push_frontend_feature_flag(:security_configuration_redesign, project, default_enabled: :yaml)
       end
 
-      private
-
-      def feature_enabled?
-        ::Feature.enabled?(:secure_security_and_compliance_configuration_page_on_ce, @project, default_enabled: :yaml)
+      def show
+        render_403 unless can?(current_user, :read_security_configuration, project)
       end
     end
   end
 end
 
-Projects::Security::ConfigurationController.prepend_if_ee('EE::Projects::Security::ConfigurationController')
+Projects::Security::ConfigurationController.prepend_mod_with('Projects::Security::ConfigurationController')

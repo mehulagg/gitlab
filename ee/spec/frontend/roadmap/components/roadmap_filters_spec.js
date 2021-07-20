@@ -1,4 +1,4 @@
-import { GlSegmentedControl, GlDropdown, GlDropdownItem, GlFilteredSearchToken } from '@gitlab/ui';
+import { GlSegmentedControl, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 
@@ -6,14 +6,20 @@ import RoadmapFilters from 'ee/roadmap/components/roadmap_filters.vue';
 import { PRESET_TYPES, EPICS_STATES } from 'ee/roadmap/constants';
 import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-import { mockSortedBy, mockTimeframeInitialDate } from 'ee_jest/roadmap/mock_data';
+import {
+  mockSortedBy,
+  mockTimeframeInitialDate,
+  mockAuthorTokenConfig,
+  mockLabelTokenConfig,
+  mockMilestoneTokenConfig,
+  mockConfidentialTokenConfig,
+  mockEpicTokenConfig,
+  mockReactionEmojiTokenConfig,
+} from 'ee_jest/roadmap/mock_data';
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { visitUrl, mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   mergeUrlParams: jest.fn(),
@@ -27,6 +33,7 @@ const createComponent = ({
   epicsState = EPICS_STATES.ALL,
   sortedBy = mockSortedBy,
   groupFullPath = 'gitlab-org',
+  listEpicsPath = '/groups/gitlab-org/-/epics',
   groupMilestonesPath = '/groups/gitlab-org/-/milestones.json',
   timeframe = getTimeframeForMonthsView(mockTimeframeInitialDate),
   filterParams = {},
@@ -50,6 +57,7 @@ const createComponent = ({
     provide: {
       groupFullPath,
       groupMilestonesPath,
+      listEpicsPath,
     },
   });
 };
@@ -142,11 +150,19 @@ describe('RoadmapFilters', () => {
       const mockInitialFilterValue = [
         {
           type: 'author_username',
-          value: { data: 'root' },
+          value: { data: 'root', operator: '=' },
+        },
+        {
+          type: 'author_username',
+          value: { data: 'John', operator: '!=' },
         },
         {
           type: 'label_name',
-          value: { data: 'Bug' },
+          value: { data: 'Bug', operator: '=' },
+        },
+        {
+          type: 'label_name',
+          value: { data: 'Feature', operator: '!=' },
         },
         {
           type: 'milestone_title',
@@ -155,6 +171,10 @@ describe('RoadmapFilters', () => {
         {
           type: 'confidential',
           value: { data: true },
+        },
+        {
+          type: 'my_reaction_emoji',
+          value: { data: 'thumbs_up', operator: '!=' },
         },
       ];
       let filteredSearchBar;
@@ -169,50 +189,13 @@ describe('RoadmapFilters', () => {
         expect(filteredSearchBar.props('recentSearchesStorageKey')).toBe('epics');
       });
 
-      it('includes `Author` and `Label` tokens', () => {
+      it('includes `Author`, `Milestone`, `Confidential`, `Epic` and `Label` tokens when user is not logged in', () => {
         expect(filteredSearchBar.props('tokens')).toEqual([
-          {
-            type: 'author_username',
-            icon: 'user',
-            title: 'Author',
-            unique: true,
-            symbol: '@',
-            token: AuthorToken,
-            operators: [{ value: '=', description: 'is', default: 'true' }],
-            fetchAuthors: expect.any(Function),
-          },
-          {
-            type: 'label_name',
-            icon: 'labels',
-            title: 'Label',
-            unique: false,
-            symbol: '~',
-            token: LabelToken,
-            operators: [{ value: '=', description: 'is', default: 'true' }],
-            fetchLabels: expect.any(Function),
-          },
-          {
-            type: 'milestone_title',
-            icon: 'clock',
-            title: 'Milestone',
-            unique: true,
-            symbol: '%',
-            token: MilestoneToken,
-            operators: [{ value: '=', description: 'is', default: 'true' }],
-            fetchMilestones: expect.any(Function),
-          },
-          {
-            type: 'confidential',
-            icon: 'eye-slash',
-            title: 'Confidential',
-            unique: true,
-            token: GlFilteredSearchToken,
-            operators: [{ value: '=', description: 'is', default: 'true' }],
-            options: [
-              { icon: 'eye-slash', value: true, title: 'Yes' },
-              { icon: 'eye', value: false, title: 'No' },
-            ],
-          },
+          mockAuthorTokenConfig,
+          mockLabelTokenConfig,
+          mockMilestoneTokenConfig,
+          mockConfidentialTokenConfig,
+          mockEpicTokenConfig,
         ]);
       });
 
@@ -243,6 +226,9 @@ describe('RoadmapFilters', () => {
           labelName: ['Bug'],
           milestoneTitle: '4.0',
           confidential: true,
+          'not[authorUsername]': 'John',
+          'not[labelName]': ['Feature'],
+          'not[myReactionEmoji]': 'thumbs_up',
         });
 
         await wrapper.vm.$nextTick();
@@ -265,6 +251,9 @@ describe('RoadmapFilters', () => {
           labelName: ['Bug'],
           milestoneTitle: '4.0',
           confidential: true,
+          'not[authorUsername]': 'John',
+          'not[labelName]': ['Feature'],
+          'not[myReactionEmoji]': 'thumbs_up',
         });
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
       });
@@ -281,6 +270,36 @@ describe('RoadmapFilters', () => {
 
         expect(wrapper.vm.setSortedBy).toHaveBeenCalledWith('end_date_asc');
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
+      });
+
+      describe('when user is logged in', () => {
+        beforeAll(() => {
+          gon.current_user_id = 1;
+          gon.current_user_fullname = 'Administrator';
+          gon.current_username = 'root';
+          gon.current_user_avatar_url = 'avatar/url';
+        });
+
+        it('includes `Author`, `Milestone`, `Confidential`, `Label` and `My-Reaction` tokens', () => {
+          expect(filteredSearchBar.props('tokens')).toEqual([
+            {
+              ...mockAuthorTokenConfig,
+              preloadedAuthors: [
+                {
+                  id: 1,
+                  name: 'Administrator',
+                  username: 'root',
+                  avatar_url: 'avatar/url',
+                },
+              ],
+            },
+            mockLabelTokenConfig,
+            mockMilestoneTokenConfig,
+            mockConfidentialTokenConfig,
+            mockEpicTokenConfig,
+            mockReactionEmojiTokenConfig,
+          ]);
+        });
       });
     });
   });

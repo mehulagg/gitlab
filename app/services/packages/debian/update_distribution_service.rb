@@ -4,7 +4,8 @@ module Packages
   module Debian
     class UpdateDistributionService
       def initialize(distribution, params)
-        @distribution, @params = distribution, params
+        @distribution = distribution
+        @params = params
 
         @components = params.delete(:components)
 
@@ -30,7 +31,7 @@ module Packages
       end
 
       def update_distribution
-        distribution.transaction do
+        result = distribution.transaction do
           if distribution.update(params)
             update_components if components
             update_architectures if architectures
@@ -40,7 +41,13 @@ module Packages
             append_errors(distribution)
             error
           end
-        end || error
+        end
+
+        result ||= error
+
+        ::Packages::Debian::GenerateDistributionWorker.perform_async(distribution.class.container_type, distribution.id) if result.success?
+
+        result
       end
 
       def update_components

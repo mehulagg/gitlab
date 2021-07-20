@@ -3,6 +3,7 @@
 module API
   module Helpers
     include Gitlab::Utils
+    include Helpers::Caching
     include Helpers::Pagination
     include Helpers::PaginationStrategies
 
@@ -48,7 +49,11 @@ module API
     # Returns the job associated with the token provided for
     # authentication, if any
     def current_authenticated_job
-      @current_authenticated_job
+      if try(:namespace_inheritable, :authentication)
+        ci_build_from_namespace_inheritable
+      else
+        @current_authenticated_job # rubocop:disable Gitlab/ModuleWithInstanceVariables
+      end
     end
 
     # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -68,6 +73,11 @@ module API
       validate_access_token!(scopes: scopes_registered_for_endpoint) unless sudo?
 
       save_current_user_in_env(@current_user) if @current_user
+
+      if @current_user
+        ::Gitlab::Database::LoadBalancing::RackMiddleware
+          .stick_or_unstick(env, :user, @current_user.id)
+      end
 
       @current_user
     end
@@ -119,10 +129,20 @@ module API
     def find_project!(id)
       project = find_project(id)
 
+      return forbidden! unless authorized_project_scope?(project)
+
       return project if can?(current_user, :read_project, project)
       return unauthorized! if authenticate_non_public?
 
       not_found!('Project')
+    end
+
+    def authorized_project_scope?(project)
+      return true unless job_token_authentication?
+      return true unless route_authentication_setting[:job_token_scope] == :project
+
+      ::Feature.enabled?(:ci_job_token_scope, project, default_enabled: :yaml) &&
+        current_authenticated_job.project == project
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -303,7 +323,7 @@ module API
 
     def verify_workhorse_api!
       Gitlab::Workhorse.verify_api_request!(request.headers)
-    rescue => e
+    rescue StandardError => e
       Gitlab::ErrorTracking.track_exception(e)
 
       forbidden!
@@ -467,9 +487,8 @@ module API
     def handle_api_exception(exception)
       if report_exception?(exception)
         define_params_for_grape_middleware
-        Gitlab::ErrorTracking.with_context(current_user) do
-          Gitlab::ErrorTracking.track_exception(exception)
-        end
+        Gitlab::ApplicationContext.push(user: current_user)
+        Gitlab::ErrorTracking.track_exception(exception)
       end
 
       # This is used with GrapeLogging::Loggers::ExceptionLogger
@@ -539,23 +558,12 @@ module API
       end
     end
 
-    def track_event(action = action_name, **args)
-      category = args.delete(:category) || self.options[:for].name
-      raise "invalid category" unless category
-
-      ::Gitlab::Tracking.event(category, action.to_s, **args)
-    rescue => error
-      Gitlab::AppLogger.warn(
-        "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
-      )
-    end
-
     def increment_counter(event_name)
       feature_name = "usage_data_#{event_name}"
       return unless Feature.enabled?(feature_name)
 
       Gitlab::UsageDataCounters.count(event_name)
-    rescue => error
+    rescue StandardError => error
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
 
@@ -564,17 +572,9 @@ module API
     def increment_unique_values(event_name, values)
       return unless values.present?
 
-      feature_flag = "usage_data_#{event_name}"
-
-      return unless Feature.enabled?(feature_flag, default_enabled: true)
-
       Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
-    rescue => error
+    rescue StandardError => error
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
-    end
-
-    def with_api_params(&block)
-      yield({ api: true, request: request })
     end
 
     protected
@@ -592,18 +592,26 @@ module API
 
     def project_finder_params_ce
       finder_params = project_finder_params_visibility_ce
+
+      finder_params.merge!(
+        params
+          .slice(:search,
+                 :custom_attributes,
+                 :last_activity_after,
+                 :last_activity_before,
+                 :topic,
+                 :repository_storage)
+          .symbolize_keys
+          .compact
+      )
+
       finder_params[:with_issues_enabled] = true if params[:with_issues_enabled].present?
       finder_params[:with_merge_requests_enabled] = true if params[:with_merge_requests_enabled].present?
       finder_params[:without_deleted] = true
-      finder_params[:search] = params[:search] if params[:search]
       finder_params[:search_namespaces] = true if params[:search_namespaces].present?
       finder_params[:user] = params.delete(:user) if params[:user]
-      finder_params[:custom_attributes] = params[:custom_attributes] if params[:custom_attributes]
       finder_params[:id_after] = sanitize_id_param(params[:id_after]) if params[:id_after]
       finder_params[:id_before] = sanitize_id_param(params[:id_before]) if params[:id_before]
-      finder_params[:last_activity_after] = params[:last_activity_after] if params[:last_activity_after]
-      finder_params[:last_activity_before] = params[:last_activity_before] if params[:last_activity_before]
-      finder_params[:repository_storage] = params[:repository_storage] if params[:repository_storage]
       finder_params
     end
 
@@ -710,4 +718,4 @@ module API
   end
 end
 
-API::Helpers.prepend_if_ee('EE::API::Helpers')
+API::Helpers.prepend_mod_with('API::Helpers')

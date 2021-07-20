@@ -7,9 +7,10 @@ RSpec.describe EpicsFinder do
   let_it_be(:search_user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:another_group) { create(:group) }
-  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago, end_date: 10.days.ago) }
-  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.ago, author: user, start_date: 2.days.ago, end_date: 3.days.from_now) }
-  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.ago, end_date: 3.days.ago) }
+  let_it_be(:reference_time) { Time.parse('2020-09-15 01:00') } # Arbitrary time used for time/date range filters
+  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.before(reference_time), end_date: 10.days.before(reference_time)) }
+  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.before(reference_time), author: user, start_date: 2.days.before(reference_time), end_date: 3.days.since(reference_time), parent: epic1) }
+  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.before(reference_time), end_date: 3.days.before(reference_time), parent: epic2) }
   let_it_be(:epic4) { create(:epic, :closed, group: another_group) }
 
   describe '#execute' do
@@ -73,15 +74,15 @@ RSpec.describe EpicsFinder do
 
         context 'by created_at' do
           it 'returns all epics created before the given date' do
-            expect(epics(created_before: 2.days.ago)).to contain_exactly(epic1, epic2)
+            expect(epics(created_before: 2.days.before(reference_time))).to contain_exactly(epic1, epic2)
           end
 
           it 'returns all epics created after the given date' do
-            expect(epics(created_after: 2.days.ago)).to contain_exactly(epic3)
+            expect(epics(created_after: 2.days.before(reference_time))).to contain_exactly(epic3)
           end
 
           it 'returns all epics created within the given interval' do
-            expect(epics(created_after: 5.days.ago, created_before: 1.day.ago)).to contain_exactly(epic2)
+            expect(epics(created_after: 5.days.before(reference_time), created_before: 1.day.before(reference_time))).to contain_exactly(epic2)
           end
         end
 
@@ -104,6 +105,22 @@ RSpec.describe EpicsFinder do
           it 'returns all epics authored by the given user' do
             expect(epics(author_id: user.id)).to contain_exactly(epic2)
           end
+
+          context 'using OR' do
+            it 'returns all epics authored by any of the given users' do
+              expect(epics(or: { author_username: [epic2.author.username, epic3.author.username] })).to contain_exactly(epic2, epic3)
+            end
+
+            context 'when feature flag is disabled' do
+              before do
+                stub_feature_flags(or_issuable_queries: false)
+              end
+
+              it 'does not add any filter' do
+                expect(epics(or: { author_username: [epic2.author.username, epic3.author.username] })).to contain_exactly(epic1, epic2, epic3)
+              end
+            end
+          end
         end
 
         context 'by label' do
@@ -123,9 +140,14 @@ RSpec.describe EpicsFinder do
 
         context 'when subgroups are supported' do
           let_it_be(:subgroup) { create(:group, :private, parent: group) }
+          let_it_be(:subgroup_guest) { create(:user) }
           let_it_be(:subgroup2) { create(:group, :private, parent: subgroup) }
           let_it_be(:subgroup_epic) { create(:epic, group: subgroup) }
           let_it_be(:subgroup2_epic) { create(:epic, group: subgroup2) }
+
+          before do
+            subgroup.add_guest(subgroup_guest)
+          end
 
           it 'returns all epics that belong to the given group and its subgroups' do
             expect(epics).to contain_exactly(epic1, epic2, epic3, subgroup_epic, subgroup2_epic)
@@ -151,20 +173,49 @@ RSpec.describe EpicsFinder do
                 let(:finder_params) { { include_descendant_groups: false, include_ancestor_groups: true } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, epic1, epic2, epic3) }
+
+                context "when user does not have permission to view ancestor groups" do
+                  let(:finder_params) { { group_id: subgroup.id, include_descendant_groups: false, include_ancestor_groups: true } }
+
+                  subject { described_class.new(subgroup_guest, finder_params).execute }
+
+                  it { is_expected.to contain_exactly(subgroup_epic) }
+                end
               end
             end
 
-            context 'when include_descendant_groups is true' do
+            context 'when include_descendant_groups is true (by default)' do
               context 'and include_ancestor_groups is false' do
-                let(:finder_params) { { include_descendant_groups: true, include_ancestor_groups: false } }
+                let(:finder_params) { { include_ancestor_groups: false } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic) }
               end
 
               context 'and include_ancestor_groups is true' do
-                let(:finder_params) { { include_descendant_groups: true, include_ancestor_groups: true } }
+                let(:finder_params) { { include_ancestor_groups: true } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic, epic1, epic2, epic3) }
+
+                context "when user does not have permission to view ancestor groups" do
+                  let(:finder_params) { { group_id: subgroup.id, include_ancestor_groups: true } }
+
+                  subject { described_class.new(subgroup_guest, finder_params).execute }
+
+                  it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic) }
+                end
+              end
+            end
+
+            context 'when user is a guest of top level group' do
+              it 'does not have N+1 queries for subgroups' do
+                GroupMember.where(user_id: search_user.id).delete_all
+                group.add_guest(search_user)
+
+                control = ActiveRecord::QueryRecorder.new(skip_cached: false) { epics.to_a }
+
+                create_list(:group, 5, :private, parent: group)
+
+                expect { epics.to_a }.not_to exceed_all_query_limit(control)
               end
             end
           end
@@ -178,7 +229,7 @@ RSpec.describe EpicsFinder do
               .to receive(:should_check_namespace_plan?)
               .and_return(true)
 
-            create(:gitlab_subscription, :gold, namespace: group)
+            create(:gitlab_subscription, :ultimate, namespace: group)
 
             expect { epics.to_a }.not_to exceed_all_query_limit(6)
           end
@@ -187,8 +238,8 @@ RSpec.describe EpicsFinder do
         context 'by timeframe' do
           it 'returns epics which start in the timeframe' do
             params = {
-              start_date: 2.days.ago.strftime('%Y-%m-%d'),
-              end_date: 1.day.ago.strftime('%Y-%m-%d')
+              start_date: 2.days.before(reference_time).strftime('%Y-%m-%d'),
+              end_date: 1.day.before(reference_time).strftime('%Y-%m-%d')
             }
 
             expect(epics(params)).to contain_exactly(epic2)
@@ -196,8 +247,8 @@ RSpec.describe EpicsFinder do
 
           it 'returns epics which end in the timeframe' do
             params = {
-              start_date: 4.days.ago.strftime('%Y-%m-%d'),
-              end_date: 3.days.ago.strftime('%Y-%m-%d')
+              start_date: 4.days.before(reference_time).strftime('%Y-%m-%d'),
+              end_date: 3.days.before(reference_time).strftime('%Y-%m-%d')
             }
 
             expect(epics(params)).to contain_exactly(epic3)
@@ -205,8 +256,8 @@ RSpec.describe EpicsFinder do
 
           it 'returns epics which start before and end after the timeframe' do
             params = {
-              start_date: 4.days.ago.strftime('%Y-%m-%d'),
-              end_date: 4.days.ago.strftime('%Y-%m-%d')
+              start_date: 4.days.before(reference_time).strftime('%Y-%m-%d'),
+              end_date: 4.days.before(reference_time).strftime('%Y-%m-%d')
             }
 
             expect(epics(params)).to contain_exactly(epic3)
@@ -214,13 +265,13 @@ RSpec.describe EpicsFinder do
 
           describe 'when one of the timeframe params are missing' do
             it 'does not filter by timeframe if start_date is missing' do
-              only_end_date = epics(end_date: 1.year.ago.strftime('%Y-%m-%d'))
+              only_end_date = epics(end_date: 1.year.before(reference_time).strftime('%Y-%m-%d'))
 
               expect(only_end_date).to eq(epics)
             end
 
             it 'does not filter by timeframe if end_date is missing' do
-              only_start_date = epics(start_date: 1.year.from_now.strftime('%Y-%m-%d'))
+              only_start_date = epics(start_date: 1.year.since(reference_time).strftime('%Y-%m-%d'))
 
               expect(only_start_date).to eq(epics)
             end
@@ -228,17 +279,18 @@ RSpec.describe EpicsFinder do
         end
 
         context 'by parent' do
-          before do
-            epic2.update!(parent: epic1)
-            epic3.update!(parent: epic2)
-          end
-
           it 'returns direct children of the parent' do
-            params = {
-              parent_id: epic1.id
-            }
+            params = { parent_id: epic1.id }
 
             expect(epics(params)).to contain_exactly(epic2)
+          end
+        end
+
+        context 'by child' do
+          it 'returns ancestors of the child epic' do
+            params = { child_id: epic3.id }
+
+            expect(epics(params)).to contain_exactly(epic1, epic2)
           end
         end
 
@@ -504,19 +556,49 @@ RSpec.describe EpicsFinder do
           let_it_be(:public_group1) { create(:group, :public, parent: base_group) }
           let_it_be(:public_epic1) { create(:epic, group: public_group1) }
           let_it_be(:public_epic2) { create(:epic, :confidential, group: public_group1) }
+          let_it_be(:internal_group) { create(:group, :internal, parent: base_group) }
+          let_it_be(:internal_epic) { create(:epic, group: internal_group) }
+
           let(:execute_params) { {} }
 
-          subject { described_class.new(search_user, group_id: base_group.id).execute(**execute_params) }
+          def execute
+            described_class.new(search_user, group_id: base_group.id).execute(**execute_params)
+          end
 
-          it 'returns only public epics' do
-            expect(subject).to match_array([base_epic2, public_epic1])
+          shared_examples 'avoids N+1 queries' do
+            it 'avoids N+1 queries on searched groups' do
+              execute # warm up
+              control = ActiveRecord::QueryRecorder.new(skip_cached: false) { execute }
+
+              create_list(:group, 5, :private, parent: base_group)
+
+              expect { execute }.not_to exceed_all_query_limit(control)
+            end
+          end
+
+          context 'when user is not set' do
+            let(:search_user) { nil }
+
+            it 'returns only public epics in public groups' do
+              expect(execute).to match_array([base_epic2, public_epic1])
+            end
+
+            it_behaves_like 'avoids N+1 queries'
+          end
+
+          context 'when user is not member of any groups being searched' do
+            it 'returns only public epics in public and internal groups' do
+              expect(execute).to match_array([base_epic2, public_epic1, internal_epic])
+            end
+
+            it_behaves_like 'avoids N+1 queries'
           end
 
           context 'when skip_visibility_check is true' do
             let(:execute_params) { { skip_visibility_check: true } }
 
             it 'returns all epics' do
-              expect(subject).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2])
+              expect(execute).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2, internal_epic])
             end
           end
 
@@ -526,12 +608,10 @@ RSpec.describe EpicsFinder do
             end
 
             it 'returns all nested epics' do
-              expect(subject).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2])
+              expect(execute).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2, internal_epic])
             end
 
-            it 'does not execute more than 5 SQL queries' do
-              expect { subject }.not_to exceed_all_query_limit(5)
-            end
+            it_behaves_like 'avoids N+1 queries'
 
             it 'does not check permission for subgroups because user inherits permission' do
               finder = described_class.new(search_user, group_id: base_group.id)
@@ -548,13 +628,14 @@ RSpec.describe EpicsFinder do
             end
 
             it 'returns also confidential epics from this subgroup' do
-              expect(subject).to match_array([base_epic2, private_epic1, private_epic2, public_epic1])
+              expect(execute).to match_array([base_epic2, private_epic1, private_epic2, public_epic1, internal_epic])
             end
 
             # if user is not member of top-level group, we need to check
             # if he can read epics in each subgroup
-            it 'does not execute more than 10 SQL queries' do
-              expect { subject }.not_to exceed_all_query_limit(10)
+            it 'does not execute more than 17 SQL queries' do
+              # The limit here is fragile!
+              expect { execute }.not_to exceed_all_query_limit(17)
             end
 
             it 'checks permission for each subgroup' do
@@ -566,13 +647,23 @@ RSpec.describe EpicsFinder do
             end
           end
 
+          context 'when user is a guest in the base group' do
+            before do
+              base_group.add_guest(search_user)
+            end
+
+            it 'does not return any confidential epics in the base or subgroups' do
+              expect(execute).to match_array([base_epic2, private_epic1, public_epic1, internal_epic])
+            end
+          end
+
           context 'when user is member of public subgroup' do
             before do
               public_group1.add_developer(search_user)
             end
 
             it 'returns also confidential epics from this subgroup' do
-              expect(subject).to match_array([base_epic2, public_epic1, public_epic2])
+              expect(execute).to match_array([base_epic2, public_epic1, public_epic2, internal_epic])
             end
           end
         end
@@ -591,16 +682,6 @@ RSpec.describe EpicsFinder do
           it 'returns all epics without negated label' do
             expect(epics(params)).to contain_exactly(epic1, epic2, epic3)
           end
-
-          context 'when not_issuable_queries is disabled' do
-            before do
-              stub_feature_flags(not_issuable_queries: false)
-            end
-
-            it 'returns epics that include negated params' do
-              expect(epics(params)).to contain_exactly(negated_epic, negated_epic2, epic1, epic2, epic3)
-            end
-          end
         end
 
         context 'with negated author' do
@@ -615,15 +696,14 @@ RSpec.describe EpicsFinder do
           it 'returns all epics without given author' do
             expect(epics(params)).to contain_exactly(epic1, epic2, epic3)
           end
+        end
 
-          context 'when not_issuable_queries is disabled' do
-            before do
-              stub_feature_flags(not_issuable_queries: false)
-            end
+        context 'with negated reaction emoji' do
+          let_it_be(:awarded_emoji) { create(:award_emoji, name: 'thumbsup', awardable: epic3, user: search_user) }
+          let_it_be(:params) { { not: { my_reaction_emoji: awarded_emoji.name } } }
 
-            it 'returns epics that include negated params' do
-              expect(epics(params)).to contain_exactly(authored_epic, epic1, epic2, epic3)
-            end
+          it 'returns all epics without given emoji name' do
+            expect(epics(params)).to contain_exactly(epic1, epic2)
           end
         end
       end

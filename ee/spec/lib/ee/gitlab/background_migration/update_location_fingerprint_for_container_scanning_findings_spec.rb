@@ -13,7 +13,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateLocationFingerprintForContaine
   let!(:project) { projects.create!(id: 123, namespace_id: group.id, name: 'gitlab', path: 'gitlab') }
 
   let!(:scanner) do
-    scanners.create!(id: 6, project_id: project.id, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: project.id, external_id: 'trivy', name: 'Security Scanner')
   end
 
   it 'updates location fingerprint' do

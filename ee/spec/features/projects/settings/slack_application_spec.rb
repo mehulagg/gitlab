@@ -6,14 +6,14 @@ RSpec.describe 'Slack application' do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:role) { :developer }
-  let(:service) { create(:gitlab_slack_application_service, project: project) }
-  let(:slack_application_form_path) { edit_project_service_path(project, service) }
+  let(:integration) { create(:gitlab_slack_application_integration, project: project) }
+  let(:slack_application_form_path) { edit_project_service_path(project, integration) }
 
   before do
     gitlab_sign_in(user)
     project.add_maintainer(user)
 
-    create(:slack_integration, service: service)
+    create(:slack_integration, integration: integration)
 
     allow(Gitlab).to receive(:com?).and_return(true)
     allow(Gitlab::CurrentSettings).to receive(:slack_app_enabled).and_return(true)

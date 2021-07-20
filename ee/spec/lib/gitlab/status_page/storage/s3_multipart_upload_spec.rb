@@ -108,7 +108,7 @@ RSpec.describe Gitlab::StatusPage::Storage::S3MultipartUpload, :aws_s3 do
   end
 
   def error_message(error_class, **args)
-    %{Error occured "Aws::S3::Errors::#{error_class}" } \
+    %{Error occurred "Aws::S3::Errors::#{error_class}" } \
       "for bucket #{bucket_name.inspect}. Arguments: #{args.inspect}"
   end
 end

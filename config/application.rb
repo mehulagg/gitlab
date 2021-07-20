@@ -29,13 +29,14 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/same_site_cookies')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
+    require_dependency Rails.root.join('lib/gitlab/middleware/rack_multipart_tempfile_factory')
     require_dependency Rails.root.join('lib/gitlab/runtime')
+
+    config.autoloader = :classic
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
-
-    config.active_record.sqlite3.represent_boolean_as_integer = true
 
     # Sidekiq uses eager loading, but directories not in the standard Rails
     # directories must be added to the eager load paths:
@@ -56,26 +57,36 @@ module Gitlab
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
-    if Gitlab.ee?
-      ee_paths = config.eager_load_paths.each_with_object([]) do |path, memo|
-        ee_path = config.root.join('ee', Pathname.new(path).relative_path_from(config.root))
-        memo << ee_path.to_s
+    foss_eager_load_paths = config.eager_load_paths.dup.freeze
+    load_paths = lambda do |dir:|
+      ext_paths = foss_eager_load_paths.each_with_object([]) do |path, memo|
+        ext_path = config.root.join(dir, Pathname.new(path).relative_path_from(config.root))
+        memo << ext_path.to_s
       end
 
-      ee_paths << "#{config.root}/ee/app/replicators"
+      ext_paths << "#{config.root}/#{dir}/app/replicators"
 
       # Eager load should load CE first
-      config.eager_load_paths.push(*ee_paths)
-      config.helpers_paths.push "#{config.root}/ee/app/helpers"
+      config.eager_load_paths.push(*ext_paths)
+      config.helpers_paths.push "#{config.root}/#{dir}/app/helpers"
 
-      # Other than Ruby modules we load EE first
-      config.paths['lib/tasks'].unshift "#{config.root}/ee/lib/tasks"
-      config.paths['app/views'].unshift "#{config.root}/ee/app/views"
+      # Other than Ruby modules we load extensions first
+      config.paths['lib/tasks'].unshift "#{config.root}/#{dir}/lib/tasks"
+      config.paths['app/views'].unshift "#{config.root}/#{dir}/app/views"
+    end
+
+    Gitlab.ee do
+      load_paths.call(dir: 'ee')
+    end
+
+    Gitlab.jh do
+      load_paths.call(dir: 'jh')
     end
 
     # Rake tasks ignore the eager loading settings, so we need to set the
     # autoload paths explicitly
     config.autoload_paths = config.eager_load_paths.dup
+    config.autoload_paths.push("#{config.root}/lib/generators")
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -137,8 +148,10 @@ module Gitlab
       encrypted_key
       import_url
       elasticsearch_url
+      elasticsearch_password
       search
       jwt
+      mailgun_signing_key
       otp_attempt
       sentry_dsn
       trace
@@ -154,6 +167,10 @@ module Gitlab
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
+
+    # Use new connection handling so that we can use Rails 6.1+ multiple
+    # database support.
+    config.active_record.legacy_connection_handling = false
 
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
@@ -184,30 +201,36 @@ module Gitlab
     config.assets.precompile << "page_bundles/build.css"
     config.assets.precompile << "page_bundles/ci_status.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
-    config.assets.precompile << "page_bundles/security_discover.css"
     config.assets.precompile << "page_bundles/dev_ops_report.css"
     config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/epics.css"
     config.assets.precompile << "page_bundles/error_tracking_details.css"
     config.assets.precompile << "page_bundles/error_tracking_index.css"
+    config.assets.precompile << "page_bundles/group.css"
     config.assets.precompile << "page_bundles/ide.css"
     config.assets.precompile << "page_bundles/import.css"
     config.assets.precompile << "page_bundles/incident_management_list.css"
     config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
     config.assets.precompile << "page_bundles/jira_connect_users.css"
+    config.assets.precompile << "page_bundles/learn_gitlab.css"
+    config.assets.precompile << "page_bundles/members.css"
     config.assets.precompile << "page_bundles/merge_conflicts.css"
     config.assets.precompile << "page_bundles/merge_requests.css"
     config.assets.precompile << "page_bundles/milestone.css"
+    config.assets.precompile << "page_bundles/new_namespace.css"
     config.assets.precompile << "page_bundles/oncall_schedules.css"
+    config.assets.precompile << "page_bundles/escalation_policies.css"
     config.assets.precompile << "page_bundles/pipeline.css"
     config.assets.precompile << "page_bundles/pipeline_schedules.css"
     config.assets.precompile << "page_bundles/pipelines.css"
     config.assets.precompile << "page_bundles/productivity_analytics.css"
     config.assets.precompile << "page_bundles/profile_two_factor_auth.css"
+    config.assets.precompile << "page_bundles/project.css"
     config.assets.precompile << "page_bundles/reports.css"
     config.assets.precompile << "page_bundles/roadmap.css"
     config.assets.precompile << "page_bundles/security_dashboard.css"
+    config.assets.precompile << "page_bundles/security_discover.css"
     config.assets.precompile << "page_bundles/signup.css"
     config.assets.precompile << "page_bundles/terminal.css"
     config.assets.precompile << "page_bundles/todos.css"
@@ -217,6 +240,7 @@ module Gitlab
     config.assets.precompile << "lazy_bundles/select2.css"
     config.assets.precompile << "performance_bar.css"
     config.assets.precompile << "disable_animations.css"
+    config.assets.precompile << "test_environment.css"
     config.assets.precompile << "snippets.css"
     config.assets.precompile << "locale/**/app.js"
     config.assets.precompile << "emoji_sprites.css"
@@ -268,6 +292,8 @@ module Gitlab
 
     config.middleware.insert_after ActionDispatch::ActionableExceptions, ::Gitlab::Middleware::HandleMalformedStrings
 
+    config.middleware.insert_after Rack::Sendfile, ::Gitlab::Middleware::RackMultipartTempfileFactory
+
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do
       headers_to_expose = %w[Link X-Total X-Total-Pages X-Per-Page X-Page X-Next-Page X-Prev-Page X-Gitlab-Blob-Id X-Gitlab-Commit-Id X-Gitlab-Content-Sha256 X-Gitlab-Encoding X-Gitlab-File-Name X-Gitlab-File-Path X-Gitlab-Last-Commit-Id X-Gitlab-Ref X-Gitlab-Size]
@@ -292,11 +318,33 @@ module Gitlab
       end
 
       # Cross-origin requests must be enabled for the Authorization code with PKCE OAuth flow when used from a browser.
+      %w(/oauth/token /oauth/revoke).each do |oauth_path|
+        allow do
+          origins '*'
+          resource oauth_path,
+            headers: %w(Authorization),
+            credentials: false,
+            methods: %i(post)
+        end
+      end
+
+      # These are routes from doorkeeper-openid_connect:
+      # https://github.com/doorkeeper-gem/doorkeeper-openid_connect#routes
       allow do
         origins '*'
-        resource '/oauth/token',
+        resource '/oauth/userinfo',
+          headers: %w(Authorization),
           credentials: false,
-          methods: [:post]
+          methods: %i(get head post)
+      end
+
+      %w(/oauth/discovery/keys /.well-known/openid-configuration /.well-known/webfinger).each do |openid_path|
+        allow do
+          origins '*'
+          resource openid_path,
+          credentials: false,
+          methods: %i(get head)
+        end
       end
     end
 
@@ -338,7 +386,15 @@ module Gitlab
     initializer :correct_precompile_targets, after: :set_default_precompile do |app|
       app.config.assets.precompile.reject! { |entry| entry == Sprockets::Railtie::LOOSE_APP_ASSETS }
 
-      asset_roots = [config.root.join("app/assets").to_s]
+      # if two files in assets are named the same, it'll likely resolve to the normal app/assets version.
+      # See https://gitlab.com/gitlab-jh/gitlab/-/merge_requests/27#note_609101582 for more details
+      asset_roots = []
+
+      if Gitlab.jh?
+        asset_roots << config.root.join("jh/app/assets").to_s
+      end
+
+      asset_roots << config.root.join("app/assets").to_s
 
       if Gitlab.ee?
         asset_roots << config.root.join("ee/app/assets").to_s
@@ -366,16 +422,18 @@ module Gitlab
       end
     end
 
-    # Add EE assets. They should take precedence over CE. This means if two files exist, e.g.:
+    # Add assets for variants of GitLab. They should take precedence over CE.
+    # This means if multiple files exist, e.g.:
     #
+    # jh/app/assets/stylesheets/example.scss
     # ee/app/assets/stylesheets/example.scss
     # app/assets/stylesheets/example.scss
     #
-    # The ee/ version will be preferred.
-    initializer :prefer_ee_assets, after: :append_assets_path do |app|
-      if Gitlab.ee?
+    # The jh/ version will be preferred.
+    initializer :prefer_specialized_assets, after: :append_assets_path do |app|
+      Gitlab.extensions.each do |extension|
         %w[images javascripts stylesheets].each do |path|
-          app.config.assets.paths.unshift("#{config.root}/ee/app/assets/#{path}")
+          app.config.assets.paths.unshift("#{config.root}/#{extension}/app/assets/#{path}")
         end
       end
     end

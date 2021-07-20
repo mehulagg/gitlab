@@ -4,7 +4,7 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Exploring GitLab Pages
+# Exploring GitLab Pages **(FREE)**
 
 This document is a user guide to explore the options and settings
 GitLab Pages offers.
@@ -22,7 +22,7 @@ In brief, this is what you need to upload your website in GitLab Pages:
 
 1. Domain of the instance: domain name that is used for GitLab Pages
    (ask your administrator).
-1. GitLab CI/CD: a `.gitlab-ci.yml` file with a specific job named [`pages`](../../../ci/yaml/README.md#pages) in the root directory of your repository.
+1. GitLab CI/CD: a `.gitlab-ci.yml` file with a specific job named [`pages`](../../../ci/yaml/index.md#pages) in the root directory of your repository.
 1. A directory called `public` in your site's repository containing the content
    to be published.
 1. GitLab Runner enabled for the project.
@@ -129,7 +129,7 @@ See this document for a [step-by-step guide](getting_started/pages_from_scratch.
 
 Remember that GitLab Pages are by default branch/tag agnostic and their
 deployment relies solely on what you specify in `.gitlab-ci.yml`. You can limit
-the `pages` job with the [`only` parameter](../../../ci/yaml/README.md#onlyexcept-basic),
+the `pages` job with the [`only` parameter](../../../ci/yaml/index.md#only--except),
 whenever a new commit is pushed to a branch used specifically for your
 pages.
 
@@ -273,6 +273,10 @@ Sure. All you need to do is download the artifacts archive from the job page.
 Yes. GitLab Pages doesn't care whether you set your project's visibility level
 to private, internal or public.
 
+### Can I create a personal or a group website
+
+Yes. See the documentation about [GitLab Pages domain names, URLs, and base URLs](getting_started_part_one.md).
+
 ### Do I need to create a user/group website before creating a project website?
 
 No, you don't. You can create your project first and access it under
@@ -281,3 +285,43 @@ No, you don't. You can create your project first and access it under
 ## Known issues
 
 For a list of known issues, visit the GitLab [public issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues?label_name[]=Category%3APages).
+
+## Troubleshooting
+
+### 404 error when accessing a GitLab Pages site URL
+
+This problem most likely results from a missing `index.html` file in the public directory. If after deploying a Pages site
+a 404 is encountered, confirm that the public directory contains an `index.html` file. If the file contains a different name
+such as `test.html`, the Pages site can still be accessed, but the full path would be needed. For example: `https//group-name.pages.example.com/project-name/test.html`.
+
+The contents of the public directory can be confirmed by [browsing the artifacts](../../../ci/pipelines/job_artifacts.md#download-job-artifacts) from the latest pipeline.
+
+Files listed under the public directory can be accessed through the Pages URL for the project.
+
+A 404 can also be related to incorrect permissions. If [Pages Access Control](pages_access_control.md) is enabled, and a user
+navigates to the Pages URL and receives a 404 response, it is possible that the user does not have permission to view the site.
+To fix this, verify that the user is a member of the project.
+
+For Geo instances, 404 errors on Pages occur after promoting a secondary to a primary.
+Find more details in the [Pages administration documentation](../../../administration/pages/index.md#404-error-after-promoting-a-geo-secondary-to-a-primary-node)
+
+### Cannot play media content on Safari
+
+Safari requires the web server to support the [Range request header](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/CreatingVideoforSafarioniPhone/CreatingVideoforSafarioniPhone.html#//apple_ref/doc/uid/TP40006514-SW6)
+in order to play your media content. For GitLab Pages to serve
+HTTP Range requests, you should use the following two variables in your `.gitlab-ci.yaml` file:
+
+```yaml
+pages:
+  stage: deploy
+  variables:
+    FF_USE_FASTZIP: "true"
+    ARTIFACT_COMPRESSION_LEVEL: "fastest"
+  script:
+    - echo "Deploying pages"
+  artifacts:
+    paths:
+      - public
+```
+
+The `FF_USE_FASTZIP` variable enables the [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) which is needed for [`ARTIFACT_COMPRESSION_LEVEL`](../../../ci/runners/configure_runners.md#artifact-and-cache-settings).

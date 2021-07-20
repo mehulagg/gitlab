@@ -4,15 +4,18 @@ module API
   class Experiments < ::API::Base
     before { authorize_read_experiments! }
 
-    feature_category :product_analytics
+    feature_category :experimentation_expansion
 
     resource :experiments do
       desc 'Get a list of all experiments' do
         success EE::API::Entities::Experiment
       end
       get do
-        experiments = Gitlab::Experimentation::EXPERIMENTS.keys.map do |experiment_key|
-          { key: experiment_key, enabled: Gitlab::Experimentation.active?(experiment_key) }
+        experiments = []
+
+        experiment(:null_hypothesis, canary: true, user: current_user) do |e|
+          e.use { bad_request! 'experimentation may not be working right now' }
+          e.try { experiments = Feature::Definition.definitions.values.select { |d| d.attributes[:type] == 'experiment' } }
         end
 
         present experiments, with: EE::API::Entities::Experiment, current_user: current_user
@@ -20,6 +23,8 @@ module API
     end
 
     helpers do
+      include Gitlab::Experiment::Dsl
+
       def authorize_read_experiments!
         authenticate!
 

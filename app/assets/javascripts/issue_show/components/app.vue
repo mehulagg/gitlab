@@ -1,13 +1,20 @@
 <script>
 import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
 import Visibility from 'visibilityjs';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import Poll from '~/lib/utils/poll';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __, s__, sprintf } from '~/locale';
-import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
-import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
+import {
+  IssuableStatus,
+  IssuableStatusText,
+  IssuableType,
+  IssueTypePath,
+  IncidentTypePath,
+  IncidentType,
+} from '../constants';
 import eventHub from '../event_hub';
+import getIssueStateQuery from '../queries/get_issue_state.query.graphql';
 import Service from '../services/index';
 import Store from '../stores';
 import descriptionComponent from './description.vue';
@@ -25,7 +32,6 @@ export default {
     formComponent,
     PinnedLinks,
   },
-  mixins: [recaptchaModalImplementor],
   props: {
     endpoint: {
       required: true,
@@ -197,7 +203,13 @@ export default {
       showForm: false,
       templatesRequested: false,
       isStickyHeaderShowing: false,
+      issueState: {},
     };
+  },
+  apollo: {
+    issueState: {
+      query: getIssueStateQuery,
+    },
   },
   computed: {
     issuableTemplates() {
@@ -240,7 +252,7 @@ export default {
         : '';
     },
     statusIcon() {
-      return this.isClosed ? 'mobile-issue-close' : 'issue-open-m';
+      return this.isClosed ? 'issue-close' : 'issue-open-m';
     },
     statusText() {
       return IssuableStatusText[this.issuableStatus];
@@ -250,6 +262,7 @@ export default {
     },
   },
   created() {
+    this.flashContainer = null;
     this.service = new Service(this.endpoint);
     this.poll = new Poll({
       resource: this.service,
@@ -289,7 +302,7 @@ export default {
   methods: {
     handleBeforeUnloadEvent(e) {
       const event = e;
-      if (this.showForm && this.issueChanged && !this.showRecaptcha) {
+      if (this.showForm && this.issueChanged && !this.issueState.isDirty) {
         event.returnValue = __('Are you sure you want to lose your issue information?');
       }
       return undefined;
@@ -303,11 +316,13 @@ export default {
           this.store.updateState(data);
         })
         .catch(() => {
-          createFlash(this.defaultErrorMessage);
+          createFlash({
+            message: this.defaultErrorMessage,
+          });
         });
     },
 
-    updateAndShowForm(templates = []) {
+    updateAndShowForm(templates = {}) {
       if (!this.showForm) {
         this.showForm = true;
         this.store.setFormState({
@@ -328,7 +343,9 @@ export default {
           this.updateAndShowForm(res.data);
         })
         .catch(() => {
-          createFlash(this.defaultErrorMessage);
+          createFlash({
+            message: this.defaultErrorMessage,
+          });
           this.updateAndShowForm();
         });
     },
@@ -347,13 +364,31 @@ export default {
     },
 
     updateIssuable() {
+      const {
+        store: { formState },
+        issueState,
+      } = this;
+      const issuablePayload = issueState.isDirty
+        ? { ...formState, issue_type: issueState.issueType }
+        : formState;
+      this.clearFlash();
       return this.service
-        .updateIssuable(this.store.formState)
+        .updateIssuable(issuablePayload)
         .then((res) => res.data)
-        .then((data) => this.checkForSpam(data))
         .then((data) => {
-          if (!window.location.pathname.includes(data.web_url)) {
+          if (
+            !window.location.pathname.includes(data.web_url) &&
+            issueState.issueType !== IncidentType
+          ) {
             visitUrl(data.web_url);
+          }
+
+          if (issueState.isDirty) {
+            const URI =
+              issueState.issueType === IncidentType
+                ? data.web_url.replace(IssueTypePath, IncidentTypePath)
+                : data.web_url;
+            visitUrl(URI);
           }
         })
         .then(this.updateStoreState)
@@ -361,28 +396,24 @@ export default {
           eventHub.$emit('close.form');
         })
         .catch((error = {}) => {
-          const { name, response = {} } = error;
+          const { message, response = {} } = error;
 
-          if (name === 'SpamError') {
-            this.openRecaptcha();
-          } else {
-            let errMsg = this.defaultErrorMessage;
+          this.store.setFormState({
+            updateLoading: false,
+          });
 
-            if (response.data && response.data.errors) {
-              errMsg += `. ${response.data.errors.join(' ')}`;
-            }
+          let errMsg = this.defaultErrorMessage;
 
-            createFlash(errMsg);
+          if (response.data && response.data.errors) {
+            errMsg += `. ${response.data.errors.join(' ')}`;
+          } else if (message) {
+            errMsg += `. ${message}`;
           }
+
+          this.flashContainer = createFlash({
+            message: errMsg,
+          });
         });
-    },
-
-    closeRecaptchaModal() {
-      this.store.setFormState({
-        updateLoading: false,
-      });
-
-      this.closeRecaptcha();
     },
 
     deleteIssuable(payload) {
@@ -396,9 +427,11 @@ export default {
           visitUrl(data.web_url);
         })
         .catch(() => {
-          createFlash(
-            sprintf(s__('Error deleting %{issuableType}'), { issuableType: this.issuableType }),
-          );
+          createFlash({
+            message: sprintf(s__('Error deleting %{issuableType}'), {
+              issuableType: this.issuableType,
+            }),
+          });
         });
     },
 
@@ -409,6 +442,13 @@ export default {
     showStickyHeader() {
       this.isStickyHeaderShowing = true;
     },
+
+    clearFlash() {
+      if (this.flashContainer) {
+        this.flashContainer.style.display = 'none';
+        this.flashContainer = null;
+      }
+    },
   },
 };
 </script>
@@ -418,6 +458,7 @@ export default {
     <div v-if="canUpdate && showForm">
       <form-component
         :form-state="formState"
+        :initial-description-text="initialDescriptionText"
         :can-destroy="canDestroy"
         :issuable-templates="issuableTemplates"
         :markdown-docs-path="markdownDocsPath"
@@ -429,13 +470,6 @@ export default {
         :can-attach-file="canAttachFile"
         :enable-autocomplete="enableAutocomplete"
         :issuable-type="issuableType"
-      />
-
-      <recaptcha-modal
-        v-show="showRecaptcha"
-        ref="recaptchaModal"
-        :html="recaptchaHTML"
-        @close="closeRecaptchaModal"
       />
     </div>
     <div v-else>

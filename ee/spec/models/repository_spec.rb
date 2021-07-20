@@ -49,6 +49,41 @@ RSpec.describe Repository do
     end
   end
 
+  describe '#fetch_upstream' do
+    let(:url) { "http://example.com" }
+
+    context 'when :fetch_remote_params is enabled' do
+      it 'fetches the URL without creating a remote' do
+        expect(repository).not_to receive(:add_remote)
+        expect(repository)
+          .to receive(:fetch_remote)
+          .with(described_class::MIRROR_REMOTE, url: url, refmap: ['+refs/heads/*:refs/remotes/upstream/*'], ssh_auth: nil, forced: true, check_tags_changed: true)
+          .and_return(nil)
+
+        repository.fetch_upstream(url, forced: true, check_tags_changed: true)
+      end
+    end
+
+    context 'when :fetch_remote_params is disabled' do
+      before do
+        stub_feature_flags(fetch_remote_params: false)
+      end
+
+      it 'creates a remote and fetches it' do
+        expect(repository)
+          .to receive(:add_remote)
+          .with(described_class::MIRROR_REMOTE, url)
+          .and_return(nil)
+        expect(repository)
+          .to receive(:fetch_remote)
+          .with(described_class::MIRROR_REMOTE, ssh_auth: nil, forced: true, check_tags_changed: true)
+          .and_return(nil)
+
+        repository.fetch_upstream(url, forced: true, check_tags_changed: true)
+      end
+    end
+  end
+
   describe '#with_config' do
     let(:rugged) { rugged_repo(repository) }
     let(:entries) do
@@ -173,12 +208,12 @@ RSpec.describe Repository do
 
     it 'requests the CODOWNER blobs in batch in the correct order' do
       expect(repository).to receive(:blobs_at)
-                              .with([%w(HEAD CODEOWNERS),
-                                     %w(HEAD docs/CODEOWNERS),
-                                     %w(HEAD .gitlab/CODEOWNERS)])
+                              .with([%w(master CODEOWNERS),
+                                     %w(master docs/CODEOWNERS),
+                                     %w(master .gitlab/CODEOWNERS)])
                               .and_call_original
 
-      repository.code_owners_blob
+      repository.code_owners_blob(ref: 'master')
     end
   end
 
@@ -227,6 +262,52 @@ RSpec.describe Repository do
       it 'returns false' do
         is_expected.to be_falsy
       end
+    end
+  end
+
+  describe '#update_root_ref' do
+    let(:url) { 'http://git.example.com/remote-repo.git' }
+    let(:auth) { 'Basic secret' }
+
+    it 'updates the default branch when HEAD has changed' do
+      stub_find_remote_root_ref(repository, ref: 'feature')
+
+      expect { repository.update_root_ref('origin', url, auth) }
+        .to change { project.default_branch }
+        .from('master')
+        .to('feature')
+    end
+
+    it 'always updates the default branch even when HEAD does not change' do
+      stub_find_remote_root_ref(repository, ref: 'master')
+
+      expect(repository).to receive(:change_head).with('master').and_call_original
+
+      repository.update_root_ref('origin', url, auth)
+
+      expect(project.default_branch).to eq('master')
+    end
+
+    it 'does not update the default branch when HEAD does not exist' do
+      stub_find_remote_root_ref(repository, ref: 'foo')
+
+      expect { repository.update_root_ref('origin', url, auth) }
+        .not_to change { project.default_branch }
+    end
+
+    it 'does not raise error when repository does not exist' do
+      allow(repository).to receive(:find_remote_root_ref)
+        .with('origin', url, auth)
+        .and_raise(Gitlab::Git::Repository::NoRepository)
+
+      expect { repository.update_root_ref('origin', url, auth) }.not_to raise_error
+    end
+
+    def stub_find_remote_root_ref(repository, ref:)
+      allow(repository)
+        .to receive(:find_remote_root_ref)
+        .with('origin', url, auth)
+        .and_return(ref)
     end
   end
 end

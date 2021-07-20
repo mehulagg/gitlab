@@ -2,9 +2,12 @@
 
 class GroupSamlGroupSyncWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include Gitlab::Utils::StrongMemoize
 
   feature_category :authentication_and_authorization
+  tags :exclude_from_kubernetes
   idempotent!
 
   loggable_arguments 2

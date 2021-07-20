@@ -20,10 +20,13 @@ module Gitlab
     # solutions can be found at
     # https://gitlab.com/gitlab-org/gitlab/-/issues/227693
     REPLICATOR_CLASSES = [
+      ::Geo::LfsObjectReplicator,
       ::Geo::MergeRequestDiffReplicator,
       ::Geo::PackageFileReplicator,
       ::Geo::TerraformStateVersionReplicator,
-      ::Geo::SnippetRepositoryReplicator
+      ::Geo::SnippetRepositoryReplicator,
+      ::Geo::GroupWikiRepositoryReplicator,
+      ::Geo::PipelineArtifactReplicator
     ].freeze
 
     def self.current_node

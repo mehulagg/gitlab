@@ -14,8 +14,6 @@ module Gitlab
         COUNTER = :external_http_count
         DURATION = :external_http_duration_s
 
-        KNOWN_PAYLOAD_KEYS = [COUNTER, DURATION].freeze
-
         def self.detail_store
           ::Gitlab::SafeRequestStore[DETAIL_STORE] ||= []
         end
@@ -37,7 +35,7 @@ module Gitlab
 
         def request(event)
           payload = event.payload
-          add_to_detail_store(payload)
+          add_to_detail_store(event.time, payload)
           add_to_request_store(payload)
           expose_metrics(payload)
         end
@@ -48,10 +46,11 @@ module Gitlab
           ::Gitlab::Metrics::Transaction.current
         end
 
-        def add_to_detail_store(payload)
+        def add_to_detail_store(start, payload)
           return unless Gitlab::PerformanceBar.enabled_for_request?
 
           self.class.detail_store << {
+            start: start,
             duration: payload[:duration],
             scheme: payload[:scheme],
             method: payload[:method],

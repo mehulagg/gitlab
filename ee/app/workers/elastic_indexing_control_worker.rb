@@ -3,6 +3,8 @@
 class ElasticIndexingControlWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :global_search
   idempotent!
 

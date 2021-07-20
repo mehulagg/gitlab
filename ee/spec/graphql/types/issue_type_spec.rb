@@ -7,8 +7,10 @@ RSpec.describe GitlabSchema.types['Issue'] do
   it { expect(described_class).to have_graphql_field(:iteration) }
   it { expect(described_class).to have_graphql_field(:weight) }
   it { expect(described_class).to have_graphql_field(:health_status) }
+  it { expect(described_class).to have_graphql_field(:blocking_count) }
   it { expect(described_class).to have_graphql_field(:blocked) }
   it { expect(described_class).to have_graphql_field(:blocked_by_count) }
+  it { expect(described_class).to have_graphql_field(:blocked_by_issues) }
   it { expect(described_class).to have_graphql_field(:sla_due_at) }
   it { expect(described_class).to have_graphql_field(:metric_images) }
 
@@ -17,6 +19,7 @@ RSpec.describe GitlabSchema.types['Issue'] do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, :public, group: group) }
     let_it_be(:project_path) { project.full_path }
+
     let!(:blocking_issue1) { create(:issue, project: project) }
     let!(:blocked_issue1) { create(:issue, project: project) }
     let!(:issue_link1) { create :issue_link, source: blocking_issue1, target: blocked_issue1, link_type: IssueLink::TYPE_BLOCKS }

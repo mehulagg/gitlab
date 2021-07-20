@@ -195,6 +195,22 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '#archived_trace_exists?' do
+    subject { artifact.archived_trace_exists? }
+
+    context 'when the file exists' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the file does not exist' do
+      before do
+        artifact.file.remove!
+      end
+
+      it { is_expected.to be_falsy }
+    end
+  end
+
   describe '.for_sha' do
     let(:first_pipeline) { create(:ci_pipeline) }
     let(:second_pipeline) { create(:ci_pipeline, project: first_pipeline.project, sha: Digest::SHA1.hexdigest(SecureRandom.hex)) }
@@ -249,6 +265,29 @@ RSpec.describe Ci::JobArtifact do
 
     it 'returns ordered artifacts' do
       expect(described_class.order_expired_desc).to eq([second_artifact, first_artifact])
+    end
+  end
+
+  describe '.for_project' do
+    it 'returns artifacts only for given project(s)', :aggregate_failures do
+      artifact1 = create(:ci_job_artifact)
+      artifact2 = create(:ci_job_artifact)
+      create(:ci_job_artifact)
+
+      expect(described_class.for_project(artifact1.project)).to match_array([artifact1])
+      expect(described_class.for_project([artifact1.project, artifact2.project])).to match_array([artifact1, artifact2])
+    end
+  end
+
+  describe 'created_in_time_range' do
+    it 'returns artifacts created in given time range', :aggregate_failures do
+      artifact1 = create(:ci_job_artifact, created_at: 1.day.ago)
+      artifact2 = create(:ci_job_artifact, created_at: 1.month.ago)
+      artifact3 = create(:ci_job_artifact, created_at: 1.year.ago)
+
+      expect(described_class.created_in_time_range(from: 1.week.ago)).to match_array([artifact1])
+      expect(described_class.created_in_time_range(to: 1.week.ago)).to match_array([artifact2, artifact3])
+      expect(described_class.created_in_time_range(from: 2.months.ago, to: 1.week.ago)).to match_array([artifact2])
     end
   end
 
@@ -312,34 +351,8 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
-  describe 'validates if file format is supported' do
-    subject { artifact }
-
-    let(:artifact) { build(:ci_job_artifact, file_type: :license_management, file_format: :raw) }
-
-    context 'when license_management is supported' do
-      before do
-        stub_feature_flags(drop_license_management_artifact: false)
-      end
-
-      it { is_expected.to be_valid }
-    end
-
-    context 'when license_management is not supported' do
-      before do
-        stub_feature_flags(drop_license_management_artifact: true)
-      end
-
-      it { is_expected.not_to be_valid }
-    end
-  end
-
   describe 'validates file format' do
     subject { artifact }
-
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
 
     described_class::TYPE_AND_FORMAT_PAIRS.except(:trace).each do |file_type, file_format|
       context "when #{file_type} type with #{file_format} format" do
@@ -582,6 +595,34 @@ RSpec.describe Ci::JobArtifact do
 
           it_behaves_like 'basing off the project closest setting'
         end
+      end
+    end
+  end
+
+  context 'FastDestroyAll' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
+    let_it_be(:job) { create(:ci_build, pipeline: pipeline, project: project) }
+
+    let!(:job_artifact) { create(:ci_job_artifact, :archive, job: job) }
+    let(:subjects) { pipeline.job_artifacts }
+
+    describe '.use_fast_destroy' do
+      it 'performs cascading delete with fast_destroy_all' do
+        expect(Ci::DeletedObject.count).to eq(0)
+        expect(subjects.count).to be > 0
+
+        expect { pipeline.destroy! }.not_to raise_error
+
+        expect(subjects.count).to eq(0)
+        expect(Ci::DeletedObject.count).to be > 0
+      end
+
+      it 'updates project statistics' do
+        expect(ProjectStatistics).to receive(:increment_statistic).once
+              .with(project, :build_artifacts_size, -job_artifact.file.size)
+
+        pipeline.destroy!
       end
     end
   end

@@ -18,20 +18,13 @@ module EE
       with_scope :subject
       condition(:requirements_available) { @subject.feature_available?(:requirements) & access_allowed_to?(:requirements) }
 
+      with_scope :subject
+      condition(:quality_management_available) { @subject.feature_available?(:quality_management) }
+
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
       with_scope :global
       condition(:is_development) { Rails.env.development? }
-
-      with_scope :global
-      condition(:reject_unsigned_commits_disabled_globally) do
-        !PushRule.global&.reject_unsigned_commits
-      end
-
-      with_scope :global
-      condition(:commit_committer_check_disabled_globally) do
-        !PushRule.global&.commit_committer_check
-      end
 
       with_scope :global
       condition(:locked_approvers_rules) do
@@ -52,8 +45,8 @@ module EE
       end
 
       with_scope :subject
-      condition(:project_activity_analytics_available) do
-        @subject.feature_available?(:project_activity_analytics)
+      condition(:dora4_analytics_available) do
+        @subject.feature_available?(:dora4_analytics)
       end
 
       condition(:project_merge_request_analytics_available) do
@@ -62,7 +55,7 @@ module EE
 
       with_scope :subject
       condition(:group_push_rules_enabled) do
-        @subject.group && @subject.group.feature_available?(:push_rules)
+        @subject.group && @subject.group.licensed_feature_available?(:push_rules)
       end
 
       with_scope :subject
@@ -71,39 +64,8 @@ module EE
       end
 
       with_scope :subject
-      condition(:reject_unsigned_commits_disabled_by_group) do
-        if group_push_rule_present?
-          !subject.group.push_rule.reject_unsigned_commits
-        else
-          true
-        end
-      end
-
-      condition(:can_change_reject_unsigned_commits) do
-        admin? ||
-          (can?(:maintainer_access) &&
-            reject_unsigned_commits_disabled_globally? &&
-            reject_unsigned_commits_disabled_by_group?)
-      end
-
-      condition(:commit_committer_check_disabled_by_group) do
-        if group_push_rule_present?
-          !subject.group.push_rule.commit_committer_check
-        else
-          true
-        end
-      end
-
-      with_scope :subject
       condition(:commit_committer_check_available) do
         @subject.feature_available?(:commit_committer_check)
-      end
-
-      condition(:can_change_commit_commiter_check) do
-        admin? ||
-          (can?(:maintainer_access) &&
-            commit_committer_check_disabled_globally? &&
-            commit_committer_check_disabled_by_group?)
       end
 
       with_scope :subject
@@ -112,8 +74,8 @@ module EE
       end
 
       with_scope :subject
-      condition(:security_and_compliance_enabled) do
-        @subject.feature_available?(:security_and_compliance) && access_allowed_to?(:security_and_compliance)
+      condition(:security_orchestration_policies_enabled) do
+        @subject.feature_available?(:security_orchestration_policies)
       end
 
       with_scope :subject
@@ -160,10 +122,6 @@ module EE
         @subject.feature_available?(:status_page, @user)
       end
 
-      condition(:group_timelogs_available) do
-        @subject.feature_available?(:group_timelogs)
-      end
-
       condition(:over_storage_limit, scope: :subject) do
         @subject.root_namespace.over_storage_limit?
       end
@@ -176,6 +134,11 @@ module EE
       with_scope :subject
       condition(:oncall_schedules_available) do
         ::Gitlab::IncidentManagement.oncall_schedules_available?(@subject)
+      end
+
+      with_scope :subject
+      condition(:escalation_policies_available) do
+        ::Gitlab::IncidentManagement.escalation_policies_available?(@subject)
       end
 
       rule { visual_review_bot }.policy do
@@ -200,20 +163,18 @@ module EE
         prevent :admin_feature_flags_issue_links
       end
 
-      rule { ~group_timelogs_available }.prevent :read_group_timelogs
-
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :admin_epic_issue
-        enable :read_group_timelogs
       end
 
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
+      rule { escalation_policies_available & can?(:reporter_access) }.enable :read_incident_management_escalation_policy
 
       rule { can?(:developer_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :read_vulnerability_feedback
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
@@ -230,12 +191,16 @@ module EE
 
       rule { can?(:read_project) & iterations_available }.enable :read_iteration
 
-      rule { security_and_compliance_enabled & can?(:developer_access) }.policy do
-        enable :access_security_and_compliance
+      rule { security_orchestration_policies_enabled & can?(:developer_access) }.policy do
+        enable :security_orchestration_policies
+      end
+
+      rule { security_orchestration_policies_enabled & can?(:owner_access) }.policy do
+        enable :update_security_orchestration_policy_project
       end
 
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
-        enable :read_vulnerability
+        enable :read_security_resource
         enable :read_vulnerability_scanner
       end
 
@@ -250,7 +215,7 @@ module EE
 
       rule { can?(:read_merge_request) & can?(:read_pipeline) }.enable :read_merge_train
 
-      rule { can?(:read_vulnerability) }.policy do
+      rule { can?(:read_security_resource) }.policy do
         enable :read_project_security_dashboard
         enable :create_vulnerability
         enable :create_vulnerability_export
@@ -293,6 +258,7 @@ module EE
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
 
       rule { oncall_schedules_available & can?(:maintainer_access) }.enable :admin_incident_management_oncall_schedule
+      rule { escalation_policies_available & can?(:maintainer_access) }.enable :admin_incident_management_escalation_policy
 
       rule { auditor }.policy do
         enable :public_user_access
@@ -304,8 +270,12 @@ module EE
         enable :read_pages
       end
 
+      rule { ~security_and_compliance_disabled & auditor }.policy do
+        enable :access_security_and_compliance
+      end
+
       rule { auditor & security_dashboard_enabled }.policy do
-        enable :read_vulnerability
+        enable :read_security_resource
         enable :read_vulnerability_scanner
       end
 
@@ -325,19 +295,19 @@ module EE
 
       rule { ~can?(:push_code) }.prevent :push_code_to_protected_branches
 
-      rule { can_change_reject_unsigned_commits }.enable :change_reject_unsigned_commits
+      rule { admin | maintainer }.enable :change_reject_unsigned_commits
 
       rule { reject_unsigned_commits_available }.enable :read_reject_unsigned_commits
 
       rule { ~reject_unsigned_commits_available }.prevent :change_reject_unsigned_commits
 
-      rule { can_change_commit_commiter_check }.enable :change_commit_committer_check
+      rule { admin | maintainer }.enable :change_commit_committer_check
 
       rule { commit_committer_check_available }.enable :read_commit_committer_check
 
       rule { ~commit_committer_check_available }.prevent :change_commit_committer_check
 
-      rule { owner | reporter }.enable :build_read_project
+      rule { owner | reporter | public_project }.enable :build_read_project
 
       rule { ~admin & owner & owner_cannot_destroy_project }.prevent :remove_project
 
@@ -362,7 +332,7 @@ module EE
         prevent :owner_access
       end
 
-      rule { ip_enforcement_prevents_access & ~admin }.policy do
+      rule { ip_enforcement_prevents_access & ~admin & ~auditor }.policy do
         prevent :read_project
       end
 
@@ -382,8 +352,8 @@ module EE
 
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
 
-      rule { reporter & project_activity_analytics_available }
-        .enable :read_project_activity_analytics
+      rule { reporter & dora4_analytics_available }
+        .enable :read_dora4_analytics
 
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics
@@ -401,7 +371,9 @@ module EE
 
       rule { requirements_available & owner }.enable :destroy_requirement
 
-      rule { compliance_framework_available & can?(:owner_access) }.enable :admin_compliance_framework
+      rule { quality_management_available & can?(:reporter_access) & can?(:create_issue) }.enable :create_test_case
+
+      rule { compliance_framework_available & can?(:maintainer_access) }.enable :admin_compliance_framework
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
@@ -413,6 +385,8 @@ module EE
           prevent(*create_update_admin(feature))
         end
       end
+
+      rule { auditor | can?(:developer_access) }.enable :add_project_to_instance_security_dashboard
     end
 
     override :lookup_access_level!
@@ -425,14 +399,13 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      return super unless ::Gitlab.com?
 
-      group = project.namespace
+      namespace = project.namespace
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

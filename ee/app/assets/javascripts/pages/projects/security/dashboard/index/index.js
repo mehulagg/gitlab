@@ -1,9 +1,9 @@
-import initSecurityCharts from 'ee/security_dashboard/security_charts_init';
+import initSecurityDashboard from 'ee/security_dashboard/security_dashboard_init';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { waitForCSSLoaded } from '~/helpers/startup_css_helper';
 
 waitForCSSLoaded(() => {
-  initSecurityCharts(
+  initSecurityDashboard(
     document.getElementById('js-project-security-dashboard'),
     DASHBOARD_TYPES.PROJECT,
   );

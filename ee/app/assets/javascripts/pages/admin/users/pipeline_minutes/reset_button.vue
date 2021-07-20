@@ -22,11 +22,7 @@ export default {
             this.$toast.show(__('User pipeline minutes were successfully reset.'));
           }
         })
-        .catch(() =>
-          this.$toast.show(__('There was an error resetting user pipeline minutes.'), {
-            type: 'error',
-          }),
-        );
+        .catch(() => this.$toast.show(__('There was an error resetting user pipeline minutes.')));
     },
   },
 };

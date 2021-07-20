@@ -47,8 +47,6 @@ module EE
       base.validates :list_type,
         exclusion: { in: %w[iteration], message: -> (_object, _data) { _('Iteration lists not available with your current license') } },
         unless: -> { board&.resource_parent&.feature_available?(:board_iteration_lists) }
-
-      base.scope :without_types, ->(list_types) { where.not(list_type: list_types) }
     end
 
     def assignee=(user)

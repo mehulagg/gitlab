@@ -4,7 +4,7 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Store all of your packages in one GitLab project
+# Store all of your packages in one GitLab project **(FREE)**
 
 You can store all of your packages in one project's Package Registry. Rather than using
 a GitLab repository to store code, you can use the repository to store all your packages.
@@ -34,8 +34,8 @@ of each package management system to publish different package types to the same
 
 Let's take a look at how you might create a public place to hold all of your public packages.
 
-1. Create a new project in GitLab. The project doesn't require any code or content. Note the project ID
-   that's displayed on the project overview page.
+1. Create a new project in GitLab. The project doesn't require any code or content.
+1. On the left sidebar, select **Project information**, and note the project ID.
 1. Create an access token. All package types in the Package Registry are accessible by using
    [GitLab personal access tokens](../../profile/personal_access_tokens.md).
    If you're using CI/CD, you can use CI job tokens (`CI_JOB_TOKEN`) to authenticate.
@@ -76,6 +76,11 @@ depending on your final package recipe. For example:
 ```shell
 CONAN_LOGIN_USERNAME=<gitlab-username> CONAN_PASSWORD=<personal_access_token> conan upload MyPackage/1.0.0@foo+bar+my-proj/channel --all --remote=gitlab
 ```
+
+### Composer
+
+You can't publish a Composer package outside of its project. An [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/250633)
+exists to implement functionality that allows you to publish such packages to other projects.
 
 ### All other package types
 

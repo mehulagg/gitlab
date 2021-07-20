@@ -36,7 +36,11 @@ module API
           merge_request.labels.map(&:title).sort
         end
       end
-      expose :work_in_progress?, as: :work_in_progress
+      expose :draft?, as: :draft
+
+      # [Deprecated]  see draft
+      #
+      expose :draft?, as: :work_in_progress
       expose :milestone, using: Entities::Milestone
       expose :merge_when_pipeline_succeeds
 
@@ -89,4 +93,4 @@ module API
   end
 end
 
-API::Entities::MergeRequestBasic.prepend_if_ee('EE::API::Entities::MergeRequestBasic', with_descendants: true)
+API::Entities::MergeRequestBasic.prepend_mod_with('API::Entities::MergeRequestBasic', with_descendants: true)

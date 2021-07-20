@@ -14,7 +14,6 @@ module Geo
                        Geo::ResetChecksumEvent
                        Geo::HashedStorageMigratedEvent
                        Geo::HashedStorageAttachmentsEvent
-                       Geo::LfsObjectDeletedEvent
                        Geo::JobArtifactDeletedEvent
                        Geo::UploadDeletedEvent
                        Geo::ContainerRepositoryUpdatedEvent
@@ -51,10 +50,6 @@ module Geo
     belongs_to :hashed_storage_attachments_event,
       class_name: 'Geo::HashedStorageAttachmentsEvent',
       foreign_key: :hashed_storage_attachments_event_id
-
-    belongs_to :lfs_object_deleted_event,
-      class_name: 'Geo::LfsObjectDeletedEvent',
-      foreign_key: :lfs_object_deleted_event_id
 
     belongs_to :job_artifact_deleted_event,
       class_name: 'Geo::JobArtifactDeletedEvent',
@@ -104,7 +99,6 @@ module Geo
         repositories_changed_event ||
         hashed_storage_migrated_event ||
         hashed_storage_attachments_event ||
-        lfs_object_deleted_event ||
         job_artifact_deleted_event ||
         upload_deleted_event ||
         reset_checksum_event ||

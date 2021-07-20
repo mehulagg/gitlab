@@ -35,10 +35,13 @@ describe('Packages shared utils', () => {
       packageType   | expectedResult
       ${'conan'}    | ${'Conan'}
       ${'maven'}    | ${'Maven'}
-      ${'npm'}      | ${'NPM'}
+      ${'npm'}      | ${'npm'}
       ${'nuget'}    | ${'NuGet'}
       ${'pypi'}     | ${'PyPI'}
+      ${'rubygems'} | ${'RubyGems'}
       ${'composer'} | ${'Composer'}
+      ${'debian'}   | ${'Debian'}
+      ${'helm'}     | ${'Helm'}
       ${'foo'}      | ${null}
     `(`package type`, ({ packageType, expectedResult }) => {
       it(`${packageType} should show as ${expectedResult}`, () => {

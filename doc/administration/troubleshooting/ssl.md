@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Troubleshooting SSL
+# Troubleshooting SSL **(FREE SELF)**
 
 This page contains a list of common SSL-related errors and scenarios that you
 may encounter while working with GitLab. It should serve as an addition to the
@@ -238,3 +238,17 @@ remote server that is serving only HTTP.
 One scenario is that you're using [object storage](../object_storage.md), which
 isn't served under HTTPS. GitLab is misconfigured and attempts a TLS handshake,
 but the object storage will respond with plain HTTP.
+
+## `schannel: SEC_E_UNTRUSTED_ROOT`
+
+If you're on Windows and get the following error:
+
+```plaintext
+Fatal: unable to access 'https://gitlab.domain.tld/group/project.git': schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted."
+```
+
+You may need to specify that Git should use OpenSSL:
+
+```shell
+git config --system http.sslbackend openssl
+```

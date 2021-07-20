@@ -12,7 +12,7 @@ module WikiPages
     def execute_hooks(page)
       page_data = payload(page)
       container.execute_hooks(page_data, :wiki_page_hooks)
-      container.execute_services(page_data, :wiki_page_hooks)
+      container.execute_integrations(page_data, :wiki_page_hooks)
       increment_usage
       create_wiki_event(page)
     end
@@ -61,4 +61,4 @@ module WikiPages
   end
 end
 
-WikiPages::BaseService.prepend_if_ee('EE::WikiPages::BaseService')
+WikiPages::BaseService.prepend_mod_with('WikiPages::BaseService')

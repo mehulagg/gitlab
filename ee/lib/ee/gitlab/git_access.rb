@@ -83,6 +83,13 @@ module EE
         super
       end
 
+      override :check_additional_conditions!
+      def check_additional_conditions!
+        check_sso_session!
+
+        super
+      end
+
       def check_geo_license!
         if ::Gitlab::Geo.secondary? && !::Gitlab::Geo.license_allows?
           raise ::Gitlab::GitAccess::ForbiddenError, 'Your current license does not have GitLab Geo add-on enabled.'
@@ -104,10 +111,20 @@ module EE
 
         if ::Gitlab::Auth::Otp::SessionEnforcer.new(actor).access_restricted?
           message = "OTP verification is required to access the repository.\n\n"\
-                  "   Use: #{build_ssh_otp_verify_command}"
+          "   Use: #{build_ssh_otp_verify_command}"
 
           raise ::Gitlab::GitAccess::ForbiddenError, message
         end
+      end
+
+      def check_sso_session!
+        return true unless user && container
+
+        return unless ::Gitlab::Auth::GroupSaml::SessionEnforcer.new(user, containing_group).access_restricted?
+
+        root_group = containing_group.root_ancestor
+        group_saml_url = Rails.application.routes.url_helpers.sso_group_saml_providers_url(root_group, token: root_group.saml_discovery_token)
+        raise ::Gitlab::GitAccess::ForbiddenError, "Cannot find valid SSO session. Please login via your group's SSO at #{group_saml_url}"
       end
 
       def build_ssh_otp_verify_command
@@ -140,7 +157,7 @@ module EE
 
       def check_if_license_blocks_changes!
         if ::License.block_changes?
-          message = license_message(signed_in: true, is_admin: (user && user.admin?))
+          message = license_message(signed_in: true, is_admin: (user && user.admin?), force_notification: true)
           raise ::Gitlab::GitAccess::ForbiddenError, strip_tags(message)
         end
       end
@@ -154,6 +171,11 @@ module EE
         strong_memoize(:check_size_limit) do
           size_checker.enabled? && super
         end
+      end
+
+      def containing_group
+        return group if group?
+        return project.group if project?
       end
     end
   end

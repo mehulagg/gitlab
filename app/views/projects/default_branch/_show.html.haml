@@ -2,8 +2,8 @@
 
 %section.settings.no-animate#default-branch-settings{ class: ('expanded' if expanded) }
   .settings-header
-    %h4= _('Default branch')
-    %button.btn.js-settings-toggle
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only= _('Default branch')
+    %button.btn.gl-button.btn-default.js-settings-toggle
       = expanded ? _('Collapse') : _('Expand')
     %p
       = _('Set the default branch for this project. All merge requests and commits are made against this branch unless you specify a different one.')
@@ -17,7 +17,7 @@
         - else
           .form-group
             = f.label :default_branch, "Default branch", class: 'label-bold'
-            = f.select(:default_branch, @project.repository.branch_names, {}, {class: 'select2 select-wide'})
+            = f.select(:default_branch, @project.repository.branch_names, {}, {class: 'select2 select-wide', data: { qa_selector: 'default_branch_dropdown' }})
 
         .form-group
           .form-check
@@ -28,4 +28,4 @@
               = _("When merge requests and commits in the default branch close, any issues they reference also close.")
               = link_to sprite_icon('question-o'), help_page_path('user/project/issues/managing_issues.md', anchor: 'disabling-automatic-issue-closing'), target: '_blank'
 
-      = f.submit _('Save changes'), class: "gl-button btn btn-success"
+      = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'save_changes_button' }

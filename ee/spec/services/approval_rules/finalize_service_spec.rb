@@ -45,7 +45,7 @@ RSpec.describe ApprovalRules::FinalizeService do
         let(:merge_request) { create(:merged_merge_request, source_project: project, target_project: project) }
 
         before do
-          merge_request.approval_rules.code_owner.create(name: 'Code Owner', rule_type: :code_owner)
+          merge_request.approval_rules.code_owner.create!(name: 'Code Owner', rule_type: :code_owner)
         end
 
         it 'copies project rules to MR, keep snapshot of group member by including it as part of users association' do
@@ -65,7 +65,7 @@ RSpec.describe ApprovalRules::FinalizeService do
 
         shared_examples 'idempotent approval tests' do |rule_type|
           before do
-            project_rule.destroy
+            project_rule.destroy!
 
             rule = create(:approval_project_rule, project: project, name: 'another rule', approvals_required: 2, rule_type: rule_type)
             rule.users = [user1]

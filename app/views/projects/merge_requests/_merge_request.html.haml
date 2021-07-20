@@ -1,7 +1,9 @@
 %li{ id: dom_id(merge_request), class: mr_css_classes(merge_request), data: { labels: merge_request.label_ids, id: merge_request.id } }
   - if @can_bulk_update
     .issue-check.hidden
-      = check_box_tag dom_id(merge_request, "selected"), nil, false, 'data-id' => merge_request.id, class: "selected-issuable"
+      - checkbox_id = dom_id(merge_request, "selected")
+      %label.gl-sr-only{ for: checkbox_id }= merge_request.title
+      = check_box_tag checkbox_id, nil, false, 'data-id' => merge_request.id, class: "selected-issuable"
 
   .issuable-info-container
     .issuable-main-info
@@ -18,7 +20,7 @@
           #{issuable_reference(merge_request)}
         %span.issuable-authored.d-none.d-sm-inline-block
           &middot;
-          opened #{time_ago_with_tooltip(merge_request.created_at, placement: 'bottom')}
+          created #{time_ago_with_tooltip(merge_request.created_at, placement: 'bottom')}
           by #{link_to_member(@project, merge_request.author, avatar: false)}
           = render_if_exists 'shared/issuable/gitlab_team_member_badge', author: merge_request.author
         - if merge_request.milestone

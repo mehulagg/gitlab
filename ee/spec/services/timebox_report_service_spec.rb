@@ -289,6 +289,28 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
         }
       ])
     end
+
+    context 'when timebox is removed and then added back' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:event_types, :scope_count) do
+        [:add, :add]                        | 1
+        [:remove, :remove]                  | 0
+        [:add, :add, :remove]               | 0
+        [:add, :remove, :remove]            | 0
+        [:add, :remove, :add]               | 1
+        [:add, :remove, :remove, :add]      | 1
+        [:add, :add, :remove, :add, :add]   | 1
+      end
+
+      with_them do
+        it "updates the counts correspondingly" do
+          create_events(event_types, timebox_type)
+
+          expect(response.payload[:burnup_time_series].first&.dig(:scope_count).to_i).to eq(scope_count)
+        end
+      end
+    end
   end
 end
 
@@ -303,6 +325,7 @@ RSpec.describe TimeboxReportService do
   context 'milestone charts' do
     let_it_be(:timebox, reload: true) { create(:milestone, project: project, start_date: timebox_start_date, due_date: timebox_end_date) }
     let_it_be(:another_timebox) { create(:milestone, project: project) }
+
     let(:timebox_without_dates) { build(:milestone, project: project) }
 
     it_behaves_like 'timebox chart', 'milestone'
@@ -311,8 +334,15 @@ RSpec.describe TimeboxReportService do
   context 'iteration charts' do
     let_it_be(:timebox, reload: true) { create(:iteration, group: group, start_date: timebox_start_date, due_date: timebox_end_date) }
     let_it_be(:another_timebox) { create(:iteration, group: group, start_date: timebox_end_date + 1.day, due_date: timebox_end_date + 15.days) }
+
     let(:timebox_without_dates) { build(:iteration, group: group, start_date: nil, due_date: nil) }
 
     it_behaves_like 'timebox chart', 'iteration'
+  end
+
+  def create_events(event_types, timebox_type)
+    event_types.each_with_index do |event_type, index|
+      create(:"resource_#{timebox_type}_event", issue: issues[0], "#{timebox_type}" => timebox, action: event_type, created_at: timebox_start_date + 4.days + (index + 1).seconds)
+    end
   end
 end

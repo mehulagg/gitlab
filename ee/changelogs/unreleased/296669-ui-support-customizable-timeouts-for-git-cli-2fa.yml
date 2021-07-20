@@ -1,5 +1,0 @@
----
-title: Support setting customizable timeouts for git CLI 2FA via UI & API
-merge_request: 52769
-author:
-type: added

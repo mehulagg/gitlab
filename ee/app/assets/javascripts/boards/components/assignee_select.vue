@@ -121,6 +121,7 @@ export default {
 
     <div class="selectbox" style="display: none">
       <div class="dropdown">
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <button
           ref="dropdown"
           :data-field-name="fieldName"
@@ -141,6 +142,8 @@ export default {
             :size="16"
           />
         </button>
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
+
         <div
           class="dropdown-menu dropdown-select dropdown-menu-paging dropdown-menu-user dropdown-menu-selectable dropdown-menu-author"
         >
@@ -162,7 +165,7 @@ export default {
           </div>
           <div class="dropdown-content"></div>
           <div class="dropdown-loading">
-            <gl-loading-icon />
+            <gl-loading-icon size="sm" />
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ RSpec.describe TestHooks::ProjectService do
 
   describe '#execute' do
     let_it_be(:project) { create(:project, :repository) }
+
     let(:hook) { create(:project_hook, project: project) }
     let(:trigger) { 'not_implemented_events' }
     let(:service) { described_class.new(hook, current_user, trigger) }
@@ -140,21 +141,6 @@ RSpec.describe TestHooks::ProjectService do
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)
       end
-
-      context 'when the reorder feature flag is disabled' do
-        before do
-          stub_feature_flags(integrations_test_webhook_reorder: false)
-        end
-
-        it 'executes the old query' do
-          allow(Gitlab::DataBuilder::Build).to receive(:build).and_return(sample_data)
-
-          expect(Ci::JobsFinder).not_to receive(:new)
-          expect(project).to receive(:builds).and_return([ci_job])
-          expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
-          expect(service.execute).to include(success_result)
-        end
-      end
     end
 
     context 'pipeline_events' do
@@ -174,25 +160,11 @@ RSpec.describe TestHooks::ProjectService do
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)
       end
-
-      context 'when the reorder feature flag is disabled' do
-        before do
-          stub_feature_flags(integrations_test_webhook_reorder: false)
-        end
-
-        it 'executes the old query' do
-          create(:ci_empty_pipeline, project: project)
-          allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
-
-          expect(Ci::PipelinesFinder).not_to receive(:new)
-          expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
-          expect(service.execute).to include(success_result)
-        end
-      end
     end
 
     context 'wiki_page_events' do
       let_it_be(:project) { create(:project, :wiki_repo) }
+
       let(:trigger) { 'wiki_page_events' }
       let(:trigger_key) { :wiki_page_hooks }
 
@@ -233,21 +205,6 @@ RSpec.describe TestHooks::ProjectService do
 
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)
-      end
-
-      context 'when the reorder feature flag is disabled' do
-        before do
-          stub_feature_flags(integrations_test_webhook_reorder: false)
-        end
-
-        it 'executes the old query' do
-          allow(release).to receive(:to_hook_data).and_return(sample_data)
-
-          expect(ReleasesFinder).not_to receive(:new)
-          expect(project).to receive(:releases).and_return([release])
-          expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
-          expect(service.execute).to include(success_result)
-        end
       end
     end
   end

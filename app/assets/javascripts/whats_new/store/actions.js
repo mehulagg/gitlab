@@ -1,30 +1,32 @@
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import { STORAGE_KEY } from '../utils/notification';
 import * as types from './mutation_types';
 
 export default {
   closeDrawer({ commit }) {
     commit(types.CLOSE_DRAWER);
   },
-  openDrawer({ commit }, storageKey) {
+  openDrawer({ commit }, versionDigest) {
     commit(types.OPEN_DRAWER);
 
-    if (storageKey) {
-      localStorage.setItem(storageKey, JSON.stringify(false));
+    if (versionDigest) {
+      localStorage.setItem(STORAGE_KEY, versionDigest);
     }
   },
-  fetchItems({ commit, state }, { page, version } = { page: null, version: null }) {
+  fetchItems({ commit, state }, { page, versionDigest } = { page: null, versionDigest: null }) {
     if (state.fetching) {
       return false;
     }
 
     commit(types.SET_FETCHING, true);
 
+    const v = versionDigest;
     return axios
       .get('/-/whats_new', {
         params: {
           page,
-          version,
+          v,
         },
       })
       .then(({ data, headers }) => {

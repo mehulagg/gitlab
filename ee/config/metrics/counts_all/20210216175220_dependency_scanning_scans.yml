@@ -1,0 +1,16 @@
+---
+data_category: Operational
+key_path: usage_activity_by_stage.secure.dependency_scanning_scans
+description: Total number of users running Dependency Scanning Scans
+product_section: sec
+product_stage: secure
+product_group: group::composition analysis
+product_category: dependency_scanning
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ee
+tier:
+- ultimate

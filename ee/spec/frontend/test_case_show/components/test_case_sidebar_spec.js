@@ -5,6 +5,7 @@ import Mousetrap from 'mousetrap';
 import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
 import { mockCurrentUserTodo, mockLabels } from 'jest/issuable_list/mock_data';
 
+import { keysFor, ISSUABLE_CHANGE_LABEL } from '~/behaviors/shortcuts/keybindings';
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
@@ -99,7 +100,10 @@ describe('TestCaseSidebar', () => {
 
   describe('mounted', () => {
     it('binds key-press listener for `l` on Mousetrap', () => {
-      expect(mousetrapSpy).toHaveBeenCalledWith('l', wrapper.vm.handleLabelsCollapsedButtonClick);
+      expect(mousetrapSpy).toHaveBeenCalledWith(
+        keysFor(ISSUABLE_CHANGE_LABEL),
+        wrapper.vm.handleLabelsCollapsedButtonClick,
+      );
     });
   });
 
@@ -135,17 +139,9 @@ describe('TestCaseSidebar', () => {
       });
 
       it('dispatches click event on sidebar toggle button', () => {
-        const buttonEl = document.querySelector('.js-toggle-right-sidebar-button');
-
-        jest.spyOn(buttonEl, 'dispatchEvent');
-
         wrapper.vm.toggleSidebar();
 
-        expect(buttonEl.dispatchEvent).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'click',
-          }),
-        );
+        expect(wrapper.emitted('sidebar-toggle')).toBeDefined();
       });
     });
 

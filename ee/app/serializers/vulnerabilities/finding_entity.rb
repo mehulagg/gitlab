@@ -41,6 +41,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
     expose(:assets) { |model, _| model.assets }
   end
 
+  expose :details
   expose :state
   expose :scan
 
@@ -55,4 +56,4 @@ class Vulnerabilities::FindingEntity < Grape::Entity
   end
 end
 
-Vulnerabilities::FindingEntity.include_if_ee('::EE::ProjectsHelper')
+Vulnerabilities::FindingEntity.include_mod_with('ProjectsHelper')

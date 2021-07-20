@@ -12,6 +12,20 @@ module Geo
       event :deleted
     end
 
+    class_methods do
+      def sync_timeout
+        ::Geo::BlobDownloadService::LEASE_TIMEOUT
+      end
+
+      def data_type
+        'blob'
+      end
+
+      def data_type_title
+        _('File')
+      end
+    end
+
     def handle_after_create_commit
       return false unless Gitlab::Geo.primary?
       return unless self.class.enabled?
@@ -91,6 +105,15 @@ module Geo
     # @return [Boolean] whether it can generate a checksum
     def checksummable?
       carrierwave_uploader.file_storage? && file_exists?
+    end
+
+    # Return whether it's immutable
+    #
+    # @return [Boolean] whether the replicable is immutable
+    def immutable?
+      # Most blobs are supposed to be immutable.
+      # Override this in your specific Replicator class if needed.
+      true
     end
   end
 end

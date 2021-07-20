@@ -2,7 +2,8 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
 import Api from '~/api';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import axios from '~/lib/utils/axios_utils';
 import * as notesConstants from '~/notes/constants';
 import createStore from '~/notes/stores';
@@ -10,7 +11,6 @@ import * as actions from '~/notes/stores/actions';
 import * as mutationTypes from '~/notes/stores/mutation_types';
 import mutations from '~/notes/stores/mutations';
 import * as utils from '~/notes/stores/utils';
-import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
 import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
 import mrWidgetEventHub from '~/vue_merge_request_widget/event_hub';
@@ -25,7 +25,16 @@ import {
 } from '../mock_data';
 
 const TEST_ERROR_MESSAGE = 'Test error message';
-jest.mock('~/flash');
+const mockFlashClose = jest.fn();
+jest.mock('~/flash', () => {
+  const flash = jest.fn().mockImplementation(() => {
+    return {
+      close: mockFlashClose,
+    };
+  });
+
+  return flash;
+});
 
 describe('Actions Notes Store', () => {
   let commit;
@@ -203,7 +212,7 @@ describe('Actions Notes Store', () => {
 
   describe('emitStateChangedEvent', () => {
     it('emits an event on the document', () => {
-      document.addEventListener('issuable_vue_app:change', (event) => {
+      document.addEventListener(EVENT_ISSUABLE_VUE_APP_CHANGE, (event) => {
         expect(event.detail.data).toEqual({ id: '1', state: 'closed' });
         expect(event.detail.isClosed).toEqual(false);
       });
@@ -253,122 +262,145 @@ describe('Actions Notes Store', () => {
     });
   });
 
-  describe('fetchData', () => {
-    describe('given there are no notes', () => {
-      const lastFetchedAt = '13579';
-
-      beforeEach(() => {
-        axiosMock
-          .onGet(notesDataMock.notesPath)
-          .replyOnce(200, { notes: [], last_fetched_at: lastFetchedAt });
-      });
-
-      it('should commit SET_LAST_FETCHED_AT', () =>
-        testAction(
-          actions.fetchData,
-          undefined,
-          { notesData: notesDataMock },
-          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
-          [],
-        ));
-    });
-
-    describe('given there are notes', () => {
-      const lastFetchedAt = '12358';
-
-      beforeEach(() => {
-        axiosMock
-          .onGet(notesDataMock.notesPath)
-          .replyOnce(200, { notes: discussionMock.notes, last_fetched_at: lastFetchedAt });
-      });
-
-      it('should dispatch updateOrCreateNotes, startTaskList and commit SET_LAST_FETCHED_AT', () =>
-        testAction(
-          actions.fetchData,
-          undefined,
-          { notesData: notesDataMock },
-          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
-          [
-            { type: 'updateOrCreateNotes', payload: discussionMock.notes },
-            { type: 'startTaskList' },
-            { type: 'updateResolvableDiscussionsCounts' },
-          ],
-        ));
-    });
-
-    describe('paginated notes feature flag enabled', () => {
-      const lastFetchedAt = '12358';
-
-      beforeEach(() => {
-        window.gon = { features: { paginatedNotes: true } };
-
-        axiosMock.onGet(notesDataMock.notesPath).replyOnce(200, {
-          notes: discussionMock.notes,
-          more: false,
-          last_fetched_at: lastFetchedAt,
-        });
-      });
-
-      afterEach(() => {
-        window.gon = null;
-      });
-
-      it('should dispatch setFetchingState, setNotesFetchedState, setLoadingState, updateOrCreateNotes, startTaskList and commit SET_LAST_FETCHED_AT', () => {
-        return testAction(
-          actions.fetchData,
-          null,
-          { notesData: notesDataMock, isFetching: true },
-          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
-          [
-            { type: 'setFetchingState', payload: false },
-            { type: 'setNotesFetchedState', payload: true },
-            { type: 'setLoadingState', payload: false },
-            { type: 'updateOrCreateNotes', payload: discussionMock.notes },
-            { type: 'startTaskList' },
-            { type: 'updateResolvableDiscussionsCounts' },
-          ],
-        );
-      });
-    });
-  });
-
   describe('poll', () => {
-    beforeEach((done) => {
-      axiosMock
-        .onGet(notesDataMock.notesPath)
-        .reply(200, { notes: [], last_fetched_at: '123456' }, { 'poll-interval': '1000' });
+    const pollInterval = 6000;
+    const pollResponse = { notes: [], last_fetched_at: '123456' };
+    const pollHeaders = { 'poll-interval': `${pollInterval}` };
+    const successMock = () =>
+      axiosMock.onGet(notesDataMock.notesPath).reply(200, pollResponse, pollHeaders);
+    const failureMock = () => axiosMock.onGet(notesDataMock.notesPath).reply(500);
+    const advanceAndRAF = async (time) => {
+      if (time) {
+        jest.advanceTimersByTime(time);
+      }
 
+      return new Promise((resolve) => requestAnimationFrame(resolve));
+    };
+    const advanceXMoreIntervals = async (number) => {
+      const timeoutLength = pollInterval * number;
+
+      return advanceAndRAF(timeoutLength);
+    };
+    const startPolling = async () => {
+      await store.dispatch('poll');
+      await advanceAndRAF(2);
+    };
+    const cleanUp = async () => {
+      jest.clearAllTimers();
+
+      return store.dispatch('stopPolling');
+    };
+
+    beforeEach((done) => {
       store.dispatch('setNotesData', notesDataMock).then(done).catch(done.fail);
     });
 
-    it('calls service with last fetched state', (done) => {
-      store
-        .dispatch('poll')
-        .then(() => {
-          jest.advanceTimersByTime(2);
-        })
-        .then(() => new Promise((resolve) => requestAnimationFrame(resolve)))
-        .then(() => {
-          expect(store.state.lastFetchedAt).toBe('123456');
+    afterEach(() => {
+      return cleanUp();
+    });
 
-          jest.advanceTimersByTime(1500);
-        })
-        .then(
-          () =>
-            new Promise((resolve) => {
-              requestAnimationFrame(resolve);
-            }),
-        )
-        .then(() => {
-          const expectedGetRequests = 2;
-          expect(axiosMock.history.get.length).toBe(expectedGetRequests);
-          expect(axiosMock.history.get[expectedGetRequests - 1].headers).toMatchObject({
-            'X-Last-Fetched-At': '123456',
-          });
-        })
-        .then(() => store.dispatch('stopPolling'))
-        .then(done)
-        .catch(done.fail);
+    it('calls service with last fetched state', async () => {
+      successMock();
+
+      await startPolling();
+
+      expect(store.state.lastFetchedAt).toBe('123456');
+
+      await advanceXMoreIntervals(1);
+
+      expect(axiosMock.history.get).toHaveLength(2);
+      expect(axiosMock.history.get[1].headers).toMatchObject({
+        'X-Last-Fetched-At': '123456',
+      });
+    });
+
+    describe('polling side effects', () => {
+      it('retries twice', async () => {
+        failureMock();
+
+        await startPolling();
+
+        // This is the first request, not a retry
+        expect(axiosMock.history.get).toHaveLength(1);
+
+        await advanceXMoreIntervals(1);
+
+        // Retry #1
+        expect(axiosMock.history.get).toHaveLength(2);
+
+        await advanceXMoreIntervals(1);
+
+        // Retry #2
+        expect(axiosMock.history.get).toHaveLength(3);
+
+        await advanceXMoreIntervals(10);
+
+        // There are no more retries
+        expect(axiosMock.history.get).toHaveLength(3);
+      });
+
+      it('shows the error display on the second failure', async () => {
+        failureMock();
+
+        await startPolling();
+
+        expect(axiosMock.history.get).toHaveLength(1);
+        expect(createFlash).not.toHaveBeenCalled();
+
+        await advanceXMoreIntervals(1);
+
+        expect(axiosMock.history.get).toHaveLength(2);
+        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalledTimes(1);
+      });
+
+      it('resets the failure counter on success', async () => {
+        // We can't get access to the actual counter in the polling closure.
+        // So we can infer that it's reset by ensuring that the error is only
+        //  shown when we cause two failures in a row - no successes between
+
+        axiosMock
+          .onGet(notesDataMock.notesPath)
+          .replyOnce(500) // cause one error
+          .onGet(notesDataMock.notesPath)
+          .replyOnce(200, pollResponse, pollHeaders) // then a success
+          .onGet(notesDataMock.notesPath)
+          .reply(500); // and then more errors
+
+        await startPolling(); // Failure #1
+        await advanceXMoreIntervals(1); // Success #1
+        await advanceXMoreIntervals(1); // Failure #2
+
+        // That was the first failure AFTER a success, so we should NOT see the error displayed
+        expect(createFlash).not.toHaveBeenCalled();
+
+        // Now we'll allow another failure
+        await advanceXMoreIntervals(1); // Failure #3
+
+        // Since this is the second failure in a row, the error should happen
+        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalledTimes(1);
+      });
+
+      it('hides the error display if it exists on success', async () => {
+        jest.mock();
+        failureMock();
+
+        await startPolling();
+        await advanceXMoreIntervals(2);
+
+        // After two errors, the error should be displayed
+        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalledTimes(1);
+
+        axiosMock.reset();
+        successMock();
+
+        await advanceXMoreIntervals(1);
+
+        expect(mockFlashClose).toHaveBeenCalled();
+        expect(mockFlashClose).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -871,7 +903,7 @@ describe('Actions Notes Store', () => {
           .then(() => done.fail('Expected error to be thrown!'))
           .catch((err) => {
             expect(err).toBe(error);
-            expect(Flash).not.toHaveBeenCalled();
+            expect(createFlash).not.toHaveBeenCalled();
           })
           .then(done)
           .catch(done.fail);
@@ -893,11 +925,10 @@ describe('Actions Notes Store', () => {
           )
           .then((resp) => {
             expect(resp.hasFlash).toBe(true);
-            expect(Flash).toHaveBeenCalledWith(
-              'Your comment could not be submitted because something went wrong',
-              'alert',
-              flashContainer,
-            );
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Your comment could not be submitted because something went wrong',
+              parent: flashContainer,
+            });
           })
           .catch(() => done.fail('Expected success response!'))
           .then(done)
@@ -919,7 +950,7 @@ describe('Actions Notes Store', () => {
           )
           .then((data) => {
             expect(data).toBe(res);
-            expect(Flash).not.toHaveBeenCalled();
+            expect(createFlash).not.toHaveBeenCalled();
           })
           .then(done)
           .catch(done.fail);
@@ -962,7 +993,7 @@ describe('Actions Notes Store', () => {
           ['resolveDiscussion', { discussionId }],
           ['restartPolling'],
         ]);
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
 
@@ -977,7 +1008,10 @@ describe('Actions Notes Store', () => {
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(TEST_ERROR_MESSAGE, 'alert', flashContainer);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: TEST_ERROR_MESSAGE,
+          parent: flashContainer,
+        });
       });
     });
 
@@ -992,11 +1026,10 @@ describe('Actions Notes Store', () => {
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(
-          'Something went wrong while applying the suggestion. Please try again.',
-          'alert',
-          flashContainer,
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Something went wrong while applying the suggestion. Please try again.',
+          parent: flashContainer,
+        });
       });
     });
 
@@ -1004,7 +1037,7 @@ describe('Actions Notes Store', () => {
       dispatch.mockReturnValue(Promise.reject());
 
       testSubmitSuggestion(done, () => {
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
   });
@@ -1048,7 +1081,7 @@ describe('Actions Notes Store', () => {
           ['restartPolling'],
         ]);
 
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
 
@@ -1066,7 +1099,10 @@ describe('Actions Notes Store', () => {
         ]);
 
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(TEST_ERROR_MESSAGE, 'alert', flashContainer);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: TEST_ERROR_MESSAGE,
+          parent: flashContainer,
+        });
       });
     });
 
@@ -1084,11 +1120,11 @@ describe('Actions Notes Store', () => {
         ]);
 
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(
-          'Something went wrong while applying the batch of suggestions. Please try again.',
-          'alert',
-          flashContainer,
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message:
+            'Something went wrong while applying the batch of suggestions. Please try again.',
+          parent: flashContainer,
+        });
       });
     });
 
@@ -1104,7 +1140,7 @@ describe('Actions Notes Store', () => {
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
 
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
   });
@@ -1248,7 +1284,7 @@ describe('Actions Notes Store', () => {
         )
           .then(() => done.fail('Expected error to be thrown'))
           .catch(() => {
-            expect(Flash).toHaveBeenCalled();
+            expect(createFlash).toHaveBeenCalled();
             done();
           });
       });
@@ -1273,68 +1309,6 @@ describe('Actions Notes Store', () => {
         [],
         done,
       );
-    });
-  });
-
-  describe('updateConfidentialityOnIssuable', () => {
-    state = { noteableData: { confidential: false } };
-    const iid = '1';
-    const projectPath = 'full/path';
-    const getters = { getNoteableData: { iid } };
-    const actionArgs = { fullPath: projectPath, confidential: true };
-    const confidential = true;
-
-    beforeEach(() => {
-      jest
-        .spyOn(utils.gqClient, 'mutate')
-        .mockResolvedValue({ data: { issueSetConfidential: { issue: { confidential } } } });
-    });
-
-    it('calls gqClient mutation one time', () => {
-      actions.updateConfidentialityOnIssuable({ commit: () => {}, state, getters }, actionArgs);
-
-      expect(utils.gqClient.mutate).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls gqClient mutation with the correct values', () => {
-      actions.updateConfidentialityOnIssuable({ commit: () => {}, state, getters }, actionArgs);
-
-      expect(utils.gqClient.mutate).toHaveBeenCalledWith({
-        mutation: updateIssueConfidentialMutation,
-        variables: { input: { iid, projectPath, confidential } },
-      });
-    });
-
-    describe('on success of mutation', () => {
-      it('calls commit with the correct values', () => {
-        const commitSpy = jest.fn();
-
-        return actions
-          .updateConfidentialityOnIssuable({ commit: commitSpy, state, getters }, actionArgs)
-          .then(() => {
-            expect(Flash).not.toHaveBeenCalled();
-            expect(commitSpy).toHaveBeenCalledWith(
-              mutationTypes.SET_ISSUE_CONFIDENTIAL,
-              confidential,
-            );
-          });
-      });
-    });
-
-    describe('on user recoverable error', () => {
-      it('sends the error to Flash', () => {
-        const error = 'error';
-
-        jest
-          .spyOn(utils.gqClient, 'mutate')
-          .mockResolvedValue({ data: { issueSetConfidential: { errors: [error] } } });
-
-        return actions
-          .updateConfidentialityOnIssuable({ commit: () => {}, state, getters }, actionArgs)
-          .then(() => {
-            expect(Flash).toHaveBeenCalledWith(error, 'alert');
-          });
-      });
     });
   });
 

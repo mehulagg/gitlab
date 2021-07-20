@@ -15,7 +15,7 @@ RSpec.describe SlashCommands::GlobalSlackHandler do
   end
 
   def enable_slack_application(project)
-    create(:gitlab_slack_application_service, project: project)
+    create(:gitlab_slack_application_integration, project: project)
   end
 
   def handler(params)
@@ -39,7 +39,7 @@ RSpec.describe SlashCommands::GlobalSlackHandler do
 
       enable_slack_application(project)
 
-      slack_integration = create(:slack_integration, service: project.gitlab_slack_application_service)
+      slack_integration = create(:slack_integration, integration: project.gitlab_slack_application_integration)
       slack_integration.update(alias: project.full_path)
 
       handler_with_valid_token(
@@ -54,7 +54,7 @@ RSpec.describe SlashCommands::GlobalSlackHandler do
 
       enable_slack_application(project)
 
-      slack_integration = create(:slack_integration, service: project.gitlab_slack_application_service)
+      slack_integration = create(:slack_integration, integration: project.gitlab_slack_application_integration)
 
       handler_with_valid_token(
         text: "fake/fake issue new title",
@@ -68,7 +68,7 @@ RSpec.describe SlashCommands::GlobalSlackHandler do
 
       enable_slack_application(project)
 
-      slack_integration = create(:slack_integration, service: project.gitlab_slack_application_service)
+      slack_integration = create(:slack_integration, integration: project.gitlab_slack_application_integration)
       slack_integration.update(alias: project.full_path)
 
       handler_with_valid_token(

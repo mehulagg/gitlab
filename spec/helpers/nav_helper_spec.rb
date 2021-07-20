@@ -35,7 +35,7 @@ RSpec.describe NavHelper do
       context 'as admin' do
         let(:user) { create(:user, :admin) }
 
-        context 'feature flag :user_mode_in_session is enabled' do
+        context 'application setting :admin_mode is enabled' do
           it 'does not contain the admin mode link by default' do
             expect(helper.header_links).not_to include(:admin_mode)
           end
@@ -52,9 +52,9 @@ RSpec.describe NavHelper do
           end
         end
 
-        context 'feature flag :user_mode_in_session is disabled' do
+        context 'application setting :admin_mode is disabled' do
           before do
-            stub_feature_flags(user_mode_in_session: false)
+            stub_application_setting(admin_mode: false)
           end
 
           it 'does not contain the admin mode link' do
@@ -114,6 +114,10 @@ RSpec.describe NavHelper do
 
   describe '.group_issues_sub_menu_items' do
     subject { helper.group_issues_sub_menu_items }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(nil)
+    end
 
     it { is_expected.to all(be_a(String)) }
   end

@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ee/dora/components/util.js lead time data returns the correct lead time chart data after all processing of the API response 1`] = `
+Array [
+  Object {
+    "areaStyle": Object {
+      "color": "none",
+    },
+    "data": Array [
+      Array [
+        "Jun 27",
+        86400,
+      ],
+      Array [
+        "Jun 28",
+        86400,
+      ],
+      Array [
+        "Jun 29",
+        86400,
+      ],
+      Array [
+        "Jun 30",
+        86400,
+      ],
+      Array [
+        "Jul 1",
+        432000,
+      ],
+      Array [
+        "Jul 2",
+        518400,
+      ],
+      Array [
+        "Jul 3",
+        604800,
+      ],
+    ],
+    "itemStyle": Object {
+      "color": "#b24800",
+    },
+    "lineStyle": Object {
+      "color": "#b24800",
+      "type": "dashed",
+    },
+    "name": "No merge requests were deployed during this period",
+  },
+  Object {
+    "areaStyle": Object {
+      "color": "#5772ff",
+    },
+    "data": Array [
+      Array [
+        "Jun 27",
+        null,
+      ],
+      Array [
+        "Jun 28",
+        null,
+      ],
+      Array [
+        "Jun 29",
+        null,
+      ],
+      Array [
+        "Jun 30",
+        86400,
+      ],
+      Array [
+        "Jul 1",
+        432000,
+      ],
+      Array [
+        "Jul 2",
+        null,
+      ],
+      Array [
+        "Jul 3",
+        604800,
+      ],
+    ],
+    "itemStyle": Object {
+      "color": "#5772ff",
+    },
+    "lineStyle": Object {
+      "color": "#5772ff",
+    },
+    "name": "Lead time",
+    "showAllSymbol": true,
+    "showSymbol": true,
+    "symbolSize": 8,
+  },
+]
+`;

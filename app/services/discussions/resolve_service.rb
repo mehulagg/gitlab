@@ -44,10 +44,17 @@ module Discussions
         Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
           .track_resolve_thread_action(user: current_user)
 
-        MergeRequests::ResolvedDiscussionNotificationService.new(project, current_user).execute(merge_request)
+        MergeRequests::ResolvedDiscussionNotificationService.new(project: project, current_user: current_user).execute(merge_request)
       end
 
+      resolve_user_todos_for(discussion)
       SystemNoteService.discussion_continued_in_issue(discussion, project, current_user, follow_up_issue) if follow_up_issue
+    end
+
+    def resolve_user_todos_for(discussion)
+      return unless discussion.for_design?
+
+      TodoService.new.resolve_todos_for_target(discussion, current_user)
     end
 
     def first_discussion

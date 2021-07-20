@@ -333,7 +333,7 @@ export default {
     ghostClass: 'gl-visibility-hidden',
   },
   i18n: {
-    dropzoneDescriptionText: __('Drop or %{linkStart}upload%{linkEnd} designs to attach'),
+    dropzoneDescriptionText: __('Drag your designs here or %{linkStart}click to upload%{linkEnd}.'),
   },
 };
 </script>
@@ -347,20 +347,26 @@ export default {
   >
     <header
       v-if="showToolbar"
-      class="row-content-block gl-border-t-0 gl-p-3 gl-display-flex"
+      class="row-content-block gl-border-t-0 gl-py-3 gl-display-flex"
       data-testid="design-toolbar-wrapper"
     >
-      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-w-full">
-        <div>
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-w-full gl-flex-wrap"
+      >
+        <div class="gl-display-flex gl-align-items-center gl-my-2">
           <span class="gl-font-weight-bold gl-mr-3">{{ s__('DesignManagement|Designs') }}</span>
           <design-version-dropdown />
         </div>
-        <div v-show="hasDesigns" class="qa-selector-toolbar gl-display-flex gl-align-items-center">
+        <div
+          v-show="hasDesigns"
+          class="qa-selector-toolbar gl-display-flex gl-align-items-center gl-my-2"
+        >
           <gl-button
             v-if="isLatestVersion"
             variant="link"
             size="small"
-            class="gl-mr-4 js-select-all"
+            class="gl-mr-3"
+            data-testid="select-all-designs-button"
             @click="toggleDesignsSelection"
             >{{ selectAllButtonText }}
           </gl-button>
@@ -373,14 +379,13 @@ export default {
             <delete-button
               v-if="isLatestVersion"
               :is-deleting="loading"
-              button-variant="warning"
-              button-category="secondary"
+              button-variant="default"
               button-class="gl-mr-3"
               button-size="small"
               data-qa-selector="archive_button"
               :loading="loading"
               :has-selected-designs="hasSelectedDesigns"
-              @deleteSelectedDesigns="mutate()"
+              @delete-selected-designs="mutate()"
             >
               {{ s__('DesignManagement|Archive selected') }}
             </delete-button>
@@ -479,9 +484,7 @@ export default {
               <template #upload-text="{ openFileUpload }">
                 <gl-sprintf :message="$options.i18n.dropzoneDescriptionText">
                   <template #link="{ content }">
-                    <gl-link @click.stop="openFileUpload">
-                      {{ content }}
-                    </gl-link>
+                    <gl-link @click.stop="openFileUpload">{{ content }}</gl-link>
                   </template>
                 </gl-sprintf>
               </template>

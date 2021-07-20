@@ -24,20 +24,15 @@ export default {
       type: Boolean,
       required: true,
     },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     ...mapState(['filterParams', 'highlightedLists']),
-    ...mapGetters(['getIssuesByList']),
+    ...mapGetters(['getBoardItemsByList']),
     highlighted() {
       return this.highlightedLists.includes(this.list.id);
     },
-    listIssues() {
-      return this.getIssuesByList(this.list.id);
+    listItems() {
+      return this.getBoardItemsByList(this.list.id);
     },
     isListDraggable() {
       return isListDraggable(this.list);
@@ -46,10 +41,19 @@ export default {
   watch: {
     filterParams: {
       handler() {
-        this.fetchIssuesForList({ listId: this.list.id });
+        if (this.list.id && !this.list.collapsed) {
+          this.fetchItemsForList({ listId: this.list.id });
+        }
       },
       deep: true,
       immediate: true,
+    },
+    'list.id': {
+      handler(id) {
+        if (id) {
+          this.fetchItemsForList({ listId: this.list.id });
+        }
+      },
     },
     highlighted: {
       handler(highlighted) {
@@ -63,7 +67,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['fetchIssuesForList']),
+    ...mapActions(['fetchItemsForList']),
   },
 };
 </script>
@@ -83,14 +87,8 @@ export default {
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
       :class="{ 'board-column-highlighted': highlighted }"
     >
-      <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
-      <board-list
-        ref="board-list"
-        :disabled="disabled"
-        :issues="listIssues"
-        :list="list"
-        :can-admin-list="canAdminList"
-      />
+      <board-list-header :list="list" :disabled="disabled" />
+      <board-list ref="board-list" :disabled="disabled" :board-items="listItems" :list="list" />
     </div>
   </div>
 </template>

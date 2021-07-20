@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Projects::Integrations::Jira::IssuesFinder do
   let_it_be(:project, refind: true) { create(:project) }
-  let_it_be(:jira_service, reload: true) { create(:jira_service, project: project) }
+  let_it_be(:jira_integration, reload: true) { create(:jira_integration, project: project) }
+
   let(:params) { {} }
   let(:service) { described_class.new(project, params) }
 
@@ -17,13 +18,13 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
 
     context 'when jira service integration does not have project_key' do
       it 'raises error' do
-        expect { subject }.to raise_error(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Jira project key is not configured')
+        expect { subject }.to raise_error(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Jira project key is not configured.')
       end
     end
 
     context 'when jira service integration is not active' do
       before do
-        jira_service.update!(active: false)
+        jira_integration.update!(active: false)
       end
 
       it 'raises error' do
@@ -36,7 +37,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
       let(:client) { double(options: { site: 'https://jira.example.com' }) }
 
       before do
-        jira_service.update!(project_key: 'TEST')
+        jira_integration.update!(project_key: 'TEST')
         expect_next_instance_of(Jira::Requests::Issues::ListService) do |instance|
           expect(instance).to receive(:client).at_least(:once).and_return(client)
         end
@@ -73,7 +74,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
           shared_examples 'maps sort values' do
             it do
               expect(::Jira::JqlBuilderService).to receive(:new)
-                .with(jira_service.project_key, expected_sort_values)
+                .with(jira_integration.project_key, expected_sort_values)
                 .and_call_original
 
               subject
@@ -116,7 +117,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
 
           it 'passes them to JqlBuilderService' do
             expect(::Jira::JqlBuilderService).to receive(:new)
-              .with(jira_service.project_key, include({ page: '10', per_page: '20' }))
+              .with(jira_integration.project_key, include({ page: '10', per_page: '20' }))
               .and_call_original
 
             subject

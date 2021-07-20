@@ -7,6 +7,6 @@ FactoryBot.define do
     sequence(:team_name) { |n| "team#{n}" }
     sequence(:alias) { |n| "namespace#{n}/project_name#{n}" }
 
-    service factory: :gitlab_slack_application_service
+    integration factory: :gitlab_slack_application_integration
   end
 end

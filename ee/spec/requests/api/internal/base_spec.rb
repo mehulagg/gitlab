@@ -10,11 +10,13 @@ RSpec.describe API::Internal::Base do
   let_it_be(:primary_node, reload: true) { create(:geo_node, :primary, url: primary_url) }
   let_it_be(:secondary_node, reload: true) { create(:geo_node, url: secondary_url) }
   let_it_be(:user) { create(:user) }
+
   let(:secret_token) { Gitlab::Shell.secret_token }
 
   describe 'POST /internal/post_receive', :geo do
     let(:key) { create(:key, user: user) }
     let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
+
     let(:gl_repository) { "project-#{project.id}" }
     let(:reference_counter) { double('ReferenceCounter') }
 
@@ -197,6 +199,7 @@ RSpec.describe API::Internal::Base do
     context 'ip restriction' do
       let_it_be(:group) { create(:group)}
       let_it_be(:project) { create(:project, :repository, namespace: group) }
+
       let(:params) do
         {
           key_id: key.id,
@@ -310,6 +313,7 @@ RSpec.describe API::Internal::Base do
 
   describe 'POST /internal/personal_access_token' do
     let_it_be(:key) { create(:key, user: user) }
+
     let(:instance_level_max_personal_access_token_lifetime) { nil }
 
     before do
@@ -361,6 +365,7 @@ RSpec.describe API::Internal::Base do
 
   describe 'POST /internal/two_factor_otp_check' do
     let_it_be(:key) { create(:key, user: user) }
+
     let(:key_id) { key.id }
     let(:otp) { '123456'}
 

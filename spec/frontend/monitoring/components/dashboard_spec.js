@@ -1,13 +1,12 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import VueDraggable from 'vuedraggable';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { ESC_KEY } from '~/lib/utils/keys';
 import { objectToQuery } from '~/lib/utils/url_utility';
 import Dashboard from '~/monitoring/components/dashboard.vue';
-
 import DashboardHeader from '~/monitoring/components/dashboard_header.vue';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
 import EmptyState from '~/monitoring/components/empty_state.vue';
@@ -40,24 +39,28 @@ describe('Dashboard', () => {
   let mock;
 
   const createShallowWrapper = (props = {}, options = {}) => {
-    wrapper = shallowMount(Dashboard, {
+    wrapper = shallowMountExtended(Dashboard, {
       propsData: { ...dashboardProps, ...props },
       store,
       stubs: {
         DashboardHeader,
       },
+      provide: { hasManagedPrometheus: false },
       ...options,
     });
   };
 
   const createMountedWrapper = (props = {}, options = {}) => {
-    wrapper = mount(Dashboard, {
+    wrapper = mountExtended(Dashboard, {
       propsData: { ...dashboardProps, ...props },
       store,
       stubs: {
         'graph-group': true,
         'dashboard-panel': true,
         'dashboard-header': DashboardHeader,
+      },
+      provide: {
+        hasManagedPrometheus: false,
       },
       ...options,
     });
@@ -811,5 +814,30 @@ describe('Dashboard', () => {
 
       expect(dashboardPanel.exists()).toBe(true);
     });
+  });
+
+  describe('alerts deprecation', () => {
+    beforeEach(() => {
+      setupStoreWithData(store);
+    });
+
+    const findDeprecationNotice = () => wrapper.findByTestId('alerts-deprecation-warning');
+
+    it.each`
+      managedAlertsDeprecation | hasManagedPrometheus | isVisible
+      ${false}                 | ${false}             | ${false}
+      ${false}                 | ${true}              | ${true}
+      ${true}                  | ${false}             | ${false}
+      ${true}                  | ${true}              | ${false}
+    `(
+      'when the deprecation feature flag is $managedAlertsDeprecation and has managed prometheus is $hasManagedPrometheus',
+      ({ hasManagedPrometheus, managedAlertsDeprecation, isVisible }) => {
+        createMountedWrapper(
+          {},
+          { provide: { hasManagedPrometheus, glFeatures: { managedAlertsDeprecation } } },
+        );
+        expect(findDeprecationNotice().exists()).toBe(isVisible);
+      },
+    );
   });
 });

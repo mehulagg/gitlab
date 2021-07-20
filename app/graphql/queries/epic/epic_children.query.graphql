@@ -16,6 +16,10 @@ fragment RelatedTreeBaseEpic on Epic {
     adminEpic
     createEpic
   }
+  descendantWeightSum {
+    closedIssues
+    openedIssues
+  }
   descendantCounts {
     __typename
     openedEpics
@@ -38,6 +42,7 @@ fragment EpicNode on Epic {
   relationPath
   createdAt
   closedAt
+  confidential
   hasChildren
   hasIssues
   group {

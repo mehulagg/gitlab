@@ -18,7 +18,11 @@ RSpec.describe 'Rack Attack global throttles', :use_clean_rails_memory_store_cac
       throttle_authenticated_web_requests_per_period: 100,
       throttle_authenticated_web_period_in_seconds: 1,
       throttle_authenticated_protected_paths_request_per_period: 100,
-      throttle_authenticated_protected_paths_in_seconds: 1
+      throttle_authenticated_protected_paths_in_seconds: 1,
+      throttle_unauthenticated_packages_api_requests_per_period: 100,
+      throttle_unauthenticated_packages_api_period_in_seconds: 1,
+      throttle_authenticated_packages_api_requests_per_period: 100,
+      throttle_authenticated_packages_api_period_in_seconds: 1
     }
   end
 
@@ -143,6 +147,31 @@ RSpec.describe 'Rack Attack global throttles', :use_clean_rails_memory_store_cac
         end
       end
 
+      context 'when the request is to a container registry notification endpoint' do
+        let(:secret_token) { 'secret_token' }
+        let(:events) { [{ action: 'push' }] }
+        let(:registry_endpoint) { '/api/v4/container_registry_event/events' }
+        let(:registry_headers) { { 'Content-Type' => ::API::ContainerRegistryEvent::DOCKER_DISTRIBUTION_EVENTS_V1_JSON } }
+
+        before do
+          allow(Gitlab.config.registry).to receive(:notification_secret) { secret_token }
+
+          event = spy(:event)
+          allow(::ContainerRegistry::Event).to receive(:new).and_return(event)
+          allow(event).to receive(:supported?).and_return(true)
+        end
+
+        it 'does not throttle the requests' do
+          (1 + requests_per_period).times do
+            post registry_endpoint,
+                 params: { events: events }.to_json,
+                 headers: registry_headers.merge('Authorization' => secret_token)
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
+      end
+
       it 'logs RackAttack info into structured logs' do
         requests_per_period.times do
           get url_that_does_not_require_authentication
@@ -192,6 +221,7 @@ RSpec.describe 'Rack Attack global throttles', :use_clean_rails_memory_store_cac
     let_it_be(:token) { create(:personal_access_token, user: user) }
     let_it_be(:other_user) { create(:user) }
     let_it_be(:other_user_token) { create(:personal_access_token, user: other_user) }
+
     let(:throttle_setting_prefix) { 'throttle_authenticated_api' }
     let(:api_partial_url) { '/todos' }
 
@@ -410,6 +440,186 @@ RSpec.describe 'Rack Attack global throttles', :use_clean_rails_memory_store_cac
     end
   end
 
+  describe 'Packages API' do
+    let(:request_method) { 'GET' }
+
+    context 'unauthenticated' do
+      let_it_be(:project) { create(:project, :public) }
+
+      let(:throttle_setting_prefix) { 'throttle_unauthenticated_packages_api' }
+      let(:packages_path_that_does_not_require_authentication) { "/api/v4/projects/#{project.id}/packages/conan/v1/ping" }
+
+      def do_request
+        get packages_path_that_does_not_require_authentication
+      end
+
+      before do
+        settings_to_set[:throttle_unauthenticated_packages_api_requests_per_period] = requests_per_period
+        settings_to_set[:throttle_unauthenticated_packages_api_period_in_seconds] = period_in_seconds
+      end
+
+      context 'when unauthenticated packages api throttle is disabled' do
+        before do
+          settings_to_set[:throttle_unauthenticated_packages_api_enabled] = false
+          stub_application_setting(settings_to_set)
+        end
+
+        it 'allows requests over the rate limit' do
+          (1 + requests_per_period).times do
+            do_request
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
+
+        context 'when unauthenticated api throttle is enabled' do
+          before do
+            settings_to_set[:throttle_unauthenticated_requests_per_period] = requests_per_period
+            settings_to_set[:throttle_unauthenticated_period_in_seconds] = period_in_seconds
+            settings_to_set[:throttle_unauthenticated_enabled] = true
+            stub_application_setting(settings_to_set)
+          end
+
+          it 'rejects requests over the unauthenticated api rate limit' do
+            requests_per_period.times do
+              do_request
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+
+            expect_rejection { do_request }
+          end
+        end
+      end
+
+      context 'when unauthenticated packages api throttle is enabled' do
+        before do
+          settings_to_set[:throttle_unauthenticated_packages_api_requests_per_period] = requests_per_period # 1
+          settings_to_set[:throttle_unauthenticated_packages_api_period_in_seconds] = period_in_seconds # 10_000
+          settings_to_set[:throttle_unauthenticated_packages_api_enabled] = true
+          stub_application_setting(settings_to_set)
+        end
+
+        it 'rejects requests over the rate limit' do
+          requests_per_period.times do
+            do_request
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+
+          expect_rejection { do_request }
+        end
+
+        context 'when unauthenticated api throttle is lower' do
+          before do
+            settings_to_set[:throttle_unauthenticated_requests_per_period] = 0
+            settings_to_set[:throttle_unauthenticated_period_in_seconds] = period_in_seconds
+            settings_to_set[:throttle_unauthenticated_enabled] = true
+            stub_application_setting(settings_to_set)
+          end
+
+          it 'ignores unauthenticated api throttle' do
+            requests_per_period.times do
+              do_request
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+
+            expect_rejection { do_request }
+          end
+        end
+
+        it_behaves_like 'tracking when dry-run mode is set' do
+          let(:throttle_name) { 'throttle_unauthenticated_packages_api' }
+        end
+      end
+    end
+
+    context 'authenticated', :api do
+      let_it_be(:project) { create(:project, :internal) }
+      let_it_be(:user) { create(:user) }
+      let_it_be(:token) { create(:personal_access_token, user: user) }
+      let_it_be(:other_user) { create(:user) }
+      let_it_be(:other_user_token) { create(:personal_access_token, user: other_user) }
+
+      let(:throttle_setting_prefix) { 'throttle_authenticated_packages_api' }
+      let(:api_partial_url) { "/projects/#{project.id}/packages/conan/v1/ping" }
+
+      before do
+        stub_application_setting(settings_to_set)
+      end
+
+      context 'with the token in the query string' do
+        let(:request_args) { [api(api_partial_url, personal_access_token: token), {}] }
+        let(:other_user_request_args) { [api(api_partial_url, personal_access_token: other_user_token), {}] }
+
+        it_behaves_like 'rate-limited token-authenticated requests'
+      end
+
+      context 'with the token in the headers' do
+        let(:request_args) { api_get_args_with_token_headers(api_partial_url, personal_access_token_headers(token)) }
+        let(:other_user_request_args) { api_get_args_with_token_headers(api_partial_url, personal_access_token_headers(other_user_token)) }
+
+        it_behaves_like 'rate-limited token-authenticated requests'
+      end
+
+      context 'precedence over authenticated api throttle' do
+        before do
+          settings_to_set[:throttle_authenticated_packages_api_requests_per_period] = requests_per_period
+          settings_to_set[:throttle_authenticated_packages_api_period_in_seconds] = period_in_seconds
+        end
+
+        def do_request
+          get api(api_partial_url, personal_access_token: token)
+        end
+
+        context 'when authenticated packages api throttle is enabled' do
+          before do
+            settings_to_set[:throttle_authenticated_packages_api_enabled] = true
+          end
+
+          context 'when authenticated api throttle is lower' do
+            before do
+              settings_to_set[:throttle_authenticated_api_requests_per_period] = 0
+              settings_to_set[:throttle_authenticated_api_period_in_seconds] = period_in_seconds
+              settings_to_set[:throttle_authenticated_api_enabled] = true
+              stub_application_setting(settings_to_set)
+            end
+
+            it 'ignores authenticated api throttle' do
+              requests_per_period.times do
+                do_request
+                expect(response).to have_gitlab_http_status(:ok)
+              end
+
+              expect_rejection { do_request }
+            end
+          end
+        end
+
+        context 'when authenticated packages api throttle is disabled' do
+          before do
+            settings_to_set[:throttle_authenticated_packages_api_enabled] = false
+          end
+
+          context 'when authenticated api throttle is enabled' do
+            before do
+              settings_to_set[:throttle_authenticated_api_requests_per_period] = requests_per_period
+              settings_to_set[:throttle_authenticated_api_period_in_seconds] = period_in_seconds
+              settings_to_set[:throttle_authenticated_api_enabled] = true
+              stub_application_setting(settings_to_set)
+            end
+
+            it 'rejects requests over the authenticated api rate limit' do
+              requests_per_period.times do
+                do_request
+                expect(response).to have_gitlab_http_status(:ok)
+              end
+
+              expect_rejection { do_request }
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe 'throttle bypass header' do
     let(:headers) { {} }
     let(:bypass_header) { 'gitlab-bypass-rate-limiting' }
@@ -465,6 +675,120 @@ RSpec.describe 'Rack Attack global throttles', :use_clean_rails_memory_store_cac
       let(:headers) { { bypass_header => 'some other value' } }
 
       it_behaves_like 'reject requests over the rate limit'
+    end
+  end
+
+  describe 'Gitlab::RackAttack::Request#unauthenticated?' do
+    let_it_be(:url) { "/api/v4/projects" }
+    let_it_be(:user) { create(:user) }
+
+    def expect_unauthenticated_request
+      expect_next_instance_of(Rack::Attack::Request) do |instance|
+        expect(instance.unauthenticated?).to be true
+      end
+    end
+
+    def expect_authenticated_request
+      expect_next_instance_of(Rack::Attack::Request) do |instance|
+        expect(instance.unauthenticated?).to be false
+      end
+    end
+
+    before do
+      settings_to_set[:throttle_unauthenticated_enabled] = true
+      stub_application_setting(settings_to_set)
+    end
+
+    context 'without authentication' do
+      it 'request is unauthenticated' do
+        expect_unauthenticated_request
+
+        get url
+      end
+    end
+
+    context 'authenticated by a runner token' do
+      let_it_be(:runner) { create(:ci_runner) }
+
+      it 'request is authenticated' do
+        expect_authenticated_request
+
+        get url, params: { token: runner.token }
+      end
+    end
+
+    context 'authenticated with personal access token' do
+      let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
+
+      it 'request is authenticated by token in query string' do
+        expect_authenticated_request
+
+        get url, params: { private_token: personal_access_token.token }
+      end
+
+      it 'request is authenticated by token in the headers' do
+        expect_authenticated_request
+
+        get url, headers: personal_access_token_headers(personal_access_token)
+      end
+
+      it 'request is authenticated by token in the OAuth headers' do
+        expect_authenticated_request
+
+        get url, headers: oauth_token_headers(personal_access_token)
+      end
+
+      it 'request is authenticated by token in basic auth' do
+        expect_authenticated_request
+
+        get url, headers: basic_auth_headers(user, personal_access_token)
+      end
+    end
+
+    context 'authenticated with OAuth token' do
+      let(:application) { Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user) }
+      let(:oauth_token) { Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "api") }
+
+      it 'request is authenticated by token in query string' do
+        expect_authenticated_request
+
+        get url, params: { access_token: oauth_token.token }
+      end
+
+      it 'request is authenticated by token in the headers' do
+        expect_authenticated_request
+
+        get url, headers: oauth_token_headers(oauth_token)
+      end
+    end
+
+    context 'authenticated with lfs token' do
+      it 'request is authenticated by token in basic auth' do
+        lfs_token = Gitlab::LfsToken.new(user)
+        encoded_login = ["#{user.username}:#{lfs_token.token}"].pack('m0')
+
+        expect_authenticated_request
+
+        get url, headers: { 'AUTHORIZATION' => "Basic #{encoded_login}" }
+      end
+    end
+
+    context 'authenticated with regular login' do
+      it 'request is authenticated after login' do
+        login_as(user)
+
+        expect_authenticated_request
+
+        get url
+      end
+
+      it 'request is authenticated by credentials in basic auth' do
+        encoded_login = ["#{user.username}:#{user.password}"].pack('m0')
+
+        expect_authenticated_request
+
+        get url, headers: { 'AUTHORIZATION' => "Basic #{encoded_login}" }
+      end
     end
   end
 end

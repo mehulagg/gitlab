@@ -1,11 +1,10 @@
 <script>
-import { GlSprintf, GlButton } from '@gitlab/ui';
-import { sprintf, n__ } from '~/locale';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { sprintf, n__, s__ } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import {
-  DETAILS_PAGE_TITLE,
   UPDATED_AT,
   CLEANUP_UNSCHEDULED_TEXT,
   CLEANUP_SCHEDULED_TEXT,
@@ -20,21 +19,23 @@ import {
   UNSCHEDULED_STATUS,
   SCHEDULED_STATUS,
   ONGOING_STATUS,
+  ROOT_IMAGE_TEXT,
+  ROOT_IMAGE_TOOLTIP,
 } from '../../constants/index';
+
+import getContainerRepositoryTagsCountQuery from '../../graphql/queries/get_container_repository_tags_count.query.graphql';
 
 export default {
   name: 'DetailsHeader',
-  components: { GlSprintf, GlButton, TitleArea, MetadataItem },
+  components: { GlButton, GlIcon, TitleArea, MetadataItem },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   mixins: [timeagoMixin],
   props: {
     image: {
       type: Object,
       required: true,
-    },
-    metadataLoading: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     disabled: {
       type: Boolean,
@@ -42,54 +43,82 @@ export default {
       required: false,
     },
   },
+  data() {
+    return {
+      containerRepository: {},
+      fetchTagsCount: false,
+    };
+  },
+  apollo: {
+    containerRepository: {
+      query: getContainerRepositoryTagsCountQuery,
+      variables() {
+        return {
+          id: this.image.id,
+        };
+      },
+    },
+  },
   computed: {
+    imageDetails() {
+      return { ...this.image, ...this.containerRepository };
+    },
     visibilityIcon() {
-      return this.image?.project?.visibility === 'public' ? 'eye' : 'eye-slash';
+      return this.imageDetails?.project?.visibility === 'public' ? 'eye' : 'eye-slash';
     },
     timeAgo() {
-      return this.timeFormatted(this.image.updatedAt);
+      return this.timeFormatted(this.imageDetails.updatedAt);
     },
     updatedText() {
       return sprintf(UPDATED_AT, { time: this.timeAgo });
     },
     tagCountText() {
-      return n__('%d tag', '%d tags', this.image.tagsCount);
+      if (this.$apollo.queries.containerRepository.loading) {
+        return s__('ContainerRegistry|-- tags');
+      }
+      return n__('%d tag', '%d tags', this.imageDetails.tagsCount);
     },
     cleanupTextAndTooltip() {
-      if (!this.image.project.containerExpirationPolicy?.enabled) {
+      if (!this.imageDetails.project.containerExpirationPolicy?.enabled) {
         return { text: CLEANUP_DISABLED_TEXT, tooltip: CLEANUP_DISABLED_TOOLTIP };
       }
       return {
         [UNSCHEDULED_STATUS]: {
           text: sprintf(CLEANUP_UNSCHEDULED_TEXT, {
-            time: this.timeFormatted(this.image.project.containerExpirationPolicy.nextRunAt),
+            time: this.timeFormatted(this.imageDetails.project.containerExpirationPolicy.nextRunAt),
           }),
         },
         [SCHEDULED_STATUS]: { text: CLEANUP_SCHEDULED_TEXT, tooltip: CLEANUP_SCHEDULED_TOOLTIP },
         [ONGOING_STATUS]: { text: CLEANUP_ONGOING_TEXT, tooltip: CLEANUP_ONGOING_TOOLTIP },
         [UNFINISHED_STATUS]: { text: CLEANUP_UNFINISHED_TEXT, tooltip: CLEANUP_UNFINISHED_TOOLTIP },
-      }[this.image?.expirationPolicyCleanupStatus];
+      }[this.imageDetails?.expirationPolicyCleanupStatus];
     },
     deleteButtonDisabled() {
-      return this.disabled || !this.image.canDelete;
+      return this.disabled || !this.imageDetails.canDelete;
     },
-  },
-  i18n: {
-    DETAILS_PAGE_TITLE,
+    rootImageTooltip() {
+      return !this.imageDetails.name ? ROOT_IMAGE_TOOLTIP : '';
+    },
+    imageName() {
+      return this.imageDetails.name || ROOT_IMAGE_TEXT;
+    },
   },
 };
 </script>
 
 <template>
-  <title-area :metadata-loading="metadataLoading">
+  <title-area>
     <template #title>
       <span data-testid="title">
-        <gl-sprintf :message="$options.i18n.DETAILS_PAGE_TITLE">
-          <template #imageName>
-            {{ image.name }}
-          </template>
-        </gl-sprintf>
+        {{ imageName }}
       </span>
+      <gl-icon
+        v-if="rootImageTooltip"
+        v-gl-tooltip="rootImageTooltip"
+        class="gl-text-blue-600"
+        name="information-o"
+        :aria-label="rootImageTooltip"
+      />
     </template>
     <template #metadata-tags-count>
       <metadata-item icon="tag" :text="tagCountText" data-testid="tags-count" />
@@ -114,13 +143,8 @@ export default {
       />
     </template>
     <template #right-actions>
-      <gl-button
-        v-if="!metadataLoading"
-        variant="danger"
-        :disabled="deleteButtonDisabled"
-        @click="$emit('delete')"
-      >
-        {{ __('Delete') }}
+      <gl-button variant="danger" :disabled="deleteButtonDisabled" @click="$emit('delete')">
+        {{ __('Delete image repository') }}
       </gl-button>
     </template>
   </title-area>

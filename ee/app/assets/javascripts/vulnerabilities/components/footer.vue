@@ -5,13 +5,14 @@ import Api from 'ee/api';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import GenericReportSection from './generic_report/report_section.vue';
 import HistoryEntry from './history_entry.vue';
 import RelatedIssues from './related_issues.vue';
 import RelatedJiraIssues from './related_jira_issues.vue';
@@ -20,6 +21,7 @@ import StatusDescription from './status_description.vue';
 export default {
   name: 'VulnerabilityFooter',
   components: {
+    GenericReportSection,
     SolutionCard,
     MergeRequestNote,
     HistoryEntry,
@@ -40,12 +42,12 @@ export default {
       required: true,
     },
   },
-
-  data: () => ({
-    discussionsDictionary: {},
-    lastFetchedAt: null,
-  }),
-
+  data() {
+    return {
+      discussionsDictionary: {},
+      lastFetchedAt: null,
+    };
+  },
   computed: {
     discussions() {
       return Object.values(this.discussionsDictionary);
@@ -92,21 +94,17 @@ export default {
       };
     },
   },
-
   created() {
     this.fetchDiscussions();
   },
-
   updated() {
     this.$nextTick(() => {
       initUserPopovers(this.$el.querySelectorAll('.js-user-link'));
     });
   },
-
   beforeDestroy() {
     if (this.poll) this.poll.stop();
   },
-
   methods: {
     dateToSeconds(date) {
       return Date.parse(date) / 1000;
@@ -140,11 +138,11 @@ export default {
           });
         })
         .catch(() => {
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to retrieve the vulnerability history. Please try again later.',
             ),
-          );
+          });
         });
     },
     createNotesPoll() {
@@ -163,7 +161,9 @@ export default {
           this.lastFetchedAt = lastFetchedAt;
         },
         errorCallback: () =>
-          createFlash(__('Something went wrong while fetching latest comments.')),
+          createFlash({
+            message: __('Something went wrong while fetching latest comments.'),
+          }),
       });
     },
     updateNotes(notes) {
@@ -199,7 +199,6 @@ export default {
           }
         }
       });
-
       // Emit an event that tells the header to refresh the vulnerability.
       if (isVulnerabilityStateChanged) {
         this.$emit('vulnerability-state-change');
@@ -211,7 +210,11 @@ export default {
 <template>
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
-
+    <generic-report-section
+      v-if="vulnerability.details"
+      class="md gl-mt-6"
+      :details="vulnerability.details"
+    />
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
         :feedback="vulnerability.mergeRequestFeedback"
@@ -219,8 +222,10 @@ export default {
         class="card-body"
       />
     </div>
-
-    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl" />
+    <related-jira-issues
+      v-if="createJiraIssueUrl || glFeatures.createVulnerabilityJiraIssueViaGraphql"
+      class="gl-mt-6"
+    />
     <related-issues
       v-else
       :endpoint="issueLinksEndpoint"
@@ -228,7 +233,6 @@ export default {
       :project-path="project.url"
       :help-path="vulnerability.relatedIssuesHelpPath"
     />
-
     <div class="notes" data-testid="detection-note">
       <div class="system-note gl-display-flex gl-align-items-center gl-p-0! gl-mt-6!">
         <div class="timeline-icon gl-m-0!">
@@ -241,9 +245,7 @@ export default {
         />
       </div>
     </div>
-
     <hr />
-
     <ul v-if="discussions.length" ref="historyList" class="notes discussion-body">
       <history-entry
         v-for="discussion in discussions"

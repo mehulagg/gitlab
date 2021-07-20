@@ -8,6 +8,8 @@ module Geo
     # If multiple jobs are scheduled, only one will run and the others will drop forever.
     class ProjectRegistryWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       include GeoQueue
       include ::Gitlab::Geo::LogHelpers
 

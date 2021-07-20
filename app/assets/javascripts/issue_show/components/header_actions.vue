@@ -1,7 +1,8 @@
 <script>
-import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlLink, GlModal } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlLink, GlModal } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import createFlash, { FLASH_TYPES } from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import { IssuableType } from '~/issuable_show/constants';
 import { IssuableStatus, IssueStateEvent } from '~/issue_show/constants';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
@@ -16,7 +17,6 @@ export default {
     GlButton,
     GlDropdown,
     GlDropdownItem,
-    GlIcon,
     GlLink,
     GlModal,
   },
@@ -25,7 +25,6 @@ export default {
   },
   actionPrimary: {
     text: __('Yes, close issue'),
-    attributes: [{ variant: 'warning' }],
   },
   i18n: {
     promoteErrorMessage: __(
@@ -87,9 +86,6 @@ export default {
     qaSelector() {
       return this.isClosed ? 'reopen_issue_button' : 'close_issue_button';
     },
-    buttonVariant() {
-      return this.isClosed ? 'default' : 'warning';
-    },
     dropdownText() {
       return sprintf(__('%{issueType} actions'), {
         issueType: capitalizeFirstCharacter(this.issueType),
@@ -148,7 +144,7 @@ export default {
           };
 
           // Dispatch event which updates open/close state, shared among the issue show page
-          document.dispatchEvent(new CustomEvent('issuable_vue_app:change', payload));
+          document.dispatchEvent(new CustomEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, payload));
         })
         .catch(() => createFlash({ message: __('Error occurred while updating the issue status') }))
         .finally(() => {
@@ -191,9 +187,9 @@ export default {
 </script>
 
 <template>
-  <div class="detail-page-header-actions">
+  <div class="detail-page-header-actions gl-display-flex">
     <gl-dropdown
-      class="gl-display-block gl-sm-display-none!"
+      class="gl-sm-display-none! w-100"
       block
       :text="dropdownText"
       :loading="isToggleStateButtonLoading"
@@ -223,26 +219,22 @@ export default {
     <gl-button
       v-if="showToggleIssueStateButton"
       class="gl-display-none gl-sm-display-inline-flex!"
-      category="secondary"
       :data-qa-selector="qaSelector"
       :loading="isToggleStateButtonLoading"
-      :variant="buttonVariant"
       @click="toggleIssueState"
     >
       {{ buttonText }}
     </gl-button>
 
     <gl-dropdown
-      class="gl-display-none gl-sm-display-inline-flex!"
-      toggle-class="gl-border-0! gl-shadow-none!"
+      class="gl-display-none gl-sm-display-inline-flex! gl-ml-3"
+      icon="ellipsis_v"
+      category="tertiary"
+      :text="dropdownText"
+      :text-sr-only="true"
       no-caret
       right
     >
-      <template #button-content>
-        <gl-icon name="ellipsis_v" />
-        <span class="gl-sr-only">{{ dropdownText }}</span>
-      </template>
-
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
       </gl-dropdown-item>

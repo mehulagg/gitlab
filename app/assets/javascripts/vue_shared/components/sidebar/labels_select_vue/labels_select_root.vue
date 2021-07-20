@@ -5,13 +5,12 @@ import Vuex, { mapState, mapActions, mapGetters } from 'vuex';
 import { isInViewport } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
-import DropdownValueCollapsed from '~/vue_shared/components/sidebar/labels_select/dropdown_value_collapsed.vue';
-
 import { DropdownVariant } from './constants';
 import DropdownButton from './dropdown_button.vue';
 import DropdownContents from './dropdown_contents.vue';
 import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
+import DropdownValueCollapsed from './dropdown_value_collapsed.vue';
 import labelsSelectModule from './store';
 
 Vue.use(Vuex);
@@ -61,6 +60,11 @@ export default {
       required: false,
       default: () => [],
     },
+    hideCollapsedView: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     labelsSelectInProgress: {
       type: Boolean,
       required: false,
@@ -80,6 +84,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    labelsFilterParam: {
+      type: String,
+      required: false,
+      default: 'label_name',
     },
     dropdownButtonText: {
       type: String,
@@ -156,6 +165,7 @@ export default {
       labelsFetchPath: this.labelsFetchPath,
       labelsManagePath: this.labelsManagePath,
       labelsFilterBasePath: this.labelsFilterBasePath,
+      labelsFilterParam: this.labelsFilterParam,
       labelsListTitle: this.labelsListTitle,
       labelsCreateTitle: this.labelsCreateTitle,
       footerCreateLabelTitle: this.footerCreateLabelTitle,
@@ -166,9 +176,11 @@ export default {
       after: this.handleVuexActionDispatch,
     });
 
+    document.addEventListener('mousedown', this.handleDocumentMousedown);
     document.addEventListener('click', this.handleDocumentClick);
   },
   beforeDestroy() {
+    document.removeEventListener('mousedown', this.handleDocumentMousedown);
     document.removeEventListener('click', this.handleDocumentClick);
   },
   methods: {
@@ -191,11 +203,36 @@ export default {
       }
     },
     /**
+     * This method stores a mousedown event's target.
+     * Required by the click listener because the click
+     * event itself has no reference to this element.
+     */
+    handleDocumentMousedown({ target }) {
+      this.mousedownTarget = target;
+    },
+    /**
      * This method listens for document-wide click event
      * and toggle dropdown if user clicks anywhere outside
      * the dropdown while dropdown is visible.
      */
     handleDocumentClick({ target }) {
+      // We also perform the toggle exception check for the
+      // last mousedown event's target to avoid hiding the
+      // box when the mousedown happened inside the box and
+      // only the mouseup did not.
+      if (
+        this.showDropdownContents &&
+        !this.preventDropdownToggleOnClick(target) &&
+        !this.preventDropdownToggleOnClick(this.mousedownTarget)
+      ) {
+        this.toggleDropdownContents();
+      }
+    },
+    /**
+     * This method checks whether a given click target
+     * should prevent the dropdown from being toggled.
+     */
+    preventDropdownToggleOnClick(target) {
       // This approach of element detection is needed
       // as the dropdown wrapper is not using `GlDropdown` as
       // it will also require us to use `BDropdownForm`
@@ -210,19 +247,20 @@ export default {
           target?.parentElement?.classList.contains(className),
       );
 
-      const hadExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
+      const hasExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
         (className) => $(target).parents(className).length,
       );
 
-      if (
-        this.showDropdownContents &&
-        !hadExceptionParent &&
-        !hasExceptionClass &&
-        !this.$refs.dropdownButtonCollapsed?.$el.contains(target) &&
-        !this.$refs.dropdownContents?.$el.contains(target)
-      ) {
-        this.toggleDropdownContents();
-      }
+      const isInDropdownButtonCollapsed = this.$refs.dropdownButtonCollapsed?.$el.contains(target);
+
+      const isInDropdownContents = this.$refs.dropdownContents?.$el.contains(target);
+
+      return (
+        hasExceptionClass ||
+        hasExceptionParent ||
+        isInDropdownButtonCollapsed ||
+        isInDropdownContents
+      );
     },
     handleDropdownClose(labels) {
       // Only emit label updates if there are any labels to update
@@ -234,7 +272,7 @@ export default {
       this.$emit('toggleCollapse');
     },
     setContentIsOnViewport(showDropdownContents) {
-      if (!this.isDropdownVariantEmbedded || !showDropdownContents) {
+      if (!showDropdownContents) {
         this.contentIsOnViewport = true;
 
         return;
@@ -242,8 +280,7 @@ export default {
 
       this.$nextTick(() => {
         if (this.$refs.dropdownContents) {
-          const offset = { top: 100 };
-          this.contentIsOnViewport = isInViewport(this.$refs.dropdownContents.$el, offset);
+          this.contentIsOnViewport = isInViewport(this.$refs.dropdownContents.$el);
         }
       });
     },
@@ -261,6 +298,7 @@ export default {
   >
     <template v-if="isDropdownVariantSidebar">
       <dropdown-value-collapsed
+        v-if="!hideCollapsedView"
         ref="dropdownButtonCollapsed"
         :labels="selectedLabels"
         @onValueClick="handleCollapsedValueClick"
@@ -277,8 +315,9 @@ export default {
       </dropdown-value>
       <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
       <dropdown-contents
-        v-show="dropdownButtonVisible && showDropdownContents"
+        v-if="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
+        :render-on-top="!contentIsOnViewport"
       />
     </template>
     <template v-if="isDropdownVariantStandalone || isDropdownVariantEmbedded">

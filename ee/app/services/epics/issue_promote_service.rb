@@ -33,11 +33,13 @@ module Epics
 
     def track_event
       ::Gitlab::Tracking.event('epics', 'promote', property: 'issue_id', value: original_entity.id,
-                               project: issue.project, user: current_user, namespace: @parent_group)
+                               project: issue.project, user: current_user, namespace: parent_group, weight: issue.weight)
+
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_issue_promoted_to_epic(author: current_user)
     end
 
     def create_new_entity
-      @new_entity = Epics::CreateService.new(parent_group, current_user, params).execute
+      @new_entity = Epics::CreateService.new(group: parent_group, current_user: current_user, params: params).execute
     end
 
     def update_old_entity
@@ -53,7 +55,8 @@ module Epics
     def params
       {
         title: original_entity.title,
-        parent: issue_epic
+        parent: issue_epic,
+        confidential: issue.confidential
       }
     end
 

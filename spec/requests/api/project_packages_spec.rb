@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe API::ProjectPackages do
-  let(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public) }
+
+  let(:user) { create(:user) }
   let!(:package1) { create(:npm_package, project: project, version: '3.1.0', name: "@#{project.root_namespace.path}/foo1") }
   let(:package_url) { "/projects/#{project.id}/packages/#{package1.id}" }
   let!(:package2) { create(:nuget_package, project: project, version: '2.0.4') }
@@ -34,6 +35,56 @@ RSpec.describe API::ProjectPackages do
 
           expect(response_conan_package['name']).to eq(conan_package.conan_recipe)
           expect(response_conan_package['conan_package_name']).to eq(conan_package.name)
+        end
+      end
+
+      context 'with terraform module package' do
+        let_it_be(:terraform_module_package) { create(:terraform_module_package, project: project) }
+
+        context 'when no package_type filter is set' do
+          let(:params) { {} }
+
+          it 'filters out terraform module packages' do
+            subject
+
+            expect(json_response).not_to include(a_hash_including('package_type' => 'terraform_module'))
+          end
+
+          it 'returns packages with the package registry web_path' do
+            subject
+
+            expect(json_response).to include(a_hash_including('_links' => a_hash_including('web_path' => include('packages'))))
+          end
+        end
+
+        context 'when package_type filter is set to terraform_module' do
+          let(:params) { { package_type: :terraform_module } }
+
+          it 'returns the terraform module package' do
+            subject
+
+            expect(json_response).to include(a_hash_including('package_type' => 'terraform_module'))
+          end
+
+          it 'returns the terraform module package with the infrastructure registry web_path' do
+            subject
+
+            expect(json_response).to include(a_hash_including('_links' => a_hash_including('web_path' => include('infrastructure_registry'))))
+          end
+        end
+
+        context 'in nested group' do
+          let_it_be(:nested_project) { create(:project, :public, :in_subgroup) }
+          let_it_be(:nested_terraform_module_package) { create(:terraform_module_package, project: nested_project) }
+
+          let(:params) { { package_type: :terraform_module } }
+          let(:url) { "/projects/#{nested_project.id}/packages" }
+
+          it 'returns the nested terraform module package with the correct web_path' do
+            subject
+
+            expect(json_response).to include(a_hash_including('_links' => a_hash_including('web_path' => include(nested_project.namespace.full_path))))
+          end
         end
       end
 
@@ -120,6 +171,7 @@ RSpec.describe API::ProjectPackages do
       end
 
       it_behaves_like 'with versionless packages'
+      it_behaves_like 'with status param'
       it_behaves_like 'does not cause n^2 queries'
     end
   end
@@ -256,6 +308,10 @@ RSpec.describe API::ProjectPackages do
       context 'project is private' do
         let(:project) { create(:project, :private) }
 
+        before do
+          expect(::Packages::Maven::Metadata::SyncWorker).not_to receive(:perform_async)
+        end
+
         it 'returns 404 for non authenticated user' do
           delete api(package_url)
 
@@ -298,6 +354,19 @@ RSpec.describe API::ProjectPackages do
           delete api(package_url, user)
 
           expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'with a maven package' do
+        let_it_be(:package1) { create(:maven_package, project: project) }
+
+        it 'enqueues a sync worker job' do
+          project.add_maintainer(user)
+
+          expect(::Packages::Maven::Metadata::SyncWorker)
+            .to receive(:perform_async).with(user.id, project.id, package1.name)
+
+          delete api(package_url, user)
         end
       end
     end

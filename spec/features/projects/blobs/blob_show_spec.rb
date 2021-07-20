@@ -119,6 +119,99 @@ RSpec.describe 'File blob', :js do
       end
     end
 
+    context 'when ref switch' do
+      def switch_ref_to(ref_name)
+        first('.qa-branches-select').click
+
+        page.within '.project-refs-form' do
+          click_link ref_name
+          wait_for_requests
+        end
+      end
+
+      it 'displays single highlighted line number of different ref' do
+        visit_blob('files/js/application.js', anchor: 'L1')
+
+        switch_ref_to('feature')
+
+        page.within '.blob-content' do
+          expect(find_by_id('LC1')[:class]).to include("hll")
+        end
+      end
+
+      it 'displays multiple highlighted line numbers of different ref' do
+        visit_blob('files/js/application.js', anchor: 'L1-3')
+
+        switch_ref_to('feature')
+
+        page.within '.blob-content' do
+          expect(find_by_id('LC1')[:class]).to include("hll")
+          expect(find_by_id('LC2')[:class]).to include("hll")
+          expect(find_by_id('LC3')[:class]).to include("hll")
+        end
+      end
+
+      it 'displays no highlighted number of different ref' do
+        Files::UpdateService.new(
+          project,
+          project.owner,
+          commit_message: 'Update',
+          start_branch: 'feature',
+          branch_name: 'feature',
+          file_path: 'files/js/application.js',
+          file_content: 'new content'
+        ).execute
+
+        project.commit('feature').diffs.diff_files.first
+
+        visit_blob('files/js/application.js', anchor: 'L3')
+        switch_ref_to('feature')
+
+        page.within '.blob-content' do
+          expect(page).not_to have_css('.hll')
+        end
+      end
+
+      context 'successfully change ref of similar name' do
+        before do
+          project.repository.create_branch('dev')
+          project.repository.create_branch('development')
+        end
+
+        it 'switch ref from longer to shorter ref name' do
+          visit_blob('files/js/application.js', ref: 'development')
+          switch_ref_to('dev')
+
+          aggregate_failures do
+            expect(page.find('.file-title-name').text).to eq('application.js')
+            expect(page).not_to have_css('flash-container')
+          end
+        end
+
+        it 'switch ref from shorter to longer ref name' do
+          visit_blob('files/js/application.js', ref: 'dev')
+          switch_ref_to('development')
+
+          aggregate_failures do
+            expect(page.find('.file-title-name').text).to eq('application.js')
+            expect(page).not_to have_css('flash-container')
+          end
+        end
+      end
+
+      it 'successfully changes ref when the ref name matches the project name' do
+        project.repository.create_branch(project.name)
+
+        visit_blob('files/js/application.js', ref: project.name)
+        switch_ref_to('master')
+
+        aggregate_failures do
+          expect(page.find('.file-title-name').text).to eq('application.js')
+          expect(page).not_to have_css('flash-container')
+        end
+      end
+    end
+
     context 'visiting with a line number anchor' do
       before do
         visit_blob('files/markdown/ruby-style-guide.md', anchor: 'L1')

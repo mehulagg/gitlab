@@ -249,15 +249,11 @@ RSpec.describe GlobalPolicy do
     let_it_be(:admin) { build_stubbed(:admin) }
     let_it_be(:guest) { build_stubbed(:user) }
 
-    where(:role, :flag_enabled, :licensed, :allowed) do
-      :admin      | true  | true  | true
-      :admin      | true  | false | false
-      :admin      | false | true  | false
-      :admin      | false | false | false
-      :guest      | true  | true  | false
-      :guest      | true  | false | false
-      :guest      | false | true  | false
-      :guest      | false | false | false
+    where(:role, :licensed, :allowed) do
+      :admin | true | true
+      :admin | false | false
+      :guest | true | false
+      :guest | false | false
     end
 
     with_them do
@@ -265,10 +261,79 @@ RSpec.describe GlobalPolicy do
 
       before do
         stub_licensed_features(export_user_permissions: licensed)
-        stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
       end
 
       it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
+
+  describe 'create_group_via_api' do
+    let(:policy) { :create_group_via_api }
+
+    context 'on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when feature is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it { is_expected.to be_allowed(policy) }
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it { is_expected.to be_disallowed(policy) }
+      end
+    end
+
+    context 'on self-managed' do
+      context 'when feature is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it { is_expected.to be_allowed(policy) }
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it { is_expected.to be_allowed(policy) }
+      end
+    end
+  end
+
+  describe ':view_instance_devops_adoption & :manage_devops_adoption_namespaces', :enable_admin_mode do
+    let(:current_user) { admin }
+
+    context 'when license does not include the feature' do
+      before do
+        stub_licensed_features(instance_level_devops_adoption: false)
+      end
+
+      it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_namespaces) }
+    end
+
+    context 'when feature is enabled and license include the feature' do
+      before do
+        stub_licensed_features(instance_level_devops_adoption: true)
+      end
+
+      it { is_expected.to be_allowed(:view_instance_devops_adoption, :manage_devops_adoption_namespaces) }
+
+      context 'for non-admins' do
+        let(:current_user) { user }
+
+        it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_namespaces) }
+      end
     end
   end
 end

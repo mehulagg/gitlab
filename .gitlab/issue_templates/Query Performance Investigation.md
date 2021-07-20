@@ -1,6 +1,6 @@
 ## Description
 
-As the name implies, the purpose of the template is to detail underperforming queries for futher investigation.
+As the name implies, the purpose of the template is to detail underperforming queries for further investigation.
 
 ### Steps
 
@@ -10,15 +10,26 @@ As the name implies, the purpose of the template is to detail underperforming qu
 - [ ] Provide [priority and severity labels](https://about.gitlab.com/handbook/engineering/quality/issue-triage/#availability)
 - [ ] If this requires immediate attention cc `@gitlab-org/database-team` and reach out in the #g_database slack channel
 
+### SQL Statement
+
+```sql
+
+```
+
+### Data from Elastic
+
+Instructions on collecting data from [PostgreSQL slow logs stored in Elasticsearch](https://gitlab.com/gitlab-com/runbooks/-/merge_requests/3361/diffs)
+
 ### Requested Data points
 
 Please provide as many of these fields as possible when submitting a query performance report.
 
-- TPS
-- Duration
+- Queries per second (on average or peak)
+- Number of calls per second and relative to total number of calls
+- Query timings (on average or peak)
+- Database time relative to total database time
 - Source of calls (Sidekiq, WebAPI, etc)
 - Query ID
-- SQL Statement
 - Query Plan
 - Query Example
 - Total number of calls (relative)

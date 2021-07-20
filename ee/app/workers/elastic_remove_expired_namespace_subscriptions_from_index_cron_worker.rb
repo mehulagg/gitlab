@@ -2,10 +2,13 @@
 
 class ElasticRemoveExpiredNamespaceSubscriptionsFromIndexCronWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include Gitlab::ExclusiveLeaseHelpers
   include CronjobQueue
 
   feature_category :global_search
+  tags :exclude_from_kubernetes
   idempotent!
 
   def perform

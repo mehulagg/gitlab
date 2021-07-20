@@ -16,20 +16,20 @@ module SlashCommands
         return Gitlab::SlashCommands::ApplicationHelp.new(nil, params).execute
       end
 
-      unless integration = find_integration
+      unless slack_integration = find_slack_integration
         error_message = 'GitLab error: project or alias not found'
         return Gitlab::SlashCommands::Presenters::Error.new(error_message).message
       end
 
-      service = integration.service
-      project = service.project
+      integration = slack_integration.integration
+      project = integration.project
 
-      chat_user = ChatNames::FindUserService.new(service, params).execute
+      chat_user = ChatNames::FindUserService.new(integration, params).execute
 
       if chat_user&.user
         Gitlab::SlashCommands::Command.new(project, chat_user, params).execute
       else
-        url = ChatNames::AuthorizeUserService.new(service, params).execute
+        url = ChatNames::AuthorizeUserService.new(integration, params).execute
         Gitlab::SlashCommands::Presenters::Access.new(url).authorize
       end
     end
@@ -49,7 +49,7 @@ module SlashCommands
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_integration
+    def find_slack_integration
       SlackIntegration.find_by(team_id: params[:team_id], alias: project_alias)
     end
     # rubocop: enable CodeReuse/ActiveRecord

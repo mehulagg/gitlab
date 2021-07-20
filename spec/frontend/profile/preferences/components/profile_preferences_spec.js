@@ -1,11 +1,22 @@
 import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import createFlash from '~/flash';
 import IntegrationView from '~/profile/preferences/components/integration_view.vue';
 import ProfilePreferences from '~/profile/preferences/components/profile_preferences.vue';
 import { i18n } from '~/profile/preferences/constants';
-import { integrationViews, userFields, bodyClasses } from '../mock_data';
+import {
+  integrationViews,
+  userFields,
+  bodyClasses,
+  themes,
+  lightModeThemeId1,
+  darkModeThemeId,
+  lightModeThemeId2,
+} from '../mock_data';
 
+jest.mock('~/flash');
 const expectedUrl = '/foo';
 
 describe('ProfilePreferences component', () => {
@@ -14,7 +25,7 @@ describe('ProfilePreferences component', () => {
     integrationViews: [],
     userFields,
     bodyClasses,
-    themes: [{ id: 1, css_class: 'foo' }],
+    themes,
     profilePreferencesPath: '/update-profile',
     formEl: document.createElement('form'),
   };
@@ -45,13 +56,29 @@ describe('ProfilePreferences component', () => {
     return wrapper.findComponent(GlButton);
   }
 
-  function findFlashError() {
-    return document.querySelector('.flash-container .flash-text');
+  function createThemeInput(themeId = lightModeThemeId1) {
+    const input = document.createElement('input');
+    input.setAttribute('name', 'user[theme_id]');
+    input.setAttribute('type', 'radio');
+    input.setAttribute('value', themeId.toString());
+    input.setAttribute('checked', 'checked');
+    return input;
   }
 
-  beforeEach(() => {
-    setFixtures('<div class="flash-container"></div>');
-  });
+  function createForm(themeInput = createThemeInput()) {
+    const form = document.createElement('form');
+    form.setAttribute('url', expectedUrl);
+    form.setAttribute('method', 'put');
+    form.appendChild(themeInput);
+    return form;
+  }
+
+  function setupBody() {
+    const div = document.createElement('div');
+    div.classList.add('container-fluid');
+    document.body.appendChild(div);
+    document.body.classList.add('content-wrapper');
+  }
 
   afterEach(() => {
     wrapper.destroy();
@@ -84,30 +111,15 @@ describe('ProfilePreferences component', () => {
     let form;
 
     beforeEach(() => {
-      const div = document.createElement('div');
-      div.classList.add('container-fluid');
-      document.body.appendChild(div);
-      document.body.classList.add('content-wrapper');
-
-      form = document.createElement('form');
-      form.setAttribute('url', expectedUrl);
-      form.setAttribute('method', 'put');
-
-      const input = document.createElement('input');
-      input.setAttribute('name', 'user[theme_id]');
-      input.setAttribute('type', 'radio');
-      input.setAttribute('value', '1');
-      input.setAttribute('checked', 'checked');
-      form.appendChild(input);
-
+      setupBody();
+      form = createForm();
       wrapper = createComponent({ provide: { formEl: form }, attachTo: document.body });
-
       const beforeSendEvent = new CustomEvent('ajax:beforeSend');
       form.dispatchEvent(beforeSendEvent);
     });
 
     it('disables the submit button', async () => {
-      await wrapper.vm.$nextTick();
+      await nextTick();
       const button = findSubmitButton();
       expect(button.props('disabled')).toBe(true);
     });
@@ -116,7 +128,7 @@ describe('ProfilePreferences component', () => {
       const successEvent = new CustomEvent('ajax:success');
       form.dispatchEvent(successEvent);
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
       const button = findSubmitButton();
       expect(button.props('disabled')).toBe(false);
     });
@@ -125,7 +137,7 @@ describe('ProfilePreferences component', () => {
       const errorEvent = new CustomEvent('ajax:error');
       form.dispatchEvent(errorEvent);
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
       const button = findSubmitButton();
       expect(button.props('disabled')).toBe(false);
     });
@@ -134,7 +146,7 @@ describe('ProfilePreferences component', () => {
       const successEvent = new CustomEvent('ajax:success');
       form.dispatchEvent(successEvent);
 
-      expect(findFlashError().innerText.trim()).toEqual(i18n.defaultSuccess);
+      expect(createFlash).toHaveBeenCalledWith({ message: i18n.defaultSuccess, type: 'notice' });
     });
 
     it('displays the custom success message', () => {
@@ -142,14 +154,14 @@ describe('ProfilePreferences component', () => {
       const successEvent = new CustomEvent('ajax:success', { detail: [{ message }] });
       form.dispatchEvent(successEvent);
 
-      expect(findFlashError().innerText.trim()).toEqual(message);
+      expect(createFlash).toHaveBeenCalledWith({ message, type: 'notice' });
     });
 
     it('displays the default error message', () => {
       const errorEvent = new CustomEvent('ajax:error');
       form.dispatchEvent(errorEvent);
 
-      expect(findFlashError().innerText.trim()).toEqual(i18n.defaultError);
+      expect(createFlash).toHaveBeenCalledWith({ message: i18n.defaultError, type: 'alert' });
     });
 
     it('displays the custom error message', () => {
@@ -157,7 +169,92 @@ describe('ProfilePreferences component', () => {
       const errorEvent = new CustomEvent('ajax:error', { detail: [{ message }] });
       form.dispatchEvent(errorEvent);
 
-      expect(findFlashError().innerText.trim()).toEqual(message);
+      expect(createFlash).toHaveBeenCalledWith({ message, type: 'alert' });
+    });
+  });
+
+  describe('theme changes', () => {
+    const { location } = window;
+
+    let themeInput;
+    let form;
+
+    function setupWrapper() {
+      wrapper = createComponent({ provide: { formEl: form }, attachTo: document.body });
+    }
+
+    function selectThemeId(themeId) {
+      themeInput.setAttribute('value', themeId.toString());
+    }
+
+    function dispatchBeforeSendEvent() {
+      const beforeSendEvent = new CustomEvent('ajax:beforeSend');
+      form.dispatchEvent(beforeSendEvent);
+    }
+
+    function dispatchSuccessEvent() {
+      const successEvent = new CustomEvent('ajax:success');
+      form.dispatchEvent(successEvent);
+    }
+
+    beforeAll(() => {
+      delete window.location;
+      window.location = {
+        ...location,
+        reload: jest.fn(),
+      };
+    });
+
+    afterAll(() => {
+      window.location = location;
+    });
+
+    beforeEach(() => {
+      setupBody();
+      themeInput = createThemeInput();
+      form = createForm(themeInput);
+    });
+
+    it('reloads the page when switching from light to dark mode', async () => {
+      selectThemeId(lightModeThemeId1);
+      setupWrapper();
+
+      selectThemeId(darkModeThemeId);
+      dispatchBeforeSendEvent();
+      await nextTick();
+
+      dispatchSuccessEvent();
+      await nextTick();
+
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('reloads the page when switching from dark to light mode', async () => {
+      selectThemeId(darkModeThemeId);
+      setupWrapper();
+
+      selectThemeId(lightModeThemeId1);
+      dispatchBeforeSendEvent();
+      await nextTick();
+
+      dispatchSuccessEvent();
+      await nextTick();
+
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reload the page when switching between light mode themes', async () => {
+      selectThemeId(lightModeThemeId1);
+      setupWrapper();
+
+      selectThemeId(lightModeThemeId2);
+      dispatchBeforeSendEvent();
+      await nextTick();
+
+      dispatchSuccessEvent();
+      await nextTick();
+
+      expect(window.location.reload).not.toHaveBeenCalled();
     });
   });
 });

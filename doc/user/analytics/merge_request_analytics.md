@@ -7,8 +7,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Merge Request Analytics **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229045) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.3.
-> - Moved to [GitLab Premium](https://about.gitlab.com/pricing/) due to Starter/Bronze being [discontinued](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) in 13.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229045) in GitLab 13.3.
+> - Moved to GitLab Premium in 13.9.
 
 Merge Request Analytics helps you understand the efficiency of your code review process, and the productivity of your team.
 
@@ -39,6 +39,15 @@ Merge Request Analytics could be used when:
 
 The following visualizations and data are available, representing all merge requests that were merged in the given date range.
 
+### Mean time to merge
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229389) in GitLab 13.9.
+
+The mean time to merge (MTTM) metric shows the average time between when a merge request is created,
+and when it is merged. To view how the MTTM changes over time, compare MTTM across different date ranges.
+
+![Mean time to merge](img/mr_mean_time_to_merge_metric_v13_9.png "Merge Request Analytics - MTTM metric showing the average time it takes from initiating a MR to being merged")
+
 ### Throughput chart
 
 The throughput chart shows the number of merge requests merged per month.
@@ -47,7 +56,7 @@ The throughput chart shows the number of merge requests merged per month.
 
 ### Throughput table
 
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232651) in GitLab 13.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232651) in GitLab 13.3.
 
 The Throughput table displays the most recent merge requests merged in the date range. The
 table displays up to 20 merge requests at a time. If there are more than 20 merge requests,

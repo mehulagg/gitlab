@@ -2,7 +2,6 @@ import * as types from 'ee/subscriptions/new/store/mutation_types';
 import mutations from 'ee/subscriptions/new/store/mutations';
 
 const state = () => ({
-  currentStep: 'firstStep',
   selectedPlan: 'firstPlan',
   isSetupForCompany: true,
   numberOfUsers: 1,
@@ -22,7 +21,6 @@ beforeEach(() => {
 describe('ee/subscriptions/new/store/mutation', () => {
   describe.each`
     mutation                                  | value                                 | stateProp
-    ${types.UPDATE_CURRENT_STEP}              | ${'secondStep'}                       | ${'currentStep'}
     ${types.UPDATE_SELECTED_PLAN}             | ${'secondPlan'}                       | ${'selectedPlan'}
     ${types.UPDATE_SELECTED_GROUP}            | ${'selectedGroup'}                    | ${'selectedGroup'}
     ${types.UPDATE_IS_SETUP_FOR_COMPANY}      | ${false}                              | ${'isSetupForCompany'}

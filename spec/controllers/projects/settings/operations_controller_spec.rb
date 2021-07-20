@@ -493,6 +493,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
     describe 'PATCH #update' do
       let_it_be(:external_url) { 'https://gitlab.com' }
+
       let(:params) do
         {
           tracing_setting_attributes: {
@@ -508,7 +509,10 @@ RSpec.describe Projects::Settings::OperationsController do
           it 'tracks an event' do
             expect_snowplow_event(
               category: 'project:operations:tracing',
-              action: 'external_url_populated'
+              action: 'external_url_populated',
+              user: user,
+              project: project,
+              namespace: project.namespace
             )
           end
         end

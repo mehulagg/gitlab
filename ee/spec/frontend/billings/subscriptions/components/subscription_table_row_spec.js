@@ -39,15 +39,7 @@ describe('subscription table row', () => {
 
   const defaultProps = { header: HEADER, columns: COLUMNS };
 
-  const createComponent = ({
-    props = {},
-    billableSeatsHref = BILLABLE_SEATS_URL,
-    isGroup = true,
-  } = {}) => {
-    if (wrapper) {
-      throw new Error('wrapper already exists!');
-    }
-
+  const createComponent = ({ props = {}, billableSeatsHref = BILLABLE_SEATS_URL } = {}) => {
     wrapper = shallowMount(SubscriptionTableRow, {
       propsData: {
         ...defaultProps,
@@ -55,7 +47,6 @@ describe('subscription table row', () => {
       },
       provide: {
         billableSeatsHref,
-        isGroup,
       },
       store,
       localVue,
@@ -69,7 +60,6 @@ describe('subscription table row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findHeaderCell = () => wrapper.find('[data-testid="header-cell"]');
@@ -87,18 +77,6 @@ describe('subscription table row', () => {
   };
 
   const findUsageButton = () => findContentCells().at(0).find('[data-testid="seats-usage-button"]');
-
-  describe('dispatched actions', () => {
-    it('dispatches action when created if namespace is group', () => {
-      createComponent();
-      expect(store.dispatch).toHaveBeenCalledWith('fetchHasBillableGroupMembers');
-    });
-
-    it('does not dispatch action when created if namespace is not group', () => {
-      createComponent({ isGroup: false });
-      expect(store.dispatch).not.toHaveBeenCalledWith('fetchHasBillableGroupMembers');
-    });
-  });
 
   describe('default', () => {
     beforeEach(() => {
@@ -156,7 +134,7 @@ describe('subscription table row', () => {
     };
 
     it('renders a dash when the value is zero', () => {
-      createComponent({ props: { columns: [dateColumn] } });
+      createComponent({ props: { isFreePlan: true, columns: [dateColumn] } });
 
       expect(wrapper.find('[data-testid="property-value"]').text()).toBe('-');
     });
@@ -185,22 +163,23 @@ describe('subscription table row', () => {
     });
   });
 
-  it.each`
-    state                                 | columnId        | provide                      | exists   | attrs
-    ${{ hasBillableGroupMembers: true }}  | ${'seatsInUse'} | ${{}}                        | ${true}  | ${{ href: BILLABLE_SEATS_URL }}
-    ${{ hasBillableGroupMembers: true }}  | ${'seatsInUse'} | ${{ billableSeatsHref: '' }} | ${false} | ${{}}
-    ${{ hasBillableGroupMembers: true }}  | ${'some_value'} | ${{}}                        | ${false} | ${{}}
-    ${{ hasBillableGroupMembers: false }} | ${'seatsInUse'} | ${{}}                        | ${false} | ${{}}
-  `(
-    'should exists=$exists with (state=$state, columnId=$columnId, provide=$provide)',
-    ({ state, columnId, provide, exists, attrs }) => {
-      Object.assign(store.state, state);
-      createComponent({ props: { columns: [{ id: columnId }] }, ...provide });
+  describe('seats in use button', () => {
+    it.each`
+      columnId        | provide                        | exists   | attrs
+      ${'seatsInUse'} | ${{}}                          | ${true}  | ${{ href: BILLABLE_SEATS_URL }}
+      ${'seatsInUse'} | ${{ billableSeatsHref: '' }}   | ${false} | ${{}}
+      ${'some_value'} | ${{}}                          | ${false} | ${{}}
+      ${'seatsInUse'} | ${{ billableSeatsHref: null }} | ${false} | ${{}}
+    `(
+      'should exists=$exists with (columnId=$columnId, provide=$provide)',
+      ({ columnId, provide, exists, attrs }) => {
+        createComponent({ props: { columns: [{ id: columnId }] }, ...provide });
 
-      expect(findUsageButton().exists()).toBe(exists);
-      if (exists) {
-        expect(findUsageButton().attributes()).toMatchObject(attrs);
-      }
-    },
-  );
+        expect(findUsageButton().exists()).toBe(exists);
+        if (exists) {
+          expect(findUsageButton().attributes()).toMatchObject(attrs);
+        }
+      },
+    );
+  });
 });

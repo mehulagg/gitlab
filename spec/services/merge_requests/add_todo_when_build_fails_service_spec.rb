@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequests::AddTodoWhenBuildFailsService do
+RSpec.describe ::MergeRequests::AddTodoWhenBuildFailsService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:sha) { '1234567890abcdef1234567890abcdef12345678' }
   let(:ref) { merge_request.source_branch }
 
   let(:service) do
-    described_class.new(project, user, commit_message: 'Awesome message')
+    described_class.new(project: project, current_user: user, params: { commit_message: 'Awesome message' })
   end
 
   let(:todo_service) { spy('todo service') }
@@ -24,8 +24,8 @@ RSpec.describe MergeRequests::AddTodoWhenBuildFailsService do
 
   before do
     allow_any_instance_of(MergeRequest)
-      .to receive(:head_pipeline)
-      .and_return(pipeline)
+      .to receive(:head_pipeline_id)
+      .and_return(pipeline.id)
 
     allow(service).to receive(:todo_service).and_return(todo_service)
   end

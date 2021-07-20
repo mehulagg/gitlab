@@ -12,20 +12,13 @@ module QA
 
             base.class_eval do
               include QA::Page::Project::SubMenus::Common
-
-              view 'app/views/layouts/nav/sidebar/_project.html.haml' do
-                element :settings_item
-                element :general_settings_link
-                element :integrations_settings_link
-                element :operations_settings_link
-              end
             end
           end
 
           def go_to_ci_cd_settings
             hover_settings do
               within_submenu do
-                click_link('CI / CD')
+                click_element(:sidebar_menu_item_link, menu_item: 'CI/CD')
               end
             end
           end
@@ -33,7 +26,7 @@ module QA
           def go_to_repository_settings
             hover_settings do
               within_submenu do
-                click_link('Repository')
+                click_element(:sidebar_menu_item_link, menu_item: 'Repository')
               end
             end
           end
@@ -41,29 +34,37 @@ module QA
           def go_to_general_settings
             hover_settings do
               within_submenu do
-                click_element :general_settings_link
+                click_element(:sidebar_menu_item_link, menu_item: 'General')
               end
             end
           end
 
           def click_settings
             within_sidebar do
-              click_on 'Settings'
+              click_element(:sidebar_menu_link, menu_item: 'Settings')
             end
           end
 
           def go_to_integrations_settings
             hover_settings do
               within_submenu do
-                click_element :integrations_settings_link
+                click_element(:sidebar_menu_item_link, menu_item: 'Integrations')
               end
             end
           end
 
-          def go_to_operations_settings
+          def go_to_monitor_settings
             hover_settings do
               within_submenu do
-                click_element :operations_settings_link
+                click_element(:sidebar_menu_item_link, menu_item: 'Monitor')
+              end
+            end
+          end
+
+          def go_to_access_token_settings
+            hover_settings do
+              within_submenu do
+                click_element(:sidebar_menu_item_link, menu_item: 'Access Tokens')
               end
             end
           end
@@ -72,8 +73,8 @@ module QA
 
           def hover_settings
             within_sidebar do
-              scroll_to_element(:settings_item)
-              find_element(:settings_item).hover
+              scroll_to_element(:sidebar_menu_link, menu_item: 'Settings')
+              find_element(:sidebar_menu_link, menu_item: 'Settings').hover
 
               yield
             end

@@ -29,6 +29,7 @@ const defaultProps = {
     showDefaultAwardEmojis: true,
     allowEditingCommitMessages: false,
   },
+  isGitlabCom: true,
   canDisableEmails: true,
   canChangeVisibilityLevel: true,
   allowedVisibilityOptions: [0, 10, 20],
@@ -45,6 +46,7 @@ const defaultProps = {
   pagesHelpPath: '/help/user/project/pages/introduction#gitlab-pages-access-control',
   packagesAvailable: false,
   packagesHelpPath: '/help/user/packages/index',
+  requestCveAvailable: true,
 };
 
 describe('Settings Panel', () => {
@@ -75,6 +77,7 @@ describe('Settings Panel', () => {
   const findRepositoryFeatureSetting = () =>
     findRepositoryFeatureProjectRow().find(projectFeatureSetting);
   const findProjectVisibilitySettings = () => wrapper.find({ ref: 'project-visibility-settings' });
+  const findIssuesSettingsRow = () => wrapper.find({ ref: 'issues-settings' });
   const findAnalyticsRow = () => wrapper.find({ ref: 'analytics-settings' });
   const findProjectVisibilityLevelInput = () => wrapper.find('[name="project[visibility_level]"]');
   const findRequestAccessEnabledInput = () =>
@@ -91,6 +94,8 @@ describe('Settings Panel', () => {
   const findPackageSettings = () => wrapper.find({ ref: 'package-settings' });
   const findPackagesEnabledInput = () => wrapper.find('[name="project[packages_enabled]"]');
   const findPagesSettings = () => wrapper.find({ ref: 'pages-settings' });
+  const findPagesAccessLevels = () =>
+    wrapper.find('[name="project[project_feature_attributes][pages_access_level]"]');
   const findEmailSettings = () => wrapper.find({ ref: 'email-settings' });
   const findShowDefaultAwardEmojis = () =>
     wrapper.find('input[name="project[project_setting_attributes][show_default_award_emojis]"]');
@@ -173,6 +178,16 @@ describe('Settings Panel', () => {
     });
   });
 
+  describe('Issues settings', () => {
+    it('has label for CVE request toggle', () => {
+      wrapper = mountComponent();
+
+      expect(findIssuesSettingsRow().findComponent(GlToggle).props('label')).toBe(
+        settingsPanel.i18n.cve_request_toggle_label,
+      );
+    });
+  });
+
   describe('Repository', () => {
     it('should set the repository help text when the visibility level is set to private', () => {
       wrapper = mountComponent({ currentSettings: { visibilityLevel: visibilityOptions.PRIVATE } });
@@ -227,7 +242,7 @@ describe('Settings Panel', () => {
     });
   });
 
-  describe('Pipelines', () => {
+  describe('CI/CD', () => {
     it('should enable the builds access level input when the repository is enabled', () => {
       wrapper = mountComponent({
         currentSettings: { repositoryAccessLevel: featureAccessLevel.EVERYONE },
@@ -303,6 +318,17 @@ describe('Settings Panel', () => {
 
       expect(findContainerRegistryEnabledInput().props('disabled')).toBe(true);
     });
+
+    it('has label for the toggle', () => {
+      wrapper = mountComponent({
+        currentSettings: { visibilityLevel: visibilityOptions.PUBLIC },
+        registryAvailable: true,
+      });
+
+      expect(findContainerRegistrySettings().findComponent(GlToggle).props('label')).toBe(
+        settingsPanel.i18n.containerRegistryLabel,
+      );
+    });
   });
 
   describe('Git Large File Storage', () => {
@@ -339,6 +365,15 @@ describe('Settings Panel', () => {
       });
 
       expect(findLFSFeatureToggle().props('disabled')).toBe(true);
+    });
+
+    it('has label for toggle', () => {
+      wrapper = mountComponent({
+        currentSettings: { repositoryAccessLevel: featureAccessLevel.EVERYONE },
+        lfsAvailable: true,
+      });
+
+      expect(findLFSFeatureToggle().props('label')).toBe(settingsPanel.i18n.lfsLabel);
     });
 
     it('should not change lfsEnabled when disabling the repository', async () => {
@@ -431,9 +466,43 @@ describe('Settings Panel', () => {
 
       expect(findPackagesEnabledInput().props('disabled')).toBe(true);
     });
+
+    it('has label for toggle', () => {
+      wrapper = mountComponent({
+        currentSettings: { repositoryAccessLevel: featureAccessLevel.EVERYONE },
+        packagesAvailable: true,
+      });
+
+      expect(findPackagesEnabledInput().findComponent(GlToggle).props('label')).toBe(
+        settingsPanel.i18n.packagesLabel,
+      );
+    });
   });
 
   describe('Pages', () => {
+    it.each`
+      visibilityLevel               | pagesAccessControlForced | output
+      ${visibilityOptions.PRIVATE}  | ${true}                  | ${[[visibilityOptions.INTERNAL, 'Only Project Members'], [visibilityOptions.PUBLIC, 'Everyone With Access']]}
+      ${visibilityOptions.PRIVATE}  | ${false}                 | ${[[visibilityOptions.INTERNAL, 'Only Project Members'], [visibilityOptions.PUBLIC, 'Everyone With Access'], [30, 'Everyone']]}
+      ${visibilityOptions.INTERNAL} | ${true}                  | ${[[visibilityOptions.INTERNAL, 'Only Project Members'], [visibilityOptions.PUBLIC, 'Everyone With Access']]}
+      ${visibilityOptions.INTERNAL} | ${false}                 | ${[[visibilityOptions.INTERNAL, 'Only Project Members'], [visibilityOptions.PUBLIC, 'Everyone With Access'], [30, 'Everyone']]}
+      ${visibilityOptions.PUBLIC}   | ${true}                  | ${[[visibilityOptions.INTERNAL, 'Only Project Members'], [visibilityOptions.PUBLIC, 'Everyone With Access']]}
+      ${visibilityOptions.PUBLIC}   | ${false}                 | ${[[visibilityOptions.INTERNAL, 'Only Project Members'], [visibilityOptions.PUBLIC, 'Everyone With Access'], [30, 'Everyone']]}
+    `(
+      'renders correct options when pagesAccessControlForced is $pagesAccessControlForced and visibilityLevel is $visibilityLevel',
+      async ({ visibilityLevel, pagesAccessControlForced, output }) => {
+        wrapper = mountComponent({
+          pagesAvailable: true,
+          pagesAccessControlEnabled: true,
+          pagesAccessControlForced,
+        });
+
+        await findProjectVisibilityLevelInput().trigger('change', visibilityLevel);
+
+        expect(findPagesAccessLevels().props('options')).toStrictEqual(output);
+      },
+    );
+
     it.each`
       pagesAvailable | pagesAccessControlEnabled | visibility
       ${true}        | ${true}                   | ${'show'}

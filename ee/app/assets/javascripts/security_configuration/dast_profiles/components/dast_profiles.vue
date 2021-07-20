@@ -1,12 +1,12 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
-import { camelCase, kebabCase } from 'lodash';
+import * as Sentry from '@sentry/browser';
 import { getLocationHash } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
+import DastFailedSiteValidations from './dast_failed_site_validations.vue';
 
 export default {
   components: {
@@ -14,6 +14,7 @@ export default {
     GlDropdownItem,
     GlTab,
     GlTabs,
+    DastFailedSiteValidations,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -39,22 +40,21 @@ export default {
 
       return getProfileSettings({
         createNewProfilePaths,
-        isDastSavedScansEnabled: this.glFeatures.dastSavedScans,
       });
     },
     tabIndex: {
       get() {
-        const activeTabIndex = Object.keys(this.profileSettings).indexOf(
-          camelCase(getLocationHash()),
+        const activeTabIndex = Object.values(this.profileSettings).findIndex(
+          ({ tabName }) => tabName === getLocationHash(),
         );
 
         return Math.max(0, activeTabIndex);
       },
       set(newTabIndex) {
-        const profileTypeName = Object.keys(this.profileSettings)[newTabIndex];
+        const { tabName } = Object.values(this.profileSettings)[newTabIndex];
 
-        if (profileTypeName) {
-          window.location.hash = kebabCase(profileTypeName);
+        if (tabName) {
+          window.location.hash = tabName;
         }
       },
     },
@@ -224,6 +224,10 @@ export default {
 
 <template>
   <section>
+    <dast-failed-site-validations
+      v-if="glFeatures.dastFailedSiteValidations"
+      :full-path="projectFullPath"
+    />
     <header>
       <div class="gl-display-flex gl-align-items-center gl-pt-6 gl-pb-4">
         <h2 class="my-0">
@@ -231,7 +235,7 @@ export default {
         </h2>
         <gl-dropdown
           :text="$options.i18n.newProfileDropdownLabel"
-          variant="success"
+          variant="confirm"
           right
           class="gl-ml-auto"
         >

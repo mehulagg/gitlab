@@ -10,7 +10,11 @@ module EE
             extend ::Gitlab::Utils::Override
 
             prepended do
-              attributes :secrets
+              attributes :dast_configuration, :secrets
+
+              entry :dast_configuration, ::Gitlab::Ci::Config::Entry::DastConfiguration,
+                description: 'DAST configuration for this job',
+                inherit: false
 
               entry :secrets, ::Gitlab::Config::Entry::ComposableHash,
                 description: 'Configured secrets for this job',
@@ -20,7 +24,7 @@ module EE
 
             override :value
             def value
-              super.merge({ secrets: secrets_value }.compact)
+              super.merge({ dast_configuration: dast_configuration_value, secrets: secrets_value }.compact)
             end
           end
         end

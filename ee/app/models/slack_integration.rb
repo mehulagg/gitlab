@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class SlackIntegration < ApplicationRecord
-  belongs_to :service
+  belongs_to :integration, foreign_key: :service_id
 
   validates :team_id, presence: true
   validates :team_name, presence: true
@@ -9,11 +9,11 @@ class SlackIntegration < ApplicationRecord
                     uniqueness: { scope: :team_id, message: 'This alias has already been taken' },
                     length: 2..80
   validates :user_id, presence: true
-  validates :service, presence: true
+  validates :integration, presence: true
 
-  after_commit :update_active_status_of_service, on: [:create, :destroy]
+  after_commit :update_active_status_of_integration, on: [:create, :destroy]
 
-  def update_active_status_of_service
-    service.update_active_status
+  def update_active_status_of_integration
+    integration.update_active_status
   end
 end

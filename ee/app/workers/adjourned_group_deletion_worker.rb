@@ -2,6 +2,8 @@
 
 class AdjournedGroupDeletionWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include CronjobQueue
 
   INTERVAL = 10.seconds.to_i

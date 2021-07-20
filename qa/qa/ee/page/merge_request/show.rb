@@ -16,12 +16,12 @@ module QA
               prepend Page::Component::LicenseManagement
 
               view 'app/assets/javascripts/vue_merge_request_widget/components/states/sha_mismatch.vue' do
-                element :head_mismatch, "The source branch HEAD has recently changed." # rubocop:disable QA/ElementWithPattern
+                element :head_mismatch_content
               end
 
               view 'ee/app/views/projects/merge_requests/_code_owner_approval_rules.html.haml' do
-                element :approver
-                element :approver_list
+                element :approver_content
+                element :approver_list_content
               end
 
               view 'ee/app/assets/javascripts/vue_shared/security_reports/grouped_security_reports_app.vue' do
@@ -78,7 +78,7 @@ module QA
           end
 
           def wait_for_license_compliance_report
-            has_no_text?('Loading License Compliance report', wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
+            has_text?('License Compliance detected', wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           end
 
           def approvals_required_from
@@ -93,8 +93,8 @@ module QA
           end
 
           def approvers
-            within_element :approver_list do
-              all_elements(:approver, minimum: 1).map { |item| item.find('img')['title'] }
+            within_element :approver_list_content do
+              all_elements(:approver_content, minimum: 1).map { |item| item.find('img')['title'] }
             end
           end
 
@@ -214,7 +214,7 @@ module QA
 
           def skip_merge_train_and_merge_immediately
             click_element :merge_moment_dropdown
-            click_element :merge_immediately_option
+            click_element :merge_immediately_menu_item
 
             # Wait for the warning modal dialog to appear
             wait_for_animated_element :merge_immediately_button
@@ -225,9 +225,12 @@ module QA
           end
 
           def merge_via_merge_train
+            # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+            # To remove page refresh logic if possible
             wait_until_ready_to_merge
+            wait_until { !find_element(:merge_button).has_text?("when pipeline succeeds") }
 
-            click_element(:merge_button, text: "Start merge train")
+            click_element(:merge_button)
 
             finished_loading?
           end

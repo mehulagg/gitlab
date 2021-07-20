@@ -14,7 +14,7 @@ module Gitlab
           ALLOWED_KEYS = %i[tags script type image services start_in artifacts
                             cache dependencies before_script after_script
                             environment coverage retry parallel interruptible timeout
-                            release secrets].freeze
+                            release dast_configuration secrets].freeze
 
           REQUIRED_BY_NEEDS = %i[stage].freeze
 
@@ -64,7 +64,7 @@ module Gitlab
             description: 'Commands that will be executed when finishing job.',
             inherit: true
 
-          entry :cache, Entry::Cache,
+          entry :cache, Entry::Caches,
             description: 'Cache definition for this job.',
             inherit: true
 
@@ -200,4 +200,4 @@ module Gitlab
   end
 end
 
-::Gitlab::Ci::Config::Entry::Job.prepend_if_ee('::EE::Gitlab::Ci::Config::Entry::Job')
+::Gitlab::Ci::Config::Entry::Job.prepend_mod_with('Gitlab::Ci::Config::Entry::Job')

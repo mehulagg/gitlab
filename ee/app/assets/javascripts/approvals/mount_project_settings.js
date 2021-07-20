@@ -1,18 +1,19 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import ProjectSettingsApp from './components/project_settings/app.vue';
 import createStore from './stores';
 import projectSettingsModule from './stores/modules/project_settings';
-
-Vue.use(Vuex);
 
 export default function mountProjectSettingsApprovals(el) {
   if (!el) {
     return null;
   }
 
-  const { vulnerabilityCheckHelpPagePath, licenseCheckHelpPagePath } = el.dataset;
+  const {
+    vulnerabilityCheckHelpPagePath,
+    licenseCheckHelpPagePath,
+    coverageCheckHelpPagePath,
+  } = el.dataset;
 
   const store = createStore(projectSettingsModule(), {
     ...el.dataset,
@@ -27,6 +28,7 @@ export default function mountProjectSettingsApprovals(el) {
     provide: {
       vulnerabilityCheckHelpPagePath,
       licenseCheckHelpPagePath,
+      coverageCheckHelpPagePath,
     },
     render(h) {
       return h(ProjectSettingsApp);

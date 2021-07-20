@@ -5,8 +5,8 @@ module Types
     graphql_name 'HealthStatus'
     description 'Health status of an issue or epic'
 
-    value 'onTrack', value: Issue.health_statuses.key(1)
-    value 'needsAttention', value: Issue.health_statuses.key(2)
-    value 'atRisk', value: Issue.health_statuses.key(3)
+    Issue.health_statuses.each do |status, val|
+      value status.camelize(:lower), description: status.humanize, value: status
+    end
   end
 end

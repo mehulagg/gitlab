@@ -51,7 +51,7 @@ module Projects
       end
 
       def authorize_read_vulnerability!
-        return if can?(current_user, :read_vulnerability, project)
+        return if can?(current_user, :read_security_resource, project)
 
         render_404
       end

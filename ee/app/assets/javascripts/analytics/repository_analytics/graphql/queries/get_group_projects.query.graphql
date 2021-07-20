@@ -2,7 +2,7 @@
 
 query getGroupProjects($groupFullPath: ID!, $after: String) {
   group(fullPath: $groupFullPath) {
-    projects(after: $after, first: 100) {
+    projects(hasCodeCoverage: true, after: $after, first: 100) {
       nodes {
         name
         id

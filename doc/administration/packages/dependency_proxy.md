@@ -4,7 +4,7 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Dependency Proxy administration
+# GitLab Dependency Proxy administration **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/273655) to [GitLab Free](https://about.gitlab.com/pricing/) in GitLab 13.6.
@@ -32,6 +32,23 @@ To enable the dependency proxy feature:
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure "How to reconfigure Omnibus GitLab") for the changes to take effect.
 1. Enable the [Puma web server](https://docs.gitlab.com/omnibus/settings/puma.html).
 
+**Helm chart installations**
+
+1. After the installation is complete, update the global `appConfig` to enable the feature:
+
+   ```yaml
+   global:
+     appConfig:
+       dependencyProxy:
+         enabled: true
+         bucket: gitlab-dependency-proxy
+         connection: {}
+          secret:
+          key:
+   ```
+
+For more information, see [Configure Charts using Globals](https://docs.gitlab.com/charts/charts/globals.html#configure-appconfig-settings).
+
 **Installations from source**
 
 1. After the installation is complete, configure the `dependency_proxy`
@@ -46,6 +63,10 @@ To enable the dependency proxy feature:
 
 Since Puma is already the default web server for installations from source as of GitLab 12.9,
 no further changes are needed.
+
+**Multi-node GitLab installations**
+
+Follow the steps for **Omnibus GitLab installation** for each Web and Sidekiq nodes.
 
 ## Changing the storage path
 

@@ -16,7 +16,11 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
         created_at: file.created_at,
         download_path: file.download_path,
         file_name: file.file_name,
-        size: file.size
+        size: file.size,
+        file_md5: file.file_md5,
+        file_sha1: file.file_sha1,
+        file_sha256: file.file_sha256,
+        id: file.id
       }
     end
   end
@@ -28,7 +32,6 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
       id: pipeline.id,
       sha: pipeline.sha,
       ref: pipeline.ref,
-      git_commit_message: pipeline.git_commit_message,
       user: user_info,
       project: {
         name: pipeline.project.name,
@@ -48,6 +51,7 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
       name: package.name,
       package_files: expected_package_files,
       package_type: package.package_type,
+      status: package.status,
       project_id: package.project_id,
       tags: package.tags.as_json,
       updated_at: package.updated_at,
@@ -123,6 +127,7 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
     context 'with nuget_metadatum' do
       let_it_be(:package) { create(:nuget_package, project: project) }
       let_it_be(:nuget_metadatum) { create(:nuget_metadatum, package: package) }
+
       let(:expected_package_details) { super().merge(nuget_metadatum: nuget_metadatum) }
 
       it 'returns nuget_metadatum' do

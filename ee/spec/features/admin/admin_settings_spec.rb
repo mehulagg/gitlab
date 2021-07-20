@@ -64,8 +64,16 @@ RSpec.describe 'Admin updates EE-only settings' do
       page.within('.as-elasticsearch') do
         check 'Elasticsearch indexing'
         check 'Search with Elasticsearch enabled'
-        fill_in 'Number of Elasticsearch shards', with: '120'
-        fill_in 'Number of Elasticsearch replicas', with: '2'
+
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test]', with: '120'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test]', with: '2'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-issues]', with: '10'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-issues]', with: '3'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-notes]', with: '20'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-notes]', with: '4'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-merge_requests]', with: '15'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-merge_requests]', with: '5'
+
         fill_in 'Maximum file size indexed (KiB)', with: '5000'
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
@@ -78,8 +86,18 @@ RSpec.describe 'Admin updates EE-only settings' do
       aggregate_failures do
         expect(current_settings.elasticsearch_indexing).to be_truthy
         expect(current_settings.elasticsearch_search).to be_truthy
+
         expect(current_settings.elasticsearch_shards).to eq(120)
         expect(current_settings.elasticsearch_replicas).to eq(2)
+        expect(Elastic::IndexSetting['gitlab-test'].number_of_shards).to eq(120)
+        expect(Elastic::IndexSetting['gitlab-test'].number_of_replicas).to eq(2)
+        expect(Elastic::IndexSetting['gitlab-test-issues'].number_of_shards).to eq(10)
+        expect(Elastic::IndexSetting['gitlab-test-issues'].number_of_replicas).to eq(3)
+        expect(Elastic::IndexSetting['gitlab-test-notes'].number_of_shards).to eq(20)
+        expect(Elastic::IndexSetting['gitlab-test-notes'].number_of_replicas).to eq(4)
+        expect(Elastic::IndexSetting['gitlab-test-merge_requests'].number_of_shards).to eq(15)
+        expect(Elastic::IndexSetting['gitlab-test-merge_requests'].number_of_replicas).to eq(5)
+
         expect(current_settings.elasticsearch_indexed_file_size_limit_kb).to eq(5000)
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)
@@ -164,9 +182,9 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
 
     it 'zero-downtime reindexing shows popup', :js do
-      page.within('.as-elasticsearch') do
+      page.within('.as-elasticsearch-reindexing') do
         expect(page).to have_content 'Trigger cluster reindexing'
-        click_link 'Trigger cluster reindexing'
+        click_button 'Trigger cluster reindexing'
       end
 
       text = page.driver.browser.switch_to.alert.text
@@ -250,7 +268,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'allows you to change the npm_forwaring setting' do
       page.within('#js-package-settings') do
-        check 'Enable forwarding of NPM package requests to npmjs.org'
+        check 'Enable forwarding of npm package requests to npmjs.org'
         click_button 'Save'
       end
 
@@ -258,29 +276,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  context 'Metrics and profiling page' do
-    before do
-      visit metrics_and_profiling_admin_application_settings_path
-    end
-
-    it 'loads seat link payload on click', :js do
-      page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
-
-        expect(page).not_to have_content expected_payload_content
-
-        click_button('Preview payload')
-
-        wait_for_requests
-
-        expect(page).to have_selector '.js-seat-link-payload'
-        expect(page).to have_button 'Hide payload'
-        expect(page).to have_content expected_payload_content
-      end
-    end
-  end
-
-  context 'sign up settings' do
+  context 'sign up settings', :js do
     context 'when license has active user count' do
       let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
 
@@ -288,18 +284,17 @@ RSpec.describe 'Admin updates EE-only settings' do
         allow(License).to receive(:current).and_return(license)
       end
 
-      it 'disallows entering user cap greater then license allows', :js do
+      it 'disallows entering user cap greater then license allows' do
         visit general_admin_application_settings_path
 
         page.within('#js-signup-settings') do
-          fill_in 'User cap', with: 5
+          fill_in 'application_setting[new_user_signups_cap]', with: 5
 
           click_button 'Save changes'
 
-          message =
-            page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
-
-          expect(message).to eq('Value must be less than or equal to 1.')
+          page.within '#error_explanation' do
+            expect(page).to have_text('New user signups cap must be less than or equal to 1')
+          end
         end
       end
     end
@@ -310,7 +305,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(current_settings.new_user_signups_cap).to be_nil
 
       page.within('#js-signup-settings') do
-        fill_in 'User cap', with: 5
+        fill_in 'application_setting[new_user_signups_cap]', with: 5
 
         click_button 'Save changes'
 
@@ -322,7 +317,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       visit general_admin_application_settings_path
 
       page.within('#js-signup-settings') do
-        fill_in 'User cap', with: nil
+        fill_in 'application_setting[new_user_signups_cap]', with: nil
 
         click_button 'Save changes'
 

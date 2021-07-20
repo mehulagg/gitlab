@@ -1,6 +1,6 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormText } from '@gitlab/ui';
-import { I18N, ADDITIONAL_DEFAULT_STAGE_EVENTS } from './constants';
+import { i18n, ADDITIONAL_DEFAULT_STAGE_EVENTS } from './constants';
 import StageFieldActions from './stage_field_actions.vue';
 
 const findStageEvent = (stageEvents = [], eid = null) => {
@@ -55,25 +55,26 @@ export default {
       return eventIdToName([...this.stageEvents, ...ADDITIONAL_DEFAULT_STAGE_EVENTS], eventId);
     },
   },
-  I18N,
+  i18n,
 };
 </script>
 <template>
-  <div class="gl-mb-4">
+  <div class="gl-mb-4" data-testid="value-stream-stage-fields">
     <div class="gl-display-flex">
       <gl-form-group
         class="gl-flex-grow-1 gl-mb-0"
         :state="isValid('name')"
         :invalid-feedback="renderError('name')"
         :data-testid="`default-stage-name-${index}`"
+        :description="$options.i18n.DEFAULT_STAGE_FEATURES"
       >
         <!-- eslint-disable vue/no-mutating-props -->
         <gl-form-input
           v-model.trim="stage.name"
           :name="`create-value-stream-stage-${index}`"
-          :placeholder="$options.I18N.FORM_FIELD_STAGE_NAME_PLACEHOLDER"
+          :placeholder="$options.i18n.FORM_FIELD_STAGE_NAME_PLACEHOLDER"
+          disabled="disabled"
           required
-          @input="$emit('input', $event)"
         />
         <!-- eslint-enable vue/no-mutating-props -->
       </gl-form-group>
@@ -84,23 +85,24 @@ export default {
         @hide="$emit('hide', $event)"
       />
     </div>
-    <div class="gl-display-flex gl-align-items-center" :data-testid="`stage-start-event-${index}`">
+    <div
+      class="gl-display-flex gl-align-items-center gl-mt-3"
+      :data-testid="`stage-start-event-${index}`"
+    >
       <span class="gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold">{{
-        $options.I18N.DEFAULT_FIELD_START_EVENT_LABEL
+        $options.i18n.DEFAULT_FIELD_START_EVENT_LABEL
       }}</span>
-      <gl-form-text class="gl-m-0">{{ eventName(stage.startEventIdentifier) }}</gl-form-text>
-      <gl-form-text v-if="stage.startEventLabel" class="gl-m-0"
-        >&nbsp;-&nbsp;{{ stage.startEventLabel }}</gl-form-text
-      >
+      <gl-form-text class="gl-m-0" tag="span">{{
+        eventName(stage.startEventIdentifier)
+      }}</gl-form-text>
     </div>
     <div class="gl-display-flex gl-align-items-center" :data-testid="`stage-end-event-${index}`">
       <span class="gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold">{{
-        $options.I18N.DEFAULT_FIELD_END_EVENT_LABEL
+        $options.i18n.DEFAULT_FIELD_END_EVENT_LABEL
       }}</span>
-      <gl-form-text class="gl-m-0">{{ eventName(stage.endEventIdentifier) }}</gl-form-text>
-      <gl-form-text v-if="stage.endEventLabel" class="gl-m-0"
-        >&nbsp;-&nbsp;{{ stage.endEventLabel }}</gl-form-text
-      >
+      <gl-form-text class="gl-m-0" tag="span">{{
+        eventName(stage.endEventIdentifier)
+      }}</gl-form-text>
     </div>
   </div>
 </template>

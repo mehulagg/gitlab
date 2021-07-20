@@ -3,12 +3,13 @@
 module Issuable
   module Clone
     class BaseService < IssuableBaseService
-      attr_reader :original_entity, :new_entity
+      attr_reader :original_entity, :new_entity, :target_project
 
       alias_method :old_project, :project
 
-      def execute(original_entity, new_project = nil)
+      def execute(original_entity, target_project = nil)
         @original_entity = original_entity
+        @target_project = target_project
 
         # Using transaction because of a high resources footprint
         # on rewriting notes (unfolding references)
@@ -64,8 +65,8 @@ module Issuable
       end
 
       def close_issue
-        close_service = Issues::CloseService.new(old_project, current_user)
-        close_service.execute(original_entity, notifications: false, system_note: false)
+        close_service = Issues::CloseService.new(project: old_project, current_user: current_user)
+        close_service.execute(original_entity, notifications: false, system_note: true)
       end
 
       def new_parent
@@ -77,8 +78,14 @@ module Issuable
           new_entity.project.group
         end
       end
+
+      def relative_position
+        return if original_entity.project.root_ancestor.id != target_project.root_ancestor.id
+
+        original_entity.relative_position
+      end
     end
   end
 end
 
-Issuable::Clone::BaseService.prepend_if_ee('EE::Issuable::Clone::BaseService')
+Issuable::Clone::BaseService.prepend_mod_with('Issuable::Clone::BaseService')

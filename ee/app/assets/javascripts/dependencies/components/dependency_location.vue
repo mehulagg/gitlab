@@ -66,7 +66,6 @@ export default {
       <gl-popover
         :target="() => $refs.moreLink.$el"
         placement="top"
-        triggers="hover focus"
         :title="s__('Dependencies|Dependency path')"
       >
         <dependency-path-viewer :dependencies="ancestors" />

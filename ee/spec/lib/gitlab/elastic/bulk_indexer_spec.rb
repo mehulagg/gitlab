@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Elastic::BulkIndexer, :elastic do
+RSpec.describe Gitlab::Elastic::BulkIndexer, :elastic, :clean_gitlab_redis_shared_state do
   let_it_be(:issue) { create(:issue) }
   let_it_be(:other_issue) { create(:issue, project: issue.project) }
 
@@ -145,6 +145,19 @@ RSpec.describe Gitlab::Elastic::BulkIndexer, :elastic do
         refresh_index!
 
         expect(search_one(Issue)).to have_attributes(issue_as_json)
+      end
+
+      it 'deletes the issue from the index if DocumentShouldBeDeletedFromIndexException is raised' do
+        database_record = issue_as_ref.database_record
+        allow(database_record.__elasticsearch__)
+          .to receive(:as_indexed_json)
+                .and_raise ::Elastic::Latest::DocumentShouldBeDeletedFromIndexError.new(database_record.class.name, database_record.id)
+
+        expect(indexer.process(issue_as_ref).flush).to be_empty
+
+        refresh_index!
+
+        expect(search(Issue, '*').size).to eq(0)
       end
     end
 

@@ -26,10 +26,6 @@ FactoryBot.define do
       hashed_storage_attachments_event factory: :geo_hashed_storage_attachments_event
     end
 
-    trait :lfs_object_deleted_event do
-      lfs_object_deleted_event factory: :geo_lfs_object_deleted_event
-    end
-
     trait :job_artifact_deleted_event do
       job_artifact_deleted_event factory: :geo_job_artifact_deleted_event
     end
@@ -97,49 +93,37 @@ FactoryBot.define do
   end
 
   factory :geo_repository_renamed_event, class: 'Geo::RepositoryRenamedEvent' do
-    project { create(:project, :repository) }
+    project { association(:project, :repository) }
 
     repository_storage_name { project.repository_storage }
     old_path_with_namespace { project.path_with_namespace }
-    new_path_with_namespace { project.path_with_namespace + '_new' }
+    new_path_with_namespace { "#{project.path_with_namespace}_new" }
     old_wiki_path_with_namespace { project.wiki.path_with_namespace }
-    new_wiki_path_with_namespace { project.wiki.path_with_namespace + '_new' }
+    new_wiki_path_with_namespace { "#{project.wiki.path_with_namespace}_new" }
     old_path { project.path }
-    new_path { project.path + '_new' }
+    new_path { "#{project.path}_new" }
   end
 
   factory :geo_hashed_storage_migrated_event, class: 'Geo::HashedStorageMigratedEvent' do
-    project { create(:project, :repository) }
+    project { association(:project, :repository) }
 
     repository_storage_name { project.repository_storage }
     old_disk_path { project.path_with_namespace }
-    new_disk_path { project.path_with_namespace + '_new' }
+    new_disk_path { "#{project.path_with_namespace}_new" }
     old_wiki_disk_path { project.wiki.path_with_namespace }
-    new_wiki_disk_path { project.wiki.path_with_namespace + '_new' }
+    new_wiki_disk_path { "#{project.wiki.path_with_namespace}_new" }
     new_storage_version { Project::HASHED_STORAGE_FEATURES[:repository] }
   end
 
   factory :geo_hashed_storage_attachments_event, class: 'Geo::HashedStorageAttachmentsEvent' do
-    project { create(:project, :repository) }
+    project { association(:project, :repository) }
 
     old_attachments_path { Storage::LegacyProject.new(project).disk_path }
     new_attachments_path { Storage::Hashed.new(project).disk_path }
   end
 
-  factory :geo_lfs_object_deleted_event, class: 'Geo::LfsObjectDeletedEvent' do
-    lfs_object { create(:lfs_object, :with_file) }
-
-    after(:build, :stub) do |event, _|
-      local_store_path = Pathname.new(LfsObjectUploader.root)
-      relative_path = Pathname.new(event.lfs_object.file.path).relative_path_from(local_store_path)
-
-      event.oid = event.lfs_object.oid
-      event.file_path = relative_path
-    end
-  end
-
   factory :geo_job_artifact_deleted_event, class: 'Geo::JobArtifactDeletedEvent' do
-    job_artifact { create(:ci_job_artifact, :archive) }
+    job_artifact { association(:ci_job_artifact, :archive) }
 
     after(:build, :stub) do |event, _|
       local_store_path = Pathname.new(JobArtifactUploader.root)
@@ -150,22 +134,22 @@ FactoryBot.define do
   end
 
   factory :geo_upload_deleted_event, class: 'Geo::UploadDeletedEvent' do
-    upload { create(:upload) }
+    upload { association(:upload) }
     file_path { upload.path }
     model_id { upload.model_id }
     model_type { upload.model_type }
     uploader { upload.uploader }
 
     trait :issuable_upload do
-      upload { create(:upload, :issuable_upload) }
+      upload { association(:upload, :issuable_upload) }
     end
 
     trait :personal_snippet do
-      upload { create(:upload, :personal_snippet) }
+      upload { association(:upload, :personal_snippet) }
     end
 
     trait :namespace_upload do
-      upload { create(:upload, :namespace_upload) }
+      upload { association(:upload, :namespace_upload) }
     end
   end
 

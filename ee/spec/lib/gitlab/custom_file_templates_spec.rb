@@ -224,6 +224,16 @@ RSpec.describe Gitlab::CustomFileTemplates do
   end
 
   describe '#all_template_names' do
+    RSpec.shared_examples 'does not list an empty category' do
+      it 'misses subgroup category' do
+        expect(template_categories).to eq(["Group #{group.full_name}", "Instance"])
+      end
+
+      it 'misses subgroup templates' do
+        expect(template_file_names).to eq(["group_#{type}", "instance_#{type}"])
+      end
+    end
+
     where(:template_finder, :type) do
       Gitlab::Template::CustomDockerfileTemplate  | :dockerfile
       Gitlab::Template::CustomGitignoreTemplate   | :gitignore
@@ -265,22 +275,42 @@ RSpec.describe Gitlab::CustomFileTemplates do
         end
 
         context 'in a subgroup' do
-          let_it_be(:subgroup) { create(:group, parent: group) }
-          let_it_be(:subproject) { create(:project, namespace: subgroup) }
+          let_it_be_with_reload(:subgroup) { create(:group, parent: group) }
+          let_it_be_with_reload(:subproject) { create(:project, namespace: subgroup) }
           let_it_be(:subgroup_template_project) { create(:project, :custom_repo, namespace: subgroup, files: template_files('subgroup')) }
 
           let(:target_project) { subproject }
 
-          before do
-            subgroup.update_columns(file_template_project_id: subgroup_template_project.id)
+          context 'with nested group templates' do
+            before do
+              subgroup.update_columns(file_template_project_id: subgroup_template_project.id)
+            end
+
+            it 'has the group names and instance as category' do
+              expect(template_categories).to eq(["Group #{subgroup.full_name}", "Group #{group.full_name}", "Instance"])
+            end
+
+            it 'orders results from most specific to least specific' do
+              expect(template_file_names).to eq(["subgroup_#{type}", "group_#{type}", "instance_#{type}"])
+            end
           end
 
-          it 'has the group names and instance as category' do
-            expect(template_categories).to eq(["Group #{subgroup.full_name}", "Group #{group.full_name}", "Instance"])
-          end
+          context 'with templates missing for a nested group' do
+            context 'when subgroup template config points to a project that has no templates' do
+              before do
+                subgroup.update_columns(file_template_project_id: subproject.id)
+              end
 
-          it 'orders results from most specific to least specific' do
-            expect(template_file_names).to eq(["subgroup_#{type}", "group_#{type}", "instance_#{type}"])
+              it_behaves_like 'does not list an empty category'
+            end
+
+            context 'when subgroup template config is not setup' do
+              before do
+                subgroup.update_columns(file_template_project_id: nil)
+              end
+
+              it_behaves_like 'does not list an empty category'
+            end
           end
         end
       end

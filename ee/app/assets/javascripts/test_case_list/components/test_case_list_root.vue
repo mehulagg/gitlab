@@ -5,10 +5,11 @@ import Api from '~/api';
 import createFlash from '~/flash';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import axios from '~/lib/utils/axios_utils';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+// eslint-disable-next-line import/no-deprecated
+import { updateHistory, setUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 
 import { s__, __ } from '~/locale';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
@@ -142,6 +143,7 @@ export default {
   },
   methods: {
     updateUrl() {
+      // eslint-disable-next-line import/no-deprecated
       const queryParams = urlParamsToObject(window.location.search);
       const { authorUsername, labelName, search } = this.filterParams || {};
       const { currentState, sortedBy, currentPage, prevPageCursor, nextPageCursor } = this;
@@ -197,7 +199,7 @@ export default {
           unique: true,
           symbol: '@',
           token: AuthorToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchPath: this.projectFullPath,
           fetchAuthors: Api.projectUsers.bind(Api),
         },
@@ -208,7 +210,7 @@ export default {
           unique: false,
           symbol: '~',
           token: LabelToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchLabels: (search = '') => {
             const params = {
               include_ancestor_groups: true,

@@ -84,7 +84,7 @@ module Gitlab
 
         Oj.load(string, opts)
       rescue Oj::ParseError, Encoding::UndefinedConversionError => ex
-        raise parser_error.new(ex)
+        raise parser_error, ex
       end
 
       # Take a Ruby object and convert it to a string. This method varies
@@ -169,7 +169,7 @@ module Gitlab
       # @return [Boolean]
       def feature_table_exists?
         Feature::FlipperFeature.table_exists?
-      rescue
+      rescue StandardError
         false
       end
     end
@@ -186,14 +186,55 @@ module Gitlab
       # The `env` param is ignored because it's not needed in either our formatter or Grape's,
       # but it is passed through for consistency.
       #
+      # If explicitly supplied with a `PrecompiledJson` instance it will skip conversion
+      # and return it directly. This is mostly used in caching.
+      #
       # @param object [Object]
       # @return [String]
       def self.call(object, env = nil)
+        return object.to_s if object.is_a?(PrecompiledJson)
+
         if Feature.enabled?(:grape_gitlab_json, default_enabled: true)
           Gitlab::Json.dump(object)
         else
           Grape::Formatter::Json.call(object, env)
         end
+      end
+    end
+
+    # Wrapper class used to skip JSON dumping on Grape endpoints.
+
+    class PrecompiledJson
+      UnsupportedFormatError = Class.new(StandardError)
+
+      # @overload PrecompiledJson.new("foo")
+      #   @param value [String]
+      #
+      # @overload PrecompiledJson.new(["foo", "bar"])
+      #   @param value [Array<String>]
+      def initialize(value)
+        @value = value
+      end
+
+      # Convert the value to a String. This will invoke
+      # `#to_s` on the members of the value if it's an array.
+      #
+      # @return [String]
+      # @raise [NoMethodError] if the objects in an array doesn't support to_s
+      # @raise [PrecompiledJson::UnsupportedFormatError] if the value is neither a String or Array
+      def to_s
+        return @value if @value.is_a?(String)
+        return "[#{@value.join(',')}]" if @value.is_a?(Array)
+
+        raise UnsupportedFormatError
+      end
+
+      def render_in(_view_context)
+        to_s
+      end
+
+      def format
+        :json
       end
     end
 
@@ -209,7 +250,7 @@ module Gitlab
       def self.encode(object, limit: 25.megabytes)
         return ::Gitlab::Json.dump(object) unless Feature.enabled?(:json_limited_encoder)
 
-        buffer = []
+        buffer = StringIO.new
         buffer_size = 0
 
         ::Yajl::Encoder.encode(object) do |data_chunk|
@@ -221,7 +262,7 @@ module Gitlab
           buffer_size += chunk_size
         end
 
-        buffer.join('')
+        buffer.string
       end
     end
   end

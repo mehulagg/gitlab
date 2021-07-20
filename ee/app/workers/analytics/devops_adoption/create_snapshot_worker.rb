@@ -2,34 +2,33 @@
 
 module Analytics
   module DevopsAdoption
-    # Updates all pending snapshots for given segment (from previous month)
-    # and creates or update snapshot for current month
+    # Updates all pending snapshots for given enabled_namespace (from previous month)
     class CreateSnapshotWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       feature_category :devops_reports
       idempotent!
+      tags :exclude_from_kubernetes
 
-      # range_end was deprecated and must be removed in 14.0
-      #
-      def perform(segment_id, _deprecated_range_end = nil)
-        segment = Segment.find(segment_id)
+      def perform(enabled_namespace_id)
+        enabled_namespace = EnabledNamespace.find(enabled_namespace_id)
 
-        pending_ranges(segment).each do |range_end|
-          Snapshots::CalculateAndSaveService.new(segment: segment, range_end: range_end).execute
+        pending_ranges(enabled_namespace).each do |range_end|
+          Snapshots::CalculateAndSaveService.new(enabled_namespace: enabled_namespace, range_end: range_end).execute
         end
       end
 
       private
 
       # rubocop: disable CodeReuse/ActiveRecord
-      def pending_ranges(segment)
-        end_times = segment.snapshots.not_finalized.pluck(:end_time)
+      def pending_ranges(enabled_namespace)
+        end_times = enabled_namespace.snapshots.not_finalized.pluck(:end_time)
 
-        now = Time.zone.now
-
-        if !now.end_of_month.to_date.in?(end_times.map(&:to_date)) && now.day > 1
-          end_times << now.end_of_month
+        prev_month = Time.current.last_month.end_of_month
+        unless prev_month.to_date.in?(end_times.map(&:to_date)) || enabled_namespace.snapshots.for_month(prev_month).exists?
+          end_times << prev_month
         end
 
         end_times

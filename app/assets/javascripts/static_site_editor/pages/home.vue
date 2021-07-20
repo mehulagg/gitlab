@@ -1,5 +1,5 @@
 <script>
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import Tracking from '~/tracking';
 
 import EditArea from '../components/edit_area.vue';
@@ -45,7 +45,9 @@ export default {
         return !this.appData.isSupportedContent;
       },
       error() {
-        createFlash(LOAD_CONTENT_ERROR);
+        createFlash({
+          message: LOAD_CONTENT_ERROR,
+        });
       },
     },
   },
@@ -111,6 +113,7 @@ export default {
               project: this.appData.project,
               username: this.appData.username,
               sourcePath: this.appData.sourcePath,
+              targetBranch: this.appData.branch,
               content: this.content,
               formattedMarkdown: this.formattedMarkdown,
               images: this.images,

@@ -23,6 +23,13 @@ module API
     helpers ::API::Helpers::PackagesHelpers
 
     helpers do
+      def path_exists?(path)
+        return false if path.blank?
+
+        Packages::Maven::Metadatum.with_path(path)
+                                  .exists?
+      end
+
       def extract_format(file_name)
         name, _, format = file_name.rpartition('.')
 
@@ -77,6 +84,18 @@ module API
           request.head? &&
           file.fog_credentials[:provider] == 'AWS'
       end
+
+      def fetch_package(file_name:, project: nil, group: nil)
+        order_by_package_file = file_name.include?(::Packages::Maven::Metadata.filename) &&
+                                  !params[:path].include?(::Packages::Maven::FindOrCreatePackageService::SNAPSHOT_TERM)
+
+        ::Packages::Maven::PackageFinder.new(
+          current_user,
+          project || group,
+          path: params[:path],
+          order_by_package_file: order_by_package_file
+        ).execute!
+      end
     end
 
     desc 'Download the maven package file at instance level' do
@@ -88,6 +107,9 @@ module API
     end
     route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
     get 'packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
+      # return a similar failure to authorize_read_package!(project)
+      forbidden! unless path_exists?(params[:path])
+
       file_name, format = extract_format(params[:file_name])
 
       # To avoid name collision we require project path and project package be the same.
@@ -97,8 +119,7 @@ module API
 
       authorize_read_package!(project)
 
-      package = ::Packages::Maven::PackageFinder
-        .new(params[:path], current_user, project: project).execute!
+      package = fetch_package(file_name: file_name, project: project)
 
       package_file = ::Packages::PackageFileFinder
         .new(package, file_name).execute!
@@ -109,7 +130,7 @@ module API
       when 'sha1'
         package_file.file_sha1
       else
-        track_package_event('pull_package', :maven) if jar_file?(format)
+        track_package_event('pull_package', :maven, project: project, namespace: project.namespace) if jar_file?(format)
         present_carrierwave_file_with_head_support!(package_file.file)
       end
     end
@@ -127,14 +148,16 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       get ':id/-/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
+        # return a similar failure to group = find_group(params[:id])
+        not_found!('Group') unless path_exists?(params[:path])
+
         file_name, format = extract_format(params[:file_name])
 
         group = find_group(params[:id])
 
         not_found!('Group') unless can?(current_user, :read_group, group)
 
-        package = ::Packages::Maven::PackageFinder
-          .new(params[:path], current_user, group: group).execute!
+        package = fetch_package(file_name: file_name, group: group)
 
         authorize_read_package!(package.project)
 
@@ -147,7 +170,7 @@ module API
         when 'sha1'
           package_file.file_sha1
         else
-          track_package_event('pull_package', :maven) if jar_file?(format)
+          track_package_event('pull_package', :maven, project: package.project, namespace: package.project.namespace) if jar_file?(format)
 
           present_carrierwave_file_with_head_support!(package_file.file)
         end
@@ -167,12 +190,14 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       get ':id/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
+        # return a similar failure to user_project
+        not_found!('Project') unless path_exists?(params[:path])
+
         authorize_read_package!(user_project)
 
         file_name, format = extract_format(params[:file_name])
 
-        package = ::Packages::Maven::PackageFinder
-          .new(params[:path], current_user, project: user_project).execute!
+        package = fetch_package(file_name: file_name, project: user_project)
 
         package_file = ::Packages::PackageFileFinder
           .new(package, file_name).execute!
@@ -183,7 +208,7 @@ module API
         when 'sha1'
           package_file.file_sha1
         else
-          track_package_event('pull_package', :maven) if jar_file?(format)
+          track_package_event('pull_package', :maven, project: user_project, namespace: user_project.namespace) if jar_file?(format)
 
           present_carrierwave_file_with_head_support!(package_file.file)
         end
@@ -239,7 +264,7 @@ module API
         when 'md5'
           ''
         else
-          track_package_event('push_package', :maven) if jar_file?(format)
+          track_package_event('push_package', :maven, user: current_user, project: user_project, namespace: user_project.namespace) if jar_file?(format)
 
           file_params = {
             file:      params[:file],

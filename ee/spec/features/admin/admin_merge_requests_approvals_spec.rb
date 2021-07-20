@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe 'Admin interacts with merge requests approvals settings' do
   include StubENV
 
-  let_it_be(:application_settings) { create(:application_setting) }
   let_it_be(:user) { create(:admin) }
   let_it_be(:project) { create(:project, creator: user) }
 
@@ -23,7 +22,7 @@ RSpec.describe 'Admin interacts with merge requests approvals settings' do
     page.within('.merge-request-approval-settings') do
       check 'Prevent MR approvals by author.'
       check 'Prevent MR approvals from users who make commits to the MR.'
-      check 'Prevent users from modifying MR approval rules.'
+      check _('Prevent users from modifying MR approval rules in projects and merge requests.')
       click_button('Save changes')
     end
 
@@ -31,15 +30,14 @@ RSpec.describe 'Admin interacts with merge requests approvals settings' do
 
     expect(find_field('Prevent MR approvals by author.')).to be_checked
     expect(find_field('Prevent MR approvals from users who make commits to the MR.')).to be_checked
-    expect(find_field('Prevent users from modifying MR approval rules.')).to be_checked
+    expect(find_field(_('Prevent users from modifying MR approval rules in projects and merge requests.'))).to be_checked
 
     visit edit_project_path(project)
 
     page.within('#js-merge-request-approval-settings') do
       expect(find('#project_merge_requests_author_approval')).to be_disabled.and be_checked
       expect(find('#project_merge_requests_disable_committers_approval')).to be_disabled.and be_checked
-      expect(find('#project_disable_overriding_approvers_per_merge_request')).to be_disabled
-      expect(find('#project_disable_overriding_approvers_per_merge_request')).not_to be_checked
+      expect(find('#project_disable_overriding_approvers_per_merge_request')).to be_disabled.and be_checked
     end
   end
 end

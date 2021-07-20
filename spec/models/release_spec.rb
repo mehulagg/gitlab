@@ -5,12 +5,13 @@ require 'spec_helper'
 RSpec.describe Release do
   let_it_be(:user)    { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:release) { create(:release, project: project, author: user) }
 
   it { expect(release).to be_valid }
 
   describe 'associations' do
-    it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:project).touch(true) }
     it { is_expected.to belong_to(:author).class_name('User') }
     it { is_expected.to have_many(:links).class_name('Releases::Link') }
     it { is_expected.to have_many(:milestones) }
@@ -37,6 +38,18 @@ RSpec.describe Release do
       end
     end
 
+    context 'when description of a release is longer than the limit' do
+      let(:description) { 'a' * (Gitlab::Database::MAX_TEXT_SIZE_LIMIT + 1) }
+      let(:release) { build(:release, project: project, description: description) }
+
+      it 'creates a validation error' do
+        release.validate
+
+        expect(release.errors.full_messages)
+          .to include("Description is too long (maximum is #{Gitlab::Database::MAX_TEXT_SIZE_LIMIT} characters)")
+      end
+    end
+
     context 'when a release is tied to a milestone for another project' do
       it 'creates a validation error' do
         milestone = build(:milestone, project: create(:project))
@@ -53,7 +66,7 @@ RSpec.describe Release do
   end
 
   describe '#assets_count' do
-    subject { release.assets_count }
+    subject { Release.find(release.id).assets_count }
 
     it 'returns the number of sources' do
       is_expected.to eq(Gitlab::Workhorse::ARCHIVE_FORMATS.count)
@@ -67,7 +80,7 @@ RSpec.describe Release do
       end
 
       it "excludes sources count when asked" do
-        assets_count = release.assets_count(except: [:sources])
+        assets_count = Release.find(release.id).assets_count(except: [:sources])
         expect(assets_count).to eq(1)
       end
     end

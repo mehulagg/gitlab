@@ -7,12 +7,29 @@ RSpec.describe Ci::RunnersFinder do
     let_it_be(:admin) { create(:user, :admin) }
 
     describe '#execute' do
-      context 'with empty params' do
-        it 'returns all runners' do
-          runner1 = create :ci_runner, active: true
-          runner2 = create :ci_runner, active: false
+      context 'with 2 runners' do
+        let_it_be(:runner1) { create(:ci_runner, active: true) }
+        let_it_be(:runner2) { create(:ci_runner, active: false) }
 
-          expect(described_class.new(current_user: admin, params: {}).execute).to match_array [runner1, runner2]
+        context 'with empty params' do
+          it 'returns all runners' do
+            expect(Ci::Runner).to receive(:with_tags).and_call_original
+            expect(described_class.new(current_user: admin, params: {}).execute).to match_array [runner1, runner2]
+          end
+        end
+
+        context 'with preload param set to :tag_name true' do
+          it 'requests tags' do
+            expect(Ci::Runner).to receive(:with_tags).and_call_original
+            expect(described_class.new(current_user: admin, params: { preload: { tag_name: true } }).execute).to match_array [runner1, runner2]
+          end
+        end
+
+        context 'with preload param set to :tag_name false' do
+          it 'does not request tags' do
+            expect(Ci::Runner).not_to receive(:with_tags)
+            expect(described_class.new(current_user: admin, params: { preload: { tag_name: false } }).execute).to match_array [runner1, runner2]
+          end
         end
       end
 
@@ -25,10 +42,12 @@ RSpec.describe Ci::RunnersFinder do
       end
 
       context 'filter by status' do
-        it 'calls the corresponding scope on Ci::Runner' do
-          expect(Ci::Runner).to receive(:paused).and_call_original
+        Ci::Runner::AVAILABLE_STATUSES.each do |status|
+          it "calls the corresponding :#{status} scope on Ci::Runner" do
+            expect(Ci::Runner).to receive(status.to_sym).and_call_original
 
-          described_class.new(current_user: admin, params: { status_status: 'paused' }).execute
+            described_class.new(current_user: admin, params: { status_status: status }).execute
+          end
         end
       end
 
@@ -49,35 +68,56 @@ RSpec.describe Ci::RunnersFinder do
       end
 
       context 'sort' do
+        let_it_be(:runner1) { create :ci_runner, created_at: '2018-07-12 07:00', contacted_at: 1.minute.ago }
+        let_it_be(:runner2) { create :ci_runner, created_at: '2018-07-12 08:00', contacted_at: 3.minutes.ago }
+        let_it_be(:runner3) { create :ci_runner, created_at: '2018-07-12 09:00', contacted_at: 2.minutes.ago }
+
+        subject do
+          described_class.new(current_user: admin, params: params).execute
+        end
+
+        shared_examples 'sorts by created_at descending' do
+          it 'sorts by created_at descending' do
+            is_expected.to eq [runner3, runner2, runner1]
+          end
+        end
+
         context 'without sort param' do
-          it 'sorts by created_at' do
-            runner1 = create :ci_runner, created_at: '2018-07-12 07:00'
-            runner2 = create :ci_runner, created_at: '2018-07-12 08:00'
-            runner3 = create :ci_runner, created_at: '2018-07-12 09:00'
+          let(:params) { {} }
 
-            expect(described_class.new(current_user: admin, params: {}).execute).to eq [runner3, runner2, runner1]
+          it_behaves_like 'sorts by created_at descending'
+        end
+
+        %w(created_date created_at_desc).each do |sort|
+          context "with sort param equal to #{sort}" do
+            let(:params) { { sort: sort } }
+
+            it_behaves_like 'sorts by created_at descending'
           end
         end
 
-        context 'with sort param' do
-          it 'sorts by specified attribute' do
-            runner1 = create :ci_runner, contacted_at: 1.minute.ago
-            runner2 = create :ci_runner, contacted_at: 3.minutes.ago
-            runner3 = create :ci_runner, contacted_at: 2.minutes.ago
+        context 'with sort param equal to created_at_asc' do
+          let(:params) { { sort: 'created_at_asc' } }
 
-            expect(described_class.new(current_user: admin, params: { sort: 'contacted_asc' }).execute).to eq [runner2, runner3, runner1]
+          it 'sorts by created_at ascending' do
+            is_expected.to eq [runner1, runner2, runner3]
           end
         end
-      end
 
-      context 'paginate' do
-        it 'returns the runners for the specified page' do
-          stub_const('Ci::RunnersFinder::NUMBER_OF_RUNNERS_PER_PAGE', 1)
-          runner1 = create :ci_runner, created_at: '2018-07-12 07:00'
-          runner2 = create :ci_runner, created_at: '2018-07-12 08:00'
+        context 'with sort param equal to contacted_asc' do
+          let(:params) { { sort: 'contacted_asc' } }
 
-          expect(described_class.new(current_user: admin, params: { page: 1 }).execute).to eq [runner2]
-          expect(described_class.new(current_user: admin, params: { page: 2 }).execute).to eq [runner1]
+          it 'sorts by contacted_at ascending' do
+            is_expected.to eq [runner2, runner3, runner1]
+          end
+        end
+
+        context 'with sort param equal to contacted_desc' do
+          let(:params) { { sort: 'contacted_desc' } }
+
+          it 'sorts by contacted_at descending' do
+            is_expected.to eq [runner1, runner3, runner2]
+          end
         end
       end
 
@@ -170,38 +210,6 @@ RSpec.describe Ci::RunnersFinder do
         end
       end
 
-      context 'paginate' do
-        using RSpec::Parameterized::TableSyntax
-
-        let(:runners) do
-          [[runner_project_7, runner_project_6, runner_project_5],
-           [runner_project_4, runner_project_3, runner_project_2],
-           [runner_project_1, runner_sub_group_4, runner_sub_group_3],
-           [runner_sub_group_2, runner_sub_group_1, runner_group]]
-        end
-
-        where(:page, :index) do
-          1 | 0
-          2 | 1
-          3 | 2
-          4 | 3
-        end
-
-        before do
-          stub_const('Ci::RunnersFinder::NUMBER_OF_RUNNERS_PER_PAGE', 3)
-
-          group.add_owner(user)
-        end
-
-        with_them do
-          let(:params) { { page: page } }
-
-          it 'returns the runners for the specified page' do
-            expect(subject).to eq(runners[index])
-          end
-        end
-      end
-
       context 'filter by search term' do
         let(:params) { { search: 'runner_project_search' } }
 
@@ -287,8 +295,8 @@ RSpec.describe Ci::RunnersFinder do
       subject { described_class.new(current_user: user, group: group, params: params).sort_key }
 
       context 'no params' do
-        it 'returns created_date' do
-          expect(subject).to eq('created_date')
+        it 'returns created_at_desc' do
+          expect(subject).to eq('created_at_desc')
         end
       end
 

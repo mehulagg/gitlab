@@ -8,13 +8,23 @@ type: howto, reference
 # Deploy Boards **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1589) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
-> - [Moved](<https://gitlab.com/gitlab-org/gitlab/-/issues/212320>) to GitLab Free in 13.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212320) to GitLab Free in 13.8.
+> - In GitLab 13.5 and earlier, apps that consist of multiple deployments are shown as
+>   duplicates on the deploy board. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/8463)
+>   in GitLab 13.6.
+> - In GitLab 13.11 and earlier, environments in folders do not show deploy boards.
+>   This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60525) in
+>   GitLab 13.12.
 
 GitLab Deploy Boards offer a consolidated view of the current health and
 status of each CI [environment](../../ci/environments/index.md) running on [Kubernetes](https://kubernetes.io), displaying the status
 of the pods in the deployment. Developers and other teammates can view the
 progress and status of a rollout, pod by pod, in the workflow they already use
 without any need to access Kubernetes.
+
+NOTE:
+If you have a Kubernetes cluster, you can Auto Deploy applications to production
+environments by using [Auto DevOps](../../topics/autodevops/index.md).
 
 ## Overview
 
@@ -42,10 +52,6 @@ knowledge. In particular, you should be familiar with:
 - [Kubernetes namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
 - [Kubernetes canary deployments](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/#canary-deployments)
 
-In GitLab 13.5 and earlier, apps that consist of multiple deployments are shown as
-duplicates on the deploy board. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/8463)
-in GitLab 13.6.
-
 ## Use cases
 
 Since the Deploy Board is a visual representation of the Kubernetes pods for a
@@ -53,7 +59,7 @@ specific environment, there are a lot of use cases. To name a few:
 
 - You want to promote what's running in staging, to production. You go to the
   environments list, verify that what's running in staging is what you think is
-  running, then click on the [manual action](../../ci/yaml/README.md#whenmanual) to deploy to production.
+  running, then click on the [manual action](../../ci/yaml/index.md#whenmanual) to deploy to production.
 - You trigger a deploy, and you have many containers to upgrade so you know
   this takes a while (you've also throttled your deploy to only take down X
   containers at a time). But you need to tell someone when it's deployed, so you
@@ -71,7 +77,7 @@ specific environment, there are a lot of use cases. To name a few:
 
 To display the Deploy Boards for a specific [environment](../../ci/environments/index.md) you should:
 
-1. Have [defined an environment](../../ci/environments/index.md#defining-environments) with a deploy stage.
+1. Have [defined an environment](../../ci/environments/index.md) with a deploy stage.
 
 1. Have a Kubernetes cluster up and running.
 
@@ -82,15 +88,15 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    [OpenShift docs](https://docs.openshift.com/container-platform/3.7/dev_guide/deployments/kubernetes_deployments.html#kubernetes-deployments-vs-deployment-configurations)
    and [GitLab issue #4584](https://gitlab.com/gitlab-org/gitlab/-/issues/4584).
 
-1. [Configure GitLab Runner](../../ci/runners/README.md) with the [`docker`](https://docs.gitlab.com/runner/executors/docker.html) or
+1. [Configure GitLab Runner](../../ci/runners/index.md) with the [`docker`](https://docs.gitlab.com/runner/executors/docker.html) or
    [`kubernetes`](https://docs.gitlab.com/runner/executors/kubernetes.html) executor.
 1. Configure the [Kubernetes integration](clusters/index.md) in your project for the
    cluster. The Kubernetes namespace is of particular note as you need it
-   for your deployment scripts (exposed by the `KUBE_NAMESPACE` environment variable).
+   for your deployment scripts (exposed by the `KUBE_NAMESPACE` deployment variable).
 1. Ensure Kubernetes annotations of `app.gitlab.com/env: $CI_ENVIRONMENT_SLUG`
    and `app.gitlab.com/app: $CI_PROJECT_PATH_SLUG` are applied to the
    deployments, replica sets, and pods, where `$CI_ENVIRONMENT_SLUG` and
-   `$CI_PROJECT_PATH_SLUG` are the values of the CI variables. This is so we can
+   `$CI_PROJECT_PATH_SLUG` are the values of the CI/CD variables. This is so we can
    lookup the proper environment in a cluster/namespace which may have more
    than one. These resources should be contained in the namespace defined in
    the Kubernetes service setting. You can use an [Auto deploy](../../topics/autodevops/stages.md#auto-deploy) `.gitlab-ci.yml`
@@ -111,7 +117,7 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    ![Deploy Boards Kubernetes Label](img/deploy_boards_kubernetes_label.png)
 
 Once all of the above are set up and the pipeline has run at least once,
-navigate to the environments page under **Operations > Environments**.
+navigate to the environments page under **Deployments > Environments**.
 
 Deploy Boards are visible by default. You can explicitly click
 the triangle next to their respective environment name in order to hide them.
@@ -159,6 +165,6 @@ version of your application.
 ## Further reading
 
 - [GitLab Auto deploy](../../topics/autodevops/stages.md#auto-deploy)
-- [GitLab CI/CD environment variables](../../ci/variables/README.md)
+- [GitLab CI/CD variables](../../ci/variables/index.md)
 - [Environments and deployments](../../ci/environments/index.md)
 - [Kubernetes deploy example](https://gitlab.com/gitlab-examples/kubernetes-deploy)

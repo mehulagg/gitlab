@@ -33,6 +33,12 @@ RSpec.describe 'User views iteration' do
       end
 
       it 'shows iteration info' do
+        aggregate_failures 'expect Iterations highlighted on left sidebar' do
+          page.within '.sidebar-top-level-items' do
+            expect(page).to have_css('li.active > a', text: 'Iterations')
+          end
+        end
+
         aggregate_failures 'expect title, description, and dates' do
           expect(page).to have_content(iteration.title)
           expect(page).to have_content(iteration.description)

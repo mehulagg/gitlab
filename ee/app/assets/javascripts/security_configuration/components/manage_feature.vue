@@ -1,71 +1,39 @@
 <script>
-import { GlButton } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import CreateMergeRequestButton from './create_merge_request_button.vue';
+import { propsUnion } from '~/vue_shared/components/lib/utils/props_utils';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ManageViaMr from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
+import {
+  REPORT_TYPE_DAST_PROFILES,
+  REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_SECRET_DETECTION,
+} from '~/vue_shared/security_reports/constants';
+import ManageDastProfiles from './manage_dast_profiles.vue';
+import ManageGeneric from './manage_generic.vue';
+
+const scannerComponentMap = {
+  [REPORT_TYPE_DAST_PROFILES]: ManageDastProfiles,
+  [REPORT_TYPE_DEPENDENCY_SCANNING]: ManageViaMr,
+  [REPORT_TYPE_SECRET_DETECTION]: ManageViaMr,
+};
 
 export default {
-  components: {
-    GlButton,
-    CreateMergeRequestButton,
-  },
-  mixins: [glFeatureFlagsMixin()],
-  props: {
-    feature: {
-      type: Object,
-      required: true,
-    },
-    autoDevopsEnabled: {
-      type: Boolean,
-      required: true,
-    },
-    createSastMergeRequestPath: {
-      type: String,
-      required: true,
-    },
-  },
+  mixins: [glFeatureFlagMixin()],
+  props: propsUnion([ManageGeneric, ...Object.values(scannerComponentMap)]),
   computed: {
-    canConfigureFeature() {
-      return Boolean(this.glFeatures.sastConfigurationUi && this.feature.configuration_path);
+    filteredScannerComponentMap() {
+      const scannerComponentMapCopy = { ...scannerComponentMap };
+      if (!this.glFeatures.secDependencyScanningUiEnable) {
+        delete scannerComponentMapCopy[REPORT_TYPE_DEPENDENCY_SCANNING];
+      }
+      return scannerComponentMapCopy;
     },
-    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377
-    canCreateSASTMergeRequest() {
-      return Boolean(this.feature.type === 'sast' && this.createSastMergeRequestPath);
-    },
-    canManageProfiles() {
-      return this.feature.type === 'dast_profiles';
+    manageComponent() {
+      return this.filteredScannerComponentMap[this.feature.type] ?? ManageGeneric;
     },
   },
 };
 </script>
 
 <template>
-  <gl-button
-    v-if="canManageProfiles"
-    :href="feature.configuration_path"
-    data-testid="manageButton"
-    >{{ s__('SecurityConfiguration|Manage') }}</gl-button
-  >
-
-  <gl-button
-    v-else-if="canConfigureFeature && feature.configured"
-    :href="feature.configuration_path"
-    data-testid="configureButton"
-    >{{ s__('SecurityConfiguration|Configure') }}</gl-button
-  >
-
-  <gl-button
-    v-else-if="canConfigureFeature"
-    variant="success"
-    category="primary"
-    :href="feature.configuration_path"
-    data-testid="enableButton"
-    >{{ s__('SecurityConfiguration|Enable') }}</gl-button
-  >
-
-  <!-- TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377 -->
-  <create-merge-request-button
-    v-else-if="canCreateSASTMergeRequest"
-    :auto-devops-enabled="autoDevopsEnabled"
-    :endpoint="createSastMergeRequestPath"
-  />
+  <component :is="manageComponent" v-bind="$props" @error="$emit('error', $event)" />
 </template>

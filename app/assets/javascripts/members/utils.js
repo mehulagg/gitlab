@@ -1,10 +1,6 @@
 import { isUndefined } from 'lodash';
-import {
-  getParameterByName,
-  convertObjectPropsToCamelCase,
-  parseBoolean,
-} from '~/lib/utils/common_utils';
-import { setUrlParams } from '~/lib/utils/url_utility';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { getParameterByName, setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import {
   FIELDS,
@@ -13,7 +9,7 @@ import {
   GROUP_LINK_ACCESS_LEVEL_PROPERTY_NAME,
 } from './constants';
 
-export const generateBadges = (member, isCurrentUser) => [
+export const generateBadges = ({ member, isCurrentUser, canManageMembers }) => [
   {
     show: isCurrentUser,
     text: __("It's you"),
@@ -25,7 +21,7 @@ export const generateBadges = (member, isCurrentUser) => [
     variant: 'danger',
   },
   {
-    show: member.user?.twoFactorEnabled,
+    show: member.user?.twoFactorEnabled && (canManageMembers || isCurrentUser),
     text: __('2FA'),
     variant: 'info',
   },
@@ -105,14 +101,12 @@ export const buildSortHref = ({
 export const canOverride = () => false;
 
 export const parseDataAttributes = (el) => {
-  const { members, sourceId, memberPath, canManageMembers } = el.dataset;
+  const { membersData } = el.dataset;
 
-  return {
-    members: convertObjectPropsToCamelCase(JSON.parse(members), { deep: true }),
-    sourceId: parseInt(sourceId, 10),
-    memberPath,
-    canManageMembers: parseBoolean(canManageMembers),
-  };
+  return convertObjectPropsToCamelCase(JSON.parse(membersData), {
+    deep: true,
+    ignoreKeyNames: ['params'],
+  });
 };
 
 export const baseRequestFormatter = (basePropertyName, accessLevelPropertyName) => ({

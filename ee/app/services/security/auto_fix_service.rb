@@ -42,7 +42,7 @@ module Security
     end
 
     def assign_label(merge_request)
-      ::MergeRequests::UpdateService.new(project, User.security_bot, add_label_ids: [label.id])
+      ::MergeRequests::UpdateService.new(project: project, current_user: User.security_bot, params: { add_label_ids: [label.id] })
         .execute(merge_request)
     end
 

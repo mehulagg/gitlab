@@ -8,11 +8,12 @@ RSpec.describe 'Creating a DAST Site Profile' do
   let!(:dast_site_profile) { create(:dast_site_profile, project: project) }
 
   let(:mutation_name) { :dast_site_profile_delete }
+  let(:dast_site_profile_id) { dast_site_profile.to_global_id.to_s }
   let(:mutation) do
     graphql_mutation(
       mutation_name,
       full_path: full_path,
-      id: dast_site_profile.to_global_id.to_s
+      id: dast_site_profile_id
     )
   end
 
@@ -24,22 +25,18 @@ RSpec.describe 'Creating a DAST Site Profile' do
 
     context 'when there is an issue deleting the dast_site_profile' do
       before do
-        mutation_klass = Mutations::DastSiteProfiles::Delete
-        allow_any_instance_of(mutation_klass).to receive(:find_dast_site_profile).and_return(dast_site_profile)
-        allow(dast_site_profile).to receive(:destroy).and_return(false)
-        dast_site_profile.errors.add(:name, 'is weird')
+        allow_next_instance_of(::AppSec::Dast::SiteProfiles::DestroyService) do |service|
+          allow(service).to receive(:execute).and_return(double(success?: false, errors: ['Name is weird']))
+        end
       end
 
       it_behaves_like 'a mutation that returns errors in the response', errors: ['Name is weird']
     end
 
     context 'when the dast_site_profile does not exist' do
-      before do
-        dast_site_profile.destroy!
-      end
+      let(:dast_site_profile_id) { Gitlab::GlobalId.build(nil, model_name: 'DastSiteProfile', id: 'does_not_exist') }
 
-      it_behaves_like 'a mutation that returns top-level errors',
-        errors: [::Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR]
+      it_behaves_like 'a mutation that returns errors in the response', errors: ['Site profile not found for given parameters']
     end
 
     context 'when wrong type of global id is passed' do

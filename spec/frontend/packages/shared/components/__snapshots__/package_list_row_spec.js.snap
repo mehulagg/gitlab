@@ -6,12 +6,12 @@ exports[`packages_list_row renders 1`] = `
   data-qa-selector="package_row"
 >
   <div
-    class="gl-display-flex gl-align-items-center gl-py-3"
+    class="gl-display-flex gl-align-items-center gl-py-3 gl-px-5"
   >
     <!---->
      
     <div
-      class="gl-display-flex gl-xs-flex-direction-column gl-justify-content-space-between gl-align-items-stretch gl-flex-fill-1"
+      class="gl-display-flex gl-xs-flex-direction-column gl-justify-content-space-between gl-align-items-stretch gl-flex-grow-1"
     >
       <div
         class="gl-display-flex gl-flex-direction-column gl-xs-mb-3 gl-min-w-0 gl-flex-grow-1"
@@ -34,13 +34,15 @@ exports[`packages_list_row renders 1`] = `
             </gl-link-stub>
              
             <!---->
+             
+            <!---->
           </div>
            
           <!---->
         </div>
          
         <div
-          class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-min-h-6 gl-min-w-0 gl-flex-fill-1"
+          class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-min-h-6 gl-min-w-0 gl-flex-grow-1"
         >
           <div
             class="gl-display-flex"
@@ -51,20 +53,7 @@ exports[`packages_list_row renders 1`] = `
              
             <!---->
              
-            <div
-              class="d-flex align-items-center"
-              data-testid="package-type"
-            >
-              <gl-icon-stub
-                class="gl-ml-3 gl-mr-2"
-                name="package"
-                size="16"
-              />
-               
-              <span>
-                Maven
-              </span>
-            </div>
+            <div />
              
             <package-path-stub
               path="foo/bar/baz"
@@ -102,7 +91,7 @@ exports[`packages_list_row renders 1`] = `
       <gl-button-stub
         aria-label="Remove package"
         buttontextclasses=""
-        category="primary"
+        category="secondary"
         data-testid="action-delete"
         icon="remove"
         size="medium"

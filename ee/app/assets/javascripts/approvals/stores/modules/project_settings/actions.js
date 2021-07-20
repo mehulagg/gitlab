@@ -1,11 +1,11 @@
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
 import {
   mapApprovalRuleRequest,
   mapApprovalSettingsResponse,
   mapApprovalFallbackRuleRequest,
-} from '../../../mappers';
+} from 'ee/approvals/mappers';
+import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 import * as types from '../base/mutation_types';
 
 export const requestRules = ({ commit }) => {
@@ -18,13 +18,15 @@ export const receiveRulesSuccess = ({ commit }, approvalSettings) => {
 };
 
 export const receiveRulesError = () => {
-  createFlash(__('An error occurred fetching the approval rules.'));
+  createFlash({
+    message: __('An error occurred fetching the approval rules.'),
+  });
 };
 
 export const fetchRules = ({ rootState, dispatch }) => {
-  const { settingsPath } = rootState.settings;
-
   dispatch('requestRules');
+
+  const { settingsPath } = rootState.settings;
 
   return axios
     .get(settingsPath)
@@ -59,7 +61,9 @@ export const deleteRuleSuccess = ({ dispatch }) => {
 };
 
 export const deleteRuleError = () => {
-  createFlash(__('An error occurred while deleting the approvers group'));
+  createFlash({
+    message: __('An error occurred while deleting the approvers group'),
+  });
 };
 
 export const deleteRule = ({ rootState, dispatch }, id) => {

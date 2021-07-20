@@ -4,7 +4,7 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Container Registry
+# GitLab Container Registry **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4040) in GitLab 8.8.
 > - Docker Registry manifest `v1` support was added in GitLab 8.9 to support Docker
@@ -35,7 +35,8 @@ You can view the Container Registry for a project or group.
 1. Go to your project or group.
 1. Go to **Packages & Registries > Container Registry**.
 
-You can search, sort, filter, and [delete](#delete-images-from-within-gitlab) containers on this page.
+You can search, sort, filter, and [delete](#delete-images-from-within-gitlab)
+containers on this page. You can share a filtered view by copying the URL from your browser.
 
 Only members of the project or group can access a private project's Container Registry.
 
@@ -134,7 +135,7 @@ To view these commands, go to your project's **Packages & Registries > Container
 
 ## Build and push by using GitLab CI/CD
 
-Use [GitLab CI/CD](../../../ci/yaml/README.md) to build and push images to the
+Use [GitLab CI/CD](../../../ci/yaml/index.md) to build and push images to the
 Container Registry. Use it to test, build, and deploy your project from the Docker
 image you created.
 
@@ -153,7 +154,7 @@ To use CI/CD to authenticate, you can use:
   docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   ```
 
-- A [CI job token](../../../ci/triggers/README.md#ci-job-token).
+- A [CI job token](../../../ci/triggers/index.md#ci-job-token).
 
   ```shell
   docker login -u $CI_JOB_USER -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -209,7 +210,7 @@ build:
     - docker push $CI_REGISTRY/group/project/image:latest
 ```
 
-You can also make use of [other CI/CD variables](../../../ci/variables/README.md) to avoid hard-coding:
+You can also make use of [other CI/CD variables](../../../ci/variables/index.md) to avoid hard-coding:
 
 ```yaml
 build:
@@ -308,7 +309,7 @@ in addition to the steps in the
 [Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker) section:
 
 1. Update the `image` and `service` to point to your registry.
-1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
+1. Add a service [alias](../../../ci/yaml/index.md#servicesalias).
 
 Below is an example of what your `.gitlab-ci.yml` should look like:
 
@@ -317,6 +318,36 @@ build:
   image: $CI_REGISTRY/group/project/docker:19.03.12
   services:
     - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
+      alias: docker
+  stage: build
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
+```
+
+If you forget to set the service alias, the `docker:19.03.12` image is unable to find the
+`dind` service, and an error like the following is thrown:
+
+```plaintext
+error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
+```
+
+### Using a Docker-in-Docker image with Dependency Proxy
+
+To use your own Docker images with Dependency Proxy, follow these steps
+in addition to the steps in the
+[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker) section:
+
+1. Update the `image` and `service` to point to your registry.
+1. Add a service [alias](../../../ci/yaml/index.md#servicesalias).
+
+Below is an example of what your `.gitlab-ci.yml` should look like:
+
+```yaml
+build:
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:19.03.12
+  services:
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:18.09.7-dind
       alias: docker
   stage: build
   script:
@@ -487,6 +518,10 @@ Cleanup policies can be run on all projects, with these exceptions:
   Feature.disable(:container_expiration_policies_historic_entry, Project.find(<project id>))
   ```
 
+WARNING:
+For performance reasons, enabled cleanup policies are automatically disabled for projects on
+GitLab.com that don't have a container image.
+
 ### How the cleanup policy works
 
 The cleanup policy collects all tags in the Container Registry and excludes tags
@@ -499,11 +534,11 @@ The cleanup policy:
 1. Collects all tags for a given repository in a list.
 1. Excludes the tag named `latest` from the list.
 1. Evaluates the `name_regex` (tags to expire), excluding non-matching names from the list.
+1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Excludes any tags that do not have a manifest (not part of the options in the UI).
 1. Orders the remaining tags by `created_date`.
 1. Excludes from the list the N tags based on the `keep_n` value (Number of tags to retain).
 1. Excludes from the list the tags more recent than the `older_than` value (Expiration interval).
-1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Finally, the remaining tags in the list are deleted from the Container Registry.
 
 WARNING:
@@ -511,13 +546,24 @@ On GitLab.com, the execution time for the cleanup policy is limited, and some of
 the Container Registry after the policy runs. The next time the policy runs, the remaining tags are included,
 so it may take multiple runs for all tags to be deleted.
 
+WARNING:
+GitLab self-managed installs support for third-party container registries that comply with the
+[Docker Registry HTTP API V2](https://docs.docker.com/registry/spec/api/)
+specification. However, this specification does not include a tag delete operation. Therefore, when
+interacting with third-party container registries, GitLab uses a workaround to delete tags. See the
+[related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/15737)
+for more information. Due to possible implementation variations, this workaround is not guaranteed
+to work with all third-party registries in the same predictable way. If you use the GitLab Container
+Registry, this workaround is not required because we implemented a special tag delete operation. In
+this case, you can expect cleanup policies to be consistent and predictable.
+
 ### Create a cleanup policy
 
 You can create a cleanup policy in [the API](#use-the-cleanup-policy-api) or the UI.
 
 To create a cleanup policy in the UI:
 
-1. For your project, go to **Settings > CI/CD**.
+1. For your project, go to **Settings > Packages & Registries**.
 1. Expand the **Clean up image tags** section.
 1. Complete the fields.
 
@@ -577,7 +623,7 @@ Here are examples of regex patterns you may want to use:
   (?:v.+|master|release.*)
   ```
 
-### Set cleanup limits to conserve resources 
+### Set cleanup limits to conserve resources
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/288812) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
@@ -595,7 +641,7 @@ To prevent server resource starvation, the following application settings are av
 - `container_registry_delete_tags_service_timeout`. The maximum time, in seconds, that the cleanup process can take to delete a batch of tags.
 - `container_registry_cleanup_tags_service_max_list_size`. The maximum number of tags that can be deleted in a single execution. Additional tags must be deleted in another execution.
    We recommend starting with a low number, like `100`, and increasing it after monitoring that container images are properly deleted.
-   
+
 For self-managed instances, those settings can be updated in the [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
 
   ```ruby
@@ -632,8 +678,18 @@ Examples:
 - Select all tags, keep at least 1 tag per image, clean up any tag older than 14 days, run once a month, preserve any images with the name `master` and the policy is enabled:
 
   ```shell
-  curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' "https://gitlab.example.com/api/v4/projects/2"
+  curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" \
+       --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' \
+       "https://gitlab.example.com/api/v4/projects/2"
   ```
+
+Valid values for `cadence` when using the API are:
+
+- `1d` (every day)
+- `7d` (every week)
+- `14d` (every two weeks)
+- `1month` (every month)
+- `3month` (every quarter)
 
 See the API documentation for further details: [Edit project](../../../api/projects.md#edit-project).
 
@@ -670,8 +726,8 @@ and stored by Docker, it is not possible for GitLab to parse this data and meet 
 ## Limitations
 
 - Moving or renaming existing Container Registry repositories is not supported
-once you have pushed images, because the images are signed, and the
-signature includes the repository name. To move or rename a repository with a
+once you have pushed images, because the images are stored in a path that matches
+the repository path. To move or rename a repository with a
 Container Registry, you must delete all existing images.
 - Prior to GitLab 12.10, any tags that use the same image ID as the `latest` tag
 are not deleted by the cleanup policy.
@@ -689,6 +745,13 @@ You can, however, remove the Container Registry for a project:
 
 The **Packages & Registries > Container Registry** entry is removed from the project's sidebar.
 
+## Manifest lists and garbage collection
+
+Manifest lists are commonly used for creating multi-architecture images. If you rely on manifest
+lists, you should tag all the individual manifests referenced by a list in their respective
+repositories, and not just the manifest list itself. This ensures that those manifests aren't
+garbage collected, as long as they have at least one tag pointing to them.
+
 ## Troubleshooting the GitLab Container Registry
 
 ### Docker connection error
@@ -699,7 +762,7 @@ project or branch name. Special characters can include:
 - Leading underscore
 - Trailing hyphen/dash
 
-To get around this, you can [change the group path](../../group/index.md#changing-a-groups-path),
+To get around this, you can [change the group path](../../group/index.md#change-a-groups-path),
 [change the project path](../../project/settings/index.md#renaming-a-repository) or change the branch
 name.
 
@@ -712,7 +775,7 @@ For information on how to update your images, see the [Docker help](https://docs
 
 ### `Blob unknown to registry` error when pushing a manifest list
 
-When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/commandline/manifest/#create-and-push-a-manifest-list) to the GitLab Container Registry, you may receive the error `manifest blob unknown: blob unknown to registry`. This issue occurs when the individual child manifests referenced in the manifest list were not pushed to the same repository.
+When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/commandline/manifest/#create-and-push-a-manifest-list) to the GitLab Container Registry, you may receive the error `manifest blob unknown: blob unknown to registry`. [This issue](https://gitlab.com/gitlab-org/gitlab/-/issues/209008) occurs when the individual child manifests referenced in the manifest list were not pushed to the same repository.
 
 For example, you may have two individual images, one for `amd64` and another for `arm64v8`, and you want to build a multi-arch image with them. The `amd64` and `arm64v8` images must be pushed to the same repository where you want to push the multi-arch image.
 
@@ -720,20 +783,78 @@ As a workaround, you should include the architecture in the tag name of individu
 
 ### The cleanup policy doesn't delete any tags
 
-In GitLab 13.6 and earlier, when you run the cleanup policy,
-you may expect it to delete tags and it does not.
+There can be different reasons behind this:
 
-This issue occurs when the cleanup policy was saved without
-editing the value in the **Remove tags matching** field.
+- In GitLab 13.6 and earlier, when you run the cleanup policy you may expect it to delete tags and
+  it does not. This occurs when the cleanup policy is saved without editing the value in the
+  **Remove tags matching** field. This field has a grayed out `.*` value as a placeholder. Unless
+  `.*` (or another regex pattern) is entered explicitly into the field, a `nil` value is submitted.
+  This value prevents the saved cleanup policy from matching any tags. As a workaround, edit the
+  cleanup policy. In the **Remove tags matching** field, enter `.*` and save. This value indicates
+  that all tags should be removed.
 
-This field had a grayed out `.*` value as a placeholder.
-Unless `.*` (or other regex pattern) was entered explicitly into the
-field, a `nil` value was submitted. This value prevents the
-saved cleanup policy from matching any tags.
+- If you are on GitLab self-managed instances and you have 1000+ tags in a container repository, you
+  might run into a [Container Registry token expiration issue](https://gitlab.com/gitlab-org/gitlab/-/issues/288814),
+  with `error authorizing context: invalid token` in the logs.
 
-As a workaround, edit the cleanup policy. In the **Remove tags matching**
-field, enter `.*` and save. This value indicates that all tags should
-be removed.
+  To fix this, there are two workarounds:
+
+  - If you are on GitLab 13.9 or later, you can [set limits for the cleanup policy](#set-cleanup-limits-to-conserve-resources).
+    This limits the cleanup execution in time, and avoids the expired token error.
+
+  - Extend the expiration delay of the Container Registry authentication tokens. This defaults to 5
+    minutes. You can set a custom value by running
+    `ApplicationSetting.last.update(container_registry_token_expire_delay: <integer>)` in the Rails
+    console, where `<integer>` is the desired number of minutes. For reference, 15 minutes is the
+    value currently in use for GitLab.com. Be aware that by extending this value you increase the
+    time required to revoke permissions.
+
+If the previous fixes didn't work or you are on earlier versions of GitLab, you can generate a list
+of the tags that you want to delete, and then use that list to delete the tags. To do this, follow
+these steps:
+
+1. Run the following shell script. The command just before the `for` loop ensures that
+   `list_o_tags.out` is always reinitialized when starting the loop. After running this command, all
+   the tags' names will be in the `list_o_tags.out` file:
+
+   ```shell
+   # Get a list of all tags in a certain container repository while considering [pagination](../../../api/index.md#pagination)
+   echo -n "" > list_o_tags.out; for i in {1..N}; do curl --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | sed 's:^.\(.*\).$:\1:' >> list_o_tags.out; done
+   ```
+
+1. Remove from the `list_o_tags.out` file any tags that you want to keep. Here are some example
+   `sed` commands for this. Note that these commands are simply examples. You may change them to
+   best suit your needs:
+
+   ```shell
+   # Remove the `latest` tag from the file
+   sed -i '/latest/d' list_o_tags.out
+
+   # Remove the first N tags from the file
+   sed -i '1,Nd' list_o_tags.out
+
+   # Remove the tags starting with `Av` from the file
+   sed -i '/^Av/d' list_o_tags.out
+
+   # Remove the tags ending with `_v3` from the file
+   sed -i '/_v3$/d' list_o_tags.out
+   ```
+
+   If you are running macOS, you must add `.bak` to the commands. For example:
+
+   ```shell
+   sed -i .bak '/latest/d' list_o_tags.out
+   ```
+
+1. Double-check the `list_o_tags.out` file to make sure it contains only the tags that you want to
+   delete.
+
+1. Run this shell script to delete the tags in the `list_o_tags.out` file:
+
+   ```shell
+   # loop over list_o_tags.out to delete a single tag at a time
+   while read -r LINE || [[ -n $LINE ]]; do echo ${LINE}; curl --request DELETE --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags/${LINE}"; sleep 0.1; echo; done < list_o_tags.out > delete.logs
+   ```
 
 ### Troubleshoot as a GitLab server admin
 

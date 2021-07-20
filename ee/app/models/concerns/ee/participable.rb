@@ -10,5 +10,12 @@ module EE
 
       Ability.users_that_can_read_group(participants.to_a, self.group)
     end
+
+    override :can_read_participable?
+    def can_read_participable?(participant)
+      return super unless self.is_a?(Epic)
+
+      participant.can?(:read_group, group)
+    end
   end
 end

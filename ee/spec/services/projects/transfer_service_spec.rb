@@ -7,6 +7,7 @@ RSpec.describe Projects::TransferService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
+
   let(:project) { create(:project, :repository, :public, :legacy_storage, namespace: user.namespace) }
 
   subject { described_class.new(project, user) }
@@ -64,7 +65,7 @@ RSpec.describe Projects::TransferService do
     end
   end
 
-  describe 'elasticsearch indexing', :elastic, :aggregate_failures do
+  describe 'elasticsearch indexing', :elastic, :clean_gitlab_redis_shared_state, :aggregate_failures do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
     end
@@ -74,7 +75,7 @@ RSpec.describe Projects::TransferService do
 
       it 'reindexes the project and associated issues and notes' do
         expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
+        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues merge_requests notes])
 
         subject.execute(group)
       end

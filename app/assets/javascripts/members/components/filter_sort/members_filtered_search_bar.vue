@@ -1,10 +1,14 @@
 <script>
 import { GlFilteredSearchToken } from '@gitlab/ui';
 import { mapState } from 'vuex';
-import { getParameterByName } from '~/lib/utils/common_utils';
-import { setUrlParams, queryToObject } from '~/lib/utils/url_utility';
+import { getParameterByName, setUrlParams, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import { SEARCH_TOKEN_TYPE, SORT_PARAM } from '~/members/constants';
+import {
+  SEARCH_TOKEN_TYPE,
+  SORT_QUERY_PARAM_NAME,
+  ACTIVE_TAB_QUERY_PARAM_NAME,
+} from '~/members/constants';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
 export default {
@@ -17,7 +21,7 @@ export default {
       title: s__('Members|2FA'),
       token: GlFilteredSearchToken,
       unique: true,
-      operators: [{ value: '=', description: 'is' }],
+      operators: OPERATOR_IS_ONLY,
       options: [
         { value: 'enabled', title: s__('Members|Enabled') },
         { value: 'disabled', title: s__('Members|Disabled') },
@@ -30,20 +34,25 @@ export default {
       title: s__('Members|Membership'),
       token: GlFilteredSearchToken,
       unique: true,
-      operators: [{ value: '=', description: 'is' }],
+      operators: OPERATOR_IS_ONLY,
       options: [
         { value: 'exclude', title: s__('Members|Direct') },
         { value: 'only', title: s__('Members|Inherited') },
       ],
     },
   ],
+  inject: ['namespace', 'sourceId', 'canManageMembers'],
   data() {
     return {
       initialFilterValue: [],
     };
   },
   computed: {
-    ...mapState(['sourceId', 'filteredSearchBar', 'canManageMembers']),
+    ...mapState({
+      filteredSearchBar(state) {
+        return state[this.namespace].filteredSearchBar;
+      },
+    }),
     tokens() {
       return this.$options.availableTokens.filter((token) => {
         if (
@@ -92,9 +101,12 @@ export default {
 
         if (type === SEARCH_TOKEN_TYPE) {
           if (value.data !== '') {
+            const { searchParam } = this.filteredSearchBar;
+            const { [searchParam]: searchParamValue } = accumulator;
+
             return {
               ...accumulator,
-              [this.filteredSearchBar.searchParam]: value.data,
+              [searchParam]: searchParamValue ? `${searchParamValue} ${value.data}` : value.data,
             };
           }
         } else {
@@ -107,10 +119,15 @@ export default {
         return accumulator;
       }, {});
 
-      const sortParam = getParameterByName(SORT_PARAM);
+      const sortParamValue = getParameterByName(SORT_QUERY_PARAM_NAME);
+      const activeTabParamValue = getParameterByName(ACTIVE_TAB_QUERY_PARAM_NAME);
 
       window.location.href = setUrlParams(
-        { ...params, ...(sortParam && { sort: sortParam }) },
+        {
+          ...params,
+          ...(sortParamValue && { [SORT_QUERY_PARAM_NAME]: sortParamValue }),
+          ...(activeTabParamValue && { [ACTIVE_TAB_QUERY_PARAM_NAME]: activeTabParamValue }),
+        },
         window.location.href,
         true,
       );

@@ -1,4 +1,4 @@
-= form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-account-settings'), html: { class: 'fieldset-form' } do |f|
+= form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-account-settings'), html: { class: 'fieldset-form', id: 'account-settings' } do |f|
   = form_errors(@application_setting)
 
   %fieldset
@@ -53,6 +53,14 @@
         = _('Specify an e-mail address regex pattern to identify default internal users.')
         = link_to _('More information'), help_page_path('user/permissions', anchor: 'setting-new-users-to-external'),
           target: '_blank'
+    - unless Gitlab.com?
+      .form-group
+        = f.label :deactivate_dormant_users, _('Dormant users'), class: 'label-bold'
+        .form-check
+          = f.check_box :deactivate_dormant_users, class: 'form-check-input'
+          = f.label :deactivate_dormant_users, class: 'form-check-label' do
+            = _('Deactivate dormant users after 90 days of inactivity. Users can return to active status by signing in to their account. While inactive, a user is not counted as an active user in the instance.')
+            = link_to _('More information'), help_page_path('user/admin_area/moderate_users', anchor: 'automatically-deactivate-dormant-users'), target: '_blank'
     .form-group
       = f.label :personal_access_token_prefix, _('Personal Access Token prefix'), class: 'label-light'
       = f.text_field :personal_access_token_prefix, placeholder: _('Max 20 characters'), class: 'form-control gl-form-input'
@@ -65,4 +73,4 @@
 
     = render_if_exists 'admin/application_settings/updating_name_disabled_for_users', form: f
     = render_if_exists 'admin/application_settings/availability_on_namespace_setting', form: f
-  = f.submit _('Save changes'), class: 'gl-button btn btn-success qa-save-changes-button'
+  = f.submit _('Save changes'), class: 'gl-button btn btn-confirm qa-save-changes-button'

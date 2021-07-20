@@ -7,6 +7,8 @@ module EE
     include ::Gitlab::Utils::StrongMemoize
 
     prepended do
+      has_many :dora_daily_metrics, class_name: 'Dora::DailyMetrics'
+
       # Returns environments where its latest deployment is to a cluster
       scope :deployed_to_cluster, -> (cluster) do
         environments = model.arel_table
@@ -20,8 +22,7 @@ module EE
           .join(later_deployments, Arel::Nodes::OuterJoin)
           .on(join_conditions)
 
-        model
-          .joins(:successful_deployments)
+        joins(:successful_deployments)
           .joins(join.join_sources)
           .where(later_deployments[:id].eq(nil))
           .where(deployments[:cluster_id].eq(cluster.id))
@@ -60,11 +61,40 @@ module EE
     end
 
     def protected?
-      project.protected_environment_by_name(name).present?
+      return false unless project.licensed_feature_available?(:protected_environments)
+
+      associated_protected_environments.present?
     end
 
-    def protected_deployable_by_user?(user)
-      project.protected_environment_accessible_to?(name, user)
+    def protected_from?(user)
+      return true unless user.is_a?(User)
+      return false unless protected?
+
+      protected_environment_accesses(user).any? { |access, _| access == false }
+    end
+
+    def protected_by?(user)
+      return false unless user.is_a?(User) && protected?
+
+      protected_environment_accesses(user).all? { |access, _| access == true }
+    end
+
+    private
+
+    def protected_environment_accesses(user)
+      key = "environment:#{self.id}:for:#{user.id}"
+
+      ::Gitlab::SafeRequestStore.fetch(key) do
+        associated_protected_environments.group_by do |pe|
+          pe.accessible_to?(user)
+        end
+      end
+    end
+
+    def associated_protected_environments
+      strong_memoize(:associated_protected_environments) do
+        ::ProtectedEnvironment.for_environment(self)
+      end
     end
   end
 end

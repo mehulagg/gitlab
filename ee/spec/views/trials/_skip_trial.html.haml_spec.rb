@@ -5,11 +5,9 @@ require 'spec_helper'
 RSpec.describe 'trials/_skip_trial.html.haml' do
   include ApplicationHelper
 
-  let_it_be(:trimmed_skip_trial_copy_enabled) { false }
   let(:source) { nil }
 
   before do
-    allow(view).to receive(:experiment_enabled?).with(:trimmed_skip_trial_copy).and_return(trimmed_skip_trial_copy_enabled)
     params[:glm_source] = source
     render 'trials/skip_trial'
   end
@@ -17,7 +15,7 @@ RSpec.describe 'trials/_skip_trial.html.haml' do
   subject { rendered }
 
   shared_examples 'has Skip Trial verbiage' do
-    it { is_expected.to have_content("Skip Trial (Continue with Free Account)") }
+    it { is_expected.to have_content("Skip Trial") }
   end
 
   context 'without glm_source' do
@@ -28,12 +26,6 @@ RSpec.describe 'trials/_skip_trial.html.haml' do
     let(:source) { 'about.gitlab.com' }
 
     include_examples 'has Skip Trial verbiage'
-
-    context 'when trimmed_skip_trial_copy experiment is enabled' do
-      let_it_be(:trimmed_skip_trial_copy_enabled) { true }
-
-      it { is_expected.to have_content("Skip Trial") }
-    end
   end
 
   context 'with glm_source of gitlab.com' do

@@ -1,13 +1,13 @@
 <script>
-import { GlButton, GlLink, GlTable } from '@gitlab/ui';
+import { GlLink, GlTable } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 export default {
   components: {
-    GlButton,
     GlLink,
     GlTable,
   },
+  inject: ['integrationDocsUrl'],
   props: {
     agents: {
       required: true,
@@ -33,18 +33,19 @@ export default {
 
 <template>
   <div>
-    <div class="gl-display-block gl-text-right gl-my-4">
-      <gl-button
-        category="primary"
-        href="https://docs.gitlab.com/ee/user/clusters/agent/#get-started-with-gitops-and-the-gitlab-agent"
-        target="_blank"
-        variant="success"
-      >
-        {{ s__('ClusterAgents|Connect your cluster with the GitLab Agent') }}
-      </gl-button>
+    <div class="gl-display-block gl-text-right gl-my-3">
+      <gl-link :href="integrationDocsUrl" target="_blank">
+        {{ s__('ClusterAgents|Learn more about installing the GitLab Agent') }}
+      </gl-link>
     </div>
 
     <gl-table :items="agents" :fields="fields" stacked="md" data-testid="cluster-agent-list-table">
+      <template #cell(name)="{ item }">
+        <gl-link :href="item.webPath">
+          {{ item.name }}
+        </gl-link>
+      </template>
+
       <template #cell(configuration)="{ item }">
         <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
         <gl-link v-if="item.configFolder" :href="item.configFolder.webPath">

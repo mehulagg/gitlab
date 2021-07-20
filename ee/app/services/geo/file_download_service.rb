@@ -38,7 +38,6 @@ module Geo
     def downloader_klass
       return Gitlab::Geo::Replication::FileDownloader if user_upload?
       return Gitlab::Geo::Replication::JobArtifactDownloader if job_artifact?
-      return Gitlab::Geo::Replication::LfsDownloader if lfs?
 
       fail_unimplemented_klass!(type: 'Downloader')
     end
@@ -62,8 +61,6 @@ module Geo
       strong_memoize(:registry) do
         if job_artifact?
           Geo::JobArtifactRegistry.find_or_initialize_by(artifact_id: object_db_id)
-        elsif lfs?
-          Geo::LfsObjectRegistry.find_or_initialize_by(lfs_object_id: object_db_id)
         else
           Geo::UploadRegistry.find_or_initialize_by(file_type: object_type, file_id: object_db_id)
         end

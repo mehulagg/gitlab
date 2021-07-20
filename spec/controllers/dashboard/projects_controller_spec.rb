@@ -15,6 +15,7 @@ RSpec.describe Dashboard::ProjectsController, :aggregate_failures do
     context 'user logged in' do
       let_it_be(:project) { create(:project, name: 'Project 1') }
       let_it_be(:project2) { create(:project, name: 'Project Two') }
+
       let(:projects) { [project, project2] }
 
       before_all do
@@ -156,6 +157,12 @@ RSpec.describe Dashboard::ProjectsController, :aggregate_failures do
         let!(:design_event) { create(:design_event, project: project) }
         let!(:wiki_page_event) { create(:wiki_page_event, project: project) }
         let!(:issue_event) { create(:closed_issue_event, project: project) }
+        let!(:push_event) do
+          create(:push_event, project: project).tap do |event|
+            create(:push_event_payload, event: event, ref_count: 2, ref: nil, ref_type: :tag, commit_count: 0, action: :pushed)
+          end
+        end
+
         let(:design) { design_event.design }
         let(:wiki_page) { wiki_page_event.wiki_page }
         let(:issue) { issue_event.issue }
@@ -168,9 +175,10 @@ RSpec.describe Dashboard::ProjectsController, :aggregate_failures do
         it 'renders all kinds of event without error' do
           get :index, format: :atom
 
-          expect(assigns(:events)).to include(design_event, wiki_page_event, issue_event)
+          expect(assigns(:events)).to include(design_event, wiki_page_event, issue_event, push_event)
           expect(response).to render_template('dashboard/projects/index')
           expect(response.body).to include(
+            "pushed to project",
             "uploaded design #{design.to_reference}",
             "created wiki page #{wiki_page.title}",
             "joined project #{project.full_name}",

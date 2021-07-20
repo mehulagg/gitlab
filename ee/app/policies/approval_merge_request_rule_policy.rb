@@ -8,4 +8,6 @@ class ApprovalMergeRequestRulePolicy < BasePolicy
   end
 
   rule { editable }.enable :edit_approval_rule
+
+  rule { can?(:read_merge_request) }.enable :read_approval_rule
 end

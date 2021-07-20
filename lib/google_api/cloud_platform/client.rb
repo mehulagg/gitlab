@@ -95,7 +95,6 @@ module GoogleApi
               oauth_scopes: CLUSTER_OAUTH_SCOPES
             },
             master_auth: {
-              username: CLUSTER_MASTER_AUTH_USERNAME,
               client_certificate_config: {
                 issue_client_certificate: true
               }

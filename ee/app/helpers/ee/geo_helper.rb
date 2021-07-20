@@ -29,10 +29,9 @@ module EE
       {
         primary_version: version.to_s,
         primary_revision: revision.to_s,
-        node_actions_allowed: ::Gitlab::Database.db_read_write?.to_s,
-        node_edit_allowed: ::Gitlab::Geo.license_allows?.to_s,
-        geo_troubleshooting_help_path: help_page_path('administration/geo/replication/troubleshooting.md'),
-        replicable_types: replicable_types.to_json
+        replicable_types: replicable_types.to_json,
+        new_node_url: new_admin_geo_node_path,
+        geo_nodes_empty_state_svg: image_path("illustrations/empty-state/geo-empty.svg")
       }
     end
 
@@ -143,17 +142,47 @@ module EE
     end
 
     def resync_all_button
-      button_to(s_("Geo|Resync all"), { controller: controller_name, action: :resync_all }, class: "btn btn-default btn-md mr-2")
+      # This is deprecated and Hard Coded for Projects.
+      # All new replicable types should be using geo_replicable/app.vue
+
+      resync_all_projects_modal_data = {
+        path: resync_all_admin_geo_projects_url,
+        method: 'post',
+        modal_attributes: {
+          title: s_('Geo|Resync all projects'),
+          message: s_('Geo|This will resync all projects. It may take some time to complete. Are you sure you want to continue?'),
+          okTitle: s_('Geo|Resync all'),
+          size: 'sm'
+        }
+      }
+
+      button_tag(s_("Geo|Resync all"), type: "button", class: 'gl-button btn btn-default gl-mr-3 js-confirm-modal-button', data: resync_all_projects_modal_data)
     end
 
     def reverify_all_button
-      button_to(s_("Geo|Reverify all"), { controller: controller_name, action: :reverify_all }, class: "btn btn-default btn-md")
+      # This is deprecated and Hard Coded for Projects.
+      # All new replicable types should be using geo_replicable/app.vue
+
+      reverify_all_projects_modal_data = {
+        path: reverify_all_admin_geo_projects_url,
+        method: 'post',
+        modal_attributes: {
+          title: s_('Geo|Reverify all projects'),
+          message: s_('Geo|This will reverify all projects. It may take some time to complete. Are you sure you want to continue?'),
+          okTitle: s_('Geo|Reverify all'),
+          size: 'sm'
+        }
+      }
+
+      button_tag(s_("Geo|Reverify all"), type: "button", class: 'gl-button btn btn-default gl-mr-3 js-confirm-modal-button', data: reverify_all_projects_modal_data)
     end
 
     def replicable_types
       # Hard Coded Legacy Types, we will want to remove these when they are added to SSF
       replicable_types = [
         {
+          data_type: 'repository',
+          data_type_title: _('Git'),
           title: _('Repository'),
           title_plural: _('Repositories'),
           name: 'repository',
@@ -161,37 +190,41 @@ module EE
           secondary_view: true
         },
         {
+          data_type: 'repository',
+          data_type_title: _('Git'),
           title: _('Wiki'),
           title_plural: _('Wikis'),
           name: 'wiki',
           name_plural: 'wikis'
         },
         {
-          title: _('LFS object'),
-          title_plural: _('LFS objects'),
-          name: 'lfs_object',
-          name_plural: 'lfs_objects'
-        },
-        {
-          title: _('Attachment'),
-          title_plural: _('Attachments'),
+          data_type: 'blob',
+          data_type_title: _('File'),
+          title: _('Upload'),
+          title_plural: _('Uploads'),
           name: 'attachment',
           name_plural: 'attachments',
           secondary_view: true
         },
         {
+          data_type: 'blob',
+          data_type_title: _('File'),
           title: _('Job artifact'),
           title_plural: _('Job artifacts'),
           name: 'job_artifact',
           name_plural: 'job_artifacts'
         },
         {
+          data_type: 'blob',
+          data_type_title: _('File'),
           title: _('Container repository'),
           title_plural: _('Container repositories'),
           name: 'container_repository',
           name_plural: 'container_repositories'
         },
         {
+          data_type: 'repository',
+          data_type_title: _('Git'),
           title: _('Design repository'),
           title_plural: _('Design repositories'),
           name: 'design_repository',
@@ -204,6 +237,8 @@ module EE
       enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
           {
+            data_type: replicator_class.data_type,
+            data_type_title: replicator_class.data_type_title,
             title: replicator_class.replicable_title,
             title_plural: replicator_class.replicable_title_plural,
             name: replicator_class.replicable_name,

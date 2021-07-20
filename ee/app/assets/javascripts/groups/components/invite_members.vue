@@ -19,10 +19,35 @@ export default {
       type: Array,
       required: true,
     },
+    initialEmailInputs: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
+    emailPlaceholderPrefix: {
+      type: String,
+      required: false,
+      default: 'member',
+    },
+    addAnotherText: {
+      type: String,
+      required: false,
+      default: s__('InviteMember|Invite another member'),
+    },
+    inviteLabel: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    inputName: {
+      type: String,
+      required: false,
+      default: 'group[emails][]',
+    },
   },
   data() {
     return {
-      numberOfInputs: Math.max(this.emails.length, 1),
+      numberOfInputs: Math.max(this.emails.length, this.initialEmailInputs),
     };
   },
   methods: {
@@ -36,7 +61,9 @@ export default {
       return sprintf(this.$options.i18n.emailLabel, { number });
     },
     emailPlaceholder(number) {
-      return sprintf(this.$options.i18n.emailPlaceholder, { number });
+      const emailPrefix = this.emailPlaceholderPrefix + number;
+
+      return sprintf(this.$options.i18n.emailPlaceholder, { emailPrefix });
     },
     emailID(number) {
       return `email-${number}`;
@@ -48,14 +75,14 @@ export default {
       'InviteMember|Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later.',
     ),
     emailLabel: __('Email %{number}'),
-    emailPlaceholder: __('member%{number}@company.com'),
+    emailPlaceholder: __('%{emailPrefix}@company.com'),
     inviteAnother: s__('InviteMember|Invite another member'),
   },
 };
 </script>
 <template>
   <div class="gl-mb-6">
-    <gl-form-group :label="$options.i18n.inviteMembersLabel">
+    <gl-form-group :label="inviteLabel" data-testid="no-input-form-group">
       <template #description>
         <gl-sprintf :message="$options.i18n.inviteMembersDescription">
           <template #link="{ content }">
@@ -75,11 +102,11 @@ export default {
       <gl-form-input
         :id="emailID(number)"
         :ref="emailID(number)"
-        name="group[emails][]"
+        :name="inputName"
         :placeholder="emailPlaceholder(number)"
         :value="emails[index]"
       />
     </gl-form-group>
-    <gl-button icon="plus" @click="addInput">{{ $options.i18n.inviteAnother }}</gl-button>
+    <gl-button icon="plus" @click="addInput">{{ addAnotherText }}</gl-button>
   </div>
 </template>

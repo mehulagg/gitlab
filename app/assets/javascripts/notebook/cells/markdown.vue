@@ -3,6 +3,7 @@
 import katex from 'katex';
 import marked from 'marked';
 import { sanitize } from '~/lib/dompurify';
+import { hasContent, markdownConfig } from '~/lib/utils/text_utility';
 import Prompt from './prompt.vue';
 
 const renderer = new marked.Renderer();
@@ -37,6 +38,11 @@ const katexRegexString = `(
   .replace(/\s/g, '')
   .trim();
 
+function deHTMLify(t) {
+  // get some specific characters back, that are allowed for KaTex rendering
+  const text = t.replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  return text;
+}
 function renderKatex(t) {
   let text = t;
   let numInline = 0; // number of successfull converted math formulas
@@ -57,9 +63,7 @@ function renderKatex(t) {
 
         while (matches !== null) {
           try {
-            const renderedKatex = katex.renderToString(
-              matches[0].replace(/\$/g, '').replace(/&#39;/g, "'"),
-            ); // get the tick ' back again from HTMLified string
+            const renderedKatex = katex.renderToString(deHTMLify(matches[0].replace(/\$/g, '')));
             text = `${text.replace(matches[0], ` ${renderedKatex}`)}`;
           } catch {
             numInline -= 1;
@@ -68,7 +72,7 @@ function renderKatex(t) {
         }
       } else {
         try {
-          text = katex.renderToString(matches[2].replace(/&#39;/g, "'"));
+          text = katex.renderToString(deHTMLify(matches[2]));
         } catch (error) {
           numInline -= 1;
         }
@@ -84,6 +88,38 @@ renderer.paragraph = (t) => {
 renderer.listitem = (t) => {
   const [text, inline] = renderKatex(t);
   return `<li class="${inline ? 'inline-katex' : ''}">${text}</li>`;
+};
+renderer.originalImage = renderer.image;
+
+renderer.image = function image(href, title, text) {
+  const attachmentHeader = `attachment:`; // eslint-disable-line @gitlab/require-i18n-strings
+
+  if (!this.attachments || !href.startsWith(attachmentHeader)) {
+    return this.originalImage(href, title, text);
+  }
+
+  let img = ``;
+  const filename = href.substring(attachmentHeader.length);
+
+  if (hasContent(filename)) {
+    const attachment = this.attachments[filename];
+
+    if (attachment) {
+      const imageType = Object.keys(attachment)[0];
+
+      if (hasContent(imageType)) {
+        const data = attachment[imageType];
+        const inlined = `data:${imageType};base64,${data}"`; // eslint-disable-line @gitlab/require-i18n-strings
+        img = this.originalImage(inlined, title, text);
+      }
+    }
+  }
+
+  if (!hasContent(img)) {
+    return this.originalImage(href, title, text);
+  }
+
+  return sanitize(img);
 };
 
 marked.setOptions({
@@ -102,62 +138,9 @@ export default {
   },
   computed: {
     markdown() {
-      return sanitize(marked(this.cell.source.join('').replace(/\\/g, '\\\\')), {
-        // allowedTags from GitLab's inline HTML guidelines
-        // https://docs.gitlab.com/ee/user/markdown.html#inline-html
-        ALLOWED_TAGS: [
-          'a',
-          'abbr',
-          'b',
-          'blockquote',
-          'br',
-          'code',
-          'dd',
-          'del',
-          'div',
-          'dl',
-          'dt',
-          'em',
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'hr',
-          'i',
-          'img',
-          'ins',
-          'kbd',
-          'li',
-          'ol',
-          'p',
-          'pre',
-          'q',
-          'rp',
-          'rt',
-          'ruby',
-          's',
-          'samp',
-          'span',
-          'strike',
-          'strong',
-          'sub',
-          'summary',
-          'sup',
-          'table',
-          'tbody',
-          'td',
-          'tfoot',
-          'th',
-          'thead',
-          'tr',
-          'tt',
-          'ul',
-          'var',
-        ],
-        ALLOWED_ATTR: ['class', 'style', 'href', 'src'],
-      });
+      renderer.attachments = this.cell.attachments;
+
+      return sanitize(marked(this.cell.source.join('').replace(/\\/g, '\\\\')), markdownConfig);
     },
   },
 };

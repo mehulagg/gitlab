@@ -43,7 +43,7 @@ The following are GitLab upgrade validation tests we performed.
 - Outcome: Partial success because we observed downtime during the upgrade of the primary and secondary sites.
 - Follow up issues/actions:
   - [Fix zero-downtime upgrade process/instructions for multi-node Geo deployments](https://gitlab.com/gitlab-org/gitlab/-/issues/225684)
-  - [Geo:check Rake task: Exclude AuthorizedKeysCommand check if node not running Puma/Unicorn](https://gitlab.com/gitlab-org/gitlab/-/issues/225454)
+  - [Geo:check Rake task: Exclude AuthorizedKeysCommand check if node not running Puma](https://gitlab.com/gitlab-org/gitlab/-/issues/225454)
   - [Update instructions in the next upgrade issue to include monitoring HAProxy dashboards](https://gitlab.com/gitlab-org/gitlab/-/issues/225359)
 
 [Upgrade Geo multi-node installation](https://gitlab.com/gitlab-org/gitlab/-/issues/208104):
@@ -53,7 +53,7 @@ The following are GitLab upgrade validation tests we performed.
 - Outcome: Partial success because we did not run the looping pipeline during the demo to validate
   zero-downtime.
 - Follow up issues:
-  - [Clarify how Puma/Unicorn should include deploy node](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5460)
+  - [Clarify how Puma should include deploy node](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5460)
   - [Investigate MR creation failure after upgrade to 12.9.10](https://gitlab.com/gitlab-org/gitlab/-/issues/223282) Closed as false positive.
 
 ### February 2020
@@ -148,13 +148,13 @@ The following are PostgreSQL upgrade validation tests we performed.
 [PostgreSQL 11 upgrade procedure for Geo installations](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4975):
 
 - Description: Prior to making PostgreSQL 11 the default version of PostgreSQL in GitLab 12.10, we
-  tested upgrading to PostgreSQL 11 in Geo deployments on GitLab 12.9.
+  tested upgrading to PostgreSQL 11 in Geo deployments in GitLab 12.9.
 - Outcome: Partially successful. Issues were discovered in multi-node configurations with a separate
   tracking database and concerns were raised about allowing automatic upgrades when Geo enabled.
 - Follow up issues:
   - [`replicate-geo-database` incorrectly tries to back up repositories](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5241).
   - [`pg-upgrade` fails to upgrade a standalone Geo tracking database](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5242).
-  - [`revert-pg-upgrade` fails to downgrade the PostgreSQL data of a Geo secondary’s standalone tracking database](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5243).
+  - [`revert-pg-upgrade` fails to downgrade the PostgreSQL data of a Geo secondary's standalone tracking database](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5243).
   - [Timeout error on Geo secondary read-replica near the end of `gitlab-ctl pg-upgrade`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5235).
 
 [Verify Geo installation with PostgreSQL 11](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4971):
@@ -178,6 +178,15 @@ The following are PostgreSQL upgrade validation tests we performed.
 ## Other tests
 
 The following are additional validation tests we performed.
+
+### May 2021
+
+[Test failover with object storage replication enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/330362):
+
+- Description: At the time of testing, Geo's object storage replication functionality was in beta. We tested that object storage replication works as intended and that the data was present on the new primary after a failover.
+- Outcome: The test was successful. Data in object storage was replicated and present after a failover.
+- Follow up issues:
+  - [Geo: Failing to replicate initial Monitoring project](https://gitlab.com/gitlab-org/gitlab/-/issues/330485)
 
 ### August 2020
 

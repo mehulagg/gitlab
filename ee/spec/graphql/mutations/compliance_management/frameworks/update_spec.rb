@@ -6,6 +6,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Update do
   include GraphqlHelpers
 
   let_it_be(:framework) { create(:compliance_framework) }
+
   let(:user) { framework.namespace.owner }
   let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
   let(:params) do
@@ -18,10 +19,9 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Update do
 
   subject { mutation.resolve(id: global_id_of(framework), params: params) }
 
-  context 'feature is enabled and licensed' do
+  context 'feature is licensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     context 'parameters are valid' do

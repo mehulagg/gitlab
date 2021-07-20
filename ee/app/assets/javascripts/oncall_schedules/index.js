@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import OnCallSchedulesWrapper from './components/oncall_schedules_wrapper.vue';
 import apolloProvider from './graphql';
-import getShiftTimeUnitWidthQuery from './graphql/queries/get_shift_time_unit_width.query.graphql';
+import getTimelineWidthQuery from './graphql/queries/get_timeline_width.query.graphql';
 
 Vue.use(VueApollo);
 
@@ -14,9 +14,9 @@ export default () => {
   const { projectPath, emptyOncallSchedulesSvgPath, timezones } = el.dataset;
 
   apolloProvider.clients.defaultClient.cache.writeQuery({
-    query: getShiftTimeUnitWidthQuery,
+    query: getTimelineWidthQuery,
     data: {
-      shiftTimeUnitWidth: 0,
+      timelineWidth: 0,
     },
   });
 

@@ -7,7 +7,7 @@
 module SystemNoteService
   extend self
 
-  # Called when commits are added to a Merge Request
+  # Called when commits are added to a merge request
   #
   # noteable         - Noteable object
   # project          - Project owning noteable
@@ -168,16 +168,19 @@ module SystemNoteService
   # project     - Project owning noteable
   # author      - User performing the change
   # branch_type - 'source' or 'target'
+  # event_type  - the source of event: 'update' or 'delete'
   # old_branch  - old branch name
   # new_branch  - new branch name
   #
-  # Example Note text:
+  # Example Note text is based on event_type:
   #
-  #   "changed target branch from `Old` to `New`"
+  #   update: "changed target branch from `Old` to `New`"
+  #   delete: "deleted the `Old` branch. This merge request now targets the `New` branch"
   #
   # Returns the created Note object
-  def change_branch(noteable, project, author, branch_type, old_branch, new_branch)
-    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).change_branch(branch_type, old_branch, new_branch)
+  def change_branch(noteable, project, author, branch_type, event_type, old_branch, new_branch)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author)
+      .change_branch(branch_type, event_type, old_branch, new_branch)
   end
 
   # Called when a branch in Noteable is added or deleted
@@ -236,6 +239,10 @@ module SystemNoteService
 
   def mark_canonical_issue_of_duplicate(noteable, project, author, duplicate_issue)
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).mark_canonical_issue_of_duplicate(duplicate_issue)
+  end
+
+  def add_email_participants(noteable, project, author, body)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).add_email_participants(body)
   end
 
   def discussion_lock(issuable, author)
@@ -320,6 +327,10 @@ module SystemNoteService
     ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
   end
 
+  def log_resolving_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).log_resolving_alert(monitoring_tool)
+  end
+
   private
 
   def merge_requests_service(noteable, project, author)
@@ -327,4 +338,4 @@ module SystemNoteService
   end
 end
 
-SystemNoteService.prepend_if_ee('EE::SystemNoteService')
+SystemNoteService.prepend_mod_with('SystemNoteService')

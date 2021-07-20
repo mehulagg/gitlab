@@ -10,39 +10,35 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3672) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
 WARNING:
-GitLab 14.0 will replace its container scanning engine with Trivy. Currently, GitLab uses the open
-source Clair engine for container scanning. GitLab 13.9 deprecates Clair. This is not a hard
-breaking change, as customers who wish to continue to use Clair can do so by setting the
-`CS_MAJOR_VERSION` CI/CD variable to version 3 (or earlier) in their `gitlab-ci.yaml` file. Since Clair is
-deprecated, however, note that GitLab will no longer update or maintain that scanning engine
-beginning in the 14.0 release. We advise customers to use the new default of Trivy beginning in
-GitLab 14.0 for regular updates and the latest features.
+Versions of GitLab prior to 14.0 used Clair as the default container scanning engine. GitLab 14.0
+removes Clair from the product and replaces it with two new scanners. If you
+run container scanning with the default settings, GitLab switches you seamlessly and automatically
+to Trivy in GitLab 14.0. However, if you customized the variables in your container scanning job,
+you should review the [migration guide](#change-scanners)
+and make any necessary updates.
 
 Your application's Docker image may itself be based on Docker images that contain known
 vulnerabilities. By including an extra job in your pipeline that scans for those vulnerabilities and
 displays them in a merge request, you can use GitLab to audit your Docker-based apps.
-By default, container scanning in GitLab is based on [Clair](https://github.com/quay/clair) and
-[Klar](https://github.com/optiopay/klar), which are open-source tools for vulnerability static analysis in
-containers. The GitLab [Klar analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/klar/)
-scans the containers and serves as a wrapper for Clair.
 
-To integrate security scanners other than Clair and Klar into GitLab, see
+GitLab provides integration with open-source tools for vulnerability static analysis in containers:
+
+- [Trivy](https://github.com/aquasecurity/trivy)
+- [Grype](https://github.com/anchore/grype)
+
+To integrate GitLab with security scanners other than those listed here, see
 [Security scanner integration](../../../development/integrations/secure.md).
 
 You can enable container scanning by doing one of the following:
 
 - [Include the CI job](#configuration) in your existing `.gitlab-ci.yml` file.
-- Implicitly use [Auto Container Scanning](../../../topics/autodevops/stages.md#auto-container-scanning)
+- Implicitly use [Auto Container Scanning](../../../topics/autodevops/stages.md#auto-container-scanning),
   provided by [Auto DevOps](../../../topics/autodevops/index.md).
 
 GitLab compares the found vulnerabilities between the source and target branches, and shows the
 information directly in the merge request.
 
 ![Container Scanning Widget](img/container_scanning_v13_2.png)
-
-<!-- NOTE: The container scanning tool references the following heading in the code, so if you
-           make a change to this heading, make sure to update the documentation URLs used in the
-           container scanning tool (https://gitlab.com/gitlab-org/security-products/analyzers/klar) -->
 
 ## Requirements
 
@@ -52,48 +48,50 @@ To enable container scanning in your pipeline, you need the following:
   or [`kubernetes`](https://docs.gitlab.com/runner/install/kubernetes.html) executor.
 - Docker `18.09.03` or higher installed on the same computer as the runner. If you're using the
   shared runners on GitLab.com, then this is already the case.
-- An image matching [Clair's list of supported distributions](https://quay.github.io/claircore/).
+- An image matching the [supported distributions](#supported-distributions).
 - [Build and push](../../packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd)
-  your Docker image to your project's container registry. The name of the Docker image should use
-  the following [predefined CI/CD variables](../../../ci/variables/predefined_variables.md):
-
-  ```plaintext
-  $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-  ```
-
-  You can use these directly in your `.gitlab-ci.yml` file:
-
-  ```yaml
-  build:
-    image: docker:19.03.12
-    stage: build
-    services:
-      - docker:19.03.12-dind
-    variables:
-      IMAGE_TAG: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-    script:
-      - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-      - docker build -t $IMAGE_TAG .
-      - docker push $IMAGE_TAG
-  ```
+  the Docker image to your project's container registry. If using a third-party container
+  registry, you might need to provide authentication credentials using the `DOCKER_USER` and
+  `DOCKER_PASSWORD` [configuration variables](#available-cicd-variables).
+- The name of the Docker image to scan, in the `DOCKER_IMAGE` [configuration variable](#available-cicd-variables).
 
 ## Configuration
 
 How you enable container scanning depends on your GitLab version:
 
-- GitLab 11.9 and later: [Include](../../../ci/yaml/README.md#includetemplate) the
-  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml)
+- GitLab 11.9 and later: [Include](../../../ci/yaml/index.md#includetemplate) the
+  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml)
   that comes with your GitLab installation.
 - GitLab versions earlier than 11.9: Copy and use the job from the
-  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
-- GitLab 13.6 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263482) better support for [FIPS](https://csrc.nist.gov/publications/detail/fips/140/2/final) by upgrading the `CS_MAJOR_VERSION` from `2` to `3`.
+  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
+
+Other changes:
+
+- GitLab 13.6 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263482) better support for
+  [FIPS](https://csrc.nist.gov/publications/detail/fips/140/2/final) by upgrading the
+  `CS_MAJOR_VERSION` from `2` to `3`. Version `3` of the `container_scanning` Docker image uses
+  [`centos:centos8`](https://hub.docker.com/_/centos)
+  as the new base. It also removes the use of the [start.sh](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/merge_requests/77)
+  script and instead executes the analyzer by default. Any customizations made to the
+  `container_scanning` job's [`before_script`](../../../ci/yaml/index.md#before_script)
+  and [`after_script`](../../../ci/yaml/index.md#after_script)
+  blocks may not work with the new version. To roll back to the previous [`alpine:3.11.3`](https://hub.docker.com/_/alpine)-based
+  Docker image, you can specify the major version through the [`CS_MAJOR_VERSION`](#available-cicd-variables)
+  variable.
+- GitLab 13.9 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/322656) integration with
+  [Trivy](https://github.com/aquasecurity/trivy) by upgrading `CS_MAJOR_VERSION` from `3` to `4`.
+- GitLab 14.0 [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61850)
+  an integration with [Trivy](https://github.com/aquasecurity/trivy)
+  as the default for container scanning, and also [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/326279)
+  an integration with [Grype](https://github.com/anchore/grype)
+  as an alternative scanner.
 
 To include the `Container-Scanning.gitlab-ci.yml` template (GitLab 11.9 and later), add the
 following to your `.gitlab-ci.yml` file:
 
 ```yaml
 include:
-  - template: Container-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
 ```
 
 The included template:
@@ -103,26 +101,19 @@ The included template:
   (see [requirements](#requirements)) and scans it for possible vulnerabilities.
 
 GitLab saves the results as a
-[Container Scanning report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscontainer_scanning)
+[Container Scanning report artifact](../../../ci/yaml/index.md#artifactsreportscontainer_scanning)
 that you can download and analyze later. When downloading, you always receive the most-recent
 artifact.
 
 The following is a sample `.gitlab-ci.yml` that builds your Docker image, pushes it to the container
-registry, and scans the containers:
+registry, and scans the image:
 
 ```yaml
-variables:
-  DOCKER_DRIVER: overlay2
-
-stages:
-  - build
-  - test
-
 build:
-  image: docker:stable
+  image: docker:latest
   stage: build
   services:
-    - docker:19.03.12-dind
+    - docker:dind
   variables:
     IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
   script:
@@ -132,99 +123,133 @@ build:
     - docker push $IMAGE
 
 include:
-  - template: Container-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
 ```
 
 ### Customizing the container scanning settings
 
 There may be cases where you want to customize how GitLab scans your containers. For example, you
-may want to enable more verbose output from Clair or Klar, access a Docker registry that requires
-authentication, and more. To change such settings, use the [`variables`](../../../ci/yaml/README.md#variables)
-parameter in your `.gitlab-ci.yml` to set [CI/CD variables](#available-variables).
+may want to enable more verbose output, access a Docker registry that requires
+authentication, and more. To change such settings, use the [`variables`](../../../ci/yaml/index.md#variables)
+parameter in your `.gitlab-ci.yml` to set [CI/CD variables](#available-cicd-variables).
 The variables you set in your `.gitlab-ci.yml` overwrite those in
 `Container-Scanning.gitlab-ci.yml`.
 
-This example [includes](../../../ci/yaml/README.md#include) the container scanning template and
-enables verbose output from Clair by setting the `CLAIR_OUTPUT` variable to `High`:
+This example [includes](../../../ci/yaml/index.md#include) the container scanning template and
+enables verbose output for the analyzer:
 
 ```yaml
 include:
-  - template: Container-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
 
 variables:
-  CLAIR_OUTPUT: High
+    SECURE_LOG_LEVEL: 'debug'
 ```
 
-Version `3` of the `container_scanning` Docker image uses [`centos:centos8`](https://hub.docker.com/_/centos)
-as the new base. It also removes the use of the [start.sh](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/merge_requests/77)
-script and instead executes the analyzer by default. Any customizations made to the
-`container_scanning` job's [`before_script`](../../../ci/yaml/README.md#before_script)
-and [`after_script`](../../../ci/yaml/README.md#after_script)
-blocks may not work with the new version. To roll back to the previous [`alpine:3.11.3`](https://hub.docker.com/_/alpine)-based
-Docker image, you can specify the major version through the [`CS_MAJOR_VERSION`](#available-variables)
-variable.
+#### Available CI/CD variables
 
-This example [includes](../../../ci/yaml/README.md#include) the container scanning template and
-enables version `2` of the analyzer:
+You can [configure](#customizing-the-container-scanning-settings) analyzers by using the following CI/CD variables:
 
-```yaml
-include:
-  - template: Container-Scanning.gitlab-ci.yml
+| CI/CD Variable                 | Default       | Description | Scanner |
+| ------------------------------ | ------------- | ----------- | ------------ |
+| `ADDITIONAL_CA_CERT_BUNDLE`    | `""`          | Bundle of CA certs that you want to trust. See [Using a custom SSL CA certificate authority](#using-a-custom-ssl-ca-certificate-authority) for more details. | All |
+| `CI_APPLICATION_REPOSITORY`    | `$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG` | Docker repository URL for the image to be scanned. | All |
+| `CI_APPLICATION_TAG`           | `$CI_COMMIT_SHA` | Docker repository tag for the image to be scanned. | All |
+| `CS_ANALYZER_IMAGE`            | `registry.gitlab.com/security-products/container-scanning:4` | Docker image of the analyzer. | All |
+| `CS_DOCKER_INSECURE`           | `"false"`     | Allow access to secure Docker registries using HTTPS without validating the certificates. | All |
+| `CS_REGISTRY_INSECURE`         | `"false"`     | Allow access to insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | Trivy. The registry must listen on port `80/tcp`. |
+| `CS_SEVERITY_THRESHOLD`        | `UNKNOWN`     | Severity level threshold. The scanner outputs vulnerabilities with severity level higher than or equal to this threshold. Supported levels are Unknown, Low, Medium, High, and Critical. | Trivy |
+| `DOCKER_IMAGE`                 | `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` | The Docker image to be scanned. If set, this variable overrides the `$CI_APPLICATION_REPOSITORY` and `$CI_APPLICATION_TAG` variables. | All |
+| `DOCKER_PASSWORD`              | `$CI_REGISTRY_PASSWORD` | Password for accessing a Docker registry requiring authentication. | All |
+| `DOCKER_USER`                  | `$CI_REGISTRY_USER` | Username for accessing a Docker registry requiring authentication. | All |
+| `DOCKERFILE_PATH`              | `Dockerfile`  | The path to the `Dockerfile` to use for generating remediations. By default, the scanner looks for a file named `Dockerfile` in the root directory of the project. You should configure this variable only if your `Dockerfile` is in a non-standard location, such as a subdirectory. See [Solutions for vulnerabilities](#solutions-for-vulnerabilities-auto-remediation) for more details. | All |
+| `SECURE_LOG_LEVEL`             | `info`        | Set the minimum logging level. Messages of this logging level or higher are output. From highest to lowest severity, the logging levels are: `fatal`, `error`, `warn`, `info`, `debug`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1. | All |
 
-variables:
-  CS_MAJOR_VERSION: '2'
-```
+### Supported distributions
 
-<!-- NOTE: The container scanning tool references the following heading in the code, so if you"
-     make a change to this heading, make sure to update the documentation URLs used in the"
-     container scanning tool (https://gitlab.com/gitlab-org/security-products/analyzers/klar)" -->
+Support depends on the scanner:
 
-#### Available variables
+- [Grype](https://github.com/anchore/grype#grype)
+- [Trivy](https://aquasecurity.github.io/trivy/latest/vuln-detection/os/) (Default).
 
-You can [configure](#customizing-the-container-scanning-settings) container
-scanning by using the following CI/CD variables:
+#### UBI-based images
 
-| CI/CD Variable                 | Default       | Description |
-| ------------------------------ | ------------- | ----------- |
-| `ADDITIONAL_CA_CERT_BUNDLE`    | `""`          | Bundle of CA certs that you want to trust. See [Using a custom SSL CA certificate authority](#using-a-custom-ssl-ca-certificate-authority) for more details. |
-| `CLAIR_DB_CONNECTION_STRING`   | `postgresql://postgres:password@clair-vulnerabilities-db:5432/postgres?sslmode=disable&statement_timeout=60000` | This variable represents the [connection string](https://www.postgresql.org/docs/9.3/libpq-connect.html#AEN39692) to the [PostgreSQL server hosting the vulnerabilities definitions](https://hub.docker.com/r/arminc/clair-db) database and **shouldn't be changed** unless you're running the image locally as described in the [Running the standalone container scanning tool](#running-the-standalone-container-scanning-tool) section. The host value for the connection string must match the [alias](https://gitlab.com/gitlab-org/gitlab/-/blob/898c5da43504eba87b749625da50098d345b60d6/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L23) value of the `Container-Scanning.gitlab-ci.yml` template file, which defaults to `clair-vulnerabilities-db`. |
-| `CLAIR_DB_IMAGE`               | `arminc/clair-db:latest` | The Docker image name and tag for the [PostgreSQL server hosting the vulnerabilities definitions](https://hub.docker.com/r/arminc/clair-db). It can be useful to override this value with a specific version, for example, to provide a consistent set of vulnerabilities for integration testing purposes, or to refer to a locally hosted vulnerabilities database for an on-premise offline installation. |
-| `CLAIR_DB_IMAGE_TAG`           | `latest`      | (**DEPRECATED - use `CLAIR_DB_IMAGE` instead**) The Docker image tag for the [PostgreSQL server hosting the vulnerabilities definitions](https://hub.docker.com/r/arminc/clair-db). It can be useful to override this value with a specific version, for example, to provide a consistent set of vulnerabilities for integration testing purposes. |
-| `CLAIR_OUTPUT`                 | `Unknown`     | Severity level threshold. Vulnerabilities with severity level higher than or equal to this threshold are outputted. Supported levels are `Unknown`, `Negligible`, `Low`, `Medium`, `High`, `Critical` and `Defcon1`. |
-| `CLAIR_TRACE`                  | `"false"`     | Set to true to enable more verbose output from the Clair server process. |
-| `CLAIR_VULNERABILITIES_DB_URL` | `clair-vulnerabilities-db` | (**DEPRECATED - use `CLAIR_DB_CONNECTION_STRING` instead**) This variable is explicitly set in the [services section](https://gitlab.com/gitlab-org/gitlab/-/blob/898c5da43504eba87b749625da50098d345b60d6/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L23) of the `Container-Scanning.gitlab-ci.yml` file and defaults to `clair-vulnerabilities-db`. This value represents the address that the [PostgreSQL server hosting the vulnerabilities definitions](https://hub.docker.com/r/arminc/clair-db) is running on and **shouldn't be changed** unless you're running the image locally as described in the [Running the standalone container scanning tool](#running-the-standalone-container-scanning-tool) section. |
-| `CI_APPLICATION_REPOSITORY`    | `$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG` | Docker repository URL for the image to be scanned. |
-| `CI_APPLICATION_TAG`           | `$CI_COMMIT_SHA` | Docker repository tag for the image to be scanned. |
-| `CS_MAJOR_VERSION`             | `3`           | The major version of the Docker image tag. |
-| `DOCKER_IMAGE`                 | `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` | The Docker image to be scanned. If set, this variable overrides the `$CI_APPLICATION_REPOSITORY` and `$CI_APPLICATION_TAG` variables. |
-| `DOCKER_INSECURE`              | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access secure Docker registries using HTTPS with bad (or self-signed) SSL certificates. |
-| `DOCKER_PASSWORD`              | `$CI_REGISTRY_PASSWORD` | Password for accessing a Docker registry requiring authentication. |
-| `DOCKER_USER`                  | `$CI_REGISTRY_USER` | Username for accessing a Docker registry requiring authentication. |
-| `DOCKERFILE_PATH`              | `Dockerfile`  | The path to the `Dockerfile` to be used for generating remediations. By default, the scanner looks for a file named `Dockerfile` in the root directory of the project, so this variable should only be configured if your `Dockerfile` is in a non-standard location, such as a subdirectory. See [Solutions for vulnerabilities](#solutions-for-vulnerabilities-auto-remediation) for more details. |
-| `KLAR_TRACE`                   | `"false"`     | Set to true to enable more verbose output from Klar. |
-| `REGISTRY_INSECURE`            | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access insecure registries (HTTP only). Should only be set to `true` when testing the image locally. |
-| `SECURE_ANALYZERS_PREFIX`      | `"registry.gitlab.com/gitlab-org/security-products/analyzers"` | Set the Docker registry base address from which to download the analyzer. |
-| `SECURE_LOG_LEVEL`             | `info`        | Set the minimum logging level. Messages of this logging level or higher are output. From highest to lowest severity, the logging levels are: `fatal`, `error`, `warn`, `info`, `debug`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1. |
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5775) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 14.1.
+
+GitLab also offers [Red Hat UBI](https://www.redhat.com/en/blog/introducing-red-hat-universal-base-image)
+versions of the container-scanning images. You can therefore replace standard images with UBI-based
+images. To configure the images, set the `CS_ANALYZER_IMAGE` variable to the standard tag plus the
+`-ubi` extension.
+
+| Scanner name    | `CS_ANALYZER_IMAGE` |
+| --------------- | ------------------- |
+| Default (Trivy) | `registry.gitlab.com/security-products/container-scanning:4-ubi` |
+| Grype           | `registry.gitlab.com/security-products/container-scanning/grype:4-ubi` |
+| Trivy           | `registry.gitlab.com/security-products/container-scanning/trivy:4-ubi` |
 
 ### Overriding the container scanning template
 
 If you want to override the job definition (for example, to change properties like `variables`), you
-must declare a `container_scanning` job after the template inclusion, and then
-specify any additional keys. For example:
+must declare and override a job after the template inclusion, and then
+specify any additional keys.
+
+This example sets `GIT_STRATEGY` to `fetch`:
 
 ```yaml
 include:
-  - template: Container-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
 
 container_scanning:
   variables:
     GIT_STRATEGY: fetch
 ```
 
-WARNING:
-GitLab 13.0 and later doesn't support [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic).
-When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules)
-instead.
+### Change scanners
+
+The container-scanning analyzer can use different scanners, depending on the value of the
+`CS_ANALYZER_IMAGE` configuration variable.
+
+The following options are available:
+
+| Scanner name | `CS_ANALYZER_IMAGE` |
+| ------------ | ------------------- |
+| Default ([Trivy](https://github.com/aquasecurity/trivy)) | `registry.gitlab.com/security-products/container-scanning:4` |
+| [Grype](https://github.com/anchore/grype)                | `registry.gitlab.com/security-products/container-scanning/grype:4` |
+| Trivy                                                    | `registry.gitlab.com/security-products/container-scanning/trivy:4` |
+
+If you're migrating from a GitLab 13.x release to a GitLab 14.x release and have customized the
+`container_scanning` job or its CI variables, you might need to perform these migration steps in
+your CI file:
+
+1. Remove these variables:
+
+   - `CS_MAJOR_VERSION`
+   - `CS_PROJECT`
+   - `SECURE_ANALYZERS_PREFIX`
+
+1. Review the `CS_ANALYZER_IMAGE` variable. It no longer depends on the variables above and its new
+   default value is `registry.gitlab.com/security-products/container-scanning:4`. If you have an
+   offline environment, see
+   [Running container scanning in an offline environment](#running-container-scanning-in-an-offline-environment).
+
+1. If present, remove the `.cs_common` and `container_scanning_new` configuration sections.
+
+1. If the `container_scanning` section is present, it's safer to create one from scratch based on
+   the new version of the [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
+   Once finished, it should not have any variables that are only applicable to Klar or Clair. For a
+   complete list of supported variables, see [available variables](#available-cicd-variables).
+
+1. Make any [necessary customizations](#customizing-the-container-scanning-settings)
+   to the chosen scanner. We recommend that you minimize such customizations, as they might require
+   changes in future GitLab major releases.
+
+1. Trigger a new run of a pipeline that includes the `container_scanning` job. Inspect the job
+   output and ensure that the log messages do not mention Clair.
+
+NOTE:
+Prior to the GitLab 14.0 release, any variable defined under the scope `container_scanning` is not
+considered for scanners other than Clair. In GitLab 14.0 and later, all variables can be defined
+either as a global variable or under `container_scanning`.
 
 ### Using a custom SSL CA certificate authority
 
@@ -241,7 +266,7 @@ container_scanning:
         -----END CERTIFICATE-----
 ```
 
-The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/index.md#custom-cicd-variables), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
 
 ### Vulnerability allowlisting
 
@@ -250,8 +275,85 @@ To allowlist specific vulnerabilities, follow these steps:
 1. Set `GIT_STRATEGY: fetch` in your `.gitlab-ci.yml` file by following the instructions in
    [overriding the container scanning template](#overriding-the-container-scanning-template).
 1. Define the allowlisted vulnerabilities in a YAML file named `vulnerability-allowlist.yml`. This must use
-   the format described in the [allowlist example file](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/raw/master/testdata/vulnerability-allowlist.yml).
-1. Add the `vulnerability-allowlist.yml` file to your project's Git repository.
+   the format described in [`vulnerability-allowlist.yml` data format](#vulnerability-allowlistyml-data-format).
+1. Add the `vulnerability-allowlist.yml` file to the root folder of your project's Git repository.
+
+#### vulnerability-allowlist.yml data format
+
+The `vulnerability-allowlist.yml` file is a YAML file that specifies a list of CVE IDs of vulnerabilities that are **allowed** to exist, because they're _false positives_, or they're _not applicable_.
+
+If a matching entry is found in the `vulnerability-allowlist.yml` file, the following happens:
+
+- The vulnerability **is not included** when the analyzer generates the `gl-container-scanning-report.json` file.
+- The Security tab of the pipeline **does not show** the vulnerability. It is not included in the JSON file, which is the source of truth for the Security tab.
+
+Example `vulnerability-allowlist.yml` file:
+
+```yaml
+generalallowlist:
+  CVE-2019-8696:
+  CVE-2014-8166: cups
+  CVE-2017-18248:
+images:
+  registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:
+    CVE-2018-4180:
+  your.private.registry:5000/centos:
+    CVE-2015-1419: libxml2
+    CVE-2015-1447:
+```
+
+This example excludes from `gl-container-scanning-report.json`:
+
+1. All vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_.
+1. All vulnerabilities found in the `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256` container image with CVE ID _CVE-2018-4180_.
+1. All vulnerabilities found in `your.private.registry:5000/centos` container with CVE IDs _CVE-2015-1419_, _CVE-2015-1447_.
+
+##### File format
+
+- `generalallowlist` block allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs are excluded from the scan report.
+
+- `images` block allows you to specify CVE IDs for each container image independently. All vulnerabilities from the given image with matching CVE IDs are excluded from the scan report. The image name is retrieved from one of the environment variables used to specify the Docker image to be scanned, such as `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` or `DOCKER_IMAGE`. The image provided in this block **must** match this value and **must not** include the tag value. For example, if you specify the image to be scanned using `DOCKER_IMAGE=alpine:3.7`, then you would use `alpine` in the `images` block, but you cannot use `alpine:3.7`.
+
+  You can specify container image in multiple ways:
+
+  - as image name only (such as `centos`).
+  - as full image name with registry hostname (such as `your.private.registry:5000/centos`).
+  - as full image name with registry hostname and sha256 label (such as `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`).
+
+NOTE:
+The string after CVE ID (`cups` and `libxml2` in the previous example) is an optional comment format. It has **no impact** on the handling of vulnerabilities. You can include comments to describe the vulnerability.
+
+##### Container scanning job log format
+
+You can verify the results of your scan and the correctness of your `vulnerability-allowlist.yml` file by looking
+at the logs that are produced by the container scanning analyzer in `container_scanning` job details.
+
+The log contains a list of found vulnerabilities as a table, for example:
+
+```plaintext
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+|   STATUS   |      CVE SEVERITY       |      PACKAGE NAME      |    PACKAGE VERSION    |                            CVE DESCRIPTION                             |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+|  Approved  |   High CVE-2019-3462    |          apt           |         1.4.8         | Incorrect sanitation of the 302 redirect field in HTTP transport metho |
+|            |                         |                        |                       | d of apt versions 1.4.8 and earlier can lead to content injection by a |
+|            |                         |                        |                       |  MITM attacker, potentially leading to remote code execution on the ta |
+|            |                         |                        |                       |                             rget machine.                              |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+| Unapproved |  Medium CVE-2020-27350  |          apt           |         1.4.8         | APT had several integer overflows and underflows while parsing .deb pa |
+|            |                         |                        |                       | ckages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extr |
+|            |                         |                        |                       | acttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This |
+|            |                         |                        |                       |  issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1 |
+|            |                         |                        |                       | .6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions  |
+|            |                         |                        |                       | prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0 |
+|            |                         |                        |                       |                                  .1;                                   |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+| Unapproved |  Medium CVE-2020-3810   |          apt           |         1.4.8         | Missing input validation in the ar/tar implementations of APT before v |
+|            |                         |                        |                       | ersion 2.1.2 could result in denial of service when processing special |
+|            |                         |                        |                       |                         ly crafted deb files.                          |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+```
+
+Vulnerabilities in the log are marked as `Approved` when the corresponding CVE ID is added to the `vulnerability-allowlist.yml` file.
 
 ### Running container scanning in an offline environment
 
@@ -264,7 +366,12 @@ successfully run. For more information, see [Offline environments](../offline_de
 To use container scanning in an offline environment, you need:
 
 - GitLab Runner with the [`docker` or `kubernetes` executor](#requirements).
-- To configure a local Docker container registry with copies of the container scanning [analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/klar) images, found in the [container scanning container registry](https://gitlab.com/gitlab-org/security-products/analyzers/klar/container_registry).
+- To configure a local Docker container registry with copies of the container scanning images. You
+  can find these images in their respective registries:
+
+| GitLab Analyzer | Container Registry |
+| --- | --- |
+| [Container-Scanning](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning) | [Container-Scanning container registry](https://gitlab.com/security-products/container-scanning/container_registry/) |
 
 Note that GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
@@ -277,25 +384,27 @@ enables the use of updated scanners in your CI/CD pipelines.
 
 Support for custom certificate authorities was introduced in the following versions:
 
-| Analyzer | Version |
+| Scanner | Version |
 | -------- | ------- |
-| `klar` | [v2.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/releases/v2.3.0) |
+| `Trivy` | [4.0.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.0.0) |
+| `Grype` | [4.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.3.0) |
 
 #### Make GitLab container scanning analyzer images available inside your Docker registry
 
-For container scanning, import the following default images from `registry.gitlab.com` into your
+For container scanning, import the following images from `registry.gitlab.com` into your
 [local Docker container registry](../../packages/container_registry/index.md):
 
 ```plaintext
-registry.gitlab.com/gitlab-org/security-products/analyzers/klar
-https://hub.docker.com/r/arminc/clair-db
+registry.gitlab.com/security-products/container-scanning:4
+registry.gitlab.com/security-products/container-scanning/grype:4
+registry.gitlab.com/security-products/container-scanning/trivy:4
 ```
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
-process by which you can import or temporarily access external resources. Note that these scanners
-are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you are able to make periodic updates yourself.
+process by which you can import or temporarily access external resources. These scanners
+are [periodically updated](../vulnerabilities/index.md#vulnerability-scanner-maintenance),
+and you may be able to make occasional updates on your own.
 
 For more information, see [the specific steps on how to update an image with a pipeline](#automating-container-scanning-vulnerability-database-updates-with-a-pipeline).
 
@@ -309,74 +418,64 @@ For details on saving and transporting Docker images as a file, see Docker's doc
 
    ```yaml
    include:
-     - template: Container-Scanning.gitlab-ci.yml
+     - template: Security/Container-Scanning.gitlab-ci.yml
 
    container_scanning:
-     image: $CI_REGISTRY/namespace/gitlab-klar-analyzer
-     variables:
-       CLAIR_DB_IMAGE: $CI_REGISTRY/namespace/clair-vulnerabilities-db
+     image: $CI_REGISTRY/namespace/gitlab-container-scanning
    ```
 
 1. If your local Docker container registry is running securely over `HTTPS`, but you're using a
-   self-signed certificate, then you must set `DOCKER_INSECURE: "true"` in the above
+   self-signed certificate, then you must set `CS_DOCKER_INSECURE: "true"` in the above
    `container_scanning` section of your `.gitlab-ci.yml`.
 
 #### Automating container scanning vulnerability database updates with a pipeline
 
-It can be worthwhile to set up a [scheduled pipeline](../../../ci/pipelines/schedules.md) to
-build a new version of the vulnerabilities database on a preset schedule. Automating
-this with a pipeline means you do not have to do it manually each time. You can use the following
-`.gitlab-yml.ci` as a template:
+We recommend that you set up a [scheduled pipeline](../../../ci/pipelines/schedules.md)
+to fetch the latest vulnerabilities database on a preset schedule.
+Automating this with a pipeline means you do not have to do it manually each time. You can use the
+following `.gitlab-yml.ci` example as a template.
 
 ```yaml
+variables:
+  SOURCE_IMAGE: registry.gitlab.com/security-products/container-scanning:4
+  TARGET_IMAGE: $CI_REGISTRY/namespace/gitlab-container-scanning
+
 image: docker:stable
 
-stages:
-  - build
-
-build_latest_vulnerabilities:
-  stage: build
+update-scanner-image:
   services:
-    - docker:19.03.12-dind
+    - docker:dind
   script:
-    - docker pull arminc/clair-db:latest
-    - docker tag arminc/clair-db:latest $CI_REGISTRY/namespace/clair-vulnerabilities-db
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker push $CI_REGISTRY/namespace/clair-vulnerabilities-db
+    - docker pull $SOURCE_IMAGE
+    - docker tag $SOURCE_IMAGE $TARGET_IMAGE
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - docker push $TARGET_IMAGE
 ```
 
-The above template works for a GitLab Docker registry running on a local installation, however, if you're using a non-GitLab Docker registry, you need to change the `$CI_REGISTRY` value and the `docker login` credentials to match the details of your local registry.
+The above template works for a GitLab Docker registry running on a local installation. However, if
+you're using a non-GitLab Docker registry, you must change the `$CI_REGISTRY` value and the
+`docker login` credentials to match your local registry's details.
 
 ## Running the standalone container scanning tool
 
-It's possible to run the [GitLab container scanning tool](https://gitlab.com/gitlab-org/security-products/analyzers/klar)
+It's possible to run the [GitLab container scanning tool](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning)
 against a Docker container without needing to run it within the context of a CI job. To scan an
 image directly, follow these steps:
 
-1. Run [Docker Desktop](https://www.docker.com/products/docker-desktop) or [Docker Machine](https://github.com/docker/machine).
-1. Run the latest [prefilled vulnerabilities database](https://hub.docker.com/repository/docker/arminc/clair-db) Docker image:
+1. Run [Docker Desktop](https://www.docker.com/products/docker-desktop)
+   or [Docker Machine](https://github.com/docker/machine).
 
-   ```shell
-   docker run -p 5432:5432 -d --name clair-db arminc/clair-db:latest
-   ```
-
-1. Configure a CI/CD variable to point to your local machine's IP address (or insert your IP address instead of the `LOCAL_MACHINE_IP_ADDRESS` variable in the `CLAIR_DB_CONNECTION_STRING` in the next step):
-
-   ```shell
-   export LOCAL_MACHINE_IP_ADDRESS=your.local.ip.address
-   ```
-
-1. Run the analyzer's Docker image, passing the image and tag you want to analyze in the `CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG` variables:
+1. Run the analyzer's Docker image, passing the image and tag you want to analyze in the
+   `CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG` variables:
 
    ```shell
    docker run \
      --interactive --rm \
      --volume "$PWD":/tmp/app \
      -e CI_PROJECT_DIR=/tmp/app \
-     -e CLAIR_DB_CONNECTION_STRING="postgresql://postgres:password@${LOCAL_MACHINE_IP_ADDRESS}:5432/postgres?sslmode=disable&statement_timeout=60000" \
      -e CI_APPLICATION_REPOSITORY=registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256 \
      -e CI_APPLICATION_TAG=bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e \
-     registry.gitlab.com/gitlab-org/security-products/analyzers/klar
+     registry.gitlab.com/security-products/container-scanning
    ```
 
 The results are stored in `gl-container-scanning-report.json`.
@@ -390,19 +489,19 @@ Here's an example container scanning report:
 
 ```json-doc
 {
-  "version": "2.3",
+  "version": "3.0.0",
   "vulnerabilities": [
     {
-      "id": "ac0997ad-1006-4c81-81fb-ee2bbe6e78e3",
+      "id": "df52bc8ce9a2ae56bbcb0c4ecda62123fbd6f69b",
       "category": "container_scanning",
-      "message": "CVE-2019-3462 in apt",
+      "message": "CVE-2019-3462 in apt-1.4.8",
       "description": "Incorrect sanitation of the 302 redirect field in HTTP transport method of apt versions 1.4.8 and earlier can lead to content injection by a MITM attacker, potentially leading to remote code execution on the target machine.",
       "severity": "High",
       "confidence": "Unknown",
       "solution": "Upgrade apt from 1.4.8 to 1.4.9",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -411,7 +510,7 @@ Here's an example container scanning report:
           },
           "version": "1.4.8"
         },
-        "operating_system": "debian:9",
+        "operating_system": "debian:9.4",
         "image": "registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e"
       },
       "identifiers": [
@@ -419,27 +518,62 @@ Here's an example container scanning report:
           "type": "cve",
           "name": "CVE-2019-3462",
           "value": "CVE-2019-3462",
-          "url": "https://security-tracker.debian.org/tracker/CVE-2019-3462"
+          "url": "http://www.securityfocus.com/bid/106690"
         }
       ],
       "links": [
         {
-          "url": "https://security-tracker.debian.org/tracker/CVE-2019-3462"
+          "url": "http://www.securityfocus.com/bid/106690"
+        },
+        {
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-3462"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/8338a0f605bdbb3a6098bb76f666a95fc2b2f53f37fa1ecc89f1146f@%3Cdevnull.infra.apache.org%3E"
+        },
+        {
+          "url": "https://lists.debian.org/debian-lts-announce/2019/01/msg00013.html"
+        },
+        {
+          "url": "https://lists.debian.org/debian-lts-announce/2019/01/msg00014.html"
+        },
+        {
+          "url": "https://security.netapp.com/advisory/ntap-20190125-0002/"
+        },
+        {
+          "url": "https://usn.ubuntu.com/3863-1/"
+        },
+        {
+          "url": "https://usn.ubuntu.com/3863-2/"
+        },
+        {
+          "url": "https://usn.ubuntu.com/usn/usn-3863-1"
+        },
+        {
+          "url": "https://usn.ubuntu.com/usn/usn-3863-2"
+        },
+        {
+          "url": "https://www.debian.org/security/2019/dsa-4371"
         }
       ]
     }
   ],
-  "remediations": [
-    {
-      "fixes": [
-        {
-          "id": "c0997ad-1006-4c81-81fb-ee2bbe6e78e3"
-        }
-      ],
-      "summary": "Upgrade apt from 1.4.8 to 1.4.9",
-      "diff": "YXB0LWdldCB1cGRhdGUgJiYgYXB0LWdldCB1cGdyYWRlIC15IGFwdA=="
-    }
-  ]
+  "remediations": []
+  "scan": {
+    "scanner": {
+      "id": "trivy",
+      "name": "Trivy",
+      "url": "https://github.com/aquasecurity/trivy/",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "0.16.0"
+    },
+    "type": "container_scanning",
+    "start_time": "2021-04-14T19:45:58",
+    "end_time": "2021-04-14T19:46:18",
+    "status": "success"
+  }
 }
 ```
 
@@ -450,12 +584,12 @@ the security vulnerabilities in your groups, projects and pipelines.
 
 ## Vulnerabilities database update
 
-For more information about the vulnerabilities database update, check the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
+If you use container scanning and want more information about the vulnerabilities database update,
+see the [maintenance table](../vulnerabilities/index.md#vulnerability-scanner-maintenance).
 
 ## Interacting with the vulnerabilities
 
-After a vulnerability is found, you can [interact with it](../index.md#interacting-with-the-vulnerabilities).
+After a vulnerability is found, you can [address it](../vulnerabilities/index.md).
 
 ## Solutions for vulnerabilities (auto-remediation)
 
@@ -463,13 +597,13 @@ Some vulnerabilities can be fixed by applying the solution that GitLab
 automatically generates.
 
 To enable remediation support, the scanning tool _must_ have access to the `Dockerfile` specified by
-the [`DOCKERFILE_PATH`](#available-variables) CI/CD variable. To ensure that the scanning tool
+the [`DOCKERFILE_PATH`](#available-cicd-variables) CI/CD variable. To ensure that the scanning tool
 has access to this
-file, it's necessary to set [`GIT_STRATEGY: fetch`](../../../ci/runners/README.md#git-strategy) in
+file, it's necessary to set [`GIT_STRATEGY: fetch`](../../../ci/runners/configure_runners.md#git-strategy) in
 your `.gitlab-ci.yml` file by following the instructions described in this document's
 [overriding the container scanning template](#overriding-the-container-scanning-template) section.
 
-Read more about the [solutions for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities).
+Read more about the [solutions for vulnerabilities](../vulnerabilities/index.md#resolve-a-vulnerability).
 
 ## Troubleshooting
 

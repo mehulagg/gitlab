@@ -12,6 +12,12 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransport, :elastic, :req
     end
   end
 
+  describe '.increment_timed_out_count' do
+    it 'increases the timed out count by 1' do
+      expect { described_class.increment_timed_out_count }.to change(described_class, :get_timed_out_count).by(1)
+    end
+  end
+
   describe '.add_duration' do
     it 'does not lose precision while adding' do
       ::Gitlab::SafeRequestStore.clear!
@@ -30,7 +36,8 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransport, :elastic, :req
       allow(::Gitlab::PerformanceBar).to receive(:enabled_for_request?).and_return(true)
     end
 
-    it 'parses and tracks the call details' do
+    it 'parses and tracks the call details', :use_clean_rails_memory_store_caching do
+      create(:merge_request, title: "cache warming MR") # Warm cache for checking migrations are finished
       ensure_elasticsearch_index!
 
       ::Gitlab::SafeRequestStore.clear!
@@ -46,6 +53,8 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransport, :elastic, :req
 end
 
 RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransportInterceptor, :elastic, :request_store do
+  let(:elasticsearch_url) { Gitlab::CurrentSettings.elasticsearch_url[0] }
+
   before do
     allow(::Gitlab::PerformanceBar).to receive(:enabled_for_request?).and_return(true)
   end
@@ -61,9 +70,6 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransportInterceptor, :el
   it 'adds the labkit correlation id as X-Opaque-Id to all requests' do
     allow(Labkit::Correlation::CorrelationId).to receive(:current_or_new_id).and_return('new-correlation-id')
 
-    elasticsearch_url = Gitlab::CurrentSettings.elasticsearch_url[0]
-    stub_request(:any, elasticsearch_url)
-
     Project.__elasticsearch__.client
       .perform_request(:get, '/')
 
@@ -74,13 +80,47 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransportInterceptor, :el
   it 'does not override the X-Opaque-Id if it is already present' do
     allow(Labkit::Correlation::CorrelationId).to receive(:current_or_new_id).and_return('new-correlation-id')
 
-    elasticsearch_url = Gitlab::CurrentSettings.elasticsearch_url[0]
-    stub_request(:any, elasticsearch_url)
-
     Project.__elasticsearch__.client
       .perform_request(:get, '/', {}, nil, { 'X-Opaque-Id': 'original-opaque-id' })
 
     expect(a_request(:get, /#{elasticsearch_url}/)
       .with(headers: { 'X-Opaque-Id' => 'original-opaque-id' })).to have_been_made
+  end
+
+  context 'when the response indicates a server side timeout' do
+    it 'increments timeouts' do
+      stub_request(:any, /#{elasticsearch_url}/).to_return(body: +'{"timed_out": true}', status: 200, headers: { 'Content-Type' => 'application/json' })
+
+      Project.__elasticsearch__.client.perform_request(:get, '/')
+
+      expect(::Gitlab::Instrumentation::ElasticsearchTransport.get_timed_out_count).to eq(1)
+    end
+  end
+
+  context 'when the response does not indicate a server side timeout' do
+    it 'does not increment timeouts' do
+      stub_request(:any, /#{elasticsearch_url}/).to_return(body: +'{"timed_out": false}', status: 200, headers: { 'Content-Type' => 'application/json' })
+
+      Project.__elasticsearch__.client.perform_request(:get, '/')
+
+      expect(::Gitlab::Instrumentation::ElasticsearchTransport.get_timed_out_count).to eq(0)
+    end
+  end
+
+  context 'when the server returns a blank response body' do
+    it 'does not error' do
+      stub_request(:any, /#{elasticsearch_url}/).to_return(body: +'', status: 200)
+
+      Project.__elasticsearch__.client.perform_request(:get, '/')
+    end
+  end
+
+  context 'when the request raises some error' do
+    it 'does not raise a different error in ensure' do
+      stub_request(:any, /#{elasticsearch_url}/).to_return(body: +'', status: 500)
+
+      expect { Project.__elasticsearch__.client.perform_request(:get, '/') }
+        .to raise_error(::Elasticsearch::Transport::Transport::Errors::InternalServerError)
+    end
   end
 end

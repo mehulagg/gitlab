@@ -50,9 +50,6 @@ export default function initDiffsApp(store) {
             click: this.openFile,
           },
           class: ['diff-file-finder'],
-          style: {
-            display: this.fileFinderVisible ? '' : 'none',
-          },
         });
       },
     });
@@ -73,6 +70,8 @@ export default function initDiffsApp(store) {
         endpointMetadata: dataset.endpointMetadata || '',
         endpointBatch: dataset.endpointBatch || '',
         endpointCoverage: dataset.endpointCoverage || '',
+        endpointCodequality: dataset.endpointCodequality || '',
+        endpointUpdateUser: dataset.updateCurrentUserPath,
         projectPath: dataset.projectPath,
         helpPagePath: dataset.helpPagePath,
         currentUser: JSON.parse(dataset.currentUserData) || {},
@@ -96,10 +95,23 @@ export default function initDiffsApp(store) {
 
       this.setRenderTreeList(renderTreeList);
 
-      // Set whitespace default as per user preferences unless cookie is already set
-      if (!Cookies.get(DIFF_WHITESPACE_COOKIE_NAME)) {
-        const hideWhitespace = this.showWhitespaceDefault ? '0' : '1';
-        this.setShowWhitespace({ showWhitespace: hideWhitespace !== '1' });
+      // NOTE: A "true" or "checked" value for `showWhitespace` is '0' not '1'.
+      // Check for cookie and save that setting for future use.
+      // Then delete the cookie as we are phasing it out and using the database as SSOT.
+      // NOTE: This can/should be removed later
+      if (Cookies.get(DIFF_WHITESPACE_COOKIE_NAME)) {
+        const hideWhitespace = Cookies.get(DIFF_WHITESPACE_COOKIE_NAME);
+        this.setShowWhitespace({
+          url: this.endpointUpdateUser,
+          showWhitespace: hideWhitespace !== '1',
+        });
+        Cookies.remove(DIFF_WHITESPACE_COOKIE_NAME);
+      } else {
+        // This is only to set the the user preference in Vuex for use later
+        this.setShowWhitespace({
+          showWhitespace: this.showWhitespaceDefault,
+          updateDatabase: false,
+        });
       }
     },
     methods: {
@@ -114,6 +126,8 @@ export default function initDiffsApp(store) {
           endpointMetadata: this.endpointMetadata,
           endpointBatch: this.endpointBatch,
           endpointCoverage: this.endpointCoverage,
+          endpointCodequality: this.endpointCodequality,
+          endpointUpdateUser: this.endpointUpdateUser,
           currentUser: this.currentUser,
           projectPath: this.projectPath,
           helpPagePath: this.helpPagePath,
@@ -124,7 +138,7 @@ export default function initDiffsApp(store) {
           showSuggestPopover: this.showSuggestPopover,
           fileByFileUserPreference: this.viewDiffsFileByFile,
           defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
-          mrReviews: getReviewsForMergeRequest(mrPath),
+          rehydratedMrReviews: getReviewsForMergeRequest(mrPath),
         },
       });
     },

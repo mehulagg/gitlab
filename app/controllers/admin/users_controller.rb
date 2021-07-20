@@ -2,24 +2,25 @@
 
 class Admin::UsersController < Admin::ApplicationController
   include RoutableActions
-  include Analytics::UniqueVisitsHelper
 
   before_action :user, except: [:index, :new, :create]
   before_action :check_impersonation_availability, only: :impersonate
   before_action :ensure_destroy_prerequisites_met, only: [:destroy]
+  before_action :check_ban_user_feature_flag, only: [:ban]
 
   feature_category :users
 
+  PAGINATION_WITH_COUNT_LIMIT = 1000
+
   def index
+    return redirect_to admin_cohorts_path if params[:tab] == 'cohorts'
+
     @users = User.filter_items(params[:filter]).order_name_asc
     @users = @users.search_with_secondary_emails(params[:search_query]) if params[:search_query].present?
-    @users = @users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
+    @users = users_with_included_associations(@users)
     @users = @users.sort_by_attribute(@sort = params[:sort])
     @users = @users.page(params[:page])
-
-    @cohorts = load_cohorts
-
-    track_cohorts_visit if params[:tab] == 'cohorts'
+    @users = @users.without_count if paginate_without_count?
   end
 
   def show
@@ -124,6 +125,24 @@ class Admin::UsersController < Admin::ApplicationController
     end
   end
 
+  def ban
+    result = Users::BanService.new(current_user).execute(user)
+
+    if result[:status] == :success
+      redirect_back_or_admin_user(notice: _("Successfully banned"))
+    else
+      redirect_back_or_admin_user(alert: _("Error occurred. User was not banned"))
+    end
+  end
+
+  def unban
+    if update_user { |user| user.activate }
+      redirect_back_or_admin_user(notice: _("Successfully unbanned"))
+    else
+      redirect_back_or_admin_user(alert: _("Error occurred. User was not unbanned"))
+    end
+  end
+
   def unlock
     if update_user { |user| user.unlock_access! }
       redirect_back_or_admin_user(alert: _("Successfully unlocked"))
@@ -184,6 +203,9 @@ class Admin::UsersController < Admin::ApplicationController
       user_params_with_pass.merge!(password_params)
     end
 
+    cc_validation_params = process_credit_card_validation_params(user_params_with_pass.delete(:credit_card_validation_attributes))
+    user_params_with_pass.merge!(cc_validation_params)
+
     respond_to do |format|
       result = Users::UpdateService.new(current_user, user_params_with_pass.merge(user: user)).execute do |user|
         user.skip_reconfirmation!
@@ -227,6 +249,37 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   protected
+
+  def process_credit_card_validation_params(cc_validation_params)
+    return unless cc_validation_params && cc_validation_params[:credit_card_validated_at]
+
+    cc_validation = cc_validation_params[:credit_card_validated_at]
+
+    if cc_validation == "1" && !user.credit_card_validated_at
+      {
+        credit_card_validation_attributes: {
+          credit_card_validated_at: Time.zone.now
+        }
+      }
+
+    elsif cc_validation == "0" && user.credit_card_validated_at
+      {
+        credit_card_validation_attributes: {
+          _destroy: true
+        }
+      }
+    end
+  end
+
+  def paginate_without_count?
+    counts = Gitlab::Database::Count.approximate_counts([User])
+
+    counts[User] > PAGINATION_WITH_COUNT_LIMIT
+  end
+
+  def users_with_included_associations(users)
+    users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
+  end
 
   def admin_making_changes_for_another_user?
     user != current_user
@@ -295,7 +348,8 @@ class Admin::UsersController < Admin::ApplicationController
       :twitter,
       :username,
       :website_url,
-      :note
+      :note,
+      credit_card_validation_attributes: [:credit_card_validated_at]
     ]
   end
 
@@ -309,25 +363,13 @@ class Admin::UsersController < Admin::ApplicationController
     access_denied! unless Gitlab.config.gitlab.impersonation_enabled
   end
 
+  def check_ban_user_feature_flag
+    access_denied! unless Feature.enabled?(:ban_user_feature_flag)
+  end
+
   def log_impersonation_event
     Gitlab::AppLogger.info(_("User %{current_user_username} has started impersonating %{username}") % { current_user_username: current_user.username, username: user.username })
   end
-
-  def load_cohorts
-    if Gitlab::CurrentSettings.usage_ping_enabled
-      cohorts_results = Rails.cache.fetch('cohorts', expires_in: 1.day) do
-        CohortsService.new.execute
-      end
-
-      CohortsSerializer.new.represent(cohorts_results)
-    end
-  end
-
-  def track_cohorts_visit
-    if request.format.html? && request.headers['DNT'] != '1'
-      track_visit('i_analytics_cohorts')
-    end
-  end
 end
 
-Admin::UsersController.prepend_if_ee('EE::Admin::UsersController')
+Admin::UsersController.prepend_mod_with('Admin::UsersController')

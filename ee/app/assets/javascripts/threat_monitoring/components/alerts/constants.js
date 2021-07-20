@@ -1,4 +1,5 @@
-import { s__ } from '~/locale';
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
+import { s__, __ } from '~/locale';
 
 export const MESSAGES = {
   CONFIGURE: s__(
@@ -35,6 +36,23 @@ export const FIELDS = [
     thClass: `gl-bg-white! gl-pointer-events-none`,
   },
   {
+    key: 'eventCount',
+    label: s__('ThreatMonitoring|Events'),
+    thClass: `gl-bg-white! gl-w-10p gl-text-right`,
+    tdClass: `gl-pl-6! gl-text-right`,
+    sortable: true,
+  },
+  {
+    key: 'issue',
+    label: s__('ThreatMonitoring|Incident'),
+    thClass: 'gl-bg-white! gl-w-15p',
+  },
+  {
+    key: 'assignees',
+    label: __('Assignees'),
+    thClass: 'gl-bg-white! gl-w-10p gl-pointer-events-none',
+  },
+  {
     key: 'status',
     label: s__('ThreatMonitoring|Status'),
     thAttr: { 'data-testid': 'threat-alerts-status-header' },
@@ -49,3 +67,28 @@ export const PAGE_SIZE = 20;
 export const DEFAULT_FILTERS = { statuses: ['TRIGGERED', 'ACKNOWLEDGED'] };
 
 export const DOMAIN = 'threat_monitoring';
+
+export const DEBOUNCE = DEFAULT_DEBOUNCE_AND_THROTTLE_MS;
+
+export const ALL = { key: 'ALL', value: __('All') };
+
+export const CLOSED = __('closed');
+
+export const HIDDEN_VALUES = [
+  '__typename',
+  'assignees',
+  'details',
+  'iid',
+  'issue',
+  'notes',
+  'severity',
+  'status',
+  'todos',
+];
+
+export const ALERT_DETAILS_LOADING_ROWS = 20;
+
+export const DRAWER_ERRORS = {
+  DETAILS: __('There was an error fetching content, please refresh the page'),
+  CREATE_ISSUE: s__('ThreatMonitoring|Failed to create incident, please try again.'),
+};

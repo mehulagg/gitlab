@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Project, :elastic do
+RSpec.describe Project, :elastic, :clean_gitlab_redis_shared_state do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -182,6 +182,17 @@ RSpec.describe Project, :elastic do
     expect(described_class.elastic_search('test*', options: { project_ids: project_ids }).total_count).to eq(2)
     expect(described_class.elastic_search('test*', options: { project_ids: :any }).total_count).to eq(3)
     expect(described_class.elastic_search('"someone_elses_project"', options: { project_ids: project_ids }).total_count).to eq(0)
+  end
+
+  it 'does not update Elasticsearch if pending_delete is true' do
+    expect(Elastic::ProcessInitialBookkeepingService).to receive(:track!)
+    project = create(:project)
+
+    expect(Elastic::ProcessBookkeepingService).to receive(:track!)
+    project.update!(name: 'test 1')
+
+    expect(Elastic::ProcessBookkeepingService).not_to receive(:track!)
+    project.update!(pending_delete: true)
   end
 
   it "finds partial matches in project names" do

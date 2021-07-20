@@ -5,7 +5,7 @@ import * as types from './mutation_types';
 export const initializeAuditEvents = ({ commit }) => {
   commit(
     types.INITIALIZE_AUDIT_EVENTS,
-    parseAuditEventSearchQuery(queryToObject(window.location.search)),
+    parseAuditEventSearchQuery(queryToObject(window.location.search, { legacySpacesDecode: true })),
   );
 };
 

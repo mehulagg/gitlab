@@ -62,13 +62,18 @@
   .pipeline-tags .label-container {
     white-space: normal;
   }
+
+  .dark-mode-override {
+    .gl-dark & {
+      background-color: $white;
+    }
+  }
 }
 
 // Mini Pipelines
 
 .stage-cell {
-  .mini-pipeline-graph-dropdown-toggle,
-  .mini-pipeline-graph-gl-dropdown-toggle {
+  .mini-pipeline-graph-dropdown-toggle {
     svg {
       height: $ci-action-icon-size;
       width: $ci-action-icon-size;
@@ -117,7 +122,7 @@
         position: absolute;
         right: -7px;
         top: 11px;
-        border-bottom: 2px solid $border-color;
+        border-bottom: 2px solid var(--border-color, $border-color);
       }
     }
 
@@ -138,14 +143,16 @@
   }
 }
 
-// Dropdown button in mini pipeline graph
+// Commit mini pipeline (HAML)
 button.mini-pipeline-graph-dropdown-toggle,
-// As the `mini-pipeline-item` mixin specificity is lower
-// than the toggle of dropdown with 'variant="link"' we add
-// classes ".gl-button.btn-link" to make it more specific.
-// Once FF ci_mini_pipeline_gl_dropdown is removed, the `mini-pipeline-item`
-// itself could increase its specificity to simplify this selector
-button.gl-button.btn-link.mini-pipeline-graph-gl-dropdown-toggle {
+// GlDropdown mini pipeline (Vue)
+//   As the `mini-pipeline-item` mixin specificity is lower
+//   than the toggle of dropdown with 'variant="link"' we add
+//   classes ".gl-button.btn-link" to make it more specific
+//   and avoid having the size overriden
+//
+//   See https://gitlab.com/gitlab-org/gitlab/-/issues/320737
+button.gl-button.btn-link.mini-pipeline-graph-dropdown-toggle {
   @include mini-pipeline-item();
 }
 
@@ -179,11 +186,6 @@ button.gl-button.btn-link.mini-pipeline-graph-gl-dropdown-toggle {
   &::before {
     border-width: 0 5px 5px;
     border-bottom-color: $border-color;
-  }
-
-  &::after {
-    margin-top: 1px;
-    border-bottom-color: $white;
   }
 
   /**

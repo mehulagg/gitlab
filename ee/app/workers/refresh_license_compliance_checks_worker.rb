@@ -3,6 +3,8 @@
 class RefreshLicenseComplianceChecksWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :license_compliance
   weight 2
 

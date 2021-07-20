@@ -7,10 +7,11 @@ module EE
     READONLY_ABILITIES_EE = %i[
       admin_software_license_policy
       modify_auto_fix_setting
+      create_test_case
     ].freeze
 
     READONLY_FEATURES_EE = %i[
-      board
+      issue_board
       issue_link
       approvers
       vulnerability_feedback

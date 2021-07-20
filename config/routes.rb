@@ -44,12 +44,22 @@ Rails.application.routes.draw do
   draw :oauth
 
   use_doorkeeper_openid_connect
+  # Add OPTIONS method for CORS preflight requests
+  match '/oauth/userinfo' => 'doorkeeper/openid_connect/userinfo#show', via: :options
+  match '/oauth/discovery/keys' => 'doorkeeper/openid_connect/discovery#keys', via: :options
+  match '/.well-known/openid-configuration' => 'doorkeeper/openid_connect/discovery#provider', via: :options
+  match '/.well-known/webfinger' => 'doorkeeper/openid_connect/discovery#webfinger', via: :options
+
+  match '/oauth/token' => 'oauth/tokens#create', via: :options
+  match '/oauth/revoke' => 'oauth/tokens#revoke', via: :options
 
   # Sign up
   scope path: '/users/sign_up', module: :registrations, as: :users_sign_up do
     resource :welcome, only: [:show, :update], controller: 'welcome' do
       Gitlab.ee do
         get :trial_getting_started, on: :collection
+        get :trial_onboarding_board, on: :collection
+        get :continuous_onboarding_getting_started, on: :collection
       end
     end
 
@@ -57,6 +67,7 @@ Rails.application.routes.draw do
 
     Gitlab.ee do
       resources :groups, only: [:new, :create]
+      resources :group_invites, only: [:new, :create]
       resources :projects, only: [:new, :create]
     end
   end
@@ -72,6 +83,9 @@ Rails.application.routes.draw do
 
   # Health check
   get 'health_check(/:checks)' => 'health_check#index', as: :health_check
+
+  # Terraform service discovery
+  get '.well-known/terraform.json' => 'terraform/services#index', as: :terraform_services
 
   # Begin of the /-/ scope.
   # Use this scope for all new global routes.
@@ -130,8 +144,24 @@ Rails.application.routes.draw do
     # UserCallouts
     resources :user_callouts, only: [:create]
 
-    get 'ide' => 'ide#index'
-    get 'ide/*vueroute' => 'ide#index', format: false
+    scope :ide, as: :ide, format: false do
+      get '/', to: 'ide#index'
+      get '/project', to: 'ide#index'
+
+      scope path: 'project/:project_id', as: :project, constraints: { project_id: Gitlab::PathRegex.full_namespace_route_regex } do
+        %w[edit tree blob].each do |action|
+          get "/#{action}", to: 'ide#index'
+          get "/#{action}/*branch/-/*path", to: 'ide#index'
+          get "/#{action}/*branch/-", to: 'ide#index'
+          get "/#{action}/*branch", to: 'ide#index'
+        end
+
+        get '/merge_requests/:merge_request_id', to: 'ide#index', constraints: { merge_request_id: /\d+/ }
+        get '/', to: 'ide#index'
+      end
+    end
+
+    resource :projects
 
     draw :operations
     draw :jira_connect
@@ -154,6 +184,10 @@ Rails.application.routes.draw do
       resources :survey_responses, only: :index
     end
 
+    Gitlab.jh do
+      draw :province
+    end
+
     if ENV['GITLAB_CHAOS_SECRET'] || Rails.env.development? || Rails.env.test?
       resource :chaos, only: [] do
         get :leakmem
@@ -161,12 +195,10 @@ Rails.application.routes.draw do
         get :db_spin
         get :sleep
         get :kill
+        get :quit
         post :gc
       end
     end
-
-    # Notification settings
-    resources :notification_settings, only: [:create, :update]
 
     resources :invites, only: [:show], constraints: { id: /[A-Za-z0-9_-]+/ } do
       member do
@@ -205,6 +237,12 @@ Rails.application.routes.draw do
         post :authorize_aws_role
       end
 
+      resource :integration, controller: 'clusters/integrations', only: [] do
+        collection do
+          post :create_or_update
+        end
+      end
+
       member do
         Gitlab.ee do
           get :metrics, format: :json
@@ -225,38 +263,6 @@ Rails.application.routes.draw do
     end
   end
 
-  # Deprecated routes.
-  # Will be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/210024
-  scope as: :deprecated do
-    # Autocomplete
-    get '/autocomplete/users' => 'autocomplete#users'
-    get '/autocomplete/users/:id' => 'autocomplete#user'
-    get '/autocomplete/projects' => 'autocomplete#projects'
-    get '/autocomplete/award_emojis' => 'autocomplete#award_emojis'
-    get '/autocomplete/merge_request_target_branches' => 'autocomplete#merge_request_target_branches'
-
-    Gitlab.ee do
-      get '/autocomplete/project_groups' => 'autocomplete#project_groups'
-      get '/autocomplete/project_routes' => 'autocomplete#project_routes'
-      get '/autocomplete/namespace_routes' => 'autocomplete#namespace_routes'
-    end
-
-    resources :invites, only: [:show], constraints: { id: /[A-Za-z0-9_-]+/ } do
-      member do
-        post :accept
-        match :decline, via: [:get, :post]
-      end
-    end
-
-    resources :sent_notifications, only: [], constraints: { id: /\h{32}/ } do
-      member do
-        get :unsubscribe
-      end
-    end
-
-    resources :abuse_reports, only: [:new, :create]
-  end
-
   resources :groups, only: [:index, :new, :create] do
     post :preview_markdown
   end
@@ -269,6 +275,7 @@ Rails.application.routes.draw do
 
   draw :git_http
   draw :api
+  draw :customers_dot
   draw :sidekiq
   draw :help
   draw :google_api
@@ -283,9 +290,13 @@ Rails.application.routes.draw do
 
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
   scope as: 'deprecated' do
-    draw :snippets
+    # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/223719
+    get '/snippets/:id/raw',
+      to: 'snippets#raw',
+      format: false,
+      constraints: { id: /\d+/ }
 
-    Gitlab::Routing.redirect_legacy_paths(self, :profile)
+    Gitlab::Routing.redirect_legacy_paths(self, :snippets)
   end
 
   Gitlab.ee do

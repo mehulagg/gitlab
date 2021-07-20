@@ -4,14 +4,14 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Troubleshooting Sidekiq
+# Troubleshooting Sidekiq **(FREE SELF)**
 
 Sidekiq is the background job processor GitLab uses to asynchronously run
 tasks. When things go wrong it can be difficult to troubleshoot. These
 situations also tend to be high-pressure because a production system job queue
 may be filling up. Users will notice when this happens because new branches
 may not show up and merge requests may not be updated. The following are some
-troubleshooting steps that will help you diagnose the bottleneck.
+troubleshooting steps to help you diagnose the bottleneck.
 
 GitLab administrators/users should consider working through these
 debug steps with GitLab Support so the backtraces can be analyzed by our team.
@@ -42,7 +42,7 @@ Example log output:
 
 When using [Sidekiq JSON logging](../logs.md#sidekiqlog),
 arguments logs are limited to a maximum size of 10 kilobytes of text;
-any arguments after this limit will be discarded and replaced with a
+any arguments after this limit are discarded and replaced with a
 single argument containing the string `"..."`.
 
 You can set `SIDEKIQ_LOG_ARGUMENTS` [environment variable](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
@@ -58,7 +58,7 @@ In GitLab 13.5 and earlier, set `SIDEKIQ_LOG_ARGUMENTS` to `1` to start logging 
 
 ## Thread dump
 
-Send the Sidekiq process ID the `TTIN` signal and it will output thread
+Send the Sidekiq process ID the `TTIN` signal to output thread
 backtraces in the log file.
 
 ```shell
@@ -66,7 +66,7 @@ kill -TTIN <sidekiq_pid>
 ```
 
 Check in `/var/log/gitlab/sidekiq/current` or `$GITLAB_HOME/log/sidekiq.log` for
-the backtrace output. The backtraces will be lengthy and generally start with
+the backtrace output. The backtraces are lengthy and generally start with
 several `WARN` level messages. Here's an example of a single thread's backtrace:
 
 ```plaintext
@@ -88,8 +88,8 @@ Move on to other troubleshooting methods if this happens.
 ## Process profiling with `perf`
 
 Linux has a process profiling tool called `perf` that is helpful when a certain
-process is eating up a lot of CPU. If you see high CPU usage and Sidekiq won't
-respond to the `TTIN` signal, this is a good next step.
+process is eating up a lot of CPU. If you see high CPU usage and Sidekiq isn't
+responding to the `TTIN` signal, this is a good next step.
 
 If `perf` is not installed on your system, install it with `apt-get` or `yum`:
 
@@ -134,8 +134,8 @@ corresponding Ruby code where this is happening.
 `gdb` can be another effective tool for debugging Sidekiq. It gives you a little
 more interactive way to look at each thread and see what's causing problems.
 
-Attaching to a process with `gdb` will suspends the normal operation
-of the process (Sidekiq will not process jobs while `gdb` is attached).
+Attaching to a process with `gdb` suspends the normal operation
+of the process (Sidekiq does not process jobs while `gdb` is attached).
 
 Start by attaching to the Sidekiq PID:
 
@@ -285,7 +285,7 @@ end
 ### Remove Sidekiq jobs for given parameters (destructive)
 
 The general method to kill jobs conditionally is the following command, which
-will remove jobs that are queued but not started. Running jobs will not be killed.
+removes jobs that are queued but not started. Running jobs can not be killed.
 
 ```ruby
 queue = Sidekiq::Queue.new('<queue name>')
@@ -294,7 +294,7 @@ queue.each { |job| job.delete if <condition>}
 
 Have a look at the section below for cancelling running jobs.
 
-In the method above, `<queue-name>` is the name of the queue that contains the job(s) you want to delete and `<condition>` will decide which jobs get deleted.
+In the method above, `<queue-name>` is the name of the queue that contains the job(s) you want to delete and `<condition>` decides which jobs get deleted.
 
 Commonly, `<condition>` references the job arguments, which depend on the type of job in question. To find the arguments for a specific queue, you can have a look at the `perform` function of the related worker file, commonly found at `/app/workers/<queue-name>_worker.rb`.
 
@@ -347,7 +347,7 @@ Gitlab::SidekiqDaemon::Monitor.cancel_job('job-id')
 > environment variable.
 
 To perform of the interrupt we use `Thread.raise` which
-has number of drawbacks, as mentioned in [Why Ruby’s Timeout is dangerous (and Thread.raise is terrifying)](https://jvns.ca/blog/2015/11/27/why-rubys-timeout-is-dangerous-and-thread-dot-raise-is-terrifying/):
+has number of drawbacks, as mentioned in [Why Ruby's Timeout is dangerous (and Thread.raise is terrifying)](https://jvns.ca/blog/2015/11/27/why-rubys-timeout-is-dangerous-and-thread-dot-raise-is-terrifying/):
 
 > This is where the implications get interesting, and terrifying. This means that an exception can get raised:
 >
@@ -357,4 +357,4 @@ has number of drawbacks, as mentioned in [Why Ruby’s Timeout is dangerous (and
 > - while creating an object to save to the database afterwards
 > - in any of your code, regardless of whether it could have possibly raised an exception before
 >
-> Nobody writes code to defend against an exception being raised on literally any line. That’s not even possible. So Thread.raise is basically like a sneak attack on your code that could result in almost anything. It would probably be okay if it were pure-functional code that did not modify any state. But this is Ruby, so that’s unlikely :)
+> Nobody writes code to defend against an exception being raised on literally any line. That's not even possible. So Thread.raise is basically like a sneak attack on your code that could result in almost anything. It would probably be okay if it were pure-functional code that did not modify any state. But this is Ruby, so that's unlikely :)

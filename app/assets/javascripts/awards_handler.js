@@ -5,8 +5,9 @@ import $ from 'jquery';
 import Cookies from 'js-cookie';
 import { uniq } from 'lodash';
 import * as Emoji from '~/emoji';
+import { scrollToElement } from '~/lib/utils/common_utils';
 import { dispose, fixTitle } from '~/tooltips';
-import { deprecatedCreateFlash as flash } from './flash';
+import createFlash from './flash';
 import axios from './lib/utils/axios_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
 import { __ } from './locale';
@@ -444,7 +445,7 @@ export class AwardsHandler {
 
   createAwardButtonForVotesBlock(votesBlock, emojiName) {
     const buttonHtml = `
-      <button class="btn award-control js-emoji-btn has-tooltip active" title="You">
+      <button class="gl-button btn btn-default award-control js-emoji-btn has-tooltip active" title="You">
         ${this.emoji.glEmojiTag(emojiName)}
         <span class="award-control-text js-counter">1</span>
       </button>
@@ -487,7 +488,11 @@ export class AwardsHandler {
           callback();
         }
       })
-      .catch(() => flash(__('Something went wrong on our end.')));
+      .catch(() =>
+        createFlash({
+          message: __('Something went wrong on our end.'),
+        }),
+      );
   }
 
   findEmojiIcon(votesBlock, emoji) {
@@ -495,12 +500,7 @@ export class AwardsHandler {
   }
 
   scrollToAwards() {
-    const options = {
-      scrollTop: $('.awards').offset().top - 110,
-    };
-
-    // eslint-disable-next-line no-jquery/no-animate
-    return $('body, html').animate(options, 200);
+    scrollToElement('.awards', { offset: -110 });
   }
 
   addEmojiToFrequentlyUsedList(emoji) {

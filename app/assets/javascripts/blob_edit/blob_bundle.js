@@ -2,7 +2,8 @@
 
 import $ from 'jquery';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import initCodeQualityWalkthrough from '~/code_quality_walkthrough';
+import createFlash from '~/flash';
 import { disableButtonIfEmptyField, setCookie } from '~/lib/utils/common_utils';
 import Tracking from '~/tracking';
 import BlobFileDropzone from '../blob/blob_file_dropzone';
@@ -35,6 +36,13 @@ const initPopovers = () => {
         });
       });
     }
+  }
+};
+
+const initCodeQualityWalkthroughStep = () => {
+  const codeQualityWalkthroughEl = document.querySelector('.js-code-quality-walkthrough');
+  if (codeQualityWalkthroughEl) {
+    initCodeQualityWalkthrough(codeQualityWalkthroughEl);
   }
 };
 
@@ -74,8 +82,13 @@ export default () => {
           isMarkdown,
         });
         initPopovers();
+        initCodeQualityWalkthroughStep();
       })
-      .catch((e) => createFlash(e));
+      .catch((e) =>
+        createFlash({
+          message: e,
+        }),
+      );
 
     cancelLink.on('click', () => {
       window.onbeforeunload = null;

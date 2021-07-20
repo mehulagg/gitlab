@@ -5,9 +5,9 @@ module Gitlab
     module DatabaseTasks
       extend self
 
-      DATABASE_CONFIG = 'config/database.yml'.freeze
-      GEO_DATABASE_CONFIG = 'config/database_geo.yml'.freeze
-      GEO_DB_DIR = 'ee/db/geo'.freeze
+      DATABASE_CONFIG = 'config/database.yml'
+      GEO_DATABASE_CONFIG = 'config/database_geo.yml'
+      GEO_DB_DIR = 'ee/db/geo'
 
       def method_missing(method_name, *args, &block)
         with_geo_db do
@@ -114,7 +114,7 @@ module Gitlab
               ['up', version, '********** NO FILE **********']
             end
             # output
-            puts "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
+            puts "\ndatabase: #{ActiveRecord::Base.connection_db_config.database}\n\n"
             puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
             puts "-" * 50
             (db_list + file_list).sort_by { |_, version, _| version }.each do |status, version, name|
@@ -132,17 +132,17 @@ module Gitlab
           Gitlab::Geo::DatabaseTasks.with_geo_db do
             should_reconnect = ActiveRecord::Base.connection_pool.active_connection?
             ActiveRecord::Schema.verbose = false
-            ActiveRecord::Tasks::DatabaseTasks.load_schema ActiveRecord::Base.configurations['test'], :ruby, ENV['SCHEMA']
+            ActiveRecord::Tasks::DatabaseTasks.load_schema(ActiveRecord::Base.configurations.configs_for(env_name: 'test').first, :ruby, ENV['SCHEMA'])
           ensure
             if should_reconnect
-              ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ActiveRecord::Tasks::DatabaseTasks.env])
+              ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env).first)
             end
           end
         end
 
         def purge
           Gitlab::Geo::DatabaseTasks.with_geo_db do
-            ActiveRecord::Tasks::DatabaseTasks.purge ActiveRecord::Base.configurations['test']
+            ActiveRecord::Tasks::DatabaseTasks.purge(ActiveRecord::Base.configurations.configs_for(env_name: 'test').first)
           end
         end
       end
@@ -196,7 +196,7 @@ module Gitlab
         ActiveRecord::Base.configurations       = ActiveRecord::Tasks::DatabaseTasks.database_configuration || {}
         ActiveRecord::Migrator.migrations_paths = ActiveRecord::Tasks::DatabaseTasks.migrations_paths
 
-        ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ActiveRecord::Tasks::DatabaseTasks.env])
+        ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations.configs_for(env_name: ActiveRecord::Tasks::DatabaseTasks.env).first)
       end
 
       class SeedLoader

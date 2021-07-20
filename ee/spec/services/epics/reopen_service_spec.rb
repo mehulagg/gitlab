@@ -7,7 +7,7 @@ RSpec.describe Epics::ReopenService do
   let_it_be(:epic, reload: true) { create(:epic, group: group, state: :closed, closed_at: Date.today, closed_by: user) }
 
   describe '#execute' do
-    subject { described_class.new(group, user) }
+    subject { described_class.new(group: group, current_user: user) }
 
     context 'when epics are disabled' do
       before do
@@ -59,8 +59,15 @@ RSpec.describe Epics::ReopenService do
             subject.execute(epic)
           end
 
-          it "creates new event" do
+          it 'creates new event' do
             expect { subject.execute(epic) }.to change { Event.count }
+          end
+
+          it 'tracks reopening the epic' do
+            expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+              .to receive(:track_epic_reopened_action).with(author: user)
+
+            subject.execute(epic)
           end
         end
 
@@ -91,8 +98,14 @@ RSpec.describe Epics::ReopenService do
             subject.execute(epic)
           end
 
-          it "does not create an event" do
+          it 'does not create an event' do
             expect { subject.execute(epic) }.not_to change { Event.count }
+          end
+
+          it 'does not track reopening the epic' do
+            expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).not_to receive(:track_epic_reopened_action)
+
+            subject.execute(epic)
           end
         end
       end

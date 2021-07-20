@@ -52,9 +52,6 @@ describe('EE - DastSiteProfileList', () => {
       merge(
         {
           propsData: defaultProps,
-          provide: {
-            glFeatures: { securityOnDemandScansSiteValidation: true },
-          },
         },
         { ...options, localVue, apolloProvider },
       ),
@@ -107,7 +104,7 @@ describe('EE - DastSiteProfileList', () => {
     expect(inputHandler).toHaveBeenCalled();
   });
 
-  describe('with site validation enabled', () => {
+  describe('site validation', () => {
     const [pendingValidation, inProgressValidation] = siteProfiles;
     const urlsPendingValidation = [
       pendingValidation.normalizedTargetUrl,
@@ -228,23 +225,5 @@ describe('EE - DastSiteProfileList', () => {
         });
       },
     );
-  });
-
-  describe('without site validation enabled', () => {
-    beforeEach(() => {
-      createFullComponent({
-        provide: {
-          glFeatures: { securityOnDemandScansSiteValidation: false },
-        },
-        propsData: { siteProfiles },
-      });
-    });
-
-    it.each(siteProfiles)('profile %# should not have validate button and status', (profile) => {
-      const [, , validationStatusCell, actionsCell] = getTableRowForProfile(profile).cells;
-
-      expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);
-      expect(validationStatusCell.innerText).toBe('');
-    });
   });
 });

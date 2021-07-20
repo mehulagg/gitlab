@@ -1,6 +1,7 @@
 <script>
 import {
   GlDropdown,
+  GlDropdownDivider,
   GlDropdownItem,
   GlSearchBoxByType,
   GlDropdownSectionHeader,
@@ -8,20 +9,24 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import { __ } from '~/locale';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { iterationSelectTextMap, iterationDisplayState } from '../constants';
-import groupIterationsQuery from '../queries/group_iterations.query.graphql';
+import groupIterationsQuery from '../queries/iterations.query.graphql';
 
 export default {
+  noIteration: { title: iterationSelectTextMap.noIteration, id: null },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   components: {
     GlDropdown,
+    GlDropdownDivider,
     GlDropdownItem,
     GlSearchBoxByType,
     GlDropdownSectionHeader,
     GlLoadingIcon,
   },
+  mixins: [glFeatureFlagMixin()],
   apollo: {
     iterations: {
       query: groupIterationsQuery,
@@ -36,13 +41,7 @@ export default {
         };
       },
       update(data) {
-        // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220379
         return data.group?.iterations?.nodes || [];
-      },
-      result({ data }) {
-        const nodes = data.group?.iterations?.nodes || [];
-
-        this.iterations = iterationSelectTextMap.noIterationItem.concat(nodes);
       },
       skip() {
         return !this.shouldFetch;
@@ -64,6 +63,26 @@ export default {
     };
   },
   computed: {
+    cadenceTitle() {
+      return this.currentIteration?.iterationCadence?.title;
+    },
+    iterationCadences() {
+      const cadences = [];
+      this.iterations.forEach((iteration) => {
+        if (!iteration.iterationCadence) {
+          return;
+        }
+        const { title } = iteration.iterationCadence;
+        const cadenceIteration = { id: iteration.id, title: iteration.title };
+        const cadence = cadences.find((cad) => cad.title === title);
+        if (cadence) {
+          cadence.iterations.push(cadenceIteration);
+        } else {
+          cadences.push({ title, iterations: [cadenceIteration] });
+        }
+      });
+      return cadences;
+    },
     title() {
       return this.currentIteration?.title || __('Select iteration');
     },
@@ -89,22 +108,45 @@ export default {
 </script>
 
 <template>
-  <div data-qa-selector="iteration_container">
-    <gl-dropdown :text="title" class="gl-w-full" @show="onDropdownShow">
-      <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
-        __('Assign Iteration')
-      }}</gl-dropdown-section-header>
-      <gl-search-box-by-type v-model="searchTerm" />
-      <gl-loading-icon v-if="$apollo.loading" />
+  <gl-dropdown :text="title" class="gl-w-full" @show="onDropdownShow">
+    <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
+      __('Assign Iteration')
+    }}</gl-dropdown-section-header>
+    <gl-search-box-by-type v-model="searchTerm" />
+    <gl-dropdown-item
+      :is-check-item="true"
+      :is-checked="isIterationChecked($options.noIteration.id)"
+      @click="onClick($options.noIteration)"
+    >
+      {{ $options.noIteration.title }}
+    </gl-dropdown-item>
+    <gl-dropdown-divider />
+    <gl-loading-icon v-if="$apollo.queries.iterations.loading" size="sm" />
+    <template v-else-if="!glFeatures.iterationCadences">
       <gl-dropdown-item
         v-for="iterationItem in iterations"
-        v-else
         :key="iterationItem.id"
         :is-check-item="true"
         :is-checked="isIterationChecked(iterationItem.id)"
         @click="onClick(iterationItem)"
         >{{ iterationItem.title }}</gl-dropdown-item
       >
-    </gl-dropdown>
-  </div>
+    </template>
+    <template v-else>
+      <template v-for="(cadence, index) in iterationCadences">
+        <gl-dropdown-divider v-if="index !== 0" :key="index" />
+        <gl-dropdown-section-header :key="cadence.title">
+          {{ cadence.title }}
+        </gl-dropdown-section-header>
+        <gl-dropdown-item
+          v-for="iterationItem in cadence.iterations"
+          :key="iterationItem.id"
+          :is-check-item="true"
+          :is-checked="isIterationChecked(iterationItem.id)"
+          @click="onClick(iterationItem)"
+          >{{ iterationItem.title }}</gl-dropdown-item
+        >
+      </template>
+    </template>
+  </gl-dropdown>
 </template>

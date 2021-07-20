@@ -29,6 +29,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
         expect(subject.builds[1]).to eq(
@@ -42,6 +44,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
       end
@@ -63,6 +67,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
         expect(subject.builds[1]).to eq(
@@ -74,11 +80,13 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             bridge_needs: { pipeline: 'some/project' }
           },
           needs_attributes: [
-            { name: "build", artifacts: true }
+            { name: "build", artifacts: true, optional: false }
           ],
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
       end
@@ -147,12 +155,14 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             ]
           },
           needs_attributes: [
-            { name: 'build', artifacts: true }
+            { name: 'build', artifacts: true, optional: false }
           ],
           only: { refs: %w[branches tags] },
           when: 'on_success',
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :dag
         )
       end
@@ -249,9 +259,19 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
         ])
       end
     end
+
+    describe 'dast configuration' do
+      let(:config) do
+        { build: { stage: 'build', dast_configuration: { site_profile: 'Site profile', scanner_profile: 'Scanner profile' }, script: 'test' } }
+      end
+
+      it 'creates a job with a valid specification' do
+        expect(subject.builds[0][:options]).to include(dast_configuration: { site_profile: 'Site profile', scanner_profile: 'Scanner profile' })
+      end
+    end
   end
 
-  describe 'Secrets' do
+  describe 'secrets' do
     let(:secrets) do
       {
         DATABASE_PASSWORD: {

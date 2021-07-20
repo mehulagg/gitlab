@@ -42,13 +42,37 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
         expect(resolve_requirements(iids: [requirement1.iid, requirement3.iid])).to contain_exactly(requirement1, requirement3)
       end
 
-      it 'filters by last test report state' do
-        create(:test_report, state: :failed)
-        create(:test_report, requirement: requirement1, state: :passed)
-        create(:test_report, requirement: requirement1, state: :failed)
-        create(:test_report, requirement: requirement3, state: :failed)
+      it 'preloads correct latest test report' do
+        requirement_2_latest_report = create(:test_report, requirement: requirement2, created_at: 1.hour.ago)
+        create(:test_report, requirement: requirement1, created_at: 2.hours.ago)
+        create(:test_report, requirement: requirement2, created_at: 4.hours.ago)
+        requirement_3_latest_report = create(:test_report, requirement: requirement3, created_at: 3.hours.ago)
 
-        expect(resolve_requirements(last_test_report_state: 'failed')).to contain_exactly(requirement1, requirement3)
+        requirements = resolve_requirements(sort: 'created_desc').to_a
+
+        expect(requirements[0].latest_report).to eq(requirement_2_latest_report)
+        expect(requirements[1].latest_report).to eq(requirement_3_latest_report)
+      end
+
+      context 'when filtering by last test report state' do
+        before do
+          create(:test_report, state: :failed)
+          create(:test_report, requirement: requirement1, state: :passed)
+          create(:test_report, requirement: requirement1, state: :failed)
+          create(:test_report, requirement: requirement3, state: :passed)
+        end
+
+        it 'filters by failed requirements' do
+          expect(resolve_requirements(last_test_report_state: 'failed')).to contain_exactly(requirement1)
+        end
+
+        it 'filters by passed requirements' do
+          expect(resolve_requirements(last_test_report_state: 'passed')).to contain_exactly(requirement3)
+        end
+
+        it 'filters requirements without test reports' do
+          expect(resolve_requirements(last_test_report_state: 'missing')).to contain_exactly(requirement2)
+        end
       end
 
       describe 'sorting' do

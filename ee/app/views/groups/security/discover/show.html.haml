@@ -2,6 +2,7 @@
 - page_title _("Security")
 - add_page_specific_style 'page_bundles/security_discover'
 - linkFeedback = 'https://gitlab.com/gitlab-org/growth/ui-ux/issues/25'
-- linkUpgrade = group_billings_path(@group.root_ancestor)
+- content = 'discover-group-security'
+- linkUpgrade = group_billings_path(@group.root_ancestor, source: content)
 
-#js-security-discover-app{ data: { group: { id: @group.id, name: @group.name }, link: { main: new_trial_registration_path(glm_source: 'gitlab.com', glm_content: 'discover-group-security'), secondary: linkUpgrade, feedback: linkFeedback } } }
+#js-security-discover-app{ data: { group: { id: @group.id, name: @group.name }, link: { main: new_trial_registration_path(glm_source: 'gitlab.com', glm_content: content), secondary: linkUpgrade, feedback: linkFeedback } } }

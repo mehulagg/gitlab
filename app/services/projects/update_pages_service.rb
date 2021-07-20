@@ -23,16 +23,19 @@ module Projects
     attr_reader :build
 
     def initialize(project, build)
-      @project, @build = project, build
+      @project = project
+      @build = build
     end
 
     def execute
       register_attempt
 
       # Create status notifying the deployment of pages
-      @status = create_status
-      @status.enqueue!
-      @status.run!
+      @status = build_commit_status
+      ::Ci::Pipelines::AddJobService.new(@build.pipeline).execute!(@status) do |job|
+        job.enqueue!
+        job.run!
+      end
 
       raise InvalidStateError, 'missing pages artifacts' unless build.artifacts?
       raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
@@ -46,7 +49,7 @@ module Projects
       end
     rescue InvalidStateError => e
       error(e.message)
-    rescue => e
+    rescue StandardError => e
       error(e.message)
       raise e
     end
@@ -68,12 +71,9 @@ module Projects
       super
     end
 
-    def create_status
+    def build_commit_status
       GenericCommitStatus.new(
-        project: project,
-        pipeline: build.pipeline,
         user: build.user,
-        ref: build.ref,
         stage: 'deploy',
         name: 'pages:deploy'
       )
@@ -82,7 +82,9 @@ module Projects
     def deploy_to_legacy_storage(artifacts_path)
       # path today used by one project can later be used by another
       # so we can't really scope this feature flag by project or group
-      return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+      return unless ::Settings.pages.local_store.enabled
+
+      return if Feature.enabled?(:skip_pages_deploy_to_legacy_storage, project, default_enabled: :yaml)
 
       # Create temporary directory in which we will extract the artifacts
       make_secure_tmp_dir(tmp_path) do |tmp_path|
@@ -141,7 +143,7 @@ module Projects
       FileUtils.mkdir_p(pages_path)
       begin
         FileUtils.move(public_path, previous_public_path)
-      rescue
+      rescue StandardError
       end
       FileUtils.move(archive_public_path, public_path)
     ensure
@@ -249,14 +251,18 @@ module Projects
 
     def make_secure_tmp_dir(tmp_path)
       FileUtils.mkdir_p(tmp_path)
-      path = Dir.mktmpdir(nil, tmp_path)
+      path = Dir.mktmpdir(tmp_dir_prefix, tmp_path)
       begin
         yield(path)
       ensure
         FileUtils.remove_entry_secure(path)
       end
     end
+
+    def tmp_dir_prefix
+      "project-#{project.id}-build-#{build.id}-"
+    end
   end
 end
 
-Projects::UpdatePagesService.prepend_if_ee('EE::Projects::UpdatePagesService')
+Projects::UpdatePagesService.prepend_mod_with('Projects::UpdatePagesService')

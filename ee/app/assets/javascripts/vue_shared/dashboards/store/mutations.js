@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
@@ -29,10 +29,10 @@ export default {
         state.projects.map((p) => p.id),
       );
     } else {
-      createFlash(
-        __('Project order will not be saved as local storage is not available.'),
-        'warning',
-      );
+      createFlash({
+        message: __('Project order will not be saved as local storage is not available.'),
+        type: 'warning',
+      });
     }
   },
   [types.SET_SEARCH_QUERY](state, query) {

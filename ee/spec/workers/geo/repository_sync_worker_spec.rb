@@ -29,7 +29,7 @@ RSpec.describe Geo::RepositorySyncWorker, :geo, :clean_gitlab_redis_cache do
       create(:geo_project_registry, :synced, :repository_dirty, project: unhealthy_dirty)
 
       allow(Gitlab::GitalyClient).to receive(:call) do
-        raise GRPC::Unavailable.new('No Gitaly available')
+        raise GRPC::Unavailable, 'No Gitaly available'
       end
 
       expect(repository_worker).not_to receive(:perform_async).with('broken')

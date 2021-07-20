@@ -31,16 +31,53 @@ module EE
         end
       end
 
+      # Do not clear license feature cache in this block.
+      #
+      # Useful for specs which rely on caching license features.
+      def with_license_feature_cache(&block)
+        ClearLicensedFeatureAvailableCache.without_clear_cache(&block)
+      end
+
       def enable_namespace_license_check!
         stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
         ::Gitlab::CurrentSettings.update!(check_namespace_plan: true)
       end
 
-      def create_current_license(options = {})
+      def create_current_license(gitlab_license_options = {}, license_options = {})
         License.current.destroy!
 
-        gl_license = create(:gitlab_license, options)
-        create(:license, data: gl_license.export)
+        gl_license = create(:gitlab_license, gitlab_license_options)
+
+        create(:license, license_options.merge(data: gl_license.export))
+      end
+
+      ::Project.prepend ClearLicensedFeatureAvailableCache
+    end
+
+    # This patch helps `stub_licensed_features` to work properly
+    # without the need of clearing caches manually in `before` blocks or
+    # using `let_it_be_refind` deliberately.
+    #
+    # See https://gitlab.com/gitlab-org/gitlab/-/issues/10385
+    module ClearLicensedFeatureAvailableCache
+      class << self
+        attr_accessor :clear_cache
+
+        def without_clear_cache
+          self.clear_cache = false
+          yield
+        ensure
+          self.clear_cache = true
+        end
+      end
+
+      # Enabled by default but can be disabled via `without_clear_cache`.
+      self.clear_cache = true
+
+      def licensed_feature_available?(*)
+        clear_memoization(:licensed_feature_available) if ClearLicensedFeatureAvailableCache.clear_cache
+
+        super
       end
     end
   end

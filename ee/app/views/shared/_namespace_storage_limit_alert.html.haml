@@ -3,31 +3,33 @@
 - return unless namespace.present?
 - return unless display_namespace_storage_limit_alert?(namespace)
 
-- payload = namespace_storage_alert(namespace)
-- return if payload.empty?
+= cache([namespace, number_of_hidden_storage_alert_banners], expires_in: 1.minute) do
+  - payload = namespace_storage_alert(namespace)
+  - unless payload.empty?
+    - alert_level = payload[:alert_level]
+    - root_namespace = payload[:root_namespace]
+    - style = namespace_storage_alert_style(alert_level)
+    - icon = namespace_storage_alert_icon(alert_level)
+    - purchase_link = purchase_storage_url if purchase_storage_link_enabled?(namespace)
+    - usage_link = usage_quotas_path(root_namespace, anchor: 'storage-quota-tab')
+    - show_storage_banner_actions = purchase_link || usage_link
 
-- alert_level = payload[:alert_level]
-- root_namespace = payload[:root_namespace]
+    .gl-py-5
+      .gl-alert.js-namespace-storage-alert{ class: "gl-alert-#{style}", role: 'alert' }
+        = sprite_icon(icon, css_class: "gl-icon gl-alert-icon")
+        .gl-alert-title
+          %h4.gl-alert-title= payload[:usage_message]
 
-- style = namespace_storage_alert_style(alert_level)
-- icon = namespace_storage_alert_icon(alert_level)
-- purchase_link = purchase_storage_url if purchase_storage_link_enabled?(namespace)
-- usage_link = namespace_storage_usage_link(root_namespace)
-- show_storage_banner_actions = purchase_link || usage_link
+        - if alert_level != :error
+          %button.js-namespace-storage-alert-dismiss.gl-alert-dismiss.gl-cursor-pointer{ type: 'button', 'aria-label' => _('Dismiss'), data: { id: root_namespace.id, level: alert_level } }
+            = sprite_icon('close', css_class: 'gl-icon')
 
-.gl-py-5
-  .gl-alert.js-namespace-storage-alert{ class: "gl-alert-#{style}", role: 'alert' }
-    = sprite_icon(icon, css_class: "gl-icon gl-alert-icon")
-    .gl-alert-title
-      %h4.gl-alert-title= payload[:usage_message]
-    - if alert_level != :error
-      %button.js-namespace-storage-alert-dismiss.gl-alert-dismiss.gl-cursor-pointer{ type: 'button', 'aria-label' => _('Dismiss'), data: { id: root_namespace.id, level: alert_level } }
-        = sprite_icon('close', css_class: 'gl-icon')
-    .gl-alert-body
-      = payload[:explanation_message]
-    - if show_storage_banner_actions
-      .gl-alert-actions
-        - if purchase_link
-          = link_to(_('Purchase more storage'), purchase_link, class: "btn gl-alert-action btn-md gl-button btn-success")
-        - if usage_link
-          = link_to(_('Manage storage usage'), usage_link, class: "btn gl-alert-action btn-md gl-button btn-default")
+        .gl-alert-body
+          = payload[:explanation_message]
+
+        - if show_storage_banner_actions
+          .gl-alert-actions
+            - if purchase_link
+              = link_to(_('Purchase more storage'), purchase_link, class: "btn gl-alert-action btn-md gl-button btn-success")
+            - if usage_link
+              = link_to(_('View usage details'), usage_link, class: "btn gl-alert-action btn-md gl-button btn-default")

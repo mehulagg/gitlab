@@ -44,10 +44,7 @@ const addTooltips = (elements, config) => {
 const handleTooltipEvent = (rootTarget, e, selector, config = {}) => {
   for (let { target } = e; target && target !== rootTarget; target = target.parentNode) {
     if (isTooltip(target, selector)) {
-      addTooltips([target], {
-        show: true,
-        ...config,
-      });
+      addTooltips([target], config);
       break;
     }
   }
@@ -92,6 +89,7 @@ export const hide = createTooltipApiInvoker((element) =>
 export const show = createTooltipApiInvoker((element) =>
   tooltipsApp().triggerEvent(element, 'open'),
 );
+export const once = (event, cb) => tooltipsApp().$once(event, cb);
 export const destroy = () => {
   tooltipsApp().$destroy();
   app = null;

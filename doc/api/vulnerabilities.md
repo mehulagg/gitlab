@@ -15,11 +15,13 @@ This document now describes the new Vulnerabilities API that provides access to
 [Vulnerabilities](https://gitlab.com/groups/gitlab-org/-/epics/634).
 
 WARNING:
-This API is in an alpha stage and considered unstable.
+This API is in the process of being deprecated and considered unstable.
 The response payload may be subject to change or breakage
-across GitLab releases.
+across GitLab releases. Please use the
+[GraphQL API](graphql/reference/index.md#queryvulnerabilities)
+instead.
 
-Every API call to vulnerabilities must be [authenticated](README.md#authentication).
+Every API call to vulnerabilities must be [authenticated](index.md#authentication).
 
 Vulnerability permissions inherit permissions from their project. If a project is
 private, and a user isn't a member of the project to which the vulnerability

@@ -209,8 +209,12 @@ RSpec.describe 'admin Geo Projects', :js, :geo do
       wait_for_requests
     end
 
-    it 'fires job to resync all projects' do
+    it 'opens confirm modal and then fires job to resync all projects' do
       page.click_button('Resync all')
+
+      page.within('.modal') do
+        page.click_button('Resync all')
+      end
 
       expect(find_toast).to have_text('All projects are being scheduled for resync')
     end
@@ -222,8 +226,12 @@ RSpec.describe 'admin Geo Projects', :js, :geo do
       wait_for_requests
     end
 
-    it 'fires job to reverify all projects' do
+    it 'opens confirm modal and then fires job to reverify all projects' do
       page.click_button('Reverify all')
+
+      page.within('.modal') do
+        page.click_button('Reverify all')
+      end
 
       expect(find_toast).to have_text('All projects are being scheduled for reverify')
     end

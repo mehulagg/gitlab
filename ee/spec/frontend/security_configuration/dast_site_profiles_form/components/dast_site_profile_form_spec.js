@@ -8,22 +8,22 @@ import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_fo
 import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
 import dastSiteProfileCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
-import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
+import { siteProfiles, policySiteProfile } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
 const [siteProfileOne] = siteProfiles;
 const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_scans`;
 const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
-const excludedUrls = 'http://example.com/logout';
+const excludedUrls = 'https://foo.com/logout, https://foo.com/send_mail';
 const requestHeaders = 'my-new-header=something';
 
 const defaultProps = {
@@ -44,22 +44,56 @@ describe('DastSiteProfileForm', () => {
 
   const withinComponent = () => within(wrapper.element);
 
-  const findForm = () => wrapper.find(GlForm);
-  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
-  const findProfileNameInput = () => findByTestId('profile-name-input');
-  const findTargetUrlInput = () => findByTestId('target-url-input');
-  const findAuthSection = () => wrapper.find(DastSiteAuthSection);
-  const findExcludedUrlsInput = () => findByTestId('excluded-urls-input');
-  const findRequestHeadersInput = () => findByTestId('request-headers-input');
-  const findSubmitButton = () => findByTestId('dast-site-profile-form-submit-button');
-  const findCancelButton = () => findByTestId('dast-site-profile-form-cancel-button');
-  const findCancelModal = () => wrapper.find(GlModal);
+  const findForm = () => wrapper.findComponent(GlForm);
+  const findParentFormGroup = () => wrapper.findByTestId('dast-site-parent-group');
+  const findAuthSection = () => wrapper.findComponent(DastSiteAuthSection);
+  const findCancelModal = () => wrapper.findComponent(GlModal);
+  const findByNameAttribute = (name) => wrapper.find(`[name="${name}"]`);
+  const findProfileNameInput = () => wrapper.findByTestId('profile-name-input');
+  const findTargetUrlInput = () => wrapper.findByTestId('target-url-input');
+  const findExcludedUrlsInput = () => wrapper.findByTestId('excluded-urls-input');
+  const findRequestHeadersInput = () => wrapper.findByTestId('request-headers-input');
+  const findAuthCheckbox = () => wrapper.findByTestId('auth-enable-checkbox');
+  const findTargetTypeOption = () => wrapper.findByTestId('site-type-option');
+  const findSubmitButton = () => wrapper.findByTestId('dast-site-profile-form-submit-button');
+  const findCancelButton = () => wrapper.findByTestId('dast-site-profile-form-cancel-button');
+  const findAlert = () => wrapper.findByTestId('dast-site-profile-form-alert');
+  const findPolicyAlert = () => wrapper.findByTestId('dast-policy-site-profile-form-alert');
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
-  const findAlert = () => findByTestId('dast-site-profile-form-alert');
 
   const setFieldValue = async (field, value) => {
     await field.setValue(value);
     field.trigger('blur');
+  };
+
+  const setAuthFieldsValues = async ({ enabled, ...fields }) => {
+    await findAuthCheckbox().setChecked(enabled);
+
+    Object.keys(fields).forEach((field) => {
+      findByNameAttribute(field).setValue(fields[field]);
+    });
+  };
+
+  const fillForm = async () => {
+    await setFieldValue(findProfileNameInput(), profileName);
+    await setFieldValue(findTargetUrlInput(), targetUrl);
+    await setFieldValue(findExcludedUrlsInput(), excludedUrls);
+    await setFieldValue(findRequestHeadersInput(), requestHeaders);
+    await setAuthFieldsValues(siteProfileOne.auth);
+  };
+
+  const fillAndSubmitForm = async () => {
+    await fillForm();
+    submitForm();
+  };
+
+  const setTargetType = async (type) => {
+    const radio = wrapper
+      .findAll('input[type="radio"]')
+      .filter((r) => r.attributes('value') === type)
+      .at(0);
+    radio.element.selected = true;
+    radio.trigger('change');
   };
 
   const mockClientFactory = (handlers) => {
@@ -96,11 +130,6 @@ describe('DastSiteProfileForm', () => {
       {},
       {
         propsData: defaultProps,
-        provide: {
-          glFeatures: {
-            securityDastSiteProfilesAdditionalFields: true,
-          },
-        },
       },
       options,
       {
@@ -109,7 +138,7 @@ describe('DastSiteProfileForm', () => {
       },
     );
 
-    wrapper = mountFn(DastSiteProfileForm, mountOpts);
+    wrapper = extendedWrapper(mountFn(DastSiteProfileForm, mountOpts));
   };
   const createComponent = componentFactory();
   const createFullComponent = componentFactory(mount);
@@ -122,7 +151,18 @@ describe('DastSiteProfileForm', () => {
 
   it('renders properly', () => {
     createComponent();
-    expect(wrapper.html()).not.toBe('');
+    expect(findForm().exists()).toBe(true);
+    expect(findForm().text()).toContain('New site profile');
+  });
+
+  it('when showHeader prop is disabled', () => {
+    createComponent({
+      propsData: {
+        ...defaultProps,
+        showHeader: false,
+      },
+    });
+    expect(findForm().text()).not.toContain('New site profile');
   });
 
   describe('target URL input', () => {
@@ -153,10 +193,89 @@ describe('DastSiteProfileForm', () => {
       createFullComponent();
     });
 
-    it('should render correctly', () => {
+    it('should render correctly with default values', () => {
       expect(findAuthSection().exists()).toBe(true);
       expect(findExcludedUrlsInput().exists()).toBe(true);
       expect(findRequestHeadersInput().exists()).toBe(true);
+      expect(findTargetTypeOption().vm.$attrs.checked).toBe('WEBSITE');
+    });
+
+    it('should have maxlength constraint', () => {
+      expect(findExcludedUrlsInput().attributes('maxlength')).toBe('2048');
+      expect(findRequestHeadersInput().attributes('maxlength')).toBe('2048');
+    });
+
+    describe('request-headers and password fields renders correctly', () => {
+      it('when creating a new profile', async () => {
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe(
+          'Cache-control: no-cache, User-Agent: DAST/1.0',
+        );
+
+        expect(findRequestHeadersInput().element.value).toBe('');
+        expect(findByNameAttribute('password').exists()).toBe(false);
+      });
+
+      it('when updating an existing profile', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: siteProfileOne,
+          },
+        });
+        expect(findRequestHeadersInput().element.value).toBe(siteProfileOne.requestHeaders);
+        expect(findByNameAttribute('password').element.value).toBe(siteProfileOne.auth.password);
+      });
+
+      it('when updating an existing profile with no request-header & password', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: { ...siteProfileOne, requestHeaders: null, auth: { enabled: true } },
+          },
+        });
+        expect(findRequestHeadersInput().element.value).toBe('');
+        expect(findByNameAttribute('password').element.value).toBe('');
+      });
+    });
+
+    describe('when target type is API', () => {
+      beforeEach(() => {
+        setTargetType('API');
+      });
+
+      it('should hide auth section', () => {
+        expect(findAuthSection().exists()).toBe(false);
+      });
+
+      describe.each`
+        title                  | siteProfile       | mutationVars                 | mutationKind
+        ${'New site profile'}  | ${null}           | ${{}}                        | ${'dastSiteProfileCreate'}
+        ${'Edit site profile'} | ${siteProfileOne} | ${{ id: siteProfileOne.id }} | ${'dastSiteProfileUpdate'}
+      `('$title', ({ siteProfile, mutationVars, mutationKind }) => {
+        beforeEach(() => {
+          createFullComponent({
+            propsData: {
+              siteProfile,
+            },
+          });
+        });
+
+        it('form submission triggers correct GraphQL mutation', async () => {
+          await fillForm();
+          await setTargetType('API');
+          await submitForm();
+
+          expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
+            input: {
+              profileName,
+              targetUrl,
+              fullPath,
+              excludedUrls: siteProfileOne.excludedUrls,
+              requestHeaders,
+              targetType: 'API',
+              ...mutationVars,
+            },
+          });
+        });
+      });
     });
   });
 
@@ -171,8 +290,6 @@ describe('DastSiteProfileForm', () => {
           siteProfile,
         },
       });
-
-      jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
     });
 
     it('sets the correct title', () => {
@@ -184,14 +301,6 @@ describe('DastSiteProfileForm', () => {
     });
 
     describe('submission', () => {
-      const fillAndSubmitForm = async () => {
-        await setFieldValue(findProfileNameInput(), profileName);
-        await setFieldValue(findTargetUrlInput(), targetUrl);
-        await setFieldValue(findExcludedUrlsInput(), excludedUrls);
-        await setFieldValue(findRequestHeadersInput(), requestHeaders);
-        submitForm();
-      };
-
       describe('on success', () => {
         beforeEach(async () => {
           await fillAndSubmitForm();
@@ -206,16 +315,20 @@ describe('DastSiteProfileForm', () => {
             input: {
               profileName,
               targetUrl,
-              excludedUrls,
               requestHeaders,
               fullPath,
+              auth: siteProfileOne.auth,
+              excludedUrls: siteProfileOne.excludedUrls,
+              targetType: siteProfileOne.targetType,
               ...mutationVars,
             },
           });
         });
 
-        it('redirects to the profiles library', () => {
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        it('emits success event with correct params', () => {
+          expect(wrapper.emitted('success')).toBeTruthy();
+          expect(wrapper.emitted('success')).toHaveLength(1);
+          expect(wrapper.emitted('success')[0]).toStrictEqual([{ id: '3083' }]);
         });
 
         it('does not show an alert', () => {
@@ -273,9 +386,9 @@ describe('DastSiteProfileForm', () => {
 
     describe('cancellation', () => {
       describe('form unchanged', () => {
-        it('redirects to the profiles library', () => {
+        it('emits cancel event', () => {
           findCancelButton().vm.$emit('click');
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
 
@@ -291,29 +404,51 @@ describe('DastSiteProfileForm', () => {
           expect(findCancelModal().vm.show).toHaveBeenCalled();
         });
 
-        it('redirects to the profiles library if confirmed', () => {
+        it('emits cancel event', () => {
           findCancelModal().vm.$emit('ok');
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
     });
   });
 
-  describe('when feature flag is off', () => {
+  describe('when profile does not come from a policy', () => {
     beforeEach(() => {
-      createFullComponent({
-        provide: {
-          glFeatures: {
-            securityDastSiteProfilesAdditionalFields: false,
-          },
+      createComponent({
+        propsData: {
+          siteProfile: siteProfileOne,
         },
       });
     });
 
-    it('should not render additional fields', () => {
-      expect(findAuthSection().exists()).toBe(false);
-      expect(findExcludedUrlsInput().exists()).toBe(false);
-      expect(findRequestHeadersInput().exists()).toBe(false);
+    it('should enable all form groups', () => {
+      expect(findParentFormGroup().attributes('disabled')).toBe(undefined);
+    });
+
+    it('should show the policy profile alert', () => {
+      expect(findPolicyAlert().exists()).toBe(false);
+    });
+  });
+
+  describe('when profile does comes from a policy', () => {
+    beforeEach(() => {
+      createComponent({
+        propsData: {
+          siteProfile: policySiteProfile,
+        },
+      });
+    });
+
+    it('should show the policy profile alert', () => {
+      expect(findPolicyAlert().exists()).toBe(true);
+    });
+
+    it('should disable all form groups', () => {
+      expect(findParentFormGroup().attributes('disabled')).toBe('true');
+    });
+
+    it('should disable the save button', () => {
+      expect(findSubmitButton().props('disabled')).toBe(true);
     });
   });
 });

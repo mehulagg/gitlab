@@ -3,19 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe 'SAML provider settings' do
-  include CookieHelper
+  let_it_be_with_refind(:user) { create(:user) }
+  let_it_be_with_refind(:group) { create(:group) }
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
   let(:callback_path) { "/groups/#{group.path}/-/saml/callback" }
+
+  before_all do
+    group.add_owner(user)
+  end
 
   before do
     stub_default_url_options(protocol: "https")
     stub_saml_config
-    group.add_owner(user)
   end
 
-  around(:all) do |example|
+  around do |example|
     with_omniauth_full_host { example.run }
   end
 
@@ -29,7 +31,7 @@ RSpec.describe 'SAML provider settings' do
 
   def stub_saml_config
     stub_licensed_features(group_saml: true)
-    allow(Devise).to receive(:omniauth_providers).and_return(%i(group_saml))
+    allow(Devise).to receive(:omniauth_providers).and_return(%i[group_saml])
   end
 
   describe 'settings' do
@@ -57,6 +59,22 @@ RSpec.describe 'SAML provider settings' do
       expect(response_headers['Content-Type']).to have_content("application/xml")
     end
 
+    context '"Enforce SSO-only authentication for web activity for this group" checkbox' do
+      it 'is checked by default' do
+        visit group_saml_providers_path(group)
+
+        expect(find_field('Enforce SSO-only authentication for web activity for this group')).to be_checked
+      end
+
+      it 'displays warning if unchecked', :js do
+        visit group_saml_providers_path(group)
+
+        uncheck 'Enforce SSO-only authentication for web activity for this group'
+
+        expect(page).to have_content 'Warning - Enabling SSO enforcement can reduce security risks.'
+      end
+    end
+
     it 'allows creation of new provider' do
       visit group_saml_providers_path(group)
 
@@ -75,12 +93,12 @@ RSpec.describe 'SAML provider settings' do
     end
 
     context 'with existing SAML provider' do
-      let!(:saml_provider) { create(:saml_provider, group: group, prohibited_outer_forks: false) }
+      let!(:saml_provider) { create(:saml_provider, group: group, prohibited_outer_forks: false, enforced_sso: true) }
 
       it 'allows provider to be disabled', :js do
         visit group_saml_providers_path(group)
 
-        find('.js-group-saml-enabled-toggle-area button').click
+        uncheck 'Enable SAML authentication for this group'
 
         expect { submit }.to change { saml_provider.reload.enabled }.to false
       end
@@ -97,9 +115,10 @@ RSpec.describe 'SAML provider settings' do
       it 'updates the enforced sso setting', :js do
         visit group_saml_providers_path(group)
 
-        find('.js-group-saml-enforced-sso-toggle').click
+        uncheck 'Enforce SSO-only authentication for web activity for this group'
 
-        expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
+        expect { submit }.to change { saml_provider.reload.enforced_sso }.to(false)
+        expect(page).to have_content 'Warning - Enabling SSO enforcement can reduce security risks.'
       end
 
       context 'enforced_group_managed_accounts enabled', :js do
@@ -111,8 +130,7 @@ RSpec.describe 'SAML provider settings' do
         it 'updates the enforced_group_managed_accounts flag' do
           visit group_saml_providers_path(group)
 
-          find('.js-group-saml-enforced-sso-toggle').click
-          find('.js-group-saml-enforced-group-managed-accounts-toggle').click
+          check 'Enforce users to have dedicated group-managed accounts for this group'
 
           expect { submit }.to change { saml_provider.reload.enforced_group_managed_accounts }.to(true)
         end
@@ -120,9 +138,8 @@ RSpec.describe 'SAML provider settings' do
         it 'updates the prohibited_outer_forks flag' do
           visit group_saml_providers_path(group)
 
-          find('.js-group-saml-enforced-sso-toggle').click
-          find('.js-group-saml-enforced-group-managed-accounts-toggle').click
-          find('.js-group-saml-prohibited-outer-forks-toggle').click
+          check 'Enforce users to have dedicated group-managed accounts for this group'
+          check 'Prohibit outer forks for this group'
 
           expect { submit }.to change { saml_provider.reload.prohibited_outer_forks }.to(true)
         end
@@ -134,8 +151,8 @@ RSpec.describe 'SAML provider settings' do
 
           visit group_saml_providers_path(group)
 
-          expect(page).not_to have_selector('.js-group-saml-enforced-group-managed-accounts-toggle')
-          expect(page).not_to have_selector('.js-group-saml-prohibited-outer-forks-toggle')
+          expect(page).not_to have_field('Enforce users to have dedicated group-managed accounts for this group')
+          expect(page).not_to have_field('Prohibit outer forks for this group')
         end
       end
     end
@@ -149,22 +166,22 @@ RSpec.describe 'SAML provider settings' do
 
       before do
         mock_group_saml(uid: '123')
-
-        allow_any_instance_of(Gitlab::Auth::GroupSaml::ResponseStore).to receive(:get_raw).and_return(raw_saml_response)
-
-        allow_any_instance_of(OmniAuth::Strategies::GroupSaml).to receive(:mock_callback_call) do
-          response = Rack::Response.new
-          response.redirect(group_saml_providers_path(group))
-          response.finish
+        allow_next_instance_of(Gitlab::Auth::GroupSaml::ResponseStore) do |instance|
+          allow(instance).to receive(:get_raw).and_return(raw_saml_response)
         end
+
+        stub_const(
+          '::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE',
+          group_saml_providers_path(group)
+        )
       end
 
-      it 'displays XML validation errors' do
+      it 'displays XML validation errors', :aggregate_failures do
         visit group_saml_providers_path(group)
 
         test_sso
 
-        expect(current_path).to eq group_saml_providers_path(group)
+        expect(page).to have_current_path(group_saml_providers_path(group))
         expect(page).to have_content("Fingerprint mismatch")
         expect(page).to have_content("The attributes have expired, based on the SessionNotOnOrAfter")
       end
@@ -184,7 +201,7 @@ RSpec.describe 'SAML provider settings' do
       it 'acts as if the group was not found' do
         visit sso_group_saml_providers_path(group)
 
-        expect(current_path).to eq(new_user_session_path)
+        expect(page).to have_current_path(new_user_session_path)
       end
 
       context 'as owner' do
@@ -195,7 +212,7 @@ RSpec.describe 'SAML provider settings' do
         it 'redirects to settings page with warning' do
           visit sso_group_saml_providers_path(group)
 
-          expect(current_path).to eq group_saml_providers_path(group)
+          expect(page).to have_current_path(group_saml_providers_path(group))
           expect(page).to have_content 'SAML sign on has not been configured for this group'
         end
       end

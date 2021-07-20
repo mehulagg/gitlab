@@ -9,9 +9,9 @@ module EE
         class_methods do
           def reference_filters
             [
-              ::Banzai::Filter::EpicReferenceFilter,
-              ::Banzai::Filter::IterationReferenceFilter,
-              ::Banzai::Filter::VulnerabilityReferenceFilter,
+              ::Banzai::Filter::References::EpicReferenceFilter,
+              ::Banzai::Filter::References::IterationReferenceFilter,
+              ::Banzai::Filter::References::VulnerabilityReferenceFilter,
               *super
             ]
           end

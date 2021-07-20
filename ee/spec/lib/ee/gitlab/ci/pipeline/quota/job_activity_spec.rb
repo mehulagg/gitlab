@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
-  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
-  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: gold_plan) }
-  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+  let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
+  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: ultimate_plan) }
+
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
   subject { described_class.new(namespace, project) }
 

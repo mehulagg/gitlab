@@ -50,5 +50,12 @@ module Types
 
     field :updated_at, Types::TimeType, null: false,
           description: 'Timestamp of last iteration update.'
+
+    field :iteration_cadence, Types::Iterations::CadenceType, null: false,
+          description: 'Cadence of the iteration.'
+
+    def iteration_cadence
+      ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Iterations::Cadence, object.iterations_cadence_id).find
+    end
   end
 end

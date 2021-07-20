@@ -64,9 +64,9 @@ By default, this seeds an average of 10 issues per week for the last 52 weeks
 per project. All issues are also randomly labeled with team, type, severity,
 and priority.
 
-#### Seeding groups with sub-groups
+#### Seeding groups with subgroups
 
-You can seed groups with sub-groups that contain milestones/projects/issues
+You can seed groups with subgroups that contain milestones/projects/issues
 with the `gitlab:seed:group_seed` task:
 
 ```shell
@@ -152,6 +152,24 @@ To run several tests inside one directory:
 
 - `bin/rspec spec/requests/api/` for the RSpec tests if you want to test API only
 
+### Run RSpec tests which failed in Merge Request pipeline on your machine
+
+If your Merge Request pipeline failed with RSpec test failures,
+you can run all the failed tests on your machine with the following Rake task:
+
+```shell
+bin/rake spec:merge_request_rspec_failure
+```
+
+There are a few caveats for this Rake task:
+
+- You need to be on the same branch on your machine as the source branch of the Merge Request.
+- The pipeline must have been completed.
+- You may need to wait for the test report to be parsed and retry again.
+
+This Rake task depends on the [unit test reports](../ci/unit_test_reports.md) feature,
+which only gets parsed when it is requested for the first time.
+
 ### Speed up tests, Rake tasks, and migrations
 
 [Spring](https://github.com/rails/spring) is a Rails application pre-loader. It
@@ -218,7 +236,7 @@ task, then check the dimensions of the new sprite sheet and update the
 ## Update project templates
 
 Starting a project from a template needs this project to be exported. On a
-up to date master branch run:
+up to date main branch run:
 
 ```shell
 gdk start
@@ -229,7 +247,14 @@ git commit
 git push -u origin update-project-templates
 ```
 
-Now create a merge request and merge that to master.
+Now create a merge request and merge that to main.
+
+To update just a single template instead of all of them, specify the template name
+between square brackets. For example, for the `cluster_management` template, run:
+
+```shell
+bundle exec rake gitlab:update_project_templates\[cluster_management\]
+```
 
 ## Generate route lists
 
@@ -245,7 +270,7 @@ RESTful API verbs.
 For the Rails controllers, run:
 
 ```shell
-bundle exec rake routes
+bundle exec rails routes
 ```
 
 Since these take some time to create, it's often helpful to save the output to
@@ -340,3 +365,11 @@ bundle exec rake gitlab:graphql:schema:dump
 ```
 
 This uses GraphQL Ruby's built-in Rake tasks to generate files in both [IDL](https://www.prisma.io/blog/graphql-sdl-schema-definition-language-6755bcb9ce51) and JSON formats.
+
+### Update documentation and schema definitions
+
+The following command combines the intent of [Update GraphQL documentation and schema definitions](#update-graphql-documentation-and-schema-definitions) and [Update machine-readable schema files](#update-machine-readable-schema-files):
+
+```shell
+bundle exec rake gitlab:graphql:update_all
+```

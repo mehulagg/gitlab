@@ -6,7 +6,7 @@ module Types
 
     connection_type_class(Types::MergeRequestConnectionType)
 
-    implements(Types::Notes::NoteableType)
+    implements(Types::Notes::NoteableInterface)
     implements(Types::CurrentUserTodos)
 
     authorize :read_merge_request
@@ -54,7 +54,10 @@ module Types
     field :target_branch, GraphQL::STRING_TYPE, null: false,
           description: 'Target branch of the merge request.'
     field :work_in_progress, GraphQL::BOOLEAN_TYPE, method: :work_in_progress?, null: false,
-          description: 'Indicates if the merge request is a work in progress (WIP).'
+          deprecated: { reason: 'Use `draft`', milestone: '13.12' },
+          description: 'Indicates if the merge request is a draft.'
+    field :draft, GraphQL::BOOLEAN_TYPE, method: :draft?, null: false,
+          description: 'Indicates if the merge request is a draft.'
     field :merge_when_pipeline_succeeds, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the merge has been set to be merged when its pipeline succeeds (MWPS).'
     field :diff_head_sha, GraphQL::STRING_TYPE, null: true,
@@ -79,7 +82,11 @@ module Types
     field :force_remove_source_branch, GraphQL::BOOLEAN_TYPE, method: :force_remove_source_branch?, null: true,
           description: 'Indicates if the project settings will lead to source branch deletion after merge.'
     field :merge_status, GraphQL::STRING_TYPE, method: :public_merge_status, null: true,
-          description: 'Status of the merge request.'
+          description: 'Status of the merge request.',
+          deprecated: { reason: :renamed, replacement: 'MergeRequest.mergeStatusEnum', milestone: '14.0' }
+    field :merge_status_enum, ::Types::MergeRequests::MergeStatusEnum,
+          method: :public_merge_status, null: true,
+          description: 'Merge status of the merge request.'
     field :in_progress_merge_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'Commit SHA of the merge request if merge is in progress.'
     field :merge_error, GraphQL::STRING_TYPE, null: true,
@@ -108,6 +115,10 @@ module Types
           null: false, calls_gitaly: true,
           method: :target_branch_exists?,
           description: 'Indicates if the target branch of the merge request exists.'
+    field :diverged_from_target_branch, GraphQL::BOOLEAN_TYPE,
+          null: false, calls_gitaly: true,
+          method: :diverged_from_target_branch?,
+          description: 'Indicates if the source branch is behind the target branch.'
     field :mergeable_discussions_state, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if all discussions in the merge request have been resolved, allowing the merge request to be merged.'
     field :web_url, GraphQL::STRING_TYPE, null: true,
@@ -126,9 +137,15 @@ module Types
 
     field :milestone, Types::MilestoneType, null: true,
           description: 'The milestone of the merge request.'
-    field :assignees, Types::UserType.connection_type, null: true, complexity: 5,
+    field :assignees,
+          type: Types::MergeRequests::AssigneeType.connection_type,
+          null: true,
+          complexity: 5,
           description: 'Assignees of the merge request.'
-    field :reviewers, Types::UserType.connection_type, null: true, complexity: 5,
+    field :reviewers,
+          type: Types::MergeRequests::ReviewerType.connection_type,
+          null: true,
+          complexity: 5,
           description: 'Users from whom a review has been requested.'
     field :author, Types::UserType, null: true,
           description: 'User who created this merge request.'
@@ -145,6 +162,10 @@ module Types
           description: 'Time estimate of the merge request.'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
           description: 'Total time reported as spent on the merge request.'
+    field :human_time_estimate, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable time estimate of the merge request.'
+    field :human_total_time_spent, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable total time reported as spent on the merge request.'
     field :reference, GraphQL::STRING_TYPE, null: false, method: :to_reference,
           description: 'Internal reference of the merge request. Returned in shortened format by default.' do
       argument :full, GraphQL::BOOLEAN_TYPE, required: false, default_value: false,
@@ -179,6 +200,8 @@ module Types
           description: 'Selected auto merge strategy.'
     field :merge_user, Types::UserType, null: true,
           description: 'User who merged this merge request.'
+    field :timelogs, Types::TimelogType.connection_type, null: false,
+          description: 'Timelogs on the merge request.'
 
     def approved_by
       object.approved_by_users
@@ -248,4 +271,4 @@ module Types
   end
 end
 
-Types::MergeRequestType.prepend_if_ee('::EE::Types::MergeRequestType')
+Types::MergeRequestType.prepend_mod_with('Types::MergeRequestType')

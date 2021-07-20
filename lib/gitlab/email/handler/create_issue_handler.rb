@@ -56,10 +56,13 @@ module Gitlab
 
         def create_issue
           Issues::CreateService.new(
-            project,
-            author,
-            title:       mail.subject,
-            description: message_including_reply
+            project: project,
+            current_user: author,
+            params: {
+              title: mail.subject,
+              description: message_including_reply
+            },
+            spam_params: nil
           ).execute
         end
 

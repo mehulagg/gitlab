@@ -1,4 +1,4 @@
-import { GlFormGroup } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
@@ -37,10 +37,11 @@ describe('DefaultStageFields', () => {
   }
 
   const findStageFieldName = () => wrapper.find('[name="create-value-stream-stage-0"]');
+  const findStageFieldNameInput = () => findStageFieldName().findComponent(GlFormInput);
   const findStartEvent = () => wrapper.find('[data-testid="stage-start-event-0"]');
   const findEndEvent = () => wrapper.find('[data-testid="stage-end-event-0"]');
-  const findFormGroup = () => wrapper.find(GlFormGroup);
-  const findFieldActions = () => wrapper.find(StageFieldActions);
+  const findFormGroup = () => wrapper.findComponent(GlFormGroup);
+  const findFieldActions = () => wrapper.findComponent(StageFieldActions);
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -52,32 +53,28 @@ describe('DefaultStageFields', () => {
   });
 
   it('renders the stage field name', () => {
-    expect(findStageFieldName().exists()).toBe(true);
-    expect(findStageFieldName().html()).toContain(defaultStage.name);
+    expect(findStageFieldNameInput().exists()).toBe(true);
+    expect(findStageFieldNameInput().html()).toContain(defaultStage.name);
+  });
+
+  it('disables input for the stage field name', () => {
+    expect(findStageFieldNameInput().attributes('disabled')).toBe('disabled');
   });
 
   it('renders the field start event', () => {
-    expect(findStartEvent().exists()).toBe(true);
-    expect(findStartEvent().html()).toContain(ISSUE_CREATED.name);
+    expect(findStartEvent().text()).toContain(ISSUE_CREATED.name);
   });
 
   it('renders the field end event', () => {
-    const content = findEndEvent().html();
-    expect(content).toContain(ISSUE_CLOSED.name);
-    expect(content).toContain(defaultStage.endEventLabel);
+    expect(findEndEvent().text()).toContain(ISSUE_CLOSED.name);
   });
 
-  it('renders an event label if it exists', () => {
-    const content = findEndEvent().html();
-    expect(content).toContain(defaultStage.endEventLabel);
-  });
-
-  it('on field input emits an input event', () => {
+  it('does not emits any input', () => {
     expect(wrapper.emitted('input')).toBeUndefined();
 
     const newInput = 'coooool';
     findStageFieldName().vm.$emit('input', newInput);
-    expect(wrapper.emitted('input')[0]).toEqual([newInput]);
+    expect(wrapper.emitted('input')).toBeUndefined();
   });
 
   describe('StageFieldActions', () => {
@@ -103,7 +100,7 @@ describe('DefaultStageFields', () => {
     });
 
     it('displays the field error', () => {
-      expect(findFormGroup().html()).toContain(stageNameError);
+      expect(findFormGroup().attributes('invalid-feedback')).toBe(stageNameError);
     });
   });
 });

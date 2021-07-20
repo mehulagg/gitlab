@@ -13,6 +13,10 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
     let_it_be(:invalid_pat1) { create(:personal_access_token, expires_at: nil, user: user) }
     let_it_be(:invalid_pat2) { create(:personal_access_token, expires_at: 20.days.from_now, user: user) }
 
+    before do
+      stub_licensed_features(personal_access_token_expiration_policy: true)
+    end
+
     shared_examples 'user does not receive revoke notification email' do
       it 'does not send any notification to user' do
         expect(Notify).not_to receive(:policy_revoked_personal_access_tokens_email).and_call_original
@@ -103,9 +107,9 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
       end
     end
 
-    context 'when the feature flag for personal access token policy is disabled' do
+    context 'when the licensed feature for personal access token policy is disabled' do
       before do
-        stub_feature_flags(personal_access_token_expiration_policy: false)
+        stub_licensed_features(personal_access_token_expiration_policy: false)
       end
 
       it_behaves_like 'user does not receive revoke notification email'

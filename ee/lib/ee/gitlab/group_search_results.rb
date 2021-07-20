@@ -5,9 +5,10 @@ module EE
     module GroupSearchResults
       extend ::Gitlab::Utils::Override
 
-      override :epics
       def epics
-        EpicsFinder.new(current_user, issuable_params).execute.search(query)
+        epics = EpicsFinder.new(current_user, issuable_params).execute.search(query)
+
+        apply_sort(epics)
       end
     end
   end

@@ -10,14 +10,21 @@ module Banzai
     class WikiLinkFilter < HTML::Pipeline::Filter
       include Gitlab::Utils::SanitizeNodeLink
 
+      CSS_A     = 'a:not(.gfm)'
+      XPATH_A   = Gitlab::Utils::Nokogiri.css_to_xpath(CSS_A).freeze
+      CSS_VA    = 'video, audio'
+      XPATH_VA  = Gitlab::Utils::Nokogiri.css_to_xpath(CSS_VA).freeze
+      CSS_IMG   = 'img'
+      XPATH_IMG = Gitlab::Utils::Nokogiri.css_to_xpath(CSS_IMG).freeze
+
       def call
         return doc unless wiki?
 
-        doc.search('a:not(.gfm)').each { |el| process_link(el.attribute('href'), el) }
+        doc.xpath(XPATH_A).each { |el| process_link(el.attribute('href'), el) }
 
-        doc.search('video, audio').each { |el| process_link(el.attribute('src'), el) }
+        doc.xpath(XPATH_VA).each { |el| process_link(el.attribute('src'), el) }
 
-        doc.search('img').each do |el|
+        doc.xpath(XPATH_IMG).each do |el|
           attr = el.attribute('data-src') || el.attribute('src')
 
           process_link(attr, el)
@@ -29,7 +36,7 @@ module Banzai
       protected
 
       def process_link(link_attr, node)
-        process_link_attr(link_attr)
+        process_link_attr(link_attr, node)
         remove_unsafe_links({ node: node }, remove_invalid_links: false)
       end
 
@@ -37,12 +44,25 @@ module Banzai
         !context[:wiki].nil?
       end
 
-      def process_link_attr(html_attr)
+      def process_link_attr(html_attr, node)
         return if html_attr.blank?
 
-        html_attr.value = apply_rewrite_rules(html_attr.value)
+        rewritten_value = apply_rewrite_rules(html_attr.value)
+
+        if html_attr.value != rewritten_value
+          preserve_original_link(html_attr, node)
+        end
+
+        html_attr.value = rewritten_value
       rescue URI::Error, Addressable::URI::InvalidURIError
         # noop
+      end
+
+      def preserve_original_link(html_attr, node)
+        return if html_attr.blank?
+        return if node.value?('data-canonical-src')
+
+        node.set_attribute('data-canonical-src', html_attr.value)
       end
 
       def apply_rewrite_rules(link_string)

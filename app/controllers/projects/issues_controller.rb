@@ -9,7 +9,6 @@ class Projects::IssuesController < Projects::ApplicationController
   include IssuesCalendar
   include SpammableActions
   include RecordUserLastActivity
-  include CommentAndCloseFlag
 
   ISSUES_EXCEPT_ACTIONS = %i[index calendar new create bulk_update import_csv export_csv service_desk].freeze
   SET_ISSUEABLES_INDEX_ONLY_ACTIONS = %i[index calendar service_desk].freeze
@@ -19,7 +18,7 @@ class Projects::IssuesController < Projects::ApplicationController
   prepend_before_action :authenticate_user!, only: [:new, :export_csv]
   prepend_before_action :store_uri, only: [:new, :show, :designs]
 
-  before_action :whitelist_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
+  before_action :disable_query_limiting, only: [:create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
   before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
   after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
@@ -45,23 +44,30 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
     push_frontend_feature_flag(:usage_data_design_action, project, default_enabled: true)
+    push_frontend_feature_flag(:improved_emoji_picker, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:vue_issues_list, project)
+    push_frontend_feature_flag(:iteration_cadences, project&.group, default_enabled: :yaml)
   end
 
   before_action only: :show do
-    real_time_feature_flag = :real_time_issue_sidebar
-    real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
+    real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:real_time_issue_sidebar, @project)
 
-    push_to_gon_attributes(:features, real_time_feature_flag, real_time_enabled)
+    push_to_gon_attributes(:features, :real_time_issue_sidebar, real_time_enabled)
     push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:issue_assignees_widget, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:labels_widget, @project, default_enabled: :yaml)
 
-    record_experiment_user(:invite_members_version_a)
-    record_experiment_user(:invite_members_version_b)
+    experiment(:invite_members_in_comment, namespace: @project.root_ancestor) do |experiment_instance|
+      experiment_instance.exclude! unless helpers.can_import_members?
+
+      experiment_instance.use {}
+      experiment_instance.try(:invite_member_link) {}
+
+      experiment_instance.track(:view, property: @project.root_ancestor.id.to_s)
+    end
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
-
-  before_action :run_null_hypothesis_experiment,
-                only: [:index, :new, :create]
 
   respond_to :html
 
@@ -103,12 +109,12 @@ class Projects::IssuesController < Projects::ApplicationController
     params[:issue] ||= ActionController::Parameters.new(
       assignee_ids: ""
     )
-    build_params = issue_create_params.merge(
+    build_params = issue_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve],
-      confidential: !!Gitlab::Utils.to_boolean(issue_create_params[:confidential])
+      confidential: !!Gitlab::Utils.to_boolean(issue_params[:confidential])
     )
-    service = ::Issues::BuildService.new(project, current_user, build_params)
+    service = ::Issues::BuildService.new(project: project, current_user: current_user, params: build_params)
 
     @issue = @noteable = service.execute
 
@@ -123,12 +129,14 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def create
-    create_params = issue_create_params.merge(spammable_params).merge(
+    extract_legacy_spam_params_to_headers
+    create_params = issue_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
-    service = ::Issues::CreateService.new(project, current_user, create_params)
+    spam_params = ::Spam::SpamParams.new_from_request(request: request)
+    service = ::Issues::CreateService.new(project: project, current_user: current_user, params: create_params, spam_params: spam_params)
     @issue = service.execute
 
     create_vulnerability_issue_feedback(issue)
@@ -155,7 +163,7 @@ class Projects::IssuesController < Projects::ApplicationController
       new_project = Project.find(params[:move_to_project_id])
       return render_404 unless issue.can_move?(current_user, new_project)
 
-      @issue = ::Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
+      @issue = ::Issues::MoveService.new(project: project, current_user: current_user).execute(issue, new_project)
     end
 
     respond_to do |format|
@@ -169,7 +177,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def reorder
-    service = ::Issues::ReorderService.new(project, current_user, reorder_params)
+    service = ::Issues::ReorderService.new(project: project, current_user: current_user, params: reorder_params)
 
     if service.execute(issue)
       head :ok
@@ -180,7 +188,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def related_branches
     @related_branches = ::Issues::RelatedBranchesService
-      .new(project, current_user)
+      .new(project: project, current_user: current_user)
       .execute(issue)
       .map { |branch| branch.merge(link: branch_link(branch)) }
 
@@ -208,7 +216,7 @@ class Projects::IssuesController < Projects::ApplicationController
   def create_merge_request
     create_params = params.slice(:branch_name, :ref).merge(issue_iid: issue.iid)
     create_params[:target_project_id] = params[:target_project_id]
-    result = ::MergeRequests::CreateFromIssueService.new(project, current_user, create_params).execute
+    result = ::MergeRequests::CreateFromIssueService.new(project: project, current_user: current_user, mr_params: create_params).execute
 
     if result[:status] == :success
       render json: MergeRequestCreateSerializer.new.represent(result[:merge_request])
@@ -309,17 +317,8 @@ class Projects::IssuesController < Projects::ApplicationController
       task_num
       lock_version
       discussion_locked
-    ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
-  end
-
-  def issue_create_params
-    create_params = %i[
       issue_type
-    ]
-
-    params.require(:issue).permit(
-      *create_params
-    ).merge(issue_params)
+    ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
   end
 
   def reorder_params
@@ -337,21 +336,21 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def update_service
-    update_params = issue_params.merge(spammable_params)
-    ::Issues::UpdateService.new(project, current_user, update_params)
+    spam_params = ::Spam::SpamParams.new_from_request(request: request)
+    ::Issues::UpdateService.new(project: project, current_user: current_user, params: issue_params, spam_params: spam_params)
   end
 
   def finder_type
     IssuesFinder
   end
 
-  def whitelist_query_limiting
+  def disable_query_limiting
     # Also see the following issues:
     #
-    # 1. https://gitlab.com/gitlab-org/gitlab-foss/issues/42423
-    # 2. https://gitlab.com/gitlab-org/gitlab-foss/issues/42424
-    # 3. https://gitlab.com/gitlab-org/gitlab-foss/issues/42426
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42422')
+    # 1. https://gitlab.com/gitlab-org/gitlab/-/issues/20815
+    # 2. https://gitlab.com/gitlab-org/gitlab/-/issues/20816
+    # 3. https://gitlab.com/gitlab-org/gitlab/-/issues/21068
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20814')
   end
 
   private
@@ -391,16 +390,8 @@ class Projects::IssuesController < Projects::ApplicationController
     action_name == 'service_desk'
   end
 
-  def run_null_hypothesis_experiment
-    experiment(:null_hypothesis, project: project) do |e|
-      e.use { } # define the control
-      e.try { } # define the candidate
-      e.track(action_name) # track the action so we can build a funnel
-    end
-  end
-
   # Overridden in EE
   def create_vulnerability_issue_feedback(issue); end
 end
 
-Projects::IssuesController.prepend_if_ee('EE::Projects::IssuesController')
+Projects::IssuesController.prepend_mod_with('Projects::IssuesController')

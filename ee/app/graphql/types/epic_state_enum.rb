@@ -5,8 +5,8 @@ module Types
     graphql_name 'EpicState'
     description 'State of an epic'
 
-    value 'all'
-    value 'opened'
-    value 'closed'
+    value 'all', description: 'All epics.'
+    value 'opened', description: 'Open epics.'
+    value 'closed', description: 'Closed epics.'
   end
 end

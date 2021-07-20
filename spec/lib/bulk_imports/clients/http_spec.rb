@@ -2,83 +2,71 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Clients::Http do
+RSpec.describe BulkImports::Clients::HTTP do
   include ImportSpecHelper
 
-  let(:uri) { 'http://gitlab.example' }
+  let(:url) { 'http://gitlab.example' }
   let(:token) { 'token' }
   let(:resource) { 'resource' }
+  let(:version) { "#{BulkImport::MINIMUM_GITLAB_MAJOR_VERSION}.0.0" }
+  let(:response_double) { double(code: 200, success?: true, parsed_response: {}) }
+  let(:version_response) { double(code: 200, success?: true, parsed_response: { 'version' => version }) }
 
-  subject { described_class.new(uri: uri, token: token) }
+  before do
+    allow(Gitlab::HTTP).to receive(:get)
+      .with('http://gitlab.example/api/v4/version', anything)
+      .and_return(version_response)
+  end
 
-  describe '#get' do
-    let(:response_double) { double(code: 200, success?: true, parsed_response: {}) }
+  subject { described_class.new(url: url, token: token) }
 
-    shared_examples 'performs network request' do
-      it 'performs network request' do
-        expect(Gitlab::HTTP).to receive(:get).with(*expected_args).and_return(response_double)
+  shared_examples 'performs network request' do
+    it 'performs network request' do
+      expect(Gitlab::HTTP).to receive(method).with(*expected_args).and_return(response_double)
 
-        subject.get(resource)
-      end
-    end
-
-    describe 'request query' do
-      include_examples 'performs network request' do
-        let(:expected_args) do
-          [
-            anything,
-            hash_including(
-              query: {
-                page: described_class::DEFAULT_PAGE,
-                per_page: described_class::DEFAULT_PER_PAGE
-              }
-            )
-          ]
-        end
-      end
-    end
-
-    describe 'request headers' do
-      include_examples 'performs network request' do
-        let(:expected_args) do
-          [
-            anything,
-            hash_including(
-              headers: {
-                'Content-Type' => 'application/json',
-                'Authorization' => "Bearer #{token}"
-              }
-            )
-          ]
-        end
-      end
-    end
-
-    describe 'request uri' do
-      include_examples 'performs network request' do
-        let(:expected_args) do
-          ['http://gitlab.example:80/api/v4/resource', anything]
-        end
-      end
+      subject.public_send(method, resource)
     end
 
     context 'error handling' do
       context 'when error occurred' do
-        it 'raises ConnectionError' do
-          allow(Gitlab::HTTP).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        it 'raises BulkImports::Error' do
+          allow(Gitlab::HTTP).to receive(method).and_raise(Errno::ECONNREFUSED)
 
-          expect { subject.get(resource) }.to raise_exception(described_class::ConnectionError)
+          expect { subject.public_send(method, resource) }.to raise_exception(BulkImports::Error)
         end
       end
 
       context 'when response is not success' do
-        it 'raises ConnectionError' do
+        it 'raises BulkImports::Error' do
           response_double = double(code: 503, success?: false)
 
-          allow(Gitlab::HTTP).to receive(:get).and_return(response_double)
+          allow(Gitlab::HTTP).to receive(method).and_return(response_double)
 
-          expect { subject.get(resource) }.to raise_exception(described_class::ConnectionError)
+          expect { subject.public_send(method, resource) }.to raise_exception(BulkImports::Error)
         end
+      end
+    end
+  end
+
+  describe '#get' do
+    let(:method) { :get }
+
+    include_examples 'performs network request' do
+      let(:expected_args) do
+        [
+          'http://gitlab.example/api/v4/resource',
+          hash_including(
+            follow_redirects: false,
+            query: {
+              page: described_class::DEFAULT_PAGE,
+              per_page: described_class::DEFAULT_PER_PAGE
+            },
+            headers: {
+              'Content-Type' => 'application/json',
+              'Authorization' => "Bearer #{token}"
+            }
+          )
+        ]
       end
     end
 
@@ -116,7 +104,7 @@ RSpec.describe BulkImports::Clients::Http do
       private
 
       def stub_http_get(path, query, response)
-        uri = "http://gitlab.example:80/api/v4/#{path}"
+        uri = "http://gitlab.example/api/v4/#{path}"
         params = {
           follow_redirects: false,
           headers: {
@@ -127,6 +115,88 @@ RSpec.describe BulkImports::Clients::Http do
 
         allow(Gitlab::HTTP).to receive(:get).with(uri, params).and_return(response)
       end
+    end
+  end
+
+  describe '#post' do
+    let(:method) { :post }
+
+    include_examples 'performs network request' do
+      let(:expected_args) do
+        [
+          'http://gitlab.example/api/v4/resource',
+          hash_including(
+            body: {},
+            follow_redirects: false,
+            headers: {
+              'Content-Type' => 'application/json',
+              'Authorization' => "Bearer #{token}"
+            }
+          )
+        ]
+      end
+    end
+  end
+
+  describe '#head' do
+    let(:method) { :head }
+
+    include_examples 'performs network request' do
+      let(:expected_args) do
+        [
+          'http://gitlab.example/api/v4/resource',
+          hash_including(
+            follow_redirects: false,
+            headers: {
+              'Content-Type' => 'application/json',
+              'Authorization' => "Bearer #{token}"
+            }
+          )
+        ]
+      end
+    end
+  end
+
+  describe '#stream' do
+    it 'performs network request with stream_body option' do
+      expected_args = [
+        'http://gitlab.example/api/v4/resource',
+        hash_including(
+          stream_body: true,
+          headers: {
+            'Content-Type' => 'application/json',
+            'Authorization' => "Bearer #{token}"
+          }
+        )
+      ]
+
+      expect(Gitlab::HTTP).to receive(:get).with(*expected_args).and_return(response_double)
+
+      subject.stream(resource)
+    end
+  end
+
+  context 'when source instance is incompatible' do
+    let(:version) { '13.0.0' }
+
+    it 'raises an error' do
+      expect { subject.get(resource) }.to raise_error(::BulkImports::Error, "Unsupported GitLab Version. Minimum Supported Gitlab Version #{BulkImport::MINIMUM_GITLAB_MAJOR_VERSION}.")
+    end
+  end
+
+  context 'when url is relative' do
+    let(:url) { 'http://website.example/gitlab' }
+
+    before do
+      allow(Gitlab::HTTP).to receive(:get)
+        .with('http://website.example/gitlab/api/v4/version', anything)
+        .and_return(version_response)
+    end
+
+    it 'performs network request to a relative gitlab url' do
+      expect(Gitlab::HTTP).to receive(:get).with('http://website.example/gitlab/api/v4/resource', anything).and_return(response_double)
+
+      subject.get(resource)
     end
   end
 end

@@ -14,7 +14,10 @@ module Types
 
       field :plain_data, GraphQL::STRING_TYPE,
             description: 'Blob plain highlighted data.',
-            calls_gitaly: true,
+            null: true
+
+      field :raw_plain_data, GraphQL::STRING_TYPE,
+            description: 'The raw content of the blob, if the blob is text data.',
             null: true
 
       field :raw_path, GraphQL::STRING_TYPE,

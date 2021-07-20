@@ -1,8 +1,0 @@
----
-name: threat_monitoring_alerts
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48400
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/287676
-milestone: '13.7'
-type: development
-group: group::container security
-default_enabled: false

@@ -2,34 +2,21 @@
 
 module Ci
   class RunDastScanService < BaseService
-    ENV_MAPPING = {
-      spider_timeout: 'DAST_SPIDER_MINS',
-      target_timeout: 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-      target_url: 'DAST_WEBSITE',
-      use_ajax_spider: 'DAST_USE_AJAX_SPIDER',
-      show_debug_messages: 'DAST_DEBUG',
-      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
-    }.freeze
-
-    def self.ci_template
-      @ci_template ||= YAML.safe_load(ci_template_raw)
-    end
-
-    def self.ci_template_raw
-      <<~YAML
-        stages:
-          - dast
-        include:
-          - template: DAST-On-Demand-Scan.gitlab-ci.yml
-      YAML
-    end
-
-    def execute(branch:, **args)
+    def execute(branch:, ci_configuration:, dast_profile: nil, dast_site_profile: nil, dast_scanner_profile: nil)
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
       service = Ci::CreatePipelineService.new(project, current_user, ref: branch)
-      pipeline = service.execute(:ondemand_dast_scan, content: ci_yaml(args))
 
+      response = service.execute(:ondemand_dast_scan, content: ci_configuration) do |pipeline|
+        if dast_profile
+          pipeline.dast_profile = dast_profile
+        else
+          # Subject to change. Please see gitlab-org/gitlab#330950 for more info.
+          pipeline.dast_site_profile = dast_site_profile
+        end
+      end
+
+      pipeline = response.payload
       if pipeline.created_successfully?
         ServiceResponse.success(payload: pipeline)
       else
@@ -41,19 +28,6 @@ module Ci
 
     def allowed?
       Ability.allowed?(current_user, :create_on_demand_dast_scan, project)
-    end
-
-    def ci_yaml(args)
-      variables = args.each_with_object({}) do |(key, val), hash|
-        next if val.nil? || !ENV_MAPPING[key]
-
-        hash[ENV_MAPPING[key]] = !!val == val ? val.to_s : val
-        hash
-      end
-
-      self.class.ci_template.deep_merge(
-        'variables' => variables
-      ).to_yaml
     end
   end
 end

@@ -32,6 +32,9 @@ class AuditEvent < ApplicationRecord
   scope :by_author_id, -> (author_id) { where(author_id: author_id) }
 
   after_initialize :initialize_details
+
+  before_validation :sanitize_message
+
   # Note: The intention is to remove this once refactoring of AuditEvent
   # has proceeded further.
   #
@@ -83,13 +86,26 @@ class AuditEvent < ApplicationRecord
 
   private
 
+  def sanitize_message
+    message = details[:custom_message]
+
+    return unless message
+
+    self.details = details.merge(custom_message: Sanitize.clean(message))
+  end
+
   def default_author_value
     ::Gitlab::Audit::NullAuthor.for(author_id, (self[:author_name] || details[:author_name]))
   end
 
   def parallel_persist
-    PARALLEL_PERSISTENCE_COLUMNS.each { |col| self[col] = details[col] }
+    PARALLEL_PERSISTENCE_COLUMNS.each do |name|
+      original = self[name] || self.details[name]
+      next unless original
+
+      self[name] = self.details[name] = original
+    end
   end
 end
 
-AuditEvent.prepend_if_ee('EE::AuditEvent')
+AuditEvent.prepend_mod_with('AuditEvent')

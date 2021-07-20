@@ -6,8 +6,9 @@ RSpec.describe 'Coverage-Fuzzing.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Coverage-Fuzzing') }
 
   describe 'the created pipeline' do
+    let_it_be(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
+
     let(:default_branch) { 'master' }
-    let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
     let(:user) { project.owner }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
     let(:pipeline) { service.execute!(:push) }
@@ -15,12 +16,14 @@ RSpec.describe 'Coverage-Fuzzing.gitlab-ci.yml' do
 
     before do
       stub_ci_pipeline_yaml_file(template.content)
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
     context 'when project has Ultimate license' do
-      let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+      let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
       before do
         allow(License).to receive(:current).and_return(license)

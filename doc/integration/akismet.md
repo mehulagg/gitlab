@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Akismet
+# Akismet **(FREE)**
 
 GitLab leverages [Akismet](https://akismet.com/) to protect against spam.
 GitLab uses Akismet to prevent the creation of spam issues on public projects. Issues
@@ -25,8 +25,10 @@ To use Akismet:
 
 1. Go to the [Akismet sign-in page](https://akismet.com/account/).
 1. Sign in or create a new account.
-1. Click **Show** to reveal the API key.
-1. Go to **Admin Area > Settings > Reporting** (`/admin/application_settings/reporting`).
+1. Click **Show** to reveal the API key, and copy the API key's value.
+1. Sign in to GitLab as an administrator.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > Reporting** (`/admin/application_settings/reporting`).
 1. Select the **Enable Akismet** checkbox.
 1. Fill in the API key from step 3.
 1. Save the configuration.

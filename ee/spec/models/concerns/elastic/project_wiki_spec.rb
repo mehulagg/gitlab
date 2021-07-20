@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ProjectWiki, :elastic do
-  let_it_be(:project) { create(:project, :wiki_repo) }
+  let(:project) { create(:project, :wiki_repo) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
@@ -31,7 +31,7 @@ RSpec.describe ProjectWiki, :elastic do
   end
 
   it 'indexes' do
-    expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+    expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, true)
 
     project.wiki.index_wiki_blobs
   end

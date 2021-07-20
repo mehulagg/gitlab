@@ -6,7 +6,7 @@
 # This file should not receive new settings. All configuration options #
 # * are being moved to ApplicationSetting model!                       #
 # If a setting requires an application restart say so in that screen.  #
-# If you change this file in a Merge Request, please also create       #
+# If you change this file in a merge request, please also create       #
 # a MR on https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests. #
 # For more details see https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/gitlab.yml.md #
 ########################################################################
@@ -33,7 +33,7 @@ production: &base
     host: localhost
     port: 80 # Set to 443 if using HTTPS, see installation.md#using-https for additional HTTPS configuration details
     https: false # Set to true if using HTTPS, see installation.md#using-https for additional HTTPS configuration details
-    # The maximum time unicorn/puma can spend on the request. This needs to be smaller than the worker timeout.
+    # The maximum time Puma can spend on the request. This needs to be smaller than the worker timeout.
     # Default is 95% of the worker timeout
     max_request_duration_seconds: 57
 
@@ -72,6 +72,8 @@ production: &base
         style_src: "'self' 'unsafe-inline'"
         worker_src: "'self' blob:"
         report_uri:
+
+    allowed_hosts: []
 
     # Trusted Proxies
     # Customize if you have GitLab behind a reverse proxy which is running on a different machine.
@@ -151,7 +153,7 @@ production: &base
     ### GraphQL Settings
     # Tells the rails application how long it has to complete a GraphQL request.
     # We suggest this value to be higher than the database timeout value
-    # and lower than the worker timeout set in unicorn/puma. (default: 30)
+    # and lower than the worker timeout set in Puma. (default: 30)
     # graphql_timeout: 30
 
     ## Repository downloads directory
@@ -167,6 +169,9 @@ production: &base
 
     ## Application settings cache expiry in seconds (default: 60)
     # application_settings_cache_seconds: 60
+
+    ## Print initial root password to stdout during initialization (default: true)
+    # display_initial_root_password: true
 
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
@@ -207,6 +212,13 @@ production: &base
 
     # Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
     expunge_deleted: false
+
+    # For Microsoft Graph support
+    # inbox_method: microsoft_graph
+    # inbox_options:
+    #   tenant_id: "YOUR-TENANT-ID"
+    #   client_id: "YOUR-CLIENT-ID"
+    #   client_secret: "YOUR-CLIENT-SECRET"
 
   ## Consolidated object store config
   ## This will only take effect if the object_store sections are not defined
@@ -406,6 +418,10 @@ production: &base
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    local_store:
+      enabled: true
+      # The location where pages are stored (default: shared/pages).
+      # path: shared/pages
 
   ## Mattermost
   ## For enabling Add to Mattermost button
@@ -425,6 +441,12 @@ production: &base
   ## Sidekiq
   sidekiq:
     log_format: json # (default is the original format)
+    # An array of tuples indicating the rules for re-routing a worker to a
+    # desirable queue before scheduling. For example:
+    # routing_rules:
+    #   - ["resource_boundary=cpu", "cpu_boundary"]
+    #   - ["feature_category=pages", null]
+    #   - ["*", "default"]
 
   ## Auxiliary jobs
   # Periodically executed jobs, to self-heal GitLab, do external synchronizations, etc.
@@ -483,7 +505,7 @@ production: &base
   ee_cron_jobs:
     # Schedule snapshots for all devops adoption segments
     analytics_devops_adoption_create_all_snapshots_worker:
-      cron: 0 4 * * *
+      cron: 0 0 1 * *
 
     # Snapshot active users statistics
     historical_data_worker:
@@ -806,6 +828,11 @@ production: &base
         #
         sync_ssh_keys: false
 
+        # Retry ldap search connection if got empty results with specified response code(s)
+        #
+        #   Ex. [80]
+        # retry_empty_result_with_codes: []
+
         # LDAP attributes that GitLab will use to create an account for the LDAP user.
         # The specified attribute can either be the attribute name as a string (e.g. 'mail'),
         # or an array of attribute names to try in order (e.g. ['mail', 'email']).
@@ -1070,8 +1097,6 @@ production: &base
 
   # Gitaly settings
   gitaly:
-    # Path to the directory containing Gitaly client executables.
-    client_path: /home/git/gitaly
     # Default Gitaly authentication token. Can be overridden per storage. Can
     # be left blank when Gitaly is running locally on a Unix socket, which
     # is the normal way to deploy Gitaly.
@@ -1096,6 +1121,7 @@ production: &base
   ## Backup settings
   backup:
     path: "tmp/backups"   # Relative paths are relative to Rails.root (default: tmp/backups/)
+    # gitaly_backup_path: # Path of the gitaly-backup binary (default: searches $PATH)
     # archive_permissions: 0640 # Permissions for the resulting backup.tar file (default: 0600)
     # keep_time: 604800   # default: 0 (forever) (in seconds)
     # pg_schema: public     # default: nil, it means that all schemas will be backed up
@@ -1159,9 +1185,16 @@ production: &base
     # secret_file: /home/git/gitlab/.gitlab_workhorse_secret
 
   gitlab_kas:
+    # enabled: true
     # File that contains the secret key for verifying access for gitlab-kas.
     # Default is '.gitlab_kas_secret' relative to Rails.root (i.e. root of the GitLab app).
     # secret_file: /home/git/gitlab/.gitlab_kas_secret
+
+    # The URL to the external KAS API (used by the Kubernetes agents)
+    # external_url: wss://kas.example.com
+
+    # The URL to the internal KAS API (used by the GitLab backend)
+    # internal_url: grpc://localhost:8153
 
   ## GitLab Elasticsearch settings
   elasticsearch:
@@ -1186,8 +1219,6 @@ production: &base
   ## Monitoring
   # Built in monitoring settings
   monitoring:
-    # Time between sampling of unicorn socket metrics, in seconds
-    # unicorn_sampler_interval: 10
     # IP whitelist to access monitoring endpoints
     ip_whitelist:
       - 127.0.0.0/8
@@ -1199,7 +1230,7 @@ production: &base
     #  address: localhost
     #  port: 8082
 
-    # Web exporter is webserver built in to Unicorn/Puma to expose Prometheus metrics
+    # Web exporter is a dedicated Rack server running alongside Puma to expose Prometheus metrics
     # It runs alongside the `/metrics` endpoints to ease the publish of metrics
     web_exporter:
     #  enabled: true
@@ -1243,6 +1274,10 @@ production: &base
     # matomo_url: '_your_matomo_url'
     # matomo_site_id: '_your_matomo_site_id'
     # matomo_disable_cookies: false
+
+    ## Maximum file size for syntax highlighting
+    ## https://docs.gitlab.com/ee/user/project/highlighting.html
+    # maximum_text_highlight_size_kilobytes: 512
 
   rack_attack:
     git_basic_auth:
@@ -1386,6 +1421,9 @@ test:
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    local_store:
+      enabled: true
+      path: tmp/tests/pages
   repositories:
     storages:
       default:
@@ -1393,12 +1431,13 @@ test:
         gitaly_address: unix:tmp/tests/gitaly/praefect.socket
 
   gitaly:
-    client_path: tmp/tests/gitaly
+    client_path: tmp/tests/gitaly/_build/bin
     token: secret
   workhorse:
     secret_file: tmp/gitlab_workhorse_test_secret
   backup:
     path: tmp/tests/backups
+    gitaly_backup_path: tmp/tests/gitaly/_build/bin/gitaly-backup
   pseudonymizer:
     manifest: config/pseudonymizer.yml
     upload:

@@ -155,7 +155,7 @@ RSpec.describe PipelineSerializer do
 
         it 'verifies number of queries', :request_store do
           recorded = ActiveRecord::QueryRecorder.new { subject }
-          expected_queries = Gitlab.ee? ? 39 : 36
+          expected_queries = Gitlab.ee? ? 33 : 30
 
           expect(recorded.count).to be_within(2).of(expected_queries)
           expect(recorded.cached_count).to eq(0)
@@ -176,7 +176,7 @@ RSpec.describe PipelineSerializer do
           # pipeline. With the same ref this check is cached but if refs are
           # different then there is an extra query per ref
           # https://gitlab.com/gitlab-org/gitlab-foss/issues/46368
-          expected_queries = Gitlab.ee? ? 42 : 39
+          expected_queries = Gitlab.ee? ? 36 : 33
 
           expect(recorded.count).to be_within(2).of(expected_queries)
           expect(recorded.cached_count).to eq(0)
@@ -202,10 +202,43 @@ RSpec.describe PipelineSerializer do
           # Existing numbers are high and require performance optimization
           # Ongoing issue:
           # https://gitlab.com/gitlab-org/gitlab/-/issues/225156
-          expected_queries = Gitlab.ee? ? 85 : 76
+          expected_queries = Gitlab.ee? ? 77 : 70
 
           expect(recorded.count).to be_within(2).of(expected_queries)
           expect(recorded.cached_count).to eq(0)
+        end
+      end
+
+      context 'with build environments' do
+        let(:ref) { 'feature' }
+
+        let_it_be(:production) { create(:environment, :production, project: project) }
+        let_it_be(:staging) { create(:environment, :staging, project: project) }
+
+        it 'executes one query to fetch all related environments', :request_store do
+          pipeline = create(:ci_pipeline, project: project)
+          create(:ci_build, :manual, pipeline: pipeline, environment: production.name)
+          create(:ci_build, :manual, pipeline: pipeline, environment: staging.name)
+          create(:ci_build, :scheduled, pipeline: pipeline, environment: production.name)
+          create(:ci_build, :scheduled, pipeline: pipeline, environment: staging.name)
+
+          expect { subject }.not_to exceed_query_limit(1).for_query /SELECT "environments".*/
+        end
+      end
+
+      context 'with scheduled and manual builds' do
+        let(:ref) { 'feature' }
+
+        before do
+          create(:ci_build, :scheduled, pipeline: resource.first)
+          create(:ci_build, :scheduled, pipeline: resource.second)
+          create(:ci_build, :manual, pipeline: resource.first)
+          create(:ci_build, :manual, pipeline: resource.second)
+        end
+
+        it 'sends at most one metadata query for each type of build', :request_store do
+          # 1 for the existing failed builds and 2 for the added scheduled and manual builds
+          expect { subject }.not_to exceed_query_limit(1 + 2).for_query /SELECT "ci_builds_metadata".*/
         end
       end
 

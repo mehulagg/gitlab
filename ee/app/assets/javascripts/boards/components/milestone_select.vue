@@ -89,6 +89,7 @@ export default {
     <div class="selectbox" style="display: none">
       <input :value="milestoneId" name="milestone_id" type="hidden" />
       <div class="dropdown">
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <button
           ref="dropdownButton"
           :data-selected="selected"
@@ -110,6 +111,8 @@ export default {
             :size="16"
           />
         </button>
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
+
         <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
           <div class="dropdown-input">
             <input
@@ -128,7 +131,7 @@ export default {
             />
           </div>
           <div class="dropdown-content"></div>
-          <div class="dropdown-loading"><gl-loading-icon /></div>
+          <div class="dropdown-loading"><gl-loading-icon size="sm" /></div>
         </div>
       </div>
     </div>

@@ -1,26 +1,46 @@
-query($fullPath: ID!, $pipelineIid: ID!) {
+#import "../fragments/security_report_scans.fragment.graphql"
+
+query pipelineSecuritySummary($fullPath: ID!, $pipelineIid: ID!) {
   project(fullPath: $fullPath) {
     pipeline(iid: $pipelineIid) {
       securityReportSummary {
         dast {
           vulnerabilitiesCount
-          scannedResourcesCount
           scannedResourcesCsvPath
-          scannedResources {
-            nodes {
-              requestMethod
-              url
-            }
-          }
+          ...SecurityReportSummaryScans
+          # The following fields will be added in
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/321586
+          # scannedResourcesCount
+          # scannedResources {
+          #   nodes {
+          #     requestMethod
+          #     url
+          #   }
+          # }
         }
         sast {
           vulnerabilitiesCount
+          ...SecurityReportSummaryScans
         }
         containerScanning {
           vulnerabilitiesCount
+          ...SecurityReportSummaryScans
         }
         dependencyScanning {
           vulnerabilitiesCount
+          ...SecurityReportSummaryScans
+        }
+        apiFuzzing {
+          vulnerabilitiesCount
+          ...SecurityReportSummaryScans
+        }
+        coverageFuzzing {
+          vulnerabilitiesCount
+          ...SecurityReportSummaryScans
+        }
+        clusterImageScanning {
+          vulnerabilitiesCount
+          ...SecurityReportSummaryScans
         }
       }
     }

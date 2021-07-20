@@ -11,12 +11,20 @@ module Gitlab
 
           delegate :dig, to: :@seed_attributes
 
-          def initialize(pipeline, attributes, previous_stages)
-            @pipeline = pipeline
+          def initialize(context, attributes, previous_stages, current_stage)
+            @context = context
+            @pipeline = context.pipeline
             @seed_attributes = attributes
-            @previous_stages = previous_stages
+            @stages_for_needs_lookup = if Feature.enabled?(:ci_same_stage_job_needs, @pipeline.project, default_enabled: :yaml)
+                                         (previous_stages + [current_stage]).compact
+                                       else
+                                         previous_stages
+                                       end
+
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
+            @job_variables = @seed_attributes.delete(:job_variables)
+            @root_variables_inheritance = @seed_attributes.delete(:root_variables_inheritance) { true }
 
             @using_rules  = attributes.key?(:rules)
             @using_only   = attributes.key?(:only)
@@ -28,8 +36,10 @@ module Gitlab
               .fabricate(attributes.delete(:except))
             @rules = Gitlab::Ci::Build::Rules
               .new(attributes.delete(:rules), default_when: 'on_success')
-            @cache = Seed::Build::Cache
-              .new(pipeline, attributes.delete(:cache))
+            @cache = Gitlab::Ci::Build::Cache
+              .new(attributes.delete(:cache), @pipeline)
+
+            recalculate_yaml_variables!
           end
 
           def name
@@ -52,7 +62,7 @@ module Gitlab
             return unless included?
 
             strong_memoize(:errors) do
-              needs_errors
+              [needs_errors, variable_expansion_errors].compact.flatten
             end
           end
 
@@ -61,7 +71,8 @@ module Gitlab
               .deep_merge(pipeline_attributes)
               .deep_merge(rules_attributes)
               .deep_merge(allow_failure_criteria_attributes)
-              .deep_merge(cache_attributes)
+              .deep_merge(@cache.cache_attributes)
+              .deep_merge(runner_tags)
           end
 
           def bridge?
@@ -141,16 +152,28 @@ module Gitlab
             end
 
             @needs_attributes.flat_map do |need|
-              result = @previous_stages.any? do |stage|
-                stage.seeds_names.include?(need[:name])
-              end
+              next if need[:optional]
 
-              "'#{name}' job needs '#{need[:name]}' job, but it was not added to the pipeline" unless result
+              result = need_present?(need)
+
+              "'#{name}' job needs '#{need[:name]}' job, but '#{need[:name]}' is not in any previous stage" unless result
             end.compact
+          end
+
+          def need_present?(need)
+            @stages_for_needs_lookup.any? do |stage|
+              stage.seeds_names.include?(need[:name])
+            end
           end
 
           def max_needs_allowed
             @pipeline.project.actual_limits.ci_needs_size_limit
+          end
+
+          def variable_expansion_errors
+            expanded_collection = evaluate_context.variables.sort_and_expand_all(@pipeline.project)
+            errors = expanded_collection.errors
+            ["#{name}: #{errors}"] if errors
           end
 
           def pipeline_attributes
@@ -169,15 +192,11 @@ module Gitlab
             strong_memoize(:rules_attributes) do
               next {} unless @using_rules
 
-              if ::Gitlab::Ci::Features.rules_variables_enabled?(@pipeline.project)
-                rules_variables_result = ::Gitlab::Ci::Variables::Helpers.merge_variables(
-                  @seed_attributes[:yaml_variables], rules_result.variables
-                )
+              rules_variables_result = ::Gitlab::Ci::Variables::Helpers.merge_variables(
+                @seed_attributes[:yaml_variables], rules_result.variables
+              )
 
-                rules_result.build_attributes.merge(yaml_variables: rules_variables_result)
-              else
-                rules_result.build_attributes
-              end
+              rules_result.build_attributes.merge(yaml_variables: rules_variables_result)
             end
           end
 
@@ -193,9 +212,13 @@ module Gitlab
             end
           end
 
-          def cache_attributes
-            strong_memoize(:cache_attributes) do
-              @cache.build_attributes
+          def runner_tags
+            { tag_list: evaluate_runner_tags }.compact
+          end
+
+          def evaluate_runner_tags
+            @seed_attributes[:tag_list]&.map do |tag|
+              ExpandVariables.expand_existing(tag, evaluate_context.variables)
             end
           end
 
@@ -208,8 +231,16 @@ module Gitlab
 
             { options: { allow_failure_criteria: nil } }
           end
+
+          def recalculate_yaml_variables!
+            @seed_attributes[:yaml_variables] = Gitlab::Ci::Variables::Helpers.inherit_yaml_variables(
+              from: @context.root_variables, to: @job_variables, inheritance: @root_variables_inheritance
+            )
+          end
         end
       end
     end
   end
 end
+
+Gitlab::Ci::Pipeline::Seed::Build.prepend_mod_with('Gitlab::Ci::Pipeline::Seed::Build')

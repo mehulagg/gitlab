@@ -38,16 +38,22 @@ RSpec.describe API::Internal::Kubernetes do
   end
 
   shared_examples 'agent authentication' do
-    it 'returns 403 if Authorization header not sent' do
+    it 'returns 401 if Authorization header not sent' do
       send_request
 
-      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(response).to have_gitlab_http_status(:unauthorized)
     end
 
-    it 'returns 403 if Authorization is for non-existent agent' do
+    it 'returns 401 if Authorization is for non-existent agent' do
       send_request(headers: { 'Authorization' => 'Bearer NONEXISTENT' })
 
-      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(response).to have_gitlab_http_status(:unauthorized)
+    end
+  end
+
+  shared_examples 'agent token tracking' do
+    it 'tracks token usage' do
+      expect { response }.to change { agent_token.reload.read_attribute(:last_used_at) }
     end
   end
 
@@ -61,26 +67,26 @@ RSpec.describe API::Internal::Kubernetes do
     context 'is authenticated for an agent' do
       let!(:agent_token) { create(:cluster_agent_token) }
 
-      it 'returns no_content for valid gitops_sync_count' do
-        send_request(params: { gitops_sync_count: 10 })
+      it 'returns no_content for valid events' do
+        send_request(params: { gitops_sync_count: 10, k8s_api_proxy_request_count: 5 })
 
         expect(response).to have_gitlab_http_status(:no_content)
       end
 
-      it 'returns no_content 0 gitops_sync_count' do
-        send_request(params: { gitops_sync_count: 0 })
+      it 'returns no_content for counts of zero' do
+        send_request(params: { gitops_sync_count: 0, k8s_api_proxy_request_count: 0 })
 
         expect(response).to have_gitlab_http_status(:no_content)
       end
 
       it 'returns 400 for non number' do
-        send_request(params: { gitops_sync_count: 'string' })
+        send_request(params: { gitops_sync_count: 'string', k8s_api_proxy_request_count: 1 })
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
       it 'returns 400 for negative number' do
-        send_request(params: { gitops_sync_count: '-1' })
+        send_request(params: { gitops_sync_count: -1, k8s_api_proxy_request_count: 1 })
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
@@ -100,6 +106,8 @@ RSpec.describe API::Internal::Kubernetes do
 
       let(:agent) { agent_token.agent }
       let(:project) { agent.project }
+
+      shared_examples 'agent token tracking'
 
       it 'returns expected data', :aggregate_failures do
         send_request(headers: { 'Authorization' => "Bearer #{agent_token.token}" })
@@ -125,36 +133,6 @@ RSpec.describe API::Internal::Kubernetes do
           )
         )
       end
-
-      context 'on GitLab.com' do
-        before do
-          allow(::Gitlab).to receive(:com?).and_return(true)
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
-          end
-
-          it 'returns 403' do
-            send_request(headers: { 'Authorization' => "Bearer #{agent_token.token}" })
-
-            expect(response).to have_gitlab_http_status(:forbidden)
-          end
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: agent_token.agent.project)
-          end
-
-          it 'returns success' do
-            send_request(headers: { 'Authorization' => "Bearer #{agent_token.token}" })
-
-            expect(response).to have_gitlab_http_status(:success)
-          end
-        end
-      end
     end
   end
 
@@ -168,6 +146,8 @@ RSpec.describe API::Internal::Kubernetes do
 
     context 'an agent is found' do
       let_it_be(:agent_token) { create(:cluster_agent_token) }
+
+      shared_examples 'agent token tracking'
 
       context 'project is public' do
         let(:project) { create(:project, :public) }
@@ -202,36 +182,6 @@ RSpec.describe API::Internal::Kubernetes do
             send_request(params: { id: project.id }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
 
             expect(response).to have_gitlab_http_status(:not_found)
-          end
-        end
-
-        context 'on GitLab.com' do
-          before do
-            allow(::Gitlab).to receive(:com?).and_return(true)
-          end
-
-          context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
-            before do
-              stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
-            end
-
-            it 'returns 403' do
-              send_request(params: { id: project.id }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
-
-              expect(response).to have_gitlab_http_status(:forbidden)
-            end
-          end
-
-          context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
-            before do
-              stub_feature_flags(kubernetes_agent_on_gitlab_com: agent_token.agent.project)
-            end
-
-            it 'returns success' do
-              send_request(params: { id: project.id }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
-
-              expect(response).to have_gitlab_http_status(:success)
-            end
           end
         end
       end

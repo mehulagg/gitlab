@@ -15,10 +15,14 @@ module Gitlab
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
-        def load
-          order_by_end_event(query)
-            .select(round_duration_to_seconds.as('duration_in_seconds'), stage.end_event.timestamp_projection.as('finished_at'))
-            .limit(MAX_RESULTS)
+        def average_by_day
+          date = Arel::Nodes::NamedFunction.new('DATE', [stage.end_event.timestamp_projection])
+          average = round_duration_to_seconds.average
+
+          @query
+            .reorder(nil)
+            .group(date)
+            .select(date.dup.as('date'), average.as('average_duration_in_seconds'))
         end
         # rubocop: enable CodeReuse/ActiveRecord
 

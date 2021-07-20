@@ -7,7 +7,7 @@ RSpec.describe 'Edit group settings' do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:developer) { create(:user) }
-  let_it_be(:group) { create(:group, path: 'foo') }
+  let_it_be(:group) { create(:group, name: 'Foo bar', path: 'foo') }
 
   before_all do
     group.add_owner(user)
@@ -153,6 +153,23 @@ RSpec.describe 'Edit group settings' do
     end
   end
 
+  context 'enable delayed project removal' do
+    before do
+      stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+    end
+
+    let_it_be(:subgroup) { create(:group, parent: group) }
+
+    let(:form_group_selector) { '[data-testid="delayed-project-removal-form-group"]' }
+    let(:setting_field_selector) { '[data-testid="delayed-project-removal-checkbox"]' }
+    let(:setting_path) { edit_group_path(group, anchor: 'js-permissions-settings') }
+    let(:group_path) { edit_group_path(group) }
+    let(:subgroup_path) { edit_group_path(subgroup) }
+    let(:click_save_button) { save_permissions_group }
+
+    it_behaves_like 'a cascading setting'
+  end
+
   context 'when custom_project_templates feature' do
     let!(:subgroup) { create(:group, :public, parent: group) }
     let!(:subgroup_1) { create(:group, :public, parent: subgroup) }
@@ -223,7 +240,7 @@ RSpec.describe 'Edit group settings' do
       end
 
       context 'namespace is on the proper plan' do
-        let(:plan) { create(:gold_plan) }
+        let(:plan) { create(:ultimate_plan) }
 
         context 'when the group is a top parent group' do
           let(:selected_group) { group }
@@ -296,9 +313,11 @@ RSpec.describe 'Edit group settings' do
 
         within('[data-testid="merge-request-approval-settings"]') do
           click_button 'Expand'
-          expect(find('[data-testid="prevent-author-approval"]')).to be_checked
+          checkbox = find('[data-testid="prevent-author-approval"] > input')
 
-          find('[data-testid="prevent-author-approval"]').set(false)
+          expect(checkbox).to be_checked
+
+          checkbox.set(false)
           click_button 'Save changes'
           wait_for_all_requests
         end
@@ -308,7 +327,7 @@ RSpec.describe 'Edit group settings' do
 
         within('[data-testid="merge-request-approval-settings"]') do
           click_button 'Expand'
-          expect(find('[data-testid="prevent-author-approval"]')).not_to be_checked
+          expect(find('[data-testid="prevent-author-approval"] > input')).not_to be_checked
         end
       end
     end
@@ -324,6 +343,12 @@ RSpec.describe 'Edit group settings' do
 
         expect(page).not_to have_content('Merge request approvals')
       end
+    end
+  end
+
+  def save_permissions_group
+    page.within('.gs-permissions') do
+      click_button 'Save changes'
     end
   end
 end

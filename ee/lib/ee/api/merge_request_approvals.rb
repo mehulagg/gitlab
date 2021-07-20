@@ -70,31 +70,7 @@ module EE
 
               error!('Overriding approvals is disabled', 422) if merge_request.project.disable_overriding_approvers_per_merge_request
 
-              merge_request = ::MergeRequests::UpdateService.new(user_project, current_user, approvals_before_merge: params[:approvals_required]).execute(merge_request)
-
-              # Merge request shouldn't be in an invalid state after the changes, but handling errors to be safe
-              handle_merge_request_errors!(merge_request)
-
-              present_approval(merge_request)
-            end
-
-            # Deprecated in favor of approval rules API
-            desc 'Update approvers and approver groups' do
-              detail 'This feature was introduced in 10.6'
-              success ::EE::API::Entities::ApprovalState
-            end
-            params do
-              requires :approver_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce,
-                desc: 'Array of User IDs to set as approvers.'
-              requires :approver_group_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce,
-                desc: 'Array of Group IDs to set as approvers.'
-            end
-            put 'approvers' do
-              ::Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/8883')
-
-              merge_request = find_merge_request_with_access(params[:merge_request_iid], :update_approvers)
-
-              merge_request = ::MergeRequests::UpdateService.new(user_project, current_user, declared(params, include_parent_namespaces: false).merge(remove_old_approvers: true)).execute(merge_request)
+              merge_request = ::MergeRequests::UpdateService.new(project: user_project, current_user: current_user, params: { approvals_before_merge: params[:approvals_required] }).execute(merge_request)
 
               # Merge request shouldn't be in an invalid state after the changes, but handling errors to be safe
               handle_merge_request_errors!(merge_request)

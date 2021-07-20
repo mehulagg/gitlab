@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TrialStatusPopover component matches the snapshot 1`] = `
+<gl-popover-stub
+  boundary="viewport"
+  cssclasses=""
+  delay="[object Object]"
+  placement="rightbottom"
+  target="target-element-identifier"
+  triggers="hover focus"
+>
+   
+  <gl-sprintf-stub
+    message="Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the features of GitLab %{planName}. To keep those features after your trial ends, you’ll need to buy a subscription. (You can also choose GitLab Premium if it meets your needs.)"
+  />
+   
+  <div
+    class="gl-mt-5"
+  >
+    <gl-button-stub
+      block=""
+      buttontextclasses=""
+      category="primary"
+      class="gl-mb-0"
+      data-testid="upgradeBtn"
+      href="transactions/new"
+      icon=""
+      size="small"
+      variant="confirm"
+    >
+      <span
+        class="gl-font-sm"
+      >
+        Upgrade Some Test Group to Ultimate
+      </span>
+    </gl-button-stub>
+     
+    <gl-button-stub
+      block=""
+      buttontextclasses=""
+      category="secondary"
+      class="gl-mb-0"
+      data-testid="compareBtn"
+      href="billing/path-for/group"
+      icon=""
+      size="small"
+      title="Compare all plans"
+      variant="confirm"
+    >
+      <span
+        class="gl-font-sm"
+      >
+        Compare all plans
+      </span>
+    </gl-button-stub>
+  </div>
+</gl-popover-stub>
+`;

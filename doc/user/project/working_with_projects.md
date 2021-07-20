@@ -13,12 +13,17 @@ code are saved in projects, and most features are in the scope of projects.
 
 You can explore other popular projects available on GitLab. To explore projects:
 
-1. Click **Projects** in the navigation bar.
-1. Click **Explore Projects**.
+1. On the top bar, select **Menu > Project**.
+1. Select **Explore projects**.
 
 GitLab displays a list of projects, sorted by last updated date. To view
 projects with the most [stars](#star-a-project), click **Most stars**. To view
 projects with the largest number of comments in the past month, click **Trending**.
+
+NOTE:
+By default, `/explore` is visible to unauthenticated users. However, if the
+[**Public** visibility level](../admin_area/settings/visibility_and_access_controls.md#restricted-visibility-levels)
+is restricted, `/explore` is visible only to signed-in users.
 
 ## Create a project
 
@@ -41,7 +46,8 @@ For a list of words that can't be used as project names see
 
 To create a new blank project on the **New project** page:
 
-1. On the **Blank project** tab, provide the following information:
+1. Click **Create blank project**
+1. Provide the following information:
    - The name of your project in the **Project name** field. You can't use
      special characters, but you can use spaces, hyphens, underscores, or even
      emoji. When adding the name, the **Project slug** auto populates.
@@ -83,10 +89,12 @@ Built-in templates are project templates that are:
 - Developed and maintained in the [`project-templates`](https://gitlab.com/gitlab-org/project-templates)
   and [`pages`](https://gitlab.com/pages) groups.
 - Released with GitLab.
+- Anyone can contribute a built-in template by following [these steps](https://about.gitlab.com/community/contribute/project-templates/).
 
 To use a built-in template on the **New project** page:
 
-1. On the **Create from template** tab, select the **Built-in** tab.
+1. Click **Create from template**
+1. Select the **Built-in** tab.
 1. From the list of available built-in templates, click the:
    - **Preview** button to look at the template source itself.
    - **Use template** button to start creating the project.
@@ -99,7 +107,8 @@ GitLab is developing Enterprise templates to help you streamline audit managemen
 
 To create a new project with an Enterprise template, on the **New project** page:
 
-1. On the **Create from template** tab, select the **Built-in** tab.
+1. Click **Create from template**
+1. Select the **Built-in** tab.
 1. From the list of available built-in Enterprise templates, click the:
    - **Preview** button to look at the template source itself.
    - **Use template** button to start creating the project.
@@ -123,11 +132,12 @@ quickly starting projects.
 
 Custom projects are available at the [instance-level](../../user/admin_area/custom_project_templates.md)
 from the **Instance** tab, or at the [group-level](../../user/group/custom_project_templates.md)
-from the **Group** tab, under the **Create from template** tab.
+from the **Group** tab, on the **Create from template** page.
 
 To use a custom project template on the **New project** page:
 
-1. On the **Create from template** tab, select the **Instance** tab or the **Group** tab.
+1. Click **Create from template**
+1. Select the **Instance** tab or the **Group** tab.
 1. From the list of available custom templates, click the:
    - **Preview** button to look at the template source itself.
    - **Use template** button to start creating the project.
@@ -143,7 +153,7 @@ and then [cloning the repository](../../gitlab-basics/start-using-git.md#clone-a
 locally, you can directly push it to GitLab to create the new project, all without leaving
 your terminal. If you have access rights to the associated namespace, GitLab
 automatically creates a new project under that GitLab namespace with its visibility
-set to Private by default (you can later change it in the [project's settings](../../public_access/public_access.md#how-to-change-project-visibility)).
+set to Private by default (you can later change it in the [project's settings](../../public_access/public_access.md#change-project-visibility)).
 
 This can be done by using either SSH or HTTPS:
 
@@ -192,8 +202,8 @@ To star a project:
 
 To view your starred projects:
 
-1. Click **Projects** in the navigation bar.
-1. Click **Starred Projects**.
+1. On the top bar, select **Menu > Project**.
+1. Select **Starred Projects**.
 1. GitLab displays information about your starred projects, including:
 
    - Project description, including name, description, and icon
@@ -212,7 +222,7 @@ To delete a project, first navigate to the home page for that project.
 1. Click **Delete project**
 1. Confirm this action by typing in the expected text.
 
-Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [Enabling delayed project removal](../group/index.md#enabling-delayed-project-removal).
+Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [Enable delayed project removal](../group/index.md#enable-delayed-project-removal).
 
 ## Project settings
 
@@ -223,10 +233,16 @@ Read through the documentation on [project settings](settings/index.md).
 
 ## Project activity
 
-To view the activity of a project, navigate to **Project overview > Activity**.
-From there, you can click on the tabs to see **All** the activity, or see it
-filtered by **Push events**, **Merge events**, **Issue events**, **Comments**,
-**Team**, and **Wiki**.
+To view the activity of a project:
+
+1. On the left sidebar, select **Project information > Activity**.
+1. Select a tab to view **All** the activity, or to filter it by any of these criteria:
+   - **Push events**
+   - **Merge events**
+   - **Issue events**
+   - **Comments**
+   - **Team**
+   - **Wiki**
 
 ### Leave a project
 
@@ -278,7 +294,7 @@ databases if the module name or a prefix of it appears in `GONOPRIVATE` or
 ### Authenticate Go requests
 
 To authenticate requests to private projects made by Go, use a [`.netrc`
-file](https://ec.haxx.se/usingcurl-netrc.html) and a [personal access
+file](https://everything.curl.dev/usingcurl/netrc) and a [personal access
 token](../profile/personal_access_tokens.md) in the password field. **This only
 works if your GitLab instance can be accessed with HTTPS.** The `go` command
 does not transmit credentials over insecure connections. This authenticates
@@ -329,7 +345,7 @@ For public projects, and to members of internal and private projects
 with [permissions to view the project's code](../permissions.md#project-members-permissions):
 
 - The content of a
-  [`README` or an index file](repository/#repository-readme-and-index-files)
+  [`README` or an index file](repository/index.md#readme-and-index-files)
   is displayed (if any), followed by the list of directories in the
   project's repository.
 - If the project doesn't contain either of these files, the

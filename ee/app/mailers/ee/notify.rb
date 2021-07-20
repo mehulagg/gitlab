@@ -9,9 +9,10 @@ module EE
     # interaction between ActiveSupport::Concern and ActionMailer::Base
     # See https://gitlab.com/gitlab-org/gitlab/issues/7846
     prepended do
-      include ::Emails::AdminNotification
       include ::Emails::Epics
       include ::Emails::Requirements
+      include ::Emails::UserCap
+      include ::Emails::OncallRotation
     end
 
     attr_reader :group

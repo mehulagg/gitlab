@@ -72,7 +72,7 @@ export default {
         <input
           id="import-requirements-file-input"
           ref="fileInput"
-          class="gl-mt-3 gl-mb-2 bv-no-focus-ring"
+          class="gl-mt-3 gl-mb-2"
           type="file"
           accept=".csv,text/csv"
           @change="handleCSVFile"

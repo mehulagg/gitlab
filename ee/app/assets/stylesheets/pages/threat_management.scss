@@ -5,3 +5,19 @@
     background-color: $gray-50;
   }
 }
+
+.threat-monitoring-alert-drawer .gl-drawer-header {
+  align-items: flex-start;
+}
+
+.gl-md-max-w-30p {
+  @media (min-width: $breakpoint-md) {
+    max-width: 30%;
+  }
+}
+
+.gl-md-w-50p {
+  @media (min-width: $breakpoint-md) {
+    width: 50%;
+  }
+}

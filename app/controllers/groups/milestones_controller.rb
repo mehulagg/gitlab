@@ -15,13 +15,13 @@ class Groups::MilestonesController < Groups::ApplicationController
         @milestones = milestones.page(params[:page])
       end
       format.json do
-        render json: milestones.to_json(only: [:id, :title], methods: :name)
+        render json: milestones.to_json(only: [:id, :title, :due_date], methods: :name)
       end
     end
   end
 
   def new
-    @milestone = Milestone.new
+    @noteable = @milestone = Milestone.new
   end
 
   def create
@@ -70,7 +70,7 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 
   def milestone
-    @milestone = group.milestones.find_by_iid(params[:id])
+    @noteable = @milestone ||= group.milestones.find_by_iid(params[:id])
 
     render_404 unless @milestone
   end
@@ -95,4 +95,4 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 end
 
-Groups::MilestonesController.prepend_if_ee('EE::Groups::MilestonesController')
+Groups::MilestonesController.prepend_mod_with('Groups::MilestonesController')

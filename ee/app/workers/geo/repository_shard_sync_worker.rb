@@ -4,13 +4,17 @@ module Geo
   class RepositoryShardSyncWorker < Geo::Scheduler::Secondary::SchedulerWorker # rubocop:disable Scalability/IdempotentWorker
     sidekiq_options retry: false
     loggable_arguments 0
+    tags :exclude_from_gitlab_com
 
     attr_accessor :shard_name
 
     def perform(shard_name)
       @shard_name = shard_name
 
-      return unless Gitlab::ShardHealthCache.healthy_shard?(shard_name)
+      unless Gitlab::ShardHealthCache.healthy_shard?(shard_name)
+        log_error("Skipped scheduling syncs due to unhealthy shard", nil, { shard_name: shard_name })
+        return
+      end
 
       super()
     end

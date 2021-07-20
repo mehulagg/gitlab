@@ -34,22 +34,6 @@
 module Gitlab
   module Experimentation
     EXPERIMENTS = {
-      ci_notification_dot: {
-        tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot',
-        use_backwards_compatible_subject_index: true
-      },
-      upgrade_link_in_user_menu_a: {
-        tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA',
-        use_backwards_compatible_subject_index: true
-      },
-      invite_members_version_a: {
-        tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionA',
-        use_backwards_compatible_subject_index: true
-      },
-      invite_members_version_b: {
-        tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionB',
-        use_backwards_compatible_subject_index: true
-      },
       invite_members_empty_group_version_a: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyGroupVersionA',
         use_backwards_compatible_subject_index: true
@@ -58,32 +42,8 @@ module Gitlab
         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
         use_backwards_compatible_subject_index: true
       },
-      customize_homepage: {
-        tracking_category: 'Growth::Expansion::Experiment::CustomizeHomepage',
-        use_backwards_compatible_subject_index: true
-      },
-      group_only_trials: {
-        tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials',
-        use_backwards_compatible_subject_index: true
-      },
       remove_known_trial_form_fields: {
         tracking_category: 'Growth::Conversion::Experiment::RemoveKnownTrialFormFields'
-      },
-      trimmed_skip_trial_copy: {
-        tracking_category: 'Growth::Conversion::Experiment::TrimmedSkipTrialCopy'
-      },
-      trial_registration_with_social_signin: {
-        tracking_category: 'Growth::Conversion::Experiment::TrialRegistrationWithSocialSigning'
-      },
-      invite_members_empty_project_version_a: {
-        tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyProjectVersionA'
-      },
-      trial_during_signup: {
-        tracking_category: 'Growth::Conversion::Experiment::TrialDuringSignup'
-      },
-      ci_syntax_templates: {
-        tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates',
-        rollout_strategy: :user
       },
       invite_members_new_dropdown: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersNewDropdown'
@@ -95,8 +55,13 @@ module Gitlab
       trial_onboarding_issues: {
         tracking_category: 'Growth::Conversion::Experiment::TrialOnboardingIssues'
       },
-      in_product_marketing_emails: {
-        tracking_category: 'Growth::Activation::Experiment::InProductMarketingEmails'
+      learn_gitlab_a: {
+        tracking_category: 'Growth::Conversion::Experiment::LearnGitLabA',
+        rollout_strategy: :user
+      },
+      learn_gitlab_b: {
+        tracking_category: 'Growth::Activation::Experiment::LearnGitLabB',
+        rollout_strategy: :user
       }
     }.freeze
 
@@ -174,7 +139,7 @@ module Gitlab
         elsif subject.respond_to?(:to_s)
           subject.to_s
         else
-          raise ArgumentError.new('Subject must respond to `to_global_id` or `to_s`')
+          raise ArgumentError, 'Subject must respond to `to_global_id` or `to_s`'
         end
       end
     end

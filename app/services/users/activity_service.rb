@@ -17,7 +17,7 @@ module Users
     def execute
       return unless @user
 
-      record_activity
+      ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes { record_activity }
     end
 
     private

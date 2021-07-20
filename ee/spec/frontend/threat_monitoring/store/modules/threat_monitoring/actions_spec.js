@@ -4,16 +4,15 @@ import * as actions from 'ee/threat_monitoring/store/modules/threat_monitoring/a
 import * as types from 'ee/threat_monitoring/store/modules/threat_monitoring/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/threat_monitoring/state';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
-import { mockEnvironmentsResponse } from '../../../mock_data';
+import { mockEnvironmentsResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 
 const environmentsEndpoint = 'environmentsEndpoint';
-const wafStatisticsEndpoint = 'wafStatisticsEndpoint';
 const networkPolicyStatisticsEndpoint = 'networkPolicyStatisticsEndpoint';
 
 describe('Threat Monitoring actions', () => {
@@ -33,7 +32,6 @@ describe('Threat Monitoring actions', () => {
         actions.setEndpoints,
         {
           environmentsEndpoint,
-          wafStatisticsEndpoint,
           networkPolicyStatisticsEndpoint,
         },
         state,
@@ -41,10 +39,6 @@ describe('Threat Monitoring actions', () => {
           {
             type: types.SET_ENDPOINT,
             payload: environmentsEndpoint,
-          },
-          {
-            type: `threatMonitoringWaf/${types.SET_ENDPOINT}`,
-            payload: wafStatisticsEndpoint,
           },
           {
             type: `threatMonitoringNetworkPolicy/${types.SET_ENDPOINT}`,
@@ -227,12 +221,6 @@ describe('Threat Monitoring actions', () => {
 
   describe('setAllEnvironments', () => {
     it('commits the SET_ALL_ENVIRONMENTS mutation and dispatches Network Policy fetch action', () =>
-      testAction(
-        actions.setAllEnvironments,
-        null,
-        state,
-        [{ type: types.SET_ALL_ENVIRONMENTS }],
-        [{ type: 'networkPolicies/fetchPolicies', payload: null }],
-      ));
+      testAction(actions.setAllEnvironments, null, state, [{ type: types.SET_ALL_ENVIRONMENTS }]));
   });
 });

@@ -3,32 +3,34 @@
   = render "layouts/google_tag_manager_head"
 = render "layouts/google_tag_manager_body"
 
-%h3.center.pt-6
-  = _('Almost there')
+.row
+  .col-md-6.offset-md-3
+    %h3.gl-text-center.gl-mt-0
+      = _('Almost there')
 
-%p.center
-  = trial_selection_intro_text
+    %p.gl-text-center
+      = trial_selection_intro_text
 
-= render 'errors'
+    = render 'errors'
 
-= form_tag apply_trials_path(glm_params), method: :post do
-  - if show_trial_namespace_select?
-    .form-group.gl-select2-html5-required-fix
-      = label_tag :namespace_id, _('This subscription is for'), for: :namespace_id, class: 'col-form-label'
-      = select_tag :namespace_id, namespace_options_for_select(params[:namespace_id]), class: 'select2', required: true
-  #group_name.form-group{ class: ("hidden" if show_trial_namespace_select?) }
-    = label_tag :new_group_name, _('New Group Name'), for: :new_group_name, class: 'col-form-label'
-    = text_field_tag :new_group_name, nil, class: 'form-control', required: !show_trial_namespace_select?
-  - if should_ask_company_question?
-    .form-group
-      = label_tag :trial_entity, _('Is this GitLab trial for your company?')
-      .gl-form-checkbox-group
-        .gl-form-checkbox.form-check.form-check-inline
-          = radio_button_tag :trial_entity, :company, params[:trial_entity]=='company', required: true, class: 'form-check-input'
-          = label_tag :trial_entity_company, _('Yes'), class: 'form-check-label'
-        .gl-form-checkbox.form-check.form-check-inline
-          = radio_button_tag :trial_entity, :individual, params[:trial_entity]=='individual', required: true, class: 'form-check-input'
-          = label_tag :trial_entity_individual, _('No'), class: 'form-check-label'
-  = submit_tag _('Start your free trial'), class: 'btn btn-success btn-block'
+    = form_tag apply_trials_path(glm_params), method: :post do
+      - if show_trial_namespace_select?
+        .form-group.gl-select2-html5-required-fix
+          = label_tag :namespace_id, _('This subscription is for'), for: :namespace_id, class: 'col-form-label'
+          = select_tag :namespace_id, namespace_options_for_select(params[:namespace_id]), class: 'select2', required: true, data: { qa_selector: 'subscription_for' }
+      #group_name.form-group{ class: ("hidden" if show_trial_namespace_select?) }
+        = label_tag :new_group_name, _('New Group Name'), for: :new_group_name, class: 'col-form-label'
+        = text_field_tag :new_group_name, nil, class: 'form-control', required: !show_trial_namespace_select?, data: { qa_selector: 'new_group_name' }
+      - if should_ask_company_question?
+        .form-group
+          = label_tag :trial_entity, _('Is this GitLab trial for your company?')
+          .gl-form-checkbox-group
+            .gl-form-checkbox.form-check.form-check-inline
+              = radio_button_tag :trial_entity, :company, params[:trial_entity]=='company', required: true, class: 'form-check-input'
+              = label_tag :trial_entity_company, _('Yes'), class: 'form-check-label'
+            .gl-form-checkbox.form-check.form-check-inline
+              = radio_button_tag :trial_entity, :individual, params[:trial_entity]=='individual', required: true, class: 'form-check-input', data: { qa_selector: 'trial_individual' }
+              = label_tag :trial_entity_individual, _('No'), class: 'form-check-label'
+      = submit_tag _('Start your free trial'), class: 'gl-button btn btn-confirm btn-block', data: { qa_selector: 'start_your_free_trial' }
 
-= render 'skip_trial'
+    = render 'skip_trial'

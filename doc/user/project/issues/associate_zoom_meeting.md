@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Associate a Zoom meeting with an issue
+# Associate a Zoom meeting with an issue **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16609) in GitLab 12.4.
 
@@ -17,7 +17,7 @@ team members can join swiftly without requesting a link.
 ## Adding a Zoom meeting to an issue
 
 To associate a Zoom meeting with an issue, you can use GitLab
-[quick actions](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+[quick actions](../quick_actions.md#issues-merge-requests-and-epics).
 
 In an issue, leave a comment using the `/zoom` quick action followed by a valid Zoom link:
 

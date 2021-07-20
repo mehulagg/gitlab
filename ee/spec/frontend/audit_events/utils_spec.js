@@ -1,5 +1,4 @@
 import {
-  isNumeric,
   getTypeFromEntityType,
   getEntityTypeFromType,
   parseAuditEventSearchQuery,
@@ -7,34 +6,6 @@ import {
 } from 'ee/audit_events/utils';
 
 describe('Audit Event Utils', () => {
-  describe('isNumeric', () => {
-    describe.each`
-      value
-      ${false}
-      ${true}
-      ${undefined}
-      ${null}
-      ${'abcd'}
-      ${''}
-    `('for a list of non-numeric values', ({ value }) => {
-      it(`returns false for ${value}`, () => {
-        expect(isNumeric(value)).toBe(false);
-      });
-    });
-
-    describe.each`
-      value
-      ${0}
-      ${12345}
-      ${'0'}
-      ${'6789'}
-    `('for a list of numeric values', ({ value }) => {
-      it(`returns true for ${value}`, () => {
-        expect(isNumeric(value)).toBe(true);
-      });
-    });
-  });
-
   describe('getTypeFromEntityType', () => {
     it('returns the correct type when given a valid entity type', () => {
       expect(getTypeFromEntityType('User')).toEqual('user');

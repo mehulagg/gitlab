@@ -2,7 +2,6 @@
 
 module Types
   module ComplianceManagement
-    # rubocop: disable Graphql/AuthorizeTypes
     class ComplianceFrameworkInputType < BaseInputObject
       graphql_name 'ComplianceFrameworkInput'
 
@@ -24,7 +23,7 @@ module Types
       argument :pipeline_configuration_full_path,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hippa`.'
+               description: 'Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa` **(ULTIMATE)**.'
     end
   end
 end

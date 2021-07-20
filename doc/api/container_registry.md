@@ -6,9 +6,29 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Container Registry API
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55978) in GitLab 11.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55978) in GitLab 11.8.
+> - The use of `CI_JOB_TOKEN` scoped to the current project was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49750) in GitLab 13.12.
 
 This is the API documentation of the [GitLab Container Registry](../user/packages/container_registry/index.md).
+
+When the `ci_job_token_scope` feature flag is enabled (it is **disabled by default**), you can use the below endpoints
+from a CI/CD job, by passing the `$CI_JOB_TOKEN` variable as the `JOB-TOKEN` header.
+The job token will only have access to its own project.
+
+[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
+can opt to enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_job_token_scope)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_job_token_scope)
+```
 
 ## List registry repositories
 
@@ -22,7 +42,7 @@ GET /projects/:id/registry/repositories
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) accessible by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) accessible by the authenticated user. |
 | `tags`      | boolean | no | If the parameter is included as true, each repository includes an array of `"tags"` in the response. |
 | `tags_count` | boolean | no | If the parameter is included as true, each repository includes `"tags_count"` in the response ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/32141) in GitLab 13.1). |
 
@@ -65,12 +85,13 @@ GET /groups/:id/registry/repositories
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) accessible by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) accessible by the authenticated user. |
 | `tags`      | boolean | no | If the parameter is included as true, each repository includes an array of `"tags"` in the response. |
 | `tags_count` | boolean | no | If the parameter is included as true, each repository includes `"tags_count"` in the response ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/32141) in GitLab 13.1). |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/2/registry/repositories?tags=1&tags_count=true"
+curl --header "PRIVATE-TOKEN: <your_access_token>" \
+     "https://gitlab.example.com/api/v4/groups/2/registry/repositories?tags=1&tags_count=true"
 ```
 
 Example response:
@@ -141,7 +162,8 @@ GET /registry/repositories/:id
 | `tags_count` | boolean | no | If the parameter is included as `true`, the response includes `"tags_count"`. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/registry/repositories/2?tags=true&tags_count=true"
+curl --header "PRIVATE-TOKEN: <your_access_token>" \
+     "https://gitlab.example.com/api/v4/registry/repositories/2?tags=true&tags_count=true"
 ```
 
 Example response:
@@ -178,11 +200,12 @@ DELETE /projects/:id/registry/repositories/:repository_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `repository_id` | integer | yes | The ID of registry repository. |
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2"
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" \
+     "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2"
 ```
 
 ## List registry repository tags
@@ -197,11 +220,12 @@ GET /projects/:id/registry/repositories/:repository_id/tags
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) accessible by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) accessible by the authenticated user. |
 | `repository_id` | integer | yes | The ID of registry repository. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+curl --header "PRIVATE-TOKEN: <your_access_token>" \
+     "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
 ```
 
 Example response:
@@ -231,12 +255,13 @@ GET /projects/:id/registry/repositories/:repository_id/tags/:tag_name
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) accessible by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) accessible by the authenticated user. |
 | `repository_id` | integer | yes | The ID of registry repository. |
 | `tag_name` | string | yes | The name of tag. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags/v10.0.0"
+curl --header "PRIVATE-TOKEN: <your_access_token>" \
+     "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags/v10.0.0"
 ```
 
 Example response:
@@ -264,12 +289,13 @@ DELETE /projects/:id/registry/repositories/:repository_id/tags/:tag_name
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `repository_id` | integer | yes | The ID of registry repository. |
 | `tag_name` | string | yes | The name of tag. |
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags/v10.0.0"
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" \
+     "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags/v10.0.0"
 ```
 
 This action doesn't delete blobs. To delete them and recycle disk space,
@@ -288,7 +314,7 @@ DELETE /projects/:id/registry/repositories/:repository_id/tags
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `repository_id` | integer | yes | The ID of registry repository. |
 | `name_regex` | string | no | The [re2](https://github.com/google/re2/wiki/Syntax) regex of the name to delete. To delete all tags specify `.*`. **Note:** `name_regex` is deprecated in favor of `name_regex_delete`. This field is validated. |
 | `name_regex_delete` | string | yes | The [re2](https://github.com/google/re2/wiki/Syntax) regex of the name to delete. To delete all tags specify `.*`. This field is validated. |
@@ -330,23 +356,27 @@ Examples:
    and remove ones that are older than 2 days:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=[0-9a-z]{40}' --data 'keep_n=5' --data 'older_than=2d' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=[0-9a-z]{40}' --data 'keep_n=5' --data 'older_than=2d' \
+        --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
 
 1. Remove all tags, but keep always the latest 5:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=.*' --data 'keep_n=5' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=.*' --data 'keep_n=5' \
+        --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
 
 1. Remove all tags, but keep always tags beginning with `stable`:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=.*' --data 'name_regex_keep=stable.*' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=.*' --data 'name_regex_keep=stable.*' \
+        --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
 
 1. Remove all tags that are older than 1 month:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=.*' --data 'older_than=1month' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=.*' --data 'older_than=1month' \
+        --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```

@@ -6,7 +6,7 @@ module ApplicationSettings
 
     attr_reader :params, :application_setting
 
-    MARKDOWN_CACHE_INVALIDATING_PARAMS = %w(asset_proxy_enabled asset_proxy_url asset_proxy_secret_key asset_proxy_allowlist).freeze
+    MARKDOWN_CACHE_INVALIDATING_PARAMS = %w(asset_proxy_enabled asset_proxy_url asset_proxy_secret_key asset_proxy_whitelist).freeze
 
     def execute
       result = update_settings
@@ -67,10 +67,8 @@ module ApplicationSettings
     end
 
     def update_terms(terms)
-      return unless terms.present?
-
       # Avoid creating a new terms record if the text is exactly the same.
-      terms = terms.strip
+      terms = terms&.strip
       return if terms == @application_setting.terms
 
       ApplicationSetting::Term.create(terms: terms)
@@ -120,4 +118,4 @@ module ApplicationSettings
   end
 end
 
-ApplicationSettings::UpdateService.prepend_if_ee('EE::ApplicationSettings::UpdateService')
+ApplicationSettings::UpdateService.prepend_mod_with('ApplicationSettings::UpdateService')

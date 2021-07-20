@@ -7,6 +7,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
   let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:user) { create(:user) }
+
   let(:service) { described_class.new(project, user, params) }
   let(:params) { {} }
 
@@ -58,7 +59,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when failed to save the record' do
       before do
-        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled.new }
+        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled }
       end
 
       it 'returns result code' do
@@ -68,7 +69,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns failed status' do
@@ -217,7 +218,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns error' do
@@ -303,7 +304,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns error' do
@@ -402,6 +403,6 @@ RSpec.describe AutoMerge::MergeTrainService do
   end
 
   def create_pipeline_for(merge_request)
-    MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
+    MergeRequests::CreatePipelineService.new(project: project, current_user: user).execute(merge_request)
   end
 end

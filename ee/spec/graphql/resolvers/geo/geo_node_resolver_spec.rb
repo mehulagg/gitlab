@@ -10,6 +10,7 @@ RSpec.describe Resolvers::Geo::GeoNodeResolver do
     let_it_be(:primary) { create(:geo_node, :primary) }
     let_it_be(:secondary) { create(:geo_node) }
     let_it_be(:user) { create(:user, :admin) }
+
     let(:gql_context) { { current_user: user } }
 
     context 'when the user has permission to view Geo data', :enable_admin_mode do

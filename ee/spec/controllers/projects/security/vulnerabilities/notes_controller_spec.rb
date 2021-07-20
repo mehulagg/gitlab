@@ -138,6 +138,11 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
         end
       end
     end
+
+    it_behaves_like 'request exceeding rate limit', :clean_gitlab_redis_cache do
+      let(:params) { request_params.except(:format) }
+      let(:request_full_path) { project_security_vulnerability_notes_path(project, vulnerability) }
+    end
   end
 
   describe 'PUT update' do

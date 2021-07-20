@@ -22,6 +22,10 @@ module Gitlab
           pr.number
         end
 
+        def object_type
+          :pull_request
+        end
+
         def each_object_to_import
           super do |pr|
             update_repository if update_repository?(pr)
@@ -36,7 +40,11 @@ module Gitlab
           # updating the timestamp.
           project.update_column(:last_repository_updated_at, Time.zone.now)
 
-          project.repository.fetch_remote('github', forced: false)
+          if Feature.enabled?(:fetch_remote_params, project, default_enabled: :yaml)
+            project.repository.fetch_remote('github', url: project.import_url, refmap: Gitlab::GithubImport.refmap, forced: false)
+          else
+            project.repository.fetch_remote('github', forced: false)
+          end
 
           pname = project.path_with_namespace
 

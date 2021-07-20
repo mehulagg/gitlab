@@ -221,7 +221,7 @@ export default {
             @click.stop="toggleResolvedStatus"
           >
             <gl-icon v-if="!isResolving" :name="resolveIconName" data-testid="resolve-icon" />
-            <gl-loading-icon v-else inline />
+            <gl-loading-icon v-else size="sm" inline />
           </button>
         </template>
         <template v-if="discussion.resolved" #resolved-status>
@@ -253,12 +253,12 @@ export default {
         :class="{ 'gl-bg-blue-50': isDiscussionActive }"
         @error="$emit('update-note-error', $event)"
       />
-      <li v-show="isReplyPlaceholderVisible" class="reply-wrapper">
+      <li v-show="isReplyPlaceholderVisible" class="reply-wrapper discussion-reply-holder">
         <reply-placeholder
           v-if="!isFormVisible"
           class="qa-discussion-reply"
-          :button-text="__('Reply...')"
-          @onClick="showForm"
+          :placeholder-text="__('Reply…')"
+          @focus="showForm"
         />
         <apollo-mutation
           v-else

@@ -1,0 +1,20 @@
+---
+key_path: active_user_count
+description: The number of active users existing in the instance. This is named the instance_user_count in the Versions application.
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: string
+status: data_available
+data_category: Subscription
+time_frame: none
+data_source: database
+distribution:
+- ce
+- ee
+tier:
+- free
+- premium
+- ultimate
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/557

@@ -37,6 +37,14 @@
   }
 }
 
+.board-add-new-list .gl-new-dropdown-inner {
+  max-height: 12rem !important;
+
+  .gl-form-radio {
+    min-height: 1em;
+  }
+}
+
 .tab-pane-labels {
   .dropdown-page-one .dropdown-content {
     height: 140px;
@@ -91,11 +99,24 @@
 
 .board-swimlanes {
   overflow-x: auto;
+
+  .board-swimlanes-content {
+    height: fit-content;
+  }
+
+  .board-add-new-list {
+    height: calc(100% - 1rem);
+  }
+}
+
+.board-epic-lane-container:last-child .board-epic-lane-issues {
+  padding-bottom: $gl-spacing-scale-3;
 }
 
 $epic-icons-spacing: 40px;
 
-.board-epic-lane {
+.board-epic-lane,
+.swimlanes-button {
   max-width: calc(100vw - #{$contextual-sidebar-width} - #{$epic-icons-spacing});
 
   .page-with-icon-sidebar & {

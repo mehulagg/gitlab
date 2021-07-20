@@ -3,10 +3,13 @@
 class LdapGroupSyncWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :authentication_and_authorization
   worker_has_external_dependencies!
   weight 2
   loggable_arguments 0, 1
+  tags :exclude_from_gitlab_com
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(group_ids, provider = nil)

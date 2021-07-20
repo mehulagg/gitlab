@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Irker IRC Gateway
+# Irker IRC Gateway **(FREE)**
 
 GitLab provides a way to push update messages to an Irker server. When
 configured, pushes to a project trigger the service to send data directly
@@ -23,7 +23,7 @@ git clone https://gitlab.com/esr/irker.git
 
 Once you have downloaded the code, you can run the Python script named `irkerd`.
 This script is the gateway script, it acts both as an IRC client, for sending
-messages to an IRC server obviously, and as a TCP server, for receiving messages
+messages to an IRC server, and as a TCP server, for receiving messages
 from the GitLab service.
 
 If the Irker server runs on the same machine, you are done. If not, you

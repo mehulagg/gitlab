@@ -22,7 +22,7 @@ module Gitlab
 
       CommandError = Class.new(StandardError)
 
-      def initialize(log_output = STDERR)
+      def initialize(log_output = $stderr)
         require_relative '../../../lib/gitlab/sidekiq_logging/json_formatter'
 
         # As recommended by https://github.com/mperham/sidekiq/wiki/Advanced-Options#concurrency
@@ -47,32 +47,25 @@ module Gitlab
 
         option_parser.parse!(argv)
 
-        # Remove with https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/646
-        if @queue_selector && @experimental_queue_selector
-          raise CommandError,
-            'You cannot specify --queue-selector and --experimental-queue-selector together'
-        end
+        worker_metadatas = SidekiqConfig::CliMethods.worker_metadatas(@rails_path)
+        worker_queues = SidekiqConfig::CliMethods.worker_queues(@rails_path)
 
-        all_queues = SidekiqConfig::CliMethods.all_queues(@rails_path)
-        queue_names = SidekiqConfig::CliMethods.worker_queues(@rails_path)
-
-        queue_groups = argv.map do |queues|
-          next queue_names if queues == '*'
+        queue_groups = argv.map do |queues_or_query_string|
+          next worker_queues if queues_or_query_string == SidekiqConfig::WorkerMatcher::WILDCARD_MATCH
 
           # When using the queue query syntax, we treat each queue group
           # as a worker attribute query, and resolve the queues for the
           # queue group using this query.
 
-          # Simplify with https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/646
-          if @queue_selector || @experimental_queue_selector
-            SidekiqConfig::CliMethods.query_workers(queues, all_queues)
+          if @queue_selector
+            SidekiqConfig::CliMethods.query_queues(queues_or_query_string, worker_metadatas)
           else
-            SidekiqConfig::CliMethods.expand_queues(queues.split(','), queue_names)
+            SidekiqConfig::CliMethods.expand_queues(queues_or_query_string.split(','), worker_queues)
           end
         end
 
         if @negate_queues
-          queue_groups.map! { |queues| queue_names - queues }
+          queue_groups.map! { |queues| worker_queues - queues }
         end
 
         if queue_groups.all?(&:empty?)
@@ -192,11 +185,6 @@ module Gitlab
 
           opt.on('--queue-selector', 'Run workers based on the provided selector') do |queue_selector|
             @queue_selector = queue_selector
-          end
-
-          # Remove with https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/646
-          opt.on('--experimental-queue-selector', 'DEPRECATED: use --queue-selector-instead') do |experimental_queue_selector|
-            @experimental_queue_selector = experimental_queue_selector
           end
 
           opt.on('-n', '--negate', 'Run workers for all queues in sidekiq_queues.yml except the given ones') do

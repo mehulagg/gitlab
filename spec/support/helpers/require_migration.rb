@@ -15,12 +15,12 @@ class RequireMigration
   end
 
   MIGRATION_FOLDERS = %w[db/migrate db/post_migrate].freeze
-  SPEC_FILE_PATTERN = /.+\/(?<file_name>.+)_spec\.rb/.freeze
+  SPEC_FILE_PATTERN = %r{.+/(?<file_name>.+)_spec\.rb}.freeze
 
   class << self
     def require_migration!(file_name)
       file_paths = search_migration_file(file_name)
-      raise AutoLoadError.new(file_name) unless file_paths.first
+      raise AutoLoadError, file_name unless file_paths.first
 
       require file_paths.first
     end
@@ -29,7 +29,7 @@ class RequireMigration
       migration_folders.flat_map do |path|
         migration_path = Rails.root.join(path).to_s
 
-        Find.find(migration_path).grep(/\d+_#{file_name}\.rb/)
+        Find.find(migration_path).select { |m| File.basename(m).match? /\A\d+_#{file_name}\.rb\z/ }
       end
     end
 
@@ -41,7 +41,7 @@ class RequireMigration
   end
 end
 
-RequireMigration.prepend_if_ee('EE::RequireMigration')
+RequireMigration.prepend_mod_with('RequireMigration')
 
 def require_migration!(file_name = nil)
   location_info = caller_locations.first.path.match(RequireMigration::SPEC_FILE_PATTERN)

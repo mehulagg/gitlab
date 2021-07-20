@@ -5,10 +5,12 @@ module Gitlab
     module StuckImportJob
       extend ActiveSupport::Concern
 
-      IMPORT_JOBS_EXPIRATION = 15.hours.seconds.to_i
+      IMPORT_JOBS_EXPIRATION = 24.hours.seconds.to_i
 
       included do
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         # rubocop:disable Scalability/CronWorkerContext
         # This worker updates several import states inline and does not schedule
         # other jobs. So no context needed

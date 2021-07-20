@@ -4,11 +4,22 @@ module Issues
   class CreateService < Issues::BaseService
     include ResolveDiscussions
 
-    def execute(skip_system_notes: false)
-      @request = params.delete(:request)
-      @spam_params = Spam::SpamActionService.filter_spam_params!(params)
+    # NOTE: For Issues::CreateService, we require the spam_params and do not default it to nil, because
+    # spam_checking is likely to be necessary.  However, if there is not a request available in scope
+    # in the caller (for example, an issue created via email) and the required arguments to the
+    # SpamParams constructor are not otherwise available, spam_params: must be explicitly passed as nil.
+    def initialize(project:, current_user: nil, params: {}, spam_params:)
+      # Temporary check to ensure we are no longer passing request in params now that we have
+      # introduced spam_params. Raise an exception if it is present.
+      # Remove after https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58603 is complete.
+      raise if params[:request]
 
-      @issue = BuildService.new(project, current_user, params).execute
+      super(project: project, current_user: current_user, params: params)
+      @spam_params = spam_params
+    end
+
+    def execute(skip_system_notes: false)
+      @issue = BuildService.new(project: project, current_user: current_user, params: params).execute
 
       filter_resolve_discussion_params
 
@@ -18,28 +29,40 @@ module Issues
     def before_create(issue)
       Spam::SpamActionService.new(
         spammable: issue,
-        request: request,
+        spam_params: spam_params,
         user: current_user,
         action: :create
-      ).execute(spam_params: spam_params)
+      ).execute
 
       # current_user (defined in BaseService) is not available within run_after_commit block
       user = current_user
       issue.run_after_commit do
         NewIssueWorker.perform_async(issue.id, user.id)
         IssuePlacementWorker.perform_async(nil, issue.project_id)
+        Namespaces::OnboardingIssueCreatedWorker.perform_async(issue.namespace.id)
       end
     end
 
+    # Add new items to Issues::AfterCreateService if they can be performed in Sidekiq
     def after_create(issue)
-      add_incident_label(issue)
-      todo_service.new_issue(issue, current_user)
       user_agent_detail_service.create
       resolve_discussions_with_issue(issue)
-      delete_milestone_total_issue_counter_cache(issue.milestone)
-      track_incident_action(current_user, issue, :incident_created)
 
       super
+    end
+
+    def handle_changes(issue, options)
+      super
+      old_associations = options.fetch(:old_associations, {})
+      old_assignees = old_associations.fetch(:assignees, [])
+
+      handle_assignee_changes(issue, old_assignees)
+    end
+
+    def handle_assignee_changes(issue, old_assignees)
+      return if issue.assignees == old_assignees
+
+      create_assignee_note(issue, old_assignees)
     end
 
     def resolve_discussions_with_issue(issue)
@@ -52,28 +75,12 @@ module Issues
 
     private
 
-    attr_reader :request, :spam_params
+    attr_reader :spam_params
 
     def user_agent_detail_service
-      UserAgentDetailService.new(@issue, request)
-    end
-
-    # Applies label "incident" (creates it if missing) to incident issues.
-    # For use in "after" hooks only to ensure we are not appyling
-    # labels prematurely.
-    def add_incident_label(issue)
-      return unless issue.incident?
-
-      label = ::IncidentManagement::CreateIncidentLabelService
-        .new(project, current_user)
-        .execute
-        .payload[:label]
-
-      return if issue.label_ids.include?(label.id)
-
-      issue.labels << label
+      UserAgentDetailService.new(spammable: @issue, spam_params: spam_params)
     end
   end
 end
 
-Issues::CreateService.prepend_if_ee('EE::Issues::CreateService')
+Issues::CreateService.prepend_mod

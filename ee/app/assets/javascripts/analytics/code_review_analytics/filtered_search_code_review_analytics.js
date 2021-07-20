@@ -1,5 +1,6 @@
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import CodeReviewAnalyticsFilteredSearchTokenKeys from './code_review_analytics_filtered_search_token_keys';
 import store from './store';
@@ -24,6 +25,7 @@ export default class FilteredSearchCodeReviewAnalytics extends FilteredSearchMan
    * Updates filters in code review analytics store
    */
   updateObject = (path) => {
+    // eslint-disable-next-line import/no-deprecated
     const filters = urlParamsToObject(path);
     const { selectedLabels: selectedLabelList, selectedMilestone } = transformFilters(filters);
 

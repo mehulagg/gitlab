@@ -47,9 +47,12 @@ module Security
       report_finding = report_finding_for(security_finding)
       return Vulnerabilities::Finding.new unless report_finding
 
-      finding_data = report_finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :links)
+      finding_data = report_finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :links, :signatures)
       identifiers = report_finding.identifiers.map do |identifier|
         Vulnerabilities::Identifier.new(identifier.to_hash)
+      end
+      signatures = report_finding.signatures.map do |signature|
+        Vulnerabilities::FindingSignature.new(signature.to_hash)
       end
 
       Vulnerabilities::Finding.new(finding_data).tap do |finding|
@@ -59,11 +62,12 @@ module Security
         finding.sha = pipeline.sha
         finding.scanner = security_finding.scanner
         finding.identifiers = identifiers
+        finding.signatures = signatures
       end
     end
 
     def report_finding_for(security_finding)
-      security_reports[security_finding.build.id].findings[security_finding.position]
+      report_findings.dig(security_finding.build.id, security_finding.uuid)
     end
 
     def vulnerability_for(security_finding)
@@ -89,10 +93,13 @@ module Security
       security_findings.map(&:project_fingerprint)
     end
 
-    def security_reports
-      @security_reports ||= begin
+    def report_findings
+      @report_findings ||= begin
         builds.each_with_object({}) do |build, memo|
-          memo[build.id] = build.job_artifacts.map(&:security_report).compact.first
+          reports = build.job_artifacts.map(&:security_report).compact
+          next unless reports.present?
+
+          memo[build.id] = reports.flat_map(&:findings).index_by(&:uuid)
         end
       end
     end

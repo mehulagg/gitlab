@@ -15,8 +15,8 @@ project level.
 
 To enable merge request approval rules for an instance:
 
-1. Navigate to **Admin Area >** **{push-rules}** **Push Rules** and expand **Merge
-requests approvals**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **{push-rules}** **Push Rules**, and expand **Merge request (MR) approvals**.
 1. Set the required rule.
 1. Click **Save changes**.
 
@@ -31,3 +31,5 @@ maintainers from allowing users to approve merge requests if they have submitted
 any commits to the source branch.
 - **Prevent users from modifying merge request approvers list**. Prevents users from
 modifying the approvers list in project settings or in individual merge requests.
+
+Also read the [project level merge request approval rules](../project/merge_requests/approvals/index.md), which are affected by instance level rules.

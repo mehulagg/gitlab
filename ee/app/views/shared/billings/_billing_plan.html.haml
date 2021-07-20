@@ -7,7 +7,7 @@
   - faq_link_url   = 'https://about.gitlab.com/pricing/faq-new-product-subscription-tiers'
   - faq_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: faq_link_url }
 
-.card-wrapper{ class: ("card-wrapper-has-badge" if has_upgrade) }
+.card-wrapper{ class: ("card-wrapper-has-badge" if has_upgrade), data: { testid: "plan-card-#{plan.code}" } }
   - if has_upgrade
     .card-badge
       %span.card-badge-text
@@ -70,6 +70,6 @@
       - show_contact_sales_button = show_contact_sales_button?(purchase_link.action, plan_offer_type)
       .gl-min-h-7.gl-display-flex.gl-flex-wrap.gl-justify-content-end
         - if show_contact_sales_button
-          = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: [("btn gl-button"), (show_upgrade_button ? "btn-success-secondary" : "btn-success")], data: { **experiment_tracking_data_for_button_click('contact_sales') }
+          = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: ["btn gl-button", show_upgrade_button ? "btn-success-secondary" : "btn-success"], data: { **experiment_tracking_data_for_button_click('contact_sales') }
         - if show_upgrade_button
           = link_to upgrade_button_text, plan_purchase_or_upgrade_url(namespace, plan), class: "#{upgrade_button_classes} billing-cta-purchase#{cta_class} gl-ml-3", data: { **experiment_tracking_data_for_button_click('upgrade') }

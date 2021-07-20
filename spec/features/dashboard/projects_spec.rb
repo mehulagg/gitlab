@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe 'Dashboard Projects' do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository, name: 'awesome stuff') }
-  let(:project2) { create(:project, :public, name: 'Community project') }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project, :repository) }
+  let_it_be(:project2) { create(:project, :public) }
 
   before do
     project.add_developer(user)
@@ -15,19 +15,6 @@ RSpec.describe 'Dashboard Projects' do
   it_behaves_like "an autodiscoverable RSS feed with current_user's feed token" do
     before do
       visit dashboard_projects_path
-    end
-  end
-
-  it 'shows the project the user in a member of in the list' do
-    visit dashboard_projects_path
-    expect(page).to have_content('awesome stuff')
-  end
-
-  it 'shows "New project" button' do
-    visit dashboard_projects_path
-
-    page.within '#content-body' do
-      expect(page).to have_link('New project')
     end
   end
 
@@ -48,7 +35,7 @@ RSpec.describe 'Dashboard Projects' do
           expect(page).to have_content('Developer')
         end
 
-        project.members.last.update(access_level: 40)
+        project.members.last.update!(access_level: 40)
 
         visit dashboard_projects_path
 
@@ -153,7 +140,7 @@ RSpec.describe 'Dashboard Projects' do
   end
 
   describe 'with a pipeline', :clean_gitlab_redis_shared_state do
-    let(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit.sha, ref: project.default_branch) }
+    let_it_be(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit.sha, ref: project.default_branch) }
 
     before do
       # Since the cache isn't updated when a new pipeline is created
@@ -190,17 +177,9 @@ RSpec.describe 'Dashboard Projects' do
       let(:guest_user) { create(:user) }
 
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
         project.add_guest(guest_user)
         sign_in(guest_user)
-      end
-
-      it_behaves_like 'hidden pipeline status'
-    end
-
-    context 'when dashboard_pipeline_status is disabled' do
-      before do
-        stub_feature_flags(dashboard_pipeline_status: false)
       end
 
       it_behaves_like 'hidden pipeline status'

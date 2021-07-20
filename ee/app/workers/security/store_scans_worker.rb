@@ -3,7 +3,11 @@
 module Security
   class StoreScansWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include SecurityScansQueue
+
+    tags :exclude_from_kubernetes
 
     # rubocop: disable CodeReuse/ActiveRecord
     def perform(pipeline_id)

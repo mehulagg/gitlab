@@ -34,11 +34,9 @@ but only for updating the declaration of the columns. We can then validate it at
 `VALIDATE CONSTRAINT`, which requires only a `SHARE UPDATE EXCLUSIVE LOCK` (only conflicts with other
 validations and index creation while it allows reads and writes).
 
-### Exceptions
-
-Text columns used by `attr_encrypted` are not required to have a limit, because the length of the
-text after encryption may be longer than the text itself. Instead, you can use an Active Record
-length validation on the attribute.
+NOTE:
+Don't use text columns for `attr_encrypted` attributes. Use a
+[`:binary` column](../migration_style_guide.md#encrypted-attributes) instead.
 
 ## Create a new table with text columns
 
@@ -51,8 +49,6 @@ For example, consider a migration that creates a table with two text columns,
 ```ruby
 class CreateDbGuides < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
-
-  DOWNTIME = false
 
   def up
     create_table_with_constraints :db_guides do |t|
@@ -89,7 +85,6 @@ For example, consider a migration that adds a new text column `extended_title` t
 
 ```ruby
 class AddExtendedTitleToSprints < ActiveRecord::Migration[6.0]
-  DOWNTIME = false
 
   # rubocop:disable Migration/AddLimitToTextColumns
   # limit is added in 20200501000002_add_text_limit_to_sprints_extended_title
@@ -106,8 +101,6 @@ A second migration should follow the first one with a limit added to `extended_t
 ```ruby
 class AddTextLimitToSprintsExtendedTitle < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
-  DOWNTIME = false
-
   disable_ddl_transaction!
 
   def up
@@ -184,8 +177,6 @@ in a post-deployment migration,
 ```ruby
 class AddTextLimitMigration < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
-
-  DOWNTIME = false
 
   disable_ddl_transaction!
 
@@ -266,7 +257,6 @@ helper in a final post-deployment migration,
 ```ruby
 class ValidateTextLimitMigration < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
-  DOWNTIME = false
 
   disable_ddl_transaction!
 

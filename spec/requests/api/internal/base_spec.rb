@@ -9,6 +9,7 @@ RSpec.describe API::Internal::Base do
   let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
   let_it_be(:personal_snippet) { create(:personal_snippet, :repository, author: user) }
   let_it_be(:project_snippet) { create(:project_snippet, :repository, author: user, project: project) }
+
   let(:key) { create(:key, user: user) }
   let(:secret_token) { Gitlab::Shell.secret_token }
   let(:gl_repository) { "project-#{project.id}" }
@@ -341,9 +342,9 @@ RSpec.describe API::Internal::Base do
   end
 
   describe "GET /internal/authorized_keys" do
-    context "using an existing key's fingerprint" do
+    context "using an existing key" do
       it "finds the key" do
-        get(api('/internal/authorized_keys'), params: { fingerprint: key.fingerprint, secret_token: secret_token })
+        get(api('/internal/authorized_keys'), params: { key: key.key.split[1], secret_token: secret_token })
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['id']).to eq(key.id)
@@ -351,58 +352,23 @@ RSpec.describe API::Internal::Base do
       end
 
       it 'exposes the comment of the key as a simple identifier of username + hostname' do
-        get(api('/internal/authorized_keys'), params: { fingerprint: key.fingerprint, secret_token: secret_token })
+        get(api('/internal/authorized_keys'), params: { key: key.key.split[1], secret_token: secret_token })
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['key']).to include("#{key.user_name} (#{Gitlab.config.gitlab.host})")
       end
     end
 
-    context "non existing key's fingerprint" do
-      it "returns 404" do
-        get(api('/internal/authorized_keys'), params: { fingerprint: "no:t-:va:li:d0", secret_token: secret_token })
+    it "returns 404 with a partial key" do
+      get(api('/internal/authorized_keys'), params: { key: key.key.split[1][0...-3], secret_token: secret_token })
 
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
-    context "using a partial fingerprint" do
-      it "returns 404" do
-        get(api('/internal/authorized_keys'), params: { fingerprint: "#{key.fingerprint[0..5]}%", secret_token: secret_token })
+    it "returns 404 with an not valid base64 string" do
+      get(api('/internal/authorized_keys'), params: { key: "whatever!", secret_token: secret_token })
 
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context "sending the key" do
-      context "using an existing key" do
-        it "finds the key" do
-          get(api('/internal/authorized_keys'), params: { key: key.key.split[1], secret_token: secret_token })
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['id']).to eq(key.id)
-          expect(json_response['key'].split[1]).to eq(key.key.split[1])
-        end
-
-        it 'exposes the comment of the key as a simple identifier of username + hostname' do
-          get(api('/internal/authorized_keys'), params: { fingerprint: key.fingerprint, secret_token: secret_token })
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['key']).to include("#{key.user_name} (#{Gitlab.config.gitlab.host})")
-        end
-      end
-
-      it "returns 404 with a partial key" do
-        get(api('/internal/authorized_keys'), params: { key: key.key.split[1][0...-3], secret_token: secret_token })
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-
-      it "returns 404 with an not valid base64 string" do
-        get(api('/internal/authorized_keys'), params: { key: "whatever!", secret_token: secret_token })
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -543,25 +509,51 @@ RSpec.describe API::Internal::Base do
       end
 
       context "git pull" do
-        before do
-          stub_feature_flags(gitaly_mep_mep: true)
+        context "with a feature flag enabled globally" do
+          before do
+            stub_feature_flags(gitaly_mep_mep: true)
+          end
+
+          it "has the correct payload" do
+            pull(key, project)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["status"]).to be_truthy
+            expect(json_response["gl_repository"]).to eq("project-#{project.id}")
+            expect(json_response["gl_project_path"]).to eq(project.full_path)
+            expect(json_response["gitaly"]).not_to be_nil
+            expect(json_response["gitaly"]["repository"]).not_to be_nil
+            expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
+            expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
+            expect(json_response["gitaly"]["address"]).to eq(Gitlab::GitalyClient.address(project.repository_storage))
+            expect(json_response["gitaly"]["token"]).to eq(Gitlab::GitalyClient.token(project.repository_storage))
+            expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'true')
+            expect(user.reload.last_activity_on).to eql(Date.today)
+          end
         end
 
-        it "has the correct payload" do
-          pull(key, project)
+        context "with a feature flag enabled for a project" do
+          before do
+            stub_feature_flags(gitaly_mep_mep: project)
+          end
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["status"]).to be_truthy
-          expect(json_response["gl_repository"]).to eq("project-#{project.id}")
-          expect(json_response["gl_project_path"]).to eq(project.full_path)
-          expect(json_response["gitaly"]).not_to be_nil
-          expect(json_response["gitaly"]["repository"]).not_to be_nil
-          expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
-          expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
-          expect(json_response["gitaly"]["address"]).to eq(Gitlab::GitalyClient.address(project.repository_storage))
-          expect(json_response["gitaly"]["token"]).to eq(Gitlab::GitalyClient.token(project.repository_storage))
-          expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'true')
-          expect(user.reload.last_activity_on).to eql(Date.today)
+          it "has the flag set to true for that project" do
+            pull(key, project)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["gl_repository"]).to eq("project-#{project.id}")
+            expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'true')
+          end
+
+          it "has the flag set to false for other projects" do
+            other_project = create(:project, :public, :repository)
+
+            pull(key, other_project)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["gl_repository"]).to eq("project-#{other_project.id}")
+            expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'false')
+          end
         end
       end
 
@@ -618,7 +610,7 @@ RSpec.describe API::Internal::Base do
 
       context 'with Project' do
         it_behaves_like 'storing arguments in the application context' do
-          let(:expected_params) { { user: key.user.username, project: project.full_path } }
+          let(:expected_params) { { user: key.user.username, project: project.full_path, caller_id: "POST /api/:version/internal/allowed" } }
 
           subject { push(key, project) }
         end
@@ -626,7 +618,7 @@ RSpec.describe API::Internal::Base do
 
       context 'with PersonalSnippet' do
         it_behaves_like 'storing arguments in the application context' do
-          let(:expected_params) { { user: key.user.username } }
+          let(:expected_params) { { user: key.user.username, caller_id: "POST /api/:version/internal/allowed" } }
 
           subject { push(key, personal_snippet) }
         end
@@ -634,7 +626,7 @@ RSpec.describe API::Internal::Base do
 
       context 'with ProjectSnippet' do
         it_behaves_like 'storing arguments in the application context' do
-          let(:expected_params) { { user: key.user.username, project: project_snippet.project.full_path } }
+          let(:expected_params) { { user: key.user.username, project: project_snippet.project.full_path, caller_id: "POST /api/:version/internal/allowed" } }
 
           subject { push(key, project_snippet) }
         end
@@ -861,7 +853,7 @@ RSpec.describe API::Internal::Base do
     context 'project does not exist' do
       context 'git pull' do
         it 'returns a 200 response with status: false' do
-          project.destroy
+          project.destroy!
 
           pull(key, project)
 
@@ -1089,7 +1081,7 @@ RSpec.describe API::Internal::Base do
         end
       end
 
-      context 'feature flag :user_mode_in_session is enabled' do
+      context 'application setting :admin_mode is enabled' do
         context 'with an admin user' do
           let(:user) { create(:admin) }
 
@@ -1121,9 +1113,9 @@ RSpec.describe API::Internal::Base do
         end
       end
 
-      context 'feature flag :user_mode_in_session is disabled' do
+      context 'application setting :admin_mode is disabled' do
         before do
-          stub_feature_flags(user_mode_in_session: false)
+          stub_application_setting(admin_mode: false)
         end
 
         context 'with an admin user' do
@@ -1185,59 +1177,68 @@ RSpec.describe API::Internal::Base do
       allow_any_instance_of(Gitlab::Identifier).to receive(:identify).and_return(user)
     end
 
-    context 'with Project' do
-      it 'executes PostReceiveService' do
-        message = <<~MESSAGE.strip
-          To create a merge request for #{branch_name}, visit:
-            http://#{Gitlab.config.gitlab.host}/#{project.full_path}/-/merge_requests/new?merge_request%5Bsource_branch%5D=#{branch_name}
-        MESSAGE
+    shared_examples 'runs post-receive hooks' do
+      let(:gl_repository) { container.repository.gl_repository }
+      let(:messages) { [] }
 
+      it 'executes PostReceiveService' do
         subject
 
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq({
-          'messages' => [{ 'message' => message, 'type' => 'basic' }],
+          'messages' => messages,
           'reference_counter_decreased' => true
         })
       end
 
+      it 'tries to notify that the container has moved' do
+        expect(Gitlab::Checks::ContainerMoved).to receive(:fetch_message).with(user, container.repository)
+
+        subject
+      end
+
       it_behaves_like 'storing arguments in the application context' do
-        let(:expected_params) { { user: user.username, project: project.full_path } }
+        let(:expected_params) { expected_context }
+      end
+    end
+
+    context 'with Project' do
+      it_behaves_like 'runs post-receive hooks' do
+        let(:container) { project }
+        let(:expected_context) { { user: user.username, project: project.full_path } }
+
+        let(:messages) do
+          [
+            {
+              'message' => <<~MESSAGE.strip,
+                To create a merge request for #{branch_name}, visit:
+                  http://#{Gitlab.config.gitlab.host}/#{project.full_path}/-/merge_requests/new?merge_request%5Bsource_branch%5D=#{branch_name}
+              MESSAGE
+              'type' => 'basic'
+            }
+          ]
+        end
       end
     end
 
     context 'with PersonalSnippet' do
-      let(:gl_repository) { "snippet-#{personal_snippet.id}" }
-
-      it 'executes PostReceiveService' do
-        subject
-
-        expect(json_response).to eq({
-          'messages' => [],
-          'reference_counter_decreased' => true
-        })
-      end
-
-      it_behaves_like 'storing arguments in the application context' do
-        let(:expected_params) { { user: key.user.username } }
-        let(:gl_repository) { "snippet-#{personal_snippet.id}" }
+      it_behaves_like 'runs post-receive hooks' do
+        let(:container) { personal_snippet }
+        let(:expected_context) { { user: key.user.username } }
       end
     end
 
     context 'with ProjectSnippet' do
-      let(:gl_repository) { "snippet-#{project_snippet.id}" }
-
-      it 'executes PostReceiveService' do
-        subject
-
-        expect(json_response).to eq({
-          'messages' => [],
-          'reference_counter_decreased' => true
-        })
+      it_behaves_like 'runs post-receive hooks' do
+        let(:container) { project_snippet }
+        let(:expected_context) { { user: key.user.username, project: project_snippet.project.full_path } }
       end
+    end
 
-      it_behaves_like 'storing arguments in the application context' do
-        let(:expected_params) { { user: key.user.username, project: project_snippet.project.full_path } }
-        let(:gl_repository) { "snippet-#{project_snippet.id}" }
+    context 'with ProjectWiki' do
+      it_behaves_like 'runs post-receive hooks' do
+        let(:container) { project.wiki }
+        let(:expected_context) { { user: key.user.username, project: project.full_path } }
       end
     end
 
@@ -1245,7 +1246,7 @@ RSpec.describe API::Internal::Base do
       it 'does not try to notify that project moved' do
         allow_any_instance_of(Gitlab::Identifier).to receive(:identify).and_return(nil)
 
-        expect(Gitlab::Checks::ProjectMoved).not_to receive(:fetch_message)
+        expect(Gitlab::Checks::ContainerMoved).not_to receive(:fetch_message)
 
         subject
 
@@ -1253,33 +1254,17 @@ RSpec.describe API::Internal::Base do
       end
     end
 
-    context 'when project is nil' do
-      context 'with Project' do
-        let(:gl_repository) { 'project-foo' }
+    context 'when container is nil' do
+      let(:gl_repository) { 'project-foo' }
 
-        it 'does not try to notify that project moved' do
-          allow(Gitlab::GlRepository).to receive(:parse).and_return([nil, nil, Gitlab::GlRepository::PROJECT])
+      it 'does not try to notify that project moved' do
+        allow(Gitlab::GlRepository).to receive(:parse).and_return([nil, nil, Gitlab::GlRepository::PROJECT])
 
-          expect(Gitlab::Checks::ProjectMoved).not_to receive(:fetch_message)
+        expect(Gitlab::Checks::ContainerMoved).not_to receive(:fetch_message)
 
-          subject
+        subject
 
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-      end
-
-      context 'with PersonalSnippet' do
-        let(:gl_repository) { "snippet-#{personal_snippet.id}" }
-
-        it 'does not try to notify that project moved' do
-          allow(Gitlab::GlRepository).to receive(:parse).and_return([personal_snippet, nil, Gitlab::GlRepository::SNIPPET])
-
-          expect(Gitlab::Checks::ProjectMoved).not_to receive(:fetch_message)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end

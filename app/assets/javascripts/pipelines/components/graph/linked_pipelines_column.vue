@@ -1,9 +1,17 @@
 <script>
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { LOAD_FAILURE } from '../../constants';
-import { ONE_COL_WIDTH, UPSTREAM } from './constants';
+import { reportToSentry } from '../../utils';
+import { listByLayers } from '../parsing_utils';
+import { ONE_COL_WIDTH, UPSTREAM, LAYER_VIEW, STAGE_VIEW } from './constants';
 import LinkedPipeline from './linked_pipeline.vue';
-import { unwrapPipelineData, toggleQueryPollingByVisibility, reportToSentry } from './utils';
+import {
+  getQueryHeaders,
+  serializeLoadErrors,
+  toggleQueryPollingByVisibility,
+  unwrapPipelineData,
+  validateConfigPaths,
+} from './utils';
 
 export default {
   components: {
@@ -15,11 +23,24 @@ export default {
       type: String,
       required: true,
     },
+    configPaths: {
+      type: Object,
+      required: true,
+      validator: validateConfigPaths,
+    },
     linkedPipelines: {
       type: Array,
       required: true,
     },
+    showLinks: {
+      type: Boolean,
+      required: true,
+    },
     type: {
+      type: String,
+      required: true,
+    },
+    viewType: {
       type: String,
       required: true,
     },
@@ -28,6 +49,7 @@ export default {
     return {
       currentPipeline: null,
       loadingPipelineId: null,
+      pipelineLayers: {},
       pipelineExpanded: false,
     };
   },
@@ -58,8 +80,14 @@ export default {
     graphPosition() {
       return this.isUpstream ? 'left' : 'right';
     },
+    graphViewType() {
+      return this.currentPipeline?.usesNeeds ? this.viewType : STAGE_VIEW;
+    },
     isUpstream() {
       return this.type === UPSTREAM;
+    },
+    minWidth() {
+      return this.isUpstream ? 0 : this.$options.minWidth;
     },
   },
   methods: {
@@ -69,6 +97,9 @@ export default {
       this.$apollo.addSmartQuery('currentPipeline', {
         query: getPipelineDetails,
         pollInterval: 10000,
+        context() {
+          return getQueryHeaders(this.configPaths.graphqlResourceEtag);
+        },
         variables() {
           return {
             projectPath,
@@ -76,23 +107,41 @@ export default {
           };
         },
         update(data) {
-          return unwrapPipelineData(projectPath, data);
+          /*
+            This check prevents the pipeline from being overwritten
+            when a poll times out and the data returned is empty.
+            This can be removed once the timeout behavior is updated.
+            See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
+          */
+
+          if (!data?.project?.pipeline) {
+            return this.currentPipeline;
+          }
+
+          return unwrapPipelineData(projectPath, JSON.parse(JSON.stringify(data)));
         },
         result() {
           this.loadingPipelineId = null;
           this.$emit('scrollContainer');
         },
-        error(err, _vm, _key, type) {
-          this.$emit('error', LOAD_FAILURE);
+        error(err) {
+          this.$emit('error', { type: LOAD_FAILURE, skipSentry: true });
 
           reportToSentry(
             'linked_pipelines_column',
-            `error type: ${LOAD_FAILURE}, error: ${err}, apollo error type: ${type}`,
+            `error type: ${LOAD_FAILURE}, error: ${serializeLoadErrors(err)}`,
           );
         },
       });
 
       toggleQueryPollingByVisibility(this.$apollo.queries.currentPipeline);
+    },
+    getPipelineLayers(id) {
+      if (this.viewType === LAYER_VIEW && !this.pipelineLayers[id]) {
+        this.pipelineLayers[id] = listByLayers(this.currentPipeline);
+      }
+
+      return this.pipelineLayers[id];
     },
     isExpanded(id) {
       return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
@@ -132,8 +181,8 @@ export default {
 
       this.$emit('pipelineExpandToggle', jobName, expanded);
     },
-    showDownstreamContainer(id) {
-      return !this.isUpstream && (this.isExpanded(id) || this.isLoadingPipeline(id));
+    showContainer(id) {
+      return this.isExpanded(id) || this.isLoadingPipeline(id);
     },
   },
 };
@@ -164,16 +213,20 @@ export default {
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
           <div
-            v-if="showDownstreamContainer(pipeline.id)"
-            :style="{ minWidth: $options.minWidth }"
+            v-if="showContainer(pipeline.id)"
+            :style="{ minWidth }"
             class="gl-display-inline-block"
           >
             <pipeline-graph
               v-if="isExpanded(pipeline.id)"
               :type="type"
               class="d-inline-block gl-mt-n2"
+              :config-paths="configPaths"
               :pipeline="currentPipeline"
+              :pipeline-layers="getPipelineLayers(pipeline.id)"
+              :show-links="showLinks"
               :is-linked-pipeline="true"
+              :view-type="graphViewType"
             />
           </div>
         </li>

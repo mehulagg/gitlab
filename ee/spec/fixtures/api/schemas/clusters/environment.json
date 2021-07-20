@@ -25,7 +25,7 @@
       ]
     },
     "logs_path": { "type": "string" },
-    "updated_at": { "type": "date" }
+    "updated_at": { "type": "string", "format": "date-time" }
   },
   "additionalProperties": false
 }

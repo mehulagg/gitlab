@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
   let_it_be(:project, reload: true) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:service) { described_class.new(project, user) }
 
   let(:merge_request) do

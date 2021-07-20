@@ -6,9 +6,11 @@ module ApprovalRuleLike
   DEFAULT_NAME = 'Default'
   DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check'
   DEFAULT_NAME_FOR_VULNERABILITY_REPORT = 'Vulnerability-Check'
+  DEFAULT_NAME_FOR_COVERAGE = 'Coverage-Check'
   REPORT_TYPES_BY_DEFAULT_NAME = {
     DEFAULT_NAME_FOR_LICENSE_REPORT => :license_scanning,
-    DEFAULT_NAME_FOR_VULNERABILITY_REPORT => :vulnerability
+    DEFAULT_NAME_FOR_VULNERABILITY_REPORT => :vulnerability,
+    DEFAULT_NAME_FOR_COVERAGE => :code_coverage
   }.freeze
   APPROVALS_REQUIRED_MAX = 100
   ALL_MEMBERS = 'All Members'

@@ -9,6 +9,7 @@ RSpec.describe MergeRequestWidgetEntity do
   let_it_be(:project, reload: true) { create :project, :repository }
   let_it_be(:merge_request, reload: true) { create(:merge_request, source_project: project, target_project: project) }
   let_it_be(:pipeline, reload: true) { create(:ci_empty_pipeline, project: project) }
+
   let(:request) { double('request', current_user: user) }
 
   before do

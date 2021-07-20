@@ -1,43 +1,47 @@
+import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import { parseBoolean } from '~/lib/utils/common_utils';
 import ThreatMonitoringApp from './components/app.vue';
 import createStore from './store';
 
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      assumeImmutableResults: true,
+      cacheConfig: {
+        dataIdFromObject: (object) => {
+          // eslint-disable-next-line no-underscore-dangle
+          if (object.__typename === 'AlertManagementAlert') {
+            return object.iid;
+          }
+          return defaultDataIdFromObject(object);
+        },
+      },
+    },
+  ),
 });
 
 export default () => {
   const el = document.querySelector('#js-threat-monitoring-app');
   const {
-    wafStatisticsEndpoint,
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
-    networkPoliciesEndpoint,
     emptyStateSvgPath,
-    wafNoDataSvgPath,
     networkPolicyNoDataSvgPath,
     newPolicyPath,
     documentationPath,
     defaultEnvironmentId,
     projectPath,
-    showUserCallout,
-    userCalloutId,
-    userCalloutsPath,
   } = el.dataset;
 
   const store = createStore();
   store.dispatch('threatMonitoring/setEndpoints', {
-    wafStatisticsEndpoint,
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
-  });
-  store.dispatch('networkPolicies/setEndpoints', {
-    networkPoliciesEndpoint,
   });
 
   return new Vue({
@@ -52,12 +56,8 @@ export default () => {
     render(createElement) {
       return createElement(ThreatMonitoringApp, {
         props: {
-          wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),
-          showUserCallout: parseBoolean(showUserCallout),
-          userCalloutId,
-          userCalloutsPath,
           newPolicyPath,
         },
       });

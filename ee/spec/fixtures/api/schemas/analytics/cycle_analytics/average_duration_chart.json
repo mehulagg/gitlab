@@ -1,0 +1,17 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["average_duration_in_seconds", "date"],
+    "properties": {
+      "average_duration_in_seconds": {
+        "type": "integer"
+      },
+      "date": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}
+

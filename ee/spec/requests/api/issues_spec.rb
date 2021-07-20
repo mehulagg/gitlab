@@ -47,7 +47,7 @@ RSpec.describe API::Issues, :mailer do
 
       context 'and epic issue is not present' do
         it 'exposes epic as nil' do
-          issue_with_epic.epic_issue.destroy
+          issue_with_epic.epic_issue.destroy!
 
           subject
 
@@ -162,6 +162,12 @@ RSpec.describe API::Issues, :mailer do
 
           expect_paginated_array_response([issue3.id, issue2.id, issue1.id])
         end
+
+        it 'returns issues without specific weight' do
+          get api('/issues', user), params: { scope: 'all', not: { weight: 5 } }
+
+          expect_paginated_array_response([issue3.id, issue1.id, issue.id])
+        end
       end
 
       context 'filtering by assignee_username' do
@@ -262,6 +268,28 @@ RSpec.describe API::Issues, :mailer do
 
         expect_response_contain_exactly(iteration_1_issue.id)
       end
+    end
+
+    it 'avoids N+1 queries' do
+      stub_licensed_features(epics: true)
+
+      group.add_developer(user)
+
+      subgroup_1 = create(:group, parent: group)
+      subgroup_1_project = create(:project, group: subgroup_1)
+
+      create(:issue, project: subgroup_1_project, epic: create(:epic, group: subgroup_1))
+
+      get api("/groups/#{group.id}/issues", user)
+
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/groups/#{group.id}/issues", user) }
+
+      subgroup_2 = create(:group, parent: group)
+      subgroup_2_project = create(:project, group: subgroup_2)
+
+      create(:issue, project: subgroup_2_project, epic: create(:epic, group: subgroup_2))
+
+      expect { get api("/groups/#{group.id}/issues", user) }.not_to exceed_query_limit(control_count)
     end
   end
 
@@ -465,7 +493,7 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'PUT /projects/:id/issues/:issue_id to update weight' do
+  describe 'PUT /projects/:id/issues/:issue_iid to update weight' do
     let!(:issue) { create :issue, author: user, project: project }
 
     it 'updates an issue with no weight' do
@@ -525,14 +553,14 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'PUT /projects/:id/issues/:issue_id to update epic' do
+  describe 'PUT /projects/:id/issues/:issue_iid to update epic' do
     it_behaves_like 'with epic parameter' do
       let(:issue_with_epic) { create(:issue, project: target_project) }
       let(:request) { put api("/projects/#{target_project.id}/issues/#{issue_with_epic.iid}", user), params: params }
     end
   end
 
-  describe 'POST /projects/:id/issues/:issue_id/metric_images' do
+  describe 'POST /projects/:id/issues/:issue_iid/metric_images' do
     include WorkhorseHelpers
     using RSpec::Parameterized::TableSyntax
 
@@ -637,7 +665,7 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'GET /projects/:id/issues/:issue_id/metric_images' do
+  describe 'GET /projects/:id/issues/:issue_iid/metric_images' do
     using RSpec::Parameterized::TableSyntax
 
     let_it_be(:project) do
@@ -645,6 +673,7 @@ RSpec.describe API::Issues, :mailer do
     end
 
     let_it_be(:issue) { create(:incident, project: project) }
+
     let!(:image) { create(:issuable_metric_image, issue: issue) }
 
     subject { get api("/projects/#{project.id}/issues/#{issue.iid}/metric_images", user2) }
@@ -695,11 +724,11 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'DELETE /projects/:id/issues/:issue_id/metric_images/:metric_image_id' do
+  describe 'DELETE /projects/:id/issues/:issue_iid/metric_images/:metric_image_id' do
     using RSpec::Parameterized::TableSyntax
 
     let_it_be(:project) do
-      create(:project, :private, creator_id: user.id, namespace: user.namespace)
+      create(:project, :public, creator_id: user.id, namespace: user.namespace)
     end
 
     let!(:image) { create(:issuable_metric_image, issue: issue) }
@@ -719,6 +748,15 @@ RSpec.describe API::Issues, :mailer do
       it 'cannot delete the metric image' do
         subject
 
+        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(image.reload).to eq(image)
+      end
+    end
+
+    shared_examples 'not_found' do
+      it 'cannot delete the metric image' do
+        subject
+
         expect(response).to have_gitlab_http_status(:not_found)
         expect(image.reload).to eq(image)
       end
@@ -728,9 +766,9 @@ RSpec.describe API::Issues, :mailer do
       :not_member | false | false | :unauthorized_delete
       :not_member | true  | false | :unauthorized_delete
       :not_member | true  | true  | :unauthorized_delete
-      :guest      | false | true  | :unauthorized_delete
+      :guest      | false | true  | :not_found
+      :guest      | false | false | :unauthorized_delete
       :guest      | true  | false | :can_delete_metric_image
-      :guest      | false | false | :can_delete_metric_image
       :reporter   | true  | false | :can_delete_metric_image
       :reporter   | false | false | :can_delete_metric_image
     end

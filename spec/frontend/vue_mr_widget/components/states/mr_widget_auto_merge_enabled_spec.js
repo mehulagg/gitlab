@@ -28,11 +28,11 @@ function convertPropsToGraphqlState(props) {
   };
 }
 
-function factory(propsData) {
+function factory(propsData, stateOverride = {}) {
   let state = {};
 
   if (mergeRequestWidgetGraphqlEnabled) {
-    state = convertPropsToGraphqlState(propsData);
+    state = { ...convertPropsToGraphqlState(propsData), ...stateOverride };
   }
 
   wrapper = extendedWrapper(
@@ -125,13 +125,36 @@ describe('MRWidgetAutoMergeEnabled', () => {
             },
           );
 
-          it('should return false when shouldRemoveSourceBranch set to false', () => {
+          it('should not find "Delete" button when shouldRemoveSourceBranch set to true', () => {
             factory({
               ...defaultMrProps(),
               shouldRemoveSourceBranch: true,
             });
 
             expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
+          });
+
+          it('should find "Delete" button when shouldRemoveSourceBranch overrides state.forceRemoveSourceBranch', () => {
+            factory(
+              {
+                ...defaultMrProps(),
+                shouldRemoveSourceBranch: false,
+              },
+              {
+                forceRemoveSourceBranch: true,
+              },
+            );
+
+            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
+          });
+
+          it('should find "Delete" button when shouldRemoveSourceBranch set to false', () => {
+            factory({
+              ...defaultMrProps(),
+              shouldRemoveSourceBranch: false,
+            });
+
+            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
           });
 
           it('should return false if user is not able to remove the source branch', () => {
@@ -169,15 +192,13 @@ describe('MRWidgetAutoMergeEnabled', () => {
         });
 
         describe('cancelButtonText', () => {
-          it('should return "Cancel automatic merge" if MWPS is selected', () => {
+          it('should return "Cancel" if MWPS is selected', () => {
             factory({
               ...defaultMrProps(),
               autoMergeStrategy: MWPS_MERGE_STRATEGY,
             });
 
-            expect(wrapper.findByTestId('cancelAutomaticMergeButton').text()).toBe(
-              'Cancel automatic merge',
-            );
+            expect(wrapper.findByTestId('cancelAutomaticMergeButton').text()).toBe('Cancel');
           });
         });
       });
@@ -306,7 +327,7 @@ describe('MRWidgetAutoMergeEnabled', () => {
           expect(statusText).toBe('to be merged automatically when the pipeline succeeds');
         });
 
-        it('should render the cancel button as "Cancel automatic merge" if MWPS is selected', () => {
+        it('should render the cancel button as "Cancel" if MWPS is selected', () => {
           factory({
             ...defaultMrProps(),
             autoMergeStrategy: MWPS_MERGE_STRATEGY,
@@ -314,7 +335,7 @@ describe('MRWidgetAutoMergeEnabled', () => {
 
           const cancelButtonText = trimText(wrapper.find('.js-cancel-auto-merge').text());
 
-          expect(cancelButtonText).toBe('Cancel automatic merge');
+          expect(cancelButtonText).toBe('Cancel');
         });
       });
     });

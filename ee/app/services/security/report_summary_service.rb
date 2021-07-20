@@ -4,6 +4,8 @@ module Security
   class ReportSummaryService
     include Gitlab::Utils::StrongMemoize
 
+    SCANNED_RESOURCES_LIMIT = 20
+
     # @param [Ci::Pipeline] pipeline
     # @param [Hash[Symbol, Array[Symbol]] selection_information keys must be in the set of Enums::Vulnerability.report_types for example: {dast: [:scanned_resources_count, :vulnerabilities_count], container_scanning:[:vulnerabilities_count]}
     def initialize(pipeline, selection_information)
@@ -13,27 +15,33 @@ module Security
 
     def execute
       @selection_information.each_with_object({}) do |(report_type, summary_types), response|
-        response[report_type] = summary_counts_for_report_type(report_type, summary_types)
+        response[report_type] = summary_counts_for_report_type(report_type.to_s, summary_types)
       end
     end
 
     private
 
     def summary_counts_for_report_type(report_type, summary_types)
-      return unless report_exists?(report_type)
+      return unless has_report?(report_type)
 
       summary_types.each_with_object({}) do |summary_type, response|
         case summary_type
         when :vulnerabilities_count
-          response[:vulnerabilities_count] = vulnerability_counts[report_type.to_s]
+          response[:vulnerabilities_count] = vulnerability_counts[report_type]
         when :scanned_resources_count
-          response[:scanned_resources_count] = scanned_resources_counts[report_type.to_s]
+          response[:scanned_resources_count] = scanned_resources_counts[report_type]
         when :scanned_resources
-          response[:scanned_resources] = scanned_resources[report_type.to_s]
+          response[:scanned_resources] = scanned_resources[report_type]
         when :scanned_resources_csv_path
           response[:scanned_resources_csv_path] = csv_path
+        when :scans
+          response[:scans] = grouped_scans[report_type]
         end
       end
+    end
+
+    def has_report?(report_type)
+      grouped_scans[report_type].present?
     end
 
     def csv_path
@@ -50,8 +58,7 @@ module Security
 
     def scanned_resources
       strong_memoize(:scanned_resources) do
-        scanned_resources_limit = 20
-        ::Security::ScannedResourcesService.new(@pipeline, requested_report_types(:scanned_resources), scanned_resources_limit).execute
+        ::Security::ScannedResourcesService.new(@pipeline, requested_report_types(:scanned_resources), SCANNED_RESOURCES_LIMIT).execute
       end
     end
 
@@ -67,8 +74,8 @@ module Security
       end
     end
 
-    def report_exists?(report_type)
-      @pipeline&.security_reports&.reports&.key?(report_type.to_s)
+    def grouped_scans
+      @grouped_scans ||= @pipeline.security_scans.by_scan_types(@selection_information.keys).group_by(&:scan_type)
     end
   end
 end

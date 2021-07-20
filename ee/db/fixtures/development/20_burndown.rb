@@ -57,7 +57,7 @@ class Gitlab::Seeder::Burndown
         weight: rand(1..9)
       }
 
-      Issues::CreateService.new(@project, @project.team.users.sample, issue_params).execute
+      Issues::CreateService.new(project: @project, current_user: @project.team.users.sample, params: issue_params, spam_params: nil).execute
     end
   end
 
@@ -70,7 +70,7 @@ class Gitlab::Seeder::Burndown
       open_issues  = open_issues.limit(close_number)
 
       open_issues.each do |issue|
-        Issues::CloseService.new(@project, @project.team.users.sample, {}).execute(issue)
+        Issues::CloseService.new(project: @project, current_user: @project.team.users.sample).execute(issue)
       end
     end
 

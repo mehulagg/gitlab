@@ -89,9 +89,9 @@ module Gitlab
       def root_ref
         gitaly_ref_client.default_branch_name
       rescue GRPC::NotFound => e
-        raise NoRepository.new(e.message)
+        raise NoRepository, e.message
       rescue GRPC::Unknown => e
-        raise Gitlab::Git::CommandError.new(e.message)
+        raise Gitlab::Git::CommandError, e.message
       end
 
       def exists?
@@ -302,8 +302,6 @@ module Gitlab
       private :archive_file_path
 
       def archive_version_path
-        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive, default_enabled: true)
-
         '@v2'
       end
       private :archive_version_path
@@ -348,7 +346,7 @@ module Gitlab
 
         limit = options[:limit]
         if limit == 0 || !limit.is_a?(Integer)
-          raise ArgumentError.new("invalid Repository#log limit: #{limit.inspect}")
+          raise ArgumentError, "invalid Repository#log limit: #{limit.inspect}"
         end
 
         wrapped_gitaly_errors do
@@ -356,9 +354,13 @@ module Gitlab
         end
       end
 
-      def new_commits(newrev)
+      def new_commits(newrevs)
         wrapped_gitaly_errors do
-          gitaly_ref_client.list_new_commits(newrev)
+          if Feature.enabled?(:list_commits)
+            gitaly_commit_client.list_commits(Array.wrap(newrevs) + %w[--not --all])
+          else
+            Array.wrap(newrevs).flat_map { |newrev| gitaly_ref_client.list_new_commits(newrev) }
+          end
         end
       end
 
@@ -369,6 +371,20 @@ module Gitlab
           wrapped_gitaly_errors do
             gitaly_ref_client.list_new_blobs(newrev, REV_LIST_COMMIT_LIMIT, dynamic_timeout: dynamic_timeout)
           end
+        end
+      end
+
+      # List blobs reachable via a set of revisions. Supports the
+      # pseudo-revisions `--not` and `--all`. Uses the minimum of
+      # GitalyClient.medium_timeout and dynamic timeout if the dynamic
+      # timeout is set, otherwise it'll always use the medium timeout.
+      def blobs(revisions, dynamic_timeout: nil)
+        revisions = revisions.reject { |rev| rev.blank? || rev == ::Gitlab::Git::BLANK_SHA }
+
+        return [] if revisions.blank?
+
+        wrapped_gitaly_errors do
+          gitaly_blob_client.list_blobs(revisions, limit: REV_LIST_COMMIT_LIMIT, dynamic_timeout: dynamic_timeout)
         end
       end
 
@@ -414,7 +430,7 @@ module Gitlab
             end
           end
       rescue ArgumentError => e
-        raise Gitlab::Git::Repository::GitError.new(e)
+        raise Gitlab::Git::Repository::GitError, e
       end
 
       # Returns the SHA of the most recent common ancestor of +from+ and +to+
@@ -599,9 +615,9 @@ module Gitlab
         tags.find { |tag| tag.name == name }
       end
 
-      def merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
+      def merge_to_ref(user, **kwargs)
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
+          gitaly_operation_client.user_merge_to_ref(user, **kwargs)
         end
       end
 
@@ -700,11 +716,11 @@ module Gitlab
         end
       end
 
-      def find_remote_root_ref(remote_name)
-        return unless remote_name.present?
+      def find_remote_root_ref(remote_name, remote_url, authorization = nil)
+        return unless remote_name.present? && remote_url.present?
 
         wrapped_gitaly_errors do
-          gitaly_remote_client.find_remote_root_ref(remote_name)
+          gitaly_remote_client.find_remote_root_ref(remote_name, remote_url, authorization)
         end
       end
 
@@ -797,15 +813,19 @@ module Gitlab
       # Fetch remote for repository
       #
       # remote - remote name
+      # url - URL of the remote to fetch. `remote` is not used in this case.
+      # refmap - if url is given, determines which references should get fetched where
       # ssh_auth - SSH known_hosts data and a private key to use for public-key authentication
       # forced - should we use --force flag?
       # no_tags - should we use --no-tags flag?
       # prune - should we use --prune flag?
       # check_tags_changed - should we ask gitaly to calculate whether any tags changed?
-      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true, check_tags_changed: false)
+      def fetch_remote(remote, url: nil, refmap: nil, ssh_auth: nil, forced: false, no_tags: false, prune: true, check_tags_changed: false)
         wrapped_gitaly_errors do
           gitaly_repository_client.fetch_remote(
             remote,
+            url: url,
+            refmap: refmap,
             ssh_auth: ssh_auth,
             forced: forced,
             no_tags: no_tags,
@@ -836,7 +856,7 @@ module Gitlab
       def fsck
         msg, status = gitaly_repository_client.fsck
 
-        raise GitError.new("Could not fsck repository: #{msg}") unless status == 0
+        raise GitError, "Could not fsck repository: #{msg}" unless status == 0
       end
 
       def create_from_bundle(bundle_path)
@@ -864,12 +884,6 @@ module Gitlab
             push_options: push_options,
             &block
           )
-        end
-      end
-
-      def rebase_in_progress?(rebase_id)
-        wrapped_gitaly_errors do
-          gitaly_repository_client.rebase_in_progress?(rebase_id)
         end
       end
 
@@ -1015,6 +1029,10 @@ module Gitlab
         return [] if empty? || safe_query.blank?
 
         gitaly_repository_client.search_files_by_name(ref, safe_query)
+      end
+
+      def search_files_by_regexp(filter, ref = 'HEAD')
+        gitaly_repository_client.search_files_by_regexp(ref, filter)
       end
 
       def find_commits_by_message(query, ref, path, limit, offset)

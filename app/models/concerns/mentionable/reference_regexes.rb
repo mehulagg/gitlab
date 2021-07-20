@@ -29,7 +29,7 @@ module Mentionable
 
     def self.external_pattern
       strong_memoize(:external_pattern) do
-        issue_pattern = IssueTrackerService.reference_pattern
+        issue_pattern = Integrations::BaseIssueTracker.reference_pattern
         link_patterns = URI::DEFAULT_PARSER.make_regexp(%w(http https))
         reference_pattern(link_patterns, issue_pattern)
       end
@@ -37,4 +37,4 @@ module Mentionable
   end
 end
 
-Mentionable::ReferenceRegexes.prepend_if_ee('EE::Mentionable::ReferenceRegexes')
+Mentionable::ReferenceRegexes.prepend_mod_with('Mentionable::ReferenceRegexes')

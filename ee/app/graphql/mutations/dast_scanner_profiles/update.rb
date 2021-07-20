@@ -55,7 +55,7 @@ module Mutations
 
         project = authorized_find!(full_path)
 
-        service = ::DastScannerProfiles::UpdateService.new(project, current_user)
+        service = ::AppSec::Dast::ScannerProfiles::UpdateService.new(project, current_user)
         result = service.execute(**service_args, id: gid.model_id)
 
         if result.success?

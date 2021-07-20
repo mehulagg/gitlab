@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'Group' do
-  let_it_be(:user) { create(:user) }
+  let(:user) { create(:user) }
 
   before do
     sign_in(user)
@@ -15,9 +15,10 @@ RSpec.describe 'Group' do
     end
   end
 
-  describe 'create a group' do
+  describe 'create a group', :js do
     before do
       visit new_group_path
+      click_link 'Create group'
     end
 
     describe 'as a non-admin' do
@@ -50,13 +51,14 @@ RSpec.describe 'Group' do
         fill_in 'Group URL', with: 'space group'
         click_button 'Create group'
 
-        expect(current_path).to eq(groups_path)
-        expect(page).to have_namespace_error_message
+        expect(current_path).to eq(new_group_path)
+        expect(page).to have_text('Please choose a group URL with no special characters.')
       end
     end
 
     describe 'with .atom at end of group path' do
       it 'renders new group form with validation errors' do
+        fill_in 'Group name', with: 'test-group'
         fill_in 'Group URL', with: 'atom_group.atom'
         click_button 'Create group'
 
@@ -67,6 +69,7 @@ RSpec.describe 'Group' do
 
     describe 'with .git at end of group path' do
       it 'renders new group form with validation errors' do
+        fill_in 'Group name', with: 'test-group'
         fill_in 'Group URL', with: 'git_group.git'
         click_button 'Create group'
 
@@ -87,7 +90,7 @@ RSpec.describe 'Group' do
         fill_in 'group_path', with: user.username
         wait_for_requests
 
-        expect(page).to have_content('Group path is already taken')
+        expect(page).to have_content("Group path is already taken. We've suggested one that is available.")
       end
 
       it 'does not break after an invalid form submit' do
@@ -109,6 +112,7 @@ RSpec.describe 'Group' do
         stub_mattermost_setting(enabled: mattermost_enabled)
 
         visit new_group_path
+        click_link 'Create group'
       end
 
       context 'Mattermost enabled' do
@@ -119,7 +123,7 @@ RSpec.describe 'Group' do
         end
 
         it 'unchecks the checkbox by default' do
-          expect(find('#group_create_chat_team')['checked']).to eq(false)
+          expect(find('#group_create_chat_team')).not_to be_checked
         end
 
         it 'updates the team URL on graph path update', :js do
@@ -141,6 +145,32 @@ RSpec.describe 'Group' do
         end
       end
     end
+
+    describe 'showing recaptcha on group creation when it is enabled' do
+      before do
+        stub_application_setting(recaptcha_enabled: true)
+        allow(Gitlab::Recaptcha).to receive(:load_configurations!)
+        visit new_group_path
+        click_link 'Create group'
+      end
+
+      it 'renders recaptcha' do
+        expect(page).to have_css('.recaptcha')
+      end
+    end
+
+    describe 'not showing recaptcha on group creation when it is disabled' do
+      before do
+        stub_feature_flags(recaptcha_on_top_level_group_creation: false)
+        stub_application_setting(recaptcha_enabled: true)
+        visit new_group_path
+        click_link 'Create group'
+      end
+
+      it 'does not render recaptcha' do
+        expect(page).not_to have_css('.recaptcha')
+      end
+    end
   end
 
   describe 'create a nested group', :js do
@@ -150,16 +180,24 @@ RSpec.describe 'Group' do
       let(:user) { create(:admin) }
 
       before do
-        visit new_group_path(group, parent_id: group.id)
+        visit new_group_path(parent_id: group.id)
       end
 
-      it 'creates a nested group' do
-        fill_in 'Group name', with: 'bar'
-        fill_in 'Group URL', with: 'bar'
-        click_button 'Create group'
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'creates a nested group' do
+          click_link 'Create group'
+          fill_in 'Group name', with: 'bar'
+          click_button 'Create group'
 
-        expect(current_path).to eq(group_path('foo/bar'))
-        expect(page).to have_content("Group 'bar' was successfully created.")
+          expect(current_path).to eq(group_path('foo/bar'))
+          expect(page).to have_selector 'h1', text: 'bar'
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'is not allowed' do
+          expect(page).not_to have_button('Create group')
+        end
       end
     end
 
@@ -171,30 +209,73 @@ RSpec.describe 'Group' do
         sign_out(:user)
         sign_in(user)
 
-        visit new_group_path(group, parent_id: group.id)
+        visit new_group_path(parent_id: group.id)
+        click_link 'Create group'
 
         fill_in 'Group name', with: 'bar'
-        fill_in 'Group URL', with: 'bar'
         click_button 'Create group'
 
         expect(current_path).to eq(group_path('foo/bar'))
-        expect(page).to have_content("Group 'bar' was successfully created.")
+        expect(page).to have_selector 'h1', text: 'bar'
+      end
+    end
+
+    context 'when recaptcha is enabled' do
+      before do
+        stub_application_setting(recaptcha_enabled: true)
+        allow(Gitlab::Recaptcha).to receive(:load_configurations!)
+      end
+
+      context 'when creating subgroup' do
+        let(:path) { new_group_path(parent_id: group.id) }
+
+        it 'does not render recaptcha' do
+          visit path
+
+          expect(page).not_to have_css('.recaptcha')
+        end
+      end
+    end
+
+    describe 'real-time group url validation', :js do
+      let_it_be(:subgroup) { create(:group, path: 'sub', parent: group) }
+
+      before do
+        group.add_owner(user)
+        visit new_group_path(parent_id: group.id)
+        click_link 'Create group'
+      end
+
+      it 'shows a message if group url is available' do
+        fill_in 'Group URL', with: group.path
+        wait_for_requests
+
+        expect(page).to have_content('Group path is available')
+      end
+
+      it 'shows an error if group url is taken' do
+        fill_in 'Group URL', with: subgroup.path
+        wait_for_requests
+
+        expect(page).to have_content("Group path is already taken. We've suggested one that is available.")
       end
     end
   end
 
-  it 'checks permissions to avoid exposing groups by parent_id' do
+  it 'checks permissions to avoid exposing groups by parent_id', :js do
     group = create(:group, :private, path: 'secret-group')
 
     sign_out(:user)
     sign_in(create(:user))
     visit new_group_path(parent_id: group.id)
 
-    expect(page).not_to have_content('secret-group')
+    expect(page).to have_title('Not Found')
+    expect(page).to have_content('Page Not Found')
   end
 
   describe 'group edit', :js do
     let_it_be(:group) { create(:group, :public) }
+
     let(:path) { edit_group_path(group) }
     let(:new_name) { 'new-name' }
 
@@ -240,6 +321,7 @@ RSpec.describe 'Group' do
 
   describe 'group page with markdown description' do
     let_it_be(:group) { create(:group) }
+
     let(:path) { group_path(group) }
 
     before do
@@ -294,21 +376,21 @@ RSpec.describe 'Group' do
 
       expect(page).to have_content(nested_group.name)
       expect(page).to have_content(project.name)
-      expect(page).to have_link('Group overview')
+      expect(page).to have_link('Group information')
     end
 
-    it 'renders subgroup page with the text "Subgroup overview"' do
+    it 'renders subgroup page with the text "Subgroup information"' do
       visit group_path(nested_group)
       wait_for_requests
 
-      expect(page).to have_link('Subgroup overview')
+      expect(page).to have_link('Subgroup information')
     end
 
-    it 'renders project page with the text "Project overview"' do
+    it 'renders project page with the text "Project information"' do
       visit project_path(project)
       wait_for_requests
 
-      expect(page).to have_link('Project overview')
+      expect(page).to have_link('Project information')
     end
   end
 

@@ -224,6 +224,27 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
           expect(MergeRequestDiffCommit.count).to eq(77)
         end
 
+        it 'assigns committer and author details to all diff commits' do
+          MergeRequestDiffCommit.all.each do |commit|
+            expect(commit.commit_author_id).not_to be_nil
+            expect(commit.committer_id).not_to be_nil
+          end
+        end
+
+        it 'assigns the correct commit users to different diff commits' do
+          commit1 = MergeRequestDiffCommit
+            .find_by(sha: '0b4bc9a49b562e85de7cc9e834518ea6828729b9')
+
+          commit2 = MergeRequestDiffCommit
+            .find_by(sha: 'a4e5dfebf42e34596526acb8611bc7ed80e4eb3f')
+
+          expect(commit1.commit_author.name).to eq('Dmitriy Zaporozhets')
+          expect(commit1.commit_author.email).to eq('dmitriy.zaporozhets@gmail.com')
+
+          expect(commit2.commit_author.name).to eq('James Lopez')
+          expect(commit2.commit_author.email).to eq('james@jameslopez.es')
+        end
+
         it 'has the correct data for merge request latest_merge_request_diff' do
           MergeRequest.find_each do |merge_request|
             expect(merge_request.latest_merge_request_diff_id).to eq(merge_request.merge_request_diffs.maximum(:id))
@@ -600,9 +621,8 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
           setup_import_export_config('light')
           setup_reader(reader)
 
-          expect(project)
-            .to receive(:merge_requests)
-            .and_raise(exception)
+          expect(project).to receive(:merge_requests).and_call_original
+          expect(project).to receive(:merge_requests).and_raise(exception)
         end
 
         it 'report post import error' do
@@ -618,12 +638,9 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
           setup_import_export_config('light')
           setup_reader(reader)
 
-          expect(project)
-            .to receive(:merge_requests)
-            .and_raise(exception)
-          expect(project)
-            .to receive(:merge_requests)
-            .and_call_original
+          expect(project).to receive(:merge_requests).and_call_original
+          expect(project).to receive(:merge_requests).and_raise(exception)
+          expect(project).to receive(:merge_requests).and_call_original
           expect(restored_project_json).to eq(true)
         end
 
@@ -684,7 +701,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
 
         it 'overrides project feature access levels' do
           access_level_keys = ProjectFeature.available_features.map { |feature| ProjectFeature.access_level_attribute(feature) }
-          disabled_access_levels = Hash[access_level_keys.collect { |item| [item, 'disabled'] }]
+          disabled_access_levels = access_level_keys.to_h { |item| [item, 'disabled'] }
 
           project.create_import_data(data: { override_params: disabled_access_levels })
 
@@ -824,9 +841,9 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
       end
 
       before do
-        allow_any_instance_of(Gitlab::ImportExport::JSON::LegacyReader::File).to receive(:exist?).and_return(true)
-        allow_any_instance_of(Gitlab::ImportExport::JSON::NdjsonReader).to receive(:exist?).and_return(false)
-        allow_any_instance_of(Gitlab::ImportExport::JSON::LegacyReader::File).to receive(:tree_hash) { tree_hash }
+        allow_any_instance_of(Gitlab::ImportExport::Json::LegacyReader::File).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Gitlab::ImportExport::Json::NdjsonReader).to receive(:exist?).and_return(false)
+        allow_any_instance_of(Gitlab::ImportExport::Json::LegacyReader::File).to receive(:tree_hash) { tree_hash }
       end
 
       context 'no group visibility' do

@@ -2,12 +2,10 @@ import $ from 'jquery';
 
 import Api from '~/api';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
 
-import { deprecatedCreateFlash as Flash } from '../flash';
-
-import BlobCiSyntaxYamlSelector from './template_selectors/ci_syntax_yaml_selector';
 import BlobCiYamlSelector from './template_selectors/ci_yaml_selector';
 import DockerfileSelector from './template_selectors/dockerfile_selector';
 import GitignoreSelector from './template_selectors/gitignore_selector';
@@ -34,7 +32,6 @@ export default class FileTemplateMediator {
     this.templateSelectors = [
       GitignoreSelector,
       BlobCiYamlSelector,
-      BlobCiSyntaxYamlSelector,
       MetricsDashboardSelector,
       DockerfileSelector,
       LicenseSelector,
@@ -148,7 +145,7 @@ export default class FileTemplateMediator {
             text: __('Undo'),
             onClick: (e, toastObj) => {
               self.restoreFromCache();
-              toastObj.goAway(0);
+              toastObj.hide();
             },
           },
         });
@@ -157,7 +154,11 @@ export default class FileTemplateMediator {
           initPopover(suggestCommitChanges);
         }
       })
-      .catch((err) => new Flash(`An error occurred while fetching the template: ${err}`));
+      .catch((err) =>
+        createFlash({
+          message: __(`An error occurred while fetching the template: ${err}`),
+        }),
+      );
   }
 
   displayMatchedTemplateSelector() {

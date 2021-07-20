@@ -1,6 +1,7 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
+import { serializeFormObject } from '~/lib/utils/forms';
 import validation from '~/vue_shared/directives/validation';
 
 export default {
@@ -13,7 +14,12 @@ export default {
     validation: validation(),
   },
   props: {
-    fields: {
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    value: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -23,43 +29,52 @@ export default {
       required: false,
       default: false,
     },
+    isEditMode: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     const {
-      authEnabled,
-      authenticationUrl,
-      userName,
+      enabled = false,
+      url,
+      username,
       password,
-      // default to commonly used names for `userName` and `password` fields in authentcation forms
-      userNameFormField = 'username',
-      passwordFormField = 'password',
-    } = this.fields;
+      // default to commonly used names for `username` and `password` fields in authentcation forms
+      usernameField = 'username',
+      passwordField = 'password',
+    } = this.value.fields;
 
     return {
       form: {
         state: false,
         fields: {
-          authEnabled: initFormField({ value: authEnabled, skipValidation: true }),
-          authenticationUrl: initFormField({ value: authenticationUrl }),
-          userName: initFormField({ value: userName }),
-          password: initFormField({ value: password }),
-          userNameFormField: initFormField({ value: userNameFormField }),
-          passwordFormField: initFormField({ value: passwordFormField }),
+          enabled: initFormField({ value: enabled, skipValidation: true }),
+          url: initFormField({ value: url }),
+          username: initFormField({ value: username }),
+          password: this.isEditMode
+            ? initFormField({ value: password, required: false, skipValidation: true })
+            : initFormField({ value: password }),
+          usernameField: initFormField({ value: usernameField }),
+          passwordField: initFormField({ value: passwordField }),
         },
       },
+      isSensitiveFieldRequired: !this.isEditMode,
     };
-  },
-  computed: {
-    showValidationOrInEditMode() {
-      return this.showValidation || Object.keys(this.fields).length > 0;
-    },
   },
   watch: {
     form: { handler: 'emitUpdate', immediate: true, deep: true },
   },
+  created() {
+    this.emitUpdate();
+  },
   methods: {
     emitUpdate() {
-      this.$emit('input', this.form);
+      this.$emit('input', {
+        fields: serializeFormObject(this.form.fields),
+        state: this.form.state,
+      });
     },
   },
 };
@@ -67,90 +82,92 @@ export default {
 
 <template>
   <section>
-    <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-form-checkbox v-model="form.fields.authEnabled.value">{{
-        s__('DastProfiles|Enable Authentication')
-      }}</gl-form-checkbox>
+    <gl-form-group data-testid="dast-site-auth-parent-group" :disabled="disabled">
+      <gl-form-group :label="s__('DastProfiles|Authentication')">
+        <gl-form-checkbox v-model="form.fields.enabled.value" data-testid="auth-enable-checkbox">{{
+          s__('DastProfiles|Enable Authentication')
+        }}</gl-form-checkbox>
+      </gl-form-group>
+      <div v-if="form.fields.enabled.value" data-testid="auth-form">
+        <div class="row">
+          <gl-form-group
+            :label="s__('DastProfiles|Authentication URL')"
+            :invalid-feedback="form.fields.url.feedback"
+            class="col-md-6"
+          >
+            <gl-form-input
+              v-model="form.fields.url.value"
+              v-validation:[showValidation]
+              name="url"
+              type="url"
+              required
+              :state="form.fields.url.state"
+            />
+          </gl-form-group>
+        </div>
+        <div class="row">
+          <gl-form-group
+            :label="s__('DastProfiles|Username')"
+            :invalid-feedback="form.fields.username.feedback"
+            class="col-md-6"
+          >
+            <gl-form-input
+              v-model="form.fields.username.value"
+              v-validation:[showValidation]
+              autocomplete="off"
+              name="username"
+              type="text"
+              required
+              :state="form.fields.username.state"
+            />
+          </gl-form-group>
+          <gl-form-group
+            :label="s__('DastProfiles|Password')"
+            :invalid-feedback="form.fields.password.feedback"
+            class="col-md-6"
+          >
+            <gl-form-input
+              v-model="form.fields.password.value"
+              v-validation:[showValidation]
+              autocomplete="off"
+              name="password"
+              type="password"
+              :required="isSensitiveFieldRequired"
+              :state="form.fields.password.state"
+            />
+          </gl-form-group>
+        </div>
+        <div class="row">
+          <gl-form-group
+            :label="s__('DastProfiles|Username form field')"
+            :invalid-feedback="form.fields.usernameField.feedback"
+            class="col-md-6"
+          >
+            <gl-form-input
+              v-model="form.fields.usernameField.value"
+              v-validation:[showValidation]
+              name="usernameField"
+              type="text"
+              required
+              :state="form.fields.usernameField.state"
+            />
+          </gl-form-group>
+          <gl-form-group
+            :label="s__('DastProfiles|Password form field')"
+            :invalid-feedback="form.fields.passwordField.feedback"
+            class="col-md-6"
+          >
+            <gl-form-input
+              v-model="form.fields.passwordField.value"
+              v-validation:[showValidation]
+              name="passwordField"
+              type="text"
+              required
+              :state="form.fields.passwordField.state"
+            />
+          </gl-form-group>
+        </div>
+      </div>
     </gl-form-group>
-    <div v-if="form.fields.authEnabled.value" data-testid="auth-form">
-      <div class="row">
-        <gl-form-group
-          :label="s__('DastProfiles|Authentication URL')"
-          :invalid-feedback="form.fields.authenticationUrl.feedback"
-          class="col-md-6"
-        >
-          <gl-form-input
-            v-model="form.fields.authenticationUrl.value"
-            v-validation:[showValidationOrInEditMode]
-            name="authenticationUrl"
-            type="url"
-            required
-            :state="form.fields.authenticationUrl.state"
-          />
-        </gl-form-group>
-      </div>
-      <div class="row">
-        <gl-form-group
-          :label="s__('DastProfiles|Username')"
-          :invalid-feedback="form.fields.userName.feedback"
-          class="col-md-6"
-        >
-          <gl-form-input
-            v-model="form.fields.userName.value"
-            v-validation:[showValidationOrInEditMode]
-            autocomplete="off"
-            name="userName"
-            type="text"
-            required
-            :state="form.fields.userName.state"
-          />
-        </gl-form-group>
-        <gl-form-group
-          :label="s__('DastProfiles|Password')"
-          :invalid-feedback="form.fields.password.feedback"
-          class="col-md-6"
-        >
-          <gl-form-input
-            v-model="form.fields.password.value"
-            v-validation:[showValidationOrInEditMode]
-            autocomplete="off"
-            name="password"
-            type="password"
-            required
-            :state="form.fields.password.state"
-          />
-        </gl-form-group>
-      </div>
-      <div class="row">
-        <gl-form-group
-          :label="s__('DastProfiles|Username form field')"
-          :invalid-feedback="form.fields.userNameFormField.feedback"
-          class="col-md-6"
-        >
-          <gl-form-input
-            v-model="form.fields.userNameFormField.value"
-            v-validation:[showValidationOrInEditMode]
-            name="userNameFormField"
-            type="text"
-            required
-            :state="form.fields.userNameFormField.state"
-          />
-        </gl-form-group>
-        <gl-form-group
-          :label="s__('DastProfiles|Password form field')"
-          :invalid-feedback="form.fields.passwordFormField.feedback"
-          class="col-md-6"
-        >
-          <gl-form-input
-            v-model="form.fields.passwordFormField.value"
-            v-validation:[showValidationOrInEditMode]
-            name="passwordFormField"
-            type="text"
-            required
-            :state="form.fields.passwordFormField.state"
-          />
-        </gl-form-group>
-      </div>
-    </div>
   </section>
 </template>

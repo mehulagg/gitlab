@@ -4,7 +4,8 @@ import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 export const mockProjectNamespace = 'user1';
 export const mockProjectPath = 'project1';
 export const mockProjectFullPath = `${mockProjectNamespace}/${mockProjectPath}`;
-export const mockDefaultBranch = 'master';
+export const mockDefaultBranch = 'main';
+export const mockNewBranch = 'new-branch';
 export const mockNewMergeRequestPath = '/-/merge_requests/new';
 export const mockCommitSha = 'aabbccdd';
 export const mockCommitNextSha = 'eeffgghh';
@@ -34,6 +35,23 @@ job_build:
     - echo "build"
   needs: ["job_test_2"]
 `;
+export const mockBlobContentQueryResponse = {
+  data: {
+    project: { repository: { blobs: { nodes: [{ rawBlob: mockCiYml }] } } },
+  },
+};
+
+export const mockBlobContentQueryResponseNoCiFile = {
+  data: {
+    project: { repository: { blobs: { nodes: [] } } },
+  },
+};
+
+export const mockBlobContentQueryResponseEmptyCiFile = {
+  data: {
+    project: { repository: { blobs: { nodes: [{ rawBlob: '' }] } } },
+  },
+};
 
 const mockJobFields = {
   beforeScript: [],
@@ -138,6 +156,100 @@ export const mergeUnwrappedCiConfig = (mergedConfig) => {
   };
 };
 
+export const mockNewCommitShaResults = {
+  data: {
+    project: {
+      pipelines: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Ci::Pipeline/1',
+            sha: 'd0d56d363d8a3f67a8ab9fc00207d468f30032ca',
+            path: `/${mockProjectFullPath}/-/pipelines/488`,
+            commitPath: `/${mockProjectFullPath}/-/commit/d0d56d363d8a3f67a8ab9fc00207d468f30032ca`,
+          },
+          {
+            id: 'gid://gitlab/Ci::Pipeline/2',
+            sha: 'fcab2ece40b26f428dfa3aa288b12c3c5bdb06aa',
+            path: `/${mockProjectFullPath}/-/pipelines/487`,
+            commitPath: `/${mockProjectFullPath}/-/commit/fcab2ece40b26f428dfa3aa288b12c3c5bdb06aa`,
+          },
+          {
+            id: 'gid://gitlab/Ci::Pipeline/3',
+            sha: '6c16b17c7f94a438ae19a96c285bb49e3c632cf4',
+            path: `/${mockProjectFullPath}/-/pipelines/433`,
+            commitPath: `/${mockProjectFullPath}/-/commit/6c16b17c7f94a438ae19a96c285bb49e3c632cf4`,
+          },
+        ],
+      },
+    },
+  },
+};
+
+export const mockProjectBranches = {
+  data: {
+    project: {
+      repository: {
+        branchNames: [
+          'main',
+          'develop',
+          'production',
+          'test',
+          'better-feature',
+          'feature-abc',
+          'update-ci',
+          'mock-feature',
+          'test-merge-request',
+          'staging',
+        ],
+      },
+    },
+  },
+};
+
+export const mockTotalBranchResults =
+  mockProjectBranches.data.project.repository.branchNames.length;
+
+export const mockSearchBranches = {
+  data: {
+    project: {
+      repository: {
+        branchNames: ['test', 'better-feature', 'update-ci', 'test-merge-request'],
+      },
+    },
+  },
+};
+
+export const mockTotalSearchResults = mockSearchBranches.data.project.repository.branchNames.length;
+
+export const mockEmptySearchBranches = {
+  data: {
+    project: {
+      repository: {
+        branchNames: [],
+      },
+    },
+  },
+};
+
+export const mockBranchPaginationLimit = 10;
+export const mockTotalBranches = 20; // must be greater than mockBranchPaginationLimit to test pagination
+
+export const mockProjectPipeline = {
+  pipeline: {
+    commitPath: '/-/commit/aabbccdd',
+    id: 'gid://gitlab/Ci::Pipeline/118',
+    iid: '28',
+    shortSha: mockCommitSha,
+    status: 'SUCCESS',
+    detailedStatus: {
+      detailsPath: '/root/sample-ci-project/-/pipelines/118"',
+      group: 'success',
+      icon: 'status_success',
+      text: 'passed',
+    },
+  },
+};
+
 export const mockLintResponse = {
   valid: true,
   mergedYaml: mockCiYml,
@@ -156,7 +268,7 @@ export const mockLintResponse = {
       when: 'on_success',
       allow_failure: false,
       only: null,
-      except: { refs: ['master@gitlab-org/gitlab', '/^release/.*$/@gitlab-org/gitlab'] },
+      except: { refs: ['main@gitlab-org/gitlab', '/^release/.*$/@gitlab-org/gitlab'] },
     },
     {
       name: 'job_2',
@@ -169,7 +281,7 @@ export const mockLintResponse = {
       when: 'on_success',
       allow_failure: true,
       only: { refs: ['web', 'chat', 'pushes'] },
-      except: { refs: ['master@gitlab-org/gitlab', '/^release/.*$/@gitlab-org/gitlab'] },
+      except: { refs: ['main@gitlab-org/gitlab', '/^release/.*$/@gitlab-org/gitlab'] },
     },
   ],
 };
@@ -212,7 +324,7 @@ export const mockJobs = [
     when: 'on_success',
     allowFailure: false,
     only: { refs: ['branches@gitlab-org/gitlab'] },
-    except: { refs: ['master@gitlab-org/gitlab', '/^release/.*$/@gitlab-org/gitlab'] },
+    except: { refs: ['main@gitlab-org/gitlab', '/^release/.*$/@gitlab-org/gitlab'] },
   },
 ];
 

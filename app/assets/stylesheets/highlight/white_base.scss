@@ -24,7 +24,7 @@ $white-gd-bg: #fdd;
 $white-gd-x: $black;
 $white-gd-x-bg: #faa;
 $white-gr: #a00;
-$white-gh: #999;
+$white-gh: #800080;
 $white-gi: $black;
 $white-gi-bg: #dfd;
 $white-gi-x: $black;
@@ -78,6 +78,10 @@ $white-gc-bg: #eaf2f5;
 }
 
 // Line numbers
+.file-line-num {
+  @include line-number-link($black-transparent);
+}
+
 .line-numbers,
 .diff-line-num {
   background-color: $gray-light;
@@ -215,7 +219,10 @@ pre.code,
 
   .line-coverage {
     @include line-coverage-border-color($green-400, $red-400);
+  }
 
+  .line-coverage,
+  .line-codequality {
     &.old {
       background-color: $line-removed;
     }
@@ -280,7 +287,9 @@ span.highlight_word {
 
 .ge { font-style: italic; }
 .gr { color: $white-gr; }
-.gh { color: $white-gh; }
+
+.gh { color: $white-gh;
+  font-weight: $gl-font-weight-bold; }
 
 .gi {
   color: $white-gi;

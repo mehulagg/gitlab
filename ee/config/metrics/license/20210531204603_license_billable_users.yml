@@ -1,0 +1,20 @@
+---
+data_category: Optional
+key_path: license_billable_users
+name: billable_users
+description: Number of all billable users (active users excluding bots and guests).
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: number
+status: implemented
+milestone: "14.0"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62850
+time_frame: all
+data_source: database
+distribution:
+- ee
+tier:
+- premium
+- ultimate

@@ -6,7 +6,8 @@ RSpec.describe Gitlab::SidekiqConfig::Worker do
   def create_worker(queue:, **attributes)
     namespace = queue.include?(':') && queue.split(':').first
     inner_worker = double(
-      queue: queue,
+      name: attributes[:worker_name] || 'Foo::BarWorker',
+      generated_queue_name: queue,
       queue_namespace: namespace,
       get_feature_category: attributes[:feature_category],
       get_weight: attributes[:weight],
@@ -47,9 +48,9 @@ RSpec.describe Gitlab::SidekiqConfig::Worker do
 
   describe 'delegations' do
     [
-      :feature_category_not_owned?, :get_feature_category, :get_weight,
-      :get_worker_resource_boundary, :get_urgency, :queue,
-      :queue_namespace, :worker_has_external_dependencies?
+      :feature_category_not_owned?, :generated_queue_name,
+      :get_feature_category, :get_weight, :get_worker_resource_boundary,
+      :get_urgency, :queue_namespace, :worker_has_external_dependencies?
     ].each do |meth|
       it "delegates #{meth} to the worker class" do
         worker = double
@@ -87,6 +88,7 @@ RSpec.describe Gitlab::SidekiqConfig::Worker do
   describe 'YAML encoding' do
     it 'encodes the worker in YAML as a hash of the queue' do
       attributes_a = {
+        worker_name: 'WorkerA',
         feature_category: :source_code_management,
         has_external_dependencies: false,
         urgency: :low,
@@ -97,6 +99,7 @@ RSpec.describe Gitlab::SidekiqConfig::Worker do
       }
 
       attributes_b = {
+        worker_name: 'WorkerB',
         feature_category: :not_owned,
         has_external_dependencies: true,
         urgency: :high,

@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Debugging Tips
+# Debugging tips **(FREE SELF)**
 
 Sometimes things don't work the way they should. Here are some tips on debugging issues out
 in production.
@@ -26,7 +26,7 @@ You can enable output of Active Record debug logging in the Rails console
 session by running:
 
 ```ruby
-ActiveRecord::Base.logger = Logger.new(STDOUT)
+ActiveRecord::Base.logger = Logger.new($stdout)
 ```
 
 This will show information about database queries triggered by any Ruby code
@@ -111,7 +111,7 @@ an SMTP server, but you're not seeing mail delivered. Here's how to check the se
    ```
 
    In the example above, the SMTP server is configured for the local machine. If this is intended, you may need to check your local mail
-   logs (e.g. `/var/log/mail.log`) for more details.
+   logs (for example, `/var/log/mail.log`) for more details.
 
 1. Send a test message via the console.
 
@@ -119,7 +119,7 @@ an SMTP server, but you're not seeing mail delivered. Here's how to check the se
    irb(main):003:0> Notify.test_email('youremail@email.com', 'Hello World', 'This is a test message').deliver_now
    ```
 
-   If you do not receive an e-mail and/or see an error message, then check
+   If you do not receive an email and/or see an error message, then check
    your mail server settings.
 
 ## Advanced Issues
@@ -155,7 +155,7 @@ and more. However, this is not enabled by default. To enable it, define the
 gitlab_rails['env'] = {"ENABLE_RBTRACE" => "1"}
 ```
 
-Then reconfigure the system and restart Unicorn and Sidekiq. To run this
+Then reconfigure the system and restart Puma and Sidekiq. To run this
 in Omnibus, run as root:
 
 ```ruby
@@ -178,7 +178,7 @@ following tips are only recommended if you do NOT mind users being affected by
 downtime. Otherwise skip to the next section.
 
 1. Load the problematic URL
-1. Run `sudo gdb -p <PID>` to attach to the Unicorn process.
+1. Run `sudo gdb -p <PID>` to attach to the Puma process.
 1. In the GDB window, type:
 
    ```plaintext
@@ -186,7 +186,7 @@ downtime. Otherwise skip to the next section.
    ```
 
 1. This forces the process to generate a Ruby backtrace. Check
-   `/var/log/gitlab/unicorn/unicorn_stderr.log` for the backtrace. For example, you may see:
+   `/var/log/gitlab/puma/puma_stderr.log` for the backtrace. For example, you may see:
 
    ```plaintext
    from /opt/gitlab/embedded/service/gitlab-rails/lib/gitlab/metrics/sampler.rb:33:in `block in start'
@@ -213,16 +213,19 @@ downtime. Otherwise skip to the next section.
    exit
    ```
 
-Note that if the Unicorn process terminates before you are able to run these
+Note that if the Puma process terminates before you are able to run these
 commands, GDB will report an error. To buy more time, you can always raise the
-Unicorn timeout. For omnibus users, you can edit `/etc/gitlab/gitlab.rb` and
-increase it from 60 seconds to 300:
+Puma worker timeout. For omnibus users, you can edit `/etc/gitlab/gitlab.rb` and
+increase it from 60 seconds to 600:
 
 ```ruby
-unicorn['worker_timeout'] = 300
+gitlab_rails['env'] = {
+        'GITLAB_RAILS_RACK_TIMEOUT' => 600
+}
 ```
 
-For source installations, edit `config/unicorn.rb`.
+For source installations, set the environment variable.
+Refer to [Puma Worker timeout](https://docs.gitlab.com/omnibus/settings/puma.html#worker-timeout).
 
 [Reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
 
@@ -234,7 +237,7 @@ are concerned about affecting others during a production system, you can run a
 separate Rails process to debug the issue:
 
 1. Log in to your GitLab account.
-1. Copy the URL that is causing problems (e.g. `https://gitlab.com/ABC`).
+1. Copy the URL that is causing problems (for example, `https://gitlab.com/ABC`).
 1. Create a Personal Access Token for your user (User Settings -> Access Tokens).
 1. Bring up the [GitLab Rails console.](../operations/rails_console.md#starting-a-rails-console-session)
 1. At the Rails console, run:
@@ -255,32 +258,32 @@ separate Rails process to debug the issue:
 ### GitLab: API is not accessible
 
 This often occurs when GitLab Shell attempts to request authorization via the
-internal API (e.g., `http://localhost:8080/api/v4/internal/allowed`), and
+[internal API](../../development/internal_api.md) (for example, `http://localhost:8080/api/v4/internal/allowed`), and
 something in the check fails. There are many reasons why this may happen:
 
-1. Timeout connecting to a database (e.g., PostgreSQL or Redis)
+1. Timeout connecting to a database (for example, PostgreSQL or Redis)
 1. Error in Git hooks or push rules
-1. Error accessing the repository (e.g., stale NFS handles)
+1. Error accessing the repository (for example, stale NFS handles)
 
 To diagnose this problem, try to reproduce the problem and then see if there
 is a Unicorn worker that is spinning via `top`. Try to use the `gdb`
 techniques above. In addition, using `strace` may help isolate issues:
 
 ```shell
-strace -ttTfyyy -s 1024 -p <PID of unicorn worker> -o /tmp/unicorn.txt
+strace -ttTfyyy -s 1024 -p <PID of puma worker> -o /tmp/puma.txt
 ```
 
 If you cannot isolate which Unicorn worker is the issue, try to run `strace`
-on all the Unicorn workers to see where the `/internal/allowed` endpoint gets
-stuck:
+on all the Unicorn workers to see where the
+[`/internal/allowed`](../../development/internal_api.md) endpoint gets stuck:
 
 ```shell
-ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs  strace -ttTfyyy -s 1024 -o /tmp/unicorn.txt
+ps auwx | grep puma | awk '{ print " -p " $2}' | xargs  strace -ttTfyyy -s 1024 -o /tmp/puma.txt
 ```
 
-The output in `/tmp/unicorn.txt` may help diagnose the root cause.
+The output in `/tmp/puma.txt` may help diagnose the root cause.
 
 ## More information
 
-- [Debugging Stuck Ruby Processes](https://blog.newrelic.com/engineering/debugging-stuck-ruby-processes-what-to-do-before-you-kill-9/)
+- [Debugging Stuck Ruby Processes](https://newrelic.com/blog/engineering/debugging-stuck-ruby-processes-what-to-do-before-you-kill-9/)
 - [Cheat sheet of using GDB and Ruby processes](gdb-stuck-ruby.txt)

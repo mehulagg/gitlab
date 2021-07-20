@@ -2,7 +2,11 @@ import { GlSprintf, GlButton } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import UnconfiguredSecurityRule from 'ee/approvals/components/security_configuration/unconfigured_security_rule.vue';
-import { LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME } from 'ee/approvals/constants';
+import {
+  LICENSE_CHECK_NAME,
+  VULNERABILITY_CHECK_NAME,
+  COVERAGE_CHECK_NAME,
+} from 'ee/approvals/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -28,6 +32,13 @@ describe('UnconfiguredSecurityRule component', () => {
     docsPath: 'docs/license-check',
   };
 
+  const coverageCheckRule = {
+    name: COVERAGE_CHECK_NAME,
+    description: 'coverage-check description without enable button',
+    enableDescription: 'coverage-check description with enable button',
+    docsPath: 'docs/coverage-check',
+  };
+
   const createWrapper = (props = {}, options = {}) => {
     wrapper = mount(UnconfiguredSecurityRule, {
       localVue,
@@ -44,9 +55,10 @@ describe('UnconfiguredSecurityRule component', () => {
   });
 
   describe.each`
-    rule                | ruleName                 | descriptionText
-    ${licenseCheckRule} | ${licenseCheckRule.name} | ${licenseCheckRule.enableDescription}
-    ${vulnCheckRule}    | ${vulnCheckRule.name}    | ${vulnCheckRule.enableDescription}
+    rule                 | ruleName                  | descriptionText
+    ${licenseCheckRule}  | ${licenseCheckRule.name}  | ${licenseCheckRule.enableDescription}
+    ${vulnCheckRule}     | ${vulnCheckRule.name}     | ${vulnCheckRule.enableDescription}
+    ${coverageCheckRule} | ${coverageCheckRule.name} | ${coverageCheckRule.enableDescription}
   `('with a configured job that is eligible for $ruleName', ({ rule, descriptionText }) => {
     beforeEach(() => {
       createWrapper({
@@ -68,9 +80,10 @@ describe('UnconfiguredSecurityRule component', () => {
   });
 
   describe.each`
-    rule                | ruleName                 | descriptionText
-    ${licenseCheckRule} | ${licenseCheckRule.name} | ${licenseCheckRule.description}
-    ${vulnCheckRule}    | ${vulnCheckRule.name}    | ${vulnCheckRule.description}
+    rule                 | ruleName                  | descriptionText
+    ${licenseCheckRule}  | ${licenseCheckRule.name}  | ${licenseCheckRule.description}
+    ${vulnCheckRule}     | ${vulnCheckRule.name}     | ${vulnCheckRule.description}
+    ${coverageCheckRule} | ${coverageCheckRule.name} | ${coverageCheckRule.description}
   `('with a unconfigured job that is eligible for $ruleName', ({ rule, descriptionText }) => {
     beforeEach(() => {
       createWrapper({

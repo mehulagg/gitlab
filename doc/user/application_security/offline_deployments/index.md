@@ -5,7 +5,7 @@ group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Offline environments
+# Offline environments **(ULTIMATE SELF)**
 
 It's possible to run most of the GitLab security scanners when not connected to the internet.
 
@@ -59,14 +59,14 @@ mirroring the packages inside your own offline network.
 ### Interacting with the vulnerabilities
 
 Once a vulnerability is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
+[address the vulnerabilities](../vulnerabilities/index.md).
 
 Please note that in some cases the reported vulnerabilities provide metadata that can contain
 external links exposed in the UI. These links might not be accessible within an offline environment.
 
-### Automatic remediation for vulnerabilities
+### Resolving vulnerabilities
 
-The [automatic remediation for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities) feature is available for offline Dependency Scanning and Container Scanning, but may not work
+The [resolving vulnerabilities](../vulnerabilities/index.md#resolve-a-vulnerability) feature is available for offline Dependency Scanning and Container Scanning, but may not work
 depending on your instance's configuration. We can only suggest solutions, which are generally more
 current versions that have been patched, when we are able to access up-to-date registry services
 hosting the latest versions of that dependency or image.
@@ -93,8 +93,7 @@ above. You can find more information at each of the pages below:
 
 ## Loading Docker images onto your offline host
 
-To use many GitLab features, including
-[security scans](../index.md#working-in-an-offline-environment)
+To use many GitLab features, including security scans
 and [Auto DevOps](../../../topics/autodevops/index.md), the runner must be able to fetch the
 relevant Docker images.
 
@@ -109,7 +108,7 @@ example of such a transfer:
 
 ### Using the official GitLab template
 
-GitLab provides a [vendored template](../../../ci/yaml/README.md#includetemplate)
+GitLab provides a [vendored template](../../../ci/yaml/index.md#includetemplate)
 to ease this process.
 
 This template should be used in a new, empty project, with a `gitlab-ci.yml` file containing:
@@ -129,18 +128,16 @@ This method requires a runner with access to both `gitlab.com` (including
 to be able to use the `docker` command inside the jobs. This runner can be installed in a DMZ or on
 a bastion, and used only for this specific project.
 
+WARNING:
+This template does not include updates for the container scanning analyzer. Please see
+[Container scanning offline directions](../container_scanning/index.md#running-container-scanning-in-an-offline-environment).
+
 #### Scheduling the updates
 
 By default, this project's pipeline runs only once, when the `.gitlab-ci.yml` is added to the
 repository. To update the GitLab security scanners and signatures, it's necessary to run this pipeline
 regularly. GitLab provides a way to [schedule pipelines](../../../ci/pipelines/schedules.md). For
 example, you can set this up to download and store the Docker images every week.
-
-Some images can be updated more frequently than others. For example, the [vulnerability database](https://hub.docker.com/r/arminc/clair-db/tags)
-for Container Scanning is updated daily. To update this single image, create a new Scheduled
-Pipeline that runs daily and set `SECURE_BINARIES_ANALYZERS` to `clair-vulnerabilities-db`. Only
-this job is triggered, and the image is updated daily and made available in the project
-registry.
 
 #### Using the secure bundle created
 
@@ -152,7 +149,7 @@ GitLab.com. To do so, set the CI/CD variable `SECURE_ANALYZERS_PREFIX` with the 
 project [container registry](../../packages/container_registry/index.md).
 
 You can set this variable in the projects' `.gitlab-ci.yml`, or
-in the GitLab UI at the project or group level. See the [GitLab CI/CD variables page](../../../ci/variables/README.md#custom-cicd-variables)
+in the GitLab UI at the project or group level. See the [GitLab CI/CD variables page](../../../ci/variables/index.md#custom-cicd-variables)
 for more information.
 
 #### Variables

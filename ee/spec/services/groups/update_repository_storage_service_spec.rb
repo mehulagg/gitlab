@@ -32,7 +32,7 @@ RSpec.describe Groups::UpdateRepositoryStorageService do
     end
 
     context 'when the move succeeds' do
-      it 'moves the repository to the new storage and unmarks the repository as read only', :aggregate_failures do
+      it 'moves the repository to the new storage and unmarks the repository as read-only', :aggregate_failures do
         old_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
           wiki.repository.path_to_repo
         end
@@ -76,9 +76,10 @@ RSpec.describe Groups::UpdateRepositoryStorageService do
           .with(wiki.repository.raw)
           .and_raise(Gitlab::Git::CommandError)
 
-        result = subject.execute
+        expect do
+          subject.execute
+        end.to raise_error(Gitlab::Git::CommandError)
 
-        expect(result).to be_error
         expect(group.reload).not_to be_repository_read_only
         expect(wiki.repository_storage).to eq('default')
         expect(repository_storage_move).to be_failed
@@ -94,9 +95,10 @@ RSpec.describe Groups::UpdateRepositoryStorageService do
         expect(original_wiki_repository_double).to receive(:remove)
           .and_raise(Gitlab::Git::CommandError)
 
-        result = subject.execute
+        expect do
+          subject.execute
+        end.to raise_error(Gitlab::Git::CommandError)
 
-        expect(result).to be_error
         expect(repository_storage_move).to be_cleanup_failed
       end
     end
@@ -108,9 +110,10 @@ RSpec.describe Groups::UpdateRepositoryStorageService do
         expect(wiki_repository_double).to receive(:checksum)
           .and_return('not matching checksum')
 
-        result = subject.execute
+        expect do
+          subject.execute
+        end.to raise_error(UpdateRepositoryStorageMethods::Error, /Failed to verify wiki repository checksum from \w+ to not matching checksum/)
 
-        expect(result).to be_error
         expect(group).not_to be_repository_read_only
         expect(wiki.repository_storage).to eq('default')
       end

@@ -11,42 +11,6 @@ RSpec.describe 'Group navbar' do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
 
-  let(:structure) do
-    [
-      {
-        nav_item: _('Group overview'),
-        nav_sub_items: [
-          _('Details'),
-          _('Activity')
-        ]
-      },
-      {
-        nav_item: _('Issues'),
-        nav_sub_items: [
-          _('List'),
-          _('Board'),
-          _('Labels'),
-          _('Milestones')
-        ]
-      },
-      {
-        nav_item: _('Merge Requests'),
-        nav_sub_items: []
-      },
-      (security_and_compliance_nav_item if Gitlab.ee?),
-      (push_rules_nav_item if Gitlab.ee?),
-      {
-        nav_item: _('Kubernetes'),
-        nav_sub_items: []
-      },
-      (analytics_nav_item if Gitlab.ee?),
-      {
-        nav_item: _('Members'),
-        nav_sub_items: []
-      }
-    ]
-  end
-
   before do
     insert_package_nav(_('Kubernetes'))
 
@@ -68,7 +32,7 @@ RSpec.describe 'Group navbar' do
     before do
       stub_config(registry: { enabled: true })
 
-      insert_container_nav(_('Kubernetes'))
+      insert_container_nav
 
       visit group_path(group)
     end
@@ -80,7 +44,7 @@ RSpec.describe 'Group navbar' do
     before do
       stub_config(dependency_proxy: { enabled: true })
 
-      insert_dependency_proxy_nav(_('Dependency Proxy'))
+      insert_dependency_proxy_nav
 
       visit group_path(group)
     end

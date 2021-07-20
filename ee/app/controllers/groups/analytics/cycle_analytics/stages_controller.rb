@@ -9,7 +9,8 @@ module Groups
 
         before_action :load_group
         before_action :load_value_stream
-        before_action :validate_params, only: %i[median records duration_chart]
+        before_action :validate_params, only: %i[median average records average_duration_chart count]
+        before_action :authorize_read_group_stage, only: %i[median average records average_duration_chart count]
 
         def index
           return render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
@@ -42,21 +43,27 @@ module Groups
         end
 
         def median
-          return render_403 unless can?(current_user, :read_group_stage, @group)
-
           render json: { value: data_collector.median.seconds }
         end
 
-        def records
-          return render_403 unless can?(current_user, :read_group_stage, @group)
-
-          render json: data_collector.serialized_records
+        def average
+          render json: { value: data_collector.average.seconds }
         end
 
-        def duration_chart
-          return render_403 unless can?(current_user, :read_group_stage, @group)
+        def records
+          serialized_records = data_collector.serialized_records do |relation|
+            add_pagination_headers(relation)
+          end
 
-          render json: ::Analytics::CycleAnalytics::DurationChartItemEntity.represent(data_collector.duration_chart_data)
+          render json: serialized_records
+        end
+
+        def average_duration_chart
+          render json: ::Analytics::CycleAnalytics::DurationChartAverageItemEntity.represent(data_collector.duration_chart_average_data)
+        end
+
+        def count
+          render json: { count: data_collector.count }
         end
 
         private
@@ -128,6 +135,21 @@ module Groups
           if params[:value_stream_id] && params[:value_stream_id] != ::Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
             @value_stream = @group.value_streams.find(params[:value_stream_id])
           end
+        end
+
+        def add_pagination_headers(relation)
+          Gitlab::Pagination::OffsetHeaderBuilder.new(
+            request_context: self,
+            per_page: relation.limit_value,
+            page: relation.current_page,
+            next_page: relation.next_page,
+            prev_page: relation.prev_page,
+            params: permitted_cycle_analytics_params
+          ).execute(exclude_total_headers: true, data_without_counts: true)
+        end
+
+        def authorize_read_group_stage
+          return render_403 unless can?(current_user, :delete_group_stage, @group)
         end
       end
     end

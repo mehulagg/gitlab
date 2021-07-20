@@ -10,7 +10,7 @@ module Gitlab
 
       # Adds a "magic" comment in the generated SQL expression in order to be able to tell if we're sorting by similarity.
       # Example: /* gitlab/database/similarity_score */ SIMILARITY(COALESCE...
-      SIMILARITY_FUNCTION_CALL_WITH_ANNOTATION = "/* #{DISPLAY_NAME} */ SIMILARITY".freeze
+      SIMILARITY_FUNCTION_CALL_WITH_ANNOTATION = "/* #{DISPLAY_NAME} */ SIMILARITY"
 
       # This method returns an Arel expression that can be used in an ActiveRecord query to order the resultset by similarity.
       #
@@ -74,9 +74,14 @@ module Gitlab
         end
 
         # (SIMILARITY ...) + (SIMILARITY ...)
-        expressions.inject(first_expression) do |expression1, expression2|
+        additions = expressions.inject(first_expression) do |expression1, expression2|
           Arel::Nodes::Addition.new(expression1, expression2)
         end
+
+        score_as_numeric = Arel::Nodes::NamedFunction.new('CAST', [Arel::Nodes::Grouping.new(additions).as('numeric')])
+
+        # Rounding the score to two decimals
+        Arel::Nodes::NamedFunction.new('ROUND', [score_as_numeric, 2])
       end
 
       def self.order_by_similarity?(arel_query)

@@ -1,29 +1,36 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlLoadingIcon, GlBadge, GlTooltipDirective } from '@gitlab/ui';
-import { visitUrl } from '../../lib/utils/url_utility';
-import identicon from '../../vue_shared/components/identicon.vue';
+import {
+  GlAvatar,
+  GlLoadingIcon,
+  GlBadge,
+  GlIcon,
+  GlTooltipDirective,
+  GlSafeHtmlDirective,
+} from '@gitlab/ui';
+import { visitUrl } from '~/lib/utils/url_utility';
+import UserAccessRoleBadge from '~/vue_shared/components/user_access_role_badge.vue';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '../constants';
 import eventHub from '../event_hub';
 
 import itemActions from './item_actions.vue';
 import itemCaret from './item_caret.vue';
 import itemStats from './item_stats.vue';
-import itemStatsValue from './item_stats_value.vue';
 import itemTypeIcon from './item_type_icon.vue';
 
 export default {
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml: GlSafeHtmlDirective,
   },
   components: {
+    GlAvatar,
     GlBadge,
     GlLoadingIcon,
-    identicon,
+    GlIcon,
+    UserAccessRoleBadge,
     itemCaret,
     itemTypeIcon,
     itemStats,
-    itemStatsValue,
     itemActions,
   },
   props: {
@@ -91,6 +98,7 @@ export default {
       }
     },
   },
+  safeHtmlConfig: { ADD_TAGS: ['gl-emoji'] },
 };
 </script>
 
@@ -117,21 +125,21 @@ export default {
         size="lg"
         class="d-none d-sm-inline-flex flex-shrink-0 gl-mr-3"
       />
-      <div
-        :class="{ 'd-sm-flex': !group.isChildrenLoading }"
-        class="avatar-container rect-avatar s32 d-none flex-grow-0 flex-shrink-0"
+      <a
+        :class="{ 'gl-sm-display-flex': !group.isChildrenLoading }"
+        class="gl-display-none gl-text-decoration-none! gl-mr-3"
+        :href="group.relativePath"
+        :aria-label="group.name"
       >
-        <a :href="group.relativePath" class="no-expand">
-          <img
-            v-if="hasAvatar"
-            :src="group.avatarUrl"
-            data-testid="group-avatar"
-            class="avatar s40"
-            :itemprop="microdata.imageItemprop"
-          />
-          <identicon v-else :entity-id="group.id" :entity-name="group.name" size-class="s40" />
-        </a>
-      </div>
+        <gl-avatar
+          shape="rect"
+          :entity-name="group.name"
+          :src="group.avatarUrl"
+          :alt="group.name"
+          :size="32"
+          :itemprop="microdata.imageItemprop"
+        />
+      </a>
       <div class="group-text-container d-flex flex-fill align-items-center">
         <div class="group-text flex-grow-1 flex-shrink-1">
           <div class="d-flex align-items-center flex-wrap title namespace-title gl-mr-3">
@@ -140,45 +148,49 @@ export default {
               data-testid="group-name"
               :href="group.relativePath"
               :title="group.fullName"
-              class="no-expand gl-mt-3 gl-mr-3 gl-text-gray-900!"
+              class="no-expand gl-mr-3 gl-mt-3 gl-text-gray-900!"
               :itemprop="microdata.nameItemprop"
-              >{{
+            >
+              {{
                 // ending bracket must be by closing tag to prevent
                 // link hover text-decoration from over-extending
                 group.name
-              }}</a
-            >
-            <item-stats-value
-              :icon-name="visibilityIcon"
+              }}
+            </a>
+            <gl-icon
+              v-gl-tooltip.hover.bottom
+              class="gl-display-inline-flex gl-align-items-center gl-mr-3 gl-mt-3 gl-text-gray-500"
+              :name="visibilityIcon"
               :title="visibilityTooltip"
-              css-class="item-visibility d-inline-flex align-items-center gl-mt-3 gl-mr-2 text-secondary"
+              data-testid="group-visibility-icon"
             />
-            <span v-if="group.permission" class="user-access-role gl-mt-3">
+            <user-access-role-badge v-if="group.permission" class="gl-mt-3">
               {{ group.permission }}
-            </span>
+            </user-access-role-badge>
           </div>
           <div v-if="group.description" class="description">
             <span
+              v-safe-html:[$options.safeHtmlConfig]="group.description"
               :itemprop="microdata.descriptionItemprop"
               data-testid="group-description"
-              v-html="group.description"
             >
             </span>
           </div>
         </div>
         <div v-if="isGroupPendingRemoval">
-          <gl-badge variant="warning">{{ __('pending removal') }}</gl-badge>
+          <gl-badge variant="warning">{{ __('pending deletion') }}</gl-badge>
         </div>
-        <div
-          class="metadata align-items-md-center d-flex flex-grow-1 flex-shrink-0 flex-wrap justify-content-md-between"
-        >
+        <div class="metadata d-flex flex-grow-1 flex-shrink-0 flex-wrap justify-content-md-between">
           <item-actions
             v-if="isGroup"
             :group="group"
             :parent-group="parentGroup"
             :action="action"
           />
-          <item-stats :item="group" class="group-stats gl-mt-2 d-none d-md-flex" />
+          <item-stats
+            :item="group"
+            class="group-stats gl-mt-2 d-none d-md-flex gl-align-items-center"
+          />
         </div>
       </div>
     </div>

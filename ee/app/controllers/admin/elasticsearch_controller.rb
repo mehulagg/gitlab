@@ -25,11 +25,16 @@ class Admin::ElasticsearchController < Admin::ApplicationController
     if Elastic::ReindexingTask.running?
       flash[:warning] = _('Elasticsearch reindexing is already in progress')
     else
-      Elastic::ReindexingTask.create!
-      flash[:notice] = _('Elasticsearch reindexing triggered')
+      @elasticsearch_reindexing_task = Elastic::ReindexingTask.new(trigger_reindexing_params)
+      if @elasticsearch_reindexing_task.save
+        flash[:notice] = _('Elasticsearch reindexing triggered')
+      else
+        errors = @elasticsearch_reindexing_task.errors.full_messages.join(', ')
+        flash[:alert] = _("Elasticsearch reindexing was not started: %{errors}") % { errors: errors }
+      end
     end
 
-    redirect_to redirect_path
+    redirect_to redirect_path(anchor: 'js-elasticsearch-reindexing')
   end
 
   # POST
@@ -40,7 +45,7 @@ class Admin::ElasticsearchController < Admin::ApplicationController
 
     flash[:notice] = _('Index deletion is canceled')
 
-    redirect_to redirect_path
+    redirect_to redirect_path(anchor: 'js-elasticsearch-reindexing')
   end
 
   # POST
@@ -58,7 +63,16 @@ class Admin::ElasticsearchController < Admin::ApplicationController
 
   private
 
-  def redirect_path
-    advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+  def redirect_path(anchor: 'js-elasticsearch-settings')
+    advanced_search_admin_application_settings_path(anchor: anchor)
+  end
+
+  def trigger_reindexing_params
+    permitted_params = params.require(:elastic_reindexing_task).permit(:elasticsearch_max_slices_running, :elasticsearch_slice_multiplier)
+    trigger_reindexing_params = {}
+    trigger_reindexing_params[:max_slices_running] = permitted_params[:elasticsearch_max_slices_running] if permitted_params.has_key?(:elasticsearch_max_slices_running)
+    trigger_reindexing_params[:slice_multiplier] = permitted_params[:elasticsearch_slice_multiplier] if permitted_params.has_key?(:elasticsearch_slice_multiplier)
+
+    trigger_reindexing_params
   end
 end

@@ -110,10 +110,8 @@ module TodosHelper
         'alert'
       end
 
-    content_tag(:span, nil, class: 'target-status') do
-      content_tag(:span, nil, class: "status-box status-box-#{type}-#{todo.target.state.to_s.dasherize}") do
-        todo.target.state.to_s.capitalize
-      end
+    tag.span class: "gl-my-0 gl-px-2 status-box status-box-#{type}-#{todo.target.state.to_s.dasherize}" do
+      todo.target.state.to_s.capitalize
     end
   end
 
@@ -157,21 +155,11 @@ module TodosHelper
     ]
   end
 
-  def todo_projects_options
-    projects = current_user.authorized_projects.sorted_by_activity.non_archived.with_route
-
-    projects = projects.map do |project|
-      { id: project.id, text: project.full_name }
-    end
-
-    projects.unshift({ id: '', text: 'Any Project' }).to_json
-  end
-
   def todo_types_options
     [
       { id: '', text: 'Any Type' },
       { id: 'Issue', text: 'Issue' },
-      { id: 'MergeRequest', text: 'Merge Request' },
+      { id: 'MergeRequest', text: 'Merge request' },
       { id: 'DesignManagement::Design', text: 'Design' },
       { id: 'AlertManagement::Alert', text: 'Alert' }
     ]
@@ -240,14 +228,6 @@ module TodosHelper
       false
     end
   end
-
-  def todo_group_options
-    groups = current_user.authorized_groups.with_route.map do |group|
-      { id: group.id, text: group.full_name }
-    end
-
-    groups.unshift({ id: '', text: 'Any Group' }).to_json
-  end
 end
 
-TodosHelper.prepend_if_ee('EE::TodosHelper')
+TodosHelper.prepend_mod_with('TodosHelper')

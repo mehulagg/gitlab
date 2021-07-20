@@ -2,7 +2,6 @@
 
 module Groups
   class SamlGroupLinksController < Groups::ApplicationController
-    before_action :require_saml_group_links_enabled
     before_action :authorize_admin_saml_group_links!
 
     layout 'group_settings'
@@ -28,10 +27,6 @@ module Groups
     end
 
     private
-
-    def require_saml_group_links_enabled
-      render_404 unless ::Feature.enabled?(:saml_group_links, group, default_enabled: true)
-    end
 
     def authorize_admin_saml_group_links!
       access_denied! unless can?(current_user, :admin_saml_group_links, group)

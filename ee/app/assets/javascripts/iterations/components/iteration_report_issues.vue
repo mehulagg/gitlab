@@ -6,16 +6,19 @@ import {
   GlButton,
   GlLabel,
   GlLink,
-  GlLoadingIcon,
   GlPagination,
+  GlSkeletonLoader,
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { __, sprintf } from '~/locale';
+import { isScopedLabel } from '~/lib/utils/common_utils';
+import { __, n__, sprintf } from '~/locale';
 import { Namespace } from '../constants';
 import iterationIssuesQuery from '../queries/iteration_issues.query.graphql';
 import iterationIssuesWithLabelFilterQuery from '../queries/iteration_issues_with_label_filter.query.graphql';
+
+const skeletonLoaderLimit = 5;
 
 const states = {
   opened: 'opened',
@@ -23,6 +26,7 @@ const states = {
 };
 
 export default {
+  skeletonLoaderLimit,
   fields: [
     {
       key: 'title',
@@ -49,8 +53,8 @@ export default {
     GlButton,
     GlLabel,
     GlLink,
-    GlLoadingIcon,
     GlPagination,
+    GlSkeletonLoader,
     GlTable,
   },
   directives: {
@@ -80,7 +84,10 @@ export default {
         };
       },
       result({ data }) {
-        this.$emit('issueCount', data[this.namespaceType]?.issues?.count);
+        this.$emit('issuesUpdate', {
+          count: data[this.namespaceType]?.issues?.count,
+          labelId: this.label?.id,
+        });
       },
       error() {
         this.error = __('Error loading issues');
@@ -91,6 +98,11 @@ export default {
     fullPath: {
       type: String,
       required: true,
+    },
+    hasScopedLabelsFeature: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     iterationId: {
       type: String,
@@ -129,7 +141,7 @@ export default {
       return this.isExpanded ? 'chevron-down' : 'chevron-right';
     },
     accordionName() {
-      return this.isExpanded ? __('Collapse') : __('Expand');
+      return this.isExpanded ? __('Collapse issues') : __('Expand issues');
     },
     pageSize() {
       const labelGroupingPageSize = 5;
@@ -163,6 +175,17 @@ export default {
     nextPage() {
       return Number(this.issues.pageInfo.hasNextPage);
     },
+    sectionName() {
+      return this.label.title
+        ? sprintf(__('Issues with label %{label}'), { label: this.label.title })
+        : __('Issues');
+    },
+    badgeAriaLabel() {
+      return n__('%d issue', '%d issues', this.issues.count);
+    },
+    tbodyTrClass() {
+      return this.label.title ? 'gl-bg-gray-10' : undefined;
+    },
   },
   methods: {
     tooltipText(assignee) {
@@ -194,6 +217,9 @@ export default {
         };
       }
     },
+    shouldShowScopedLabel(label) {
+      return this.hasScopedLabelsFeature && isScopedLabel(label);
+    },
     toggleIsExpanded() {
       this.isExpanded = !this.isExpanded;
     },
@@ -202,12 +228,12 @@ export default {
 </script>
 
 <template>
-  <div>
+  <section :aria-label="sectionName">
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error }}
     </gl-alert>
 
-    <div v-if="label.title" class="gl-display-flex gl-align-items-center">
+    <div v-if="label.title" class="gl-display-flex gl-align-items-center gl-mb-2">
       <gl-button
         category="tertiary"
         :icon="accordionIcon"
@@ -218,15 +244,22 @@ export default {
         class="gl-ml-1"
         :background-color="label.color"
         :description="label.description"
-        :scoped="label.scoped"
+        :scoped="shouldShowScopedLabel(label)"
+        show-close-button
+        :target="null"
         :title="label.title"
+        @close="$emit('removeLabel', label.id)"
       />
-      <gl-badge class="gl-ml-2" size="sm" variant="muted">
+      <gl-badge class="gl-ml-2" size="sm" variant="muted" :aria-label="badgeAriaLabel">
         {{ issues.count }}
       </gl-badge>
     </div>
 
-    <gl-loading-icon v-show="$apollo.queries.issues.loading" class="gl-my-9" size="md" />
+    <div v-show="$apollo.queries.issues.loading">
+      <div v-for="n in $options.skeletonLoaderLimit" :key="n" class="gl-mx-5 gl-my-6">
+        <gl-skeleton-loader />
+      </div>
+    </div>
     <gl-table
       v-show="shouldShowTable"
       :items="issues.list"
@@ -235,20 +268,34 @@ export default {
       :show-empty="true"
       fixed
       stacked="sm"
+      :tbody-tr-class="tbodyTrClass"
       data-qa-selector="iteration_issues_container"
     >
-      <template #cell(title)="{ item: { iid, title, webUrl } }">
+      <template #cell(title)="{ item: { iid, labels, title, webUrl } }">
         <div class="gl-text-truncate">
           <gl-link
             class="gl-text-gray-900 gl-font-weight-bold"
             :href="webUrl"
+            :title="title"
             data-qa-selector="iteration_issue_link"
             :data-qa-issue-title="title"
             >{{ title }}
           </gl-link>
-          <!-- TODO: add references.relative (project name) -->
-          <!-- Depends on https://gitlab.com/gitlab-org/gitlab/-/issues/222763 -->
-          <div class="gl-text-secondary">#{{ iid }}</div>
+        </div>
+        <!-- TODO: add references.relative (project name) -->
+        <!-- Depends on https://gitlab.com/gitlab-org/gitlab/-/issues/222763 -->
+        <div class="gl-text-secondary">#{{ iid }}</div>
+        <div role="group" :aria-label="__('Labels')">
+          <gl-label
+            v-for="l in labels"
+            :key="l.id"
+            class="gl-mt-2 gl-mr-2"
+            :background-color="l.color"
+            :description="l.description"
+            :scoped="shouldShowScopedLabel(l)"
+            :target="null"
+            :title="l.title"
+          />
         </div>
       </template>
 
@@ -263,7 +310,7 @@ export default {
             :key="assignee.username"
             v-gl-tooltip="tooltipText(assignee)"
           >
-            <gl-avatar :src="assignee.avatarUrl" :size="16" />
+            <gl-avatar :src="assignee.avatarUrl" :size="24" />
           </span>
         </span>
       </template>
@@ -278,5 +325,5 @@ export default {
         @input="handlePageChange"
       />
     </div>
-  </div>
+  </section>
 </template>

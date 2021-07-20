@@ -4,16 +4,16 @@
     .settings-header
       %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only= _('Default description template for issues')
       %button.gl-button.btn.btn-default.js-settings-toggle{ type: 'button' }= expanded ? _('Collapse') : _('Expand')
-      - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/project/description_templates', anchor: 'setting-a-default-template-for-merge-requests-and-issues') }
+      - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/project/description_templates', anchor: 'set-a-default-template-for-merge-requests-and-issues') }
       %p#issue-settings-default-template-label= _('Set a default description template to be used for new issues. %{link_start}What are description templates?%{link_end}').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
 
     .settings-content
-      = form_for @project, remote: true, html: { multipart: true, class: "issue-settings-form" }, authenticity_token: true do |f|
+      = form_for @project, html: { multipart: true, class: "issue-settings-form" }, authenticity_token: true do |f|
         %input{ type: 'hidden', name: 'update_section', value: 'js-issue-settings' }
         .row
           .form-group.col-md-9
-            = f.text_area :issues_template, class: "form-control", rows: 3, aria: { labelledby: 'issue-settings-default-template-label'}, data: { qa_selector: 'issue_template_field' }
+            = f.text_area :issues_template, class: "form-control gl-form-input", rows: 3, aria: { labelledby: 'issue-settings-default-template-label'}, data: { qa_selector: 'issue_template_field' }
             .text-secondary
               - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }
               = _('Description parsed with %{link_start}GitLab Flavored Markdown%{link_end}.').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
-        = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'save_issue_template_button' }
+        = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'save_issue_template_button' }

@@ -23,9 +23,8 @@ RSpec.describe Gitlab::Email::Handler::CreateNoteHandler do
 
   context "when the note could not be saved" do
     before do
-      allow_next_instance_of(Note) do |instance|
-        allow(instance).to receive(:persisted?).and_return(false)
-      end
+      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56711#note_551958817
+      allow_any_instance_of(Note).to receive(:persisted?).and_return(false) # rubocop:disable RSpec/AnyInstanceOf
     end
 
     it "raises an InvalidNoteError" do

@@ -5,6 +5,7 @@ import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { PAGE_CONFIG } from '~/vue_shared/alert_details/constants';
 import AlertManagementList from './components/alert_management_list_wrapper.vue';
+import alertsHelpUrlQuery from './graphql/queries/alert_help_url.query.graphql';
 
 Vue.use(VueApollo);
 
@@ -22,6 +23,7 @@ export default () => {
     assigneeUsernameQuery,
     alertManagementEnabled,
     userCanEnableAlertManagement,
+    hasManagedPrometheus,
   } = domEl.dataset;
 
   const apolloProvider = new VueApollo({
@@ -41,7 +43,8 @@ export default () => {
     ),
   });
 
-  apolloProvider.clients.defaultClient.cache.writeData({
+  apolloProvider.clients.defaultClient.cache.writeQuery({
+    query: alertsHelpUrlQuery,
     data: {
       alertsHelpUrl,
     },
@@ -62,6 +65,7 @@ export default () => {
       alertManagementEnabled: parseBoolean(alertManagementEnabled),
       trackAlertStatusUpdateOptions: PAGE_CONFIG.OPERATIONS.TRACK_ALERT_STATUS_UPDATE_OPTIONS,
       userCanEnableAlertManagement: parseBoolean(userCanEnableAlertManagement),
+      hasManagedPrometheus: parseBoolean(hasManagedPrometheus),
     },
     apolloProvider,
     render(createElement) {

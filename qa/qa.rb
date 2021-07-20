@@ -8,6 +8,8 @@ require_relative '../lib/gitlab'
 require_relative '../lib/gitlab/utils'
 require_relative '../config/initializers/0_inject_enterprise_edition_module'
 
+require 'chemlab'
+
 module QA
   ##
   # Helper classes to represent frequently used sequences of actions
@@ -43,6 +45,7 @@ module QA
     autoload :IPAddress, 'qa/runtime/ip_address'
     autoload :Search, 'qa/runtime/search'
     autoload :ApplicationSettings, 'qa/runtime/application_settings'
+    autoload :AllureReport, 'qa/runtime/allure_report'
 
     module API
       autoload :Client, 'qa/runtime/api/client'
@@ -65,13 +68,18 @@ module QA
     autoload :ApiFabricator, 'qa/resource/api_fabricator'
     autoload :Base, 'qa/resource/base'
 
+    autoload :GroupBase, 'qa/resource/group_base'
     autoload :Sandbox, 'qa/resource/sandbox'
     autoload :Group, 'qa/resource/group'
     autoload :Issue, 'qa/resource/issue'
+    autoload :ProjectIssueNote, 'qa/resource/project_issue_note'
     autoload :Project, 'qa/resource/project'
-    autoload :Label, 'qa/resource/label'
+    autoload :LabelBase, 'qa/resource/label_base'
+    autoload :ProjectLabel, 'qa/resource/project_label'
+    autoload :GroupLabel, 'qa/resource/group_label'
     autoload :MergeRequest, 'qa/resource/merge_request'
     autoload :ProjectImportedFromGithub, 'qa/resource/project_imported_from_github'
+    autoload :ProjectImportedFromURL, 'qa/resource/project_imported_from_url'
     autoload :MergeRequestFromFork, 'qa/resource/merge_request_from_fork'
     autoload :DeployKey, 'qa/resource/deploy_key'
     autoload :DeployToken, 'qa/resource/deploy_token'
@@ -80,6 +88,8 @@ module QA
     autoload :CiVariable, 'qa/resource/ci_variable'
     autoload :Runner, 'qa/resource/runner'
     autoload :PersonalAccessToken, 'qa/resource/personal_access_token'
+    autoload :PersonalAccessTokenCache, 'qa/resource/personal_access_token_cache'
+    autoload :ProjectAccessToken, 'qa/resource/project_access_token'
     autoload :User, 'qa/resource/user'
     autoload :ProjectMilestone, 'qa/resource/project_milestone'
     autoload :GroupMilestone, 'qa/resource/group_milestone'
@@ -95,6 +105,10 @@ module QA
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
     autoload :Design, 'qa/resource/design'
+    autoload :RegistryRepository, 'qa/resource/registry_repository'
+    autoload :Package, 'qa/resource/package'
+    autoload :PipelineSchedules, 'qa/resource/pipeline_schedules'
+    autoload :ImportProject, 'qa/resource/import_project'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -120,6 +134,7 @@ module QA
 
     module Wiki
       autoload :ProjectPage, 'qa/resource/wiki/project_page'
+      autoload :GroupPage, 'qa/resource/wiki/group_page'
     end
   end
 
@@ -157,6 +172,7 @@ module QA
         autoload :ObjectStorage, 'qa/scenario/test/integration/object_storage'
         autoload :SMTP, 'qa/scenario/test/integration/smtp'
         autoload :SSHTunnel, 'qa/scenario/test/integration/ssh_tunnel'
+        autoload :Registry, 'qa/scenario/test/integration/registry'
       end
 
       module Sanity
@@ -219,6 +235,7 @@ module QA
       autoload :Show, 'qa/page/group/show'
       autoload :Menu, 'qa/page/group/menu'
       autoload :Members, 'qa/page/group/members'
+      autoload :BulkImport, 'qa/page/group/bulk_import'
 
       module Milestone
         autoload :Index, 'qa/page/group/milestone/index'
@@ -231,6 +248,7 @@ module QA
 
       module Settings
         autoload :General, 'qa/page/group/settings/general'
+        autoload :PackageRegistries, 'qa/page/group/settings/package_registries'
       end
     end
 
@@ -254,11 +272,14 @@ module QA
 
     module Project
       autoload :New, 'qa/page/project/new'
-      autoload :NewExperiment, 'qa/page/project/new_experiment'
       autoload :Show, 'qa/page/project/show'
       autoload :Activity, 'qa/page/project/activity'
       autoload :Menu, 'qa/page/project/menu'
       autoload :Members, 'qa/page/project/members'
+
+      module Artifact
+        autoload :Show, 'qa/page/project/artifact/show'
+      end
 
       module Branches
         autoload :Show, 'qa/page/project/branches/show'
@@ -270,12 +291,17 @@ module QA
 
       module Import
         autoload :Github, 'qa/page/project/import/github'
+        autoload :RepoByURL, 'qa/page/project/import/repo_by_url'
       end
 
       module Pipeline
         autoload :Index, 'qa/page/project/pipeline/index'
         autoload :Show, 'qa/page/project/pipeline/show'
         autoload :New, 'qa/page/project/pipeline/new'
+      end
+
+      module PipelineEditor
+        autoload :Show, 'qa/page/project/pipeline_editor/show'
       end
 
       module Tag
@@ -291,6 +317,10 @@ module QA
       module Packages
         autoload :Index, 'qa/page/project/packages/index'
         autoload :Show, 'qa/page/project/packages/show'
+      end
+
+      module Registry
+        autoload :Show, 'qa/page/project/registry/show'
       end
 
       module Settings
@@ -309,15 +339,17 @@ module QA
         autoload :MergeRequest, 'qa/page/project/settings/merge_request'
         autoload :MirroringRepositories, 'qa/page/project/settings/mirroring_repositories'
         autoload :ProtectedTags, 'qa/page/project/settings/protected_tags'
+        autoload :DefaultBranch, 'qa/page/project/settings/default_branch'
         autoload :VisibilityFeaturesPermissions, 'qa/page/project/settings/visibility_features_permissions'
+        autoload :AccessTokens, 'qa/page/project/settings/access_tokens'
 
         module Services
           autoload :Jira, 'qa/page/project/settings/services/jira'
           autoload :Jenkins, 'qa/page/project/settings/services/jenkins'
           autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
         end
-        autoload :Operations, 'qa/page/project/settings/operations'
-        autoload :Incidents, 'qa/page/project/settings/incidents'
+        autoload :Monitor, 'qa/page/project/settings/monitor'
+        autoload :Alerts, 'qa/page/project/settings/alerts'
         autoload :Integrations, 'qa/page/project/settings/integrations'
       end
 
@@ -325,7 +357,9 @@ module QA
         autoload :CiCd, 'qa/page/project/sub_menus/ci_cd'
         autoload :Common, 'qa/page/project/sub_menus/common'
         autoload :Issues, 'qa/page/project/sub_menus/issues'
-        autoload :Operations, 'qa/page/project/sub_menus/operations'
+        autoload :Monitor, 'qa/page/project/sub_menus/monitor'
+        autoload :Deployments, 'qa/page/project/sub_menus/deployments'
+        autoload :Infrastructure, 'qa/page/project/sub_menus/infrastructure'
         autoload :Repository, 'qa/page/project/sub_menus/repository'
         autoload :Settings, 'qa/page/project/sub_menus/settings'
         autoload :Project, 'qa/page/project/sub_menus/project'
@@ -348,25 +382,29 @@ module QA
         autoload :Index, 'qa/page/project/milestone/index'
       end
 
-      module Operations
+      module Deployments
         module Environments
-          autoload :Index, 'qa/page/project/operations/environments/index'
-          autoload :Show, 'qa/page/project/operations/environments/show'
+          autoload :Index, 'qa/page/project/deployments/environments/index'
+          autoload :Show, 'qa/page/project/deployments/environments/show'
         end
+      end
 
+      module Infrastructure
         module Kubernetes
-          autoload :Index, 'qa/page/project/operations/kubernetes/index'
-          autoload :Add, 'qa/page/project/operations/kubernetes/add'
-          autoload :AddExisting, 'qa/page/project/operations/kubernetes/add_existing'
-          autoload :Show, 'qa/page/project/operations/kubernetes/show'
+          autoload :Index, 'qa/page/project/infrastructure/kubernetes/index'
+          autoload :Add, 'qa/page/project/infrastructure/kubernetes/add'
+          autoload :AddExisting, 'qa/page/project/infrastructure/kubernetes/add_existing'
+          autoload :Show, 'qa/page/project/infrastructure/kubernetes/show'
         end
+      end
 
+      module Monitor
         module Metrics
-          autoload :Show, 'qa/page/project/operations/metrics/show'
+          autoload :Show, 'qa/page/project/monitor/metrics/show'
         end
 
         module Incidents
-          autoload :Index, 'qa/page/project/operations/incidents/index'
+          autoload :Index, 'qa/page/project/monitor/incidents/index'
         end
       end
 
@@ -374,7 +412,6 @@ module QA
         autoload :Edit, 'qa/page/project/wiki/edit'
         autoload :Show, 'qa/page/project/wiki/show'
         autoload :GitAccess, 'qa/page/project/wiki/git_access'
-        autoload :Sidebar, 'qa/page/project/wiki/sidebar'
         autoload :List, 'qa/page/project/wiki/list'
       end
 
@@ -402,12 +439,17 @@ module QA
       end
     end
 
+    module User
+      autoload :Show, 'qa/page/user/show'
+    end
+
     module Issuable
       autoload :New, 'qa/page/issuable/new'
     end
 
     module Alert
       autoload :AutoDevopsAlert, 'qa/page/alert/auto_devops_alert'
+      autoload :FreeTrial, 'qa/page/alert/free_trial'
     end
 
     module Layout
@@ -489,6 +531,18 @@ module QA
       autoload :ProjectSelector, 'qa/page/component/project_selector'
       autoload :Snippet, 'qa/page/component/snippet'
       autoload :NewSnippet, 'qa/page/component/new_snippet'
+      autoload :InviteMembersModal, 'qa/page/component/invite_members_modal'
+      autoload :Wiki, 'qa/page/component/wiki'
+      autoload :WikiSidebar, 'qa/page/component/wiki_sidebar'
+      autoload :WikiPageForm, 'qa/page/component/wiki_page_form'
+      autoload :AccessTokens, 'qa/page/component/access_tokens'
+      autoload :CommitModal, 'qa/page/component/commit_modal'
+      autoload :VisibilitySetting, 'qa/page/component/visibility_setting'
+
+      module Import
+        autoload :Gitlab, 'qa/page/component/import/gitlab'
+        autoload :Selection, 'qa/page/component/import/selection'
+      end
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'
@@ -510,6 +564,11 @@ module QA
       module Project
         autoload :Templates, 'qa/page/component/project/templates'
       end
+    end
+
+    module Trials
+      autoload :New, 'qa/page/trials/new'
+      autoload :Select, 'qa/page/trials/select'
     end
 
     module Modal
@@ -541,6 +600,7 @@ module QA
       autoload :Minikube, 'qa/service/cluster_provider/minikube'
       autoload :K3d, 'qa/service/cluster_provider/k3d'
       autoload :K3s, 'qa/service/cluster_provider/k3s'
+      autoload :K3sCilium, 'qa/service/cluster_provider/k3s_cilium'
     end
 
     module DockerRun
@@ -566,7 +626,9 @@ module QA
     autoload :LoopRunner, 'qa/specs/loop_runner'
 
     module Helpers
+      autoload :ContextSelector, 'qa/specs/helpers/context_selector'
       autoload :Quarantine, 'qa/specs/helpers/quarantine'
+      autoload :RSpec, 'qa/specs/helpers/rspec'
     end
   end
 

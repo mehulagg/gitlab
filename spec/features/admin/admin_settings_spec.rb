@@ -8,9 +8,11 @@ RSpec.describe 'Admin updates settings' do
   include UsageDataHelpers
 
   let(:admin) { create(:admin) }
+  let(:dot_com?) { false }
 
-  context 'feature flag :user_mode_in_session is enabled', :request_store do
+  context 'application setting :admin_mode is enabled', :request_store do
     before do
+      allow(Gitlab).to receive(:com?).and_return(dot_com?)
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
       sign_in(admin)
       gitlab_enable_admin_mode_sign_in(admin)
@@ -127,9 +129,40 @@ RSpec.describe 'Admin updates settings' do
         expect(user_internal_regex['placeholder']).to eq 'Regex pattern'
       end
 
+      context 'Dormant users' do
+        context 'when Gitlab.com' do
+          let(:dot_com?) { true }
+
+          it 'does not expose the setting' do
+            expect(page).to have_no_selector('#application_setting_deactivate_dormant_users')
+          end
+        end
+
+        context 'when not Gitlab.com' do
+          let(:dot_com?) { false }
+
+          it 'change Dormant users' do
+            expect(page).to have_unchecked_field('Deactivate dormant users after 90 days of inactivity')
+            expect(current_settings.deactivate_dormant_users).to be_falsey
+
+            page.within('.as-account-limit') do
+              check 'application_setting_deactivate_dormant_users'
+              click_button 'Save changes'
+            end
+
+            expect(page).to have_content "Application settings saved successfully"
+
+            page.refresh
+
+            expect(current_settings.deactivate_dormant_users).to be_truthy
+            expect(page).to have_checked_field('Deactivate dormant users after 90 days of inactivity')
+          end
+        end
+      end
+
       context 'Change Sign-up restrictions' do
         context 'Require Admin approval for new signup setting' do
-          it 'changes the setting' do
+          it 'changes the setting', :js do
             page.within('.as-signup') do
               check 'Require admin approval for new sign-ups'
               click_button 'Save changes'
@@ -236,13 +269,16 @@ RSpec.describe 'Admin updates settings' do
     end
 
     context 'Integrations page' do
+      let(:mailgun_events_receiver_enabled) { true }
+
       before do
+        stub_feature_flags(mailgun_events_receiver: mailgun_events_receiver_enabled)
         visit general_admin_application_settings_path
       end
 
       it 'enable hiding third party offers' do
         page.within('.as-third-party-offers') do
-          check 'Do not display offers from third parties within GitLab'
+          check 'Do not display offers from third parties'
           click_button 'Save changes'
         end
 
@@ -250,33 +286,26 @@ RSpec.describe 'Admin updates settings' do
         expect(current_settings.hide_third_party_offers).to be true
       end
 
-      it 'change Slack Notifications Service template settings', :js do
-        first(:link, 'Service Templates').click
-        click_link 'Slack notifications'
-        fill_in 'Webhook', with: 'http://localhost'
-        fill_in 'Username', with: 'test_user'
-        fill_in 'service[push_channel]', with: '#test_channel'
-        page.check('Notify only broken pipelines')
-        page.select 'All branches', from: 'Branches to be notified'
+      context 'when mailgun_events_receiver feature flag is enabled' do
+        it 'enabling Mailgun events', :aggregate_failures do
+          page.within('.as-mailgun') do
+            check 'Enable Mailgun event receiver'
+            fill_in 'Mailgun HTTP webhook signing key', with: 'MAILGUN_SIGNING_KEY'
+            click_button 'Save changes'
+          end
 
-        check_all_events
-        click_button 'Save changes'
-
-        expect(page).to have_content 'Application settings saved successfully'
-
-        click_link 'Slack notifications'
-
-        expect(page.all('input[type=checkbox]')).to all(be_checked)
-        expect(find_field('Webhook').value).to eq 'http://localhost'
-        expect(find_field('Username').value).to eq 'test_user'
-        expect(find('[name="service[push_channel]"]').value).to eq '#test_channel'
+          expect(page).to have_content 'Application settings saved successfully'
+          expect(current_settings.mailgun_events_enabled).to be true
+          expect(current_settings.mailgun_signing_key).to eq 'MAILGUN_SIGNING_KEY'
+        end
       end
 
-      it 'defaults Deployment events to false for chat notification template settings', :js do
-        first(:link, 'Service Templates').click
-        click_link 'Slack notifications'
+      context 'when mailgun_events_receiver feature flag is disabled' do
+        let(:mailgun_events_receiver_enabled) { false }
 
-        expect(find_field('Deployment')).not_to be_checked
+        it 'does not have mailgun' do
+          expect(page).not_to have_selector('.as-mailgun')
+        end
       end
     end
 
@@ -285,17 +314,8 @@ RSpec.describe 'Admin updates settings' do
         visit integrations_admin_application_settings_path
       end
 
-      it 'allows user to dismiss deprecation notice' do
-        expect(page).to have_content('Some settings have moved')
-
-        click_button 'Dismiss'
-        wait_for_requests
-
-        expect(page).not_to have_content('Some settings have moved')
-
-        visit integrations_admin_application_settings_path
-
-        expect(page).not_to have_content('Some settings have moved')
+      it 'shows integrations table' do
+        expect(page).to have_selector '[data-testid="inactive-integrations-table"]'
       end
     end
 
@@ -314,6 +334,43 @@ RSpec.describe 'Admin updates settings' do
         expect(current_settings.auto_devops_domain).to eq('domain.com')
         expect(current_settings.keep_latest_artifact).to be false
         expect(page).to have_content "Application settings saved successfully"
+      end
+
+      context 'Runner Registration' do
+        context 'when feature is enabled' do
+          before do
+            stub_feature_flags(runner_registration_control: true)
+          end
+
+          it 'allows admins to control who has access to register runners' do
+            visit ci_cd_admin_application_settings_path
+
+            expect(current_settings.valid_runner_registrars).to eq(ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
+
+            page.within('.as-runner') do
+              find_all('.form-check-input').each(&:click)
+
+              click_button 'Save changes'
+            end
+
+            expect(current_settings.valid_runner_registrars).to eq([])
+            expect(page).to have_content "Application settings saved successfully"
+          end
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_feature_flags(runner_registration_control: false)
+          end
+
+          it 'does not allow admins to control who has access to register runners' do
+            visit ci_cd_admin_application_settings_path
+
+            expect(current_settings.valid_runner_registrars).to eq(ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
+
+            expect(page).not_to have_css('.as-runner')
+          end
+        end
       end
 
       context 'Container Registry' do
@@ -384,7 +441,20 @@ RSpec.describe 'Admin updates settings' do
           click_button 'Save changes'
         end
 
-        expect(current_settings.repository_storages_weighted_default).to be 50
+        expect(current_settings.repository_storages_weighted).to eq('default' => 50)
+      end
+
+      it 'still saves when settings are outdated' do
+        current_settings.update_attribute :repository_storages_weighted, { 'default' => 100, 'outdated' => 100 }
+
+        visit repository_admin_application_settings_path
+
+        page.within('.as-repository-storage') do
+          fill_in 'application_setting_repository_storages_weighted_default', with: 50
+          click_button 'Save changes'
+        end
+
+        expect(current_settings.repository_storages_weighted).to eq('default' => 50)
       end
     end
 
@@ -399,7 +469,8 @@ RSpec.describe 'Admin updates settings' do
           check 'Enable reCAPTCHA for login'
           fill_in 'IPs per user', with: 15
           check 'Enable Spam Check via external API endpoint'
-          fill_in 'URL of the external Spam Check endpoint', with: 'https://www.example.com/spamcheck'
+          fill_in 'URL of the external Spam Check endpoint', with: 'grpc://www.example.com/spamcheck'
+          fill_in 'Spam Check API Key', with: 'SPAM_CHECK_API_KEY'
           click_button 'Save changes'
         end
 
@@ -408,7 +479,7 @@ RSpec.describe 'Admin updates settings' do
         expect(current_settings.login_recaptcha_protection_enabled).to be true
         expect(current_settings.unique_ips_limit_per_user).to eq(15)
         expect(current_settings.spam_check_endpoint_enabled).to be true
-        expect(current_settings.spam_check_endpoint_url).to eq 'https://www.example.com/spamcheck'
+        expect(current_settings.spam_check_endpoint_url).to eq 'grpc://www.example.com/spamcheck'
       end
     end
 
@@ -462,7 +533,7 @@ RSpec.describe 'Admin updates settings' do
 
           wait_for_requests
 
-          expect(page).to have_selector '.js-usage-ping-payload'
+          expect(page).to have_selector '.js-service-ping-payload'
           expect(page).to have_button 'Hide payload'
           expect(page).to have_content expected_payload_content
         end
@@ -513,8 +584,8 @@ RSpec.describe 'Admin updates settings' do
         new_documentation_url = 'https://docs.gitlab.com'
 
         page.within('.as-help-page') do
-          fill_in 'Help page text', with: 'Example text'
-          check 'Hide marketing-related entries from help'
+          fill_in 'Additional text to show on the Help page', with: 'Example text'
+          check 'Hide marketing-related entries from the Help page.'
           fill_in 'Support page URL', with: new_support_url
           fill_in 'Documentation pages URL', with: new_documentation_url
           click_button 'Save changes'
@@ -575,7 +646,7 @@ RSpec.describe 'Admin updates settings' do
 
     context 'Nav bar' do
       it 'shows default help links in nav' do
-        default_support_url = 'https://about.gitlab.com/getting-help/'
+        default_support_url = "https://#{ApplicationHelper.promo_host}/getting-help/"
 
         visit root_dashboard_path
 
@@ -602,9 +673,9 @@ RSpec.describe 'Admin updates settings' do
     end
   end
 
-  context 'feature flag :user_mode_in_session is disabled' do
+  context 'application setting :admin_mode is disabled' do
     before do
-      stub_feature_flags(user_mode_in_session: false)
+      stub_application_setting(admin_mode: false)
 
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
 

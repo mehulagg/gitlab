@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Jenkins spec
 
-The [`jenkins_build_status_spec`](https://gitlab.com/gitlab-org/gitlab/blob/163c8a8c814db26d11e104d1cb2dcf02eb567dbe/qa/qa/specs/features/ee/browser_ui/3_create/jenkins/jenkins_build_status_spec.rb) spins up a Jenkins instance in a Docker container based on an image stored in the [GitLab-QA container registry](https://gitlab.com/gitlab-org/gitlab-qa/container_registry).
+The [`jenkins_build_status_spec`](https://gitlab.com/gitlab-org/gitlab/-/blob/163c8a8c814db26d11e104d1cb2dcf02eb567dbe/qa/qa/specs/features/ee/browser_ui/3_create/jenkins/jenkins_build_status_spec.rb) spins up a Jenkins instance in a Docker container based on an image stored in the [GitLab-QA container registry](https://gitlab.com/gitlab-org/gitlab-qa/container_registry).
 The Docker image it uses is preconfigured with some base data and plugins.
 The test then configures the GitLab plugin in Jenkins with a URL of the GitLab instance that are used
 to run the tests. Unfortunately, the GitLab Jenkins plugin does not accept ports so `http://localhost:3000` would
@@ -27,7 +27,7 @@ docker run \
 To run the tests from the `/qa` directory:
 
 ```shell
-CHROME_HEADLESS=false bin/qa Test::Instance::All http://localhost -- qa/specs/features/ee/browser_ui/3_create/jenkins/jenkins_build_status_spec.rb
+WEBDRIVER_HEADLESS=false bin/qa Test::Instance::All http://localhost -- qa/specs/features/ee/browser_ui/3_create/jenkins/jenkins_build_status_spec.rb
 ```
 
 The test automatically spins up a Docker container for Jenkins and tear down once the test completes.
@@ -47,7 +47,7 @@ Jenkins is available on `http://localhost:8080`.
 
 Admin username is `admin` and password is `password`.
 
-It is worth noting that this is not an orchestrated test. It is [tagged with the `:orchestrated` meta](https://gitlab.com/gitlab-org/gitlab/blob/163c8a8c814db26d11e104d1cb2dcf02eb567dbe/qa/qa/specs/features/ee/browser_ui/3_create/jenkins/jenkins_build_status_spec.rb#L5)
+It is worth noting that this is not an orchestrated test. It is [tagged with the `:orchestrated` meta](https://gitlab.com/gitlab-org/gitlab/-/blob/163c8a8c814db26d11e104d1cb2dcf02eb567dbe/qa/qa/specs/features/ee/browser_ui/3_create/jenkins/jenkins_build_status_spec.rb#L5)
 only to prevent it from running in the pipelines for live environments such as Staging.
 
 ### Troubleshooting
@@ -131,7 +131,7 @@ sudo nginx -s reload
 You could then run the tests from the `/qa` directory:
 
 ```shell
-CHROME_HEADLESS=false bin/qa Test::Instance::All http://gitlab-gitaly-cluster.test -- --tag gitaly_cluster
+WEBDRIVER_HEADLESS=false bin/qa Test::Instance::All http://gitlab-gitaly-cluster.test -- --tag gitaly_cluster
 ```
 
 Once you have finished testing you can stop and remove the Docker containers:
@@ -147,11 +147,11 @@ docker rm gitlab-gitaly-cluster praefect postgres gitaly3 gitaly2 gitaly1
 
 To run the Monitor tests locally, against the GDK, please follow the preparation steps below:
 
-1. Complete the [Prerequisites](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/auto_devops/index.md#prerequisites-for-gitlab-team-members-only), at least through step 5. Note that the monitor tests do not require permissions to work with GKE because they use [k3s as a Kubernetes cluster provider](https://github.com/rancher/k3s).
+1. Complete the [Prerequisites](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/auto_devops/index.md#prerequisites-for-gitlab-team-members-only), at least through step 5. Note that the monitor tests do not require permissions to work with GKE because they use [k3s as a Kubernetes cluster provider](https://github.com/rancher/k3s).
 1. The test setup deploys the app in a Kubernetes cluster, using the Auto DevOps deployment strategy.
-To enable Auto DevOps in GDK, follow the [associated setup](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/auto_devops/index.md#setup) instructions. If you have problems, review the [troubleshooting guide](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/auto_devops/tips_and_troubleshooting.md) or reach out to the `#gdk` channel in the internal GitLab Slack.
-1. Do [secure your GitLab instance](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/auto_devops/index.md#secure-your-gitlab-instance) since it is now publicly accessible on `https://[YOUR-PORT].qa-tunnel.gitlab.info`.
-1. Install the Kubernetes command line tool known as `kubectl`. Use the [official installation instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+To enable Auto DevOps in GDK, follow the [associated setup](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/auto_devops/index.md#setup) instructions. If you have problems, review the [troubleshooting guide](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/auto_devops/tips_and_troubleshooting.md) or reach out to the `#gdk` channel in the internal GitLab Slack.
+1. Do [secure your GitLab instance](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/auto_devops/index.md#secure-your-gitlab-instance) since it is now publicly accessible on `https://[YOUR-PORT].qa-tunnel.gitlab.info`.
+1. Install the Kubernetes command line tool known as `kubectl`. Use the [official installation instructions](https://kubernetes.io/docs/tasks/tools/).
 
 You might see NGINX issues when you run `gdk start` or `gdk restart`. In that case, run `sft login` to revalidate your credentials and regain access the QA Tunnel.
 
@@ -160,13 +160,13 @@ You might see NGINX issues when you run `gdk start` or `gdk restart`. In that ca
 Navigate to the folder in `/your-gdk/gitlab/qa` and issue the command:
 
 ```shell
-QA_DEBUG=true CHROME_HEADLESS=false GITLAB_ADMIN_USERNAME=rootusername GITLAB_ADMIN_PASSWORD=rootpassword GITLAB_QA_ACCESS_TOKEN=your_token_here GITLAB_QA_ADMIN_ACCESS_TOKEN=your_token_here CLUSTER_API_URL=https://kubernetes.docker.internal:6443 bundle exec bin/qa Test::Instance::All https://[YOUR-PORT].qa-tunnel.gitlab.info/ -- qa/specs/features/browser_ui/8_monitor/all_monitor_core_features_spec.rb --tag kubernetes --tag orchestrated --tag requires_admin
+QA_DEBUG=true WEBDRIVER_HEADLESS=false GITLAB_ADMIN_USERNAME=rootusername GITLAB_ADMIN_PASSWORD=rootpassword GITLAB_QA_ACCESS_TOKEN=your_token_here GITLAB_QA_ADMIN_ACCESS_TOKEN=your_token_here CLUSTER_API_URL=https://kubernetes.docker.internal:6443 bundle exec bin/qa Test::Instance::All https://[YOUR-PORT].qa-tunnel.gitlab.info/ -- qa/specs/features/browser_ui/8_monitor/all_monitor_core_features_spec.rb --tag kubernetes --tag orchestrated --tag requires_admin
 ```
 
 The following includes more information on the command:
 
 -`QA_DEBUG` - Set to `true` to verbosely log page object actions.
--`CHROME_HEADLESS` - When running locally, set to `false` to allow Chrome tests to be visible - watch your tests being run.
+-`WEBDRIVER_HEADLESS` - When running locally, set to `false` to allow browser tests to be visible - watch your tests being run.
 -`GITLAB_ADMIN_USERNAME` - Admin username to use when adding a license.
 -`GITLAB_ADMIN_PASSWORD` - Admin password to use when adding a license.
 -`GITLAB_QA_ACCESS_TOKEN` and `GITLAB_QA_ADMIN_ACCESS_TOKEN` - A valid personal access token with the `api` scope. This is used for API access during tests, and is used in the version that staging is currently running. The `ADMIN_ACCESS_TOKEN` is from a user with admin access. Used for API access as an admin during tests.
@@ -272,14 +272,14 @@ You can free some memory with either of the following commands: `docker prune sy
 
 ## Geo tests
 
-Geo end-to-end tests can run locally against a [Geo GDK setup](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/geo.md) or on Geo spun up in Docker containers.
+Geo end-to-end tests can run locally against a [Geo GDK setup](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/geo.md) or on Geo spun up in Docker containers.
 
 ### Using Geo GDK
 
 Run from the [`qa/` directory](https://gitlab.com/gitlab-org/gitlab/-/blob/f7272b77e80215c39d1ffeaed27794c220dbe03f/qa) with both GDK Geo primary and Geo secondary instances running:
 
 ```shell
-CHROME_HEADLESS=false bundle exec bin/qa QA::EE::Scenario::Test::Geo --primary-address http://localhost:3001 --secondary-address http://localhost:3002 --without-setup
+WEBDRIVER_HEADLESS=false bundle exec bin/qa QA::EE::Scenario::Test::Geo --primary-address http://localhost:3001 --secondary-address http://localhost:3002 --without-setup
 ```
 
 ### Using Geo in Docker
@@ -455,7 +455,7 @@ To run the LDAP tests on your local with TLS enabled, follow these steps:
 1. Run an LDAP test from [`gitlab/qa`](https://gitlab.com/gitlab-org/gitlab/-/tree/d5447ebb5f99d4c72780681ddf4dc25b0738acba/qa) directory:
 
    ```shell
-   GITLAB_LDAP_USERNAME="tanuki" GITLAB_LDAP_PASSWORD="password" QA_DEBUG=true CHROME_HEADLESS=false bin/qa Test::Instance::All https://gitlab.test qa/specs/features/browser_ui/1_manage/login/log_into_gitlab_via_ldap_spec.rb
+   GITLAB_LDAP_USERNAME="tanuki" GITLAB_LDAP_PASSWORD="password" QA_DEBUG=true WEBDRIVER_HEADLESS=false bin/qa Test::Instance::All https://gitlab.test qa/specs/features/browser_ui/1_manage/login/log_into_gitlab_via_ldap_spec.rb
    ```
 
 ### Running LDAP tests with TLS disabled
@@ -483,5 +483,5 @@ To run the LDAP tests on your local with TLS disabled, follow these steps:
 1. Run an LDAP test from [`gitlab/qa`](https://gitlab.com/gitlab-org/gitlab/-/tree/d5447ebb5f99d4c72780681ddf4dc25b0738acba/qa) directory:
 
    ```shell
-   GITLAB_LDAP_USERNAME="tanuki" GITLAB_LDAP_PASSWORD="password" QA_DEBUG=true CHROME_HEADLESS=false bin/qa Test::Instance::All http://localhost qa/specs/features/browser_ui/1_manage/login/log_into_gitlab_via_ldap_spec.rb
+   GITLAB_LDAP_USERNAME="tanuki" GITLAB_LDAP_PASSWORD="password" QA_DEBUG=true WEBDRIVER_HEADLESS=false bin/qa Test::Instance::All http://localhost qa/specs/features/browser_ui/1_manage/login/log_into_gitlab_via_ldap_spec.rb
    ```

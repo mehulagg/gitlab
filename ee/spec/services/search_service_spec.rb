@@ -76,7 +76,7 @@ RSpec.describe SearchService do
     end
 
     context 'redacting search results' do
-      let(:user) { create(:user) }
+      let_it_be(:user) { create(:user) }
 
       # Resources the user has access to
       let(:project) { create(:project) }
@@ -215,6 +215,99 @@ RSpec.describe SearchService do
 
         expect(subject).to be_kind_of(Kaminari::PaginatableArray)
         expect(subject).to contain_exactly(note_on_issue_in_project)
+      end
+    end
+  end
+
+  describe '#projects' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:accessible_project) { create(:project, :public, namespace: group) }
+    let_it_be(:inaccessible_project) { create(:project, :private, namespace: group) }
+
+    before do
+      stub_feature_flags(advanced_search_multi_project_select: group)
+    end
+
+    context 'when all projects are accessible' do
+      let_it_be(:accessible_project_2) { create(:project, :public, namespace: group) }
+
+      it 'returns the project' do
+        project_ids = [accessible_project.id, accessible_project_2.id].join(',')
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to match_array [accessible_project, accessible_project_2]
+      end
+
+      it 'returns the projects for guests' do
+        search_project = create :project
+        search_project.add_guest(user)
+        project_ids = [accessible_project.id, accessible_project_2.id, search_project.id].join(',')
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to match_array [accessible_project, accessible_project_2, search_project]
+      end
+
+      it 'handles spaces in the param' do
+        project_ids = [accessible_project.id, accessible_project_2.id].join(',    ')
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to match_array [accessible_project, accessible_project_2]
+      end
+
+      it 'returns nil if projects param is not a String' do
+        project_ids = accessible_project.id
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to be_nil
+      end
+    end
+
+    context 'when some projects are accessible' do
+      it 'returns only accessible projects' do
+        project_ids = [accessible_project.id, inaccessible_project.id].join(',')
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to match_array [accessible_project]
+      end
+    end
+
+    context 'when no projects are accessible' do
+      it 'returns nil' do
+        project_ids = "#{inaccessible_project.id}"
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to be_nil
+      end
+    end
+
+    context 'when no project_ids are provided' do
+      it 'returns nil' do
+        projects = described_class.new(user).projects
+
+        expect(projects).to be_nil
+      end
+    end
+
+    context 'when no group_id provided' do
+      it 'returns nil' do
+        project_ids = "#{accessible_project.id}"
+        projects = described_class.new(user, project_ids: project_ids).projects
+
+        expect(projects).to be_nil
+      end
+    end
+
+    context 'when the advanced_search_multi_project_select feature is not enabled for the group' do
+      before do
+        stub_feature_flags(advanced_search_multi_project_select: false)
+      end
+
+      it 'returns nil' do
+        project_ids = "#{accessible_project.id}"
+        projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
+
+        expect(projects).to be_nil
       end
     end
   end

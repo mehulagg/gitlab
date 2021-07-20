@@ -363,23 +363,6 @@ RSpec.describe Todo do
     end
   end
 
-  describe '.for_ids' do
-    it 'returns the expected todos' do
-      todo1 = create(:todo)
-      todo2 = create(:todo)
-      todo3 = create(:todo)
-      create(:todo)
-
-      expect(described_class.for_ids([todo2.id, todo1.id, todo3.id])).to contain_exactly(todo1, todo2, todo3)
-    end
-
-    it 'returns an empty collection when no ids are given' do
-      create(:todo)
-
-      expect(described_class.for_ids([])).to be_empty
-    end
-  end
-
   describe '.for_user' do
     it 'returns the expected todos' do
       user1 = create(:user)
@@ -390,6 +373,34 @@ RSpec.describe Todo do
       create(:todo, user: user2)
 
       expect(described_class.for_user(user1)).to contain_exactly(todo1, todo2)
+    end
+  end
+
+  describe '.for_note' do
+    it 'returns todos that belongs to notes' do
+      note_1 = create(:note, noteable: issue, project: issue.project)
+      note_2 = create(:note, noteable: issue, project: issue.project)
+      todo_1 = create(:todo, note: note_1)
+      todo_2 = create(:todo, note: note_2)
+      create(:todo, note: create(:note))
+
+      expect(described_class.for_note([note_1, note_2])).to contain_exactly(todo_1, todo_2)
+    end
+  end
+
+  describe '.group_by_user_id_and_state' do
+    let_it_be(:user1) { create(:user) }
+    let_it_be(:user2) { create(:user) }
+
+    before do
+      create(:todo, user: user1, state: :pending)
+      create(:todo, user: user1, state: :pending)
+      create(:todo, user: user1, state: :done)
+      create(:todo, user: user2, state: :pending)
+    end
+
+    specify do
+      expect(Todo.count_grouped_by_user_id_and_state).to eq({ [user1.id, "done"] => 1, [user1.id, "pending"] => 2, [user2.id, "pending"] => 1 })
     end
   end
 
@@ -451,5 +462,17 @@ RSpec.describe Todo do
         expect(Todo.where(id: ids).map(&:updated_at)).to all(be_like_time(expected_update_date))
       end
     end
+  end
+
+  describe '.distinct_user_ids' do
+    subject { described_class.distinct_user_ids }
+
+    let_it_be(:user1) { create(:user) }
+    let_it_be(:user2) { create(:user) }
+    let_it_be(:todo) { create(:todo, user: user1) }
+    let_it_be(:todo) { create(:todo, user: user1) }
+    let_it_be(:todo) { create(:todo, user: user2) }
+
+    it { is_expected.to contain_exactly(user1.id, user2.id) }
   end
 end

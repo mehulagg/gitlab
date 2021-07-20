@@ -55,7 +55,7 @@ RSpec.describe 'User uses header search field', :js do
         expect(page).to have_selector('.dropdown-header', text: /#{scope_name}/i)
       end
 
-      context 'when clicking issues' do
+      context 'when clicking issues', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332317' do
         let!(:issue) { create(:issue, project: project, author: user, assignees: [user]) }
 
         it 'shows assigned issues' do
@@ -75,7 +75,7 @@ RSpec.describe 'User uses header search field', :js do
         end
       end
 
-      context 'when clicking merge requests' do
+      context 'when clicking merge requests', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332317' do
         let!(:merge_request) { create(:merge_request, source_project: project, author: user, assignees: [user]) }
 
         it 'shows assigned merge requests' do
@@ -175,7 +175,7 @@ RSpec.describe 'User uses header search field', :js do
         fill_in_search('Merge')
 
         within(dashboard_search_options_popup_menu) do
-          expect(page).to have_text('Merge Requests')
+          expect(page).to have_text('Merge requests')
         end
       end
 

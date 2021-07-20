@@ -10,9 +10,9 @@ module Gitlab
         NOP_RELATION.new
       end
 
-      def perform(_scan_ids); end
+      def perform(*_scan_ids); end
     end
   end
 end
 
-Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings.prepend_if_ee('::EE::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings')
+Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings.prepend_mod_with('Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings')

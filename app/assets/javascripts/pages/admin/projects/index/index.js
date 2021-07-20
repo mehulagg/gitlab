@@ -6,16 +6,18 @@ import Translate from '~/vue_shared/translate';
 
 import deleteProjectModal from './components/delete_project_modal.vue';
 
-document.addEventListener('DOMContentLoaded', () => {
+(() => {
   Vue.use(Translate);
 
   const deleteProjectModalEl = document.getElementById('delete-project-modal');
 
   const deleteModal = new Vue({
     el: deleteProjectModalEl,
-    data: {
-      deleteProjectUrl: '',
-      projectName: '',
+    data() {
+      return {
+        deleteProjectUrl: '',
+        projectName: '',
+      };
     },
     mounted() {
       const deleteProjectButtons = document.querySelectorAll('.delete-project-button');
@@ -39,4 +41,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     },
   });
-});
+})();

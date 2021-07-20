@@ -20,3 +20,5 @@ module Types
     end
   end
 end
+
+Types::AlertManagement::HttpIntegrationType.prepend_mod

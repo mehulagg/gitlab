@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Source Code
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
 ---
@@ -21,7 +21,7 @@ request is updated to show the impending merge. If you can't wait
 for the pipeline to succeed, you can choose **Merge immediately**
 in the dropdown menu on the right of the main button.
 
-The author of the merge request and project members with developer permissions can
+The author of the merge request and project members with the Developer role can
 cancel the automatic merge at any time before the pipeline finishes.
 
 ![Status](img/merge_when_pipeline_succeeds_status.png)
@@ -67,8 +67,8 @@ You should be careful to configure CI/CD so that pipelines run for every merge r
 ### Limitations
 
 When this setting is enabled, a merge request is prevented from being merged if there
-is no pipeline. This may conflict with some use cases where [`only/except`](../../../ci/yaml/README.md#onlyexcept-advanced)
-or [`rules`](../../../ci/yaml/README.md#rules) are used and they don't generate any pipelines.
+is no pipeline. This may conflict with some use cases where [`only/except`](../../../ci/yaml/index.md#only--except)
+or [`rules`](../../../ci/yaml/index.md#rules) are used and they don't generate any pipelines.
 
 You should ensure that [there is always a pipeline](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/54226)
 and that it's successful.
@@ -94,14 +94,14 @@ merge-request-pipeline-job:
 ```
 
 You should avoid configuration like this, and only use branch (`push`) pipelines
-or merge request pipelines, when possible. See [`rules` documentation](../../../ci/yaml/README.md#prevent-duplicate-pipelines)
+or merge request pipelines, when possible. See [`rules` documentation](../../../ci/jobs/job_control.md#avoid-duplicate-pipelines)
 for details on avoiding two pipelines for a single merge request.
 
 ### Skipped pipelines
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211482) in GitLab 13.1.
 
-When the **Pipelines must succeed** checkbox is checked, [skipped pipelines](../../../ci/yaml/README.md#skip-pipeline) prevent
+When the **Pipelines must succeed** checkbox is checked, [skipped pipelines](../../../ci/yaml/index.md#skip-pipeline) prevent
 merge requests from being merged. To change this behavior:
 
 1. Navigate to your project's **Settings > General** page.

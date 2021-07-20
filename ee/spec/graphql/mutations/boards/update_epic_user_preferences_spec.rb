@@ -8,6 +8,7 @@ RSpec.describe Mutations::Boards::UpdateEpicUserPreferences do
   let_it_be(:user) { create(:user) }
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:epic) { create(:epic, group: group) }
+
   let(:context) { { current_user: user } }
 
   subject(:mutation) { described_class.new(object: nil, context: context, field: nil).resolve(**mutation_params) }

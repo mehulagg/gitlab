@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Create' do
-    describe 'Search using Elasticsearch', :orchestrated, :elasticsearch, :requires_admin do
+    describe 'Search using Elasticsearch', :orchestrated, :elasticsearch, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332210', type: :investigating } do
       include Runtime::Fixtures
       let(:project_name) { 'testing_elasticsearch_indexing' }
       let(:project_file_name) { 'elasticsearch.rb' }
@@ -13,13 +13,15 @@ module QA
         end
       end
 
-      before do
+      before(:all) do
         Flow::Login.while_signed_in_as_admin do
           QA::EE::Resource::Settings::Elasticsearch.fabricate_via_browser_ui!
         end
 
         Runtime::Search.assert_elasticsearch_responding
+      end
 
+      before do
         Flow::Login.sign_in
 
         Resource::Repository::ProjectPush.fabricate! do |push|

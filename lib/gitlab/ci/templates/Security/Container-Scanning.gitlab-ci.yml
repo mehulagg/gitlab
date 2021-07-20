@@ -1,34 +1,47 @@
-# Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/container_scanning/
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml
+
+# Use this template to enable container scanning in your project.
+# You should add this template to an existing `.gitlab-ci.yml` file by using the `include:`
+# keyword.
+# The template should work without modifications but you can customize the template settings if
+# needed: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+#
+# Requirements:
+# - A `test` stage to be present in the pipeline.
+# - You must define the image to be scanned in the DOCKER_IMAGE variable. If DOCKER_IMAGE is the
+#   same as $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG, you can skip this.
+# - Container registry credentials defined by `DOCKER_USER` and `DOCKER_PASSWORD` variables if the
+# image to be scanned is in a private registry.
+# - For auto-remediation, a readable Dockerfile in the root of the project or as defined by the
+#   DOCKERFILE_PATH variable.
+#
+# Configure container scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
+# List of available variables: https://docs.gitlab.com/ee/user/application_security/container_scanning/#available-variables
 
 variables:
-  # Setting this variable will affect all Security templates
-  # (SAST, Dependency Scanning, ...)
-  SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
-  CS_MAJOR_VERSION: 3
+  CS_ANALYZER_IMAGE: registry.gitlab.com/security-products/container-scanning:4
 
 container_scanning:
-  stage: test
   image: "$CS_ANALYZER_IMAGE"
+  stage: test
   variables:
-    # By default, use the latest clair vulnerabilities database, however, allow it to be overridden here with a specific image
-    # to enable container scanning to run offline, or to provide a consistent list of vulnerabilities for integration testing purposes
-    CLAIR_DB_IMAGE_TAG: "latest"
-    CLAIR_DB_IMAGE: "$SECURE_ANALYZERS_PREFIX/clair-vulnerabilities-db:$CLAIR_DB_IMAGE_TAG"
-    # Override the GIT_STRATEGY variable in your `.gitlab-ci.yml` file and set it to `fetch` if you want to provide a `clair-whitelist.yml`
-    # file. See https://docs.gitlab.com/ee/user/application_security/container_scanning/index.html#overriding-the-container-scanning-template
-    # for details
+    # To provide a `vulnerability-allowlist.yml` file, override the GIT_STRATEGY variable in your
+    # `.gitlab-ci.yml` file and set it to `fetch`.
+    # For details, see the following links:
+    # https://docs.gitlab.com/ee/user/application_security/container_scanning/index.html#overriding-the-container-scanning-template
+    # https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
     GIT_STRATEGY: none
-    CS_ANALYZER_IMAGE: $SECURE_ANALYZERS_PREFIX/klar:$CS_MAJOR_VERSION
   allow_failure: true
-  services:
-    - name: $CLAIR_DB_IMAGE
-      alias: clair-vulnerabilities-db
-  script:
-    - /analyzer run
   artifacts:
     reports:
       container_scanning: gl-container-scanning-report.json
+    paths: [gl-container-scanning-report.json]
   dependencies: []
+  script:
+    - gtcs scan
   rules:
     - if: $CONTAINER_SCANNING_DISABLED
       when: never

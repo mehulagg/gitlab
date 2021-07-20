@@ -32,7 +32,9 @@
   - 1
 - - analytics_devops_adoption_create_snapshot
   - 1
-- - analytics_instance_statistics_counter_job
+- - analytics_usage_trends_counter_job
+  - 1
+- - approval_rules_external_approval_rule_payload
   - 1
 - - approve_blocked_pending_approval_users
   - 1
@@ -51,6 +53,12 @@
 - - bulk_import
   - 1
 - - bulk_imports_entity
+  - 1
+- - bulk_imports_export_request
+  - 1
+- - bulk_imports_pipeline
+  - 1
+- - bulk_imports_relation_export
   - 1
 - - chaos
   - 2
@@ -98,6 +106,8 @@
   - 1
 - - disallow_two_factor_for_subgroups
   - 1
+- - dora_metrics
+  - 1
 - - elastic_association_indexer
   - 1
 - - elastic_commit_indexer
@@ -105,8 +115,6 @@
 - - elastic_delete_project
   - 1
 - - elastic_full_index
-  - 1
-- - elastic_indexer
   - 1
 - - elastic_indexing_control
   - 1
@@ -122,6 +130,8 @@
   - 1
 - - epics
   - 2
+- - epics_new_epic_issue
+  - 1
 - - error_tracking_issue_link
   - 1
 - - experiments_record_conversion_event
@@ -139,8 +149,6 @@
 - - gcp_cluster
   - 1
 - - geo
-  - 1
-- - git_garbage_collect
   - 1
 - - github_import_advance_stage
   - 1
@@ -164,6 +172,8 @@
   - 1
 - - groups_update_repository_storage
   - 1
+- - groups_update_statistics
+  - 1
 - - hashed_storage
   - 1
 - - import_issues_csv
@@ -174,15 +184,25 @@
   - 1
 - - incident_management_oncall_rotations_persist_shifts_job
   - 1
+- - incident_management_pending_escalations_alert_check
+  - 1
+- - incident_management_pending_escalations_alert_create
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
   - 1
 - - issuable_export_csv
   - 1
+- - issuable_label_links_destroy
+  - 1
+- - issuables_clear_groups_issue_counter
+  - 1
 - - issue_placement
   - 2
 - - issue_rebalancing
+  - 1
+- - iterations
   - 1
 - - jira_connect
   - 1
@@ -202,6 +222,14 @@
   - 1
 - - merge_request_reset_approvals
   - 1
+- - merge_requests_delete_source_branch
+  - 1
+- - merge_requests_handle_assignees_change
+  - 1
+- - merge_requests_resolve_todos
+  - 1
+- - merge_requests_sync_code_owner_approval_rules
+  - 1
 - - metrics_dashboard_prune_old_annotations
   - 1
 - - metrics_dashboard_sync_dashboards
@@ -210,7 +238,11 @@
   - 1
 - - namespaceless_project_destroy
   - 1
+- - namespaces_onboarding_issue_created
+  - 1
 - - namespaces_onboarding_pipeline_created
+  - 1
+- - namespaces_onboarding_progress
   - 1
 - - namespaces_onboarding_user_added
   - 1
@@ -227,6 +259,8 @@
 - - object_storage
   - 1
 - - package_repositories
+  - 1
+- - packages_composer_cache_update
   - 1
 - - pages
   - 1
@@ -270,15 +304,17 @@
   - 1
 - - project_import_schedule
   - 1
-- - project_schedule_bulk_repository_shard_moves
-  - 1
 - - project_service
   - 1
 - - project_template_export
   - 1
-- - project_update_repository_storage
-  - 1
 - - projects_git_garbage_collect
+  - 1
+- - projects_post_creation
+  - 1
+- - projects_schedule_bulk_repository_shard_moves
+  - 1
+- - projects_update_repository_storage
   - 1
 - - prometheus_create_default_alerts
   - 1
@@ -300,6 +336,8 @@
   - 2
 - - refresh_license_compliance_checks
   - 2
+- - releases_create_evidence
+  - 1
 - - remote_mirror_notification
   - 2
 - - repository_check
@@ -334,9 +372,9 @@
   - 1
 - - set_user_status_based_on_user_cap_setting
   - 1
-- - snippet_schedule_bulk_repository_shard_moves
+- - snippets_schedule_bulk_repository_shard_moves
   - 1
-- - snippet_update_repository_storage
+- - snippets_update_repository_storage
   - 1
 - - status_page_publish
   - 1
@@ -369,6 +407,8 @@
 - - web_hook
   - 1
 - - web_hooks_destroy
+  - 1
+- - web_hooks_log_execution
   - 1
 - - wikis_git_garbage_collect
   - 1

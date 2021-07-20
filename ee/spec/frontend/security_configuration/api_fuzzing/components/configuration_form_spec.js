@@ -2,17 +2,16 @@ import { GlAlert } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
-import ConfigurationSnippetModal from 'ee/security_configuration/api_fuzzing/components/configuration_snippet_modal.vue';
-import {
-  SCAN_MODES,
-  CONFIGURATION_SNIPPET_MODAL_ID,
-} from 'ee/security_configuration/api_fuzzing/constants';
+import { SCAN_MODES } from 'ee/security_configuration/api_fuzzing/constants';
+import ConfigurationSnippetModal from 'ee/security_configuration/components/configuration_snippet_modal.vue';
+import { CONFIGURATION_SNIPPET_MODAL_ID } from 'ee/security_configuration/components/constants';
 import DropdownInput from 'ee/security_configuration/components/dropdown_input.vue';
 import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
 import FormInput from 'ee/security_configuration/components/form_input.vue';
 import { stripTypenames } from 'helpers/graphql_helpers';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { CODE_SNIPPET_SOURCE_API_FUZZING } from '~/pipeline_editor/components/code_snippet_alert/constants';
 import {
   apiFuzzingConfigurationQueryResponse,
   createApiFuzzingConfigurationMutationResponse,
@@ -169,11 +168,11 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
     });
 
     it('displays a dropdown option for each scan profile', () => {
-      findScanProfileDropdownInput()
-        .findAll('li')
-        .wrappers.forEach((item, index) => {
-          expect(item.text()).toBe(apiFuzzingCiConfiguration.scanProfiles[index].description);
-        });
+      const dropdownItems = findScanProfileDropdownInput().findAll('li').wrappers;
+      dropdownItems.shift(); // Skip section header
+      dropdownItems.forEach((item, index) => {
+        expect(item.text()).toBe(apiFuzzingCiConfiguration.scanProfiles[index].description);
+      });
     });
 
     it('by default, YAML viewer is not visible', () => {
@@ -239,11 +238,20 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
       expect(wrapper.vm.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show).toHaveBeenCalled();
       expect(findConfigurationSnippetModal().props()).toEqual({
         ciYamlEditUrl:
-          createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration
-            .gitlabCiYamlEditUrl,
-        yaml:
-          createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration
-            .configurationYaml,
+          createApiFuzzingConfigurationMutationResponse.data.apiFuzzingCiConfigurationCreate
+            .gitlabCiYamlEditPath,
+        yaml: `---
+# Tip: Insert this part below all stages
+stages:
+- fuzz
+# Tip: Insert this part below all include
+include:
+- template: template.gitlab-ci.yml
+# Tip: Insert the following variables anywhere below stages and include
+variables:
+- FOO: bar`,
+        redirectParam: CODE_SNIPPET_SOURCE_API_FUZZING,
+        scanType: 'API Fuzzing',
       });
     });
 
@@ -263,6 +271,7 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
       await waitForPromises();
 
       expect(findAlert().exists()).toBe(true);
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 0 });
     });
 
     it('shows an error on error-as-data', async () => {
@@ -271,7 +280,7 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
           $apollo: {
             mutate: jest.fn().mockResolvedValue({
               data: {
-                createApiFuzzingCiConfiguration: {
+                apiFuzzingCiConfigurationCreate: {
                   errors: ['error#1'],
                 },
               },
@@ -287,6 +296,7 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
       await waitForPromises();
 
       expect(findAlert().exists()).toBe(true);
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 0 });
     });
   });
 });

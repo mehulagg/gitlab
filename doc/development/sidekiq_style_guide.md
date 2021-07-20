@@ -15,6 +15,36 @@ All workers should include `ApplicationWorker` instead of `Sidekiq::Worker`,
 which adds some convenience methods and automatically sets the queue based on
 the worker's name.
 
+## Retries
+
+Sidekiq defaults to using [25
+retries](https://github.com/mperham/sidekiq/wiki/Error-Handling#automatic-job-retry),
+with back-off between each retry. 25 retries means that the last retry
+would happen around three weeks after the first attempt (assuming all 24
+prior retries failed).
+
+For most workers - especially [idempotent workers](#idempotent-jobs) -
+the default of 25 retries is more than sufficient. Many of our older
+workers declare 3 retries, which used to be the default within the
+GitLab application. 3 retries happen over the course of a couple of
+minutes, so the jobs are prone to failing completely.
+
+A lower retry count may be applicable if any of the below apply:
+
+1. The worker contacts an external service and we do not provide
+   guarantees on delivery. For example, webhooks.
+1. The worker is not idempotent and running it multiple times could
+   leave the system in an inconsistent state. For example, a worker that
+   posts a system note and then performs an action: if the second step
+   fails and the worker retries, the system note will be posted again.
+1. The worker is a cronjob that runs frequently. For example, if a cron
+   job runs every hour, then we don't need to retry beyond an hour
+   because we don't need two of the same job running at once.
+
+Each retry for a worker is counted as a failure in our metrics. A worker
+which always fails 9 times and succeeds on the 10th would have a 90%
+error rate.
+
 ## Dedicated Queues
 
 All workers should use their own queue, which is automatically set based on the
@@ -123,6 +153,12 @@ A good example of that would be a cache expiration worker.
 
 A job scheduled for an idempotent worker is [deduplicated](#deduplication) when
 an unstarted job with the same arguments is already in the queue.
+
+WARNING:
+For [data consistency jobs](#job-data-consistency-strategies), the deduplication is not compatible with the
+`data_consistency` attribute set to `:sticky` or `:delayed`.
+The reason for this is that deduplication always takes into account the latest binary replication pointer into account, not the first one.
+There is an [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325291) to improve this.
 
 ### Ensuring a worker is idempotent
 
@@ -356,8 +392,12 @@ end
 If a large number of background jobs get scheduled at once, queueing of jobs may
 occur while jobs wait for a worker node to be become available. This is normal
 and gives the system resilience by allowing it to gracefully handle spikes in
-traffic. Some jobs, however, are more sensitive to latency than others. Examples
-of these jobs include:
+traffic. Some jobs, however, are more sensitive to latency than others.
+
+In general, latency-sensitive jobs perform operations that a user could
+reasonably expect to happen synchronously, rather than asynchronously in a
+background worker. A common example is a write following an action. Examples of
+these jobs include:
 
 1. A job which updates a merge request following a push to a branch.
 1. A job which invalidates a cache of known branches for a project after a push
@@ -425,6 +465,105 @@ If we expect an increase of **less than 5%**, then no further action is needed.
 
 Otherwise, please ping `@gitlab-org/scalability` on the merge request and ask
 for a review.
+
+## Job data consistency strategies
+
+In GitLab 13.11 and earlier, Sidekiq workers would always send database queries to the primary
+database node,
+both for reads and writes. This ensured that data integrity
+is both guaranteed and immediate, since in a single-node scenario it is impossible to encounter
+stale reads even for workers that read their own writes.
+If a worker writes to the primary, but reads from a replica, however, the possibility
+of reading a stale record is non-zero due to replicas potentially lagging behind the primary.
+
+When the number of jobs that rely on the database increases, ensuring immediate data consistency
+can put unsustainable load on the primary database server. We therefore added the ability to use
+[database load balancing for Sidekiq workers](../administration/database_load_balancing.md#load-balancing-for-sidekiq).
+By configuring a worker's `data_consistency` field, we can then allow the scheduler to target read replicas
+under several strategies outlined below.
+
+## Trading immediacy for reduced primary load
+
+We require Sidekiq workers to make an explicit decision around whether they need to use the
+primary database node for all reads and writes, or whether reads can be served from replicas. This is
+enforced by a RuboCop rule, which ensures that the `data_consistency` field is set.
+
+When setting this field, consider the following trade-off:
+
+- Ensure immediately consistent reads, but increase load on the primary database.
+- Prefer read replicas to add relief to the primary, but increase the likelihood of stale reads that have to be retried.
+
+To maintain the same behavior compared to before this field was introduced, set it to `:always`, so
+database operations will only target the primary. Reasons for having to do so include workers
+that mostly or exclusively perform writes, or workers that read their own writes and who might run
+into data consistency issues should a stale record be read back from a replica. **Try to avoid
+these scenarios, since `:always` should be considered the exception, not the rule.**
+
+To allow for reads to be served from replicas, we added two additional consistency modes: `:sticky` and `:delayed`.
+
+When you declare either `:sticky` or `:delayed` consistency, workers become eligible for database
+load-balancing. In both cases, jobs are enqueued with a short delay.
+This minimizes the likelihood of replication lag after a write.
+
+The difference is in what happens when there is replication lag after the delay: `sticky` workers
+switch over to the primary right away, whereas `delayed` workers fail fast and are retried once.
+If they still encounter replication lag, they also switch to the primary instead.
+**If your worker never performs any writes, it is strongly advised to apply one of these consistency settings,
+since it will never need to rely on the primary database node.**
+
+The table below shows the `data_consistency` attribute and its values, ordered by the degree to which
+they prefer read replicas and will wait for replicas to catch up:
+
+| **Data Consistency**  | **Description**  |
+|--------------|-----------------------------|
+| `:always`    | The job is required to use the primary database (default). It should be used for workers that primarily perform writes or that have strict requirements around data consistency when reading their own writes. |
+| `:sticky`    | The job prefers replicas, but switches to the primary for writes or when encountering replication lag. It should be used for jobs that require to be executed as fast as possible but can sustain a small initial queuing delay.  |
+| `:delayed`   | The job prefers replicas, but switches to the primary for writes. When encountering replication lag before the job starts, the job is retried once. If the replica is still not up to date on the next retry, it switches to the primary. It should be used for jobs where delaying execution further typically does not matter, such as cache expiration or web hooks execution. |
+
+In all cases workers read either from a replica that is fully caught up,
+or from the primary node, so data consistency is always ensured.
+
+To set a data consistency for a worker, use the `data_consistency` class method:
+
+```ruby
+class DelayedWorker
+  include ApplicationWorker
+
+  data_consistency :delayed
+
+  # ...
+end
+```
+
+For [idempotent jobs](#idempotent-jobs), the deduplication is not compatible with the
+`data_consistency` attribute set to `:sticky` or `:delayed`.
+The reason for this is that deduplication always takes into account the latest binary replication pointer into account, not the first one.
+There is an [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325291) to improve this.
+
+### `feature_flag` property
+
+The `feature_flag` property allows you to toggle a job's `data_consistency`,
+which permits you to safely toggle load balancing capabilities for a specific job.
+When `feature_flag` is disabled, the job defaults to `:always`, which means that the job will always use the primary database.
+
+The `feature_flag` property does not allow the use of
+[feature gates based on actors](../development/feature_flags/index.md).
+This means that the feature flag cannot be toggled only for particular
+projects, groups, or users, but instead, you can safely use [percentage of time rollout](../development/feature_flags/index.md).
+Note that since we check the feature flag on both Sidekiq client and server, rolling out a 10% of the time,
+will likely results in 1% (`0.1` `[from client]*0.1` `[from server]`) of effective jobs using replicas.
+
+Example:
+
+```ruby
+class DelayedWorker
+  include ApplicationWorker
+
+  data_consistency :delayed, feature_flag: :load_balancing_for_delayed_worker
+
+  # ...
+end
+```
 
 ## Jobs with External Dependencies
 
@@ -551,7 +690,7 @@ does not account for weights.
 
 As we are [moving towards using `sidekiq-cluster` in
 Free](https://gitlab.com/gitlab-org/gitlab/-/issues/34396), newly-added
-workers do not need to have weights specified. They can simply use the
+workers do not need to have weights specified. They can use the
 default weight, which is 1.
 
 ## Worker context
@@ -588,7 +727,7 @@ the `.with_route` scope defined on all `Routable`s.
 
 ### Cron workers
 
-The context is automatically cleared for workers in the Cronjob queue
+The context is automatically cleared for workers in the cronjob queue
 (`include CronjobQueue`), even when scheduling them from
 requests. We do this to avoid incorrect metadata when other jobs are
 scheduled from the cron worker.
@@ -719,6 +858,23 @@ possible situations:
 1. A job is queued by a node running the newer version of the application, but
    executed on a node running an older version of the application.
 
+### Adding new workers
+
+On GitLab.com, we [do not currently have a Sidekiq deployment in the
+canary stage](https://gitlab.com/gitlab-org/gitlab/-/issues/19239). This
+means that a new worker than can be scheduled from an HTTP endpoint may
+be scheduled from canary but not run on Sidekiq until the full
+production deployment is complete. This can be several hours later than
+scheduling the job. For some workers, this will not be a problem. For
+others - particularly [latency-sensitive
+jobs](#latency-sensitive-jobs) - this will result in a poor user
+experience.
+
+This only applies to new worker classes when they are first introduced.
+As we recommend [using feature flags](feature_flags/) as a general
+development process, it's best to control the entire change (including
+scheduling of the new Sidekiq worker) with a feature flag.
+
 ### Changing the arguments for a worker
 
 Jobs need to be backward and forward compatible between consecutive versions
@@ -824,14 +980,12 @@ Sidekiq jobs, please consider removing the worker in a major release only.
 For the same reasons that removing workers is dangerous, care should be taken
 when renaming queues.
 
-When renaming queues, use the `sidekiq_queue_migrate` helper migration method,
-as shown in this example:
+When renaming queues, use the `sidekiq_queue_migrate` helper migration method
+in a **post-deployment migration**:
 
 ```ruby
 class MigrateTheRenamedSidekiqQueue < ActiveRecord::Migration[5.0]
   include Gitlab::Database::MigrationHelpers
-
-  DOWNTIME = false
 
   def up
     sidekiq_queue_migrate 'old_queue_name', to: 'new_queue_name'
@@ -843,3 +997,7 @@ class MigrateTheRenamedSidekiqQueue < ActiveRecord::Migration[5.0]
 end
 
 ```
+
+You must rename the queue in a post-deployment migration not in a normal
+migration. Otherwise, it runs too early, before all the workers that
+schedule these jobs have stopped running. See also [other examples](post_deployment_migrations.md#use-cases).

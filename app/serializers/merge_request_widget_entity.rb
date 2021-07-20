@@ -52,11 +52,11 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   expose :reviewing_and_managing_merge_requests_docs_path do |merge_request|
-    help_page_path('user/project/merge_requests/reviewing_and_managing_merge_requests.md', anchor: "checkout-merge-requests-locally-through-the-head-ref")
+    help_page_path('user/project/merge_requests/reviews/index.md', anchor: "checkout-merge-requests-locally-through-the-head-ref")
   end
 
   expose :merge_request_pipelines_docs_path do |merge_request|
-    help_page_path('ci/merge_request_pipelines/index.md')
+    help_page_path('ci/pipelines/merge_request_pipelines.md')
   end
 
   expose :ci_environments_status_path do |merge_request|
@@ -157,7 +157,7 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   def use_merge_base_with_merged_results?
-    object.actual_head_pipeline&.merge_request_event_type == :merged_result
+    object.actual_head_pipeline&.merged_result_pipeline?
   end
 
   def head_pipeline_downloadable_path_for_report_type(file_type)
@@ -176,4 +176,4 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 end
 
-MergeRequestWidgetEntity.prepend_if_ee('EE::MergeRequestWidgetEntity')
+MergeRequestWidgetEntity.prepend_mod_with('MergeRequestWidgetEntity')

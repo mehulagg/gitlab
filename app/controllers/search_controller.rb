@@ -16,6 +16,8 @@ class SearchController < ApplicationController
     search_term_present && !params[:project_id].present?
   end
 
+  rescue_from ActiveRecord::QueryCanceled, with: :render_timeout
+
   layout 'search'
 
   feature_category :global_search
@@ -47,7 +49,17 @@ class SearchController < ApplicationController
     params.require([:search, :scope])
 
     scope = search_service.scope
-    count = search_service.search_results.formatted_count(scope)
+
+    count = 0
+    ApplicationRecord.with_fast_read_statement_timeout do
+      count = search_service.search_results.formatted_count(scope)
+    end
+
+    # Users switching tabs will keep fetching the same tab counts so it's a
+    # good idea to cache in their browser just for a short time. They can still
+    # clear cache if they are seeing an incorrect count but inaccurate count is
+    # not such a bad thing.
+    expires_in 1.minute
 
     render json: { count: count }
   end
@@ -125,7 +137,7 @@ class SearchController < ApplicationController
     payload[:metadata] ||= {}
     payload[:metadata]['meta.search.group_id'] = params[:group_id]
     payload[:metadata]['meta.search.project_id'] = params[:project_id]
-    payload[:metadata]['meta.search.scope'] = params[:scope]
+    payload[:metadata]['meta.search.scope'] = params[:scope] || @scope
     payload[:metadata]['meta.search.filters.confidential'] = params[:confidential]
     payload[:metadata]['meta.search.filters.state'] = params[:state]
     payload[:metadata]['meta.search.force_search_results'] = params[:force_search_results]
@@ -140,6 +152,15 @@ class SearchController < ApplicationController
 
     redirect_to new_user_session_path, alert: _('You must be logged in to search across all of GitLab')
   end
+
+  def render_timeout(exception)
+    raise exception unless action_name.to_sym == :show
+
+    log_exception(exception)
+
+    @timeout = true
+    render status: :request_timeout
+  end
 end
 
-SearchController.prepend_if_ee('EE::SearchController')
+SearchController.prepend_mod_with('SearchController')

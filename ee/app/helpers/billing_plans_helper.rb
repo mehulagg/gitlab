@@ -40,13 +40,13 @@ module BillingPlansHelper
     {
       namespace_id: namespace.id,
       namespace_name: namespace.name,
-      is_group: namespace.group?.to_s,
       add_seats_href: add_seats_url(namespace),
       plan_upgrade_href: plan_upgrade_url(namespace, plan),
       plan_renew_href: plan_renew_url(namespace),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
       billable_seats_href: billable_seats_href(namespace),
-      plan_name: plan&.name
+      plan_name: plan&.name,
+      free_personal_namespace: namespace.free_personal?.to_s
     }
   end
 
@@ -85,7 +85,9 @@ module BillingPlansHelper
   end
 
   def show_plans?(namespace)
-    namespace.trial_active? || !namespace.gold_plan?
+    return false if namespace.free_personal?
+
+    namespace.trial_active? || !(namespace.gold_plan? || namespace.ultimate_plan?)
   end
 
   def show_trial_banner?(namespace)
@@ -110,7 +112,7 @@ module BillingPlansHelper
     css_classes = %w[btn btn-success gl-button]
 
     css_classes << 'disabled' if is_current_plan && !namespace.trial_active?
-    css_classes << 'invisible' if plan.deprecated?
+    css_classes << 'invisible' if ::Feature.enabled?(:hide_deprecated_billing_plans) && plan.deprecated?
 
     css_classes.join(' ')
   end
@@ -127,20 +129,24 @@ module BillingPlansHelper
     end
   end
 
+  def show_start_free_trial_messages?(namespace)
+    !namespace.free_personal? && namespace.eligible_for_trial?
+  end
+
+  def plan_purchase_url(group, plan)
+    if use_new_purchase_flow?(group)
+      new_subscriptions_path(plan_id: plan.id, namespace_id: group.id, source: params[:source])
+    else
+      "#{plan.purchase_link.href}&gl_namespace_id=#{group.id}"
+    end
+  end
+
   private
 
   def add_seats_url(group)
     return unless group
 
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
-  end
-
-  def plan_purchase_url(group, plan)
-    if use_new_purchase_flow?(group)
-      new_subscriptions_path(plan_id: plan.id, namespace_id: group.id)
-    else
-      "#{plan.purchase_link.href}&gl_namespace_id=#{group.id}"
-    end
   end
 
   def plan_upgrade_url(group, plan)
@@ -155,8 +161,10 @@ module BillingPlansHelper
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
   end
 
-  def billable_seats_href(group)
-    group_seat_usage_path(group)
+  def billable_seats_href(namespace)
+    return unless namespace.group?
+
+    group_seat_usage_path(namespace)
   end
 
   def offer_from_previous_tier?(namespace_id, plan_id)
@@ -179,3 +187,5 @@ module BillingPlansHelper
     end
   end
 end
+
+BillingPlansHelper.prepend_mod

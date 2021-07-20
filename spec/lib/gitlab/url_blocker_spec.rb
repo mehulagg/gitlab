@@ -160,54 +160,13 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
         end
       end
     end
-
-    context 'when resolving runs into a timeout' do
-      let(:import_url) { 'http://example.com' }
-
-      subject { described_class.validate!(import_url, dns_rebind_protection: dns_rebind_protection) }
-
-      before do
-        skip 'timeout is not available' unless timeout_available?
-
-        stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
-        stub_const("#{described_class}::GETADDRINFO_TIMEOUT_SECONDS", 0)
-      end
-
-      context 'with dns rebinding enabled' do
-        let(:dns_rebind_protection) { true }
-
-        it 'raises an error due to DNS timeout' do
-          expect { subject }.to raise_error(described_class::BlockedUrlError)
-        end
-      end
-
-      context 'with dns rebinding disabled' do
-        let(:dns_rebind_protection) { false }
-
-        it_behaves_like 'validates URI and hostname' do
-          let(:expected_uri) { import_url }
-          let(:expected_hostname) { nil }
-        end
-      end
-
-      # Detect whether the timeout option is available.
-      #
-      # See https://bugs.ruby-lang.org/issues/15553
-      def timeout_available?
-        Addrinfo.getaddrinfo('localhost', nil, timeout: 0)
-
-        false
-      rescue SocketError
-        true
-      end
-    end
   end
 
   describe '#blocked_url?' do
     let(:ports) { Project::VALID_IMPORT_PORTS }
 
     it 'allows imports from configured web host and port' do
-      import_url = "http://#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/t.git"
+      import_url = "http://#{Gitlab.host_with_port}/t.git"
       expect(described_class.blocked_url?(import_url)).to be false
     end
 
@@ -231,7 +190,7 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
     end
 
     it 'returns true for bad protocol on configured web/SSH host and ports' do
-      web_url = "javascript://#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/t.git%0aalert(1)"
+      web_url = "javascript://#{Gitlab.host_with_port}/t.git%0aalert(1)"
       expect(described_class.blocked_url?(web_url)).to be true
 
       ssh_url = "javascript://#{Gitlab.config.gitlab_shell.ssh_host}:#{Gitlab.config.gitlab_shell.ssh_port}/t.git%0aalert(1)"

@@ -1,22 +1,27 @@
 import {
   GlPagination,
+  GlDropdown,
   GlTable,
   GlAvatarLink,
   GlAvatarLabeled,
   GlSearchBoxByType,
   GlBadge,
+  GlModal,
 } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import SubscriptionSeats from 'ee/billings/seat_usage/components/subscription_seats.vue';
+import { CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT } from 'ee/billings/seat_usage/constants';
 import { mockDataSeats, mockTableItems } from 'ee_jest/billings/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 const actionSpies = {
   fetchBillableMembersList: jest.fn(),
-  resetMembers: jest.fn(),
+  resetBillableMembers: jest.fn(),
+  setBillableMemberToRemove: jest.fn(),
 };
 
 const providedFields = {
@@ -52,10 +57,12 @@ describe('Subscription Seats', () => {
     mountFn = shallowMount,
     initialGetters = {},
   } = {}) => {
-    return mountFn(SubscriptionSeats, {
-      store: fakeStore({ initialState, initialGetters }),
-      localVue,
-    });
+    return extendedWrapper(
+      mountFn(SubscriptionSeats, {
+        store: fakeStore({ initialState, initialGetters }),
+        localVue,
+      }),
+    );
   };
 
   const findTable = () => wrapper.find(GlTable);
@@ -67,6 +74,9 @@ describe('Subscription Seats', () => {
 
   const findSearchBox = () => wrapper.find(GlSearchBoxByType);
   const findPagination = () => wrapper.find(GlPagination);
+
+  const findAllRemoveUserItems = () => wrapper.findAllByTestId('remove-user');
+  const findErrorModal = () => wrapper.findComponent(GlModal);
 
   const serializeUser = (rowWrapper) => {
     const avatarLink = rowWrapper.find(GlAvatarLink);
@@ -92,6 +102,7 @@ describe('Subscription Seats', () => {
       user: serializeUser(rowWrapper),
       email: emailWrapper.text(),
       tooltip: emailWrapper.find('span').attributes('title'),
+      dropdownExists: rowWrapper.find(GlDropdown).exists(),
     };
   };
 
@@ -106,7 +117,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('correct actions are called on create', () => {
@@ -126,7 +136,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     describe('heading text', () => {
@@ -145,9 +154,26 @@ describe('Subscription Seats', () => {
     });
 
     it('pagination is rendered and passed correct values', () => {
-      expect(findPagination().vm.value).toBe(1);
-      expect(findPagination().props('perPage')).toBe(5);
-      expect(findPagination().props('totalItems')).toBe(300);
+      const pagination = findPagination();
+
+      expect(pagination.props()).toMatchObject({
+        perPage: 5,
+        totalItems: 300,
+      });
+    });
+
+    describe('with error modal', () => {
+      it('does not render the model if the user is not removable', async () => {
+        await findAllRemoveUserItems().at(0).trigger('click');
+
+        expect(findErrorModal().html()).toBe('');
+      });
+
+      it('renders the error modal if the user is removable', async () => {
+        await findAllRemoveUserItems().at(2).trigger('click');
+
+        expect(findErrorModal().text()).toContain(CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT);
+      });
     });
   });
 
@@ -163,7 +189,6 @@ describe('Subscription Seats', () => {
         expect(findPagination().exists()).toBe(false);
 
         wrapper.destroy();
-        wrapper = null;
       },
     );
   });
@@ -175,7 +200,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('displays table in loading state', () => {
@@ -227,17 +251,17 @@ describe('Subscription Seats', () => {
       expect(findTableEmptyText()).toBe(EMPTY_TEXT_NO_USERS);
     });
 
-    it('dispatches the resetMembers action when 1 or 2 characters have been typed', async () => {
-      expect(actionSpies.resetMembers).not.toHaveBeenCalled();
+    it('dispatches the.resetBillableMembers action when 1 or 2 characters have been typed', async () => {
+      expect(actionSpies.resetBillableMembers).not.toHaveBeenCalled();
 
       await findSearchBox().vm.$emit('input', 'a');
-      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(1);
+      expect(actionSpies.resetBillableMembers).toHaveBeenCalledTimes(1);
 
       await findSearchBox().vm.$emit('input', 'aa');
-      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(2);
+      expect(actionSpies.resetBillableMembers).toHaveBeenCalledTimes(2);
 
       await findSearchBox().vm.$emit('input', 'aaa');
-      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(2);
+      expect(actionSpies.resetBillableMembers).toHaveBeenCalledTimes(2);
     });
 
     it('dispatches fetchBillableMembersList action when search box is emptied out', async () => {

@@ -16,8 +16,7 @@ module Resolvers
       alias_method :group, :object
 
       def resolve(id: nil)
-        return unless Feature.enabled?(:epic_boards, group)
-        return unless group.feature_available?(:epics)
+        return unless group.licensed_feature_available?(:epics)
 
         authorize!
 

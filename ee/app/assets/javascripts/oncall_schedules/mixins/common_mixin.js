@@ -1,5 +1,10 @@
-import { isToday } from '~/lib/utils/datetime_utility';
-import { DAYS_IN_WEEK, HOURS_IN_DAY, PRESET_TYPES } from '../constants';
+import { getDayDifference, isToday } from '~/lib/utils/datetime_utility';
+import {
+  PRESET_TYPES,
+  oneHourOffsetDayView,
+  oneDayOffsetWeekView,
+  oneHourOffsetWeekView,
+} from '../constants';
 
 export default {
   currentDate: null,
@@ -33,21 +38,34 @@ export default {
     this.$options.currentDate = currentDate;
   },
   methods: {
-    getIndicatorStyles(presetType = PRESET_TYPES.WEEKS) {
+    getIndicatorStyles(
+      presetType = PRESET_TYPES.WEEKS,
+      timeframeStartDate = new Date(),
+      timelineWidth = 1,
+    ) {
       if (presetType === PRESET_TYPES.DAYS) {
-        const currentDate = new Date();
-        const base = 100 / HOURS_IN_DAY;
-        const hours = base * currentDate.getHours();
-        const minutes = base * (currentDate.getMinutes() / 60) - 2.25;
-
-        return {
-          left: `${hours + minutes}%`,
-        };
+        return this.getDayViewIndicatorStyles();
       }
 
-      const left = 100 / DAYS_IN_WEEK / 2;
+      return this.getWeekViewIndicatorStyles(timeframeStartDate, timelineWidth);
+    },
+    getDayViewIndicatorStyles() {
+      const currentDate = new Date();
+      const hours = oneHourOffsetDayView * currentDate.getHours();
+      const minutes = oneHourOffsetDayView * (currentDate.getMinutes() / 60);
+
       return {
-        left: `${left}%`,
+        left: `${hours + minutes}%`,
+      };
+    },
+    getWeekViewIndicatorStyles(timeframeStartDate, timelineWidth) {
+      const currentDate = new Date();
+      const hourOffset = oneHourOffsetWeekView * currentDate.getHours();
+      const daysSinceShiftStart = getDayDifference(timeframeStartDate, currentDate);
+      const leftOffset = oneDayOffsetWeekView * daysSinceShiftStart + hourOffset;
+
+      return {
+        left: `${leftOffset / timelineWidth}%`,
       };
     },
   },

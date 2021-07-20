@@ -432,41 +432,7 @@ must be unique. It's advised to use `kebab-case` namespaces.
 Useful links:
 
 1. [`key`](https://vuejs.org/v2/guide/list.html#key)
-1. [Vue Style Guide: Keyed v-for](https://vuejs.org/v2/style-guide/#Keyed-v-for-essential )
-
-## Vue and Bootstrap
-
-1. Tooltips: Do not rely on `has-tooltip` class name for Vue components
-
-   ```html
-   // bad
-   <span
-     class="has-tooltip"
-     title="Some tooltip text">
-     Text
-   </span>
-
-   // good
-   <span
-     v-tooltip
-     title="Some tooltip text">
-     Text
-   </span>
-   ```
-
-1. Tooltips: When using a tooltip, include the tooltip directive, `./app/assets/javascripts/vue_shared/directives/tooltip.js`
-
-1. Don't change `data-original-title`.
-
-   ```html
-   // bad
-   <span data-original-title="tooltip text">Foo</span>
-
-   // good
-   <span title="tooltip text">Foo</span>
-
-   $('span').tooltip('_fixTitle');
-   ```
+1. [Vue Style Guide: Keyed v-for](https://vuejs.org/v2/style-guide/#Keyed-v-for-essential)
 
 ## Vue testing
 
@@ -497,7 +463,7 @@ Creating a global, mutable wrapper provides a number of advantages, including th
     let wrapper;
 
     // this can now be reused across tests
-    const findMyComponent = wrapper.find(MyComponent);
+    const findMyComponent = wrapper.findComponent(MyComponent);
     // ...
   })
   ```
@@ -599,16 +565,15 @@ the mounting function (`mount` or `shallowMount`) to be used to mount the compon
     function createComponent({ mountFn = shallowMount } = {}) { }
     ```
 
-1. Wrap calls to `mount` and `shallowMount` in `extendedWrapper`, this exposes `wrapper.findByTestId()`:
+1. Use the `mountExtended` and `shallowMountExtended` helpers to expose `wrapper.findByTestId()`:
 
     ```javascript
-    import { shallowMount } from '@vue/test-utils';
-    import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+    import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
     import { SomeComponent } from 'components/some_component.vue';
 
     let wrapper;
 
-    const createWrapper = () => { wrapper = extendedWrapper(shallowMount(SomeComponent)); };
+    const createWrapper = () => { wrapper = shallowMountExtended(SomeComponent); };
     const someButton = () => wrapper.findByTestId('someButtonTestId');
     ```
 
@@ -649,7 +614,7 @@ component state wherever possible. Instead, set the component's
     ```
 
 1. When asserting multiple props, check the deep equality of the `props()` object with
-[`toEqual`](https://jestjs.io/docs/en/expect#toequalvalue):
+[`toEqual`](https://jestjs.io/docs/expect#toequalvalue):
 
     ```javascript
     // good
@@ -666,8 +631,8 @@ component state wherever possible. Instead, set the component's
     ```
 
 1. If you are only interested in some of the props, you can use
-[`toMatchObject`](https://jestjs.io/docs/en/expect#tomatchobjectobject). Prefer `toMatchObject`
-over [`expect.objectContaining`](https://jestjs.io/docs/en/expect#expectobjectcontainingobject):
+[`toMatchObject`](https://jestjs.io/docs/expect#tomatchobjectobject). Prefer `toMatchObject`
+over [`expect.objectContaining`](https://jestjs.io/docs/expect#expectobjectcontainingobject):
 
     ```javascript
     // good

@@ -19,19 +19,20 @@ RSpec.describe 'Verify/Load-Performance-Testing.gitlab-ci.yml' do
   end
 
   describe 'the created pipeline', :clean_gitlab_redis_cache do
-    let(:project) { create(:project, :repository) }
-    let(:user) { project.owner }
+    let_it_be(:project) { create(:project, :repository) }
 
+    let(:user) { project.owner }
     let(:default_branch) { 'master' }
     let(:pipeline_ref) { default_branch }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref) }
-    let(:pipeline) { service.execute!(:push) }
+    let(:pipeline) { service.execute!(:push).payload }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
       stub_ci_pipeline_yaml_file(template)
-
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -62,9 +63,9 @@ RSpec.describe 'Verify/Load-Performance-Testing.gitlab-ci.yml' do
     end
 
     context 'on merge request' do
-      let(:service) { MergeRequests::CreatePipelineService.new(project, user) }
+      let(:service) { MergeRequests::CreatePipelineService.new(project: project, current_user: user) }
       let(:merge_request) { create(:merge_request, :simple, source_project: project) }
-      let(:pipeline) { service.execute(merge_request) }
+      let(:pipeline) { service.execute(merge_request).payload }
 
       it 'has no jobs' do
         expect(pipeline).to be_merge_request_event

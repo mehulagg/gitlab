@@ -7,7 +7,7 @@ type: reference, api
 
 # Commits API **(FREE)**
 
-This API operates on [repository commits](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository). Read more about [GitLab-specific information](../user/project/repository/index.md#commits) for commits.
+This API operates on [repository commits](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository). Read more about [GitLab-specific information](../user/project/repository/index.md#commit-changes-to-a-repository) for commits.
 
 ## List repository commits
 
@@ -19,15 +19,16 @@ GET /projects/:id/repository/commits
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `ref_name` | string | no | The name of a repository branch, tag or revision range, or if not given the default branch |
-| `since` | string | no | Only commits after or on this date will be returned in ISO 8601 format YYYY-MM-DDTHH:MM:SSZ |
-| `until` | string | no | Only commits before or on this date will be returned in ISO 8601 format YYYY-MM-DDTHH:MM:SSZ |
+| `since` | string | no | Only commits after or on this date are returned in ISO 8601 format `YYYY-MM-DDTHH:MM:SSZ` |
+| `until` | string | no | Only commits before or on this date are returned in ISO 8601 format `YYYY-MM-DDTHH:MM:SSZ` |
 | `path` | string | no | The file path |
 | `all` | boolean | no | Retrieve every commit from the repository |
-| `with_stats` | boolean | no | Stats about each commit will be added to the response |
+| `with_stats` | boolean | no | Stats about each commit are added to the response |
 | `first_parent` | boolean | no | Follow only the first parent commit upon seeing a merge commit |
 | `order` | string | no | List commits in order. Possible values: `default`, [`topo`](https://git-scm.com/docs/git-log#Documentation/git-log.txt---topo-order). Defaults to `default`, the commits are shown in reverse chronological order. |
+| `trailers` | boolean | no | Parse and include [Git trailers](https://git-scm.com/docs/git-interpret-trailers) for every commit |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits"
@@ -84,12 +85,12 @@ POST /projects/:id/repository/commits
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `branch` | string | yes | Name of the branch to commit into. To create a new branch, also provide either `start_branch` or `start_sha`, and optionally `start_project`. |
 | `commit_message` | string | yes | Commit message |
 | `start_branch` | string | no | Name of the branch to start the new branch from |
 | `start_sha` | string | no | SHA of the commit to start the new branch from |
-| `start_project` | integer/string | no | The project ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) to start the new branch from. Defaults to the value of `id`. |
+| `start_project` | integer/string | no | The project ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) to start the new branch from. Defaults to the value of `id`. |
 | `actions[]` | array | yes | An array of action hashes to commit as a batch. See the next table for what attributes it can take. |
 | `author_email` | string | no | Specify the commit author's email address |
 | `author_name` | string | no | Specify the commit author's name |
@@ -101,9 +102,9 @@ POST /projects/:id/repository/commits
 | `action` | string | yes | The action to perform, `create`, `delete`, `move`, `update`, `chmod`|
 | `file_path` | string | yes | Full path to the file. Ex. `lib/class.rb` |
 | `previous_path` | string | no | Original full path to the file being moved. Ex. `lib/class1.rb`. Only considered for `move` action. |
-| `content` | string | no | File content, required for all except `delete`, `chmod`, and `move`. Move actions that do not specify `content` will preserve the existing file content, and any other value of `content` will overwrite the file content. |
+| `content` | string | no | File content, required for all except `delete`, `chmod`, and `move`. Move actions that do not specify `content` preserve the existing file content, and any other value of `content` overwrites the file content. |
 | `encoding` | string | no | `text` or `base64`. `text` is default. |
-| `last_commit_id` | string | no | Last known file commit ID. Will be only considered in update, move, and delete actions. |
+| `last_commit_id` | string | no | Last known file commit ID. Only considered in update, move, and delete actions. |
 | `execute_filemode` | boolean | no | When `true/false` enables/disables the execute flag on the file. Only considered for `chmod` action. |
 
 ```shell
@@ -141,7 +142,8 @@ PAYLOAD=$(cat << 'JSON'
 }
 JSON
 )
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data "$PAYLOAD" "https://gitlab.example.com/api/v4/projects/1/repository/commits"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+     --data "$PAYLOAD" "https://gitlab.example.com/api/v4/projects/1/repository/commits"
 ```
 
 Example response:
@@ -172,7 +174,7 @@ Example response:
 }
 ```
 
-GitLab supports [form encoding](README.md#encoding-api-parameters-of-array-and-hash-types). The following is an example using Commit API with form encoding:
+GitLab supports [form encoding](index.md#encoding-api-parameters-of-array-and-hash-types). The following is an example using Commit API with form encoding:
 
 ```shell
 curl --request POST \
@@ -210,7 +212,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha` | string | yes | The commit hash or name of a repository branch or tag |
 | `stats` | boolean | no | Include commit stats. Default is true |
 
@@ -267,7 +269,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha` | string | yes | The commit hash  |
 | `type` | string | no | The scope of commits. Possible values `branch`, `tag`, `all`. Default is `all`.  |
 
@@ -301,13 +303,15 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `sha` | string | yes | The commit hash  |
 | `branch` | string | yes | The name of the branch  |
 | `dry_run` | boolean | no | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
+| `message` | string | no | A custom commit message to use for the new commit. [Introduced in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62481)
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master/cherry_pick"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master/cherry_pick"
 ```
 
 Example response:
@@ -316,7 +320,6 @@ Example response:
 {
   "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
   "short_id": "8b090c1b",
-  "title": "Feature added",
   "author_name": "Example User",
   "author_email": "user@example.com",
   "authored_date": "2016-12-12T20:10:39.000+01:00",
@@ -333,7 +336,7 @@ Example response:
 }
 ```
 
-In the event of a failed cherry-pick, the response will provide context about
+In the event of a failed cherry-pick, the response provides context about
 why:
 
 ```json
@@ -348,9 +351,9 @@ indicates that the commit already exists in the target branch. The other
 possible error code is `conflict`, which indicates that there was a merge
 conflict.
 
-When `dry_run` is enabled, the server will attempt to apply the cherry-pick _but
+When `dry_run` is enabled, the server attempts to apply the cherry-pick _but
 not actually commit any resulting changes_. If the cherry-pick applies cleanly,
-the API will respond with `200 OK`:
+the API responds with `200 OK`:
 
 ```json
 {
@@ -358,7 +361,7 @@ the API will respond with `200 OK`:
 }
 ```
 
-In the event of a failure, you'll see an error identical to a failure without
+In the event of a failure, an error displays that is identical to a failure without
 dry run.
 
 ## Revert a commit
@@ -375,13 +378,14 @@ Parameters:
 
 | Attribute | Type           | Required | Description                                                                     |
 | --------- | ----           | -------- | -----------                                                                     |
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `sha`     | string         | yes      | Commit SHA to revert                                                            |
 | `branch`  | string         | yes      | Target branch name                                                              |
 | `dry_run` | boolean        | no       | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/a738f717824ff53aebad8b090c1b79a14f2bd9e8/revert"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" \
+     "https://gitlab.example.com/api/v4/projects/5/repository/commits/a738f717824ff53aebad8b090c1b79a14f2bd9e8/revert"
 ```
 
 Example response:
@@ -404,7 +408,7 @@ Example response:
 }
 ```
 
-In the event of a failed revert, the response will provide context about why:
+In the event of a failed revert, the response provides context about why:
 
 ```json
 {
@@ -417,9 +421,9 @@ In this case, the revert failed because the attempted revert generated a merge
 conflict. The other possible error code is `empty`, which indicates that the
 changeset was empty, likely due to the change having already been reverted.
 
-When `dry_run` is enabled, the server will attempt to apply the revert _but not
+When `dry_run` is enabled, the server attempts to apply the revert _but not
 actually commit any resulting changes_. If the revert applies cleanly, the API
-will respond with `200 OK`:
+responds with `200 OK`:
 
 ```json
 {
@@ -427,7 +431,7 @@ will respond with `200 OK`:
 }
 ```
 
-In the event of a failure, you'll see an error identical to a failure without
+In the event of a failure, an error displays that is identical to a failure without
 dry run.
 
 ## Get the diff of a commit
@@ -442,7 +446,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha` | string | yes | The commit hash or name of a repository branch or tag |
 
 ```shell
@@ -478,7 +482,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha` | string | yes | The commit hash or name of a repository branch or tag |
 
 ```shell
@@ -511,7 +515,7 @@ In order to post a comment in a particular line of a particular file, you must
 specify the full commit SHA, the `path`, the `line` and `line_type` should be
 `new`.
 
-The comment will be added at the end of the last commit if at least one of the
+The comment is added at the end of the last commit if at least one of the
 cases below is valid:
 
 - the `sha` is instead a branch or a tag and the `line` or `path` are invalid
@@ -527,7 +531,7 @@ POST /projects/:id/repository/commits/:sha/comments
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha`       | string  | yes | The commit SHA or name of a repository branch or tag |
 | `note`      | string  | yes | The text of the comment |
 | `path`      | string  | no  | The file path relative to the repository |
@@ -535,7 +539,9 @@ POST /projects/:id/repository/commits/:sha/comments
 | `line_type` | string  | no  | The line type. Takes `new` or `old` as arguments |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "note=Nice picture man\!" --form "path=dudeism.md" --form "line=11" --form "line_type=new" "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/comments"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --form "note=Nice picture man\!" --form "path=dudeism.md" --form "line=11" --form "line_type=new" \
+     "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/comments"
 ```
 
 Example response:
@@ -570,7 +576,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha`     | string | yes | The commit hash or name of a repository branch or tag |
 
 ```shell
@@ -629,11 +635,11 @@ GET /projects/:id/repository/commits/:sha/statuses
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha`     | string  | yes | The commit SHA
 | `ref`     | string  | no  | The name of a repository branch or tag or, if not given, the default branch
-| `stage`   | string  | no  | Filter by [build stage](../ci/yaml/README.md#stages), e.g., `test`
-| `name`    | string  | no  | Filter by [job name](../ci/yaml/README.md#job-keywords), e.g., `bundler:audit`
+| `stage`   | string  | no  | Filter by [build stage](../ci/yaml/index.md#stages), for example, `test`
+| `name`    | string  | no  | Filter by [job name](../ci/yaml/index.md#job-keywords), for example, `bundler:audit`
 | `all`     | boolean | no  | Return all statuses, not only the latest ones
 
 ```shell
@@ -703,7 +709,7 @@ POST /projects/:id/statuses/:sha
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha`     | string  | yes   | The commit SHA
 | `state`   | string  | yes   | The state of the status. Can be one of the following: `pending`, `running`, `success`, `failed`, `canceled`
 | `ref`     | string  | no    | The `ref` (branch or tag) to which the status refers
@@ -756,7 +762,7 @@ GET /projects/:id/repository/commits/:sha/merge_requests
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha`     | string  | yes   | The commit SHA
 
 ```shell
@@ -792,6 +798,7 @@ Example response:
       "source_project_id":35,
       "target_project_id":35,
       "labels":[ ],
+      "draft":false,
       "work_in_progress":false,
       "milestone":null,
       "merge_when_pipeline_succeeds":false,
@@ -827,7 +834,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user
 | `sha` | string | yes | The commit hash or name of a repository branch or tag |
 
 ```shell

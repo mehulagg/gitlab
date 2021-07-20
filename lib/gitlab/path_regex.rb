@@ -21,13 +21,11 @@ module Gitlab
       500.html
       502.html
       503.html
-      abuse_reports
       admin
       api
       apple-touch-icon-precomposed.png
       apple-touch-icon.png
       assets
-      autocomplete
       dashboard
       deploy.html
       explore
@@ -38,7 +36,6 @@ module Gitlab
       health_check
       help
       import
-      invites
       jwt
       login
       oauth
@@ -48,7 +45,6 @@ module Gitlab
       robots.txt
       s
       search
-      sent_notifications
       sitemap
       sitemap.xml
       sitemap.xml.gz
@@ -181,7 +177,7 @@ module Gitlab
     end
 
     def repository_route_regex
-      @repository_route_regex ||= /#{full_namespace_route_regex}|#{personal_snippet_repository_path_regex}/.freeze
+      @repository_route_regex ||= /(#{full_namespace_route_regex}|#{personal_snippet_repository_path_regex})\.*/.freeze
     end
 
     def repository_git_route_regex
@@ -189,7 +185,7 @@ module Gitlab
     end
 
     def repository_wiki_git_route_regex
-      @repository_wiki_git_route_regex ||= /#{full_namespace_route_regex}\.wiki\.git/.freeze
+      @repository_wiki_git_route_regex ||= /#{full_namespace_route_regex}\.*\.wiki\.git/.freeze
     end
 
     def full_namespace_path_regex
@@ -288,4 +284,4 @@ module Gitlab
   end
 end
 
-Gitlab::PathRegex.prepend_if_ee('EE::Gitlab::PathRegex')
+Gitlab::PathRegex.prepend_mod_with('Gitlab::PathRegex')

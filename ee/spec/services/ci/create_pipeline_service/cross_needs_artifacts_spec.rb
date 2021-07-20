@@ -36,10 +36,10 @@ RSpec.describe Ci::CreatePipelineService do
       ]
     end
 
-    let(:build_job) { subject.builds.find_by!(name: :build_job) }
+    let(:build_job) { subject.payload.builds.find_by!(name: :build_job) }
 
     it 'persists pipeline' do
-      is_expected.to be_persisted
+      expect(subject.payload).to be_persisted
     end
 
     it 'persists job' do
@@ -47,7 +47,7 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'persists cross_dependencies' do
-      deps = build_job.options['cross_dependencies']
+      deps = build_job.options[:cross_dependencies]
       result = [
         { job: "job-1", ref: "ref-1", project: "project-1", artifacts: true },
         { job: "job-2", ref: "ref-2", project: "project-2", artifacts: false },
@@ -124,10 +124,10 @@ RSpec.describe Ci::CreatePipelineService do
       %w[build_job_1]
     end
 
-    let(:test_job) { subject.builds.find_by!(name: :test_job) }
+    let(:test_job) { subject.payload.builds.find_by!(name: :test_job) }
 
     it 'persists pipeline' do
-      is_expected.to be_persisted
+      expect(subject.payload).to be_persisted
     end
 
     it 'persists jobs' do
@@ -142,7 +142,7 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'persists cross_dependencies' do
-      deps = test_job.options['cross_dependencies']
+      deps = test_job.options[:cross_dependencies]
       result = {
         job: 'dependency',
         ref: 'master',
@@ -175,11 +175,11 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'persists pipeline' do
-      is_expected.to be_persisted
+      expect(subject.payload).to be_persisted
     end
 
     it 'has errors' do
-      expect(subject.yaml_errors)
+      expect(subject.payload.yaml_errors)
         .to include('jobs:build_job:needs:need ref should be a string')
     end
   end

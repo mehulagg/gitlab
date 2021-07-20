@@ -4,6 +4,8 @@ module Prometheus
   class CreateDefaultAlertsWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     feature_category :incident_management
     urgency :high
     idempotent!
@@ -13,7 +15,7 @@ module Prometheus
 
       return unless project
 
-      result = Prometheus::CreateDefaultAlertsService.new(project: project).execute
+      result = ::Prometheus::CreateDefaultAlertsService.new(project: project).execute
 
       log_info(result.message) if result.error?
     end

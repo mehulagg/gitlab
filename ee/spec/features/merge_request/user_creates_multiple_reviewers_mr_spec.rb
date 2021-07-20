@@ -9,5 +9,5 @@ RSpec.describe 'Merge request > User creates MR with multiple reviewers' do
     stub_licensed_features(multiple_merge_request_reviewers: true)
   end
 
-  it_behaves_like 'multiple reviewers merge request', 'creates', 'Submit merge request'
+  it_behaves_like 'multiple reviewers merge request', 'creates', 'Create merge request'
 end

@@ -40,7 +40,6 @@ class WikiPage
   end
 
   validates :title, presence: true
-  validates :content, presence: true
   validate :validate_path_limits, if: :title_changed?
   validate :validate_content_size_limit, if: :content_changed?
 
@@ -127,10 +126,21 @@ class WikiPage
     @path ||= @page.path
   end
 
+  # Returns a CommitCollection
+  #
+  # Queries the commits for current page's path, equivalent to
+  # `git log path/to/page`. Filters and options supported:
+  # https://gitlab.com/gitlab-org/gitaly/-/blob/master/proto/commit.proto#L322-344
   def versions(options = {})
     return [] unless persisted?
 
-    wiki.wiki.page_versions(page.path, options)
+    default_per_page = Kaminari.config.default_per_page
+    offset = [options[:page].to_i - 1, 0].max * options.fetch(:per_page, default_per_page)
+
+    wiki.repository.commits('HEAD',
+                            path: page.path,
+                            limit: options.fetch(:limit, default_per_page),
+                            offset: offset)
   end
 
   def count_versions
@@ -205,14 +215,15 @@ class WikiPage
     last_commit_sha = attrs.delete(:last_commit_sha)
 
     if last_commit_sha && last_commit_sha != self.last_commit_sha
-      raise PageChangedError
+      raise PageChangedError, s_(
+        'WikiPageConflictMessage|Someone edited the page the same time you did. Please check out %{wikiLinkStart}the page%{wikiLinkEnd} and make sure your changes will not unintentionally remove theirs.')
     end
 
     update_attributes(attrs)
 
     if title.present? && title_changed? && wiki.find_page(title).present?
       attributes[:title] = page.title
-      raise PageRenameError
+      raise PageRenameError, s_('WikiEdit|There is already a page with the same title in that path.')
     end
 
     save do

@@ -8,14 +8,16 @@ RSpec.describe 'Project navbar' do
 
   include_context 'project navbar structure'
 
-  let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
 
-  before do
-    insert_package_nav(_('Operations'))
+  let(:user) { project.owner }
 
-    project.add_maintainer(user)
+  before do
     sign_in(user)
+
+    stub_config(registry: { enabled: false })
+    insert_package_nav(_('Infrastructure'))
+    insert_infrastructure_registry_nav
   end
 
   it_behaves_like 'verified navigation bar' do
@@ -31,7 +33,7 @@ RSpec.describe 'Project navbar' do
 
     it 'redirects to value stream when Analytics item is clicked' do
       page.within('.sidebar-top-level-items') do
-        find('[data-qa-selector=analytics_anchor]').click
+        find('.shortcuts-analytics').click
       end
 
       wait_for_requests
@@ -45,7 +47,7 @@ RSpec.describe 'Project navbar' do
       stub_config(pages: { enabled: true })
 
       insert_after_sub_nav_item(
-        _('Operations'),
+        _('Monitor'),
         within: _('Settings'),
         new_sub_nav_item_name: _('Pages')
       )
@@ -60,7 +62,13 @@ RSpec.describe 'Project navbar' do
     before do
       stub_config(registry: { enabled: true })
 
-      insert_container_nav(_('Operations'))
+      insert_container_nav
+
+      insert_after_sub_nav_item(
+        _('Monitor'),
+        within: _('Settings'),
+        new_sub_nav_item_name: _('Packages & Registries')
+      )
 
       visit project_path(project)
     end

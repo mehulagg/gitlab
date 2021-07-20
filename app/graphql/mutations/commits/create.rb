@@ -5,6 +5,11 @@ module Mutations
     class Create < BaseMutation
       include FindsProject
 
+      class UrlHelpers
+        include GitlabRoutingHelper
+        include Gitlab::Routing
+      end
+
       graphql_name 'CommitCreate'
 
       argument :project_path, GraphQL::ID_TYPE,
@@ -29,10 +34,20 @@ module Mutations
                required: true,
                description: 'Array of action hashes to commit as a batch.'
 
+      field :commit_pipeline_path,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: "ETag path for the commit's pipeline."
+
       field :commit,
             Types::CommitType,
             null: true,
             description: 'The commit after mutation.'
+
+      field :content,
+            [GraphQL::STRING_TYPE],
+            null: true,
+            description: 'Contents of the commit.'
 
       authorize :push_code
 
@@ -49,7 +64,9 @@ module Mutations
         result = ::Files::MultiService.new(project, current_user, attributes).execute
 
         {
+          content: actions.pluck(:content),  # rubocop:disable CodeReuse/ActiveRecord because actions is an Array, not a Relation
           commit: (project.repository.commit(result[:result]) if result[:status] == :success),
+          commit_pipeline_path: UrlHelpers.new.graphql_etag_pipeline_sha_path(result[:result]),
           errors: Array.wrap(result[:message])
         }
       end

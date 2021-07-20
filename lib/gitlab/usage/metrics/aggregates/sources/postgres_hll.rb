@@ -6,6 +6,7 @@ module Gitlab
       module Aggregates
         module Sources
           class PostgresHll
+            extend Calculations::Intersection
             class << self
               def calculate_metrics_union(metric_names:, start_date:, end_date:, recorded_at:)
                 time_period = start_date && end_date ? (start_date..end_date) : nil
@@ -55,15 +56,15 @@ module Gitlab
               end
 
               def time_period_to_human_name(time_period)
-                return Gitlab::Utils::UsageData::ALL_TIME_PERIOD_HUMAN_NAME if time_period.blank?
+                return Gitlab::Usage::TimeFrame::ALL_TIME_TIME_FRAME_NAME if time_period.blank?
 
                 start_date = time_period.first.to_date
                 end_date = time_period.last.to_date
 
                 if (end_date - start_date).to_i > 7
-                  Gitlab::Utils::UsageData::MONTHLY_PERIOD_HUMAN_NAME
+                  Gitlab::Usage::TimeFrame::TWENTY_EIGHT_DAYS_TIME_FRAME_NAME
                 else
-                  Gitlab::Utils::UsageData::WEEKLY_PERIOD_HUMAN_NAME
+                  Gitlab::Usage::TimeFrame::SEVEN_DAYS_TIME_FRAME_NAME
                 end
               end
             end

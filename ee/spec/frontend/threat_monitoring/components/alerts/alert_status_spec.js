@@ -3,7 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import updateAlertStatusMutation from '~/graphql_shared/mutations/alert_status_update.mutation.graphql';
-import { mockAlerts } from '../../mock_data';
+import { mockAlerts } from '../../mocks/mock_data';
 
 const mockAlert = mockAlerts[0];
 

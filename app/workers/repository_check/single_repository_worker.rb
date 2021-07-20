@@ -3,6 +3,8 @@
 module RepositoryCheck
   class SingleRepositoryWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include RepositoryCheckQueue
 
     def perform(project_id)
@@ -44,7 +46,7 @@ module RepositoryCheck
 
       true
     rescue Gitlab::Git::Repository::GitError => e
-      Gitlab::RepositoryCheckLogger.error(e.message)
+      Gitlab::RepositoryCheckLogger.error("#{repository.full_path}: #{e.message}")
       false
     end
 
@@ -67,4 +69,4 @@ module RepositoryCheck
   end
 end
 
-RepositoryCheck::SingleRepositoryWorker.prepend_if_ee('::EE::RepositoryCheck::SingleRepositoryWorker')
+RepositoryCheck::SingleRepositoryWorker.prepend_mod_with('RepositoryCheck::SingleRepositoryWorker')

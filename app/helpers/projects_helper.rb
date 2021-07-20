@@ -125,32 +125,10 @@ module ProjectsHelper
     project.fork_source if project.fork_source && can?(current_user, :read_project, project.fork_source)
   end
 
-  def project_nav_tabs
-    @nav_tabs ||= get_project_nav_tabs(@project, current_user)
-  end
-
   def project_search_tabs?(tab)
     abilities = Array(search_tab_ability_map[tab])
 
     abilities.any? { |ability| can?(current_user, ability, @project) }
-  end
-
-  def project_nav_tab?(name)
-    project_nav_tabs.include? name
-  end
-
-  def any_project_nav_tab?(tabs)
-    tabs.any? { |tab| project_nav_tab?(tab) }
-  end
-
-  def project_for_deploy_key(deploy_key)
-    if deploy_key.has_access_to?(@project)
-      @project
-    else
-      deploy_key.projects.find do |project|
-        can?(current_user, :read_project, project)
-      end
-    end
   end
 
   def can_change_visibility_level?(project, current_user)
@@ -285,10 +263,6 @@ module ProjectsHelper
     !disabled && !compact_mode
   end
 
-  def settings_operations_available?
-    !@project.archived? && can?(current_user, :admin_operations, @project)
-  end
-
   def error_tracking_setting_project_json
     setting = @project.error_tracking_setting
 
@@ -376,84 +350,11 @@ module ProjectsHelper
     nil
   end
 
+  def show_terraform_banner?(project)
+    project.repository_languages.with_programming_language('HCL').exists? && project.terraform_states.empty?
+  end
+
   private
-
-  def can_read_security_configuration?(project, current_user)
-    ::Feature.enabled?(:secure_security_and_compliance_configuration_page_on_ce, @subject, default_enabled: :yaml) &&
-      can?(current_user, :read_security_configuration, project)
-  end
-
-  def get_project_security_nav_tabs(project, current_user)
-    if can_read_security_configuration?(project, current_user)
-      [:security_and_compliance, :security_configuration]
-    else
-      []
-    end
-  end
-
-  # rubocop:disable Metrics/CyclomaticComplexity
-  def get_project_nav_tabs(project, current_user)
-    nav_tabs = [:home]
-
-    unless project.empty_repo?
-      nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
-      nav_tabs << :releases if can?(current_user, :read_release, project)
-    end
-
-    nav_tabs += get_project_security_nav_tabs(project, current_user)
-
-    if project.repo_exists? && can?(current_user, :read_merge_request, project)
-      nav_tabs << :merge_requests
-    end
-
-    if Gitlab.config.registry.enabled && can?(current_user, :read_container_image, project)
-      nav_tabs << :container_registry
-    end
-
-    # Pipelines feature is tied to presence of builds
-    if can?(current_user, :read_build, project)
-      nav_tabs << :pipelines
-    end
-
-    if can_view_operations_tab?(current_user, project)
-      nav_tabs << :operations
-    end
-
-    if can_view_product_analytics?(current_user, project)
-      nav_tabs << :product_analytics
-    end
-
-    tab_ability_map.each do |tab, ability|
-      if can?(current_user, ability, project)
-        nav_tabs << tab
-      end
-    end
-
-    apply_external_nav_tabs(nav_tabs, project)
-
-    nav_tabs += package_nav_tabs(project, current_user)
-
-    nav_tabs
-  end
-  # rubocop:enable Metrics/CyclomaticComplexity
-
-  def package_nav_tabs(project, current_user)
-    [].tap do |tabs|
-      if ::Gitlab.config.packages.enabled && can?(current_user, :read_package, project)
-        tabs << :packages
-      end
-    end
-  end
-
-  def apply_external_nav_tabs(nav_tabs, project)
-    nav_tabs << :external_issue_tracker if project.external_issue_tracker
-    nav_tabs << :external_wiki if project.external_wiki
-
-    if project.has_confluence?
-      nav_tabs.delete(:wiki)
-      nav_tabs << :confluence
-    end
-  end
 
   def tab_ability_map
     {
@@ -477,32 +378,6 @@ module ProjectsHelper
       feature_flags:      :read_feature_flag,
       analytics:          :read_analytics
     }
-  end
-
-  def view_operations_tab_ability
-    [
-      :metrics_dashboard,
-      :read_alert_management_alert,
-      :read_environment,
-      :read_issue,
-      :read_sentry_issue,
-      :read_cluster,
-      :read_feature_flag,
-      :read_terraform_state
-    ]
-  end
-
-  def can_view_operations_tab?(current_user, project)
-    return false unless project.feature_available?(:operations, current_user)
-
-    view_operations_tab_ability.any? do |ability|
-      can?(current_user, ability, project)
-    end
-  end
-
-  def can_view_product_analytics?(current_user, project)
-    Feature.enabled?(:product_analytics, project) &&
-      can?(current_user, :read_product_analytics, project)
   end
 
   def search_tab_ability_map
@@ -572,14 +447,6 @@ module ProjectsHelper
     end
   end
 
-  def sidebar_operations_link_path(project = @project)
-    if can?(current_user, :read_environment, project)
-      metrics_project_environments_path(project)
-    else
-      project_feature_flags_path(project)
-    end
-  end
-
   def project_last_activity(project)
     if project.last_activity_at
       time_ago_with_tooltip(project.last_activity_at, placement: 'bottom', html_class: 'last_activity_time_ago')
@@ -644,7 +511,8 @@ module ProjectsHelper
       metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
       operationsAccessLevel: feature.operations_access_level,
       showDefaultAwardEmojis: project.show_default_award_emojis?,
-      allowEditingCommitMessages: project.allow_editing_commit_messages?
+      allowEditingCommitMessages: project.allow_editing_commit_messages?,
+      securityAndComplianceAccessLevel: project.security_and_compliance_access_level
     }
   end
 
@@ -666,7 +534,8 @@ module ProjectsHelper
       pagesAvailable: Gitlab.config.pages.enabled,
       pagesAccessControlEnabled: Gitlab.config.pages.access_control,
       pagesAccessControlForced: ::Gitlab::Pages.access_control_is_forced?,
-      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control')
+      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control'),
+      issuesHelpPath: help_page_path('user/project/issues/index')
     }
   end
 
@@ -716,56 +585,6 @@ module ProjectsHelper
     "#{request.path}?#{options.to_param}"
   end
 
-  def sidebar_security_configuration_paths
-    %w[
-      projects/security/configuration#show
-    ]
-  end
-
-  def sidebar_projects_paths
-    %w[
-      projects#show
-      projects#activity
-      releases#index
-    ]
-  end
-
-  def sidebar_settings_paths
-    %w[
-      projects#edit
-      integrations#show
-      services#edit
-      hooks#index
-      hooks#edit
-      access_tokens#index
-      hook_logs#show
-      repository#show
-      ci_cd#show
-      operations#show
-      badges#index
-      pages#show
-    ]
-  end
-
-  def sidebar_repository_paths
-    %w[
-      tree
-      blob
-      blame
-      edit_tree
-      new_tree
-      find_file
-      commit
-      commits
-      compare
-      projects/repositories
-      tags
-      branches
-      graphs
-      network
-    ]
-  end
-
   def sidebar_operations_paths
     %w[
       environments
@@ -786,10 +605,6 @@ module ProjectsHelper
     ]
   end
 
-  def sidebar_security_paths
-    %w[projects/security/configuration#show]
-  end
-
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)
     Ability.allowed?(user, :admin_project, project) &&
       project.has_auto_devops_implicitly_enabled? &&
@@ -799,15 +614,6 @@ module ProjectsHelper
 
   def show_visibility_confirm_modal?(project)
     project.unlink_forks_upon_visibility_decrease_enabled? && project.visibility_level > Gitlab::VisibilityLevel::PRIVATE && project.forks_count > 0
-  end
-
-  def settings_container_registry_expiration_policy_available?(project)
-    Gitlab.config.registry.enabled &&
-      can?(current_user, :destroy_container_image, project)
-  end
-
-  def project_access_token_available?(project)
-    can?(current_user, :admin_resource_access_tokens, project)
   end
 
   def build_project_breadcrumb_link(project)
@@ -835,4 +641,4 @@ module ProjectsHelper
   end
 end
 
-ProjectsHelper.prepend_if_ee('EE::ProjectsHelper')
+ProjectsHelper.prepend_mod_with('ProjectsHelper')

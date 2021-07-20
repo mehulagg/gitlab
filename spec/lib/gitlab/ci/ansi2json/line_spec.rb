@@ -76,10 +76,25 @@ RSpec.describe Gitlab::Ci::Ansi2json::Line do
   end
 
   describe '#set_section_duration' do
-    it 'sets and formats the section_duration' do
-      subject.set_section_duration(75)
+    using RSpec::Parameterized::TableSyntax
 
-      expect(subject.section_duration).to eq('01:15')
+    where(:duration, :result) do
+      nil                                         | '00:00'
+      'string'                                    | '00:00'
+      0.seconds                                   | '00:00'
+      7.seconds                                   | '00:07'
+      75                                          | '01:15'
+      1.minute + 15.seconds                       | '01:15'
+      13.hours + 14.minutes + 15.seconds          | '13:14:15'
+      1.day + 13.hours + 14.minutes + 15.seconds  | '37:14:15'
+    end
+
+    with_them do
+      it do
+        subject.set_section_duration(duration)
+
+        expect(subject.section_duration).to eq(result)
+      end
     end
   end
 

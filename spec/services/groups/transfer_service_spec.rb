@@ -5,12 +5,14 @@ require 'spec_helper'
 RSpec.describe Groups::TransferService do
   let_it_be(:user) { create(:user) }
   let_it_be(:new_parent_group) { create(:group, :public) }
+
   let!(:group_member) { create(:group_member, :owner, group: group, user: user) }
   let(:transfer_service) { described_class.new(group, user) }
 
   context 'handling packages' do
     let_it_be(:group) { create(:group, :public) }
     let_it_be(:new_group) { create(:group, :public) }
+
     let(:project) { create(:project, :public, namespace: group) }
 
     before do
@@ -238,7 +240,8 @@ RSpec.describe Groups::TransferService do
       end
 
       context 'when the group is allowed to be transferred' do
-        let_it_be(:new_parent_group_integration) { create(:slack_service, group: new_parent_group, project: nil, webhook: 'http://new-group.slack.com') }
+        let_it_be(:new_parent_group, reload: true) { create(:group, :public) }
+        let_it_be(:new_parent_group_integration) { create(:integrations_slack, group: new_parent_group, project: nil, webhook: 'http://new-group.slack.com') }
 
         before do
           allow(PropagateIntegrationWorker).to receive(:perform_async)
@@ -271,21 +274,21 @@ RSpec.describe Groups::TransferService do
         end
 
         context 'with a group integration' do
-          let_it_be(:instance_integration) { create(:slack_service, :instance, webhook: 'http://project.slack.com') }
-          let(:new_created_integration) { Service.find_by(group: group) }
+          let(:new_created_integration) { Integration.find_by(group: group) }
 
           context 'with an inherited integration' do
-            let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com', inherit_from_id: instance_integration.id) }
+            let_it_be(:instance_integration) { create(:integrations_slack, :instance, webhook: 'http://project.slack.com') }
+            let_it_be(:group_integration) { create(:integrations_slack, group: group, project: nil, webhook: 'http://group.slack.com', inherit_from_id: instance_integration.id) }
 
             it 'replaces inherited integrations', :aggregate_failures do
               expect(new_created_integration.webhook).to eq(new_parent_group_integration.webhook)
               expect(PropagateIntegrationWorker).to have_received(:perform_async).with(new_created_integration.id)
-              expect(Service.count).to eq(3)
+              expect(Integration.count).to eq(3)
             end
           end
 
           context 'with a custom integration' do
-            let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com') }
+            let_it_be(:group_integration) { create(:integrations_slack, group: group, project: nil, webhook: 'http://group.slack.com') }
 
             it 'does not updates the integrations', :aggregate_failures do
               expect { transfer_service.execute(new_parent_group) }.not_to change { group_integration.webhook }
@@ -600,6 +603,7 @@ RSpec.describe Groups::TransferService do
           create(:group_member, :owner, group: new_parent_group, user: user)
           create(:group, :private, parent: group, require_two_factor_authentication: true)
           group.update!(require_two_factor_authentication: true)
+          new_parent_group.reload # make sure traversal_ids are reloaded
         end
 
         it 'does not update group two factor authentication setting' do

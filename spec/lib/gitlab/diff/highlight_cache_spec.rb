@@ -237,17 +237,27 @@ RSpec.describe Gitlab::Diff::HighlightCache, :clean_gitlab_redis_cache do
   describe '#key' do
     subject { cache.key }
 
-    it 'returns the next version of the cache' do
-      is_expected.to start_with("highlighted-diff-files:#{cache.diffable.cache_key}:2")
+    it 'returns cache key' do
+      is_expected.to eq("highlighted-diff-files:#{cache.diffable.cache_key}:2:#{cache.diff_options}:true:true")
     end
 
-    context 'when feature flag is disabled' do
+    context 'when the `use_marker_ranges` feature flag is disabled' do
       before do
-        stub_feature_flags(improved_merge_diff_highlighting: false)
+        stub_feature_flags(use_marker_ranges: false)
       end
 
       it 'returns the original version of the cache' do
-        is_expected.to start_with("highlighted-diff-files:#{cache.diffable.cache_key}:1")
+        is_expected.to eq("highlighted-diff-files:#{cache.diffable.cache_key}:2:#{cache.diff_options}:false:true")
+      end
+    end
+
+    context 'when the `diff_line_syntax_highlighting` feature flag is disabled' do
+      before do
+        stub_feature_flags(diff_line_syntax_highlighting: false)
+      end
+
+      it 'returns the original version of the cache' do
+        is_expected.to eq("highlighted-diff-files:#{cache.diffable.cache_key}:2:#{cache.diff_options}:true:false")
       end
     end
   end

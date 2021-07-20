@@ -1,41 +1,59 @@
 <script>
 import { GlLink, GlProgressBar } from '@gitlab/ui';
+import { sprintf } from '~/locale';
+import Tracking from '~/tracking';
+import { TRACKING_PROPERTY, WIDGET } from './constants';
+
+const { i18n, trackingEvents } = WIDGET;
+const trackingMixin = Tracking.mixin({ property: TRACKING_PROPERTY });
 
 export default {
   components: {
     GlLink,
     GlProgressBar,
   },
-  props: {
-    href: {
-      type: String,
-      required: true,
+  mixins: [trackingMixin],
+  inject: {
+    containerId: { default: null },
+    daysRemaining: {},
+    navIconImagePath: {},
+    percentageComplete: {},
+    planName: {},
+    plansHref: {},
+  },
+  i18n,
+  trackingEvents,
+  computed: {
+    widgetTitle() {
+      const i18nWidgetTitle = this.$options.i18n.widgetTitle.countableTranslator(
+        this.daysRemaining,
+      );
+
+      return sprintf(i18nWidgetTitle, {
+        planName: this.planName,
+        enDash: '–',
+        num: this.daysRemaining,
+      });
     },
-    navIconImagePath: {
-      type: String,
-      required: true,
-    },
-    percentageComplete: {
-      type: Number,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
+  },
+  methods: {
+    onWidgetClick() {
+      const { action, ...options } = this.$options.trackingEvents.widgetClick;
+      this.track(action, options);
     },
   },
 };
 </script>
 
 <template>
-  <gl-link :title="title" :href="href">
+  <gl-link :id="containerId" :title="widgetTitle" :href="plansHref" @click="onWidgetClick">
     <div class="gl-display-flex gl-flex-direction-column gl-align-items-stretch gl-w-full">
       <span class="gl-display-flex gl-align-items-center">
         <span class="nav-icon-container svg-container">
           <img :src="navIconImagePath" width="16" class="svg" />
         </span>
         <span class="nav-item-name gl-white-space-normal">
-          {{ title }}
+          {{ widgetTitle }}
         </span>
       </span>
       <span class="gl-display-flex gl-align-items-stretch gl-mt-3">

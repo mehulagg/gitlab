@@ -4,9 +4,6 @@ module Gitlab
   module Ci
     class Config
       module Entry
-        ##
-        # Entry that represents a cache configuration
-        #
         class Cache < ::Gitlab::Config::Entry::Node
           include ::Gitlab::Config::Entry::Configurable
           include ::Gitlab::Config::Entry::Validatable
@@ -53,6 +50,9 @@ module Gitlab
             result[:when] = self.when || DEFAULT_WHEN
 
             result
+          end
+
+          class UnknownStrategy < ::Gitlab::Config::Entry::Node
           end
         end
       end

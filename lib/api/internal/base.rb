@@ -10,12 +10,10 @@ module API
         api_endpoint = env['api.endpoint']
         feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
 
-        header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
-
         Gitlab::ApplicationContext.push(
           user: -> { actor&.user },
           project: -> { project },
-          caller_id: route.origin,
+          caller_id: api_endpoint.endpoint_id,
           remote_ip: request.ip,
           feature_category: feature_category
         )
@@ -23,7 +21,7 @@ module API
 
       helpers ::API::Helpers::InternalHelpers
 
-      UNKNOWN_CHECK_RESULT_ERROR = 'Unknown check result'.freeze
+      UNKNOWN_CHECK_RESULT_ERROR = 'Unknown check result'
 
       VALID_PAT_SCOPES = Set.new(
         Gitlab::Auth::API_SCOPES + Gitlab::Auth::REPOSITORY_SCOPES + Gitlab::Auth::REGISTRY_SCOPES
@@ -52,20 +50,20 @@ module API
           actor.update_last_used_at!
 
           check_result = begin
-                           Gitlab::Auth::CurrentUserMode.bypass_session!(actor.user&.id) do
-                             access_check!(actor, params)
-                           end
-                         rescue Gitlab::GitAccess::ForbiddenError => e
-                           # The return code needs to be 401. If we return 403
-                           # the custom message we return won't be shown to the user
-                           # and, instead, the default message 'GitLab: API is not accessible'
-                           # will be displayed
-                           return response_with_status(code: 401, success: false, message: e.message)
-                         rescue Gitlab::GitAccess::TimeoutError => e
-                           return response_with_status(code: 503, success: false, message: e.message)
-                         rescue Gitlab::GitAccess::NotFoundError => e
-                           return response_with_status(code: 404, success: false, message: e.message)
-                         end
+            with_admin_mode_bypass!(actor.user&.id) do
+              access_check!(actor, params)
+            end
+          rescue Gitlab::GitAccess::ForbiddenError => e
+            # The return code needs to be 401. If we return 403
+            # the custom message we return won't be shown to the user
+            # and, instead, the default message 'GitLab: API is not accessible'
+            # will be displayed
+            return response_with_status(code: 401, success: false, message: e.message)
+          rescue Gitlab::GitAccess::TimeoutError => e
+            return response_with_status(code: 503, success: false, message: e.message)
+          rescue Gitlab::GitAccess::NotFoundError => e
+            return response_with_status(code: 404, success: false, message: e.message)
+          end
 
           log_user_activity(actor.user)
 
@@ -109,9 +107,7 @@ module API
           end
         end
 
-        def validate_actor_key(actor, key_id)
-          return 'Could not find a user without a key' unless key_id
-
+        def validate_actor(actor)
           return 'Could not find the given key' unless actor.key
 
           'Could not find a user for the given key' unless actor.user
@@ -119,6 +115,14 @@ module API
 
         def two_factor_otp_check
           { success: false, message: 'Feature is not available' }
+        end
+
+        def with_admin_mode_bypass!(actor_id)
+          return yield unless Gitlab::CurrentSettings.admin_mode
+
+          Gitlab::Auth::CurrentUserMode.bypass_session!(actor_id) do
+            yield
+          end
         end
       end
 
@@ -147,7 +151,7 @@ module API
           status 200
 
           unless actor.key_or_user
-            raise ActiveRecord::RecordNotFound.new('User not found!')
+            raise ActiveRecord::RecordNotFound, 'User not found!'
           end
 
           actor.update_last_used_at!
@@ -158,18 +162,15 @@ module API
         end
 
         #
-        # Get a ssh key using the fingerprint
+        # Check whether an SSH key is known to GitLab
         #
-        # rubocop: disable CodeReuse/ActiveRecord
         get '/authorized_keys', feature_category: :source_code_management do
-          fingerprint = params.fetch(:fingerprint) do
-            Gitlab::InsecureKeyFingerprint.new(params.fetch(:key)).fingerprint
-          end
-          key = Key.find_by(fingerprint: fingerprint)
+          fingerprint = Gitlab::InsecureKeyFingerprint.new(params.fetch(:key)).fingerprint_sha256
+
+          key = Key.find_by_fingerprint_sha256(fingerprint)
           not_found!('Key') if key.nil?
           present key, with: Entities::SSHKey
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
         #
         # Discover user by ssh key, user id or username
@@ -193,7 +194,7 @@ module API
           actor.update_last_used_at!
           user = actor.user
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          error_message = validate_actor(actor)
 
           if params[:user_id] && user.nil?
             break { success: false, message: 'Could not find the given user' }
@@ -222,7 +223,7 @@ module API
           actor.update_last_used_at!
           user = actor.user
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          error_message = validate_actor(actor)
 
           break { success: false, message: 'Deploy keys cannot be used to create personal access tokens' } if actor.key.is_a?(DeployKey)
 
@@ -295,7 +296,7 @@ module API
           actor.update_last_used_at!
           user = actor.user
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          error_message = validate_actor(actor)
 
           if error_message
             { success: false, message: error_message }
@@ -319,4 +320,4 @@ module API
   end
 end
 
-API::Internal::Base.prepend_if_ee('EE::API::Internal::Base')
+API::Internal::Base.prepend_mod_with('API::Internal::Base')

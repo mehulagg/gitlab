@@ -12,6 +12,7 @@ RSpec.describe API::MergeRequests do
   let_it_be(:milestone1) { create(:milestone, title: '0.9', project: project) }
   let_it_be(:label)      { create(:label, title: 'label', color: '#FFAABB', project: project) }
   let_it_be(:label2)     { create(:label, title: 'a-test', color: '#FFFFFF', project: project) }
+
   let(:base_time)        { Time.now }
   let!(:merge_request)   { create(:merge_request, :simple, milestone: milestone1, author: user, assignees: [user, user2], source_project: project, target_project: project, title: "Test", created_at: base_time) }
 
@@ -145,7 +146,7 @@ RSpec.describe API::MergeRequests do
       context 'the approvals_before_merge param' do
         context 'when the target project has disable_overriding_approvers_per_merge_request set to true' do
           before do
-            project.update(disable_overriding_approvers_per_merge_request: true)
+            project.update!(disable_overriding_approvers_per_merge_request: true)
             create_merge_request(approvals_before_merge: 1)
           end
 
@@ -156,7 +157,7 @@ RSpec.describe API::MergeRequests do
 
         context 'when the target project has disable_overriding_approvers_per_merge_request set to false' do
           before do
-            project.update(approvals_before_merge: 0)
+            project.update!(approvals_before_merge: 0)
             create_merge_request(approvals_before_merge: 1)
           end
 
@@ -173,7 +174,7 @@ RSpec.describe API::MergeRequests do
   describe "PUT /projects/:id/merge_requests/:merge_request_iid/merge" do
     it 'returns 405 if merge request was not approved' do
       project.add_developer(create(:user))
-      project.update(approvals_before_merge: 1)
+      project.update!(approvals_before_merge: 1)
 
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
 
@@ -184,8 +185,8 @@ RSpec.describe API::MergeRequests do
     it 'returns 200 if merge request was approved' do
       approver = create(:user)
       project.add_developer(approver)
-      project.update(approvals_before_merge: 1)
-      merge_request.approvals.create(user: approver)
+      project.update!(approvals_before_merge: 1)
+      merge_request.approvals.create!(user: approver)
 
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
 
@@ -198,7 +199,7 @@ RSpec.describe API::MergeRequests do
       let!(:merge_request) { create(:merge_request, :on_train, source_project: project, target_project: project) }
 
       before do
-        ::MergeRequests::MergeToRefService.new(merge_request.project, merge_request.merge_user, target_ref: merge_request.train_ref_path)
+        ::MergeRequests::MergeToRefService.new(project: merge_request.project, current_user: merge_request.merge_user, params: { target_ref: merge_request.train_ref_path })
                                           .execute(merge_request)
       end
 

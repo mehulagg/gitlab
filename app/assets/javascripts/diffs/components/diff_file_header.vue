@@ -13,6 +13,7 @@ import {
 } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { IdState } from 'vendor/vue-virtual-scroller';
 import { diffViewerModes } from '~/ide/constants';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { truncateSha } from '~/lib/utils/text_utility';
@@ -46,9 +47,10 @@ export default {
     GlTooltip: GlTooltipDirective,
     SafeHtml: GlSafeHtmlDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
+  mixins: [glFeatureFlagsMixin(), IdState({ idProp: (vm) => vm.diffFile.file_hash })],
   i18n: {
     ...DIFF_FILE_HEADER,
+    compareButtonLabel: s__('Compare submodule commit revisions'),
   },
   props: {
     discussionPath: {
@@ -94,8 +96,13 @@ export default {
       required: false,
       default: false,
     },
+    codequalityDiff: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
-  data() {
+  idState() {
     return {
       moreActionsShown: false,
     };
@@ -192,6 +199,22 @@ export default {
     isReviewable() {
       return reviewable(this.diffFile);
     },
+    externalUrlLabel() {
+      return sprintf(__('View on %{url}'), { url: this.diffFile.formatted_external_url });
+    },
+  },
+  watch: {
+    'idState.moreActionsShown': {
+      handler(val) {
+        const el = this.$el.closest('.vue-recycle-scroller__item-view');
+
+        if (this.glFeatures.diffsVirtualScrolling && el) {
+          // We can't add a style with Vue because of the way the virtual
+          // scroller library renders the diff files
+          el.style.zIndex = val ? '1' : null;
+        }
+      },
+    },
   },
   methods: {
     ...mapActions('diffs', [
@@ -226,7 +249,7 @@ export default {
       }
     },
     setMoreActionsShown(val) {
-      this.moreActionsShown = val;
+      this.idState.moreActionsShown = val;
     },
     toggleReview(newReviewedStatus) {
       const autoCollapsed =
@@ -255,7 +278,7 @@ export default {
 <template>
   <div
     ref="header"
-    :class="{ 'gl-z-dropdown-menu!': moreActionsShown }"
+    :class="{ 'gl-z-dropdown-menu!': idState.moreActionsShown }"
     class="js-file-title file-title file-title-flex-parent"
     data-qa-selector="file_title_container"
     :data-qa-file-name="filePath"
@@ -279,7 +302,7 @@ export default {
       >
         <file-icon
           :file-name="filePath"
-          :size="18"
+          :size="16"
           aria-hidden="true"
           css-classes="gl-mr-2"
           :submodule="diffFile.submodule"
@@ -334,19 +357,21 @@ export default {
       v-if="!diffFile.submodule && addMergeRequestButtons"
       class="file-actions d-flex align-items-center gl-ml-auto gl-align-self-start"
     >
-      <diff-stats :added-lines="diffFile.added_lines" :removed-lines="diffFile.removed_lines" />
+      <diff-stats
+        :diff-file="diffFile"
+        :added-lines="diffFile.added_lines"
+        :removed-lines="diffFile.removed_lines"
+      />
       <gl-form-checkbox
         v-if="isReviewable && showLocalFileReviews"
         v-gl-tooltip.hover
         data-testid="fileReviewCheckbox"
-        class="gl-mb-0"
+        class="gl-mr-5 gl-display-flex gl-align-items-center"
         :title="$options.i18n.fileReviewTooltip"
         :checked="reviewed"
         @change="toggleReview"
       >
-        <span class="gl-line-height-20">
-          {{ $options.i18n.fileReviewLabel }}
-        </span>
+        {{ $options.i18n.fileReviewLabel }}
       </gl-form-checkbox>
       <gl-button-group class="gl-pt-0!">
         <gl-button
@@ -354,7 +379,8 @@ export default {
           ref="externalLink"
           v-gl-tooltip.hover
           :href="diffFile.external_url"
-          :title="`View on ${diffFile.formatted_external_url}`"
+          :title="externalUrlLabel"
+          :aria-label="externalUrlLabel"
           target="_blank"
           data-track-event="click_toggle_external_button"
           data-track-label="diff_toggle_external_button"
@@ -430,7 +456,7 @@ export default {
               :disabled="diffFile.isLoadingFullFile"
               @click="toggleFullDiff(diffFile.file_path)"
             >
-              <gl-loading-icon v-if="diffFile.isLoadingFullFile" inline />
+              <gl-loading-icon v-if="diffFile.isLoadingFullFile" size="sm" inline />
               {{ expandDiffToFullFileTitle }}
             </gl-dropdown-item>
           </template>
@@ -446,7 +472,8 @@ export default {
         v-gl-tooltip.hover
         v-safe-html="submoduleDiffCompareLinkText"
         class="submodule-compare"
-        :title="s__('Compare submodule commit revisions')"
+        :title="$options.i18n.compareButtonLabel"
+        :aria-label="$options.i18n.compareButtonLabel"
         :href="diffFile.submodule_compare.url"
       />
     </div>

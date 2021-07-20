@@ -1,0 +1,18 @@
+// Merge request diff grid layout modifications for inline code quality diff
+// These grid templates build off of their equivalents in app/.../diffs.scss
+// to expand the column only when the .with-codequality class is applied
+.diff-grid.with-codequality {
+  .diff-grid-right {
+    grid-template-columns: 50px 8px 20px 1fr;
+  }
+
+  &.inline {
+    .diff-grid-left {
+      grid-template-columns: 50px 50px 8px 20px 1fr;
+    }
+  }
+
+  .codequality-severity-icon {
+    filter: drop-shadow(0 1px 0.5px #fff) drop-shadow(1px 0 0.5px #fff) drop-shadow(0 -1px 0.5px #fff) drop-shadow(-1px 0 0.5px #fff);
+  }
+}

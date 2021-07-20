@@ -13,6 +13,11 @@ RSpec.describe Elastic::ReindexingTask, type: :model do
     it { is_expected.to have_many(:subtasks) }
   end
 
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:max_slices_running) }
+    it { is_expected.to validate_presence_of(:slice_multiplier) }
+  end
+
   it 'only allows one running task at a time' do
     expect { create(:elastic_reindexing_task, state: :success) }.not_to raise_error
     expect { create(:elastic_reindexing_task) }.not_to raise_error

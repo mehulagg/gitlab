@@ -10,7 +10,7 @@ type: reference, how-to
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4539) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Free in 10.7.
 
-The Web IDE editor makes it faster and easier to contribute changes to your
+The Web Integrated Development Environment (IDE) editor makes it faster and easier to contribute changes to your
 projects by providing an advanced editor with commit staging.
 
 ## Open the Web IDE
@@ -66,24 +66,24 @@ Monaco uses the [Monarch](https://microsoft.github.io/monaco-editor/monarch.html
 
 If you are missing Syntax Highlighting support for any language, we prepared a short guide on how to [add support for a missing language Syntax Highlighting.](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/ide/lib/languages/README.md)
 
-NOTE:
-Single file editing is based on the [Ace Editor](https://ace.c9.io).
-
 ### Themes
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in GitLab in 13.0.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in GitLab 13.0.
 > - Full Solarized Dark Theme [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/219228) in GitLab 13.1.
+> - Full [Solarized Light](https://gitlab.com/gitlab-org/gitlab/-/issues/221035) and [Monokai](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) Themes introduced in GitLab 13.6.
 
-All the themes GitLab supports for syntax highlighting are added to the Web IDE's code editor.
+All the themes GitLab supports for syntax highlighting are applied to the Web IDE's entire screen.
 You can pick a theme from your [profile preferences](../../profile/preferences.md).
 
-The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
-the [Solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
-which apply to the entire Web IDE screen.
+| Solarized Dark Theme                                        | Dark Theme                              |
+|-------------------------------------------------------------|-----------------------------------------|
+| ![Solarized Dark Theme](img/solarized_dark_theme_v13_1.png) | ![Dark Theme](img/dark_theme_v13_0.png) |
 
-| Solarized Light Theme                                         | Solarized Dark Theme                                        | Dark Theme                              |
-|---------------------------------------------------------------|-------------------------------------------------------------|-----------------------------------------|
-| ![Solarized Light Theme](img/solarized_light_theme_v13_0.png) | ![Solarized Dark Theme](img/solarized_dark_theme_v13_1.png) | ![Dark Theme](img/dark_theme_v13_0.png) |
+## Highlight lines
+
+WebIDE is built with the [Web Editor](../repository/web_editor.md). This enables WebIDE to share the
+same core features for highlighting and linking to particular lines in the edited files
+[described for the Web Editor](../repository/web_editor.md#highlight-lines).
 
 ## Schema based validation
 
@@ -190,7 +190,7 @@ To discard a change in a particular file, click the **Discard changes** button o
 file in the changes tab. To discard all the changes, click the trash icon on the
 top-right corner of the changes sidebar.
 
-![Commit changes](img/commit_changes_v12_9.png)
+![Commit changes](img/commit_changes_v13_11.png)
 
 ## Reviewing changes
 
@@ -237,7 +237,7 @@ different branch.
 
 When you edit Markdown files in the Web IDE, you can preview your changes by
 clicking the **Preview Markdown** tab above the file editor. The Markdown preview
-supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 You can also upload any local images by pasting them directly in the Markdown file.
 The image is uploaded to the same directory and is named `image.png` by default.
@@ -259,19 +259,27 @@ Additionally, for public projects an **Open in CodeSandbox** button is available
 to transfer the contents of the project into a public CodeSandbox project to
 quickly share your project with others.
 
-### Enabling Live Preview
+### Enable Live Preview
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/268288) in GitLab 12.9, third-party assets and libraries required for Live Preview are hosted at `https://sandbox-prod.gitlab-static.net` when it is enabled. However, some libraries are still served from other third-party services which may or may not be desirable in your environment.
+With Live Preview enabled, you can preview projects with a `package.json` file and
+a `main` entry point inside the Web IDE.
 
-The Live Preview feature needs to be enabled in the GitLab instance's
-Admin Area. Live Preview is enabled for all projects on
-GitLab.com
+Live Preview is enabled for all projects on GitLab.com. If you are an administrator
+of a self-managed GitLab instance, and you want to enable Live Preview:
 
-![Administrator Live Preview setting](img/admin_live_preview_v13_0.png)
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**.
+1. Scroll to **Web IDE** and select **Expand**:
+   ![Administrator Live Preview setting](img/admin_live_preview_v13_0.png)
+1. Select **Enable Live Preview** and select **Save changes**.
 
-After you have done that, you can preview projects with a `package.json` file and
-a `main` entry point inside the Web IDE. An example `package.json` is shown
-below.
+[In GitLab 12.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/268288),
+third-party assets and libraries required for Live Preview are hosted at
+`https://sandbox-prod.gitlab-static.net` when it is enabled. However, some libraries
+are still served from other third-party services, which may or may not be desirable
+in your environment.
+
+An example `package.json`:
 
 ```json
 {
@@ -323,7 +331,7 @@ The [File Sync](#file-syncing-to-web-terminal) feature is supported on Kubernete
 
 In order to enable the Web IDE terminals you need to create the file
 `.gitlab/.gitlab-webide.yml` inside the repository's root. This
-file is fairly similar to the [CI configuration file](../../../ci/yaml/README.md)
+file is fairly similar to the [CI configuration file](../../../ci/yaml/index.md)
 syntax but with some restrictions:
 
 - No global blocks (such as `before_script` or `after_script`) can be defined.
@@ -344,7 +352,7 @@ terminal:
   # This can be any image that has the necessary runtime environment for your project.
   image: node:10-alpine
   before_script:
-    - apt-get update
+    - apk update
   script: sleep 60
   variables:
     RAILS_ENV: "test"
@@ -424,7 +432,7 @@ terminal:
   See [this issue](https://gitlab.com/gitlab-org/webide-file-sync/-/issues/7) for
   more information.
 - `$CI_PROJECT_DIR` is a
-  [predefined environment variable](../../../ci/variables/predefined_variables.md)
+  [predefined CI/CD variable](../../../ci/variables/predefined_variables.md)
   for GitLab Runners. This is where your project's repository resides.
 
 After you have configured the web terminal for file syncing, then when the web

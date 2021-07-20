@@ -3,14 +3,12 @@
 module IssuableActions
   extend ActiveSupport::Concern
   include Gitlab::Utils::StrongMemoize
+  include Gitlab::Cache::Helpers
 
   included do
     before_action :authorize_destroy_issuable!, only: :destroy
     before_action :check_destroy_confirmation!, only: :destroy
     before_action :authorize_admin_issuable!, only: :bulk_update
-    before_action do
-      push_frontend_feature_flag(:not_issuable_queries, @project, default_enabled: true)
-    end
   end
 
   def show
@@ -64,7 +62,7 @@ module IssuableActions
   end
 
   def destroy
-    Issuable::DestroyService.new(issuable.project, current_user).execute(issuable)
+    Issuable::DestroyService.new(project: issuable.project, current_user: current_user).execute(issuable)
 
     name = issuable.human_class_name
     flash[:notice] = "The #{name} was successfully deleted."
@@ -132,7 +130,11 @@ module IssuableActions
 
     discussions = Discussion.build_collection(notes, issuable)
 
-    render json: discussion_serializer.represent(discussions, context: self)
+    if issuable.is_a?(MergeRequest) && Feature.enabled?(:merge_request_discussion_cache, issuable.target_project, default_enabled: :yaml)
+      render_cached(discussions, with: discussion_serializer, context: self)
+    else
+      render json: discussion_serializer.represent(discussions, context: self)
+    end
   end
   # rubocop:enable CodeReuse/ActiveRecord
 
@@ -262,4 +264,4 @@ module IssuableActions
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 end
 
-IssuableActions.prepend_if_ee('EE::IssuableActions')
+IssuableActions.prepend_mod_with('IssuableActions')

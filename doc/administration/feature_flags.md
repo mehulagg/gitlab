@@ -13,7 +13,7 @@ to deploy features in an early stage of development so that they can be
 incrementally rolled out.
 
 Before making them permanently available, features can be deployed behind
-flags for a [number of reasons](../development/feature_flags/index.md#when-to-use-feature-flags), such as:
+flags for a [number of reasons](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#when-to-use-feature-flags), such as:
 
 - To test the feature.
 - To get feedback from users and customers while in an early stage of the development of the feature.
@@ -127,6 +127,5 @@ Feature.disabled?(:my_awesome_feature)
 => false
 ```
 
-When the feature is ready, GitLab will remove the feature flag, the option for
-enabling and disabling it will no longer exist, and the feature will become
-available in all instances.
+When the feature is ready, GitLab removes the feature flag, and the option for
+enabling and disabling it no longer exists. The feature becomes available in all instances.

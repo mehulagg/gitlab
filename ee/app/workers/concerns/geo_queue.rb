@@ -7,5 +7,6 @@ module GeoQueue
   included do
     queue_namespace :geo
     feature_category :geo_replication
+    tags :exclude_from_gitlab_com
   end
 end

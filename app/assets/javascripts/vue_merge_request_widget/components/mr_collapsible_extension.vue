@@ -50,33 +50,44 @@ export default {
     <div class="mr-widget-extension d-flex align-items-center pl-3">
       <div v-if="hasError" class="ci-widget media">
         <div class="media-body">
-          <span class="gl-font-sm mr-widget-margin-left gl-line-height-24 js-error-state">{{
-            title
-          }}</span>
+          <span class="gl-font-sm mr-widget-margin-left gl-line-height-24 js-error-state">
+            {{ title }}
+          </span>
         </div>
       </div>
 
       <template v-else>
         <button
-          class="btn-blank btn s32 square gl-mr-3"
+          class="btn-blank btn s32 square"
           type="button"
           :aria-label="ariaLabel"
           :disabled="isLoading"
           @click="toggleCollapsed"
         >
-          <gl-loading-icon v-if="isLoading" />
+          <gl-loading-icon v-if="isLoading" size="sm" />
           <gl-icon v-else :name="arrowIconName" class="js-icon" />
         </button>
+        <template v-if="isCollapsed">
+          <slot name="header"></slot>
+          <gl-button
+            variant="link"
+            data-testid="mr-collapsible-title"
+            :disabled="isLoading"
+            :class="{ 'border-0': isLoading }"
+            @click="toggleCollapsed"
+          >
+            {{ title }}
+          </gl-button>
+        </template>
         <gl-button
+          v-else
           variant="link"
-          class="js-title"
+          data-testid="mr-collapsible-title"
           :disabled="isLoading"
           :class="{ 'border-0': isLoading }"
           @click="toggleCollapsed"
+          >{{ __('Collapse') }}</gl-button
         >
-          <template v-if="isCollapsed">{{ title }}</template>
-          <template v-else>{{ __('Collapse') }}</template>
-        </gl-button>
       </template>
     </div>
 

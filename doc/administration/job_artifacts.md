@@ -1,16 +1,13 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Testing
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
-# Jobs artifacts administration
+# Jobs artifacts administration **(FREE SELF)**
 
-> - Introduced in GitLab 8.2 and GitLab Runner 0.7.0.
-> - Starting with GitLab 8.4 and GitLab Runner 1.0, the artifacts archive format changed to `ZIP`.
-> - Starting with GitLab 8.17, builds are renamed to jobs.
-> - This is the administration documentation. For the user guide see [pipelines/job_artifacts](../ci/pipelines/job_artifacts.md).
+This is the administration documentation. For the user guide see [pipelines/job_artifacts](../ci/pipelines/job_artifacts.md).
 
 Artifacts is a list of files and directories which are attached to a job after it
 finishes. This feature is enabled by default in all GitLab installations. Keep reading
@@ -45,10 +42,10 @@ To disable artifacts site-wide, follow the steps below.
 
 GitLab Runner can upload an archive containing the job artifacts to GitLab. By default,
 this is done when the job succeeds, but can also be done on failure, or always, via the
-[`artifacts:when`](../ci/yaml/README.md#artifactswhen) parameter.
+[`artifacts:when`](../ci/yaml/index.md#artifactswhen) parameter.
 
 Most artifacts are compressed by GitLab Runner before being sent to the coordinator. The exception to this is
-[reports artifacts](../ci/pipelines/job_artifacts.md#artifactsreports), which are compressed after uploading.
+[reports artifacts](../ci/yaml/index.md#artifactsreports), which are compressed after uploading.
 
 ### Using local storage
 
@@ -87,12 +84,7 @@ _The artifacts are stored by default in
 
 ### Using object storage
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1762) in
->   [GitLab Premium](https://about.gitlab.com/pricing/) 9.4.
-> - Since version 9.5, artifacts are [browsable](../ci/pipelines/job_artifacts.md#browsing-artifacts),
->   when object storage is enabled. 9.4 lacks this feature.
-> - Since version 10.6, available in [GitLab Free](https://about.gitlab.com/pricing/).
-> - Since version 11.0, we support `direct_upload` to S3.
+> Introduced in GitLab 11.0: Support for `direct_upload` to S3.
 
 If you don't want to use the local disk where GitLab is installed to store the
 artifacts, you can use an object storage like AWS S3 instead.
@@ -118,14 +110,14 @@ This section describes the earlier configuration format.
 
 For source installations the following settings are nested under `artifacts:` and then `object_store:`. On Omnibus GitLab installs they are prefixed by `artifacts_object_store_`.
 
-| Setting             | Default | Description                                                                                                                                                                             |
-|---------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`           | `false` | Enable/disable object storage                                                                                                                                                           |
-| `remote_directory`  |         | The bucket name where Artifacts are stored                                                                                                                                              |
-| `direct_upload`     | `false` | Set to `true` to enable direct upload of Artifacts without the need of local shared storage. Option may be removed once we decide to support only single storage for all files.         |
-| `background_upload` | `true`  | Set to `false` to disable automatic upload. Option may be removed once upload is direct to S3                                                                                           |
+| Setting             | Default | Description |
+|---------------------|---------|-------------|
+| `enabled`           | `false` | Enable or disable object storage. |
+| `remote_directory`  |         | The bucket name where Artifacts are stored. Use the name only, do not include the path. |
+| `direct_upload`     | `false` | Set to `true` to enable direct upload of Artifacts without the need of local shared storage. Option may be removed once we decide to support only single storage for all files. |
+| `background_upload` | `true`  | Set to `false` to disable automatic upload. Option may be removed once upload is direct to S3. |
 | `proxy_download`    | `false` | Set to `true` to enable proxying all files served. Option allows to reduce egress traffic as this allows clients to download directly from remote storage instead of proxying all data. |
-| `connection`        |         | Various connection options described below                                                                                                                                              |
+| `connection`        |         | Various connection options described below. |
 
 #### Connection settings
 
@@ -334,7 +326,7 @@ To migrate back to local storage:
 
 ## Expiring artifacts
 
-If [`artifacts:expire_in`](../ci/yaml/README.md#artifactsexpire_in) is used to set
+If [`artifacts:expire_in`](../ci/yaml/index.md#artifactsexpire_in) is used to set
 an expiry for the artifacts, they are marked for deletion right after that date passes.
 Otherwise, they expire per the [default artifacts expiration setting](../user/admin_area/settings/continuous_integration.md).
 
@@ -369,42 +361,6 @@ steps below.
 
 If the `expire` directive is not set explicitly in your pipeline, artifacts expire per the
 default artifacts expiration setting, which you can find in the [CI/CD Administration settings](../user/admin_area/settings/continuous_integration.md).
-
-## Validation for dependencies
-
-> Introduced in GitLab 10.3.
-
-To disable [the dependencies validation](../ci/yaml/README.md#when-a-dependent-job-fails),
-you can enable the `ci_validate_build_dependencies_override` feature flag from a Rails console.
-
-**In Omnibus installations:**
-
-1. Enter the Rails console:
-
-   ```shell
-   sudo gitlab-rails console
-   ```
-
-1. Enable the feature flag to disable the validation:
-
-   ```ruby
-   Feature.enable(:ci_validate_build_dependencies_override)
-   ```
-
-**In installations from source:**
-
-1. Enter the Rails console:
-
-   ```shell
-   cd /home/git/gitlab
-   sudo -u git -H bundle exec rails console -e production
-   ```
-
-1. Enable the feature flag to disable the validation:
-
-   ```ruby
-   Feature.enable(:ci_validate_build_dependencies_override)
-   ```
 
 ## Set the maximum file size of the artifacts
 
@@ -509,7 +465,7 @@ If you need to manually remove job artifacts associated with multiple jobs while
 
    NOTE:
    This step also erases artifacts that users have chosen to
-   ["keep"](../ci/pipelines/job_artifacts.md#browsing-artifacts).
+   ["keep"](../ci/pipelines/job_artifacts.md#download-job-artifacts).
 
    ```ruby
    builds_to_clear = builds_with_artifacts.where("finished_at < ?", 1.week.ago)
@@ -525,6 +481,9 @@ If you need to manually remove job artifacts associated with multiple jobs while
    - `7.days.ago`
    - `3.months.ago`
    - `1.year.ago`
+
+   `erase_erasable_artifacts!` is a synchronous method, and upon execution, the artifacts are removed immediately.
+   They are not scheduled via some background queue.
 
 #### Delete job artifacts and logs from jobs completed before a specific date
 
@@ -580,3 +539,40 @@ If you need to manually remove **all** job artifacts associated with multiple jo
    - `7.days.ago`
    - `3.months.ago`
    - `1.year.ago`
+
+### Error `Downloading artifacts from coordinator... not found`
+
+When a job tries to download artifacts from an earlier job, you might receive an error similar to:
+
+```plaintext
+Downloading artifacts from coordinator... not found  id=12345678 responseStatus=404 Not Found
+```
+
+This might be caused by a `gitlab.rb` file with the following configuration:
+
+```ruby
+gitlab_rails['artifacts_object_store_background_upload'] = false
+gitlab_rails['artifacts_object_store_direct_upload'] = true
+```
+
+To prevent this, comment out or remove those lines, or switch to their [default values](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template),
+then run `sudo gitlab-ctl reconfigure`.
+
+### Job artifact upload fails with error 500
+
+If you are using object storage for artifacts and a job artifact fails to upload,
+you can check:
+
+- The job log for an error similar to:
+
+  ```plaintext
+  WARNING: Uploading artifacts as "archive" to coordinator... failed id=12345 responseStatus=500 Internal Server Error status=500 token=abcd1234
+  ```
+
+- The [workhorse log](logs.md#workhorse-logs) for an error similar to:
+
+  ```json
+  {"error":"MissingRegion: could not find region configuration","level":"error","msg":"error uploading S3 session","time":"2021-03-16T22:10:55-04:00"}
+  ```
+
+In both cases, you might need to add `region` to the job artifact [object storage configuration](#connection-settings).

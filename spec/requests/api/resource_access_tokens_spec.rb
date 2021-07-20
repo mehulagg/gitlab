@@ -30,6 +30,19 @@ RSpec.describe API::ResourceAccessTokens do
           expect(token_ids).to match_array(access_tokens.pluck(:id))
         end
 
+        it "exposes the correct token information", :aggregate_failures do
+          get_tokens
+
+          token = access_tokens.last
+          api_get_token = json_response.last
+
+          expect(api_get_token["name"]).to eq(token.name)
+          expect(api_get_token["scopes"]).to eq(token.scopes)
+          expect(api_get_token["access_level"]).to eq(project.team.max_member_access(token.user.id))
+          expect(api_get_token["expires_at"]).to eq(token.expires_at.to_date.iso8601)
+          expect(api_get_token).not_to have_key('token')
+        end
+
         context "when using a project access token to GET other project access tokens" do
           let_it_be(:token) { access_tokens.first }
 
@@ -139,6 +152,23 @@ RSpec.describe API::ResourceAccessTokens do
           expect(User.exists?(project_bot.id)).to be_falsy
         end
 
+        context "when using project access token to DELETE other project access token" do
+          let_it_be(:other_project_bot) { create(:user, :project_bot) }
+          let_it_be(:other_token) { create(:personal_access_token, user: other_project_bot) }
+          let_it_be(:token_id) { other_token.id }
+
+          before do
+            project.add_maintainer(other_project_bot)
+          end
+
+          it "deletes the project access token from the project" do
+            delete_token
+
+            expect(response).to have_gitlab_http_status(:no_content)
+            expect(User.exists?(other_project_bot.id)).to be_falsy
+          end
+        end
+
         context "when attempting to delete a non-existent project access token" do
           let_it_be(:token_id) { non_existing_record_id }
 
@@ -182,13 +212,14 @@ RSpec.describe API::ResourceAccessTokens do
     end
 
     describe "POST projects/:id/access_tokens" do
-      let_it_be(:params) { { name: "test", scopes: ["api"], expires_at: Date.today + 1.month } }
+      let(:params) { { name: "test", scopes: ["api"], expires_at: expires_at, access_level: access_level } }
+      let(:expires_at) { 1.month.from_now }
+      let(:access_level) { 20 }
 
       subject(:create_token) { post api("/projects/#{project_id}/access_tokens", user), params: params }
 
       context "when the user has maintainer permissions" do
         let_it_be(:project_id) { project.id }
-        let_it_be(:expires_at) { 1.month.from_now }
 
         before do
           project.add_maintainer(user)
@@ -202,12 +233,14 @@ RSpec.describe API::ResourceAccessTokens do
               expect(response).to have_gitlab_http_status(:created)
               expect(json_response["name"]).to eq("test")
               expect(json_response["scopes"]).to eq(["api"])
+              expect(json_response["access_level"]).to eq(20)
               expect(json_response["expires_at"]).to eq(expires_at.to_date.iso8601)
+              expect(json_response["token"]).to be_present
             end
           end
 
           context "when 'expires_at' is not set" do
-            let_it_be(:params) { { name: "test", scopes: ["api"] } }
+            let(:expires_at) { nil }
 
             it "creates a project access token with the params", :aggregate_failures do
               create_token
@@ -216,6 +249,21 @@ RSpec.describe API::ResourceAccessTokens do
               expect(json_response["name"]).to eq("test")
               expect(json_response["scopes"]).to eq(["api"])
               expect(json_response["expires_at"]).to eq(nil)
+            end
+          end
+
+          context "when 'access_level' is not set" do
+            let(:access_level) { nil }
+
+            it 'creates a project access token with the default access level', :aggregate_failures do
+              create_token
+
+              expect(response).to have_gitlab_http_status(:created)
+              expect(json_response["name"]).to eq("test")
+              expect(json_response["scopes"]).to eq(["api"])
+              expect(json_response["access_level"]).to eq(40)
+              expect(json_response["expires_at"]).to eq(expires_at.to_date.iso8601)
+              expect(json_response["token"]).to be_present
             end
           end
         end

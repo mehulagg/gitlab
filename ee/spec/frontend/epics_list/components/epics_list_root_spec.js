@@ -54,7 +54,9 @@ const mockProvide = {
   groupFullPath: 'gitlab-org',
   groupLabelsPath: '/gitlab-org/-/labels.json',
   groupMilestonesPath: '/gitlab-org/-/milestone.json',
+  listEpicsPath: '/gitlab-org/-/epics',
   emptyStatePath: '/assets/illustrations/empty-state/epics.svg',
+  isSignedIn: false,
 };
 
 const mockPageInfo = {
@@ -101,6 +103,32 @@ describe('EpicsListRoot', () => {
   });
 
   describe('methods', () => {
+    describe('epicReference', () => {
+      const mockEpicWithPath = {
+        ...mockFormattedEpic,
+        group: {
+          fullPath: 'gitlab-org/marketing',
+        },
+      };
+      const mockEpicWithoutPath = {
+        ...mockFormattedEpic,
+        group: {
+          fullPath: 'gitlab-org',
+        },
+      };
+
+      it.each`
+        epic                   | reference
+        ${mockEpicWithPath}    | ${'gitlab-org/marketing&2'}
+        ${mockEpicWithoutPath} | ${'&2'}
+      `(
+        'returns string "$reference" based on provided `epic.group.fullPath`',
+        ({ epic, reference }) => {
+          expect(wrapper.vm.epicReference(epic)).toBe(reference);
+        },
+      );
+    });
+
     describe('epicTimeframe', () => {
       it.each`
         startDate     | dueDate        | returnValue
@@ -143,6 +171,7 @@ describe('EpicsListRoot', () => {
     const getIssuableList = () => wrapper.find(IssuableList);
 
     it('renders issuable-list component', async () => {
+      jest.spyOn(wrapper.vm, 'getFilteredSearchTokens');
       wrapper.setData({
         filterParams: {
           search: 'foo',
@@ -164,6 +193,10 @@ describe('EpicsListRoot', () => {
         urlParams: wrapper.vm.urlParams,
         issuableSymbol: '&',
         recentSearchesStorageKey: 'epics',
+      });
+
+      expect(wrapper.vm.getFilteredSearchTokens).toHaveBeenCalledWith({
+        supportsEpic: false,
       });
     });
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'GlobalSearch', :elastic do
+RSpec.describe 'GlobalSearch', :elastic, :clean_gitlab_redis_shared_state do
   include AdminModeHelper
 
   let(:features) { %i(issues merge_requests repository builds wiki snippets) }
@@ -173,7 +173,7 @@ RSpec.describe 'GlobalSearch', :elastic do
 
   # access_level can be :disabled, :enabled or :private
   def feature_settings(access_level)
-    Hash[features.collect { |k| ["#{k}_access_level", Featurable.const_get(access_level.to_s.upcase, false)] }]
+    features.to_h { |k| ["#{k}_access_level", Featurable.const_get(access_level.to_s.upcase, false)] }
   end
 
   def expect_no_items_to_be_found(user)

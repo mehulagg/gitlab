@@ -1,6 +1,5 @@
 import { property, isEqual } from 'lodash';
 import { diffModes, diffViewerModes } from '~/ide/constants';
-import { truncatePathMiddleToLength } from '~/lib/utils/text_utility';
 import {
   LINE_POSITION_LEFT,
   LINE_POSITION_RIGHT,
@@ -11,10 +10,7 @@ import {
   OLD_LINE_TYPE,
   MATCH_LINE_TYPE,
   LINES_TO_BE_RENDERED_DIRECTLY,
-  TREE_TYPE,
   INLINE_DIFF_LINES_KEY,
-  SHOW_WHITESPACE,
-  NO_SHOW_WHITESPACE,
   CONFLICT_OUR,
   CONFLICT_THEIR,
   CONFLICT_MARKER,
@@ -283,7 +279,7 @@ export function addContextLines(options) {
  * Trims the first char of the `richText` property when it's either a space or a diff symbol.
  * @param {Object} line
  * @returns {Object}
- * @deprecated
+ * @deprecated Use `line.rich_text = line.rich_text ? line.rich_text.replace(/^[+ -]/, '') : undefined;` instead!. For more information, see https://gitlab.com/gitlab-org/gitlab/-/issues/299329
  */
 export function trimFirstCharOfLineContent(line = {}) {
   // eslint-disable-next-line no-param-reassign
@@ -381,22 +377,19 @@ function prepareDiffFileLines(file) {
 
   inlineLines.forEach((line) => prepareLine(line, file)); // WARNING: In-Place Mutations!
 
-  Object.assign(file, {
-    inlineLinesCount: inlineLines.length,
-  });
-
   return file;
 }
 
-function getVisibleDiffLines(file) {
-  return file.inlineLinesCount;
-}
+function finalizeDiffFile(file, index) {
+  let renderIt = Boolean(window.gon?.features?.diffsVirtualScrolling);
 
-function finalizeDiffFile(file) {
-  const lines = getVisibleDiffLines(file);
+  if (!window.gon?.features?.diffsVirtualScrolling) {
+    renderIt =
+      index < 3 ? file[INLINE_DIFF_LINES_KEY].length < LINES_TO_BE_RENDERED_DIRECTLY : false;
+  }
 
   Object.assign(file, {
-    renderIt: lines < LINES_TO_BE_RENDERED_DIRECTLY,
+    renderIt,
     isShowingFullFile: false,
     isLoadingFullFile: false,
     discussions: [],
@@ -424,7 +417,7 @@ export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
     .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles, meta }))
     .map(ensureBasicDiffFileLines)
     .map(prepareDiffFileLines)
-    .map(finalizeDiffFile);
+    .map((file, index) => finalizeDiffFile(file, priorFiles.length + index));
 
   return deduplicateFilesList([...priorFiles, ...cleanedFiles]);
 }
@@ -493,111 +486,6 @@ export function isDiscussionApplicableToLine({ discussion, diffPosition, latestD
   // eslint-disable-next-line
   return latestDiff && discussion.active && line_code === discussion.line_code;
 }
-
-export const getLowestSingleFolder = (folder) => {
-  const getFolder = (blob, start = []) =>
-    blob.tree.reduce(
-      (acc, file) => {
-        const shouldGetFolder = file.tree.length === 1 && file.tree[0].type === TREE_TYPE;
-        const currentFileTypeTree = file.type === TREE_TYPE;
-        const path = shouldGetFolder || currentFileTypeTree ? acc.path.concat(file.name) : acc.path;
-        const tree = shouldGetFolder || currentFileTypeTree ? acc.tree.concat(file) : acc.tree;
-
-        if (shouldGetFolder) {
-          const firstFolder = getFolder(file);
-
-          path.push(...firstFolder.path);
-          tree.push(...firstFolder.tree);
-        }
-
-        return {
-          ...acc,
-          path,
-          tree,
-        };
-      },
-      { path: start, tree: [] },
-    );
-  const { path, tree } = getFolder(folder, [folder.name]);
-
-  return {
-    path: truncatePathMiddleToLength(path.join('/'), 40),
-    treeAcc: tree.length ? tree[tree.length - 1].tree : null,
-  };
-};
-
-export const flattenTree = (tree) => {
-  const flatten = (blobTree) =>
-    blobTree.reduce((acc, file) => {
-      const blob = file;
-      let treeToFlatten = blob.tree;
-
-      if (file.type === TREE_TYPE && file.tree.length === 1) {
-        const { treeAcc, path } = getLowestSingleFolder(file);
-
-        if (treeAcc) {
-          blob.name = path;
-          treeToFlatten = flatten(treeAcc);
-        }
-      }
-
-      blob.tree = flatten(treeToFlatten);
-
-      return acc.concat(blob);
-    }, []);
-
-  return flatten(tree);
-};
-
-export const generateTreeList = (files) => {
-  const { treeEntries, tree } = files.reduce(
-    (acc, file) => {
-      const split = file.new_path.split('/');
-
-      split.forEach((name, i) => {
-        const parent = acc.treeEntries[split.slice(0, i).join('/')];
-        const path = `${parent ? `${parent.path}/` : ''}${name}`;
-
-        if (!acc.treeEntries[path]) {
-          const type = path === file.new_path ? 'blob' : 'tree';
-          acc.treeEntries[path] = {
-            key: path,
-            path,
-            name,
-            type,
-            tree: [],
-          };
-
-          const entry = acc.treeEntries[path];
-
-          if (type === 'blob') {
-            Object.assign(entry, {
-              changed: true,
-              tempFile: file.new_file,
-              deleted: file.deleted_file,
-              fileHash: file.file_hash,
-              addedLines: file.added_lines,
-              removedLines: file.removed_lines,
-              parentPath: parent ? `${parent.path}/` : '/',
-              submodule: file.submodule,
-            });
-          } else {
-            Object.assign(entry, {
-              opened: true,
-            });
-          }
-
-          (parent ? parent.tree : acc.tree).push(entry);
-        }
-      });
-
-      return acc;
-    },
-    { treeEntries: {}, tree: [] },
-  );
-
-  return { treeEntries, tree: flattenTree(tree) };
-};
 
 export const getDiffMode = (diffFile) => {
   const diffModeKey = Object.keys(diffModes).find((key) => diffFile[`${key}_file`]);
@@ -674,11 +562,4 @@ export const allDiscussionWrappersExpanded = (diff) => {
   });
 
   return discussionsExpanded;
-};
-
-export const getDefaultWhitespace = (queryString, cookie) => {
-  // Querystring should override stored cookie value
-  if (queryString) return queryString === SHOW_WHITESPACE;
-  if (cookie === NO_SHOW_WHITESPACE) return false;
-  return true;
 };

@@ -36,10 +36,7 @@ export default () => {
     store.dispatch('threatMonitoring/setCurrentEnvironmentId', parseInt(environmentId, 10));
   }
 
-  const props = { threatMonitoringPath, projectId };
-  if (policy) {
-    props.existingPolicy = JSON.parse(policy);
-  }
+  const props = policy ? { existingPolicy: JSON.parse(policy) } : {};
 
   return new Vue({
     el,
@@ -47,7 +44,9 @@ export default () => {
     provide: {
       configureAgentHelpPath,
       createAgentHelpPath,
+      projectId,
       projectPath,
+      threatMonitoringPath,
     },
     store,
     render(createElement) {

@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-class ProjectImportScheduleWorker # rubocop:disable Scalability/IdempotentWorker
+class ProjectImportScheduleWorker
   ImportStateNotFound = Class.new(StandardError)
 
   include ApplicationWorker
   prepend WaitableWorker
 
-  feature_category :importers
+  idempotent!
+  feature_category :source_code_management
   sidekiq_options retry: false
   loggable_arguments 1 # For the job waiter key
 

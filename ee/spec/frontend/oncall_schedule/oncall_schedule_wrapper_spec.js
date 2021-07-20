@@ -1,4 +1,4 @@
-import { GlEmptyState, GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { GlEmptyState, GlLoadingIcon, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import AddScheduleModal from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
@@ -6,8 +6,11 @@ import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
-import getOncallSchedulesWithRotations from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import { escalationPolicyUrl } from 'ee/oncall_schedules/constants';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { preExistingSchedule, newlyCreatedSchedule } from './mocks/apollo_mock';
 
 const localVue = createLocalVue();
@@ -17,34 +20,42 @@ describe('On-call schedule wrapper', () => {
   const emptyOncallSchedulesSvgPath = 'illustration/path.svg';
   const projectPath = 'group/project';
 
-  function mountComponent({ loading, schedule } = {}) {
+  function mountComponent({ loading, schedules } = {}) {
     const $apollo = {
       queries: {
-        schedule: {
+        schedules: {
           loading,
         },
       },
     };
 
-    wrapper = shallowMount(OnCallScheduleWrapper, {
-      data() {
-        return {
-          schedule,
-        };
-      },
-      provide: {
-        emptyOncallSchedulesSvgPath,
-        projectPath,
-      },
-      mocks: { $apollo },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(OnCallScheduleWrapper, {
+        data() {
+          return {
+            schedules,
+          };
+        },
+        provide: {
+          emptyOncallSchedulesSvgPath,
+          projectPath,
+        },
+        directives: {
+          GlTooltip: createMockDirective(),
+        },
+        mocks: { $apollo },
+        stubs: {
+          GlSprintf,
+        },
+      }),
+    );
   }
 
   let getOncallSchedulesQuerySpy;
 
   function mountComponentWithApollo() {
     const fakeApollo = createMockApollo([
-      [getOncallSchedulesWithRotations, getOncallSchedulesQuerySpy],
+      [getOncallSchedulesWithRotationsQuery, getOncallSchedulesQuerySpy],
     ]);
     localVue.use(VueApollo);
 
@@ -53,7 +64,7 @@ describe('On-call schedule wrapper', () => {
       apolloProvider: fakeApollo,
       data() {
         return {
-          schedule: {},
+          schedules: [],
         };
       },
       provide: {
@@ -69,11 +80,13 @@ describe('On-call schedule wrapper', () => {
     }
   });
 
-  const findLoader = () => wrapper.find(GlLoadingIcon);
-  const findEmptyState = () => wrapper.find(GlEmptyState);
-  const findSchedule = () => wrapper.find(OnCallSchedule);
-  const findAlert = () => wrapper.find(GlAlert);
-  const findModal = () => wrapper.find(AddScheduleModal);
+  const findLoader = () => wrapper.findComponent(GlLoadingIcon);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findSchedules = () => wrapper.findAllComponents(OnCallSchedule);
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findAlertLink = () => wrapper.findComponent(GlLink);
+  const findModal = () => wrapper.findComponent(AddScheduleModal);
+  const findAddAdditionalButton = () => wrapper.findByTestId('add-additional-schedules-button');
 
   it('shows a loader while data is requested', () => {
     mountComponent({ loading: true });
@@ -81,7 +94,7 @@ describe('On-call schedule wrapper', () => {
   });
 
   it('shows empty state and passed correct attributes to it when not loading and no schedule', () => {
-    mountComponent({ loading: false, schedule: null });
+    mountComponent({ loading: false, schedules: [] });
     const emptyState = findEmptyState();
 
     expect(emptyState.exists()).toBe(true);
@@ -92,28 +105,34 @@ describe('On-call schedule wrapper', () => {
     });
   });
 
-  describe('Schedule created', () => {
+  describe('Schedules created', () => {
     beforeEach(() => {
-      mountComponent({ loading: false, schedule: { name: 'monitor rotation' } });
+      mountComponent({
+        loading: false,
+        schedules: [{ name: 'monitor rotation' }, { name: 'monitor rotation 2' }],
+      });
     });
 
-    it('renders the schedule when data received ', () => {
+    it('renders the schedules when data received', () => {
       expect(findLoader().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(false);
-      expect(findSchedule().exists()).toBe(true);
+      expect(findSchedules()).toHaveLength(2);
     });
 
-    it('shows success alert', async () => {
+    it('renders an add button with a tooltip for additional schedules', () => {
+      const button = findAddAdditionalButton();
+      expect(button.exists()).toBe(true);
+      const tooltip = getBinding(button.element, 'gl-tooltip');
+      expect(tooltip).toBeDefined();
+      expect(button.attributes('title')).toBe(i18n.add.tooltip);
+    });
+
+    it('shows success alert on new schedule creation', async () => {
       await findModal().vm.$emit('scheduleCreated');
       const alert = findAlert();
       expect(alert.exists()).toBe(true);
       expect(alert.props('title')).toBe(i18n.successNotification.title);
-      expect(alert.text()).toBe(i18n.successNotification.description);
-    });
-
-    it('renders a newly created schedule', async () => {
-      await findModal().vm.$emit('scheduleCreated');
-      expect(findSchedule().exists()).toBe(true);
+      expect(findAlertLink().attributes('href')).toBe(escalationPolicyUrl);
     });
   });
 
@@ -134,7 +153,8 @@ describe('On-call schedule wrapper', () => {
       mountComponentWithApollo();
       jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
-      expect(findSchedule().props('schedule')).toEqual(newlyCreatedSchedule);
+      const schedule = findSchedules().at(1);
+      expect(schedule.props('schedule')).toEqual(newlyCreatedSchedule);
     });
   });
 });

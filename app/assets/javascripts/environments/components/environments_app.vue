@@ -1,6 +1,6 @@
 <script>
 import { GlBadge, GlButton, GlModalDirective, GlTab, GlTabs } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 import environmentsMixin from '../mixins/environments_mixin';
@@ -85,11 +85,13 @@ export default {
       this.store.updateEnvironmentProp(folder, 'isLoadingFolderContent', showLoader);
 
       this.service
-        .getFolderContent(folder.folder_path)
+        .getFolderContent(folder.folder_path, folder.state)
         .then((response) => this.store.setfolderContent(folder, response.data.environments))
         .then(() => this.store.updateEnvironmentProp(folder, 'isLoadingFolderContent', false))
         .catch(() => {
-          Flash(s__('Environments|An error occurred while fetching the environments.'));
+          createFlash({
+            message: s__('Environments|An error occurred while fetching the environments.'),
+          });
           this.store.updateEnvironmentProp(folder, 'isLoadingFolderContent', false);
         });
     },
@@ -121,7 +123,7 @@ export default {
           variant="info"
           category="secondary"
           type="button"
-          class="gl-mb-3 gl-flex-fill-1"
+          class="gl-mb-3 gl-flex-grow-1"
           >{{ $options.i18n.reviewAppButtonLabel }}</gl-button
         >
         <gl-button
@@ -129,11 +131,11 @@ export default {
           :href="newEnvironmentPath"
           data-testid="new-environment"
           category="primary"
-          variant="success"
+          variant="confirm"
           >{{ $options.i18n.newEnvironmentButtonLabel }}</gl-button
         >
       </div>
-      <gl-tabs content-class="gl-display-none">
+      <gl-tabs :value="activeTab" content-class="gl-display-none">
         <gl-tab
           v-for="(tab, idx) in tabs"
           :key="idx"
@@ -164,7 +166,7 @@ export default {
               :href="newEnvironmentPath"
               data-testid="new-environment"
               category="primary"
-              variant="success"
+              variant="confirm"
               >{{ $options.i18n.newEnvironmentButtonLabel }}</gl-button
             >
           </div>

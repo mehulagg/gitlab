@@ -41,6 +41,8 @@ export const OVERFLOW_AFTER = 5;
 
 export const SEARCH_DEBOUNCE = 500;
 
+export const EXPAND_DELAY = 1000;
+
 export const itemRemoveModalId = 'item-remove-confirmation';
 
 export const treeItemChevronBtnClassName = 'btn-tree-item-chevron';
@@ -56,3 +58,5 @@ export const issueHealthStatusCSSMapping = {
   onTrack: 'status-on-track',
   needsAttention: 'status-needs-attention',
 };
+
+export const trackingAddedIssue = 'g_project_management_users_epic_issue_added_from_epic';

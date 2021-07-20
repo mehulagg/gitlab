@@ -1,6 +1,3 @@
-import initGeoNodes from 'ee/geo_nodes';
-import PersistentUserCallout from '~/persistent_user_callout';
+import { initGeoNodes } from 'ee/geo_nodes';
 
 initGeoNodes();
-const callout = document.querySelector('.user-callout');
-PersistentUserCallout.factory(callout);

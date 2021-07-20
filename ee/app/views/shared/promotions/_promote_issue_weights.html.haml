@@ -10,11 +10,11 @@
       = s_('Promotions|Weight')
     .hide-collapsed.js-toggle-container.promotion-issue-weight-sidebar-message
       = s_('Promotions|This feature is locked.')
-      %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#' }
+      %a.btn-link.js-toggle-button.js-weight-sidebar-callout-btn{ href: '#' }
         = s_('Promotions|Learn more')
         = sprite_icon('chevron-up', css_class: 'js-sidebar-collapse hidden')
         = sprite_icon('chevron-down', css_class: 'js-sidebar-expand')
-      .js-toggle-content{ style:'display: none' }
+      .js-toggle-content{ style: 'display: none' }
         %div
           %h4
             = s_('Promotions|Weighting your issue')
@@ -26,9 +26,9 @@
             - if Gitlab::CurrentSettings.should_check_namespace_plan?
               - subscription_link_url = "#{EE::SUBSCRIPTIONS_URL}/plans"
               - subscription_link_start = '<a href="%{url}" target="_blank" class="btn-link tr-issue-weights-bronze-features-cta">'.html_safe % { url: subscription_link_url }
-              = s_("Promotions|See the other features in the %{subscription_link_start}bronze plan%{subscription_link_end}").html_safe % { subscription_link_start: subscription_link_start, subscription_link_end: '</a>'.html_safe }
+              = s_("Promotions|See the other features in the %{subscription_link_start}Premium plan%{subscription_link_end}").html_safe % { subscription_link_start: subscription_link_start, subscription_link_end: '</a>'.html_safe }
             - else
               = s_('Promotions|Improve issues management with Issue weight and GitLab Enterprise Edition.')
           %div
-            = render 'shared/promotions/promotion_link_project', short_form: true, target_blank: false
+            = render 'shared/promotions/promotion_link_project', short_form: true, target_blank: false, location: :issue_weights
             = link_to s_("Promotions|Not now, thanks!"), '#', class: ['gl-button', 'btn', 'js-close', 'js-close-callout', 'gl-mt-3', 'js-close-session', 'tr-issue-weights-not-now-cta']

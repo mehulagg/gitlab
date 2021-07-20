@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe 'User uses shortcuts', :js do
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+
+  let(:user) { project.owner }
 
   before do
-    project.add_maintainer(user)
     sign_in(user)
 
     visit(project_path(project))
@@ -68,14 +68,13 @@ RSpec.describe 'User uses shortcuts', :js do
   end
 
   context 'when navigating to the Project pages' do
-    it 'redirects to the details page' do
+    it 'redirects to the project page' do
       visit project_issues_path(project)
 
       find('body').native.send_key('g')
       find('body').native.send_key('p')
 
-      expect(page).to have_active_navigation('Project')
-      expect(page).to have_active_sub_navigation('Details')
+      expect(page).to have_active_navigation(project.name)
     end
 
     it 'redirects to the activity page' do
@@ -151,42 +150,46 @@ RSpec.describe 'User uses shortcuts', :js do
       find('body').native.send_key('g')
       find('body').native.send_key('m')
 
-      expect(page).to have_active_navigation('Merge Requests')
+      expect(page).to have_active_navigation('Merge requests')
     end
   end
 
-  context 'when navigating to the CI / CD pages' do
+  context 'when navigating to the CI/CD pages' do
     it 'redirects to the Jobs page' do
       find('body').native.send_key('g')
       find('body').native.send_key('j')
 
-      expect(page).to have_active_navigation('CI / CD')
+      expect(page).to have_active_navigation('CI/CD')
       expect(page).to have_active_sub_navigation('Jobs')
     end
   end
 
-  context 'when navigating to the Operations pages' do
-    it 'redirects to the Metrics page' do
-      find('body').native.send_key('g')
-      find('body').native.send_key('l')
-
-      expect(page).to have_active_navigation('Operations')
-      expect(page).to have_active_sub_navigation('Metrics')
-    end
-
+  context 'when navigating to the Deployments page' do
     it 'redirects to the Environments page' do
       find('body').native.send_key('g')
       find('body').native.send_key('e')
 
-      expect(page).to have_active_navigation('Operations')
+      expect(page).to have_active_navigation('Deployments')
       expect(page).to have_active_sub_navigation('Environments')
     end
+  end
 
+  context 'when navigating to the Monitor pages' do
+    it 'redirects to the Metrics page' do
+      find('body').native.send_key('g')
+      find('body').native.send_key('l')
+
+      expect(page).to have_active_navigation('Monitor')
+      expect(page).to have_active_sub_navigation('Metrics')
+    end
+  end
+
+  context 'when navigating to the Infrastructure pages' do
     it 'redirects to the Kubernetes page' do
       find('body').native.send_key('g')
       find('body').native.send_key('k')
 
-      expect(page).to have_active_navigation('Operations')
+      expect(page).to have_active_navigation('Infrastructure')
       expect(page).to have_active_sub_navigation('Kubernetes')
     end
   end

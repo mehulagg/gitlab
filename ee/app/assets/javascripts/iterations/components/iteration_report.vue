@@ -10,24 +10,19 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
+import { TYPE_ITERATION } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { Namespace } from '../constants';
 import query from '../queries/iteration.query.graphql';
-import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 
 const iterationStates = {
   closed: 'closed',
   upcoming: 'upcoming',
   expired: 'expired',
-};
-
-const page = {
-  view: 'viewIteration',
-  edit: 'editIteration',
 };
 
 export default {
@@ -40,21 +35,18 @@ export default {
     GlDropdownItem,
     GlEmptyState,
     GlLoadingIcon,
-    IterationForm,
     IterationReportTabs,
   },
   apollo: {
     iteration: {
       query,
-      /* eslint-disable @gitlab/require-i18n-strings */
       variables() {
         return {
           fullPath: this.fullPath,
-          id: convertToGraphQLId('Iteration', this.iterationId),
+          id: convertToGraphQLId(TYPE_ITERATION, this.iterationId),
           isGroup: this.namespaceType === Namespace.Group,
         };
       },
-      /* eslint-enable @gitlab/require-i18n-strings */
       update(data) {
         return data[this.namespaceType]?.iterations?.nodes[0] || {};
       },
@@ -64,56 +56,29 @@ export default {
     },
   },
   mixins: [glFeatureFlagsMixin()],
-  props: {
-    fullPath: {
-      type: String,
-      required: true,
-    },
-    iterationId: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    canEdit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    initiallyEditing: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    labelsFetchPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    namespaceType: {
-      type: String,
-      required: false,
-      default: Namespace.Group,
-      validator: (value) => Object.values(Namespace).includes(value),
-    },
-    previewMarkdownPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
+  inject: [
+    'fullPath',
+    'hasScopedLabelsFeature',
+    'canEditIteration',
+    'namespaceType',
+    'noIssuesSvgPath',
+    'labelsFetchPath',
+  ],
   data() {
     return {
-      isEditing: this.initiallyEditing,
       error: '',
       iteration: {},
     };
   },
   computed: {
-    canEditIteration() {
-      return this.canEdit && this.namespaceType === Namespace.Group;
+    canEdit() {
+      return this.canEditIteration && this.namespaceType === Namespace.Group;
     },
     loading() {
       return this.$apollo.queries.iteration.loading;
+    },
+    iterationId() {
+      return this.$router.currentRoute.params.iterationId;
     },
     showEmptyState() {
       return !this.loading && this.iteration && !this.iteration.title;
@@ -133,36 +98,15 @@ export default {
           return { text: __('Open'), variant: 'success' };
       }
     },
-  },
-  mounted() {
-    this.boundOnPopState = this.onPopState.bind(this);
-    window.addEventListener('popstate', this.boundOnPopState);
-  },
-  beforeDestroy() {
-    window.removeEventListener('popstate', this.boundOnPopState);
+    editPage() {
+      return {
+        name: 'editIteration',
+      };
+    },
   },
   methods: {
-    onPopState(e) {
-      if (e.state?.prev === page.view) {
-        this.isEditing = true;
-      } else if (e.state?.prev === page.edit) {
-        this.isEditing = false;
-      } else {
-        this.isEditing = this.initiallyEditing;
-      }
-    },
     formatDate(date) {
       return formatDate(date, 'mmm d, yyyy', true);
-    },
-    loadEditPage() {
-      this.isEditing = true;
-      const newUrl = window.location.pathname.replace(/(\/edit)?\/?$/, '/edit');
-      window.history.pushState({ prev: page.view }, null, newUrl);
-    },
-    loadReportPage() {
-      this.isEditing = false;
-      const newUrl = window.location.pathname.replace(/\/edit$/, '');
-      window.history.pushState({ prev: page.edit }, null, newUrl);
     },
   },
 };
@@ -179,15 +123,6 @@ export default {
       :title="__('Could not find iteration')"
       :compact="false"
     />
-    <iteration-form
-      v-else-if="isEditing"
-      :group-path="fullPath"
-      :preview-markdown-path="previewMarkdownPath"
-      :is-editing="true"
-      :iteration="iteration"
-      @updated="loadReportPage"
-      @cancel="loadReportPage"
-    />
     <template v-else>
       <div
         ref="topbar"
@@ -200,7 +135,7 @@ export default {
           >{{ formatDate(iteration.startDate) }} – {{ formatDate(iteration.dueDate) }}</span
         >
         <gl-dropdown
-          v-if="canEditIteration"
+          v-if="canEdit"
           data-testid="actions-dropdown"
           variant="default"
           toggle-class="gl-text-decoration-none gl-border-0! gl-shadow-none!"
@@ -211,7 +146,7 @@ export default {
           <template #button-content>
             <gl-icon name="ellipsis_v" /><span class="gl-sr-only">{{ __('Actions') }}</span>
           </template>
-          <gl-dropdown-item @click="loadEditPage">{{ __('Edit iteration') }}</gl-dropdown-item>
+          <gl-dropdown-item :to="editPage">{{ __('Edit') }}</gl-dropdown-item>
         </gl-dropdown>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
@@ -226,9 +161,11 @@ export default {
       />
       <iteration-report-tabs
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iteration.id"
         :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
+        :svg-path="noIssuesSvgPath"
       />
     </template>
   </div>

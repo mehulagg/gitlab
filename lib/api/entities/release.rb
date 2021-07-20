@@ -8,7 +8,7 @@ module API
       expose :name
       expose :tag, as: :tag_name, if: ->(_, _) { can_download_code? }
       expose :description
-      expose :description_html do |entity|
+      expose :description_html, if: -> (_, options) { options[:include_html_description] } do |entity|
         MarkupHelper.markdown_field(entity, :description, current_user: options[:current_user])
       end
       expose :created_at
@@ -28,9 +28,7 @@ module API
       expose :assets do
         expose :assets_count, as: :count
         expose :sources, using: Entities::Releases::Source, if: ->(_, _) { can_download_code? }
-        expose :links, using: Entities::Releases::Link do |release, options|
-          release.links.sorted
-        end
+        expose :sorted_links, as: :links, using: Entities::Releases::Link
       end
       expose :evidences, using: Entities::Releases::Evidence, expose_nil: false, if: ->(_, _) { can_download_code? }
       expose :_links do

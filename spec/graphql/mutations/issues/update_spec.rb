@@ -35,6 +35,10 @@ RSpec.describe Mutations::Issues::Update do
 
     subject { mutation.resolve(**mutation_params) }
 
+    before do
+      stub_spam_services
+    end
+
     it_behaves_like 'permission level for issue mutation is correctly verified'
 
     context 'when the user can update the issue' do
@@ -126,6 +130,14 @@ RSpec.describe Mutations::Issues::Update do
           subject
 
           expect(issue.reload.labels).to match_array([project_label, label_2])
+        end
+      end
+
+      context 'when changing type' do
+        it 'changes the type of the issue' do
+          mutation_params[:issue_type] = 'incident'
+
+          expect { subject }.to change { issue.reload.issue_type }.from('issue').to('incident')
         end
       end
     end

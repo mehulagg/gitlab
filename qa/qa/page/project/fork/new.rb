@@ -9,16 +9,22 @@ module QA
             element :fork_namespace_button
           end
 
-          view 'app/assets/javascripts/pages/projects/forks/new/components/fork_groups_list.vue' do
-            element :fork_groups_list_search_field
+          view 'app/assets/javascripts/pages/projects/forks/new/components/fork_form.vue' do
+            element :fork_namespace_dropdown
+            element :fork_project_button
           end
 
-          def choose_namespace(namespace = Runtime::Namespace.path)
-            click_element(:fork_namespace_button, name: namespace)
+          def fork_project(namespace = Runtime::Namespace.path)
+            if has_element?(:fork_namespace_button, wait: 0)
+              click_element(:fork_namespace_button, name: namespace)
+            else
+              select_element(:fork_namespace_dropdown, namespace)
+              click_element(:fork_project_button)
+            end
           end
 
-          def search_for_group(group_name)
-            find_element(:fork_groups_list_search_field).set(group_name)
+          def fork_namespace_dropdown_values
+            find_element(:fork_namespace_dropdown).all(:option).map { |option| option.text.tr("\n", '').strip }
           end
         end
       end

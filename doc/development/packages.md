@@ -6,20 +6,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Packages
 
-This document guides you through adding another [package management system](../administration/packages/index.md) support to GitLab.
+This document guides you through adding support to GitLab for a new a [package management system](../administration/packages/index.md).
 
-See already supported package types in [Packages documentation](../administration/packages/index.md)
+See the already supported formats in the [Packages & Registries documentation](../user/packages/index.md)
 
-Since GitLab packages' UI is pretty generic, it is possible to add basic new
-package system support with solely backend changes. This guide is superficial and does
-not cover the way the code should be written. However, you can find a good example
-by looking at the following merge requests:
+It is possible to add a new format with only backend changes.  
+This guide is superficial and does not cover the way the code should be written.
+However, you can find a good example by looking at the following merge requests:
 
-- [npm registry support](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8673).
-- [Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6607).
-- [Composer repository for PHP dependencies](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22415).
-- [Terraform modules registry](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18834).
-- [Instance-level endpoint for Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8757).
+- [npm registry support](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8673)
+- [Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6607)
+- [Instance-level API for Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8757)
+- [NuGet group-level API](https://gitlab.com/gitlab-org/gitlab/-/issues/36423)
 
 ## General information
 
@@ -60,26 +58,13 @@ project are visible. Alternatively, a group-level endpoint may be used to allow 
 within a given group. Lastly, an instance-level endpoint can be used to allow visibility to all packages within an
 entire GitLab instance.
 
-Using group and project level endpoints allows for more flexibility in package naming, however, more remotes
-have to be managed. Using instance level endpoints requires [stricter naming conventions](#naming-conventions).
+As an MVC, we recommend beginning with a project-level endpoint. A typical iteration plan for remote hierarchies is to go from:
 
-The current state of existing package registries availability is:
+- Publish and install in a project
+- Install from a group
+- Publish and install in an Instance (this is for Self-Managed customers)
 
-| Repository Type  | Project Level | Group Level | Instance Level |
-|------------------|---------------|-------------|----------------|
-| Maven            | Yes           | Yes         | Yes            |
-| Conan            | Yes           | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/11679) | Yes |
-| npm              | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36853) | Yes | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36853) |
-| NuGet            | Yes           | Yes         | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36425) |
-| PyPI             | Yes           | No          | No             |
-| Go               | Yes           | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213900) | No - [open-issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213902) |
-| Composer         | Yes           | Yes         | No             |
-| Generic | Yes           | No          | No             |
-
-NOTE:
-npm is currently a hybrid of the instance level and group level.
-It is using the top-level group or namespace as the defining portion of the name
-(for example, `@my-group-name/my-package-name`).
+Using instance-level endpoints requires [stricter naming conventions](#naming-conventions).
 
 NOTE:
 Composer package naming scope is Instance Level.
@@ -116,8 +101,8 @@ Packages can be configured to use object storage, therefore your code must suppo
 
 The way new package systems are integrated in GitLab is using an [MVC](https://about.gitlab.com/handbook/values/#minimum-viable-change-mvc). Therefore, the first iteration should support the bare minimum user actions:
 
-- Authentication
-- Uploading a package
+- Authentication with a GitLab job, personal access, project access, or deploy token
+- Uploading a package and displaying basic metadata in the user interface
 - Pulling a package
 - Required actions
 
@@ -137,7 +122,7 @@ There are usually 2 phases for the MVC:
 
 When implementing a new package manager, it is tempting to create one large merge request containing all of the
 necessary endpoints and services necessary to support basic usage. Instead, put the
-API endpoints behind a [feature flag](feature_flags/development.md) and
+API endpoints behind a [feature flag](feature_flags/index.md) and
 submit each endpoint or behavior (download, upload, etc) in a different merge request to shorten the review
 process.
 
@@ -148,7 +133,7 @@ During this phase, the idea is to collect as much information as possible about 
 - **Authentication**: What authentication mechanisms are available (OAuth, Basic
   Authorization, other). Keep in mind that GitLab users often want to use their
   [Personal Access Tokens](../user/profile/personal_access_tokens.md).
-  Although not needed for the MVC first iteration, the [CI job tokens](../user/project/new_ci_build_permissions_model.md#job-token)
+  Although not needed for the MVC first iteration, the [CI/CD job tokens](../api/index.md#gitlab-cicd-job-token)
   have to be supported at some point in the future.
 - **Requests**: Which requests are needed to have a working MVC. Ideally, produce
   a list of all the requests needed for the MVC (including required actions). Further
@@ -198,7 +183,7 @@ supports this case.
 
 There are project and group level permissions for `read_package`, `create_package`, and `destroy_package`. Each
 endpoint should
-[authorize the requesting user](https://gitlab.com/gitlab-org/gitlab/blob/398fef1ca26ae2b2c3dc89750f6b20455a1e5507/ee/lib/api/conan_packages.rb)
+[authorize the requesting user](https://gitlab.com/gitlab-org/gitlab/-/blob/398fef1ca26ae2b2c3dc89750f6b20455a1e5507/ee/lib/api/conan_packages.rb)
 against the project or group before continuing.
 
 #### Database and handling metadata
@@ -206,7 +191,7 @@ against the project or group before continuing.
 The current database model allows you to store a name and a version for each package.
 Every time you upload a new package, you can either create a new record of `Package`
 or add files to existing record. `PackageFile` should be able to store all file-related
-information like the file `name`, `side`, `sha1`, etc.
+information like the file `name`, `side`, `sha1`, and so on.
 
 If there is specific data necessary to be stored for only one package system support,
 consider creating a separate metadata model. See `packages_maven_metadata` table
@@ -234,13 +219,24 @@ demonstrates adding an instance-level endpoint for Conan to workhorse. You can a
 implemented in the same file.
 
 Once the route has been added, you must add an additional `/authorize` version of the upload endpoint to your API file.
-[Here is an example](https://gitlab.com/gitlab-org/gitlab/blob/398fef1ca26ae2b2c3dc89750f6b20455a1e5507/ee/lib/api/maven_packages.rb#L164)
-of the additional endpoint added for Maven. The `/authorize` endpoint verifies and authorizes the request from workhorse,
+[This example](https://gitlab.com/gitlab-org/gitlab/-/blob/398fef1ca26ae2b2c3dc89750f6b20455a1e5507/ee/lib/api/maven_packages.rb#L164)
+shows the additional endpoint added for Maven. The `/authorize` endpoint verifies and authorizes the request from workhorse,
 then the normal upload endpoint is implemented below, consuming the metadata that workhorse provides in order to
 create the package record. Workhorse provides a variety of file metadata such as type, size, and different checksum formats.
 
-For testing purposes, you may want to [enable object storage](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/object_storage.md)
+For testing purposes, you may want to [enable object storage](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/object_storage.md)
 in your local development environment.
+
+#### File size limits
+
+Files uploaded to the GitLab Package Registry are [limited by format](../administration/instance_limits.md#package-registry-limits).
+On GitLab.com, these are typically set to 5GB to help prevent timeout issues and abuse.
+
+When a new package type is added to the `Packages::Package` model, a size limit must be added
+similar to [this example](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52639/diffs#382f879fb09b0212e3cedd99e6c46e2083867216),
+or the [related test](https://gitlab.com/gitlab-org/gitlab/-/blob/fe4ba43766781371cebfacd78364a1de762917cd/spec/models/packages/package_spec.rb#L761)
+must be updated if file size limits do not apply. The only reason a size limit does not apply is if
+the package format does not upload and store package files.
 
 #### Rate Limits on GitLab.com
 
@@ -259,6 +255,30 @@ These route prefixes guarantee a higher rate limit:
 /api/v4/projects/:project_id/packages/
 /api/v4/groups/:group_id/-/packages/
 ```
+
+### MVC Checklist
+
+When adding support to GitLab for a new package manager, the first iteration must contain the
+following features. You can add the features through many merge requests as needed, but all the
+features must be implemented when the feature flag is removed.
+
+- Project-level API
+- Push event tracking
+- Pull event tracking
+- Authentication with Personal Access Tokens
+- Authentication with Job Tokens
+- Authentication with Deploy Tokens (group and project)
+- File size [limit](#file-size-limits)
+- File format guards (only accept valid file formats for the package type)
+- Name regex with validation
+- Version regex with validation
+- Workhorse route for [accelerated](uploads.md#how-to-add-a-new-upload-route) uploads
+- Background workers for extracting package metadata (if applicable)
+- Documentation (how to use the feature)
+- API Documentation (individual endpoints with curl examples)
+- Seeding in [`db/fixtures/development/26_packages.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/db/fixtures/development/26_packages.rb)
+- Update the [runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/31fb4959e89db25fddf865bc81734c222daf32dd/dashboards/stage-groups/package.dashboard.jsonnet#L74) for the Grafana charts
+- End-to-end feature tests for (at the minimum) publishing and installing a package
 
 ### Future Work
 

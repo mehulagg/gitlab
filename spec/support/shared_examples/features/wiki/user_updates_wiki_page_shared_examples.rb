@@ -11,7 +11,7 @@ RSpec.shared_examples 'User updates wiki page' do
     sign_in(user)
   end
 
-  context 'when wiki is empty' do
+  context 'when wiki is empty', :js do
     before do |example|
       visit(wiki_path(wiki))
 
@@ -57,7 +57,7 @@ RSpec.shared_examples 'User updates wiki page' do
     it_behaves_like 'wiki file attachments'
   end
 
-  context 'when wiki is not empty' do
+  context 'when wiki is not empty', :js do
     let!(:wiki_page) { create(:wiki_page, wiki: wiki, title: 'home', content: 'Home page') }
 
     before do
@@ -90,19 +90,6 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(page).to have_field('wiki[message]', with: 'Update Wiki title')
     end
 
-    it 'shows a validation error message if the form is force submitted', :js do
-      fill_in(:wiki_content, with: '')
-
-      page.execute_script("window.onbeforeunload = null")
-      page.execute_script("document.querySelector('.wiki-form').submit()")
-
-      expect(page).to have_selector('.wiki-form')
-      expect(page).to have_content('Edit Page')
-      expect(page).to have_content('The form contains the following error:')
-      expect(page).to have_content("Content can't be blank")
-      expect(find('textarea#wiki_content').value).to eq('')
-    end
-
     it "disables the submit button", :js do
       page.within(".wiki-form") do
         fill_in(:wiki_content, with: "")
@@ -115,14 +102,6 @@ RSpec.shared_examples 'User updates wiki page' do
       fill_in(:wiki_content, with: ':')
 
       expect(page).to have_selector('.atwho-view')
-    end
-
-    it 'shows the error message', :js do
-      wiki_page.update(content: 'Update') # rubocop:disable Rails/SaveBang
-
-      click_button('Save changes')
-
-      expect(page).to have_content('Someone edited the page the same time you did.')
     end
 
     it 'updates a page', :js do
@@ -145,9 +124,21 @@ RSpec.shared_examples 'User updates wiki page' do
     end
 
     it_behaves_like 'wiki file attachments'
+
+    context 'when multiple people edit the page at the same time' do
+      it 'preserves user changes in the wiki editor', :js do
+        wiki_page.update(content: 'Some Other Updates') # rubocop:disable Rails/SaveBang
+
+        fill_in('Content', with: 'Updated Wiki Content')
+        click_on('Save changes')
+
+        expect(page).to have_content('Someone edited the page the same time you did.')
+        expect(find('textarea#wiki_content').value).to eq('Updated Wiki Content')
+      end
+    end
   end
 
-  context 'when the page is in a subdir' do
+  context 'when the page is in a subdir', :js do
     let(:page_name) { 'page_name' }
     let(:page_dir) { "foo/bar/#{page_name}" }
     let!(:wiki_page) { create(:wiki_page, wiki: wiki, title: page_dir, content: 'Home page') }

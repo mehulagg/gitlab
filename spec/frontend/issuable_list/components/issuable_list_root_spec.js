@@ -1,5 +1,6 @@
-import { GlSkeletonLoading, GlPagination } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { GlKeysetPagination, GlSkeletonLoading, GlPagination } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import VueDraggable from 'vuedraggable';
 
 import { TEST_HOST } from 'helpers/test_constants';
 
@@ -10,9 +11,12 @@ import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filte
 
 import { mockIssuableListProps, mockIssuables } from '../mock_data';
 
-const createComponent = ({ props = mockIssuableListProps, data = {} } = {}) =>
-  mount(IssuableListRoot, {
-    propsData: props,
+const createComponent = ({ props = {}, data = {} } = {}) =>
+  shallowMount(IssuableListRoot, {
+    propsData: {
+      ...mockIssuableListProps,
+      ...props,
+    },
     data() {
       return data;
     },
@@ -24,20 +28,30 @@ const createComponent = ({ props = mockIssuableListProps, data = {} } = {}) =>
       <p class="js-issuable-empty-state">Issuable empty state</p>
     `,
     },
+    stubs: {
+      IssuableTabs,
+    },
   });
 
 describe('IssuableListRoot', () => {
   let wrapper;
 
-  beforeEach(() => {
-    wrapper = createComponent();
-  });
+  const findFilteredSearchBar = () => wrapper.findComponent(FilteredSearchBar);
+  const findGlKeysetPagination = () => wrapper.findComponent(GlKeysetPagination);
+  const findGlPagination = () => wrapper.findComponent(GlPagination);
+  const findIssuableItem = () => wrapper.findComponent(IssuableItem);
+  const findIssuableTabs = () => wrapper.findComponent(IssuableTabs);
+  const findVueDraggable = () => wrapper.findComponent(VueDraggable);
 
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('computed', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
     const mockCheckedIssuables = {
       [mockIssuables[0].iid]: { checked: true, issuable: mockIssuables[0] },
       [mockIssuables[1].iid]: { checked: true, issuable: mockIssuables[1] },
@@ -108,6 +122,10 @@ describe('IssuableListRoot', () => {
   });
 
   describe('watch', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
     describe('issuables', () => {
       it('populates `checkedIssuables` prop with all issuables', async () => {
         wrapper.setProps({
@@ -147,6 +165,10 @@ describe('IssuableListRoot', () => {
   });
 
   describe('methods', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
     describe('issuableId', () => {
       it('returns id value from provided issuable object', () => {
         expect(wrapper.vm.issuableId({ id: 1 })).toBe(1);
@@ -172,11 +194,15 @@ describe('IssuableListRoot', () => {
 
   describe('template', () => {
     it('renders component container element with class "issuable-list-container"', () => {
+      wrapper = createComponent();
+
       expect(wrapper.classes()).toContain('issuable-list-container');
     });
 
     it('renders issuable-tabs component', () => {
-      const tabsEl = wrapper.find(IssuableTabs);
+      wrapper = createComponent();
+
+      const tabsEl = findIssuableTabs();
 
       expect(tabsEl.exists()).toBe(true);
       expect(tabsEl.props()).toMatchObject({
@@ -187,14 +213,18 @@ describe('IssuableListRoot', () => {
     });
 
     it('renders contents for slot "nav-actions" within issuable-tab component', () => {
-      const buttonEl = wrapper.find(IssuableTabs).find('button.js-new-issuable');
+      wrapper = createComponent();
+
+      const buttonEl = findIssuableTabs().find('button.js-new-issuable');
 
       expect(buttonEl.exists()).toBe(true);
       expect(buttonEl.text()).toBe('New issuable');
     });
 
     it('renders filtered-search-bar component', () => {
-      const searchEl = wrapper.find(FilteredSearchBar);
+      wrapper = createComponent();
+
+      const searchEl = findFilteredSearchBar();
       const {
         namespace,
         recentSearchesStorageKey,
@@ -217,18 +247,18 @@ describe('IssuableListRoot', () => {
       });
     });
 
-    it('renders gl-loading-icon when `issuablesLoading` prop is true', async () => {
-      wrapper.setProps({
-        issuablesLoading: true,
-      });
+    it('renders gl-loading-icon when `issuablesLoading` prop is true', () => {
+      wrapper = createComponent({ props: { issuablesLoading: true } });
 
-      await wrapper.vm.$nextTick();
-
-      expect(wrapper.findAll(GlSkeletonLoading)).toHaveLength(wrapper.vm.skeletonItemCount);
+      expect(wrapper.findAllComponents(GlSkeletonLoading)).toHaveLength(
+        wrapper.vm.skeletonItemCount,
+      );
     });
 
     it('renders issuable-item component for each item within `issuables` array', () => {
-      const itemsEl = wrapper.findAll(IssuableItem);
+      wrapper = createComponent();
+
+      const itemsEl = wrapper.findAllComponents(IssuableItem);
       const mockIssuable = mockIssuableListProps.issuables[0];
 
       expect(itemsEl).toHaveLength(mockIssuableListProps.issuables.length);
@@ -238,28 +268,23 @@ describe('IssuableListRoot', () => {
       });
     });
 
-    it('renders contents for slot "empty-state" when `issuablesLoading` is false and `issuables` is empty', async () => {
-      wrapper.setProps({
-        issuables: [],
-      });
-
-      await wrapper.vm.$nextTick();
+    it('renders contents for slot "empty-state" when `issuablesLoading` is false and `issuables` is empty', () => {
+      wrapper = createComponent({ props: { issuables: [] } });
 
       expect(wrapper.find('p.js-issuable-empty-state').exists()).toBe(true);
       expect(wrapper.find('p.js-issuable-empty-state').text()).toBe('Issuable empty state');
     });
 
-    it('renders gl-pagination when `showPaginationControls` prop is true', async () => {
-      wrapper.setProps({
-        showPaginationControls: true,
-        totalItems: 10,
+    it('renders only gl-pagination when `showPaginationControls` prop is true', () => {
+      wrapper = createComponent({
+        props: {
+          showPaginationControls: true,
+          totalItems: 10,
+        },
       });
 
-      await wrapper.vm.$nextTick();
-
-      const paginationEl = wrapper.find(GlPagination);
-      expect(paginationEl.exists()).toBe(true);
-      expect(paginationEl.props()).toMatchObject({
+      expect(findGlKeysetPagination().exists()).toBe(false);
+      expect(findGlPagination().props()).toMatchObject({
         perPage: 20,
         value: 1,
         prevPage: 0,
@@ -268,49 +293,60 @@ describe('IssuableListRoot', () => {
         align: 'center',
       });
     });
+
+    it('renders only gl-keyset-pagination when `showPaginationControls` and `useKeysetPagination` props are true', () => {
+      wrapper = createComponent({
+        props: {
+          hasNextPage: true,
+          hasPreviousPage: true,
+          showPaginationControls: true,
+          useKeysetPagination: true,
+        },
+      });
+
+      expect(findGlPagination().exists()).toBe(false);
+      expect(findGlKeysetPagination().props()).toMatchObject({
+        hasNextPage: true,
+        hasPreviousPage: true,
+      });
+    });
   });
 
   describe('events', () => {
-    let wrapperChecked;
-
-    beforeEach(() => {
-      wrapperChecked = createComponent({
-        data: {
-          checkedIssuables: {
-            [mockIssuables[0].iid]: { checked: true, issuable: mockIssuables[0] },
-          },
-        },
-      });
-    });
-
-    afterEach(() => {
-      wrapperChecked.destroy();
-    });
+    const data = {
+      checkedIssuables: {
+        [mockIssuables[0].iid]: { checked: true, issuable: mockIssuables[0] },
+      },
+    };
 
     it('issuable-tabs component emits `click-tab` event on `click-tab` event', () => {
-      wrapper.find(IssuableTabs).vm.$emit('click');
+      wrapper = createComponent({ data });
+
+      findIssuableTabs().vm.$emit('click');
 
       expect(wrapper.emitted('click-tab')).toBeTruthy();
     });
 
-    it('sets all issuables as checked when filtered-search-bar component emits `checked-input` event', async () => {
-      const searchEl = wrapperChecked.find(FilteredSearchBar);
+    it('sets all issuables as checked when filtered-search-bar component emits `checked-input` event', () => {
+      wrapper = createComponent({ data });
+
+      const searchEl = findFilteredSearchBar();
 
       searchEl.vm.$emit('checked-input', true);
-
-      await wrapperChecked.vm.$nextTick();
 
       expect(searchEl.emitted('checked-input')).toBeTruthy();
       expect(searchEl.emitted('checked-input').length).toBe(1);
 
-      expect(wrapperChecked.vm.checkedIssuables[mockIssuables[0].iid]).toEqual({
+      expect(wrapper.vm.checkedIssuables[mockIssuables[0].iid]).toEqual({
         checked: true,
         issuable: mockIssuables[0],
       });
     });
 
     it('filtered-search-bar component emits `filter` event on `onFilter` & `sort` event on `onSort` events', () => {
-      const searchEl = wrapper.find(FilteredSearchBar);
+      wrapper = createComponent({ data });
+
+      const searchEl = findFilteredSearchBar();
 
       searchEl.vm.$emit('onFilter');
       expect(wrapper.emitted('filter')).toBeTruthy();
@@ -318,31 +354,101 @@ describe('IssuableListRoot', () => {
       expect(wrapper.emitted('sort')).toBeTruthy();
     });
 
-    it('sets an issuable as checked when issuable-item component emits `checked-input` event', async () => {
-      const issuableItem = wrapperChecked.findAll(IssuableItem).at(0);
+    it('sets an issuable as checked when issuable-item component emits `checked-input` event', () => {
+      wrapper = createComponent({ data });
+
+      const issuableItem = wrapper.findAllComponents(IssuableItem).at(0);
 
       issuableItem.vm.$emit('checked-input', true);
-
-      await wrapperChecked.vm.$nextTick();
 
       expect(issuableItem.emitted('checked-input')).toBeTruthy();
       expect(issuableItem.emitted('checked-input').length).toBe(1);
 
-      expect(wrapperChecked.vm.checkedIssuables[mockIssuables[0].iid]).toEqual({
+      expect(wrapper.vm.checkedIssuables[mockIssuables[0].iid]).toEqual({
         checked: true,
         issuable: mockIssuables[0],
       });
     });
 
-    it('gl-pagination component emits `page-change` event on `input` event', async () => {
-      wrapper.setProps({
-        showPaginationControls: true,
+    it('emits `update-legacy-bulk-edit` when filtered-search-bar checkbox is checked', () => {
+      wrapper = createComponent({ data });
+
+      findFilteredSearchBar().vm.$emit('checked-input');
+
+      expect(wrapper.emitted('update-legacy-bulk-edit')).toEqual([[]]);
+    });
+
+    it('emits `update-legacy-bulk-edit` when issuable-item checkbox is checked', () => {
+      wrapper = createComponent({ data });
+
+      findIssuableItem().vm.$emit('checked-input');
+
+      expect(wrapper.emitted('update-legacy-bulk-edit')).toEqual([[]]);
+    });
+
+    it('gl-pagination component emits `page-change` event on `input` event', () => {
+      wrapper = createComponent({ data, props: { showPaginationControls: true } });
+
+      findGlPagination().vm.$emit('input');
+      expect(wrapper.emitted('page-change')).toBeTruthy();
+    });
+
+    it.each`
+      event              | glKeysetPaginationEvent
+      ${'next-page'}     | ${'next'}
+      ${'previous-page'} | ${'prev'}
+    `(
+      'emits `$event` event when gl-keyset-pagination emits `$glKeysetPaginationEvent` event',
+      ({ event, glKeysetPaginationEvent }) => {
+        wrapper = createComponent({
+          data,
+          props: { showPaginationControls: true, useKeysetPagination: true },
+        });
+
+        findGlKeysetPagination().vm.$emit(glKeysetPaginationEvent);
+
+        expect(wrapper.emitted(event)).toEqual([[]]);
+      },
+    );
+  });
+
+  describe('manual sorting', () => {
+    describe('when enabled', () => {
+      beforeEach(() => {
+        wrapper = createComponent({
+          props: {
+            ...mockIssuableListProps,
+            isManualOrdering: true,
+          },
+        });
       });
 
-      await wrapper.vm.$nextTick();
+      it('renders VueDraggable component', () => {
+        expect(findVueDraggable().exists()).toBe(true);
+      });
 
-      wrapper.find(GlPagination).vm.$emit('input');
-      expect(wrapper.emitted('page-change')).toBeTruthy();
+      it('IssuableItem has grab cursor', () => {
+        expect(findIssuableItem().classes()).toContain('gl-cursor-grab');
+      });
+
+      it('emits a "reorder" event when user updates the issue order', () => {
+        const oldIndex = 4;
+        const newIndex = 6;
+
+        findVueDraggable().vm.$emit('update', { oldIndex, newIndex });
+
+        expect(wrapper.emitted('reorder')).toEqual([[{ oldIndex, newIndex }]]);
+      });
+    });
+
+    describe('when disabled', () => {
+      beforeEach(() => {
+        wrapper = createComponent();
+      });
+
+      it('does not render VueDraggable component', () => {
+        expect(findVueDraggable().exists()).toBe(false);
+      });
     });
   });
 });

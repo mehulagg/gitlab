@@ -53,8 +53,8 @@ export function mockPipelineData(
       finished_at: finishedTimeStamp,
     },
     ref: {
-      name: 'master',
-      path: 'test/test-project/commits/master',
+      name: 'main',
+      path: 'test/test-project/commits/main',
       tag: isTag,
       branch: true,
       merge_request: false,
@@ -100,8 +100,9 @@ export function mockProjectData(
       path: 'test-project',
       path_with_namespace: 'test/test-project',
       created_at: '2019-02-01T15:40:27.522Z',
-      default_branch: 'master',
+      default_branch: 'main',
       tag_list: [],
+      topics: [],
       avatar_url: null,
       web_url: 'https://mock-web_url/',
       namespace: {

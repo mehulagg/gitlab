@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe IssuePlacementWorker do
   describe '#perform' do
     let_it_be(:time) { Time.now.utc }
-    let_it_be(:project) { create(:project) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
     let_it_be(:author) { create(:user) }
     let_it_be(:common_attrs) { { author: author, project: project } }
     let_it_be(:unplaced) { common_attrs.merge(relative_position: nil) }
@@ -34,7 +35,7 @@ RSpec.describe IssuePlacementWorker do
       it 'schedules rebalancing if needed' do
         issue_a.update!(relative_position: RelativePositioning::MAX_POSITION)
 
-        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, nil, project.group.id)
 
         run_worker
       end
@@ -100,7 +101,7 @@ RSpec.describe IssuePlacementWorker do
       it 'anticipates the failure to place the issues, and schedules rebalancing' do
         allow(Issue).to receive(:move_nulls_to_end) { raise RelativePositioning::NoSpaceLeft }
 
-        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, nil, project.group.id)
         expect(Gitlab::ErrorTracking)
           .to receive(:log_exception)
           .with(RelativePositioning::NoSpaceLeft, worker_arguments)
@@ -117,6 +118,19 @@ RSpec.describe IssuePlacementWorker do
       let(:worker_arguments) { { issue_id: issue_id, project_id: nil } }
 
       it_behaves_like 'running the issue placement worker'
+
+      context 'when block_issue_repositioning is enabled' do
+        let(:issue_id) { issue.id }
+        let(:project_id) { project.id }
+
+        before do
+          stub_feature_flags(block_issue_repositioning: group)
+        end
+
+        it 'does not run repositioning tasks' do
+          expect { run_worker }.not_to change { issue.reset.relative_position }
+        end
+      end
     end
 
     context 'passing a project ID' do
@@ -128,5 +142,10 @@ RSpec.describe IssuePlacementWorker do
 
       it_behaves_like 'running the issue placement worker'
     end
+  end
+
+  it 'has the `until_executed` deduplicate strategy' do
+    expect(described_class.get_deduplicate_strategy).to eq(:until_executed)
+    expect(described_class.get_deduplication_options).to include({ including_scheduled: true })
   end
 end

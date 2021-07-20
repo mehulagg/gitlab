@@ -52,7 +52,7 @@ RSpec.describe 'Groups > Audit Events', :js do
         click_button 'Maintainer'
       end
 
-      page.within('.qa-group-sidebar') do
+      page.within('.sidebar-top-level-items') do
         find(:link, text: 'Security & Compliance').click
         click_link 'Audit Events'
       end

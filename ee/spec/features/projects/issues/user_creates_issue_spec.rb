@@ -7,6 +7,7 @@ RSpec.describe "User creates issue", :js do
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:project) { create(:project_empty_repo, :public, namespace: group) }
   let_it_be(:epic) { create(:epic, group: group, title: 'Sample epic', author: user) }
+
   let(:issue_title) { '500 error on profile' }
 
   before_all do
@@ -29,7 +30,7 @@ RSpec.describe "User creates issue", :js do
       fill_in("Title", with: issue_title)
       fill_in("issue_weight", with: weight)
 
-      click_button("Submit issue")
+      click_button 'Create issue'
 
       page.within(".weight") do
         expect(page).to have_content(weight)
@@ -48,11 +49,11 @@ RSpec.describe "User creates issue", :js do
     it 'creates an issue with no epic' do
       click_button 'Select epic'
       find('.gl-new-dropdown-item', text: 'No Epic').click
-      click_button('Submit issue')
+      click_button 'Create issue'
 
       wait_for_all_requests
 
-      page.within(".js-epic-block .js-epic-label") do
+      page.within('[data-testid="select-epic"]') do
         expect(page).to have_content('None')
       end
 
@@ -62,11 +63,11 @@ RSpec.describe "User creates issue", :js do
     it 'credates an issue with an epic' do
       click_button 'Select epic'
       find('.gl-new-dropdown-item', text: epic.title).click
-      click_button('Submit issue')
+      click_button 'Create issue'
 
       wait_for_all_requests
 
-      page.within(".js-epic-block .js-epic-label") do
+      page.within('[data-testid="select-epic"]') do
         expect(page).to have_content(epic.title)
       end
 

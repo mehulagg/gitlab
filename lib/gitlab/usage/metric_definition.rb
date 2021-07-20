@@ -4,6 +4,8 @@ module Gitlab
   module Usage
     class MetricDefinition
       METRIC_SCHEMA_PATH = Rails.root.join('config', 'metrics', 'schema.json')
+      BASE_REPO_PATH = 'https://gitlab.com/gitlab-org/gitlab/-/blob/master'
+      SKIP_VALIDATION_STATUSES = %w[deprecated removed].to_set.freeze
 
       attr_reader :path
       attr_reader :attributes
@@ -21,10 +23,32 @@ module Gitlab
         attributes
       end
 
+      def json_schema_path
+        return '' unless has_json_schema?
+
+        "#{BASE_REPO_PATH}/#{attributes[:value_json_schema]}"
+      end
+
+      def has_json_schema?
+        attributes[:value_type] == 'object' && attributes[:value_json_schema].present?
+      end
+
+      def yaml_path
+        "#{BASE_REPO_PATH}#{path.delete_prefix(Rails.root.to_s)}"
+      end
+
       def validate!
         unless skip_validation?
           self.class.schemer.validate(attributes.stringify_keys).each do |error|
-            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Metric::InvalidMetricError.new("#{error["details"] || error['data_pointer']} for `#{path}`"))
+            error_message = <<~ERROR_MSG
+              Error type: #{error['type']}
+              Data: #{error['data']}
+              Path: #{error['data_pointer']}
+              Details: #{error['details']}
+              Metric file: #{path}
+            ERROR_MSG
+
+            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Gitlab::Usage::Metric::InvalidMetricError.new(error_message))
           end
         end
       end
@@ -33,15 +57,24 @@ module Gitlab
 
       class << self
         def paths
-          @paths ||= [Rails.root.join('config', 'metrics', '**', '*.yml')]
+          @paths ||= [Rails.root.join('config', 'metrics', '[^agg]*', '*.yml')]
         end
 
-        def definitions
+        def definitions(skip_validation: false)
+          @skip_validation = skip_validation
           @definitions ||= load_all!
+        end
+
+        def all
+          @all ||= definitions.map { |_key_path, definition| definition }
         end
 
         def schemer
           @schemer ||= ::JSONSchemer.schema(Pathname.new(METRIC_SCHEMA_PATH))
+        end
+
+        def dump_metrics_yaml
+          @metrics_yaml ||= definitions.values.map(&:to_h).map(&:deep_stringify_keys).to_yaml
         end
 
         private
@@ -58,8 +91,8 @@ module Gitlab
           definition.deep_symbolize_keys!
 
           self.new(path, definition).tap(&:validate!)
-        rescue => e
-          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Metric::InvalidMetricError.new(e.message))
+        rescue StandardError => e
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Gitlab::Usage::Metric::InvalidMetricError.new(e.message))
         end
 
         def load_all_from_path!(definitions, glob_path)
@@ -67,7 +100,7 @@ module Gitlab
             definition = load_from_file(path)
 
             if previous = definitions[definition.key]
-              Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Metric::InvalidMetricError.new("Metric '#{definition.key}' is already defined in '#{previous.path}'"))
+              Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Gitlab::Usage::Metric::InvalidMetricError.new("Metric '#{definition.key}' is already defined in '#{previous.path}'"))
             end
 
             definitions[definition.key] = definition
@@ -82,10 +115,10 @@ module Gitlab
       end
 
       def skip_validation?
-        !!attributes[:skip_validation]
+        !!attributes[:skip_validation] || @skip_validation || SKIP_VALIDATION_STATUSES.include?(attributes[:status])
       end
     end
   end
 end
 
-Gitlab::Usage::MetricDefinition.prepend_if_ee('EE::Gitlab::Usage::MetricDefinition')
+Gitlab::Usage::MetricDefinition.prepend_mod_with('Gitlab::Usage::MetricDefinition')

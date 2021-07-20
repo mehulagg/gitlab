@@ -1,6 +1,6 @@
+import * as Sentry from '@sentry/browser';
 import $ from 'jquery';
 import { __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 
 const IGNORE_ERRORS = [
   // Random plugins/extensions
@@ -59,16 +59,18 @@ const SentryConfig = {
 
   configure() {
     const { dsn, release, tags, whitelistUrls, environment } = this.options;
+
     Sentry.init({
       dsn,
       release,
-      tags,
       whitelistUrls,
       environment,
       ignoreErrors: this.IGNORE_ERRORS, // TODO: Remove in favor of https://gitlab.com/gitlab-org/gitlab/issues/35144
       blacklistUrls: this.BLACKLIST_URLS,
       sampleRate: SAMPLE_RATE,
     });
+
+    Sentry.setTags(tags);
   },
 
   setUser() {

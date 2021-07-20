@@ -54,5 +54,48 @@ RSpec.describe 'get list of epic boards' do
         let(:first_param) { 2 }
       end
     end
+
+    it 'avoids N+1 queries' do
+      list1.update_preferences_for(current_user, collapsed: true)
+
+      control = ActiveRecord::QueryRecorder.new { post_graphql(pagination_query, current_user: current_user) }
+
+      list2.update_preferences_for(current_user, collapsed: true)
+
+      expect { post_graphql(pagination_query, current_user: current_user) }.not_to exceed_query_limit(control)
+    end
+
+    describe 'field values' do
+      let_it_be(:other_user) { create(:user) }
+
+      it 'returns the correct values for collapsed' do
+        list1.update_preferences_for(current_user, collapsed: true)
+        list1.update_preferences_for(other_user, collapsed: false)
+
+        post_graphql(pagination_query, current_user: current_user)
+
+        # ordered by list_type then position - backlog first and closed last.
+        assert_field_value('id', [global_id_of(list3), global_id_of(list1), global_id_of(list2)])
+        assert_field_value('collapsed', [false, true, false])
+      end
+
+      it 'returns the correct values for count' do
+        label = create(:group_label, group: group)
+        # Epics in backlog, the list which is returned first. The first epic
+        # should be ignored because it doesn't have the label by which we are
+        # filtering.
+        create(:labeled_epic, group: group)
+        create(:labeled_epic, group: group, labels: [label])
+
+        params = { epicFilters: { labelName: label.title } }
+        post_graphql(pagination_query(params), current_user: current_user)
+
+        assert_field_value('epicsCount', [1, 0, 0])
+      end
+    end
+  end
+
+  def assert_field_value(field, expected_value)
+    expect(graphql_dig_at(graphql_data, 'group', 'epicBoard', 'lists', 'nodes', field)).to eq(expected_value)
   end
 end

@@ -3,7 +3,8 @@
 require 'airborne'
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  RSpec.describe 'Plan' do
+    # TODO: Convert back to reliable once proved to be stable. Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/219495
     describe 'Epics milestone dates API' do
       before(:context) do
         @api_client = Runtime::API::Client.new(:gitlab)

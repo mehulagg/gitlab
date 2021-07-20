@@ -11,8 +11,6 @@ class Environment < ApplicationRecord
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
 
-  PRODUCTION_ENVIRONMENT_IDENTIFIERS = %w[prod production].freeze
-
   belongs_to :project, required: true
 
   use_fast_destroy :all_deployments
@@ -26,19 +24,20 @@ class Environment < ApplicationRecord
   has_many :self_managed_prometheus_alert_events, inverse_of: :environment
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
-  has_one :last_deployment, -> { success.order('deployments.id DESC') }, class_name: 'Deployment'
+  has_one :last_deployment, -> { success.distinct_on_environment }, class_name: 'Deployment', inverse_of: :environment
   has_one :last_deployable, through: :last_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_pipeline, through: :last_deployable, source: 'pipeline'
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
-  has_one :upcoming_deployment, -> { running.order('deployments.id DESC') }, class_name: 'Deployment'
+  has_one :upcoming_deployment, -> { running.distinct_on_environment }, class_name: 'Deployment', inverse_of: :environment
   has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :nullify_external_url
   before_validation :generate_slug, if: ->(env) { env.slug.blank? }
 
   before_save :set_environment_type
+  before_save :ensure_environment_tier
   after_save :clear_reactive_cache!
 
   validates :name,
@@ -87,12 +86,37 @@ class Environment < ApplicationRecord
   end
 
   scope :for_project, -> (project) { where(project_id: project) }
+  scope :for_tier, -> (tier) { where(tier: tier).where.not(tier: nil) }
   scope :with_deployment, -> (sha) { where('EXISTS (?)', Deployment.select(1).where('deployments.environment_id = environments.id').where(sha: sha)) }
   scope :unfoldered, -> { where(environment_type: nil) }
   scope :with_rank, -> do
     select('environments.*, rank() OVER (PARTITION BY project_id ORDER BY id DESC)')
   end
   scope :for_id, -> (id) { where(id: id) }
+
+  scope :stopped_review_apps, -> (before, limit) do
+    stopped
+      .in_review_folder
+      .where("created_at < ?", before)
+      .order("created_at ASC")
+      .limit(limit)
+  end
+
+  scope :scheduled_for_deletion, -> do
+    where.not(auto_delete_at: nil)
+  end
+
+  scope :not_scheduled_for_deletion, -> do
+    where(auto_delete_at: nil)
+  end
+
+  enum tier: {
+    production: 0,
+    staging: 1,
+    testing: 2,
+    development: 3,
+    other: 4
+  }
 
   state_machine :state, initial: :available do
     event :start do
@@ -135,6 +159,10 @@ class Environment < ApplicationRecord
 
   def self.valid_states
     self.state_machine.states.map(&:name)
+  end
+
+  def self.schedule_to_delete(at_time = 1.week.from_now)
+    update_all(auto_delete_at: at_time)
   end
 
   class << self
@@ -195,6 +223,7 @@ class Environment < ApplicationRecord
     Gitlab::Ci::Variables::Collection.new
       .append(key: 'CI_ENVIRONMENT_NAME', value: name)
       .append(key: 'CI_ENVIRONMENT_SLUG', value: slug)
+      .append(key: 'CI_ENVIRONMENT_TIER', value: tier)
   end
 
   def recently_updated_on_branch?(ref)
@@ -221,10 +250,6 @@ class Environment < ApplicationRecord
     last_deployment.try(:created_at)
   end
 
-  def update_merge_request_metrics?
-    PRODUCTION_ENVIRONMENT_IDENTIFIERS.include?(folder_name.downcase)
-  end
-
   def ref_path
     "refs/#{Repository::REF_ENVIRONMENTS}/#{slug}"
   end
@@ -242,10 +267,10 @@ class Environment < ApplicationRecord
   def cancel_deployment_jobs!
     jobs = active_deployments.with_deployable
     jobs.each do |deployment|
-      Gitlab::OptimisticLocking.retry_lock(deployment.deployable) do |deployable|
+      Gitlab::OptimisticLocking.retry_lock(deployment.deployable, name: 'environment_cancel_deployment_jobs') do |deployable|
         deployable.cancel! if deployable&.cancelable?
       end
-    rescue => e
+    rescue StandardError => e
       Gitlab::ErrorTracking.track_exception(e, environment_id: id, deployment_id: deployment.id)
     end
   end
@@ -309,10 +334,6 @@ class Environment < ApplicationRecord
 
   def metrics
     prometheus_adapter.query(:environment, self) if has_metrics_and_can_query?
-  end
-
-  def prometheus_status
-    deployment_platform&.cluster&.application_prometheus&.status_name
   end
 
   def additional_metrics(*args)
@@ -382,7 +403,7 @@ class Environment < ApplicationRecord
   end
 
   def elastic_stack_available?
-    !!deployment_platform&.cluster&.application_elastic_stack_available?
+    !!deployment_platform&.cluster&.elastic_stack_available?
   end
 
   def rollout_status
@@ -429,6 +450,22 @@ class Environment < ApplicationRecord
   def generate_slug
     self.slug = Gitlab::Slug::Environment.new(name).generate
   end
+
+  def ensure_environment_tier
+    self.tier ||= guess_tier
+  end
+
+  # Guessing the tier of the environment if it's not explicitly specified by users.
+  # See https://en.wikipedia.org/wiki/Deployment_environment for industry standard deployment environments
+  def guess_tier
+    case name
+    when %r{dev|review|trunk}i then self.class.tiers[:development]
+    when %r{test|qc}i then self.class.tiers[:testing]
+    when %r{st(a|)g|mod(e|)l|pre|demo}i then self.class.tiers[:staging]
+    when %r{pr(o|)d|live}i then self.class.tiers[:production]
+    else self.class.tiers[:other]
+    end
+  end
 end
 
-Environment.prepend_if_ee('EE::Environment')
+Environment.prepend_mod_with('Environment')

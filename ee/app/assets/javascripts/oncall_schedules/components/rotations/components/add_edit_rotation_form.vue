@@ -30,14 +30,20 @@ export const i18n = {
       title: __('Participants'),
       error: s__('OnCallSchedules|Rotation participants cannot be empty'),
     },
-    rotationLength: { title: s__('OnCallSchedules|Rotation length') },
+    rotationLength: {
+      title: s__('OnCallSchedules|Rotation length'),
+      description: s__(
+        'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
+      ),
+    },
     startsAt: {
       title: __('Starts on'),
       error: s__('OnCallSchedules|Rotation start date cannot be empty'),
     },
-    endsOn: {
+    endsAt: {
       enableToggle: s__('OnCallSchedules|Enable end date'),
       title: __('Ends on'),
+      error: s__('OnCallSchedules|Rotation end date/time must come after start date/time'),
     },
     restrictToTime: {
       enableToggle: s__('OnCallSchedules|Restrict to time intervals'),
@@ -91,13 +97,6 @@ export default {
       default: () => ({}),
     },
   },
-  data() {
-    return {
-      participantsArr: [],
-      endDateEnabled: false,
-      restrictToTimeEnabled: false,
-    };
-  },
   methods: {
     format24HourTimeStringFromInt,
   },
@@ -116,7 +115,8 @@ export default {
       >
         <gl-form-input
           id="rotation-name"
-          @blur="$emit('update-rotation-form', { type: 'name', value: $event.target.value })"
+          :value="form.name"
+          @change="$emit('update-rotation-form', { type: 'name', value: $event })"
         />
       </gl-form-group>
 
@@ -128,13 +128,14 @@ export default {
         :state="validationState.participants"
       >
         <gl-token-selector
-          v-model="participantsArr"
+          :selected-tokens="form.participants"
           :dropdown-items="participants"
           :loading="isLoading"
           container-class="gl-h-13! gl-overflow-y-auto"
+          menu-class="gl-overflow-y-auto"
           @text-input="$emit('filter-participants', $event)"
-          @blur="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
-          @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
+          @blur="$emit('update-rotation-form', { type: 'participants', value: form.participants })"
+          @input="$emit('update-rotation-form', { type: 'participants', value: $event })"
         >
           <template #token-content="{ token }">
             <gl-avatar v-if="token.avatarUrl" :src="token.avatarUrl" :size="16" />
@@ -153,6 +154,7 @@ export default {
 
       <gl-form-group
         :label="$options.i18n.fields.rotationLength.title"
+        :description="$options.i18n.fields.rotationLength.description"
         label-size="sm"
         label-for="rotation-length"
       >
@@ -162,7 +164,7 @@ export default {
             type="number"
             class="gl-w-12 gl-mr-3"
             min="1"
-            :value="1"
+            :value="form.rotationLength.length"
             @input="$emit('update-rotation-form', { type: 'rotationLength.length', value: $event })"
           />
           <gl-dropdown :text="form.rotationLength.unit.toLowerCase()">
@@ -188,6 +190,7 @@ export default {
         <div class="gl-display-flex gl-align-items-center">
           <gl-datepicker
             class="gl-mr-3"
+            :value="form.startsAt.date"
             @input="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
           >
             <template #default="{ formattedDate }">
@@ -195,12 +198,6 @@ export default {
                 class="gl-w-full"
                 :value="formattedDate"
                 :placeholder="__(`YYYY-MM-DD`)"
-                @blur="
-                  $emit('update-rotation-form', {
-                    type: 'startsAt.date',
-                    value: $event.target.value,
-                  })
-                "
               />
             </template>
           </gl-datepicker>
@@ -211,7 +208,7 @@ export default {
             class="gl-px-3"
           >
             <gl-dropdown-item
-              v-for="time in $options.HOURS_IN_DAY"
+              v-for="(_, time) in $options.HOURS_IN_DAY"
               :key="time"
               :is-checked="form.startsAt.time === time"
               is-check-item
@@ -226,40 +223,53 @@ export default {
     </div>
     <div class="gl-display-inline-block">
       <gl-toggle
-        v-model="endDateEnabled"
-        :label="$options.i18n.fields.endsOn.enableToggle"
+        :value="form.isEndDateEnabled"
+        :label="$options.i18n.fields.endsAt.enableToggle"
         label-position="left"
         class="gl-mb-5"
+        @change="
+          $emit('update-rotation-form', { type: 'isEndDateEnabled', value: !form.isEndDateEnabled })
+        "
       />
 
       <gl-card
-        v-if="endDateEnabled"
+        v-if="form.isEndDateEnabled"
         data-testid="rotation-ends-on"
         class="gl-border-gray-400 gl-bg-gray-10"
       >
         <gl-form-group
-          :label="$options.i18n.fields.endsOn.title"
+          :label="$options.i18n.fields.endsAt.title"
           label-size="sm"
-          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :state="validationState.endsAt"
+          :invalid-feedback="$options.i18n.fields.endsAt.error"
           class="gl-mb-0"
         >
           <div class="gl-display-flex gl-align-items-center">
             <gl-datepicker
               class="gl-mr-3"
-              @input="$emit('update-rotation-form', { type: 'endsOn.date', value: $event })"
-            />
+              :value="form.endsAt.date"
+              @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
+            >
+              <template #default="{ formattedDate }">
+                <gl-form-input
+                  class="gl-w-full"
+                  :value="formattedDate"
+                  :placeholder="__(`YYYY-MM-DD`)"
+                />
+              </template>
+            </gl-datepicker>
             <span> {{ __('at') }} </span>
             <gl-dropdown
               data-testid="rotation-end-time"
-              :text="format24HourTimeStringFromInt(form.endsOn.time)"
+              :text="format24HourTimeStringFromInt(form.endsAt.time)"
               class="gl-px-3"
             >
               <gl-dropdown-item
-                v-for="time in $options.HOURS_IN_DAY"
+                v-for="(_, time) in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.endsOn.time === time"
+                :is-checked="form.endsAt.time === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'endsOn.time', value: time })"
+                @click="$emit('update-rotation-form', { type: 'endsAt.time', value: time })"
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span
@@ -272,37 +282,45 @@ export default {
       </gl-card>
 
       <gl-toggle
-        v-model="restrictToTimeEnabled"
+        :value="form.isRestrictedToTime"
         data-testid="restricted-to-toggle"
         :label="$options.i18n.fields.restrictToTime.enableToggle"
         label-position="left"
         class="gl-mt-5"
+        @change="
+          $emit('update-rotation-form', {
+            type: 'isRestrictedToTime',
+            value: !form.isRestrictedToTime,
+          })
+        "
       />
 
       <gl-card
-        v-if="restrictToTimeEnabled"
+        v-if="form.isRestrictedToTime"
         data-testid="restricted-to-time"
         class="gl-mt-5 gl-border-gray-400 gl-bg-gray-10"
       >
         <gl-form-group
           :label="$options.i18n.fields.restrictToTime.title"
           label-size="sm"
-          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :invalid-feedback="$options.i18n.fields.endsAt.error"
           class="gl-mb-0"
         >
           <div class="gl-display-flex gl-align-items-center">
             <span> {{ __('From') }} </span>
             <gl-dropdown
               data-testid="restricted-from"
-              :text="format24HourTimeStringFromInt(form.restrictedTo.from)"
+              :text="format24HourTimeStringFromInt(form.restrictedTo.startTime)"
               class="gl-px-3"
             >
               <gl-dropdown-item
-                v-for="time in $options.HOURS_IN_DAY"
+                v-for="(_, time) in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.restrictedTo.from === time"
+                :is-checked="form.restrictedTo.startTime === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'restrictedTo.from', value: time })"
+                @click="
+                  $emit('update-rotation-form', { type: 'restrictedTo.startTime', value: time })
+                "
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span
@@ -312,15 +330,17 @@ export default {
             <span> {{ __('To') }} </span>
             <gl-dropdown
               data-testid="restricted-to"
-              :text="format24HourTimeStringFromInt(form.restrictedTo.to)"
+              :text="format24HourTimeStringFromInt(form.restrictedTo.endTime)"
               class="gl-px-3"
             >
               <gl-dropdown-item
-                v-for="time in $options.HOURS_IN_DAY"
+                v-for="(_, time) in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.restrictedTo.to === time"
+                :is-checked="form.restrictedTo.endTime === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'restrictedTo.to', value: time })"
+                @click="
+                  $emit('update-rotation-form', { type: 'restrictedTo.endTime', value: time })
+                "
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span

@@ -1,0 +1,5 @@
+mutation addCorpus($projectPath: ID!, $name: String!) {
+  addCorpus(projectPath: $projectPath, name: $name) @client {
+    errors
+  }
+}

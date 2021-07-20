@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Graphql Field feature flags' do
   include GraphqlHelpers
+  include Graphql::ResolverFactories
 
   let_it_be(:user) { create(:user) }
 
@@ -23,18 +24,29 @@ RSpec.describe 'Graphql Field feature flags' do
 
     let(:query_type) do
       query_factory do |query|
-        query.field :item, type, null: true, feature_flag: feature_flag, resolver: simple_resolver(test_object)
+        query.field :item, type, null: true, feature_flag: feature_flag, resolver: new_resolver(test_object)
       end
     end
 
-    it 'returns the value when feature is enabled' do
-      expect(subject['item']).to eq('name' => test_object.name)
+    it 'checks YAML definition for default_enabled' do
+      # Exception is indicative of a check for YAML definition
+      expect { subject }.to raise_error(Feature::InvalidFeatureFlagError, /The feature flag YAML definition for '#{feature_flag}' does not exist/)
     end
 
-    it 'returns nil when the feature is disabled' do
-      stub_feature_flags(feature_flag => false)
+    context 'skipping YAML check' do
+      before do
+        skip_default_enabled_yaml_check
+      end
 
-      expect(subject).to be_nil
+      it 'returns the value when feature is enabled' do
+        expect(subject['item']).to eq('name' => test_object.name)
+      end
+
+      it 'returns nil when the feature is disabled' do
+        stub_feature_flags(feature_flag => false)
+
+        expect(subject).to be_nil
+      end
     end
   end
 end

@@ -1,4 +1,4 @@
-import { GlPopover, GlLink } from '@gitlab/ui';
+import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import component from 'ee/approvals/components/approval_check_popover.vue';
@@ -32,6 +32,20 @@ describe('Approval Check Popover', () => {
   describe('without a documentation link', () => {
     it('should not render the documentation link', () => {
       expect(wrapper.find(GlPopover).find(GlLink).exists()).toBeFalsy();
+    });
+  });
+
+  it('renders an Icon with an id that matches the Popover target', () => {
+    expect(wrapper.find(GlPopover).props().target).toBe(
+      wrapper.find(GlIcon).element.getAttribute('id'),
+    );
+  });
+
+  it('should render gl-popover with correct props', () => {
+    expect(wrapper.find(GlPopover).props()).toMatchObject({
+      title: 'Title',
+      target: 'reportInfo',
+      placement: 'top',
     });
   });
 });

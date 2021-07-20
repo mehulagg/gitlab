@@ -19,8 +19,8 @@ eslint-report.html
 /.ruby-version
 /.tool-versions
 /.rvmrc
-.sass-cache/
 /.secret
+.sass-cache/
 /.vagrant
 /.yarn-cache
 /.byebug_history
@@ -42,9 +42,9 @@ eslint-report.html
 /config/redis.cache.yml
 /config/redis.queues.yml
 /config/redis.shared_state.yml
+/config/redis.trace_chunks.yml
 /config/unicorn.rb
 /config/puma.rb
-/config/puma_actioncable.rb
 /config/secrets.yml
 /config/sidekiq.yml
 /config/registry.key
@@ -104,3 +104,5 @@ ee/changelogs/unreleased-ee
 /sitespeed-result
 tags.lock
 tags.temp
+.stylelintcache
+.solargraph.yml

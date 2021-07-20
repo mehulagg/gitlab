@@ -23,10 +23,11 @@ To see how GitLab looks please see the [features page on our website](https://ab
 
 ## Editions
 
-There are two editions of GitLab:
+There are three editions of GitLab:
 
 - GitLab Community Edition (CE) is available freely under the MIT Expat license.
 - GitLab Enterprise Edition (EE) includes [extra features](https://about.gitlab.com/pricing/#compare-options) that are more useful for organizations with more than 100 users. To use EE and get official support please [become a subscriber](https://about.gitlab.com/pricing/).
+- JiHu Edition (JH) tailored specifically for the [Chinese market](https://about.gitlab.cn/).
 
 ## Licensing
 
@@ -68,9 +69,9 @@ GitLab is an open source project and we are very happy to accept community contr
 
 To work on GitLab itself, we recommend setting up your development environment with [the GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit).
 If you do not use the GitLab Development Kit you need to install and setup all the dependencies yourself, this is a lot of work and error prone.
-One small thing you also have to do when installing it yourself is to copy the example development Unicorn configuration file:
+One small thing you also have to do when installing it yourself is to copy the example development Puma configuration file:
 
-    cp config/unicorn.rb.example.development config/unicorn.rb
+    cp config/puma.rb.example.development config/puma.rb
 
 Instructions on how to start GitLab and how to run the tests can be found in the [getting started section of the GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit#getting-started).
 
@@ -80,15 +81,15 @@ GitLab is a Ruby on Rails application that runs on the following software:
 
 - Ubuntu/Debian/CentOS/RHEL/OpenSUSE
 - Ruby (MRI) 2.7.2
-- Git 2.24+
-- Redis 4.0+
-- PostgreSQL 11+
+- Git 2.31+
+- Redis 5.0+
+- PostgreSQL 12+
 
 For more information please see the [architecture](https://docs.gitlab.com/ee/development/architecture.html) and [requirements](https://docs.gitlab.com/ee/install/requirements.html) documentation.
 
 ## UX design
 
-Please adhere to the [UX Guide](doc/development/ux_guide/index.md) when creating designs and implementing code.
+Please adhere to the [UX Guide](https://design.gitlab.com/) when creating designs and implementing code.
 
 ## Third-party applications
 

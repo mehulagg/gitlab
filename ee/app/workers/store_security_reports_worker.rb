@@ -4,9 +4,11 @@
 #
 class StoreSecurityReportsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include SecurityScansQueue
 
-  tags :requires_disk_io
+  worker_resource_boundary :cpu
 
   def perform(pipeline_id)
     Ci::Pipeline.find(pipeline_id).try do |pipeline|

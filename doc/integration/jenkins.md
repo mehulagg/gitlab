@@ -18,7 +18,7 @@ To better understand the GitLab Jenkins integration, watch the following video:
 
 Use the Jenkins integration with GitLab when:
 
-- You plan to migrate your CI from Jenkins to [GitLab CI/CD](../ci/README.md) in the future, but
+- You plan to migrate your CI from Jenkins to [GitLab CI/CD](../ci/index.md) in the future, but
 need an interim solution.
 - You're invested in [Jenkins Plugins](https://plugins.jenkins.io/) and choose to keep using Jenkins
 to build your apps.
@@ -31,7 +31,8 @@ the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools
 
 NOTE:
 This documentation focuses only on how to **configure** a Jenkins *integration* with
-GitLab. Learn how to **migrate** from Jenkins to GitLab CI/CD in our
+GitLab. Learn how to set up Jenkins [on your local machine](../development/integrations/jenkins.md)
+in our developer documentation, and how to **migrate** from Jenkins to GitLab CI/CD in our
 [Migrating from Jenkins](../ci/migration/jenkins.md) documentation.
 
 ## Configure GitLab integration with Jenkins
@@ -64,7 +65,7 @@ Grant a GitLab user access to the select GitLab projects.
 1. Grant the user permission to the GitLab projects.
 
    If you're integrating Jenkins with many GitLab projects, consider granting the user global
-   Administrator permission. Otherwise, add the user to each project, and grant Developer permission.
+   Administrator permission. Otherwise, add the user to each project, and grant the Developer role.
 
 ## Configure GitLab API access
 
@@ -86,7 +87,7 @@ authorize the connection to GitLab.
 1. On the Jenkins server, go to **Manage Jenkins > Manage Plugins**.
 1. Install the [Jenkins GitLab Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+Plugin).
 1. Go to **Manage Jenkins > Configure System**.
-1. In the **GitLab** section, check the **Enable authentication for ‘/project’ end-point** checkbox.
+1. In the **GitLab** section, check the **Enable authentication for '/project' end-point** checkbox.
 1. Click **Add**, then choose **Jenkins Credential Provider**.
 1. Choose **GitLab API token** as the token type.
 1. Enter the GitLab personal access token's value in the **API Token** field and click **Add**.
@@ -136,11 +137,16 @@ Set up the Jenkins project you intend to run your build on.
       }
       ```
 
+      For more Jenkins Pipeline script examples, go to the [Jenkins GitLab plugin repository on GitHub](https://github.com/jenkinsci/gitlab-plugin#scripted-pipeline-jobs).
+
 ## Configure the GitLab project
 
-Configure the GitLab integration with Jenkins.
+Configure the GitLab integration with Jenkins in one of the following ways.
 
-### Option 1: Jenkins integration (recommended)
+### Recommended Jenkins integration
+
+GitLab recommends this approach for Jenkins integrations because it is easier to configure
+than the [webhook integration](#webhook-integration).
 
 1. Create a new GitLab project or choose an existing one.
 1. Go to **Settings > Integrations**, then select **Jenkins CI**.
@@ -159,7 +165,7 @@ Configure the GitLab integration with Jenkins.
    authentication.
 1. Click **Test settings and save changes**. GitLab tests the connection to Jenkins.
 
-### Option 2: Webhook
+### Webhook integration
 
 If you are unable to provide GitLab with your Jenkins server login, you can use this option
 to integrate GitLab and Jenkins.
@@ -167,7 +173,8 @@ to integrate GitLab and Jenkins.
 1. In the configuration of your Jenkins job, in the GitLab configuration section, click **Advanced**.
 1. Click the **Generate** button under the **Secret Token** field.
 1. Copy the resulting token, and save the job configuration.
-1. In GitLab, create a webhook for your project, enter the trigger URL (such as `https://JENKINS_URL/project/YOUR_JOB`) and paste the token in the **Secret Token** field.
+1. In GitLab, create a webhook for your project, enter the trigger URL
+   (such as `https://JENKINS_URL/project/YOUR_JOB`) and paste the token in the **Secret Token** field.
 1. After you add the webhook, click the **Test** button, and it should succeed.
 
 ## Troubleshooting
@@ -213,3 +220,16 @@ If you don't find the errors above, but do find *duplicate* entries like below (
 2019-10-25_04:22:41.25630 2019-10-25T04:22:41.256Z 1584 TID-ovowh4tek WebHookWorker JID-941fb7f40b69dff3d833c99b INFO: start
 2019-10-25_04:22:41.25630 2019-10-25T04:22:41.256Z 1584 TID-ovowh4tek WebHookWorker JID-941fb7f40b69dff3d833c99b INFO: start
 ```
+
+### Enable job logs in Jenkins
+
+When troubleshooting an integration issue, it is useful to enable job logs in Jenkins to see more details about what is happening under the hood.
+To enable job logs in Jenkins:
+
+1. Go to **Dashboard > Manage Jenkins > System Log**.
+1. Select **Add new log recorder**.
+1. Enter a name for the log recorder.
+1. On the next screen, select **Add** and enter `org.jenkinsci.plugins.workflow.job` in the text field.
+1. Make sure that the Log Level is **All** and select **Save**.
+
+Now, after you run a build, you can go to the loggers page (**Dashboard > Manage Jenkins > System Log**), select your logger, and check the logs.

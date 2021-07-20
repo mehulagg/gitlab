@@ -15,6 +15,11 @@ class Projects::JobsController < Projects::ApplicationController
   before_action :verify_api_request!, only: :terminal_websocket_authorize
   before_action :authorize_create_proxy_build!, only: :proxy_websocket_authorize
   before_action :verify_proxy_request!, only: :proxy_websocket_authorize
+  before_action :push_jobs_table_vue, only: [:index]
+
+  before_action do
+    push_frontend_feature_flag(:infinitely_collapsible_sections, @project, default_enabled: :yaml)
+  end
 
   layout 'project'
 
@@ -226,10 +231,10 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   def raw_trace_content_disposition(raw_data)
-    mime_type = MimeMagic.by_magic(raw_data)
+    mime_type = Gitlab::Utils::MimeType.from_string(raw_data)
 
     # if mime_type is nil can also represent 'text/plain'
-    return 'inline' if mime_type.nil? || mime_type.type == 'text/plain'
+    return 'inline' if mime_type.nil? || mime_type == 'text/plain'
 
     'attachment'
   end
@@ -255,5 +260,9 @@ class Projects::JobsController < Projects::ApplicationController
     service[:url] = ::Gitlab::UrlHelpers.as_wss(service[:url])
 
     ::Gitlab::Workhorse.channel_websocket(service)
+  end
+
+  def push_jobs_table_vue
+    push_frontend_feature_flag(:jobs_table_vue, @project, default_enabled: :yaml)
   end
 end

@@ -40,7 +40,7 @@ When using Vuex at GitLab, separate these concerns into different files to impro
 
 The following example shows an application that lists and adds users to the
 state. (For a more complex example implementation, review the security
-applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
+applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
 
 ### `index.js`
 
@@ -106,7 +106,7 @@ In this file, we write the actions that call mutations for handling a list of us
       .then(({ data }) => commit(types.RECEIVE_USERS_SUCCESS, data))
       .catch((error) => {
         commit(types.RECEIVE_USERS_ERROR, error)
-        createFlash('There was an error')
+        createFlash({ message: 'There was an error' })
       });
   }
 
@@ -440,12 +440,11 @@ components, we need to include the store and provide the correct state:
 //component_spec.js
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { createStore } from './store';
 import Component from './component.vue'
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('component', () => {
   let store;
@@ -455,7 +454,6 @@ describe('component', () => {
     store = createStore();
 
     wrapper = mount(Component, {
-      localVue,
       store,
     });
   };
@@ -466,7 +464,6 @@ describe('component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should show a user', async () => {
@@ -482,6 +479,11 @@ describe('component', () => {
   });
 });
 ```
+
+Some test files may still use the
+[deprecated `createLocalVue` function](https://gitlab.com/gitlab-org/gitlab/-/issues/220482)
+from `@vue/test-utils` and `localVue.use(Vuex)`. This is unnecessary, and should be
+avoided or removed when possible.
 
 ### Two way data binding
 
@@ -538,11 +540,11 @@ export default {
     foo: ''
   },
   actions: {
-    updateBar() {...}
-    updateAll() {...}
+    updateBar() {...},
+    updateAll() {...},
   },
   getters: {
-    getFoo() {...}
+    getFoo() {...},
   }
 }
 ```
@@ -557,13 +559,13 @@ export default {
      * @param {string} list[].getter - the name of the getter, leave it empty to not use a getter
      * @param {string} list[].updateFn - the name of the action, leave it empty to use the default action
      * @param {string} defaultUpdateFn - the default function to dispatch
-     * @param {string} root - optional key of the state where to search fo they keys described in list
+     * @param {string|function} root - optional key of the state where to search for they keys described in list
      * @returns {Object} a dictionary with all the computed properties generated
     */
     ...mapComputed(
       [
         'baz',
-        { key: 'bar', updateFn: 'updateBar' }
+        { key: 'bar', updateFn: 'updateBar' },
         { key: 'foo', getter: 'getFoo' },
       ],
       'updateAll',
@@ -573,3 +575,48 @@ export default {
 ```
 
 `mapComputed` then generates the appropriate computed properties that get the data from the store and dispatch the correct action when updated.
+
+In the event that the `root` of the key is more than one-level deep you can use a function to retrieve the relevant state object.
+
+For instance, with a store like:
+
+```javascript
+// this store is non-functional and only used to give context to the example
+export default {
+  state: {
+    foo: {
+      qux: {
+        baz: '',
+        bar: '',
+        foo: '',
+      },
+    },
+  },
+  actions: {
+    updateBar() {...},
+    updateAll() {...},
+  },
+  getters: {
+    getFoo() {...},
+  }
+}
+```
+
+The `root` could be:
+
+```javascript
+import { mapComputed } from '~/vuex_shared/bindings'
+export default {
+  computed: {
+    ...mapComputed(
+      [
+        'baz',
+        { key: 'bar', updateFn: 'updateBar' },
+        { key: 'foo', getter: 'getFoo' },
+      ],
+      'updateAll',
+      (state) => state.foo.qux,
+    ),
+  }
+}
+```

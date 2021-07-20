@@ -41,6 +41,36 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
   end
 
+  describe '#load_from_index' do
+    it 'does not raise an exeption when connection refused' do
+      allow(Gitlab::Elastic::Helper.default).to receive(:get).and_raise(Faraday::ConnectionFailed)
+
+      expect(record.load_from_index).to be_nil
+    end
+
+    it 'does not raise an exeption when record does not exist' do
+      allow(Gitlab::Elastic::Helper.default).to receive(:get).and_raise(Elasticsearch::Transport::Transport::Errors::NotFound)
+
+      expect(record.load_from_index).to be_nil
+    end
+  end
+
+  describe '#halt!' do
+    it 'sets state for halted and halted_indexing_unpaused' do
+      record.halt!
+
+      expect(record.load_from_index.dig('_source', 'state', 'halted')).to be_truthy
+      expect(record.load_from_index.dig('_source', 'state', 'halted_indexing_unpaused')).to be_falsey
+    end
+
+    it 'sets state with additional options if passed' do
+      record.halt!(hello: 'world', good: 'bye')
+
+      expect(record.load_from_index.dig('_source', 'state', 'hello')).to eq('world')
+      expect(record.load_from_index.dig('_source', 'state', 'good')).to eq('bye')
+    end
+  end
+
   describe '#started?' do
     it 'changes on object save' do
       expect { record.save!(completed: true) }.to change { record.started? }.from(false).to(true)
@@ -70,6 +100,37 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
 
       expect(described_class.load_versions(completed: true)).to eq([])
       expect(described_class.load_versions(completed: false)).to eq([])
+    end
+
+    it 'returns empty array when exception is raised' do
+      allow(Gitlab::Elastic::Helper.default.client).to receive(:search).and_raise(Faraday::ConnectionFailed)
+
+      expect(described_class.load_versions(completed: true)).to eq([])
+      expect(described_class.load_versions(completed: false)).to eq([])
+    end
+  end
+
+  describe '#running?' do
+    using RSpec::Parameterized::TableSyntax
+
+    before do
+      allow(record).to receive(:halted?).and_return(halted)
+      allow(record).to receive(:started?).and_return(started)
+      allow(record).to receive(:completed?).and_return(completed)
+    end
+
+    where(:started, :halted, :completed, :expected) do
+      false | false | false | false
+      true  | false | false | true
+      true  | true  | false | false
+      true  | true  | true  | false
+      true  | false | true  | false
+    end
+
+    with_them do
+      it 'returns the expected result' do
+        expect(record.running?).to eq(expected)
+      end
     end
   end
 end

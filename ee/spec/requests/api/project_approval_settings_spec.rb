@@ -116,6 +116,32 @@ RSpec.describe API::ProjectApprovalSettings do
         end
       end
     end
+
+    context 'when project is archived' do
+      let_it_be(:archived_project) { create(:project, :archived, creator: user) }
+
+      let(:url) { "/projects/#{archived_project.id}/approval_settings" }
+
+      context 'when user has normal permissions' do
+        it 'returns 403' do
+          archived_project.add_guest(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when user has project admin permissions' do
+        it 'allows access' do
+          archived_project.add_maintainer(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+    end
   end
 
   describe 'POST /projects/:id/approval_settings/rules' do

@@ -8,6 +8,7 @@ RSpec.describe Geo::DesignRepositorySyncService do
 
   let_it_be(:primary) { create(:geo_node, :primary) }
   let_it_be(:secondary) { create(:geo_node) }
+
   let(:user) { create(:user) }
   let(:project) { create(:project_empty_repo, namespace: create(:namespace, owner: user)) }
 

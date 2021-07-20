@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Changes GL.com plan for group' do
+RSpec.describe 'Changes GL.com plan for group', :js do
   include WaitForRequests
 
-  let!(:silver_plan) { create(:silver_plan) }
+  let!(:premium_plan) { create(:premium_plan) }
   let(:admin) { create(:admin) }
 
   before do
@@ -28,7 +28,7 @@ RSpec.describe 'Changes GL.com plan for group' do
 
       click_button('Save changes')
 
-      expect(page).to have_content('Plan: Premium (Formerly Silver)')
+      expect(page).to have_content('Plan: Premium')
     end
   end
 
@@ -45,7 +45,7 @@ RSpec.describe 'Changes GL.com plan for group' do
 
       click_button('Save changes')
 
-      expect(page).to have_content('Plan: Premium (Formerly Silver)')
+      expect(page).to have_content('Plan: Premium')
     end
   end
 end

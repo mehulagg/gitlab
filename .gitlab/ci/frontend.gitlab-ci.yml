@@ -1,22 +1,19 @@
-.frontend-base:
-  extends:
-    - .default-retry
-    - .default-before_script
-  variables:
-    SETUP_DB: "false"
-    # we override the max_old_space_size to prevent OOM errors
-    NODE_OPTIONS: --max_old_space_size=3584
-
 .yarn-install: &yarn-install
   - source scripts/utils.sh
   - run_timed_command "retry yarn install --frozen-lockfile"
 
+.storybook-yarn-install: &storybook-yarn-install
+  - source scripts/utils.sh
+  - run_timed_command "retry yarn run storybook:install --frozen-lockfile"
+
 .compile-assets-base:
   extends:
-    - .frontend-base
+    - .default-retry
+    - .default-before_script
     - .assets-compile-cache
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-git-2.29-lfs-2.9-node-14.15-yarn-1.22-graphicsmagick-1.3.34
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-git-2.31-lfs-2.9-node-14.15-yarn-1.22-graphicsmagick-1.3.36
   variables:
+    SETUP_DB: "false"
     WEBPACK_VENDOR_DLL: "true"
   stage: prepare
   script:
@@ -42,6 +39,15 @@ compile-production-assets:
       - public/assets/
       - webpack-report/
     when: always
+  before_script:
+    - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
+        echo "Checking out \$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA ($CI_MERGE_REQUEST_SOURCE_BRANCH_SHA) instead of \$CI_COMMIT_SHA (merge result commit $CI_COMMIT_SHA) so that GitLab assets image tag actually reflect the commit for which assets were compiled.";
+        git checkout -f ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA};
+      else
+        echo "Building the image from \$CI_COMMIT_SHA ($CI_COMMIT_SHA) for this non-merge result pipeline.";
+      fi;
+    - echo "See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#with-pipeline-for-merged-results for more details.";
+    - !reference [.default-before_script, before_script]
   after_script:
     - rm -f /etc/apt/sources.list.d/google*.list  # We don't need to update Chrome here
 
@@ -65,47 +71,52 @@ compile-test-assets as-if-foss:
 update-assets-compile-production-cache:
   extends:
     - compile-production-assets
+    - .assets-compile-cache-push
     - .shared:rules:update-cache
   stage: prepare
   artifacts: {}  # This job's purpose is only to update the cache.
-  cache:
-    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
 update-assets-compile-test-cache:
   extends:
     - compile-test-assets
+    - .assets-compile-cache-push
     - .shared:rules:update-cache
   stage: prepare
   artifacts: {}  # This job's purpose is only to update the cache.
-  cache:
-    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
 update-yarn-cache:
   extends:
     - .default-retry
-    - .yarn-cache
+    - .yarn-cache-push
     - .shared:rules:update-cache
   stage: prepare
   script:
     - *yarn-install
-  cache:
-    policy: push
+
+update-storybook-yarn-cache:
+  extends:
+    - .default-retry
+    - .storybook-yarn-cache-push
+    - .shared:rules:update-cache
+  stage: prepare
+  script:
+    - *storybook-yarn-install
 
 .frontend-fixtures-base:
   extends:
-    - .frontend-base
+    - .default-retry
+    - .default-before_script
     - .rails-cache
-    - .use-pg11
+    - .use-pg12
   stage: fixtures
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
   variables:
-    SETUP_DB: "true"
     WEBPACK_VENDOR_DLL: "true"
   script:
     - run_timed_command "gem install knapsack --no-document"
     - run_timed_command "scripts/gitaly-test-spawn"
     - source ./scripts/rspec_helpers.sh
-    - rspec_paralellized_job "--tag frontend_fixture"
+    - rspec_paralellized_job
   artifacts:
     name: frontend-fixtures
     expire_in: 31d
@@ -128,15 +139,31 @@ rspec frontend_fixture as-if-foss:
 rspec-ee frontend_fixture:
   extends:
     - .frontend-fixtures-base
-    - .frontend:rules:default-frontend-jobs
+    - .frontend:rules:default-frontend-jobs-ee
   parallel: 2
+
+graphql-schema-dump:
+  variables:
+    SETUP_DB: "false"
+  extends:
+    - .default-retry
+    - .rails-cache
+    - .default-before_script
+    - .frontend:rules:default-frontend-jobs
+  stage: fixtures
+  needs: []
+  script:
+    - bundle exec rake gitlab:graphql:schema:dump
+  artifacts:
+    name: graphql-schema
+    paths:
+      - tmp/tests/graphql/gitlab_schema.graphql
+      - tmp/tests/graphql/gitlab_schema.json
 
 .frontend-test-base:
   extends:
-    - .frontend-base
+    - .default-retry
     - .yarn-cache
-  variables:
-    USE_BUNDLE_INSTALL: "false"
   stage: test
 
 eslint-as-if-foss:
@@ -147,7 +174,7 @@ eslint-as-if-foss:
   needs: []
   script:
     - *yarn-install
-    - run_timed_command "yarn run eslint"
+    - run_timed_command "yarn run lint:eslint:all"
 
 .karma-base:
   extends: .frontend-test-base
@@ -160,8 +187,10 @@ karma:
   extends:
     - .karma-base
     - .frontend:rules:default-frontend-jobs
-  # Don't use `needs` since `rspec-ee frontend_fixture` doesn't exist in `gitlab-foss` pipelines.
-  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture"]
+  needs:
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
   coverage: '/^Statements *: (\d+\.\d+%)/'
   artifacts:
     name: coverage-javascript
@@ -192,8 +221,10 @@ jest:
   extends:
     - .jest-base
     - .frontend:rules:default-frontend-jobs
-  # Don't use `needs` since `rspec-ee frontend_fixture` doesn't exist in `gitlab-foss` pipelines.
-  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture"]
+  needs:
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
   artifacts:
     name: coverage-frontend
     expire_in: 31d
@@ -213,8 +244,11 @@ jest-integration:
   script:
     - *yarn-install
     - run_timed_command "yarn jest:integration --ci"
-  # Don't use `needs` since `rspec-ee frontend_fixture` doesn't exist in `gitlab-foss` pipelines.
-  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture"]
+  needs:
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
+    - job: "graphql-schema-dump"
 
 jest-as-if-foss:
   extends:
@@ -228,7 +262,7 @@ coverage-frontend:
   extends:
     - .default-retry
     - .yarn-cache
-    - .frontend:rules:ee-mr-and-master-only
+    - .frontend:rules:ee-mr-and-default-branch-only
   needs: ["jest"]
   stage: post-test
   before_script:
@@ -305,3 +339,56 @@ bundle-size-review:
     expire_in: 31d
     paths:
       - bundle-size-review
+
+.startup-css-check-base:
+  extends:
+    - .frontend-test-base
+  script:
+    - *yarn-install
+    - run_timed_command "yarn generate:startup_css"
+    - yarn check:startup_css
+
+startup-css-check:
+  extends:
+    - .startup-css-check-base
+    - .frontend:rules:default-frontend-jobs
+  needs:
+    - job: "compile-test-assets"
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
+
+startup-css-check as-if-foss:
+  extends:
+    - .startup-css-check-base
+    - .as-if-foss
+    - .frontend:rules:default-frontend-jobs-as-if-foss
+  needs:
+    - job: "compile-test-assets as-if-foss"
+    - job: "rspec frontend_fixture as-if-foss"
+
+.compile-storybook-base:
+  extends:
+    - .frontend-test-base
+    - .storybook-yarn-cache
+  script:
+    - *yarn-install  # storybook depends on the global webpack config, so we must install global deps.
+    - *storybook-yarn-install
+    - yarn run storybook:build
+
+compile-storybook:
+  extends:
+    - .compile-storybook-base
+    - .frontend:rules:default-frontend-jobs
+  artifacts:
+    name: storybook
+    expire_in: 31d
+    when: always
+    paths:
+      - storybook/public
+
+compile-storybook as-if-foss:
+  extends:
+    - .compile-storybook-base
+    - .as-if-foss
+    - .frontend:rules:default-frontend-jobs-as-if-foss

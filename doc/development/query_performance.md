@@ -21,11 +21,11 @@ When you are optimizing your SQL queries, there are two dimensions to pay attent
 | Queries in a migration | `100ms` | This is different than the total [migration time](database_review.md#timing-guidelines-for-migrations). |
 | Concurrent operations in a migration | `5min` | Concurrent operations do not block the database, but they block the GitLab update. This includes operations such as `add_concurrent_index` and `add_concurrent_foreign_key`. |
 | Background migrations | `1s` |  |
-| Usage Ping | `1s` | See the [usage ping docs](usage_ping.md#developing-and-testing-usage-ping) for more details. |
+| Service Ping | `1s` | See the [Service Ping docs](service_ping/index.md#developing-and-testing-service-ping) for more details. |
 
 - When analyzing your query's performance, pay attention to if the time you are seeing is on a [cold or warm cache](#cold-and-warm-cache). These guidelines apply for both cache types.
 - When working with batched queries, change the range and batch size to see how it effects the query timing and caching.
-- If an existing query is already underperforming, make an effort to improve it. If it is too complex or would stall development, create a follow-up so it can be addressed in a timely manner. You can always ask the database reviewer or maintainer for help and guidance.
+- If an existing query is not performing well, make an effort to improve it. If it is too complex or would stall development, create a follow-up so it can be addressed in a timely manner. You can always ask the database reviewer or maintainer for help and guidance.
 
 ## Cold and warm cache
 
@@ -38,8 +38,8 @@ cache, or what PostgreSQL calls shared buffers. This is the "warm cache" query.
 
 When analyzing an [`EXPLAIN` plan](understanding_explain_plans.md), you can see
 the difference not only in the timing, but by looking at the output for `Buffers`
-by running your explain with `EXPLAIN(analyze, buffers)`. The [#database-lab](understanding_explain_plans.md#database-lab)
-tool will automatically include these options.
+by running your explain with `EXPLAIN(analyze, buffers)`. [Database Lab](understanding_explain_plans.md#database-lab-engine)
+will automatically include these options.
 
 If you are making a warm cache query, you will only see the `shared hits`.
 

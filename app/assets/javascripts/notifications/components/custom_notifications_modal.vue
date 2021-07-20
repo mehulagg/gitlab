@@ -24,11 +24,20 @@ export default {
       default: '',
     },
   },
+  model: {
+    prop: 'visible',
+    event: 'change',
+  },
   props: {
     modalId: {
       type: String,
       required: false,
       default: 'custom-notifications-modal',
+    },
+    visible: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -64,7 +73,7 @@ export default {
 
         this.events = this.buildEvents(events);
       } catch (error) {
-        this.$toast.show(this.$options.i18n.loadNotificationLevelErrorMessage, { type: 'error' });
+        this.$toast.show(this.$options.i18n.loadNotificationLevelErrorMessage);
       } finally {
         this.isLoading = false;
       }
@@ -84,7 +93,7 @@ export default {
 
         this.events = this.buildEvents(events);
       } catch (error) {
-        this.$toast.show(this.$options.i18n.updateNotificationLevelErrorMessage, { type: 'error' });
+        this.$toast.show(this.$options.i18n.updateNotificationLevelErrorMessage);
       }
     },
   },
@@ -95,9 +104,11 @@ export default {
 <template>
   <gl-modal
     ref="modal"
+    :visible="visible"
     :modal-id="modalId"
     :title="$options.i18n.customNotificationsModal.title"
     @show="onOpen"
+    v-on="$listeners"
   >
     <div class="container-fluid">
       <div class="row">
@@ -115,9 +126,13 @@ export default {
           <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
           <template v-else>
             <gl-form-group v-for="event in events" :key="event.id">
-              <gl-form-checkbox v-model="event.enabled" @change="updateEvent($event, event)">
+              <gl-form-checkbox
+                v-model="event.enabled"
+                :data-testid="`notification-setting-${event.id}`"
+                @change="updateEvent($event, event)"
+              >
                 <strong>{{ event.name }}</strong
-                ><gl-loading-icon v-if="event.loading" :inline="true" class="gl-ml-2" />
+                ><gl-loading-icon v-if="event.loading" size="sm" :inline="true" class="gl-ml-2" />
               </gl-form-checkbox>
             </gl-form-group>
           </template>

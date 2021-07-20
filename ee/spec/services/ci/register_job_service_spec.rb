@@ -2,41 +2,14 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::RegisterJobService do
-  let_it_be(:shared_runner) { create(:ci_runner, :instance) }
-  let!(:project) { create :project, shared_runners_enabled: true }
-  let!(:pipeline) { create :ci_empty_pipeline, project: project }
-  let!(:pending_build) { create :ci_build, pipeline: pipeline }
+RSpec.describe Ci::RegisterJobService, '#execute' do
+  let_it_be_with_refind(:shared_runner) { create(:ci_runner, :instance) }
 
-  describe '#execute' do
-    context 'checks database loadbalancing stickiness' do
-      subject { described_class.new(shared_runner).execute }
+  let!(:project) { create(:project, shared_runners_enabled: true) }
+  let!(:pipeline) { create(:ci_empty_pipeline, project: project) }
+  let!(:pending_build) { create(:ci_build, :pending, :queued, pipeline: pipeline) }
 
-      before do
-        project.update!(shared_runners_enabled: false)
-      end
-
-      it 'result is valid if replica did caught-up' do
-        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-          .and_return(true)
-
-        expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
-          .with(:runner, shared_runner.id) { true }
-
-        expect(subject).to be_valid
-      end
-
-      it 'result is invalid if replica did not caught-up' do
-        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-          .and_return(true)
-
-        expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
-          .with(:runner, shared_runner.id) { false }
-
-        expect(subject).not_to be_valid
-      end
-    end
-
+  shared_examples 'namespace minutes quota' do
     context 'shared runners minutes limit' do
       subject { described_class.new(shared_runner).execute.build }
 
@@ -46,7 +19,28 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        it { is_expected.to be_kind_of(Ci::Build) }
+        context 'with traversal_ids enabled' do
+          before do
+            stub_feature_flags(sync_traversal_ids: true)
+            stub_feature_flags(traversal_ids_for_quota_calculation: true)
+          end
+
+          it { is_expected.to be_kind_of(Ci::Build) }
+        end
+
+        context 'with traversal_ids disabled' do
+          before do
+            stub_feature_flags(traversal_ids_for_quota_calculation: false)
+          end
+
+          it { is_expected.to be_kind_of(Ci::Build) }
+        end
+
+        it 'when in disaster recovery it ignores quota and returns anyway' do
+          stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: true)
+
+          is_expected.to be_kind_of(Ci::Build)
+        end
       end
 
       shared_examples 'does not return a build' do |runners_minutes_used|
@@ -55,7 +49,28 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        it { is_expected.to be_nil }
+        context 'with traversal_ids enabled' do
+          before do
+            stub_feature_flags(sync_traversal_ids: true)
+            stub_feature_flags(traversal_ids_for_quota_calculation: true)
+          end
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'with traversal_ids disabled' do
+          before do
+            stub_feature_flags(traversal_ids_for_quota_calculation: false)
+          end
+
+          it { is_expected.to be_nil }
+        end
+
+        it 'when in disaster recovery it ignores quota and returns anyway' do
+          stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: true)
+
+          is_expected.to be_kind_of(Ci::Build)
+        end
       end
 
       context 'when limit set at global level' do
@@ -251,5 +266,21 @@ RSpec.describe Ci::RegisterJobService do
         end
       end
     end
+  end
+
+  context 'when legacy queuing is being used' do
+    before do
+      stub_feature_flags(ci_pending_builds_queue_source: false)
+    end
+
+    include_examples 'namespace minutes quota'
+  end
+
+  context 'when new pending builds table is used' do
+    before do
+      stub_feature_flags(ci_pending_builds_queue_source: true)
+    end
+
+    include_examples 'namespace minutes quota'
   end
 end

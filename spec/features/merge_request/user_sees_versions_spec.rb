@@ -17,8 +17,6 @@ RSpec.describe 'Merge request > User sees versions', :js do
   let!(:params) { {} }
 
   before do
-    stub_feature_flags(diffs_gradual_load: false)
-
     project.add_maintainer(user)
     sign_in(user)
     visit diffs_project_merge_request_path(project, merge_request, params)
@@ -30,8 +28,8 @@ RSpec.describe 'Merge request > User sees versions', :js do
       line_code = "#{file_id}_#{line_code}"
 
       page.within(diff_file_selector) do
-        find(".line_holder[id='#{line_code}'] td:nth-of-type(1)").hover
-        find(".line_holder[id='#{line_code}'] button").click
+        first("[id='#{line_code}']").hover
+        first("[id='#{line_code}'] [role='button']").click
 
         page.within("form[data-line-code='#{line_code}']") do
           fill_in "note[note]", with: comment
@@ -129,8 +127,8 @@ RSpec.describe 'Merge request > User sees versions', :js do
       )
       expect(page).to have_content '4 files'
 
-      additions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group .js-file-addition-line').text
-      deletions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group .js-file-deletion-line').text
+      additions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group [data-testid="js-file-addition-line"]').text
+      deletions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group [data-testid="js-file-deletion-line"]').text
 
       expect(additions_content).to eq '15'
       expect(deletions_content).to eq '6'
@@ -152,8 +150,8 @@ RSpec.describe 'Merge request > User sees versions', :js do
     end
 
     it 'show diff between new and old version' do
-      additions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group .js-file-addition-line').text
-      deletions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group .js-file-deletion-line').text
+      additions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group [data-testid="js-file-addition-line"]').text
+      deletions_content = page.find('.diff-stats.is-compare-versions-header .diff-stats-group [data-testid="js-file-deletion-line"]').text
 
       expect(page).to have_content '4 files'
       expect(additions_content).to eq '15'

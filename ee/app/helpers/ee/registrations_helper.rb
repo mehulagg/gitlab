@@ -3,6 +3,12 @@
 module EE
   module RegistrationsHelper
     include ::Gitlab::Utils::StrongMemoize
+    extend ::Gitlab::Utils::Override
+
+    override :signup_username_data_attributes
+    def signup_username_data_attributes
+      super.merge(api_path: suggestion_path)
+    end
 
     private
 

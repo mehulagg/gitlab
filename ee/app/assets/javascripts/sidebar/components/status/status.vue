@@ -148,12 +148,14 @@ export default {
     <div ref="status" v-gl-tooltip.left.viewport="statusTooltip" class="sidebar-collapsed-icon">
       <gl-icon name="status-health" :size="14" />
 
-      <gl-loading-icon v-if="isFetching" />
+      <gl-loading-icon v-if="isFetching" size="sm" />
       <p v-else class="collapse-truncated-title gl-px-2">{{ statusText }}</p>
     </div>
 
     <div class="hide-collapsed">
-      <p class="title gl-display-flex justify-content-between">
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-line-height-20 gl-mb-2 gl-text-gray-900"
+      >
         <span data-testid="statusTitle">{{ s__('Sidebar|Health status') }}</span>
         <span
           v-if="isEditable"
@@ -164,7 +166,7 @@ export default {
           <gl-button
             ref="editButton"
             variant="link"
-            class="edit-link btn-link-hover gl-text-black-normal!"
+            class="edit-link btn-link-hover gl-text-gray-900! gl-hover-text-blue-800!"
             :disabled="!isOpen"
             @click.stop="toggleFormDropdown"
             @keydown.esc="hideDropdown"
@@ -172,7 +174,7 @@ export default {
             {{ __('Edit') }}
           </gl-button>
         </span>
-      </p>
+      </div>
 
       <div
         data-testid="dropdownWrapper"
@@ -209,7 +211,7 @@ export default {
         </gl-dropdown>
       </div>
 
-      <gl-loading-icon v-if="isFetching" :inline="true" />
+      <gl-loading-icon v-if="isFetching" size="sm" :inline="true" />
       <p v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !status }">
         <span v-if="status" class="text-plain gl-font-weight-bold">{{ statusText }}</span>
         <span v-else>{{ $options.i18n.noneText }}</span>

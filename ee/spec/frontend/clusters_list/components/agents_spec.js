@@ -14,12 +14,14 @@ describe('Agents', () => {
   let wrapper;
 
   const propsData = {
-    emptyStateImage: '/path/to/image',
     defaultBranchName: 'default',
+  };
+  const provideData = {
     projectPath: 'path/to/project',
   };
 
   const createWrapper = ({ agents = [], pageInfo = null, trees = [] }) => {
+    const provide = provideData;
     const apolloQueryResponse = {
       data: {
         project: {
@@ -30,13 +32,14 @@ describe('Agents', () => {
     };
 
     const apolloProvider = createMockApollo([
-      [getAgentsQuery, jest.fn().mockResolvedValue(apolloQueryResponse)],
+      [getAgentsQuery, jest.fn().mockResolvedValue(apolloQueryResponse, provide)],
     ]);
 
     wrapper = shallowMount(Agents, {
       localVue,
       apolloProvider,
       propsData,
+      provide: provideData,
     });
 
     return wrapper.vm.$nextTick();
@@ -58,10 +61,12 @@ describe('Agents', () => {
       {
         id: '1',
         name: 'agent-1',
+        webPath: '/agent-1',
       },
       {
         id: '2',
         name: 'agent-2',
+        webPath: '/agent-2',
       },
     ];
 
@@ -84,7 +89,7 @@ describe('Agents', () => {
 
     it('should pass agent and folder info to table component', () => {
       expect(findAgentTable().props('agents')).toEqual([
-        { id: '1', name: 'agent-1', configFolder: undefined },
+        { id: '1', name: 'agent-1', webPath: '/agent-1', configFolder: undefined },
         {
           id: '2',
           name: 'agent-2',
@@ -93,6 +98,7 @@ describe('Agents', () => {
             path: '.gitlab/agents/agent-2',
             webPath: '/project/path/.gitlab/agents/agent-2',
           },
+          webPath: '/agent-2',
         },
       ]);
     });
@@ -137,6 +143,24 @@ describe('Agents', () => {
     });
   });
 
+  describe('when the agent configurations are present', () => {
+    const trees = [
+      {
+        name: 'agent-1',
+        path: '.gitlab/agents/agent-1',
+        webPath: '/project/path/.gitlab/agents/agent-1',
+      },
+    ];
+
+    beforeEach(() => {
+      return createWrapper({ agents: [], trees });
+    });
+
+    it('should pass the correct hasConfigurations boolean value to empty state component', () => {
+      expect(findEmptyState().props('hasConfigurations')).toEqual(true);
+    });
+  });
+
   describe('when agents query has errored', () => {
     beforeEach(() => {
       return createWrapper({ agents: null });
@@ -159,7 +183,7 @@ describe('Agents', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMount(Agents, { mocks, propsData });
+      wrapper = shallowMount(Agents, { mocks, propsData, provide: provideData });
 
       return wrapper.vm.$nextTick();
     });

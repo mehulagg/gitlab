@@ -12,6 +12,7 @@ RSpec.describe Gitlab::GithubImport::ImportIssueWorker do
       importer = double(:importer)
       hash = {
         'iid' => 42,
+        'github_id' => 42,
         'title' => 'My Issue',
         'description' => 'This is my issue',
         'milestone_number' => 4,
@@ -36,7 +37,7 @@ RSpec.describe Gitlab::GithubImport::ImportIssueWorker do
       expect(importer)
         .to receive(:execute)
 
-      expect(worker.counter)
+      expect(Gitlab::GithubImport::ObjectCounter)
         .to receive(:increment)
         .and_call_original
 

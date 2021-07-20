@@ -232,7 +232,7 @@ export function insertMarkdownText({
         .join('\n');
     }
   } else if (tag.indexOf(textPlaceholder) > -1) {
-    textToInsert = tag.replace(textPlaceholder, selected);
+    textToInsert = tag.replace(textPlaceholder, () => selected.replace(/\\n/g, '\n'));
   } else {
     textToInsert = String(startChar) + tag + selected + (wrap ? tag : '');
   }
@@ -283,9 +283,9 @@ function updateText({ textArea, tag, cursorOffset, blockTag, wrap, select, tagCo
 
 /* eslint-disable @gitlab/require-i18n-strings */
 export function keypressNoteText(e) {
-  if (this.selectionStart === this.selectionEnd) {
-    return;
-  }
+  if (!gon.markdown_surround_selection) return;
+  if (this.selectionStart === this.selectionEnd) return;
+
   const keys = {
     '*': '**{text}**', // wraps with bold character
     _: '_{text}_', // wraps with italic character
@@ -322,7 +322,7 @@ export function updateTextForToolbarBtn($toolbarBtn) {
     blockTag: $toolbarBtn.data('mdBlock'),
     wrap: !$toolbarBtn.data('mdPrepend'),
     select: $toolbarBtn.data('mdSelect'),
-    tagContent: $toolbarBtn.data('mdTagContent'),
+    tagContent: $toolbarBtn.attr('data-md-tag-content'),
   });
 }
 

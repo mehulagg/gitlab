@@ -80,7 +80,7 @@ export default {
     <template #button-content>
       <gl-icon name="play" />
       <gl-icon name="chevron-down" />
-      <gl-loading-icon v-if="isLoading" />
+      <gl-loading-icon v-if="isLoading" size="sm" />
     </template>
     <gl-dropdown-item
       v-for="(action, i) in actions"
@@ -89,7 +89,7 @@ export default {
       data-testid="manual-action-link"
       @click="onClickAction(action)"
     >
-      <span class="gl-flex-fill-1">{{ action.name }}</span>
+      <span class="gl-flex-grow-1">{{ action.name }}</span>
       <span v-if="action.scheduledAt" class="gl-text-gray-500 float-right">
         <gl-icon name="clock" />
         {{ remainingTime(action) }}

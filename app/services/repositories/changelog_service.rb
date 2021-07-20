@@ -39,10 +39,10 @@ module Repositories
       project,
       user,
       version:,
-      to:,
+      branch: project.default_branch_or_main,
       from: nil,
+      to: branch,
       date: DateTime.now,
-      branch: project.default_branch_or_master,
       trailer: DEFAULT_TRAILER,
       file: DEFAULT_FILE,
       message: "Add changelog for version #{version}"
@@ -61,19 +61,19 @@ module Repositories
     # rubocop: enable Metrics/ParameterLists
 
     def execute
-      from = start_of_commit_range
+      config = Gitlab::Changelog::Config.from_git(@project)
+      from = start_of_commit_range(config)
 
       # For every entry we want to only include the merge request that
       # originally introduced the commit, which is the oldest merge request that
       # contains the commit. We fetch there merge requests in batches, reducing
       # the number of SQL queries needed to get this data.
       mrs_finder = MergeRequests::OldestPerCommitFinder.new(@project)
-      config = Gitlab::Changelog::Config.from_git(@project)
       release = Gitlab::Changelog::Release
         .new(version: @version, date: @date, config: config)
 
       commits =
-        CommitsWithTrailerFinder.new(project: @project, from: from, to: @to)
+        ChangelogCommitsFinder.new(project: @project, from: from, to: @to)
 
       commits.each_page(@trailer) do |page|
         mrs = mrs_finder.execute(page)
@@ -98,10 +98,12 @@ module Repositories
         .commit(release: release, file: @file, branch: @branch, message: @message)
     end
 
-    def start_of_commit_range
+    def start_of_commit_range(config)
       return @from if @from
 
-      if (prev_tag = PreviousTagFinder.new(@project).execute(@version))
+      finder = ChangelogTagFinder.new(@project, regex: config.tag_regex)
+
+      if (prev_tag = finder.execute(@version))
         return prev_tag.target_commit.id
       end
 

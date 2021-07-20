@@ -82,7 +82,7 @@ export default {
               text: this.alertContent.actionText,
               onClick: (_, toastObject) => {
                 this[this.alertContent.actionName]();
-                toastObject.goAway(0);
+                toastObject.hide();
               },
             },
           };
@@ -132,11 +132,11 @@ export default {
     <div class="settings-content">
       <form name="self-monitoring-form">
         <p ref="selfMonitoringFormText" v-html="selfMonitoringFormText"></p>
-        <gl-form-group :label="$options.formLabels.createProject" label-for="self-monitor-toggle">
+        <gl-form-group>
           <gl-toggle
             v-model="selfMonitorEnabled"
             :is-loading="loading"
-            name="self-monitor-toggle"
+            :label="$options.formLabels.createProject"
           />
         </gl-form-group>
       </form>

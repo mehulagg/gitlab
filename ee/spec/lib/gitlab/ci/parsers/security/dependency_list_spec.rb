@@ -3,10 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
-  let(:parser) { described_class.new(project, sha) }
+  let(:parser) { described_class.new(project, sha, pipeline) }
   let(:project) { create(:project) }
   let(:sha) { '4242424242424242' }
   let(:report) { Gitlab::Ci::Reports::DependencyList::Report.new }
+
+  let_it_be(:pipeline) { create :ee_ci_pipeline, :with_dependency_list_report }
 
   describe '#parse!' do
     before do
@@ -16,7 +18,13 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
     end
 
     context 'with dependency_list artifact' do
-      let(:artifact) { create(:ee_ci_job_artifact, :dependency_list) }
+      let(:artifact) { pipeline.job_artifacts.last }
+
+      before do
+        artifact.each_blob do |blob|
+          parser.parse!(blob, report)
+        end
+      end
 
       it 'parses all files' do
         blob_path = "/#{project.full_path}/-/blob/#{sha}/yarn/yarn.lock"
@@ -39,32 +47,59 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
         expect(report.dependencies[13][:location][:top_level]).to be_truthy
         expect(report.dependencies[13][:location][:ancestors]).to be_nil
       end
-
-      it 'merge vulnerabilities data' do
-        vuln_nokogiri = report.dependencies[1][:vulnerabilities]
-        vuln_debug = report.dependencies[4][:vulnerabilities]
-        vuln_async = report.dependencies[3][:vulnerabilities]
-
-        expect(vuln_nokogiri.size).to eq(4)
-        expect(vuln_nokogiri[0][:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-        expect(vuln_nokogiri[0][:severity]).to eq('high')
-        expect(vuln_debug.size).to eq(1)
-        expect(vuln_debug[0][:name]).to eq('Regular Expression Denial of Service in debug')
-        expect(vuln_async.size).to eq(0)
-      end
     end
 
-    context 'with dependency scanning artifact without dependency_list' do
-      let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
+    context 'with vulnerabilities in the database' do
+      let_it_be(:vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
+      let_it_be(:finding) { create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: vulnerability) }
+      let_it_be(:finding_pipeline) { create(:vulnerabilities_finding_pipeline, finding: finding, pipeline: pipeline) }
 
-      it 'list of dependencies with vulnerabilities' do
-        expect(report.dependencies.size).to eq(4)
+      let(:artifact) { pipeline.job_artifacts.last }
+
+      it 'does not causes N+1 query' do
+        control_count = ActiveRecord::QueryRecorder.new do
+          artifact.each_blob do |blob|
+            parser.parse!(blob, report)
+          end
+        end
+
+        vuln2 = create(:vulnerability, report_type: :dependency_scanning)
+        finding2 = create(:vulnerabilities_finding, :with_dependency_scanning_metadata, package: 'mini_portile2', vulnerability: vuln2)
+        create(:vulnerabilities_finding_pipeline, finding: finding2, pipeline: pipeline)
+
+        expect do
+          ActiveRecord::QueryRecorder.new do
+            artifact.each_blob do |blob|
+              parser.parse!(blob, report)
+            end
+          end
+        end.not_to exceed_query_limit(control_count)
+      end
+
+      it 'merges vulnerability data' do
+        vuln_nokogiri = report.dependencies[1][:vulnerabilities]
+
+        expect(report.dependencies.size).to eq(21)
+        expect(vuln_nokogiri.size).to eq(1)
+        expect(vuln_nokogiri[0][:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+      end
+
+      context 'with newfound dependency' do
+        let_it_be(:other_finding) { create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: vulnerability, package: 'giri') }
+        let_it_be(:finding_pipeline) { create(:vulnerabilities_finding_pipeline, finding: other_finding, pipeline: pipeline) }
+
+        it 'adds new dependency and vulnerability to the report' do
+          giri = report.dependencies.detect { |dep| dep[:name] == 'giri' }
+
+          expect(report.dependencies.size).to eq(22)
+          expect(giri[:vulnerabilities].size).to eq(1)
+        end
       end
     end
   end
 
   describe '#parse_licenses!' do
-    let(:artifact) { create(:ee_ci_job_artifact, :license_management) }
+    let(:artifact) { create(:ee_ci_job_artifact, :license_scanning) }
     let(:dependency_info) { build(:dependency, :nokogiri, :with_vulnerabilities) }
 
     before do

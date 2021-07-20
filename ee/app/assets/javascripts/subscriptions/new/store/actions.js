@@ -1,25 +1,12 @@
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { PAYMENT_FORM_ID } from 'ee/subscriptions/constants';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
+import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
+import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { sprintf, s__ } from '~/locale';
-import { STEPS, PAYMENT_FORM_ID } from '../constants';
+import defaultClient from '../graphql';
 import * as types from './mutation_types';
-
-export const activateStep = ({ commit }, currentStep) => {
-  if (STEPS.includes(currentStep)) {
-    commit(types.UPDATE_CURRENT_STEP, currentStep);
-  }
-};
-
-export const activateNextStep = ({ commit, getters }) => {
-  const { currentStepIndex } = getters;
-
-  if (currentStepIndex < STEPS.length - 1) {
-    const nextStep = STEPS[currentStepIndex + 1];
-
-    commit(types.UPDATE_CURRENT_STEP, nextStep);
-  }
-};
 
 export const updateSelectedPlan = ({ commit }, selectedPlan) => {
   commit(types.UPDATE_SELECTED_PLAN, selectedPlan);
@@ -55,7 +42,9 @@ export const fetchCountriesSuccess = ({ commit }, data = []) => {
 };
 
 export const fetchCountriesError = () => {
-  createFlash(s__('Checkout|Failed to load countries. Please try again.'));
+  createFlash({
+    message: s__('Checkout|Failed to load countries. Please try again.'),
+  });
 };
 
 export const fetchStates = ({ state, dispatch }) => {
@@ -77,7 +66,9 @@ export const fetchStatesSuccess = ({ commit }, data = {}) => {
 };
 
 export const fetchStatesError = () => {
-  createFlash(s__('Checkout|Failed to load states. Please try again.'));
+  createFlash({
+    message: s__('Checkout|Failed to load states. Please try again.'),
+  });
 };
 
 export const resetStates = ({ commit }) => {
@@ -119,22 +110,24 @@ export const fetchPaymentFormParams = ({ dispatch }) =>
 
 export const fetchPaymentFormParamsSuccess = ({ commit }, data) => {
   if (data.errors) {
-    createFlash(
-      sprintf(
+    createFlash({
+      message: sprintf(
         s__('Checkout|Credit card form failed to load: %{message}'),
         {
           message: data.errors,
         },
         false,
       ),
-    );
+    });
   } else {
     commit(types.UPDATE_PAYMENT_FORM_PARAMS, data);
   }
 };
 
 export const fetchPaymentFormParamsError = () => {
-  createFlash(s__('Checkout|Credit card form failed to load. Please try again.'));
+  createFlash({
+    message: s__('Checkout|Credit card form failed to load. Please try again.'),
+  });
 };
 
 export const zuoraIframeRendered = ({ commit }) =>
@@ -157,15 +150,15 @@ export const paymentFormSubmittedSuccess = ({ commit, dispatch }, paymentMethodI
 };
 
 export const paymentFormSubmittedError = (_, response) => {
-  createFlash(
-    sprintf(
+  createFlash({
+    message: sprintf(
       s__(
         'Checkout|Submitting the credit card form failed with code %{errorCode}: %{errorMessage}',
       ),
       response,
       false,
     ),
-  );
+  });
 };
 
 export const fetchPaymentMethodDetails = ({ state, dispatch, commit }) =>
@@ -174,14 +167,22 @@ export const fetchPaymentMethodDetails = ({ state, dispatch, commit }) =>
     .catch(() => dispatch('fetchPaymentMethodDetailsError'))
     .finally(() => commit(types.UPDATE_IS_LOADING_PAYMENT_METHOD, false));
 
-export const fetchPaymentMethodDetailsSuccess = ({ commit, dispatch }, creditCardDetails) => {
+export const fetchPaymentMethodDetailsSuccess = ({ commit }, creditCardDetails) => {
   commit(types.UPDATE_CREDIT_CARD_DETAILS, creditCardDetails);
 
-  dispatch('activateNextStep');
+  defaultClient
+    .mutate({
+      mutation: activateNextStepMutation,
+    })
+    .catch((error) => {
+      createFlash({ message: GENERAL_ERROR_MESSAGE, error, captureError: true });
+    });
 };
 
 export const fetchPaymentMethodDetailsError = () => {
-  createFlash(s__('Checkout|Failed to register credit card. Please try again.'));
+  createFlash({
+    message: s__('Checkout|Failed to register credit card. Please try again.'),
+  });
 };
 
 export const confirmOrder = ({ getters, dispatch, commit }) => {
@@ -211,5 +212,7 @@ export const confirmOrderError = ({ commit }, message = null) => {
     ? s__('Checkout|Failed to confirm your order: %{message}. Please try again.')
     : s__('Checkout|Failed to confirm your order! Please try again.');
 
-  createFlash(sprintf(errorString, { message }, false));
+  createFlash({
+    message: sprintf(errorString, { message }, false),
+  });
 };

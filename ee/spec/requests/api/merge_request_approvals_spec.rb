@@ -9,6 +9,7 @@ RSpec.describe API::MergeRequestApprovals do
   let_it_be(:project, reload: true) { create(:project, :public, :repository, creator: user, namespace: user.namespace, only_allow_merge_if_pipeline_succeeds: false) }
   let_it_be(:approver) { create :user }
   let_it_be(:group) { create :group }
+
   let(:merge_request) { create(:merge_request, :simple, author: user, assignees: [user], source_project: project, target_project: project, title: "Test", created_at: Time.now) }
 
   shared_examples_for 'an API endpoint for getting merge request approval state' do
@@ -60,7 +61,7 @@ RSpec.describe API::MergeRequestApprovals do
     it 'retrieves the approval status' do
       project.add_developer(approver)
       project.add_developer(create(:user))
-      merge_request.approvals.create(user: approver)
+      merge_request.approvals.create!(user: approver)
       rule.users << approver
       rule.groups << group
 
@@ -105,7 +106,7 @@ RSpec.describe API::MergeRequestApprovals do
       before do
         private_group = create(:group, :private)
         private_group.add_developer(create(:user))
-        merge_request.approver_groups.create(group: private_group)
+        merge_request.approver_groups.create!(group: private_group)
       end
 
       it 'hides private group' do
@@ -156,7 +157,7 @@ RSpec.describe API::MergeRequestApprovals do
 
     before do
       project.add_developer(approver)
-      merge_request.approvals.create(user: approver)
+      merge_request.approvals.create!(user: approver)
       rule.users << approver
     end
 
@@ -250,7 +251,7 @@ RSpec.describe API::MergeRequestApprovals do
 
     before do
       project.add_developer(approver)
-      merge_request.approvals.create(user: approver)
+      merge_request.approvals.create!(user: approver)
       rule.users << approver
     end
 
@@ -276,7 +277,7 @@ RSpec.describe API::MergeRequestApprovals do
     shared_examples_for 'user allowed to override approvals_before_merge' do
       context 'when disable_overriding_approvers_per_merge_request is false on the project' do
         before do
-          project.update(disable_overriding_approvers_per_merge_request: false)
+          project.update!(disable_overriding_approvers_per_merge_request: false)
         end
 
         it 'allows you to set approvals required' do
@@ -291,7 +292,7 @@ RSpec.describe API::MergeRequestApprovals do
 
       context 'when disable_overriding_approvers_per_merge_request is true on the project' do
         before do
-          project.update(disable_overriding_approvers_per_merge_request: true)
+          project.update!(disable_overriding_approvers_per_merge_request: true)
         end
 
         it 'does not allow you to set approvals_before_merge' do
@@ -320,118 +321,13 @@ RSpec.describe API::MergeRequestApprovals do
 
     context 'as a random user' do
       before do
-        project.update(disable_overriding_approvers_per_merge_request: false)
+        project.update!(disable_overriding_approvers_per_merge_request: false)
       end
 
       it 'does not allow you to override approvals required' do
         expect do
           post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvals", user2), params: { approvals_required: 5 }
         end.not_to change { merge_request.reload.approvals_before_merge }
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-  end
-
-  describe 'PUT :id/merge_requests/:merge_request_iid/approvers' do
-    shared_examples_for 'user allowed to change approvers' do
-      context 'when disable_overriding_approvers_per_merge_request is true on the project' do
-        before do
-          project.update(disable_overriding_approvers_per_merge_request: true)
-        end
-
-        it 'does not allow overriding approvers' do
-          expect do
-            put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-              params: { approver_ids: approver.id.to_s, approver_group_ids: group.id.to_s }
-          end.to not_change { merge_request.approvers.count }.and not_change { merge_request.approver_groups.count }
-        end
-      end
-
-      context 'when disable_overriding_approvers_per_merge_request is false on the project' do
-        before do
-          project.update(disable_overriding_approvers_per_merge_request: false)
-        end
-
-        it 'allows overriding approvers' do
-          expect do
-            put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-              params: { approver_ids: "#{approver.id},#{user2.id}", approver_group_ids: "#{group.id}" }
-          end.to change { merge_request.approvers.count }.from(0).to(2)
-            .and change { merge_request.approver_groups.count }.from(0).to(1)
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['approvers'].map { |approver| approver['user'] }.map { |user| user['username'] }).to contain_exactly(approver.username, user2.username)
-          expect(json_response['approver_groups'][0]['group']['name']).to eq(group.name)
-        end
-
-        it 'removes approvers not in the payload' do
-          merge_request.approvers.create(user: approver)
-          merge_request.approver_groups.create(group: group)
-
-          expect do
-            put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-              params: { approver_ids: '', approver_group_ids: '' }.to_json, headers: { CONTENT_TYPE: 'application/json' }
-          end.to change { merge_request.approvers.count }.from(1).to(0)
-            .and change { merge_request.approver_groups.count }.from(1).to(0)
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['approvers']).to eq([])
-        end
-
-        context 'when sending form-encoded data' do
-          it 'removes approvers not in the payload' do
-            merge_request.approvers.create(user: approver)
-            merge_request.approver_groups.create(group: group)
-
-            expect do
-              put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-                params: { approver_ids: '', approver_group_ids: '' }
-            end.to change { merge_request.approvers.count }.from(1).to(0)
-              .and change { merge_request.approver_groups.count }.from(1).to(0)
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response['approvers']).to eq([])
-          end
-        end
-      end
-
-      it 'only shows approver groups that are visible to current user' do
-        private_group = create(:group, :private)
-        merge_request.approver_groups.create(group: private_group)
-
-        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-          params: { approver_ids: [approver.id], approver_group_ids: [private_group.id, group.id] }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['approver_groups'].size).to eq(expected_group_size)
-      end
-    end
-
-    context 'as a project admin' do
-      it_behaves_like 'user allowed to change approvers' do
-        let(:current_user) { user }
-        let(:expected_group_size) { 1 }
-      end
-    end
-
-    context 'as a global admin' do
-      it_behaves_like 'user allowed to change approvers' do
-        let(:current_user) { admin }
-        let(:expected_group_size) { 2 }
-      end
-    end
-
-    context 'as a random user' do
-      before do
-        project.update(disable_overriding_approvers_per_merge_request: false)
-      end
-
-      it 'does not allow overriding approvers' do
-        expect do
-          put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", user2),
-            params: { approver_ids: [approver.id], approver_group_ids: [group.id] }
-        end.to not_change { merge_request.approvers.count }.and not_change { merge_request.approver_groups.count }
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
@@ -508,8 +404,8 @@ RSpec.describe API::MergeRequestApprovals do
 
       context 'when project requires force auth for approval' do
         before do
-          project.update(require_password_to_approve: true)
-          approver.update(password: 'password')
+          project.update!(require_password_to_approve: true)
+          approver.update!(password: 'password')
         end
 
         it 'does not approve the merge request with no password' do
@@ -536,7 +432,7 @@ RSpec.describe API::MergeRequestApprovals do
 
       it 'only shows group approvers visible to the user' do
         private_group = create(:group, :private)
-        merge_request.approver_groups.create(group: private_group)
+        merge_request.approver_groups.create!(group: private_group)
 
         approve
 
@@ -557,8 +453,8 @@ RSpec.describe API::MergeRequestApprovals do
         project.add_developer(approver)
         project.add_developer(unapprover)
         project.add_developer(create(:user))
-        merge_request.approvals.create(user: approver)
-        merge_request.approvals.create(user: unapprover)
+        merge_request.approvals.create!(user: approver)
+        merge_request.approvals.create!(user: unapprover)
         rule.users = [approver, unapprover]
       end
 
@@ -578,7 +474,7 @@ RSpec.describe API::MergeRequestApprovals do
 
       it 'only shows group approvers visible to the user' do
         private_group = create(:group, :private)
-        merge_request.approver_groups.create(group: private_group)
+        merge_request.approver_groups.create!(group: private_group)
 
         post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/unapprove", unapprover)
 

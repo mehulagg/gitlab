@@ -7,8 +7,8 @@ RSpec.describe API::Iterations do
   let_it_be(:parent_group) { create(:group, :private) }
   let_it_be(:group) { create(:group, :private, parent: parent_group) }
 
-  let_it_be(:iteration) { create(:iteration, group: group, title: 'search_title') }
-  let_it_be(:closed_iteration) { create(:iteration, :closed, group: group) }
+  let_it_be(:current_iteration) { create(:iteration, group: group, title: 'search_title', start_date: 5.days.ago, due_date: 1.week.from_now) }
+  let_it_be(:closed_iteration) { create(:iteration, group: group, start_date: 2.weeks.ago, due_date: 1.week.ago) }
   let_it_be(:ancestor_iteration) { create(:iteration, group: parent_group) }
 
   before_all do
@@ -30,15 +30,34 @@ RSpec.describe API::Iterations do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.size).to eq(3)
-        expect(json_response.map { |i| i['id'] }).to contain_exactly(iteration.id, closed_iteration.id, ancestor_iteration.id)
+        expect(json_response.map { |i| i['id'] }).to contain_exactly(current_iteration.id, closed_iteration.id, ancestor_iteration.id)
       end
 
-      it 'returns iterations filtered by state' do
-        get api(api_path, user), params: { state: 'closed' }
+      context 'filter by iteration state' do
+        it 'returns `closed` state iterations' do
+          get api(api_path, user), params: { state: 'closed' }
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response.size).to eq(1)
-        expect(json_response.first['id']).to eq(closed_iteration.id)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response.size).to eq(1)
+          expect(json_response.first['id']).to eq(closed_iteration.id)
+        end
+
+        # to be removed when `started` state DEPRECATION is removed, planned for milestone 14.6
+        it 'returns `current` state iterations' do
+          get api(api_path, user), params: { state: 'started' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response.size).to eq(1)
+          expect(json_response.first['id']).to eq(current_iteration.id)
+        end
+
+        it 'returns `current` state iterations' do
+          get api(api_path, user), params: { state: 'current' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response.size).to eq(1)
+          expect(json_response.first['id']).to eq(current_iteration.id)
+        end
       end
 
       it 'returns iterations filtered by title' do
@@ -46,7 +65,7 @@ RSpec.describe API::Iterations do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.size).to eq(1)
-        expect(json_response.first['id']).to eq(iteration.id)
+        expect(json_response.first['id']).to eq(current_iteration.id)
       end
 
       it 'returns 400 when param is invalid' do
@@ -67,7 +86,7 @@ RSpec.describe API::Iterations do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response.size).to eq(2)
-      expect(json_response.map { |i| i['id'] }).to contain_exactly(iteration.id, closed_iteration.id)
+      expect(json_response.map { |i| i['id'] }).to contain_exactly(current_iteration.id, closed_iteration.id)
     end
   end
 
@@ -78,11 +97,11 @@ RSpec.describe API::Iterations do
 
     it_behaves_like 'iterations list'
 
-    it 'excludes ancestor iterations when include_ancestors is set to false' do
+    it 'return direct parent group iterations when include_ancestors is set to false' do
       get api(api_path, user), params: { include_ancestors: false }
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response.size).to eq(0)
+      expect(json_response.map { |i| i['id'] }).to contain_exactly(current_iteration.id, closed_iteration.id)
     end
   end
 end

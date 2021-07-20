@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Requirements
+# Installation requirements **(FREE SELF)**
 
 This page includes useful information on the supported Operating Systems as well
 as the hardware requirements that are needed to install and use GitLab.
@@ -17,7 +17,8 @@ as the hardware requirements that are needed to install and use GitLab.
 - Ubuntu (16.04/18.04/20.04)
 - Debian (9/10)
 - CentOS (7/8)
-- openSUSE (Leap 15.1/Enterprise Server 12.2)
+- openSUSE Leap (15.2)
+- SUSE Linux Enterprise Server (12 SP2/12 SP5)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
 - Scientific Linux (please use the CentOS packages and instructions)
 - Oracle Linux (please use the CentOS packages and instructions)
@@ -46,56 +47,12 @@ Please consider using a virtual machine to run GitLab.
 
 ## Software requirements
 
-### Ruby versions
-
-From GitLab 13.6:
-
-- Ruby 2.7 and later is required.
-
-From GitLab 12.2:
-
-- Ruby 2.6 and later is required.
-
-You must use the standard MRI implementation of Ruby.
-We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab
-needs several Gems that have native extensions.
-
-### Go versions
-
-The minimum required Go version is 1.13.
-
-### Git versions
-
-From GitLab 13.6:
-
-- Git 2.29.x and later is required.
-
-From GitLab 13.1:
-
-- Git 2.24.x and later is required.
-- Git 2.28.x and later [is recommended](https://gitlab.com/gitlab-org/gitaly/-/issues/2959).
-
-### Node.js versions
-
-Beginning in GitLab 12.9, we only support Node.js 10.13.0 or higher, and we have dropped
-support for Node.js 8. (Node.js 6 support was dropped in GitLab 11.8)
-
-We recommend Node 12.x, as it's faster.
-
-GitLab uses [webpack](https://webpack.js.org/) to compile frontend assets, which requires a minimum
-version of Node.js 10.13.0.
-
-You can check which version you're running with `node -v`. If you're running
-a version older than `v10.13.0`, you need to update it to a newer version. You
-can find instructions to install from community maintained packages or compile
-from source at the [Node.js website](https://nodejs.org/en/download/).
-
 ### Redis versions
 
 GitLab 13.0 and later requires Redis version 4.0 or higher.
 
-Redis version 5.0 or higher is recommended, as this is what ships with
-[Omnibus GitLab](https://docs.gitlab.com/omnibus/) packages starting with GitLab 12.7.
+Redis version 6.0 or higher is recommended, as this is what ships with
+[Omnibus GitLab](https://docs.gitlab.com/omnibus/) packages starting with GitLab 13.9.
 
 ## Hardware requirements
 
@@ -107,10 +64,14 @@ If you want to be flexible about growing your hard drive space in the future con
 
 Apart from a local hard drive you can also mount a volume that supports the network file system (NFS) protocol. This volume might be located on a file server, a network attached storage (NAS) device, a storage area network (SAN) or on an Amazon Web Services (AWS) Elastic Block Store (EBS) volume.
 
-If you have enough RAM and a recent CPU the speed of GitLab is mainly limited by hard drive seek times. Having a fast drive (7200 RPM and up) or a solid state drive (SSD) will improve the responsiveness of GitLab.
+If you have enough RAM and a recent CPU the speed of GitLab is mainly limited by hard drive seek times. Having a fast drive (7200 RPM and up) or a solid state drive (SSD) improves the responsiveness of GitLab.
 
 NOTE:
-Since file system performance may affect the overall performance of GitLab, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
+Since file system performance may affect the overall performance of GitLab,
+[we don't recommend using cloud-based file systems for storage](../administration/nfs.md#avoid-using-cloud-based-file-systems).
+
+NOTE:
+[NFS for Git repository storage is deprecated](https://about.gitlab.com/releases/2021/06/22/gitlab-14-0-released/#nfs-for-git-repository-storage-deprecated). See our official [Statement of Support](https://about.gitlab.com/support/statement-of-support.html#gitaly-and-nfs) for further information.
 
 ### CPU
 
@@ -134,7 +95,7 @@ The following is the recommended minimum Memory hardware guidance for a handful 
 - More users? Consult the [reference architectures page](../administration/reference_architectures/index.md)
 
 In addition to the above, we generally recommend having at least 2GB of swap on your server,
-even if you currently have enough available RAM. Having swap will help reduce the chance of errors occurring
+even if you currently have enough available RAM. Having swap helps to reduce the chance of errors occurring
 if your available memory changes. We also recommend configuring the kernel's swappiness setting
 to a low value like `10` to make the most of your RAM while still having the swap
 available when needed.
@@ -151,18 +112,26 @@ MySQL/MariaDB are advised to [migrate to PostgreSQL](../update/mysql_to_postgres
 The server running PostgreSQL should have _at least_ 5-10 GB of storage
 available, though the exact requirements [depend on the number of users](../administration/reference_architectures/index.md).
 
-We highly recommend users to use the minimum PostgreSQL versions specified below as these are the versions used for development and testing.
+We highly recommend using the minimum PostgreSQL versions (as specified in
+the following table) as these were used for development and testing:
 
-GitLab version | Minimum PostgreSQL version
--|-
-10.0 | 9.6
-13.0 | 11
+| GitLab version | Minimum PostgreSQL version |
+|----------------|----------------------------|
+| 10.0           | 9.6                        |
+| 13.0           | 11                         |
+| 14.0           | 12                         |
 
-You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
-GitLab database](postgresql_extensions.html).
+You must also ensure the following extensions are loaded into every
+GitLab database. [Read more about this requirement, and troubleshooting](postgresql_extensions.md).
+
+| Extension    | Minimum GitLab version |
+| ------------ | ---------------------- |
+| `pg_trgm`    | 8.6                    |
+| `btree_gist` | 13.1                   |
+| `plpgsql`    | 11.7                   |
 
 NOTE:
-Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
+Support for [PostgreSQL 9.6 and 10 was removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
 
 #### Additional requirements for GitLab Geo
 
@@ -172,26 +141,104 @@ test based on those. We try to be compatible with most external (not managed by
 Omnibus GitLab) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)),
 but we can't guarantee compatibility.
 
+#### Gitaly Cluster database requirements
+
+[Read more in the Gitaly Cluster documentation](../administration/gitaly/praefect.md).
+
+#### Exclusive use of GitLab databases
+
+Databases created or used for GitLab, Geo, Gitaly Cluster, or other components should be for the
+exclusive use of GitLab. Do not make direct changes to the database, schemas, users, or other
+properties except when following procedures in the GitLab documentation or following the directions
+of GitLab Support or other GitLab engineers.
+
+- The main GitLab application currently uses three schemas:
+
+  - The default `public` schema
+  - `gitlab_partitions_static` (automatically created)
+  - `gitlab_partitions_dynamic` (automatically created)
+
+  No other schemas should be manually created.
+
+- GitLab may create new schemas as part of Rails database migrations. This happens when performing
+  a GitLab upgrade. The GitLab database account requires access to do this.
+
+- GitLab creates and modifies tables during the upgrade process, and also as part of normal
+  operations to manage partitioned tables.
+
+- You should not modify the GitLab schema (for example, adding triggers or modifying tables).
+  Database migrations are tested against the schema definition in the GitLab code base. GitLab
+  version upgrades may fail if the schema is modified.
+
 ## Puma settings
 
 The recommended settings for Puma are determined by the infrastructure on which it's running.
-Omnibus GitLab defaults to the recommended Puma settings. Regardless of installation method, you can
-tune the Puma settings.
+The GitLab Linux package defaults to the recommended Puma settings. Regardless of installation method, you can
+tune the Puma settings:
 
-If you're using Omnibus GitLab, see [Puma settings](https://docs.gitlab.com/omnibus/settings/puma.html)
-for instructions on changing the Puma settings. If you're using the GitLab Helm chart, see the [`webservice` chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
+- If you're using the GitLab Linux package, see [Puma settings](../administration/operations/puma.md)
+  for instructions on changing the Puma settings.
+- If you're using the GitLab Helm chart, see the
+  [`webservice` chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
 
 ### Puma workers
 
 The recommended number of workers is calculated as the highest of the following:
 
 - `2`
-- Number of CPU cores - 1
+- A combination of CPU and memory resource availability (see how this is configured automatically for the [Linux package](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/ef9facdc927e7389db6a5e0655414ba8318c7b8a/files/gitlab-cookbooks/gitlab/libraries/puma.rb#L31-46)).
 
-For example a node with 4 cores should be configured with 3 Puma workers.
+Take for example the following scenarios:
 
-You can increase the number of Puma workers, providing enough CPU and memory capacity is available.
-A higher number of Puma workers will usually help to reduce the response time of the application
+- A node with 2 cores / 8 GB memory should be configured with **2 Puma workers**.
+
+  Calculated as:
+
+  ```plaintext
+  The highest number from
+  2
+  And 
+  [
+  the lowest number from
+    - number of cores: 2
+    - memory limit: (8 - 1.5) = 6
+  ]
+  ```
+
+  So, the highest from 2 and 2 is 2.
+
+- A node with 4 cores / 4 GB memory should be configured with **2 Puma workers**.
+
+  ```plaintext
+  The highest number from
+  2
+  And 
+  [
+  the lowest number from
+    - number of cores: 4
+    - memory limit: (4 - 1.5) = 2.5 
+  ]
+  ```
+
+  So, the highest from 2 and 2 is 2.
+
+- A node with 4 cores / 8 GB memory should be configured with **4 Puma workers**.
+
+  ```plaintext
+  The highest number from
+  2
+  And 
+  [
+  the lowest number from
+    - number of cores: 4
+    - memory limit: (8 - 1.5) = 6.5
+  ]
+  ```
+
+  So, the highest from 2 and 4 is 4.
+
+You can increase the number of Puma workers, provided enough CPU and memory capacity is available.
+A higher number of Puma workers usually helps to reduce the response time of the application
 and increase the ability to handle parallel requests. You must perform testing to verify the
 optimal settings for your infrastructure.
 
@@ -201,27 +248,11 @@ The recommended number of threads is dependent on several factors, including tot
 of [legacy Rugged code](../administration/gitaly/index.md#direct-access-to-git-in-gitlab).
 
 - If the operating system has a maximum 2 GB of memory, the recommended number of threads is `1`.
-  A higher value will result in excess swapping, and decrease performance.
+  A higher value results in excess swapping, and decrease performance.
 - If legacy Rugged code is in use, the recommended number of threads is `1`.
 - In all other cases, the recommended number of threads is `4`. We don't recommend setting this
 higher, due to how [Ruby MRI multi-threading](https://en.wikipedia.org/wiki/Global_interpreter_lock)
 works.
-
-## Unicorn Workers
-
-For most instances we recommend using: (CPU cores * 1.5) + 1 = Unicorn workers.
-For example a node with 4 cores would have 7 Unicorn workers.
-
-For all machines that have 2GB and up we recommend a minimum of three Unicorn workers.
-If you have a 1GB machine we recommend to configure only two Unicorn workers to prevent excessive
-swapping.
-
-As long as you have enough available CPU and memory capacity, it's okay to increase the number of
-Unicorn workers and this will usually help to reduce the response time of the applications and
-increase the ability to handle parallel requests.
-
-To change the Unicorn workers when you have the Omnibus package (which defaults to the
-recommendation above) please see [the Unicorn settings in the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/settings/unicorn.html).
 
 ## Redis and Sidekiq
 
@@ -235,8 +266,7 @@ On a very active server (10,000 billable users) the Sidekiq process can use 1GB+
 
 As of Omnibus GitLab 9.0, [Prometheus](https://prometheus.io) and its related
 exporters are enabled by default, to enable easy and in depth monitoring of
-GitLab. Approximately 200MB of memory will be consumed by these processes, with
-default settings.
+GitLab. With default settings, these processes consume approximately 200MB of memory.
 
 If you would like to disable Prometheus and it's exporters or read more information
 about it, check the [Prometheus documentation](../administration/monitoring/prometheus/index.md).
@@ -264,9 +294,9 @@ The GitLab Runner server requirements depend on:
 - Resources required to run build jobs.
 - Job concurrency settings.
 
-Since the nature of the jobs varies for each use case, you will need to experiment by adjusting the job concurrency to get the optimum setting.
+Since the nature of the jobs varies for each use case, you need to experiment by adjusting the job concurrency to get the optimum setting.
 
-For reference, GitLab.com's [auto-scaling shared runner](../user/gitlab_com/index.md#shared-runners) is configured so that a **single job** will run in a **single instance** with:
+For reference, GitLab.com's [auto-scaling shared runner](../user/gitlab_com/index.md#shared-runners) is configured so that a **single job** runs in a **single instance** with:
 
 - 1vCPU.
 - 3.75GB of RAM.

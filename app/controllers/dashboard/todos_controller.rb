@@ -3,7 +3,6 @@
 class Dashboard::TodosController < Dashboard::ApplicationController
   include ActionView::Helpers::NumberHelper
   include PaginatedCollection
-  include Analytics::UniqueVisitsHelper
 
   before_action :authorize_read_project!, only: :index
   before_action :authorize_read_group!, only: :index
@@ -52,7 +51,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   end
 
   def bulk_restore
-    TodoService.new.restore_todos(current_user.todos.for_ids(params[:ids]), current_user)
+    TodoService.new.restore_todos(current_user.todos.id_in(params[:ids]), current_user)
 
     render json: todos_counts
   end

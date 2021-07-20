@@ -24,23 +24,7 @@ RSpec.describe Gitlab::SearchResults do
     end
   end
 
-  describe '#epics' do
-    let!(:group) { create(:group, :private) }
-    let!(:searchable_epic) { create(:epic, title: 'foo', group: group) }
-    let!(:another_group) { create(:group, :private) }
-    let!(:another_epic) { create(:epic, title: 'foo 2', group: another_group) }
-
-    before do
-      create(:group_member, group: group, user: user)
-      group.add_owner(user)
-    end
-
-    it 'finds epics' do
-      expect(subject.objects('epics')).to match_array([searchable_epic])
-    end
-  end
-
   def search
-    subject.objects('projects').map { |project| project.compliance_framework_setting.framework }
+    subject.objects('projects').map { |project| project.compliance_framework_setting }
   end
 end

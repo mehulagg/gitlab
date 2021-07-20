@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Parsing GitLab logs with `jq`
+# Parsing GitLab logs with `jq` **(FREE SELF)**
 
 We recommend using log aggregation and search tools like Kibana and Splunk whenever possible,
 but if they are not available you can still quickly parse
@@ -40,6 +40,20 @@ jq -cR 'fromjson?' file.json | jq <COMMAND>
 
 By default `jq` will error out when it encounters a line that is not valid JSON.
 This skips over all invalid lines and parses the rest.
+
+#### Print a JSON log's time range
+
+```shell
+cat log.json | (head -1; tail -1) | jq '.time'
+```
+
+Use `zcat` if the file has been rotated and compressed:
+
+```shell
+zcat @400000006026b71d1a7af804.s | (head -1; tail -1) | jq '.time'
+
+zcat some_json.log.25.gz | (head -1; tail -1) | jq '.time'
+```
 
 ### Parsing `production_json.log` and `api_json.log`
 
@@ -186,4 +200,43 @@ jq --raw-output --slurp '
 grep "fatal: " /var/log/gitlab/gitaly/current | \
     jq '."grpc.request.glProjectPath"' | \
     sort | uniq
+```
+
+### Parsing `gitlab-shell.log`
+
+For investigating Git calls via SSH, from [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab-shell/-/merge_requests/367).
+
+Find the top 20 calls by project and user:
+
+```shell
+jq --raw-output --slurp '
+  map(
+    select(
+      .username != null and
+      .gl_project_path !=null
+    )
+  )
+  | group_by(.username+.gl_project_path)
+  | sort_by(-length)
+  | limit(20; .[])
+  | "count: \(length)\tuser: \(.[0].username)\tproject: \(.[0].gl_project_path)" ' \
+  /var/log/gitlab/gitlab-shell/gitlab-shell.log
+```
+
+Find the top 20 calls by project, user, and command:
+
+```shell
+jq --raw-output --slurp '
+  map(
+    select(
+      .command  != null and
+      .username != null and
+      .gl_project_path !=null
+    )
+  )
+  | group_by(.username+.gl_project_path+.command)
+  | sort_by(-length)
+  | limit(20; .[])
+  | "count: \(length)\tcommand: \(.[0].command)\tuser: \(.[0].username)\tproject: \(.[0].gl_project_path)" ' \
+  /var/log/gitlab/gitlab-shell/gitlab-shell.log
 ```

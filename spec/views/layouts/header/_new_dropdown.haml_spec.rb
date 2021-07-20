@@ -180,13 +180,13 @@ RSpec.describe 'layouts/header/_new_dropdown' do
       expect(rendered).to have_link('New snippet', href: new_snippet_path)
     end
 
-    context 'when the user is not allowed to create snippets' do
+    context 'when the user is not allowed to do anything' do
       let(:user) { create(:user, :external) }
 
-      it 'has no "New snippet" link' do
-        render
-
-        expect(rendered).not_to have_link('New snippet', href: new_snippet_path)
+      it 'is nil' do
+        # We have to us `view.render` because `render` causes issues
+        # https://github.com/rails/rails/issues/41320
+        expect(view.render("layouts/header/new_dropdown")).to be_nil
       end
     end
   end

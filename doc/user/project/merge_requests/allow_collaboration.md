@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Source Code
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
@@ -18,25 +18,23 @@ This feature is available for merge requests across forked projects that are
 publicly accessible.
 
 When enabled for a merge request, members with merge access to the target
-branch of the project will be granted write permissions to the source branch
+branch of the project is granted write permissions to the source branch
 of the merge request.
 
 ## Enabling commit edits from upstream members
 
 In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/23308),
-this setting is enabled by default. It can be changed by users with Developer
-permissions to the source project. Once enabled, upstream members will also be
-able to retry the pipelines and jobs of the merge request:
+this setting is enabled by default. It can be changed by users with the
+Developer [role](../../permissions.md) for the source project. After it's enabled,
+upstream members can retry the pipelines and jobs of the merge request:
 
-1. While creating or editing a merge request, select the checkbox **Allow
-   commits from members who can merge to the target branch**.
+1. While creating or editing a merge request, scroll to **Contribution** and
+   then select the **Allow commits from members who can merge to the target branch**.
+   checkbox.
+1. Finish creating your merge request.
 
-   ![Enable contribution](img/allow_collaboration.png)
-
-1. Once the merge request is created, you can see that commits from members who
-   can merge to the target branch are allowed.
-
-   ![Check that contribution is enabled](img/allow_collaboration_after_save.png)
+After you create the merge request, the merge request widget displays a message:
+**Members who can merge are allowed to add commits.**
 
 ## Pushing to the fork as the upstream member
 
@@ -48,38 +46,51 @@ Assuming that:
 - The forked project URL is `git@gitlab.com:thedude/awesome-project.git`.
 - The branch of the merge request is `update-docs`.
 
-Here's how the process would look like:
+To find and work with the changes from the fork:
 
-1. First, you need to get the changes that the merge request has introduced.
-   Click the **Check out branch** button that has some pre-populated
-   commands that you can run.
-
-   ![Check out branch button](img/checkout_button.png)
-
-1. Use the copy button to copy the first command and paste them
-   in your terminal:
+1. Open the merge request page, and select the **Overview** tab.
+1. Scroll to the merge request widget, and select **Check out branch**:
+   ![Check out branch button](img/commit-button_v13_12.png)
+1. In the modal window, select **{copy-to-clipboard}** (**Copy**) for step 1
+   to copy the `git fetch` and `git checkout` instructions to your clipboard.
+   Paste the commands (which look like this example) into your terminal:
 
    ```shell
    git fetch git@gitlab.com:thedude/awesome-project.git update-docs
    git checkout -b thedude-awesome-project-update-docs FETCH_HEAD
    ```
 
-   This will fetch the branch of the forked project and then create a local branch
+   These commands fetch the branch from the forked project, and create a local branch
    based off the fetched branch.
 
-1. Make any changes you want and commit.
-1. Push to the forked project:
+1. Make your changes to the local copy of the branch, and then commit them.
+1. In your terminal, push your local changes back up to the forked project. This
+   command pushes the local branch `thedude-awesome-project-update-docs` to the
+   `update-docs` branch of the `git@gitlab.com:thedude/awesome-project.git` repository:
 
    ```shell
    git push git@gitlab.com:thedude/awesome-project.git thedude-awesome-project-update-docs:update-docs
    ```
 
-   Note the colon (`:`) between the two branches. The above command will push the
-   local branch `thedude-awesome-project-update-docs` to the
-   `update-docs` branch of the `git@gitlab.com:thedude/awesome-project.git` repository.
+   Note the colon (`:`) between the two branches.
+
+## Troubleshooting
+
+### Pipeline status unavailable from MR page of forked project
+
+When a user forks a project, the permissions of the forked copy are not copied
+from the original project. The creator of the fork must grant permissions to the
+forked copy before members in the upstream project can view or merge the changes
+in the merge request.
+
+To see the pipeline status from the merge request page of a forked project
+going back to the original project:
+
+1. Create a group containing all the upstream members.
+1. Go to the **Project information > Members** page in the forked project and invite the newly-created
+   group to the forked project.
 
 <!-- ## Troubleshooting
-
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
 one might have when setting this up, or when something is changed, or on upgrading, it's
 important to describe those, too. Think of things that may go wrong and include them here.

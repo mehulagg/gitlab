@@ -1,6 +1,6 @@
 import * as types from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/mutation_types';
 import mutationsFactory from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/mutations';
-import { mockWafStatisticsResponse } from '../../../mock_data';
+import { mockNetworkPolicyStatisticsResponse } from '../../../mocks/mock_data';
 
 describe('threatMonitoringStatistics mutations', () => {
   let state;
@@ -39,11 +39,11 @@ describe('threatMonitoringStatistics mutations', () => {
 
   describe(types.RECEIVE_STATISTICS_SUCCESS, () => {
     beforeEach(() => {
-      mutations[types.RECEIVE_STATISTICS_SUCCESS](state, mockWafStatisticsResponse);
+      mutations[types.RECEIVE_STATISTICS_SUCCESS](state, mockNetworkPolicyStatisticsResponse);
     });
 
     it('sets statistics according to the payload', () => {
-      expect(state.statistics).toEqual(mockWafStatisticsResponse);
+      expect(state.statistics).toEqual(mockNetworkPolicyStatisticsResponse);
     });
 
     it('sets isLoadingStatistics to false', () => {

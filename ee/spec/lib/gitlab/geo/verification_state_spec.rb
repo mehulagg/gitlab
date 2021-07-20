@@ -23,6 +23,33 @@ RSpec.describe Gitlab::Geo::VerificationState do
 
   subject { DummyModel.new }
 
+  context 'state machine' do
+    context 'when failed' do
+      before do
+        subject.verification_started
+        subject.verification_failed_with_message!('foo')
+      end
+
+      context 'and transitioning to pending' do
+        it 'marks verification as pending' do
+          subject.verification_pending!
+
+          expect(subject.reload.verification_pending?).to be_truthy
+        end
+
+        it 'does not clear retry attributes' do
+          subject.verification_pending!
+
+          expect(subject.reload).to have_attributes(
+            verification_state: DummyModel.verification_state_value(:verification_pending),
+            verification_retry_count: 1,
+            verification_retry_at: be_present
+          )
+        end
+      end
+    end
+  end
+
   describe '.verification_pending_batch' do
     # Insert 2 records for a total of 3 with subject
     let!(:other_pending_records) do
@@ -357,6 +384,26 @@ RSpec.describe Gitlab::Geo::VerificationState do
         expect(subject.reload.verification_succeeded?).to be_truthy
         expect(subject.reload.verification_checksum).to eq('abc123')
         expect(subject.verified_at).not_to be_nil
+      end
+    end
+
+    context 'primary node' do
+      it 'calls replicator.handle_after_checksum_succeeded' do
+        stub_current_geo_node(primary_node)
+
+        expect(subject.replicator).to receive(:handle_after_checksum_succeeded)
+
+        subject.verification_succeeded_with_checksum!('abc123', Time.current)
+      end
+    end
+
+    context 'secondary node' do
+      it 'does not call replicator.handle_after_checksum_succeeded' do
+        stub_current_geo_node(secondary_node)
+
+        expect(subject.replicator).not_to receive(:handle_after_checksum_succeeded)
+
+        subject.verification_succeeded_with_checksum!('abc123', Time.current)
       end
     end
   end

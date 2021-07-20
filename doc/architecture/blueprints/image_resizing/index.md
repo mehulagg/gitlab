@@ -35,11 +35,11 @@ sequenceDiagram
 
 Content image resizing is a more complex problem to tackle. There are no set size restrictions and there are additional features or requirements to consider.
 
-- Dynamic WebP support - the WebP format typically achieves an average of 30% more compression than JPEG without the loss of image quality. More details [here](https://developers.google.com/speed/webp/docs/c_study)
+- Dynamic WebP support - the WebP format typically achieves an average of 30% more compression than JPEG without the loss of image quality. More details are in [this Google Comparative Study](https://developers.google.com/speed/webp/docs/c_study)
 - Extract first image of GIF's so we can prevent from loading 10MB pixels
 - Check Device Pixel Ratio to deliver nice images on High DPI screens
-- Progressive image loading, similar to what is described [here](https://www.sitepoint.com/how-to-build-your-own-progressive-image-loader/)
-- Resizing recommendations (size, clarity, etc.)
+- Progressive image loading, similar to what is described in [this article about how to build a progressive image loader](https://www.sitepoint.com/how-to-build-your-own-progressive-image-loader/)
+- Resizing recommendations (size, clarity, and so on)
 - Storage
 
 The MVC Avatar resizing implementation is integrated into Workhorse. With the extra requirements for content image resizing, this may require further use of GraphicsMagik (GM) or a similar library and breaking it out of Workhorse.

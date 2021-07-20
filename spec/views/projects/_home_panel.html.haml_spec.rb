@@ -5,11 +5,42 @@ require 'spec_helper'
 RSpec.describe 'projects/_home_panel' do
   include ProjectForksHelper
 
+  context 'admin area link' do
+    let(:project) { create(:project) }
+
+    before do
+      assign(:project, project)
+    end
+
+    it 'renders admin area link for admin' do
+      allow(view).to receive(:current_user).and_return(create(:admin))
+
+      render
+
+      expect(rendered).to have_link(href: admin_project_path(project))
+    end
+
+    it 'does not render admin area link for non-admin' do
+      allow(view).to receive(:current_user).and_return(create(:user))
+
+      render
+
+      expect(rendered).not_to have_link(href: admin_project_path(project))
+    end
+
+    it 'does not render admin area link for anonymous' do
+      allow(view).to receive(:current_user).and_return(nil)
+
+      render
+
+      expect(rendered).not_to have_link(href: admin_project_path(project))
+    end
+  end
+
   context 'notifications' do
     let(:project) { create(:project) }
 
     before do
-      stub_feature_flags(vue_notification_dropdown: false)
       assign(:project, project)
 
       allow(view).to receive(:current_user).and_return(user)
@@ -25,11 +56,10 @@ RSpec.describe 'projects/_home_panel' do
         assign(:notification_setting, notification_settings)
       end
 
-      it 'makes it possible to set notification level' do
+      it 'renders Vue app root' do
         render
 
-        expect(view).to render_template('shared/notifications/_new_button')
-        expect(rendered).to have_selector('.notification-dropdown')
+        expect(rendered).to have_selector('.js-vue-notification-dropdown')
       end
     end
 
@@ -40,10 +70,10 @@ RSpec.describe 'projects/_home_panel' do
         assign(:notification_setting, nil)
       end
 
-      it 'is not possible to set notification level' do
+      it 'does not render Vue app root' do
         render
 
-        expect(rendered).not_to have_selector('.notification_dropdown')
+        expect(rendered).not_to have_selector('.js-vue-notification-dropdown')
       end
     end
   end

@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 The [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) project hosts
 the repository which is used to generate the GitLab documentation website and
-is deployed to <https://docs.gitlab.com>. It uses the [Nanoc](https://nanoc.ws/)
+is deployed to <https://docs.gitlab.com>. It uses the [Nanoc](https://nanoc.app/)
 static site generator.
 
 ## Architecture
@@ -49,9 +49,9 @@ GitLab docs content isn't kept in the `gitlab-docs` repository.
 All documentation files are hosted in the respective repository of each
 product, and all together are pulled to generate the docs website:
 
-- [GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master/doc)
+- [GitLab](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc)
 - [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab/tree/master/doc)
-- [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/tree/master/docs)
+- [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/main/docs)
 - [GitLab Chart](https://gitlab.com/charts/gitlab/tree/master/doc)
 
 NOTE:
@@ -114,12 +114,12 @@ located in the [Dockerfiles directory](https://gitlab.com/gitlab-org/gitlab-docs
 If you need to rebuild the Docker images immediately (must have maintainer level permissions):
 
 WARNING:
-If you change the Dockerfile configuration and rebuild the images, you can break the master
+If you change the Dockerfile configuration and rebuild the images, you can break the main
 pipeline in the main `gitlab` repository as well as in `gitlab-docs`. Create an image with
 a different name first and test it to ensure you do not break the pipelines.
 
-1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI / CD > Pipelines**.
-1. Click the **Run Pipeline** button.
+1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI/CD > Pipelines**.
+1. Click the **Run pipeline** button.
 1. See that a new pipeline is running. The jobs that build the images are in the first
    stage, `build-images`. You can click the pipeline number to see the larger pipeline
    graph, or click the first (`build-images`) stage in the mini pipeline graph to
@@ -132,12 +132,12 @@ a different name first and test it to ensure you do not break the pipelines.
 ### Deploy the docs site
 
 Every four hours a scheduled pipeline builds and deploys the docs site. The pipeline
-fetches the current docs from the main project's master branch, builds it with Nanoc
+fetches the current docs from the main project's main branch, builds it with Nanoc
 and deploys it to <https://docs.gitlab.com>.
 
 If you need to build and deploy the site immediately (must have maintainer level permissions):
 
-1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI / CD > Schedules**.
+1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI/CD > Schedules**.
 1. For the `Build docs.gitlab.com every 4 hours` scheduled pipeline, click the **play** (**{play}**) button.
 
 Read more about the [deployment process](deployment_process.md).
@@ -146,7 +146,7 @@ Read more about the [deployment process](deployment_process.md).
 
 The easiest way to achieve something similar to
 [Jekyll's data files](https://jekyllrb.com/docs/datafiles/) in Nanoc is by
-using the [`@items`](https://nanoc.ws/doc/reference/variables/#items-and-layouts)
+using the [`@items`](https://nanoc.app/doc/reference/variables/#items-and-layouts)
 variable.
 
 The data file must be placed inside the `content/` directory and then it can
@@ -196,11 +196,11 @@ The links pointing to the files should be similar to:
 ```
 
 Nanoc then builds and renders those links correctly according with what's
-defined in [`Rules`](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/Rules).
+defined in [`Rules`](https://gitlab.com/gitlab-org/gitlab-docs/blob/main/Rules).
 
 ## Linking to source files
 
-A helper called [`edit_on_gitlab`](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/lib/helpers/edit_on_gitlab.rb) can be used
+A helper called [`edit_on_gitlab`](https://gitlab.com/gitlab-org/gitlab-docs/blob/main/lib/helpers/edit_on_gitlab.rb) can be used
 to link to a page's source file. We can link to both the simple editor and the
 web IDE. Here's how you can use it in a Nanoc layout:
 
@@ -223,15 +223,15 @@ for its search function. This is how it works:
    every 24h and [stores](https://community.algolia.com/docsearch/inside-the-engine.html)
    the [DocSearch index](https://community.algolia.com/docsearch/how-do-we-build-an-index.html)
    on [Algolia's servers](https://community.algolia.com/docsearch/faq.html#where-is-my-data-hosted%3F).
-1. On the docs side, we use a [DocSearch layout](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/layouts/docsearch.html) which
+1. On the docs side, we use a [DocSearch layout](https://gitlab.com/gitlab-org/gitlab-docs/blob/main/layouts/docsearch.html) which
    is present on pretty much every page except <https://docs.gitlab.com/search/>,
-   which uses its [own layout](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/layouts/instantsearch.html). In those layouts,
+   which uses its [own layout](https://gitlab.com/gitlab-org/gitlab-docs/blob/main/layouts/instantsearch.html). In those layouts,
    there's a JavaScript snippet which initiates DocSearch by using an API key
    and an index name (`gitlab`) that are needed for Algolia to show the results.
 
 ### Algolia notes for GitLab team members
 
-If you’re a GitLab team member, find credentials for the Algolia dashboard
+If you're a GitLab team member, find credentials for the Algolia dashboard
 in the shared [GitLab 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
 To receive weekly reports of the search usage, search the Google doc with
 title `Email, Slack, and GitLab Groups and Aliases`, search for `docsearch`,

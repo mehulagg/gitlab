@@ -38,7 +38,8 @@ export default {
       "
       :disabled="isSaving"
       :loading="isSaving"
-      variant="default"
+      category="secondary"
+      variant="confirm"
       size="small"
       @click="openFileUpload"
     >
@@ -50,7 +51,7 @@ export default {
       type="file"
       name="design_file"
       :accept="$options.VALID_DESIGN_FILE_MIMETYPE.mimetype"
-      class="hide"
+      class="gl-display-none"
       multiple
       @change="onFileUploadChange"
     />

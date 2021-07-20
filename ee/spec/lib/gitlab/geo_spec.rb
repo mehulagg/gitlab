@@ -384,16 +384,6 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
         expect(described_class.verification_enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
       end
     end
-
-    context 'when verification is disabled' do
-      before do
-        stub_feature_flags(geo_package_file_verification: false)
-      end
-
-      it 'does not return the replicator class' do
-        expect(described_class.verification_enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
-      end
-    end
   end
 
   describe '.verification_max_capacity_per_replicator_class' do
@@ -406,7 +396,7 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
 
     context 'when there are no Replicator classes with verification enabled' do
       it 'returns the total capacity' do
-        stub_feature_flags(geo_package_file_verification: false)
+        allow(described_class).to receive(:verification_enabled_replicator_classes).and_return([])
 
         expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity)
       end
@@ -414,7 +404,17 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
 
     context 'when there is 1 Replicator class with verification enabled' do
       it 'returns half capacity' do
+        allow(described_class).to receive(:verification_enabled_replicator_classes).and_return(['a replicator class'])
+
         expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity / 2)
+      end
+    end
+
+    context 'when there are 2 Replicator classes with verification enabled' do
+      it 'returns a third of total capacity' do
+        allow(described_class).to receive(:verification_enabled_replicator_classes).and_return(['a replicator class', 'another replicator class'])
+
+        expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity / 3)
       end
     end
 

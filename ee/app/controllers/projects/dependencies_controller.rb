@@ -26,7 +26,7 @@ module Projects
     def can_access_vulnerable?
       return true unless query_params[:filter] == 'vulnerable'
 
-      can?(current_user, :read_vulnerability, project)
+      can?(current_user, :read_security_resource, project)
     end
 
     def can_collect_dependencies?

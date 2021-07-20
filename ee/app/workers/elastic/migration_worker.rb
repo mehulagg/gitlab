@@ -3,10 +3,13 @@
 module Elastic
   class MigrationWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include Gitlab::ExclusiveLeaseHelpers
     # There is no onward scheduling and this cron handles work from across the
     # application, so there's no useful context to add.
     include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
+    include ActionView::Helpers::NumberHelper
 
     feature_category :global_search
     idempotent!
@@ -34,6 +37,20 @@ module Elastic
           unpause_indexing!(migration)
 
           break false
+        end
+
+        if !migration.started? && migration.space_requirements?
+          free_size_bytes = helper.cluster_free_size_bytes
+          space_required_bytes = migration.space_required_bytes
+          logger.info "MigrationWorker: migration[#{migration.name}] checking free space in cluster. Required space #{number_to_human_size(space_required_bytes)}. Free space #{number_to_human_size(free_size_bytes)}."
+
+          if free_size_bytes < space_required_bytes
+            logger.warn "MigrationWorker: migration[#{migration.name}] You should have at least #{number_to_human_size(space_required_bytes)} of free space in the cluster to run this migration. Please increase the storage in your Elasticsearch cluster."
+            logger.info "MigrationWorker: migration[#{migration.name}] updating with halted: true"
+            migration.halt!
+
+            break false
+          end
         end
 
         execute_migration(migration)

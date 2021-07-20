@@ -19,6 +19,7 @@ Migration/UpdateLargeTable:
     - :merge_request_diffs
     - :merge_request_metrics
     - :merge_requests
+    - :namespace_settings
     - :namespaces
     - :note_diff_files
     - :notes
@@ -27,6 +28,7 @@ Migration/UpdateLargeTable:
     - :project_ci_cd_settings
     - :project_settings
     - :project_features
+    - :protected_branches
     - :push_event_payloads
     - :resource_label_events
     - :routes
@@ -40,6 +42,7 @@ Migration/UpdateLargeTable:
     - :user_details
     - :vulnerability_occurrences
     - :web_hook_logs
+    - :vulnerabilities
   DeniedMethods:
     - :change_column_type_concurrently
     - :rename_column_concurrently

@@ -22,9 +22,9 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
   context 'when pipeline size limit is exceeded' do
     before do
-      gold_plan = create(:gold_plan)
-      create(:plan_limits, plan: gold_plan, ci_pipeline_size: 1)
-      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+      ultimate_plan = create(:ultimate_plan)
+      create(:plan_limits, plan: ultimate_plan, ci_pipeline_size: 1)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
     end
 
     context 'when saving incomplete pipelines' do
@@ -83,7 +83,8 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
           project: project,
           current_user: user,
           save_incompleted: false,
-          pipeline_seed: double(:seed, size: 2))
+          pipeline_seed: double(:seed, size: 2),
+          increment_pipeline_failure_reason_counter: true)
       end
 
       it 'does not drop the pipeline' do
@@ -97,14 +98,20 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
         expect(step.break?).to be true
       end
+
+      it 'increments the error metric' do
+        expect(command).to receive(:increment_pipeline_failure_reason_counter).with(:size_limit_exceeded)
+
+        subject
+      end
     end
   end
 
   context 'when pipeline size limit is not exceeded' do
     before do
-      gold_plan = create(:gold_plan)
-      create(:plan_limits, plan: gold_plan, ci_pipeline_size: 100)
-      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+      ultimate_plan = create(:ultimate_plan)
+      create(:plan_limits, plan: ultimate_plan, ci_pipeline_size: 100)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
     end
 
     it 'does not break the chain' do

@@ -36,9 +36,13 @@ class MemberEntity < Grape::Entity
     GroupEntity.represent(member.source, only: [:id, :full_name, :web_url])
   end
 
+  expose :type
+
   expose :valid_level_roles, as: :valid_roles
 
-  expose :user, if: -> (member) { member.user.present? }, using: MemberUserEntity
+  expose :user, if: -> (member) { member.user.present? } do |member, options|
+    MemberUserEntity.represent(member.user, source: options[:source])
+  end
 
   expose :invite, if: -> (member) { member.invite? } do
     expose :email do |member|
@@ -55,4 +59,4 @@ class MemberEntity < Grape::Entity
   end
 end
 
-MemberEntity.prepend_if_ee('EE::MemberEntity')
+MemberEntity.prepend_mod_with('MemberEntity')

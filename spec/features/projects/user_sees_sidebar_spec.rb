@@ -198,22 +198,22 @@ RSpec.describe 'Projects > User sees sidebar' do
         expect(page).to have_content 'Project'
         expect(page).to have_content 'Issues'
         expect(page).to have_content 'Wiki'
-        expect(page).to have_content 'Operations'
+        expect(page).to have_content 'Monitor'
 
         expect(page).not_to have_content 'Repository'
-        expect(page).not_to have_content 'CI / CD'
+        expect(page).not_to have_content 'CI/CD'
         expect(page).not_to have_content 'Merge Requests'
       end
     end
 
     it 'shows build tab if builds are public' do
       project.public_builds = true
-      project.save
+      project.save!
 
       visit project_path(project)
 
       within('.nav-sidebar') do
-        expect(page).to have_content 'CI / CD'
+        expect(page).to have_content 'CI/CD'
       end
     end
 

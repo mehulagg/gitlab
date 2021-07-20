@@ -22,7 +22,7 @@ module Gitlab
         update_importable_repository_info
 
         true
-      rescue => e
+      rescue StandardError => e
         shared.error(e)
         false
       end
@@ -42,7 +42,7 @@ module Gitlab
       def ensure_repository_does_not_exist!
         if repository.exists?
           shared.logger.info(
-            message: %Q{Deleting existing "#{repository.path}" to re-import it.}
+            message: %Q{Deleting existing "#{repository.disk_path}" to re-import it.}
           )
 
           Repositories::DestroyService.new(repository).execute
@@ -52,4 +52,4 @@ module Gitlab
   end
 end
 
-Gitlab::ImportExport::RepoRestorer.prepend_if_ee('EE::Gitlab::ImportExport::RepoRestorer')
+Gitlab::ImportExport::RepoRestorer.prepend_mod_with('Gitlab::ImportExport::RepoRestorer')

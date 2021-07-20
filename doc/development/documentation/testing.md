@@ -20,7 +20,7 @@ For the specifics of each test run in our CI/CD pipelines, see the configuration
 in the relevant projects:
 
 - <https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/docs.gitlab-ci.yml>
-- <https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/.gitlab/ci/docs.gitlab-ci.yml>
+- <https://gitlab.com/gitlab-org/gitlab-runner/-/blob/main/.gitlab/ci/docs.gitlab-ci.yml>
 - <https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/gitlab-ci-config/gitlab-com.yml>
 - <https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/.gitlab-ci.yml>
 
@@ -44,7 +44,7 @@ To run tests locally, it's important to:
 
 ### Lint checks
 
-Lint checks are performed by the [`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/lint-doc.sh)
+Lint checks are performed by the [`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/lint-doc.sh)
 script and can be executed as follows:
 
 1. Navigate to the `gitlab` directory.
@@ -150,11 +150,11 @@ from those guidelines.
 
 markdownlint configuration is found in the following projects:
 
-- [`gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.markdownlint.json)
-- [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner/blob/master/.markdownlint.json)
-- [`omnibus-gitlab`](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/.markdownlint.json)
-- [`charts`](https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/.markdownlint.json)
-- [`gitlab-development-kit`](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/.markdownlint.json)
+- [`gitlab`](https://gitlab.com/gitlab-org/gitlab)
+- [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner)
+- [`omnibus-gitlab`](https://gitlab.com/gitlab-org/omnibus-gitlab)
+- [`charts`](https://gitlab.com/gitlab-org/charts/gitlab)
+- [`gitlab-development-kit`](https://gitlab.com/gitlab-org/gitlab-development-kit)
 
 This configuration is also used in build pipelines.
 
@@ -166,9 +166,9 @@ You can use markdownlint:
 
 ### Vale
 
-[Vale](https://errata-ai.gitbook.io/vale/) is a grammar, style, and word usage linter for the
+[Vale](https://docs.errata.ai/vale/about/) is a grammar, style, and word usage linter for the
 English language. Vale's configuration is stored in the
-[`.vale.ini`](https://gitlab.com/gitlab-org/gitlab/blob/master/.vale.ini) file located in the root
+[`.vale.ini`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.vale.ini) file located in the root
 directory of projects.
 
 Vale supports creating [custom tests](https://errata-ai.github.io/vale/styles/) that extend any of
@@ -178,7 +178,7 @@ documentation directory of projects.
 You can find Vale configuration in the following projects:
 
 - [`gitlab`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc/.vale/gitlab)
-- [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/master/docs/.vale/gitlab)
+- [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/main/docs/.vale/gitlab)
 - [`omnibus-gitlab`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/tree/master/doc/.vale/gitlab)
 - [`charts`](https://gitlab.com/gitlab-org/charts/gitlab/-/tree/master/doc/.vale/gitlab)
 - [`gitlab-development-kit`](https://gitlab.com/gitlab-org/gitlab-development-kit/-/tree/master/doc/.vale/gitlab)
@@ -188,7 +188,7 @@ This configuration is also used in build pipelines, where
 
 You can use Vale:
 
-- [On the command line](https://errata-ai.gitbook.io/vale/getting-started/usage).
+- [On the command line](https://docs.errata.ai/vale/cli).
 - [In a code editor](#configure-editors).
 - [In a Git hook](#configure-pre-push-hooks). Vale only reports errors in the Git hook (the same
   configuration as the CI/CD pipelines), and does not report suggestions or warnings.
@@ -210,6 +210,20 @@ Vale returns three types of results: `suggestion`, `warning`, and `error`:
   of how to resolve the error. Errors break CI and are displayed in CI job output. See a list of
   [error-level rules](https://gitlab.com/search?utf8=✓&snippets=false&scope=&repository_ref=master&search=path%3Adoc%2F.vale%2Fgitlab+Error%3A&group_id=9970&project_id=278964).
 
+#### Vale spelling test
+
+When Vale flags a valid word as a spelling mistake, you can fix it following these
+guidelines:
+
+| Flagged word                                         | Guideline |
+|------------------------------------------------------|-----------|
+| jargon                                               | Rewrite the sentence to avoid it. |
+| *correctly-capitalized* name of a product or service | Add the word to the [vale spelling exceptions list](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/spelling-exceptions.txt). |
+| name of a person                                     | Remove the name if it's not needed, or [add the vale exception code in-line](#disable-vale-tests). |
+| a command, variable, code, or similar                | Put it in backticks or a code block. For example: ``The git clone command can be used with the CI_COMMIT_BRANCH variable.`` -> ``The `git clone` command can be used with the `CI_COMMIT_BRANCH` variable.`` |
+| UI text from GitLab                                  | Verify it correctly matches the UI, then: If it does not match the UI, update it. If it matches the UI, but the UI seems incorrect, create an issue to see if the UI needs to be fixed. If it matches the UI and seems correct, add it to the [vale spelling exceptions list](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/spelling-exceptions.txt). |
+| UI text from a third-party product                   | Rewrite the sentence to avoid it, or [add the vale exception code in-line](#disable-vale-tests). |
+
 ### Install linters
 
 At a minimum, install [markdownlint](#markdownlint) and [Vale](#vale) to match the checks run in
@@ -222,7 +236,7 @@ build pipelines:
    ```
 
    We recommend installing the version of `markdownlint-cli`
-   [used](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/.gitlab-ci.yml#L447) when building
+   [used (see `variables:` section)](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/.gitlab-ci.yml) when building
    the `image:docs-lint-markdown`.
 
 1. Install [`vale`](https://github.com/errata-ai/vale/releases). For example, to install using
@@ -240,7 +254,7 @@ It's important to use linter versions that are the same or newer than those run 
 CI/CD. This provides access to new features and possible bug fixes.
 
 To match the versions of `markdownlint-cli` and `vale` used in the GitLab projects, refer to the
-[versions used](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/.gitlab-ci.yml#L447)
+[versions used (see `variables:` section)](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/.gitlab-ci.yml)
 when building the `image:docs-lint-markdown` Docker image containing these tools for CI/CD.
 
 | Tool               | Version   | Command                                   | Additional information |
@@ -272,7 +286,11 @@ To configure Vale in your editor, install one of the following as appropriate:
   In the extension's settings:
 
   - Select the **Use CLI** checkbox.
-  - In the **Config** setting, enter an absolute path to [`.vale.ini`](https://gitlab.com/gitlab-org/gitlab/blob/master/.vale.ini) in one of the cloned GitLab repositories on your computer.
+  - In the <!-- vale gitlab.Spelling = NO --> **Config** setting, enter an absolute
+    path to [`.vale.ini`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.vale.ini)
+    in one of the cloned GitLab repositories on your computer.
+    <!-- vale gitlab.Spelling = YES -->
+
   - In the **Path** setting, enter the absolute path to the Vale binary. In most
     cases, `vale` should work. To find the location, run `which vale` in a terminal.
 
@@ -326,7 +344,18 @@ document:
 - To disable all Vale linting rules, add a `<!-- vale off -->` tag before the text, and a
   `<!-- vale on -->` tag after the text.
 
-Whenever possible, exclude only the problematic rule and line(s).
+Whenever possible, exclude only the problematic rule and lines.
 
 For more information, see
-[Vale's documentation](https://errata-ai.gitbook.io/vale/getting-started/markup#markup-based-configuration).
+[Vale's documentation](https://docs.errata.ai/vale/scoping#markup-based-configuration).
+
+### Disable markdownlint tests
+
+To disable all markdownlint rules, add a `<!-- markdownlint-disable -->` tag before the text, and a
+`<!-- markdownlint-enable -->` tag after the text.
+
+To disable only a [specific rule](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#rules),
+add the rule number to the tag, for example `<!-- markdownlint-disable MD044 -->`
+and `<!-- markdownlint-enable MD044 -->`.
+
+Whenever possible, exclude only the problematic lines.

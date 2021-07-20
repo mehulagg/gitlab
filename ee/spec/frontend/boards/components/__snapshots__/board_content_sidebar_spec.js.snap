@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
+<div
+  class="boards-sidebar gl-absolute"
+>
+  <h2
+    class="gl-my-0 gl-font-size-h2 gl-line-height-24"
+  >
+    Issue details
+  </h2>
+   
+  <sidebartodowidget-stub
+    class="gl-mt-3"
+    fullpath="gitlab-org/gitlab-test"
+    issuableid="gid://gitlab/Issue/436"
+    issuableiid="27"
+    issuabletype="issue"
+  />
+   
+  <boardsidebartitle-stub />
+   
+  <sidebarassigneeswidget-stub
+    fullpath="gitlab-org/gitlab-test"
+    iid="27"
+    initialassignees="[object Object],[object Object]"
+    issuabletype="issue"
+  />
+   
+  <sidebardropdownwidget-stub
+    attrworkspacepath="gitlab-org"
+    data-testid="sidebar-epic"
+    iid="27"
+    issuableattribute="epic"
+    issuabletype="issue"
+    workspacepath="gitlab-org/gitlab-test"
+  />
+   
+  <div>
+    <sidebardropdownwidget-stub
+      attrworkspacepath="gitlab-org/gitlab-test"
+      data-testid="sidebar-milestones"
+      iid="27"
+      issuableattribute="milestone"
+      issuabletype="issue"
+      workspacepath="gitlab-org/gitlab-test"
+    />
+     
+    <sidebardropdownwidget-stub
+      attrworkspacepath="gitlab-org"
+      class="gl-mt-5"
+      data-testid="iteration-edit"
+      iid="27"
+      issuableattribute="iteration"
+      issuabletype="issue"
+      workspacepath="gitlab-org/gitlab-test"
+    />
+  </div>
+   
+  <boardsidebartimetracker-stub
+    class="swimlanes-sidebar-time-tracker"
+  />
+   
+  <sidebardatewidget-stub
+    data-testid="sidebar-due-date"
+    datetype="dueDate"
+    fullpath="gitlab-org/gitlab-test"
+    iid="27"
+    issuabletype="issue"
+  />
+   
+  <boardsidebarlabelsselect-stub
+    class="labels"
+  />
+   
+  <sidebarweightwidget-stub
+    full-path="gitlab-org/gitlab-test"
+    iid="27"
+    issuable-type="issue"
+  />
+   
+  <sidebarconfidentialitywidget-stub
+    fullpath="gitlab-org/gitlab-test"
+    iid="27"
+    issuabletype="issue"
+  />
+   
+  <sidebarsubscriptionswidget-stub
+    data-testid="sidebar-notifications"
+    fullpath="gitlab-org/gitlab-test"
+    iid="27"
+    issuabletype="issue"
+  />
+</div>
+`;

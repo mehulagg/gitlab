@@ -8,14 +8,55 @@ RSpec.describe RequirementsManagement::TestReport do
 
     it { is_expected.to belong_to(:author).class_name('User') }
     it { is_expected.to belong_to(:requirement) }
+    it { is_expected.to belong_to(:requirement_issue) }
     it { is_expected.to belong_to(:build) }
   end
 
   describe 'validations' do
     subject { build(:test_report) }
 
-    it { is_expected.to validate_presence_of(:requirement) }
+    let(:requirement) { build(:requirement) }
+    let(:requirement_issue) { build(:requirement_issue) }
+    let(:requirement_error) { /Must be associated with either a RequirementsManagement::Requirement OR an Issue of type `requirement`, but not both/ }
+
     it { is_expected.to validate_presence_of(:state) }
+
+    context 'requirements associations' do
+      subject { build(:test_report, requirement: requirement_arg, requirement_issue: requirement_issue_arg) }
+
+      context 'when both are set' do
+        let(:requirement_arg) { requirement }
+        let(:requirement_issue_arg) { requirement_issue }
+
+        specify do
+          expect(subject).not_to be_valid
+          expect(subject.errors.messages[:base]).to include(requirement_error)
+        end
+      end
+
+      context 'when neither are set' do
+        let(:requirement_arg) { nil }
+        let(:requirement_issue_arg) { nil }
+
+        specify do
+          expect(subject).not_to be_valid
+          expect(subject.errors.messages[:base]).to include(requirement_error)
+        end
+      end
+
+      context 'when only requirement is set' do
+        let(:requirement_arg) { requirement }
+        let(:requirement_issue_arg) { nil }
+
+        specify { expect(subject).to be_valid }
+      end
+
+      context 'when only requirement issue is set' do
+        let(:requirement_arg) { nil }
+
+        it_behaves_like 'a model with a requirement issue association'
+      end
+    end
   end
 
   describe 'scopes' do
@@ -115,6 +156,7 @@ RSpec.describe RequirementsManagement::TestReport do
     let_it_be(:build_author) { create(:user) }
     let_it_be(:build) { create(:ci_build, author: build_author) }
     let_it_be(:requirement) { create(:requirement, state: :opened) }
+
     let(:now) { Time.current }
 
     context 'when build is passed as argument' do

@@ -12,6 +12,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['namespace'],
   props: {
     member: {
       type: Object,
@@ -19,7 +20,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['showLdapOverrideConfirmationModal']),
+    ...mapActions({
+      showLdapOverrideConfirmationModal(dispatch, payload) {
+        return dispatch(`${this.namespace}/showLdapOverrideConfirmationModal`, payload);
+      },
+    }),
   },
 };
 </script>

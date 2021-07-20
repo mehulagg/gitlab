@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Profiles::SlacksController < Profiles::ApplicationController
-  include ServicesHelper
+  include IntegrationsHelper
 
   skip_before_action :authenticate_user!
 
@@ -10,7 +10,7 @@ class Profiles::SlacksController < Profiles::ApplicationController
   feature_category :users
 
   def edit
-    @projects = disabled_projects if current_user
+    @projects = disabled_projects.select([:id, :name]) if current_user
   end
 
   def slack_link

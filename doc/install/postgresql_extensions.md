@@ -4,13 +4,25 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Managing PostgreSQL extensions
+# Managing PostgreSQL extensions **(FREE SELF)**
 
 This guide documents how to manage PostgreSQL extensions for installations with an external
 PostgreSQL database.
 
-GitLab requires certain extensions to be installed into the GitLab database. For example,
-GitLab relies on `pg_trgm` and the `btree_gist` extensions.
+You must load the following extensions into the main GitLab database (defaults to `gitlabhq_production`):
+
+| Extension    | Minimum GitLab version |
+|--------------|------------------------|
+| `pg_trgm`    | 8.6                    |
+| `btree_gist` | 13.1                   |
+| `plpgsql`    | 11.7                   |
+
+If you are using [GitLab Geo](https://about.gitlab.com/solutions/geo/), you must load the following 
+extensions into all secondary tracking databases (defaults to `gitlabhq_geo_production`):
+
+| Extension    | Minimum GitLab version |
+|--------------|------------------------|
+| `plpgsql`    | 9.0                    |
 
 In order to install extensions, PostgreSQL requires the user to have superuser privileges.
 Typically, the GitLab database user is not a superuser. Therefore, regular database migrations
@@ -49,7 +61,19 @@ In order to install a PostgreSQL extension, this procedure should be followed:
 On some systems you may need to install an additional package (for example,
 `postgresql-contrib`) for certain extensions to become available.
 
-## A typical migration failure scenario
+## Typical failure scenarios
+
+The following is an example of a new GitLab installation failing because the extension hasn't been
+installed first.
+
+```shell
+---- Begin output of "bash"  "/tmp/chef-script20210513-52940-d9b1gs" ----
+STDOUT: psql:/opt/gitlab/embedded/service/gitlab-rails/db/structure.sql:9: ERROR:  permission denied to create extension "btree_gist"
+HINT:  Must be superuser to create this extension.
+rake aborted!
+failed to execute:
+psql -v ON_ERROR_STOP=1 -q -X -f /opt/gitlab/embedded/service/gitlab-rails/db/structure.sql --single-transaction gitlabhq_production
+```
 
 The following is an example of a situation when the extension hasn't been installed before running migrations.
 In this scenario, the database migration fails to create the extension `btree_gist` because of insufficient
@@ -74,5 +98,9 @@ This query will grant the user superuser permissions, ensuring any database exte
 can be installed through migrations.
 ```
 
-In order to recover from this situation, the extension needs to be installed manually using a superuser, and
-the database migration (or GitLab upgrade) can be retried afterwards.
+To recover from failed migrations, the extension must be installed manually by a superuser, and the
+GitLab upgrade completed by [re-running the database migrations](../administration/raketasks/maintenance.md#run-incomplete-database-migrations):
+
+```shell
+sudo gitlab-rake db:migrate
+```

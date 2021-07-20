@@ -18,8 +18,8 @@ module QA
 
             def hover_settings
               within_sidebar do
-                scroll_to_element(:settings_item)
-                find_element(:settings_item).hover
+                scroll_to_element(:sidebar_menu_link, menu_item: 'Settings')
+                find_element(:sidebar_menu_link, menu_item: 'Settings').hover
 
                 yield
               end

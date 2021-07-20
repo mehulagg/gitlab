@@ -18,12 +18,12 @@ module Mutations
 
         argument :api_url, GraphQL::STRING_TYPE,
                  required: true,
-                 description: 'Endpoint at which prometheus can be queried.'
+                 description: 'Endpoint at which Prometheus can be queried.'
 
         def resolve(args)
           project = authorized_find!(args[:project_path])
 
-          return integration_exists if project.prometheus_service
+          return integration_exists if project.prometheus_integration
 
           result = ::Projects::Operations::UpdateService.new(
             project,
@@ -32,7 +32,7 @@ module Mutations
             **token_attributes
           ).execute
 
-          response(project.prometheus_service, result)
+          response(project.prometheus_integration, result)
         end
 
         private

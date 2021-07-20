@@ -1,0 +1,5 @@
+mutation DestroyEpicBoardList($listId: BoardsEpicListID!) {
+  destroyBoardList: epicBoardListDestroy(input: { listId: $listId }) {
+    errors
+  }
+}

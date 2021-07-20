@@ -54,8 +54,11 @@ module Gitlab
 
       attr_reader :repository
 
-      def self.default_ref
-        'master'
+      # TODO remove argument when issue
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/329190
+      # is closed.
+      def self.default_ref(container = nil)
+        Gitlab::DefaultBranch.value(object: container)
       end
 
       # Initialize with a Gitlab::Git::Repository instance
@@ -70,12 +73,6 @@ module Gitlab
       def write_page(name, format, content, commit_details)
         wrapped_gitaly_errors do
           gitaly_write_page(name, format, content, commit_details)
-        end
-      end
-
-      def delete_page(page_path, commit_details)
-        wrapped_gitaly_errors do
-          gitaly_delete_page(page_path, commit_details)
         end
       end
 
@@ -102,28 +99,6 @@ module Gitlab
         end
       end
 
-      def file(name, version)
-        wrapped_gitaly_errors do
-          gitaly_find_file(name, version)
-        end
-      end
-
-      # options:
-      #  :page     - The Integer page number.
-      #  :per_page - The number of items per page.
-      #  :limit    - Total number of items to return.
-      def page_versions(page_path, options = {})
-        versions = wrapped_gitaly_errors do
-          gitaly_wiki_client.page_versions(page_path, options)
-        end
-
-        # Gitaly uses gollum-lib to get the versions. Gollum defaults to 20
-        # per page, but also fetches 20 if `limit` or `per_page` < 20.
-        # Slicing returns an array with the expected number of items.
-        slice_bound = options[:limit] || options[:per_page] || DEFAULT_PAGINATION
-        versions[0..slice_bound]
-      end
-
       def count_page_versions(page_path)
         @repository.count_commits(ref: 'HEAD', path: page_path)
       end
@@ -146,10 +121,6 @@ module Gitlab
         gitaly_wiki_client.update_page(page_path, title, format, content, commit_details)
       end
 
-      def gitaly_delete_page(page_path, commit_details)
-        gitaly_wiki_client.delete_page(page_path, commit_details)
-      end
-
       def gitaly_find_page(title:, version: nil, dir: nil)
         return unless title.present?
 
@@ -159,13 +130,6 @@ module Gitlab
         Gitlab::Git::WikiPage.new(wiki_page, version)
       rescue GRPC::InvalidArgument
         nil
-      end
-
-      def gitaly_find_file(name, version)
-        wiki_file = gitaly_wiki_client.find_file(name, version)
-        return unless wiki_file
-
-        Gitlab::Git::WikiFile.new(wiki_file)
       end
 
       def gitaly_list_pages(limit: 0, sort: nil, direction_desc: false, load_content: false)

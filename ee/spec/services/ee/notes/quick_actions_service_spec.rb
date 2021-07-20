@@ -48,7 +48,7 @@ RSpec.describe Notes::QuickActionsService do
           expect(execute(note)).to eq('')
         end
 
-        it 'creates a system note' do
+        it 'creates a system note', :sidekiq_inline do
           expect { execute(note) }.to change { Note.system.count }.from(0).to(2)
         end
       end
@@ -483,6 +483,50 @@ RSpec.describe Notes::QuickActionsService do
         group.add_developer(user)
 
         expect { execute(note) }.not_to change { Epic.count }
+      end
+    end
+  end
+
+  context 'with issue types' do
+    shared_examples 'note on issue type that does not support time tracking' do
+      let(:note) { build(:note_on_issue, project: project, noteable: noteable) }
+
+      before do
+        note.note = note_text
+      end
+
+      context '/spend' do
+        let(:note_text) { "/spend 1h 2021-05-26" }
+
+        it 'does not change time spent' do
+          expect { execute(note) }.not_to change { noteable.reload.time_spent }
+        end
+      end
+
+      context '/estimate' do
+        let(:note_text) { "/estimate 1h" }
+
+        it 'does not execute time estimate' do
+          expect { execute(note) }.not_to change { noteable.reload.time_estimate }
+        end
+      end
+    end
+
+    context 'when issue does not support quick actions' do
+      before do
+        group.add_developer(user)
+      end
+
+      context 'for requirement' do
+        it_behaves_like 'note on issue type that does not support time tracking' do
+          let(:noteable) { create(:requirement_issue, project: project) }
+        end
+      end
+
+      context 'for test case' do
+        it_behaves_like 'note on issue type that does not support time tracking' do
+          let(:noteable) { create(:quality_test_case, project: project) }
+        end
       end
     end
   end

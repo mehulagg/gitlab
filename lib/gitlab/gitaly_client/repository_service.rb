@@ -70,12 +70,20 @@ module Gitlab
         end.join
       end
 
-      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false)
+      # rubocop: disable Metrics/ParameterLists
+      # The `remote` parameter is going away soonish anyway, at which point the
+      # Rubocop warning can be enabled again.
+      def fetch_remote(remote, url:, refmap:, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false)
         request = Gitaly::FetchRemoteRequest.new(
           repository: @gitaly_repo, remote: remote, force: forced,
           no_tags: no_tags, timeout: timeout, no_prune: !prune,
           check_tags_changed: check_tags_changed
         )
+
+        if url
+          request.remote_params = Gitaly::Remote.new(url: url,
+                                                     mirror_refmaps: Array.wrap(refmap).map(&:to_s))
+        end
 
         if ssh_auth&.ssh_mirror_url?
           if ssh_auth.ssh_key_auth? && ssh_auth.ssh_private_key.present?
@@ -89,6 +97,7 @@ module Gitlab
 
         GitalyClient.call(@storage, :repository_service, :fetch_remote, request, timeout: GitalyClient.long_timeout)
       end
+      # rubocop: enable Metrics/ParameterLists
 
       def create_repository
         request = Gitaly::CreateRepositoryRequest.new(repository: @gitaly_repo)
@@ -141,23 +150,6 @@ module Gitlab
           request,
           timeout: GitalyClient.long_timeout
         )
-      end
-
-      def rebase_in_progress?(rebase_id)
-        request = Gitaly::IsRebaseInProgressRequest.new(
-          repository: @gitaly_repo,
-          rebase_id: rebase_id.to_s
-        )
-
-        response = GitalyClient.call(
-          @storage,
-          :repository_service,
-          :is_rebase_in_progress,
-          request,
-          timeout: GitalyClient.fast_timeout
-        )
-
-        response.in_progress
       end
 
       def squash_in_progress?(squash_id)
@@ -319,7 +311,7 @@ module Gitlab
         response = GitalyClient.call(@storage, :repository_service, :calculate_checksum, request, timeout: GitalyClient.fast_timeout)
         response.checksum.presence
       rescue GRPC::DataLoss => e
-        raise Gitlab::Git::Repository::InvalidRepository.new(e)
+        raise Gitlab::Git::Repository::InvalidRepository, e
       end
 
       def raw_changes_between(from, to)
@@ -337,6 +329,11 @@ module Gitlab
         request = Gitaly::SearchFilesByContentRequest.new(repository: @gitaly_repo, ref: ref, query: query)
         response = GitalyClient.call(@storage, :repository_service, :search_files_by_content, request, timeout: GitalyClient.default_timeout)
         search_results_from_response(response, options)
+      end
+
+      def search_files_by_regexp(ref, filter)
+        request = Gitaly::SearchFilesByNameRequest.new(repository: @gitaly_repo, ref: ref, query: '.', filter: filter)
+        GitalyClient.call(@storage, :repository_service, :search_files_by_name, request, timeout: GitalyClient.fast_timeout).flat_map(&:files)
       end
 
       def disconnect_alternates

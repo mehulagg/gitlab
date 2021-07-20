@@ -31,13 +31,13 @@ export default {
       'StatusPage|Configure file storage settings to link issues in this project to an external status page.',
     ),
     introText: s__(
-      'StatusPage|To publish incidents to an external status page, GitLab will store a JSON file in your Amazon S3 account in a location accessible to your external status page service. Make sure to also set up %{docsLink}',
+      'StatusPage|To publish incidents to an external status page, GitLab stores a JSON file in your Amazon S3 account at a location that your external status page service can access. Make sure to also set up %{docsLink}',
     ),
     introLinkText: s__('StatusPage|your status page frontend.'),
     activeLabel: s__('StatusPage|Active'),
     url: {
       label: s__('StatusPage|Status page URL'),
-      linkText: s__('StatusPage|Status page frontend documentation'),
+      linkText: __('Configuration help'),
     },
     bucket: {
       label: s__('StatusPage|S3 Bucket name'),
@@ -46,8 +46,8 @@ export default {
     },
     region: {
       label: s__('StatusPage|AWS region'),
-      helpText: s__('StatusPage|For help with configuration, visit %{docsLink}'),
-      linkText: s__('StatusPage|AWS documentation'),
+      helpText: s__('StatusPage|AWS %{docsLink}'),
+      linkText: s__('StatusPage|configuration documentation'),
     },
     accessKey: {
       label: s__('StatusPage|AWS access key ID'),
@@ -67,7 +67,9 @@ export default {
       { key: 'awsSecretKey', updateFn: 'setStatusPageSecretAccessKey' },
     ]),
     statusPageHelpUrl() {
-      return helpPagePath('operations/incident_management/status_page');
+      return helpPagePath('/operations/incident_management/status_page', {
+        anchor: 'configure-gitlab-with-cloud-provider-information',
+      });
     },
   },
   methods: {
@@ -79,7 +81,10 @@ export default {
 <template>
   <section id="status-page" class="settings no-animate js-status-page-settings">
     <div class="settings-header">
-      <h4 ref="sectionHeader">
+      <h4
+        ref="sectionHeader"
+        class="settings-title js-settings-toggle js-settings-toggle-trigger-only"
+      >
         {{ $options.i18n.headerText }}
       </h4>
       <gl-button ref="toggleBtn" class="js-settings-toggle">{{
@@ -187,7 +192,7 @@ export default {
         <gl-button
           ref="submitBtn"
           :disabled="loading"
-          variant="success"
+          variant="confirm"
           category="primary"
           type="submit"
           class="js-no-auto-disable"

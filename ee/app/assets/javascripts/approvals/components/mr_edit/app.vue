@@ -1,6 +1,7 @@
 <script>
-import { GlSafeHtmlDirective, GlAccordion, GlAccordionItem } from '@gitlab/ui';
+import { GlSafeHtmlDirective, GlAccordion, GlAccordionItem, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { __, n__, sprintf, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import App from '../app.vue';
@@ -11,6 +12,8 @@ export default {
   components: {
     GlAccordion,
     GlAccordionItem,
+    GlSprintf,
+    GlLink,
     App,
     MrRules,
     MrRulesHiddenInputs,
@@ -23,6 +26,8 @@ export default {
     ...mapState({
       rules: (state) => state.approvals.rules,
       canOverride: (state) => state.settings.canOverride,
+      canUpdateApprovers: (state) => state.settings.canUpdateApprovers,
+      showCodeOwnerTip: (state) => state.settings.showCodeOwnerTip,
     }),
     accordionTitle() {
       return s__('ApprovalRule|Approval rules');
@@ -95,6 +100,7 @@ export default {
       return null;
     },
   },
+  codeOwnerHelpPage: helpPagePath('user/project/code_owners'),
 };
 </script>
 
@@ -106,17 +112,46 @@ export default {
       data-testid="collapsedSummaryText"
     ></p>
 
-    <gl-accordion>
+    <gl-accordion :header-level="3">
       <gl-accordion-item :title="accordionTitle">
         <app>
-          <mr-rules slot="rules" />
-          <mr-rules-hidden-inputs slot="footer" />
+          <template #rules>
+            <mr-rules />
+          </template>
+          <template #footer>
+            <div>
+              <mr-rules-hidden-inputs />
+              <div
+                v-if="canUpdateApprovers && showCodeOwnerTip"
+                class="form-text text-muted"
+                data-testid="codeowners-tip"
+              >
+                <gl-sprintf
+                  :message="
+                    __(
+                      'Tip: add a %{linkStart}CODEOWNERS%{linkEnd} to automatically add approvers based on file paths and file types.',
+                    )
+                  "
+                >
+                  <template #link="{ content }">
+                    <gl-link :href="$options.codeOwnerHelpPage" target="_blank">{{
+                      content
+                    }}</gl-link>
+                  </template>
+                </gl-sprintf>
+              </div>
+            </div>
+          </template>
         </app>
       </gl-accordion-item>
     </gl-accordion>
   </div>
   <app v-else>
-    <mr-rules slot="rules" />
-    <mr-rules-hidden-inputs slot="footer" />
+    <template #rules>
+      <mr-rules />
+    </template>
+    <template #footer>
+      <mr-rules-hidden-inputs />
+    </template>
   </app>
 </template>

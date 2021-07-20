@@ -22,8 +22,8 @@ module API
         success EE::API::Entities::Epic
       end
       params do
-        optional :order_by, type: String, values: %w[created_at updated_at], default: 'created_at',
-                            desc: 'Return epics ordered by `created_at` or `updated_at` fields.'
+        optional :order_by, type: String, values: %w[created_at updated_at title], default: 'created_at',
+                            desc: 'Return epics ordered by `created_at`, `updated_at` or `title` fields.'
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
                         desc: 'Return epics sorted in `asc` or `desc` order.'
         optional :search, type: String, desc: 'Search epics for text present in the title or description'
@@ -87,7 +87,7 @@ module API
         # Setting created_at is allowed only for admins and owners
         params.delete(:created_at) unless current_user.can?(:set_epic_created_at, user_group)
 
-        epic = ::Epics::CreateService.new(user_group, current_user, declared_params(include_missing: false)).execute
+        epic = ::Epics::CreateService.new(group: user_group, current_user: current_user, params: declared_params(include_missing: false)).execute
         if epic.valid?
           present epic, epic_options
         else
@@ -115,8 +115,6 @@ module API
         at_least_one_of :title, :description, :start_date_fixed, :start_date_is_fixed, :due_date_fixed, :due_date_is_fixed, :labels, :add_labels, :remove_labels, :state_event, :confidential
       end
       put ':id/(-/)epics/:epic_iid' do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/194104')
-
         authorize_can_admin_epic!
 
         # Setting updated_at is allowed only for admins and owners
@@ -125,7 +123,7 @@ module API
         update_params = declared_params(include_missing: false)
         update_params.delete(:epic_iid)
 
-        result = ::Epics::UpdateService.new(user_group, current_user, update_params).execute(epic)
+        result = ::Epics::UpdateService.new(group: user_group, current_user: current_user, params: update_params).execute(epic)
 
         if result.valid?
           present result, epic_options
@@ -143,7 +141,7 @@ module API
       delete ':id/(-/)epics/:epic_iid' do
         authorize_can_destroy!
 
-        Issuable::DestroyService.new(nil, current_user).execute(epic)
+        Issuable::DestroyService.new(project: nil, current_user: current_user).execute(epic)
       end
     end
   end

@@ -3,13 +3,13 @@
 module QA
   module EE
     module Resource
-      class ImportRepoWithCICD < QA::Resource::ProjectImportedFromGithub
-        def fabricate!
-          super
-        end
-
-        def go_to_import_tab
-          QA::Page::Project::New.perform(&:click_ci_cd_for_external_repo)
+      class ImportRepoWithCiCd < QA::Resource::ProjectImportedFromGithub
+        def go_to_import_page
+          # Overriding CE go_to_import_page, the differences happen in BE when CI/CD option is selected vs Import option
+          QA::Page::Project::New.perform do |project_page|
+            project_page.click_cicd_for_external_repo
+            project_page.click_github_link
+          end
         end
       end
     end

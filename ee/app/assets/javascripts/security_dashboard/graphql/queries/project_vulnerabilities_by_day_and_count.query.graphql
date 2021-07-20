@@ -1,4 +1,8 @@
-query project($fullPath: ID!, $startDate: ISO8601Date!, $endDate: ISO8601Date!) {
+query projectVulnerabilitiesCount(
+  $fullPath: ID!
+  $startDate: ISO8601Date!
+  $endDate: ISO8601Date!
+) {
   project(fullPath: $fullPath) {
     vulnerabilitiesCountByDay(startDate: $startDate, endDate: $endDate) {
       nodes {

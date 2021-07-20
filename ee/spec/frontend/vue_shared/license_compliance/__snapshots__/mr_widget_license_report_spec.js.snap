@@ -3,7 +3,7 @@
 exports[`License Report MR Widget report section report body should render correctly 1`] = `
 <smart-virtual-list-stub
   class="report-block-container"
-  length="1"
+  length="2"
   remain="20"
   rtag="div"
   size="26"
@@ -27,50 +27,4 @@ exports[`License Report MR Widget report section report body should render corre
   </li>
    
 </smart-virtual-list-stub>
-`;
-
-exports[`License Report MR Widget report section should render correctly 1`] = `
-<report-section-stub
-  class="license-report-widget mr-report"
-  component="LicenseIssueBody"
-  data-qa-selector="license_report_widget"
-  errortext="FOO"
-  hasissues="true"
-  loadingtext="FOO"
-  neutralissues="[object Object]"
-  popoveroptions="[object Object]"
-  resolvedissues=""
-  showreportsectionstatusicon="true"
-  status="SUCCESS"
-  successtext=""
-  unresolvedissues=""
->
-    
-  <div
-    class="gl-mr-3"
-  >
-    <a
-      class="btn btn-default btn-sm js-manage-licenses gl-mr-3"
-      data-qa-selector="manage_licenses_button"
-      href="http://test.host/lm_settings"
-    >
-      
-        Manage licenses
-      
-    </a>
-     
-    <a
-      class="btn btn-default btn-sm js-full-report"
-      href="http://test.host/path/to/the/full/report"
-      target="_blank"
-    >
-      
-        View full report 
-      <gl-icon-stub
-        name="external-link"
-        size="16"
-      />
-    </a>
-  </div>
-</report-section-stub>
 `;

@@ -37,7 +37,7 @@ describe('MembersTokenSelect', () => {
     wrapper = null;
   });
 
-  const findTokenSelector = () => wrapper.find(GlTokenSelector);
+  const findTokenSelector = () => wrapper.findComponent(GlTokenSelector);
 
   describe('rendering the token-selector component', () => {
     it('renders with the correct props', () => {
@@ -113,6 +113,21 @@ describe('MembersTokenSelect', () => {
         findTokenSelector().vm.$emit('input', [user1, user2]);
 
         expect(wrapper.emitted().input[0][0]).toEqual([user1, user2]);
+      });
+    });
+
+    describe('when user is removed', () => {
+      it('emits `clear` event', () => {
+        findTokenSelector().vm.$emit('token-remove', [user1]);
+
+        expect(wrapper.emitted('clear')).toEqual([[]]);
+      });
+
+      it('does not emit `clear` event when there are still tokens selected', () => {
+        findTokenSelector().vm.$emit('input', [user1, user2]);
+        findTokenSelector().vm.$emit('token-remove', [user1]);
+
+        expect(wrapper.emitted('clear')).toBeUndefined();
       });
     });
   });

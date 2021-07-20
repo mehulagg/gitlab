@@ -41,8 +41,8 @@ module Gitlab
         end
 
         def perform_for(index, action)
-          ConcurrentReindex.new(index).perform
-        rescue
+          ReindexConcurrently.new(index).perform
+        rescue StandardError
           action.state = :failed
 
           raise

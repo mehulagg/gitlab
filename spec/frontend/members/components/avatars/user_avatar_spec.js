@@ -2,19 +2,23 @@ import { GlAvatarLink, GlBadge } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { mount, createWrapper } from '@vue/test-utils';
 import UserAvatar from '~/members/components/avatars/user_avatar.vue';
-import { member as memberMock, orphanedMember } from '../../mock_data';
+import { member as memberMock, member2faEnabled, orphanedMember } from '../../mock_data';
 
 describe('UserAvatar', () => {
   let wrapper;
 
   const { user } = memberMock;
 
-  const createComponent = (propsData = {}) => {
+  const createComponent = (propsData = {}, provide = {}) => {
     wrapper = mount(UserAvatar, {
       propsData: {
         member: memberMock,
         isCurrentUser: false,
         ...propsData,
+      },
+      provide: {
+        canManageMembers: true,
+        ...provide,
       },
     });
   };
@@ -69,9 +73,9 @@ describe('UserAvatar', () => {
 
   describe('badges', () => {
     it.each`
-      member                                                                     | badgeText
-      ${{ ...memberMock, user: { ...memberMock.user, blocked: true } }}          | ${'Blocked'}
-      ${{ ...memberMock, user: { ...memberMock.user, twoFactorEnabled: true } }} | ${'2FA'}
+      member                                                            | badgeText
+      ${{ ...memberMock, user: { ...memberMock.user, blocked: true } }} | ${'Blocked'}
+      ${member2faEnabled}                                               | ${'2FA'}
     `('renders the "$badgeText" badge', ({ member, badgeText }) => {
       createComponent({ member });
 
@@ -82,6 +86,12 @@ describe('UserAvatar', () => {
       createComponent({ isCurrentUser: true });
 
       expect(getByText("It's you").exists()).toBe(true);
+    });
+
+    it('does not render 2FA badge when `canManageMembers` is `false`', () => {
+      createComponent({ member: member2faEnabled }, { canManageMembers: false });
+
+      expect(within(wrapper.element).queryByText('2FA')).toBe(null);
     });
   });
 

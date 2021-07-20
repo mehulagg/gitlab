@@ -165,53 +165,6 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
       end
     end
 
-    context 'with LFS object' do
-      let!(:lfs_object) { create(:lfs_object, :with_file) }
-      let!(:registry) { create(:geo_lfs_object_registry, lfs_object_id: lfs_object.id) }
-      let!(:file_path) { lfs_object.file.path }
-
-      it_behaves_like 'removes LFS object'
-
-      context 'migrated to object storage' do
-        before do
-          stub_lfs_object_storage
-          lfs_object.update_column(:file_store, LfsObjectUploader::Store::REMOTE)
-        end
-
-        context 'with object storage enabled' do
-          it_behaves_like 'removes LFS object'
-        end
-
-        context 'with object storage disabled' do
-          before do
-            stub_lfs_object_storage(enabled: false)
-          end
-
-          it_behaves_like 'removes LFS object registry'
-        end
-      end
-
-      context 'no lfs_object record' do
-        before do
-          lfs_object.delete
-        end
-
-        it_behaves_like 'removes LFS object' do
-          subject(:service) { described_class.new('lfs', registry.lfs_object_id, file_path) }
-        end
-      end
-
-      context 'with orphaned registry' do
-        before do
-          lfs_object.delete
-        end
-
-        it_behaves_like 'removes LFS object registry' do
-          subject(:service) { described_class.new('lfs', registry.lfs_object_id) }
-        end
-      end
-    end
-
     context 'with job artifact' do
       let!(:job_artifact) { create(:ci_job_artifact, :archive) }
       let!(:registry) { create(:geo_job_artifact_registry, artifact_id: job_artifact.id) }
@@ -324,6 +277,7 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
 
     context 'with namespace_file' do
       let_it_be(:group) { create(:group) }
+
       let(:file) { fixture_file_upload('spec/fixtures/dk.png', 'image/png') }
       let!(:upload) do
         NamespaceFileUploader.new(group).store!(file)

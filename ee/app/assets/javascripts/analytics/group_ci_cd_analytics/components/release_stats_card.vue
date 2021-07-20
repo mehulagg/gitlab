@@ -12,7 +12,7 @@ export default {
     GlSkeletonLoader,
   },
   inject: {
-    fullPath: {
+    groupPath: {
       default: '',
     },
   },
@@ -21,7 +21,7 @@ export default {
       query: groupReleaseStatsQuery,
       variables() {
         return {
-          fullPath: this.fullPath,
+          fullPath: this.groupPath,
         };
       },
       update(data) {
@@ -59,7 +59,7 @@ export default {
         return STAT_ERROR_PLACEHOLDER;
       }
 
-      if (this.rawStats?.releasesPercentage) {
+      if (this.rawStats?.releasesPercentage != null) {
         return sprintf(s__('CICDAnalytics|%{percent}%{percentSymbol}'), {
           percent: this.rawStats?.releasesPercentage,
           percentSymbol: '%',
@@ -115,7 +115,7 @@ export default {
           <rect x="50" y="94" rx="3" ry="3" width="300" height="31" />
         </gl-skeleton-loader>
         <template v-else>
-          <span class="gl-font-size-h-display">{{ stat.stat }}</span>
+          <span class="gl-font-size-h-display gl-line-height-42">{{ stat.stat }}</span>
           {{ stat.title }}
         </template>
       </div>

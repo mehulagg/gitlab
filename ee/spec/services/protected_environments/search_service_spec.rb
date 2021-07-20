@@ -5,7 +5,7 @@ RSpec.describe ProtectedEnvironments::SearchService, '#execute' do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
-  subject { described_class.new(project, user).execute(environment_name) }
+  subject { described_class.new(container: project, current_user: user).execute(environment_name) }
 
   before do
     %w(production staging review/app_1 review/app_2 test canary).each do |environment_name|

@@ -4,6 +4,7 @@ class PersonalAccessToken < ApplicationRecord
   include Expirable
   include TokenAuthenticatable
   include Sortable
+  include EachBatch
   extend ::Gitlab::Utils::Override
 
   add_authentication_token_field :token, digest: true
@@ -54,7 +55,7 @@ class PersonalAccessToken < ApplicationRecord
 
       begin
         Gitlab::CryptoHelper.aes256_gcm_decrypt(encrypted_token)
-      rescue => ex
+      rescue StandardError => ex
         logger.warn "Failed to decrypt #{self.name} value stored in Redis for key ##{redis_key}: #{ex.class}"
         encrypted_token
       end
@@ -97,6 +98,10 @@ class PersonalAccessToken < ApplicationRecord
   end
 
   def set_default_scopes
+    # When only loading a select set of attributes, for example using `EachBatch`,
+    # the `scopes` attribute is not present, so we can't initialize it.
+    return unless has_attribute?(:scopes)
+
     self.scopes = Gitlab::Auth::DEFAULT_SCOPES if self.scopes.empty?
   end
 
@@ -105,4 +110,4 @@ class PersonalAccessToken < ApplicationRecord
   end
 end
 
-PersonalAccessToken.prepend_if_ee('EE::PersonalAccessToken')
+PersonalAccessToken.prepend_mod_with('PersonalAccessToken')

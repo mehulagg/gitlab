@@ -1,4 +1,4 @@
-import { GlButton, GlLink } from '@gitlab/ui';
+import { GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import AgentTable from 'ee/clusters_list/components/agent_table.vue';
 
@@ -9,18 +9,21 @@ const propsData = {
       configFolder: {
         webPath: '/agent/full/path',
       },
+      webPath: '/agent-1',
     },
     {
       name: 'agent-2',
+      webPath: '/agent-2',
     },
   ],
 };
+const provideData = { integrationDocsUrl: 'path/to/integrationDocs' };
 
 describe('AgentTable', () => {
   let wrapper;
 
   beforeEach(() => {
-    wrapper = mount(AgentTable, { propsData });
+    wrapper = mount(AgentTable, { propsData, provide: provideData });
   });
 
   afterEach(() => {
@@ -30,22 +33,24 @@ describe('AgentTable', () => {
     }
   });
 
-  it('displays header button', () => {
-    expect(wrapper.find(GlButton).text()).toBe('Connect your cluster with the GitLab Agent');
+  it('displays header link with the correct href', () => {
+    expect(wrapper.find(GlLink).text()).toBe('Learn more about installing the GitLab Agent');
+    expect(wrapper.find(GlLink).attributes('href')).toBe('path/to/integrationDocs');
   });
 
   describe('agent table', () => {
     it.each`
-      agentName    | lineNumber
-      ${'agent-1'} | ${0}
-      ${'agent-2'} | ${1}
-    `('displays agent name', ({ agentName, lineNumber }) => {
+      agentName    | link          | lineNumber
+      ${'agent-1'} | ${'/agent-1'} | ${0}
+      ${'agent-2'} | ${'/agent-2'} | ${1}
+    `('displays agent link', ({ agentName, link, lineNumber }) => {
       const agents = wrapper.findAll(
         '[data-testid="cluster-agent-list-table"] tbody tr > td:first-child',
       );
-      const agent = agents.at(lineNumber);
+      const agent = agents.at(lineNumber).find(GlLink);
 
       expect(agent.text()).toBe(agentName);
+      expect(agent.attributes('href')).toBe(link);
     });
 
     it.each`

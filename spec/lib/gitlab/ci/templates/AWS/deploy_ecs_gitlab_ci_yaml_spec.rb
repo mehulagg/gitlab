@@ -6,12 +6,12 @@ RSpec.describe 'Deploy-ECS.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('AWS/Deploy-ECS') }
 
   describe 'the created pipeline' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch_or_main }
     let(:pipeline_branch) { default_branch }
     let(:project) { create(:project, :auto_devops, :custom_repo, files: { 'README.md' => '' }) }
     let(:user) { project.owner }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_branch ) }
-    let(:pipeline) { service.execute!(:push) }
+    let(:pipeline) { service.execute!(:push).payload }
     let(:build_names) { pipeline.builds.pluck(:name) }
     let(:platform_target) { 'ECS' }
 
@@ -38,7 +38,7 @@ RSpec.describe 'Deploy-ECS.gitlab-ci.yml' do
       let(:pipeline_branch) { 'test_branch' }
 
       before do
-        project.repository.create_branch(pipeline_branch)
+        project.repository.create_branch(pipeline_branch, default_branch)
       end
 
       it_behaves_like 'no pipeline yaml error'

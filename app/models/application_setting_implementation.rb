@@ -15,6 +15,7 @@ module ApplicationSettingImplementation
   # forbidden.
   FORBIDDEN_KEY_VALUE = KeyRestrictionValidator::FORBIDDEN
   SUPPORTED_KEY_TYPES = %i[rsa dsa ecdsa ed25519].freeze
+  VALID_RUNNER_REGISTRAR_TYPES = %w(project group).freeze
 
   DEFAULT_PROTECTED_PATHS = [
     '/users/password',
@@ -35,8 +36,10 @@ module ApplicationSettingImplementation
   class_methods do
     def defaults
       {
+        admin_mode: false,
         after_sign_up_text: nil,
         akismet_enabled: false,
+        akismet_api_key: nil,
         allow_local_requests_from_system_hooks: true,
         allow_local_requests_from_web_hooks_and_services: false,
         asset_proxy_enabled: false,
@@ -58,6 +61,8 @@ module ApplicationSettingImplementation
         default_projects_limit: Settings.gitlab['default_projects_limit'],
         default_snippet_visibility: Settings.gitlab.default_projects_features['visibility_level'],
         diff_max_patch_bytes: Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES,
+        diff_max_files: Commit::DEFAULT_MAX_DIFF_FILES_SETTING,
+        diff_max_lines: Commit::DEFAULT_MAX_DIFF_LINES_SETTING,
         disable_feed_token: false,
         disabled_oauth_sign_in_sources: [],
         dns_rebinding_protection_enabled: true,
@@ -71,7 +76,11 @@ module ApplicationSettingImplementation
         eks_secret_access_key: nil,
         email_restrictions_enabled: false,
         email_restrictions: nil,
+        external_pipeline_validation_service_timeout: nil,
+        external_pipeline_validation_service_token: nil,
+        external_pipeline_validation_service_url: nil,
         first_day_of_week: 0,
+        floc_enabled: false,
         gitaly_timeout_default: 55,
         gitaly_timeout_fast: 10,
         gitaly_timeout_medium: 30,
@@ -95,6 +104,8 @@ module ApplicationSettingImplementation
         issues_create_limit: 300,
         local_markdown_version: 0,
         login_recaptcha_protection_enabled: false,
+        mailgun_signing_key: nil,
+        mailgun_events_enabled: false,
         max_artifacts_size: Settings.artifacts['max_size'],
         max_attachment_size: Settings.gitlab['max_attachment_size'],
         max_import_size: 0,
@@ -123,7 +134,7 @@ module ApplicationSettingImplementation
         raw_blob_request_limit: 300,
         recaptcha_enabled: false,
         repository_checks_enabled: true,
-        repository_storages_weighted: { default: 100 },
+        repository_storages_weighted: { 'default' => 100 },
         repository_storages: ['default'],
         require_admin_approval_after_user_signup: true,
         require_two_factor_authentication: false,
@@ -145,6 +156,7 @@ module ApplicationSettingImplementation
         sourcegraph_url: nil,
         spam_check_endpoint_enabled: false,
         spam_check_endpoint_url: nil,
+        spam_check_api_key: nil,
         terminal_max_session_time: 0,
         throttle_authenticated_api_enabled: false,
         throttle_authenticated_api_period_in_seconds: 3600,
@@ -152,6 +164,9 @@ module ApplicationSettingImplementation
         throttle_authenticated_web_enabled: false,
         throttle_authenticated_web_period_in_seconds: 3600,
         throttle_authenticated_web_requests_per_period: 7200,
+        throttle_authenticated_packages_api_enabled: false,
+        throttle_authenticated_packages_api_period_in_seconds: 15,
+        throttle_authenticated_packages_api_requests_per_period: 1000,
         throttle_incident_management_notification_enabled: false,
         throttle_incident_management_notification_per_period: 3600,
         throttle_incident_management_notification_period_in_seconds: 3600,
@@ -161,6 +176,9 @@ module ApplicationSettingImplementation
         throttle_unauthenticated_enabled: false,
         throttle_unauthenticated_period_in_seconds: 3600,
         throttle_unauthenticated_requests_per_period: 3600,
+        throttle_unauthenticated_packages_api_enabled: false,
+        throttle_unauthenticated_packages_api_period_in_seconds: 15,
+        throttle_unauthenticated_packages_api_requests_per_period: 800,
         time_tracking_limit_to_hours: false,
         two_factor_grace_period: 48,
         unique_ips_limit_enabled: false,
@@ -171,12 +189,15 @@ module ApplicationSettingImplementation
         user_default_external: false,
         user_default_internal_regex: nil,
         user_show_add_ssh_key_message: true,
+        valid_runner_registrars: VALID_RUNNER_REGISTRAR_TYPES,
         wiki_page_max_content_bytes: 50.megabytes,
         container_registry_delete_tags_service_timeout: 250,
         container_registry_expiration_policies_worker_capacity: 0,
         kroki_enabled: false,
         kroki_url: nil,
-        rate_limiting_response_text: nil
+        kroki_formats: { blockdiag: false, bpmn: false, excalidraw: false },
+        rate_limiting_response_text: nil,
+        whats_new_variant: 0
       }
     end
 
@@ -279,21 +300,22 @@ module ApplicationSettingImplementation
     self.notes_create_limit_allowlist = strings_to_array(values).map(&:downcase)
   end
 
-  def asset_proxy_allowlist=(values)
+  def asset_proxy_whitelist=(values)
     values = strings_to_array(values) if values.is_a?(String)
 
     # make sure we always allow the running host
     values << Gitlab.config.gitlab.host unless values.include?(Gitlab.config.gitlab.host)
 
-    self[:asset_proxy_allowlist] = values
+    self[:asset_proxy_whitelist] = values
+  end
+  alias_method :asset_proxy_allowlist=, :asset_proxy_whitelist=
+
+  def asset_proxy_allowlist
+    read_attribute(:asset_proxy_whitelist)
   end
 
   def repository_storages
     Array(read_attribute(:repository_storages))
-  end
-
-  def repository_storages_weighted
-    read_attribute(:repository_storages_weighted)
   end
 
   def commit_email_hostname
@@ -327,9 +349,10 @@ module ApplicationSettingImplementation
 
   def normalized_repository_storage_weights
     strong_memoize(:normalized_repository_storage_weights) do
-      weights_total = repository_storages_weighted.values.reduce(:+)
+      repository_storages_weights = repository_storages_weighted.slice(*Gitlab.config.repositories.storages.keys)
+      weights_total = repository_storages_weights.values.reduce(:+)
 
-      repository_storages_weighted.transform_values do |w|
+      repository_storages_weights.transform_values do |w|
         next w if weights_total == 0
 
         w.to_f / weights_total
@@ -354,9 +377,14 @@ module ApplicationSettingImplementation
     Settings.gitlab.usage_ping_enabled
   end
 
+  def usage_ping_features_enabled?
+    usage_ping_enabled? && usage_ping_features_enabled
+  end
+
   def usage_ping_enabled
     usage_ping_can_be_configured? && super
   end
+  alias_method :usage_ping_enabled?, :usage_ping_enabled
 
   def allowed_key_types
     SUPPORTED_KEY_TYPES.select do |type|
@@ -431,11 +459,14 @@ module ApplicationSettingImplementation
   def parse_addr_and_port(str)
     case str
     when /\A\[(?<address> .* )\]:(?<port> \d+ )\z/x      # string like "[::1]:80"
-      address, port = $~[:address], $~[:port]
+      address = $~[:address]
+      port = $~[:port]
     when /\A(?<address> [^:]+ ):(?<port> \d+ )\z/x       # string like "127.0.0.1:80"
-      address, port = $~[:address], $~[:port]
+      address = $~[:address]
+      port = $~[:port]
     else                                                 # string with no port number
-      address, port = str, nil
+      address = str
+      port = nil
     end
 
     [address, port&.to_i]
@@ -467,16 +498,31 @@ module ApplicationSettingImplementation
       invalid.empty?
   end
 
+  def coerce_repository_storages_weighted
+    repository_storages_weighted.transform_values!(&:to_i)
+  end
+
   def check_repository_storages_weighted
     invalid = repository_storages_weighted.keys - Gitlab.config.repositories.storages.keys
-    errors.add(:repository_storages_weighted, "can't include: %{invalid_storages}" % { invalid_storages: invalid.join(", ") }) unless
+    errors.add(:repository_storages_weighted, _("can't include: %{invalid_storages}") % { invalid_storages: invalid.join(", ") }) unless
       invalid.empty?
 
     repository_storages_weighted.each do |key, val|
       next unless val.present?
 
-      errors.add(:"repository_storages_weighted_#{key}", "value must be an integer") unless val.is_a?(Integer)
-      errors.add(:"repository_storages_weighted_#{key}", "value must be between 0 and 100") unless val.between?(0, 100)
+      errors.add(:repository_storages_weighted, _("value for '%{storage}' must be an integer") % { storage: key }) unless val.is_a?(Integer)
+      errors.add(:repository_storages_weighted, _("value for '%{storage}' must be between 0 and 100") % { storage: key }) unless val.between?(0, 100)
+    end
+  end
+
+  def check_valid_runner_registrars
+    valid = valid_runner_registrar_combinations.include?(valid_runner_registrars)
+    errors.add(:valid_runner_registrars, _("%{value} is not included in the list") % { value: valid_runner_registrars }) unless valid
+  end
+
+  def valid_runner_registrar_combinations
+    0.upto(VALID_RUNNER_REGISTRAR_TYPES.size).flat_map do |n|
+      VALID_RUNNER_REGISTRAR_TYPES.permutation(n).to_a
     end
   end
 

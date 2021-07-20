@@ -59,9 +59,9 @@ module QA
               within_element(:custom_project_template_select) do
                 clear_current_selection_if_present
               end
-              click_element :custom_project_template_select
+              click_element(:custom_project_template_select)
               search_and_select(path)
-              click_element :save_changes_button
+              click_element(:save_changes_button)
             end
 
             def set_ip_address_restriction(ip_address)
@@ -77,31 +77,31 @@ module QA
               ip_restriction_field_input = find_element(:ip_restriction_field).find('input[type="text"]')
               ip_restriction_field_input.set ip_address
               ip_restriction_field_input.send_keys(:enter)
-              click_element :save_permissions_changes_button
+              click_element(:save_permissions_changes_button)
             end
 
             def set_membership_lock_enabled
-              expand_content :permission_lfs_2fa_content
-              check_element :membership_lock_checkbox
-              click_element :save_permissions_changes_button
+              expand_content(:permission_lfs_2fa_content)
+              check_element(:membership_lock_checkbox, true)
+              click_element(:save_permissions_changes_button)
             end
 
             def set_membership_lock_disabled
-              expand_content :permission_lfs_2fa_content
-              uncheck_element :membership_lock_checkbox
-              click_element :save_permissions_changes_button
+              expand_content(:permission_lfs_2fa_content)
+              uncheck_element(:membership_lock_checkbox, true)
+              click_element(:save_permissions_changes_button)
             end
 
             def set_prevent_forking_outside_group_enabled
-              expand_content :permission_lfs_2fa_content
-              check_element :prevent_forking_outside_group_checkbox
-              click_element :save_permissions_changes_button
+              expand_content(:permission_lfs_2fa_content)
+              check_element(:prevent_forking_outside_group_checkbox, true)
+              click_element(:save_permissions_changes_button)
             end
 
             def set_prevent_forking_outside_group_disabled
-              expand_content :permission_lfs_2fa_content
-              uncheck_element :prevent_forking_outside_group_checkbox
-              click_element :save_permissions_changes_button
+              expand_content(:permission_lfs_2fa_content)
+              uncheck_element(:prevent_forking_outside_group_checkbox, true)
+              click_element(:save_permissions_changes_button)
             end
 
             def set_repository_size_limit(limit)
@@ -122,9 +122,9 @@ module QA
               within_element(:file_template_repository_dropdown) do
                 clear_current_selection_if_present
               end
-              click_element :file_template_repository_dropdown
+              click_element(:file_template_repository_dropdown)
               search_and_select(path)
-              click_element :save_changes_button
+              click_element(:save_changes_button)
             end
           end
         end

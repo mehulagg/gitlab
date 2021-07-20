@@ -3,7 +3,11 @@
 import { keyBy } from 'lodash';
 import Vue from 'vue';
 import '~/boards/models/list';
+import { ListType } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
+import { __ } from '~/locale';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
 export const boardObj = {
   id: 1,
@@ -125,7 +129,7 @@ export const labels = [
 export const rawIssue = {
   title: 'Issue 1',
   id: 'gid://gitlab/Issue/436',
-  iid: 27,
+  iid: '27',
   dueDate: null,
   timeEstimate: 0,
   weight: null,
@@ -150,16 +154,18 @@ export const rawIssue = {
   },
 };
 
+export const mockIssueFullPath = 'gitlab-org/test-subgroup/gitlab-test';
+
 export const mockIssue = {
   id: 'gid://gitlab/Issue/436',
-  iid: 27,
+  iid: '27',
   title: 'Issue 1',
   dueDate: null,
   timeEstimate: 0,
   weight: null,
   confidential: false,
-  referencePath: 'gitlab-org/test-subgroup/gitlab-test#27',
-  path: '/gitlab-org/test-subgroup/gitlab-test/-/issues/27',
+  referencePath: `${mockIssueFullPath}#27`,
+  path: `/${mockIssueFullPath}/-/issues/27`,
   assignees,
   labels: [
     {
@@ -176,6 +182,7 @@ export const mockIssue = {
 
 export const mockActiveIssue = {
   ...mockIssue,
+  fullId: 'gid://gitlab/Issue/436',
   id: 436,
   iid: '27',
   subscribed: false,
@@ -284,7 +291,7 @@ export const setMockEndpoints = (opts = {}) => {
 
 export const mockList = {
   id: 'gid://gitlab/List/1',
-  title: 'Backlog',
+  title: 'Open',
   position: -Infinity,
   listType: 'backlog',
   collapsed: false,
@@ -351,6 +358,7 @@ export const issues = {
   [mockIssue4.id]: mockIssue4,
 };
 
+// The response from group project REST API
 export const mockRawGroupProjects = [
   {
     id: 0,
@@ -366,17 +374,200 @@ export const mockRawGroupProjects = [
   },
 ];
 
-export const mockGroupProjects = [
+// The response from GraphQL endpoint
+export const mockGroupProject1 = {
+  id: 0,
+  name: 'Example Project',
+  nameWithNamespace: 'Awesome Group / Example Project',
+  fullPath: 'awesome-group/example-project',
+  archived: false,
+};
+
+export const mockGroupProject2 = {
+  id: 1,
+  name: 'Foobar Project',
+  nameWithNamespace: 'Awesome Group / Foobar Project',
+  fullPath: 'awesome-group/foobar-project',
+  archived: false,
+};
+
+export const mockArchivedGroupProject = {
+  id: 2,
+  name: 'Archived Project',
+  nameWithNamespace: 'Awesome Group / Archived Project',
+  fullPath: 'awesome-group/archived-project',
+  archived: true,
+};
+
+export const mockGroupProjects = [mockGroupProject1, mockGroupProject2];
+
+export const mockActiveGroupProjects = [
+  { ...mockGroupProject1, archived: false },
+  { ...mockGroupProject2, archived: false },
+];
+
+export const mockIssueGroupPath = 'gitlab-org';
+export const mockIssueProjectPath = `${mockIssueGroupPath}/gitlab-test`;
+
+export const mockBlockingIssue1 = {
+  id: 'gid://gitlab/Issue/525',
+  iid: '6',
+  title: 'blocking issue title 1',
+  reference: 'gitlab-org/my-project-1#6',
+  webUrl: 'http://gdk.test:3000/gitlab-org/my-project-1/-/issues/6',
+  __typename: 'Issue',
+};
+
+export const mockBlockingIssue2 = {
+  id: 'gid://gitlab/Issue/524',
+  iid: '5',
+  title:
+    'blocking issue title 2 + blocking issue title 2 + blocking issue title 2 + blocking issue title 2',
+  reference: 'gitlab-org/my-project-1#5',
+  webUrl: 'http://gdk.test:3000/gitlab-org/my-project-1/-/issues/5',
+  __typename: 'Issue',
+};
+
+export const mockBlockingIssue3 = {
+  id: 'gid://gitlab/Issue/523',
+  iid: '4',
+  title: 'blocking issue title 3',
+  reference: 'gitlab-org/my-project-1#4',
+  webUrl: 'http://gdk.test:3000/gitlab-org/my-project-1/-/issues/4',
+  __typename: 'Issue',
+};
+
+export const mockBlockingIssue4 = {
+  id: 'gid://gitlab/Issue/522',
+  iid: '3',
+  title: 'blocking issue title 4',
+  reference: 'gitlab-org/my-project-1#3',
+  webUrl: 'http://gdk.test:3000/gitlab-org/my-project-1/-/issues/3',
+  __typename: 'Issue',
+};
+
+export const mockBlockingIssuablesResponse1 = {
+  data: {
+    issuable: {
+      __typename: 'Issue',
+      id: 'gid://gitlab/Issue/527',
+      blockingIssuables: {
+        __typename: 'IssueConnection',
+        nodes: [mockBlockingIssue1],
+      },
+    },
+  },
+};
+
+export const mockBlockingIssuablesResponse2 = {
+  data: {
+    issuable: {
+      __typename: 'Issue',
+      id: 'gid://gitlab/Issue/527',
+      blockingIssuables: {
+        __typename: 'IssueConnection',
+        nodes: [mockBlockingIssue2],
+      },
+    },
+  },
+};
+
+export const mockBlockingIssuablesResponse3 = {
+  data: {
+    issuable: {
+      __typename: 'Issue',
+      id: 'gid://gitlab/Issue/527',
+      blockingIssuables: {
+        __typename: 'IssueConnection',
+        nodes: [mockBlockingIssue1, mockBlockingIssue2, mockBlockingIssue3, mockBlockingIssue4],
+      },
+    },
+  },
+};
+
+export const mockBlockedIssue1 = {
+  id: '527',
+  blockedByCount: 1,
+};
+
+export const mockBlockedIssue2 = {
+  id: '527',
+  blockedByCount: 4,
+  webUrl: 'http://gdk.test:3000/gitlab-org/my-project-1/-/issues/0',
+};
+
+export const mockMoveIssueParams = {
+  itemId: 1,
+  fromListId: 'gid://gitlab/List/1',
+  toListId: 'gid://gitlab/List/2',
+  moveBeforeId: undefined,
+  moveAfterId: undefined,
+};
+
+export const mockMoveState = {
+  boardLists: {
+    'gid://gitlab/List/1': {
+      listType: ListType.backlog,
+    },
+    'gid://gitlab/List/2': {
+      listType: ListType.closed,
+    },
+  },
+  boardItems: {
+    [mockMoveIssueParams.itemId]: { foo: 'bar' },
+  },
+  boardItemsByListId: {
+    [mockMoveIssueParams.fromListId]: [mockMoveIssueParams.itemId],
+    [mockMoveIssueParams.toListId]: [],
+  },
+};
+
+export const mockMoveData = {
+  reordering: false,
+  shouldClone: false,
+  itemNotInToList: true,
+  originalIndex: 0,
+  originalIssue: { foo: 'bar' },
+  ...mockMoveIssueParams,
+};
+
+export const mockTokens = (fetchLabels, fetchAuthors) => [
   {
-    id: 0,
-    name: 'Example Project',
-    nameWithNamespace: 'Awesome Group / Example Project',
-    fullPath: 'awesome-group/example-project',
+    icon: 'labels',
+    title: __('Label'),
+    type: 'label_name',
+    operators: [
+      { value: '=', description: 'is' },
+      { value: '!=', description: 'is not' },
+    ],
+    token: LabelToken,
+    unique: false,
+    symbol: '~',
+    fetchLabels,
   },
   {
-    id: 1,
-    name: 'Foobar Project',
-    nameWithNamespace: 'Awesome Group / Foobar Project',
-    fullPath: 'awesome-group/foobar-project',
+    icon: 'pencil',
+    title: __('Author'),
+    type: 'author_username',
+    operators: [
+      { value: '=', description: 'is' },
+      { value: '!=', description: 'is not' },
+    ],
+    symbol: '@',
+    token: AuthorToken,
+    unique: true,
+    fetchAuthors,
+  },
+  {
+    icon: 'user',
+    title: __('Assignee'),
+    type: 'assignee_username',
+    operators: [
+      { value: '=', description: 'is' },
+      { value: '!=', description: 'is not' },
+    ],
+    token: AuthorToken,
+    unique: true,
+    fetchAuthors,
   },
 ];

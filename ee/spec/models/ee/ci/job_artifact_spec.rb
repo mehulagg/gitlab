@@ -6,6 +6,8 @@ RSpec.describe Ci::JobArtifact do
   using RSpec::Parameterized::TableSyntax
   include EE::GeoHelpers
 
+  it { is_expected.to delegate_method(:validate_schema?).to(:job) }
+
   describe '#destroy' do
     let_it_be(:primary) { create(:geo_node, :primary) }
     let_it_be(:secondary) { create(:geo_node) }
@@ -16,7 +18,7 @@ RSpec.describe Ci::JobArtifact do
       job_artifact = create(:ee_ci_job_artifact, :archive)
 
       expect do
-        job_artifact.destroy
+        job_artifact.destroy!
       end.to change { Geo::JobArtifactDeletedEvent.count }.by(1)
     end
   end
@@ -24,17 +26,17 @@ RSpec.describe Ci::JobArtifact do
   describe '.license_scanning_reports' do
     subject { Ci::JobArtifact.license_scanning_reports }
 
-    context 'when there is a license management report' do
-      let!(:artifact) { create(:ee_ci_job_artifact, :license_management) }
+    let_it_be(:artifact) { create(:ee_ci_job_artifact, :license_scanning) }
 
-      it { is_expected.to eq([artifact]) }
-    end
+    it { is_expected.to eq([artifact]) }
+  end
 
-    context 'when there is a license scanning report' do
-      let!(:artifact) { create(:ee_ci_job_artifact, :license_scanning) }
+  describe '.cluster_image_scanning_reports' do
+    subject { Ci::JobArtifact.cluster_image_scanning_reports }
 
-      it { is_expected.to eq([artifact]) }
-    end
+    let_it_be(:artifact) { create(:ee_ci_job_artifact, :cluster_image_scanning) }
+
+    it { is_expected.to eq([artifact]) }
   end
 
   describe '.metrics_reports' do
@@ -137,7 +139,7 @@ RSpec.describe Ci::JobArtifact do
     subject { Ci::JobArtifact.associated_file_types_for(file_type) }
 
     where(:file_type, :result) do
-      'license_scanning'    | %w(license_management license_scanning)
+      'license_scanning'    | %w(license_scanning)
       'codequality'         | %w(codequality)
       'browser_performance' | %w(browser_performance performance)
       'load_performance'    | %w(load_performance)
@@ -172,7 +174,7 @@ RSpec.describe Ci::JobArtifact do
     with_them do
       subject(:job_artifact_included) { described_class.replicables_for_current_secondary(ci_job_artifact).exists? }
 
-      let(:project) { create(*project_factory) }
+      let(:project) { create(*project_factory) } # rubocop:disable Rails/SaveBang
       let(:ci_build) { create(:ci_build, project: project) }
       let(:node) do
         create(:geo_node_with_selective_sync_for,
@@ -223,21 +225,23 @@ RSpec.describe Ci::JobArtifact do
 
   describe '#security_report' do
     let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
-    let(:security_report) { job_artifact.security_report }
+    let(:validate) { false }
+    let(:security_report) { job_artifact.security_report(validate: validate) }
 
     subject(:findings_count) { security_report.findings.length }
 
-    it { is_expected.to be(33) }
+    it { is_expected.to be(5) }
 
     context 'for different types' do
       where(:file_type, :security_report?) do
-        :performance         | false
-        :sast                | true
-        :secret_detection    | true
-        :dependency_scanning | true
-        :container_scanning  | true
-        :dast                | true
-        :coverage_fuzzing    | true
+        :performance            | false
+        :sast                   | true
+        :secret_detection       | true
+        :dependency_scanning    | true
+        :container_scanning     | true
+        :cluster_image_scanning | true
+        :dast                   | true
+        :coverage_fuzzing       | true
       end
 
       with_them do
@@ -246,6 +250,44 @@ RSpec.describe Ci::JobArtifact do
         subject { security_report.is_a?(::Gitlab::Ci::Reports::Security::Report) }
 
         it { is_expected.to be(security_report?) }
+      end
+    end
+
+    context 'when the parsing fails' do
+      let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
+      let(:errors) { security_report.errors }
+
+      before do
+        allow(::Gitlab::Ci::Parsers).to receive(:fabricate!).and_raise(:foo)
+      end
+
+      it 'returns an errored report instance' do
+        expect(errors).to eql([{ type: 'ParsingError', message: 'An unexpected error happened!' }])
+      end
+    end
+
+    describe 'schema validation' do
+      where(:validate, :build_is_subject_to_validation?, :expected_validate_flag) do
+        false | false | false
+        false | true  | false
+        true  | false | false
+        true  | true  | true
+      end
+
+      with_them do
+        let(:mock_parser) { double(:parser, parse!: true) }
+        let(:expected_parser_args) { ['sast', instance_of(String), instance_of(::Gitlab::Ci::Reports::Security::Report), validate: expected_validate_flag] }
+
+        before do
+          allow(job_artifact.job).to receive(:validate_schema?).and_return(build_is_subject_to_validation?)
+          allow(::Gitlab::Ci::Parsers).to receive(:fabricate!).and_return(mock_parser)
+        end
+
+        it 'calls the parser with the correct arguments' do
+          security_report
+
+          expect(::Gitlab::Ci::Parsers).to have_received(:fabricate!).with(*expected_parser_args)
+        end
       end
     end
   end

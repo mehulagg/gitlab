@@ -11,7 +11,7 @@ across the GitLab frontend team.
 
 ## Overview
 
-GitLab is built on top of [Ruby on Rails](https://rubyonrails.org). It uses [Haml](https://haml.info/) and a JavaScript0based frontend with [Vue.js](https://vuejs.org).
+GitLab is built on top of [Ruby on Rails](https://rubyonrails.org). It uses [Haml](https://haml.info/) and a JavaScript-based frontend with [Vue.js](https://vuejs.org).
 <!-- vale gitlab.Spelling = NO -->
 Be wary of [the limitations that come with using Hamlit](https://github.com/k0kubun/hamlit/blob/master/REFERENCE.md#limitations).
 <!-- vale gitlab.Spelling = YES -->
@@ -93,6 +93,11 @@ General information about frontend [dependencies](dependencies.md) and how we ma
 
 How we implement [keyboard shortcuts](keyboard_shortcuts.md) that can be customized and disabled.
 
+## Editors
+
+GitLab text editing experiences are provided by the [Source Editor](source_editor.md) and
+the [Content Editor](content_editor.md).
+
 ## Frontend FAQ
 
 Read the [frontend's FAQ](frontend_faq.md) for common small pieces of helpful information.
@@ -104,7 +109,7 @@ See the relevant style guides for our guidelines and for information on linting:
 - [JavaScript](style/javascript.md). Our guide is based on
 the excellent [Airbnb](https://github.com/airbnb/javascript) style guide with a few small
 changes.
-- [SCSS](style/scss.md): our SCSS conventions which are enforced through [`scss-lint`](https://github.com/sds/scss-lint).
+- [SCSS](style/scss.md): [our SCSS conventions](https://gitlab.com/gitlab-org/frontend/gitlab-stylelint-config) which are enforced through [`stylelint`](https://stylelint.io).
 - [HTML](style/html.md). Guidelines for writing HTML code consistent with the rest of the codebase.
 - [Vue](style/vue.md). Guidelines and conventions for Vue code may be found here.
 

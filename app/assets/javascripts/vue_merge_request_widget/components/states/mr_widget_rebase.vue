@@ -2,9 +2,9 @@
 /* eslint-disable vue/no-v-html */
 import { GlButton, GlSkeletonLoader } from '@gitlab/ui';
 import { escape } from 'lodash';
+import createFlash from '~/flash';
 import { __, sprintf } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { deprecatedCreateFlash as Flash } from '../../../flash';
 import simplePoll from '../../../lib/utils/simple_poll';
 import eventHub from '../../event_hub';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
@@ -87,9 +87,7 @@ export default {
     },
     fastForwardMergeText() {
       return sprintf(
-        __(
-          'Fast-forward merge is not possible. Rebase the source branch onto %{targetBranch} to allow this merge request to be merged.',
-        ),
+        __('Merge blocked: the source branch must be rebased onto the target branch.'),
         {
           targetBranch: `<span class="label-branch">${escape(this.targetBranch)}</span>`,
         },
@@ -113,7 +111,9 @@ export default {
           if (error.response && error.response.data && error.response.data.merge_error) {
             this.rebasingError = error.response.data.merge_error;
           } else {
-            Flash(__('Something went wrong. Please try again.'));
+            createFlash({
+              message: __('Something went wrong. Please try again.'),
+            });
           }
         });
     },
@@ -129,7 +129,9 @@ export default {
 
             if (res.merge_error && res.merge_error.length) {
               this.rebasingError = res.merge_error;
-              Flash(__('Something went wrong. Please try again.'));
+              createFlash({
+                message: __('Something went wrong. Please try again.'),
+              });
             }
 
             eventHub.$emit('MRWidgetRebaseSuccess');
@@ -138,7 +140,9 @@ export default {
         })
         .catch(() => {
           this.isMakingRequest = false;
-          Flash(__('Something went wrong. Please try again.'));
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          });
           stopPolling();
         });
     },
@@ -175,17 +179,21 @@ export default {
         >
           <gl-button
             :loading="isMakingRequest"
-            variant="success"
-            class="qa-mr-rebase-button"
+            variant="confirm"
+            data-qa-selector="mr_rebase_button"
             @click="rebase"
           >
             {{ __('Rebase') }}
           </gl-button>
-          <span v-if="!rebasingError" class="gl-font-weight-bold" data-testid="rebase-message">{{
-            __(
-              'Fast-forward merge is not possible. Rebase the source branch onto the target branch.',
-            )
-          }}</span>
+          <span
+            v-if="!rebasingError"
+            class="gl-font-weight-bold"
+            data-testid="rebase-message"
+            data-qa-selector="no_fast_forward_message_content"
+            >{{
+              __('Merge blocked: the source branch must be rebased onto the target branch.')
+            }}</span
+          >
           <span v-else class="gl-font-weight-bold danger" data-testid="rebase-message">{{
             rebasingError
           }}</span>

@@ -7,6 +7,7 @@ RSpec.describe QualityManagement::TestCases::CreateService do
   let_it_be_with_refind(:project) { create(:project, :empty_repo) }
   let(:description) { 'test case description' }
   let_it_be(:label) { create(:label, project: project) }
+
   let(:service) { described_class.new(project, user, title: title, description: description, label_ids: [label.id]) }
 
   describe '#execute' do
@@ -14,49 +15,36 @@ RSpec.describe QualityManagement::TestCases::CreateService do
       project.add_reporter(user)
     end
 
+    before do
+      stub_licensed_features(quality_management: true)
+    end
+
     context 'when test has title and description' do
       let(:title) { 'test case title' }
       let(:new_issue) { Issue.last! }
 
-      context 'when quality management license is not available' do
-        it 'responds with errors' do
-          expect(service.execute).to be_error
-          expect(service.execute.message).to eq("Test cases are not available for this project")
-        end
+      it 'responds with success' do
+        expect(service.execute).to be_success
       end
 
-      context 'when quality_management license is available' do
-        before do
-          stub_licensed_features(quality_management: true)
-        end
+      it 'creates an test case issue' do
+        expect { service.execute }.to change(Issue, :count).by(1)
+      end
 
-        it 'responds with success' do
-          expect(service.execute).to be_success
-        end
-
-        it 'creates an test case issue' do
-          expect { service.execute }.to change(Issue, :count).by(1)
-        end
-
-        it 'created issue has correct attributes' do
-          service.execute
-          aggregate_failures do
-            expect(new_issue.title).to eq(title)
-            expect(new_issue.description).to eq(description)
-            expect(new_issue.author).to eq(user)
-            expect(new_issue.issue_type).to eq('test_case')
-            expect(new_issue.labels.map(&:title)).to eq([label.title])
-          end
+      it 'created issue has correct attributes' do
+        service.execute
+        aggregate_failures do
+          expect(new_issue.title).to eq(title)
+          expect(new_issue.description).to eq(description)
+          expect(new_issue.author).to eq(user)
+          expect(new_issue.issue_type).to eq('test_case')
+          expect(new_issue.labels.map(&:title)).to eq([label.title])
         end
       end
     end
 
     context 'when test case has no title' do
       let(:title) { '' }
-
-      before do
-        stub_licensed_features(quality_management: true)
-      end
 
       it 'does not create an issue' do
         expect { service.execute }.not_to change(Issue, :count)

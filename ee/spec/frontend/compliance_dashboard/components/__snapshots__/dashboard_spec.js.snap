@@ -25,26 +25,29 @@ exports[`ComplianceDashboard component when there are merge requests and the sho
   </header>
    
   <gl-tabs-stub
+    queryparamname="tab"
     theme="indigo"
+    value="0"
   >
     <b-tab-stub
       tag="div"
       title=""
       titlelinkclass="gl-tab-nav-item"
     >
-      <template>
-         
-        <merge-requests-grid-stub
-          mergerequests="[object Object],[object Object]"
-        />
-      </template>
-      <template>
-        <span>
-          Merge Requests
-        </span>
-      </template>
+       
+      <merge-requests-grid-stub
+        mergerequests="[object Object],[object Object]"
+      />
+      <span>
+        Merge Requests
+      </span>
     </b-tab-stub>
   </gl-tabs-stub>
+   
+  <merge-request-drawer-stub
+    mergerequest="[object Object]"
+    z-index="252"
+  />
 </div>
 `;
 
@@ -74,6 +77,11 @@ exports[`ComplianceDashboard component when there are merge requests matches the
    
   <merge-requests-grid-stub
     mergerequests="[object Object],[object Object]"
+  />
+   
+  <merge-request-drawer-stub
+    mergerequest="[object Object]"
+    z-index="252"
   />
 </div>
 `;

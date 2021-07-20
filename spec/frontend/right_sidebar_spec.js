@@ -27,7 +27,6 @@ const assertSidebarState = (state) => {
 describe('RightSidebar', () => {
   describe('fixture tests', () => {
     const fixtureName = 'issues/open-issue.html';
-    preloadFixtures(fixtureName);
     let mock;
 
     beforeEach(() => {
@@ -65,22 +64,6 @@ describe('RightSidebar', () => {
       assertSidebarState('expanded');
       $toggle.click();
       assertSidebarState('collapsed');
-    });
-
-    it('should broadcast todo:toggle event when add todo clicked', (done) => {
-      const todos = getJSONFixture('todos/todos.json');
-      mock.onPost(/(.*)\/todos$/).reply(200, todos);
-
-      const todoToggleSpy = jest.fn();
-      $(document).on('todo:toggle', todoToggleSpy);
-
-      $('.issuable-sidebar-header .js-issuable-todo').click();
-
-      setImmediate(() => {
-        expect(todoToggleSpy.mock.calls.length).toEqual(1);
-
-        done();
-      });
     });
 
     it('should not hide collapsed icons', () => {

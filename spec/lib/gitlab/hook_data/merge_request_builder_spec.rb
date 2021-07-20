@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::HookData::MergeRequestBuilder do
   let_it_be(:merge_request) { create(:merge_request) }
+
   let(:builder) { described_class.new(merge_request) }
 
   describe '#build' do
@@ -56,8 +57,10 @@ RSpec.describe Gitlab::HookData::MergeRequestBuilder do
       expect(data).to include(:last_commit)
       expect(data).to include(:work_in_progress)
       expect(data).to include(:total_time_spent)
+      expect(data).to include(:time_change)
       expect(data).to include(:human_time_estimate)
       expect(data).to include(:human_total_time_spent)
+      expect(data).to include(:human_time_change)
     end
 
     context 'when the MR has an image in the description' do

@@ -14,45 +14,35 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
     it { is_expected.to have_many(:metric_images) }
+
+    it { is_expected.to have_one(:requirement) }
+    it { is_expected.to have_many(:test_reports) }
+
+    context 'for an issue with associated test report' do
+      let_it_be(:requirement_issue) do
+        ri = create(:requirement_issue)
+        create(:test_report, requirement_issue: ri, requirement: nil)
+        ri
+      end
+
+      context 'for an issue of type Requirement' do
+        specify { expect(requirement_issue.test_reports.count).to eq(1) }
+      end
+
+      context 'for an issue of a different type' do
+        before do
+          requirement_issue.update_attribute(:issue_type, :incident)
+        end
+
+        specify { expect(requirement_issue.test_reports.count).to eq(0) }
+      end
+    end
   end
 
   describe 'modules' do
     subject { build(:issue) }
 
     it { is_expected.to include_module(EE::WeightEventable) }
-  end
-
-  context 'callbacks' do
-    describe '.after_create' do
-      let_it_be(:project) { create(:project) }
-      let(:author) { User.alert_bot }
-
-      context 'when issue title is "New: Incident"' do
-        let(:issue) { build(:issue, project: project, author: author, title: 'New: Incident', iid: 503503) }
-
-        context 'when the author is Alert Bot' do
-          it 'updates issue title with the IID' do
-            expect { issue.save }.to change { issue.title }.to("New: Incident 503503")
-          end
-        end
-
-        context 'when the author is not an Alert Bot' do
-          let(:author) { create(:user) }
-
-          it 'does not change issue title' do
-            expect { issue.save }.not_to change { issue.title }
-          end
-        end
-      end
-
-      context 'when issue title is not "New: Incident"' do
-        let(:issue) { build(:issue, project: project, title: 'Not New: Incident') }
-
-        it 'does not change issue title' do
-          expect { issue.save }.not_to change { issue.title }
-        end
-      end
-    end
   end
 
   context 'scopes' do
@@ -108,8 +98,8 @@ RSpec.describe Issue do
     context 'epics' do
       let_it_be(:epic1) { create(:epic) }
       let_it_be(:epic2) { create(:epic) }
-      let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1) }
-      let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2) }
+      let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1, relative_position: 2) }
+      let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, relative_position: 1) }
       let_it_be(:issue_no_epic) { create(:issue) }
 
       before do
@@ -161,6 +151,12 @@ RSpec.describe Issue do
           end
         end
       end
+
+      describe '.sorted_by_epic_position' do
+        it 'sorts by epic relative position' do
+          expect(described_class.sorted_by_epic_position.ids).to eq([epic_issue2.issue_id, epic_issue1.issue_id])
+        end
+      end
     end
 
     context 'iterations' do
@@ -198,7 +194,7 @@ RSpec.describe Issue do
       describe '.not_in_iterations' do
         it 'returns issues not in selected iterations' do
           expect(described_class.count).to eq 3
-          expect(described_class.not_in_iterations([iteration1])).to eq [iteration2_issue, issue_no_iteration]
+          expect(described_class.not_in_iterations([iteration1])).to contain_exactly(iteration2_issue, issue_no_iteration)
         end
       end
 
@@ -438,46 +434,21 @@ RSpec.describe Issue do
     end
 
     context 'by blocking issues' do
-      it 'orders by descending blocking issues count' do
-        issue_1 = create(:issue, blocking_issues_count: 3)
-        issue_2 = create(:issue, blocking_issues_count: 2)
+      let_it_be(:issue_1) { create(:issue, blocking_issues_count: 3) }
+      let_it_be(:issue_2) { create(:issue, blocking_issues_count: 1) }
 
+      it 'orders by ascending blocking issues count', :aggregate_failures do
+        results = described_class.sort_by_attribute('blocking_issues_asc')
+
+        expect(results.first).to eq(issue_2)
+        expect(results.second).to eq(issue_1)
+      end
+
+      it 'orders by descending blocking issues count', :aggregate_failures do
         results = described_class.sort_by_attribute('blocking_issues_desc')
 
         expect(results.first).to eq(issue_1)
         expect(results.second).to eq(issue_2)
-      end
-    end
-  end
-
-  describe '#check_for_spam?' do
-    using RSpec::Parameterized::TableSyntax
-    let_it_be(:reusable_project) { create(:project) }
-    let_it_be(:author) { ::User.support_bot }
-
-    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | true
-      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
-      Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
-    end
-
-    with_them do
-      context 'when author is a bot' do
-        it 'only checks for spam when description, title, or confidential status is updated' do
-          project = reusable_project
-          project.update(visibility_level: visibility_level)
-          issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
-
-          issue.assign_attributes(new_attributes)
-
-          expect(issue.check_for_spam?).to eq(check_for_spam?)
-        end
       end
     end
   end
@@ -557,16 +528,28 @@ RSpec.describe Issue do
           issue.update!(title: 'the new title')
         end
       end
+
+      context 'when changing upvotes' do
+        it 'calls maintain_elasticsearch_update' do
+          expect(issue).to receive(:maintain_elasticsearch_update).twice
+
+          award_emoji = create(:award_emoji, :upvote, awardable: issue)
+
+          award_emoji.destroy
+        end
+      end
     end
   end
 
   describe 'relative positioning with group boards' do
     let_it_be(:group) { create(:group) }
+    let_it_be(:subgroup) { create(:group, parent: group) }
     let_it_be(:board) { create(:board, group: group) }
-    let_it_be(:project) { create(:project, namespace: group) }
-    let_it_be(:project1) { create(:project, namespace: group) }
+    let_it_be(:project) { create(:project, group: subgroup) }
+    let_it_be(:project1) { create(:project, group: group) }
     let_it_be_with_reload(:issue) { create(:issue, project: project) }
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
+
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
     describe '.relative_positioning_query_base' do
@@ -922,6 +905,7 @@ RSpec.describe Issue do
     end
 
     let_it_be(:user) { create(:user) }
+
     let(:group) { nil }
 
     subject { issue.can_be_promoted_to_epic?(user, group) }
@@ -1039,6 +1023,64 @@ RSpec.describe Issue do
 
       it 'returns the expected value' do
         expect(subject).to eq(sla_available)
+      end
+    end
+  end
+
+  describe '#supports_time_tracking?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    where(:issue_type, :supports_time_tracking) do
+      :requirement | false
+      :test_case | false
+    end
+
+    with_them do
+      before do
+        issue.update!(issue_type: issue_type)
+      end
+
+      it do
+        expect(issue.supports_time_tracking?).to eq(supports_time_tracking)
+      end
+    end
+  end
+
+  describe '#related_feature_flags' do
+    let_it_be(:user) { create(:user) }
+
+    let_it_be(:authorized_project) { create(:project) }
+    let_it_be(:authorized_project2) { create(:project) }
+    let_it_be(:unauthorized_project) { create(:project) }
+
+    let_it_be(:issue) { create(:issue, project: authorized_project) }
+
+    let_it_be(:authorized_feature_flag) { create(:operations_feature_flag, project: authorized_project) }
+    let_it_be(:authorized_feature_flag_b) { create(:operations_feature_flag, project: authorized_project2) }
+
+    let_it_be(:unauthorized_feature_flag) { create(:operations_feature_flag, project: unauthorized_project) }
+
+    let_it_be(:issue_link_a) { create(:feature_flag_issue, issue: issue, feature_flag: authorized_feature_flag) }
+    let_it_be(:issue_link_b) { create(:feature_flag_issue, issue: issue, feature_flag: unauthorized_feature_flag) }
+    let_it_be(:issue_link_c) { create(:feature_flag_issue, issue: issue, feature_flag: authorized_feature_flag_b) }
+
+    before_all do
+      authorized_project.add_developer(user)
+      authorized_project2.add_developer(user)
+    end
+
+    it 'returns only authorized related feature flags for a given user' do
+      expect(issue.related_feature_flags(user)).to contain_exactly(authorized_feature_flag, authorized_feature_flag_b)
+    end
+
+    describe 'when a user cannot read cross project' do
+      it 'only returns feature_flags within the same project' do
+        expect(Ability).to receive(:allowed?).with(user, :read_feature_flag, authorized_feature_flag).and_return(true)
+        expect(Ability).to receive(:allowed?).with(user, :read_cross_project).and_return(false)
+
+        expect(issue.related_feature_flags(user))
+          .to contain_exactly(authorized_feature_flag)
       end
     end
   end

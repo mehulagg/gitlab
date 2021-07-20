@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Static Application Security Testing (SAST)
+# Static Application Security Testing (SAST) **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3775) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
 > - All open source (OSS) analyzers were moved to GitLab Free in GitLab 13.3.
@@ -15,13 +15,15 @@ The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
 
-If you're using [GitLab CI/CD](../../../ci/README.md), you can analyze your source code for known
-vulnerabilities using Static Application Security Testing (SAST). GitLab checks the SAST report and
-compares the found vulnerabilities between the source and target branches.
+If you're using [GitLab CI/CD](../../../ci/index.md), you can use Static Application Security
+Testing (SAST) to check your source code for known vulnerabilities. When a pipeline completes,
+the results of the SAST analysis are processed and shown in the pipeline's Security tab. If the
+pipeline is associated with a merge request, the SAST analysis is compared with the results of
+the target branch's analysis (if available). The results of that comparison are shown in the merge
+request. **(ULTIMATE)** If the pipeline is running from the default branch, the results of the SAST
+analysis are available in the [security dashboards](../security_dashboard/index.md).
 
-Details of the vulnerabilities found are included in the merge request. **(ULTIMATE)**
-
-![SAST Widget](img/sast_v13_2.png)
+![SAST results shown in the MR widget](img/sast_results_in_mr_v14_0.png)
 
 The results are sorted by the priority of the vulnerability:
 
@@ -64,31 +66,36 @@ GitLab SAST supports a variety of languages, package managers, and frameworks. O
 
 You can also [view our language roadmap](https://about.gitlab.com/direction/secure/static-analysis/sast/#language-support) and [request other language support by opening an issue](https://gitlab.com/groups/gitlab-org/-/epics/297).
 
-| Language (package managers) / framework                                                                                                          | Scan tool                                                                                                     | Introduced in GitLab Version                                                                                                                                          |
-|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| .NET Core                                                                                                                                        | [Security Code Scan](https://security-code-scan.github.io)                                                    | 11.0                                          |
-| .NET Framework                                                                                                                                   | [Security Code Scan](https://security-code-scan.github.io)                                                    | 13.0                                          |
-| Apex (Salesforce)                                                                                                                                | [PMD](https://pmd.github.io/pmd/index.html)                                                                   | 12.1                                          |
-| C/C++                                                                                                                                            | [Flawfinder](https://github.com/david-a-wheeler/flawfinder)                                                   | 10.7                                          |
-| Elixir (Phoenix)                                                                                                                                 | [Sobelow](https://github.com/nccgroup/sobelow)                                                                | 11.1                                         |
-| Go                                                                                                                                               | [Gosec](https://github.com/securego/gosec)                                                                    | 10.7                                          |
-| Groovy ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/)) | [SpotBugs](https://spotbugs.github.io/) with the     [find-sec-bugs](https://find-sec-bugs.github.io/) plugin | 11.3 (Gradle) & 11.9 (Ant, Maven, SBT)        |
-| Helm Charts                                                                                                                                      | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 13.1                                          |
-| Java ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/))   | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 10.6 (Maven), 10.8 (Gradle) & 11.9 (Ant, SBT) |
-| Java (Android)                                                                                                                                   | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
-| JavaScript                                                                                                                                       | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.8                                          |
-| Kotlin (Android)                                                                                                                                 | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
-| Kubernetes manifests                                                                                                                             | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 12.6                                          |
-| Node.js                                                                                                                                          | [NodeJsScan](https://github.com/ajinabraham/NodeJsScan)                                                       | 11.1                                          |
-| Objective-C (iOS)                                                                                                                                | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
-| PHP                                                                                                                                              | [phpcs-security-audit](https://github.com/FloeDesignTechnologies/phpcs-security-audit)                        | 10.8                                          |
-| Python ([pip](https://pip.pypa.io/en/stable/))                                                                                                   | [bandit](https://github.com/PyCQA/bandit)                                                                     | 10.3                                          |
-| Python                                                                                                                                           | [semgrep](https://semgrep.dev)                                                                                | 13.9                                          |
-| React                                                                                                                                            | [ESLint react plugin](https://github.com/yannickcr/eslint-plugin-react)                                       | 12.5                                          |
-| Ruby on Rails                                                                                                                                    | [brakeman](https://brakemanscanner.org)                                                                       | 10.3                                          |
-| Scala ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/))  | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 11.0 (SBT) & 11.9 (Ant, Gradle, Maven)        |
-| Swift (iOS)                                                                                                                                      | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
-| TypeScript                                                                                                                                       | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.9, [merged](https://gitlab.com/gitlab-org/gitlab/-/issues/36059) with ESLint in 13.2                                                                               |
+| Language (package managers) / framework                                                                                                           | Scan tool                                                                                                     | Introduced in GitLab Version                                                            |
+|---------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| .NET Core                                                                                                                                         | [Security Code Scan](https://security-code-scan.github.io)                                                    | 11.0                                                                                    |
+| .NET Framework                                                                                                                                    | [Security Code Scan](https://security-code-scan.github.io)                                                    | 13.0                                                                                    |
+| Apex (Salesforce)                                                                                                                                 | [PMD](https://pmd.github.io/pmd/index.html)                                                                   | 12.1                                                                                    |
+| C/C++                                                                                                                                             | [Flawfinder](https://github.com/david-a-wheeler/flawfinder)                                                   | 10.7                                                                                    |
+| Elixir (Phoenix)                                                                                                                                  | [Sobelow](https://github.com/nccgroup/sobelow)                                                                | 11.1                                                                                    |
+| Go                                                                                                                                                | [Gosec](https://github.com/securego/gosec)                                                                    | 10.7                                                                                    |
+| Groovy ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/)) | [SpotBugs](https://spotbugs.github.io/) with the     [find-sec-bugs](https://find-sec-bugs.github.io/) plugin | 11.3 (Gradle) & 11.9 (Ant, Maven, SBT)                                                  |
+| Helm Charts                                                                                                                                       | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 13.1                                                                                    |
+| Java ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/))   | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 10.6 (Maven), 10.8 (Gradle) & 11.9 (Ant, SBT)                                           |
+| Java (Android)                                                                                                                                    | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                                                                    |
+| JavaScript                                                                                                                                        | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.8                                                                                    |
+| JavaScript                                                                                                                                        | [Semgrep](https://semgrep.dev)                                                                                | 13.10                                                                                   |
+| Kotlin (Android)                                                                                                                                  | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                                                                    |
+| Kotlin (General)                                                                                                                                  | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 13.11                                                                                   |
+| Kubernetes manifests                                                                                                                              | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 12.6                                                                                    |
+| Node.js                                                                                                                                           | [NodeJsScan](https://github.com/ajinabraham/NodeJsScan)                                                       | 11.1                                                                                    |
+| Objective-C (iOS)                                                                                                                                 | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                                                                    |
+| PHP                                                                                                                                               | [phpcs-security-audit](https://github.com/FloeDesignTechnologies/phpcs-security-audit)                        | 10.8                                                                                    |
+| Python ([pip](https://pip.pypa.io/en/stable/))                                                                                                    | [bandit](https://github.com/PyCQA/bandit)                                                                     | 10.3                                                                                    |
+| Python                                                                                                                                            | [Semgrep](https://semgrep.dev)                                                                                | 13.9                                                                                    |
+| React                                                                                                                                             | [ESLint react plugin](https://github.com/yannickcr/eslint-plugin-react)                                       | 12.5                                                                                    |
+| React                                                                                                                                             | [Semgrep](https://semgrep.dev)                                                                                | 13.10                                                                                   |
+| Ruby                                                                                                                                              | [brakeman](https://brakemanscanner.org)                                                                       | 13.9                                                                                    |
+| Ruby on Rails                                                                                                                                     | [brakeman](https://brakemanscanner.org)                                                                       | 10.3                                                                                    |
+| Scala ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/))  | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 11.0 (SBT) & 11.9 (Ant, Gradle, Maven)                                                  |
+| Swift (iOS)                                                                                                                                       | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                                                                    |
+| TypeScript                                                                                                                                        | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.9, [merged](https://gitlab.com/gitlab-org/gitlab/-/issues/36059) with ESLint in 13.2 |
+| TypeScript                                                                                                                                        | [Semgrep](https://semgrep.dev)                                                                                | 13.10                                                                                   |
 
 Note that the Java analyzers can also be used for variants like the
 [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html),
@@ -99,8 +106,7 @@ and the [Maven wrapper](https://github.com/takari/maven-wrapper).
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4895) in GitLab 13.7.
 
-GitLab SAST can scan repositories that contain multiple projects. All projects must be in the same
-language.
+GitLab SAST can scan repositories that contain multiple projects.
 
 The following analyzers have multi-project support:
 
@@ -130,16 +136,16 @@ All open source (OSS) analyzers have been moved to the GitLab Free tier as of Gi
 Different features are available in different [GitLab tiers](https://about.gitlab.com/pricing/),
 as shown in the following table:
 
-| Capability                                                                         | In Free             | In Ultimate        |
-|:-----------------------------------------------------------------------------------|:--------------------|:-------------------|
-| [Configure SAST Scanners](#configuration)                                          | **{check-circle}**  | **{check-circle}** |
-| [Customize SAST Settings](#customizing-the-sast-settings)                          | **{check-circle}**  | **{check-circle}** |
-| View [JSON Report](#reports-json-format)                                           | **{check-circle}**  | **{check-circle}** |
-| Presentation of JSON Report in Merge Request                          | **{dotted-circle}** | **{check-circle}** |
-| [Interaction with Vulnerabilities](#interacting-with-the-vulnerabilities) | **{dotted-circle}** | **{check-circle}** |
-| [Access to Security Dashboard](#security-dashboard)                       | **{dotted-circle}** | **{check-circle}** |
-| [Configure SAST in the UI](#configure-sast-in-the-ui)                     | **{dotted-circle}** | **{check-circle}** |
-| [Customize SAST Rulesets](#customize-rulesets)                            | **{dotted-circle}** | **{check-circle}** |
+| Capability                                                                             | In Free             | In Ultimate        |
+|:---------------------------------------------------------------------------------------|:--------------------|:-------------------|
+| [Configure SAST Scanners](#configuration)                                              | **{check-circle}**  | **{check-circle}** |
+| [Customize SAST Settings](#customizing-the-sast-settings)                              | **{check-circle}**  | **{check-circle}** |
+| View [JSON Report](#reports-json-format)                                               | **{check-circle}**  | **{check-circle}** |
+| Presentation of JSON Report in Merge Request                                           | **{dotted-circle}** | **{check-circle}** |
+| [Address vulnerabilities](../../application_security/vulnerabilities/index.md)         | **{dotted-circle}** | **{check-circle}** |
+| [Access to Security Dashboard](../../application_security/security_dashboard/index.md) | **{dotted-circle}** | **{check-circle}** |
+| [Configure SAST in the UI](#configure-sast-in-the-ui)                                  | **{dotted-circle}** | **{check-circle}** |
+| [Customize SAST Rulesets](#customize-rulesets)                                         | **{dotted-circle}** | **{check-circle}** |
 
 ## Contribute your scanner
 
@@ -149,15 +155,15 @@ The [Security Scanner Integration](../../../development/integrations/secure.md) 
 
 To configure SAST for a project you can:
 
-- Use [Auto SAST](../../../topics/autodevops/stages.md#auto-sast) provided by
+- Use [Auto SAST](../../../topics/autodevops/stages.md#auto-sast), provided by
   [Auto DevOps](../../../topics/autodevops/index.md).
 - [Configure SAST manually](#configure-sast-manually).
 - [Configure SAST using the UI](#configure-sast-in-the-ui) (introduced in GitLab 13.3).
 
 ### Configure SAST manually
 
-For GitLab 11.9 and later, to enable SAST you must [include](../../../ci/yaml/README.md#includetemplate)
-the [`SAST.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml)
+For GitLab 11.9 and later, to enable SAST you must [include](../../../ci/yaml/index.md#includetemplate)
+the [`SAST.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml)
 provided as a part of your GitLab installation. For GitLab versions earlier than 11.9, you
 can copy and use the job as defined that template.
 
@@ -172,7 +178,7 @@ The included template creates SAST jobs in your CI/CD pipeline and scans
 your project's source code for possible vulnerabilities.
 
 The results are saved as a
-[SAST report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportssast)
+[SAST report artifact](../../../ci/yaml/index.md#artifactsreportssast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest SAST artifact available.
 
@@ -198,9 +204,9 @@ page:
 
 ### Customizing the SAST settings
 
-The SAST settings can be changed through [CI/CD variables](#available-variables)
+The SAST settings can be changed through [CI/CD variables](#available-cicd-variables)
 by using the
-[`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
+[`variables`](../../../ci/yaml/index.md#variables) parameter in `.gitlab-ci.yml`.
 In the following example, we include the SAST template and at the same time we
 set the `SAST_GOSEC_LEVEL` variable to `2`:
 
@@ -212,14 +218,14 @@ variables:
   SAST_GOSEC_LEVEL: 2
 ```
 
-Because the template is [evaluated before](../../../ci/yaml/README.md#include)
+Because the template is [evaluated before](../../../ci/yaml/index.md#include)
 the pipeline configuration, the last mention of the variable takes precedence.
 
 ### Overriding SAST jobs
 
 WARNING:
-Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
-is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
+Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/index.md#only--except)
+is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/index.md#rules) instead.
 
 To override a job definition, (for example, change properties like `variables` or `dependencies`),
 declare a job with the same name as the SAST job to override. Place this new job after the template
@@ -235,6 +241,24 @@ spotbugs-sast:
     FAIL_NEVER: 1
 ```
 
+#### Pinning to minor image version
+
+While our templates use `MAJOR` version pinning to always ensure the latest analyzer
+versions are pulled, there are certain cases where it can be beneficial to pin
+an analyzer to a specific release. To do so, override the `SAST_ANALYZER_IMAGE_TAG` CI/CD variable
+in the job template directly.
+
+In the example below, we are pinning to a specific patch version of the `spotbugs` analyzer:
+
+```yaml
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+spotbugs-sast:
+  variables:
+    SAST_ANALYZER_IMAGE_TAG: "2.28.1"
+```
+
 ### Customize rulesets **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235382) in GitLab 13.5.
@@ -243,8 +267,8 @@ You can customize the default scanning rules provided by our SAST analyzers.
 
 Ruleset customization supports two capabilities:
 
-1. Disabling predefined rules
-1. Modifying the default behavior of a given analyzer
+1. Disabling predefined rules (available for all analyzers).
+1. Modifying the default behavior of a given analyzer (only available for `nodejs-scan` and `gosec`).
 
 These capabilities can be used simultaneously.
 
@@ -374,8 +398,6 @@ If all dependencies are present, the `COMPILE=false` CI/CD variable can be provi
 analyzer and compilation is skipped:
 
 ```yaml
-image: maven:3.6-jdk-8-alpine
-
 stages:
   - build
   - test
@@ -384,6 +406,7 @@ include:
   - template: Security/SAST.gitlab-ci.yml
 
 build:
+  image: maven:3.6-jdk-8-slim
   stage: build
   script:
     - mvn package -Dmaven.repo.local=./.m2/repository
@@ -408,7 +431,7 @@ the vendored directory. This configuration can vary per analyzer but in the case
 can use `MAVEN_REPO_PATH`. See
 [Analyzer settings](#analyzer-settings) for the complete list of available options.
 
-### Available variables
+### Available CI/CD variables
 
 SAST can be [configured](#customizing-the-sast-settings) using CI/CD variables.
 
@@ -442,7 +465,7 @@ variables:
       -----END CERTIFICATE-----
 ```
 
-The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/index.md#custom-cicd-variables), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
 
 #### Docker images
 
@@ -451,9 +474,8 @@ The following are Docker image-related CI/CD variables.
 | CI/CD variable            | Description                                                                                                                           |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `SECURE_ANALYZERS_PREFIX` | Override the name of the Docker registry providing the default images (proxy). Read more about [customizing analyzers](analyzers.md). |
-| `SAST_ANALYZER_IMAGE_TAG` | **DEPRECATED:** Override the Docker tag of the default images. Read more about [customizing analyzers](analyzers.md).                 |
-| `SAST_DEFAULT_ANALYZERS`  | **DEPRECATED:** Override the names of default images. Scheduled for [removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777). |
 | `SAST_EXCLUDED_ANALYZERS` | Names of default images that should never run. Read more about [customizing analyzers](analyzers.md).                                 |
+| `SAST_ANALYZER_IMAGE_TAG` | Override the default version of analyzer image. Read more about [pinning the analyzer image version](#pinning-to-minor-image-version).                                 |
 
 #### Vulnerability filters
 
@@ -461,7 +483,7 @@ Some analyzers make it possible to filter out vulnerabilities under a given thre
 
 | CI/CD variable               | Default value            | Description                                                                                                                                                                                                                 |
 |------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SAST_EXCLUDED_PATHS`        | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. You might need to exclude temporary directories used by your build tool as these can generate false positives. |
+| `SAST_EXCLUDED_PATHS`        | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec`). Parent directories also match patterns. You might need to exclude temporary directories used by your build tool as these can generate false positives. To exclude paths, copy and paste the default excluded paths, then **add** your own paths to be excluded. If you don't specify the default excluded paths, you will override the defaults and _only_ paths you specify will be excluded from the SAST scans. |
 | `SEARCH_MAX_DEPTH`           | 4                        | SAST searches the repository to detect the programming languages used, and selects the matching analyzers. Set the value of `SEARCH_MAX_DEPTH` to specify how many directory levels the search phase should span. After the analyzers have been selected, the _entire_ repository is analyzed. |
 | `SAST_BANDIT_EXCLUDED_PATHS` |                          | Comma-separated list of paths to exclude from scan. Uses Python's [`fnmatch` syntax](https://docs.python.org/2/library/fnmatch.html); For example: `'*/tests/*, */venv/*'`                                                  |
 | `SAST_BRAKEMAN_LEVEL`        | 1                        | Ignore Brakeman vulnerabilities under given confidence level. Integer, 1=Low 3=High.                                                                                                                                        |
@@ -477,7 +499,7 @@ Some analyzers can be customized with CI/CD variables.
 | `SCAN_KUBERNETES_MANIFESTS` | Kubesec    | Set to `"true"` to scan Kubernetes manifests.                                                                                                                                                                                      |
 | `KUBESEC_HELM_CHARTS_PATH`  | Kubesec    | Optional path to Helm charts that `helm` uses to generate a Kubernetes manifest that `kubesec` scans. If dependencies are defined, `helm dependency build` should be ran in a `before_script` to fetch the necessary dependencies. |
 | `KUBESEC_HELM_OPTIONS`      | Kubesec    | Additional arguments for the `helm` executable.                                                                                                                                                                                    |
-| `COMPILE`                   | SpotBugs   | Set to `false` to disable project compilation and dependency fetching. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195252) in GitLab 13.1.                                                                          |
+| `COMPILE`                   | Gosec, SpotBugs   | Set to `false` to disable project compilation and dependency fetching. [Introduced for `SpotBugs`](https://gitlab.com/gitlab-org/gitlab/-/issues/195252) analyzer in GitLab 13.1 and [`Gosec`](https://gitlab.com/gitlab-org/gitlab/-/issues/330678) analyzer in GitLab 14.0.  |
 | `ANT_HOME`                  | SpotBugs   | The `ANT_HOME` variable.                                                                                                                                                                                                           |
 | `ANT_PATH`                  | SpotBugs   | Path to the `ant` executable.                                                                                                                                                                                                      |
 | `GRADLE_PATH`               | SpotBugs   | Path to the `gradle` executable.                                                                                                                                                                                                   |
@@ -489,16 +511,17 @@ Some analyzers can be customized with CI/CD variables.
 | `MAVEN_REPO_PATH`           | SpotBugs   | Path to the Maven local repository (shortcut for the `maven.repo.local` property).                                                                                                                                                 |
 | `SBT_PATH`                  | SpotBugs   | Path to the `sbt` executable.                                                                                                                                                                                                      |
 | `FAIL_NEVER`                | SpotBugs   | Set to `1` to ignore compilation failure.                                                                                                                                                                                          |
-| `SAST_GOSEC_CONFIG`         | Gosec      | Path to configuration for Gosec (optional).                                                                                                                                                                                        |
+| `SAST_GOSEC_CONFIG`         | Gosec      | **{warning}** **[Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/328301)** in GitLab 14.0 - use custom rulesets instead. Path to configuration for Gosec (optional).                                                                                                                                                                                        |
 | `PHPCS_SECURITY_AUDIT_PHP_EXTENSIONS` | phpcs-security-audit | Comma separated list of additional PHP Extensions.                                                                                                                                                             |
-| `SAST_DISABLE_BABEL`        | NodeJsScan | Disable Babel processing for the NodeJsScan scanner. Set to `true` to disable Babel processing. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33065) in GitLab 13.2.                                                  |
+| `SAST_DISABLE_BABEL`        | NodeJsScan | **{warning}** **[Removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64025)** in GitLab 13.5 |
+| `SAST_SEMGREP_METRICS` | Semgrep | Set to `"false"` to disable sending anonymized scan metrics to [r2c](https://r2c.dev/). Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/330565) in GitLab 14.0.      |
 
 #### Custom CI/CD variables
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18193) in GitLab Ultimate 12.5.
 
 In addition to the aforementioned SAST configuration CI/CD variables,
-all [custom variables](../../../ci/variables/README.md#custom-cicd-variables) are propagated
+all [custom variables](../../../ci/variables/index.md#custom-cicd-variables) are propagated
 to the underlying SAST analyzer images if
 [the SAST vendored template](#configuration) is used.
 
@@ -533,7 +556,7 @@ The SAST tool emits a JSON report file. For more information, see the
 [schema for this report](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json).
 
 The JSON report file can be downloaded from the CI pipelines page, or the
-pipelines tab on merge requests by [setting `artifacts: paths`](../../../ci/pipelines/job_artifacts.md#defining-artifacts-in-gitlab-ciyml) to `gl-sast-report.json`. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
+pipelines tab on merge requests by [setting `artifacts: paths`](../../../ci/yaml/index.md#artifactspaths) to `gl-sast-report.json`. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
 
 Here's an example SAST report:
 
@@ -610,31 +633,6 @@ Here's an example SAST report:
 }
 ```
 
-## Secret detection
-
-Learn more about [Secret Detection](../secret_detection).
-
-## Security Dashboard **(ULTIMATE)**
-
-The Security Dashboard is a good place to get an overview of all the security
-vulnerabilities in your groups, projects and pipelines. Read more about the
-[Security Dashboard](../security_dashboard/index.md).
-
-## Interacting with the vulnerabilities **(ULTIMATE)**
-
-Once a vulnerability is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
-
-## Vulnerabilities database
-
-Vulnerabilities contained in the vulnerability database can be searched
-and viewed at the [GitLab vulnerability advisory database](https://advisories.gitlab.com).
-
-### Vulnerabilities database update
-
-For more information about the vulnerabilities database update, check the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
-
 ## Running SAST in an offline environment
 
 For self-managed GitLab instances in an environment with limited, restricted, or intermittent access
@@ -673,14 +671,15 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/nodejs-scan:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/phpcs-security-audit:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/pmd-apex:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/security-code-scan:2
+registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/sobelow:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/spotbugs:2
 ```
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
-process by which external resources can be imported or temporarily accessed. Note that these scanners are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you're able to make periodic updates yourself.
+process by which external resources can be imported or temporarily accessed. These scanners are [periodically updated](../vulnerabilities/index.md#vulnerability-scanner-maintenance)
+with new definitions, and you may be able to make occasional updates on your own.
 
 For details on saving and transporting Docker images as a file, see Docker's documentation on
 [`docker save`](https://docs.docker.com/engine/reference/commandline/save/), [`docker load`](https://docs.docker.com/engine/reference/commandline/load/),
@@ -702,7 +701,7 @@ Support for custom certificate authorities was introduced in the following versi
 | `phpcs-security-audit` | [v2.8.2](https://gitlab.com/gitlab-org/security-products/analyzers/phpcs-security-audit/-/releases/v2.8.2) |
 | `pmd-apex`             | [v2.1.0](https://gitlab.com/gitlab-org/security-products/analyzers/pmd-apex/-/releases/v2.1.0)             |
 | `security-code-scan`   | [v2.7.3](https://gitlab.com/gitlab-org/security-products/analyzers/security-code-scan/-/releases/v2.7.3)   |
-| `semgrep`              | [v0.0.1](https://gitlab.com/gitlab-org/security-products/analyzers/security-code-scan/-/releases/v0.0.1)   |
+| `semgrep`              | [v0.0.1](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep/-/releases/v0.0.1)   |
 | `sobelow`              | [v2.2.0](https://gitlab.com/gitlab-org/security-products/analyzers/sobelow/-/releases/v2.2.0)              |
 | `spotbugs`             | [v2.7.1](https://gitlab.com/gitlab-org/security-products/analyzers/spotbugs/-/releases/v2.7.1)             |
 
@@ -729,7 +728,20 @@ offline environment, certificate verification with an external source is not pos
 self-signed certificate or disable certificate verification. Refer to the package manager's
 documentation for instructions.
 
+## Running SAST in SELinux
+
+By default SAST analyzers are supported in GitLab instances hosted on SELinux. Adding a `before_script` in an [overridden SAST job](#overriding-sast-jobs) may not work as runners hosted on SELinux have restricted permissions.
+
 ## Troubleshooting
+
+### SAST debug logging
+
+Increase the [Secure scanner log verbosity](#logging-level) to `debug` in a global CI variable to help troubleshoot SAST jobs.
+
+```yaml
+variables:
+  SECURE_LOG_LEVEL: "debug"
+```
 
 ### `Error response from daemon: error processing tar file: docker-tar: relocation error`
 
@@ -753,7 +765,7 @@ uses the `rules:exists` parameter. For performance reasons, a maximum number of 
 against the given glob pattern. If the number of matches exceeds the maximum, the `rules:exists`
 parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
 triggered even if the scanner doesn't support your project. For more details about this issue, see
-the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
+the [`rules:exists` documentation](../../../ci/yaml/index.md#rulesexists).
 
 ### SpotBugs UTF-8 unmappable character errors
 
@@ -779,4 +791,8 @@ For Maven builds, add the following to your `pom.xml` file:
 
 ### Flawfinder encoding error
 
-This occurs when Flawfinder encounters an invalid UTF-8 character. To fix this, convert all source code in your project to UTF-8 character encoding. This can be done with [`cvt2utf`](https://github.com/x1angli/cvt2utf) or [`iconv`](https://www.gnu.org/software/libiconv/documentation/libiconv-1.13/iconv.1.html) either over the entire project or per job using the [`before_script`](../../../ci/yaml/README.md#before_script) feature.
+This occurs when Flawfinder encounters an invalid UTF-8 character. To fix this, convert all source code in your project to UTF-8 character encoding. This can be done with [`cvt2utf`](https://github.com/x1angli/cvt2utf) or [`iconv`](https://www.gnu.org/software/libiconv/documentation/libiconv-1.13/iconv.1.html) either over the entire project or per job using the [`before_script`](../../../ci/yaml/index.md#before_script) feature.
+
+### Semgrep slowness, unexpected results, or other errors
+
+If Semgrep is slow, reports too many false positives or false negatives, crashes, fails, or is otherwise broken, see the Semgrep docs for [troubleshooting GitLab SAST](https://semgrep.dev/docs/troubleshooting/gitlab-sast/).

@@ -1,4 +1,5 @@
-%commit-description-base {
+.commit-description,
+.commit-row-description {
   padding: $gl-padding-8 0 $gl-padding-8 $gl-padding-8;
   margin-top: $gl-padding-8;
   border: 0;
@@ -8,10 +9,6 @@
   overflow-x: auto;
   border-left: 3px solid $white-dark;
   color: $gl-text-color-secondary;
-}
-
-.commit-description {
-  @extend %commit-description-base;
 }
 
 .commit-box {
@@ -186,6 +183,8 @@
 }
 
 .commit-nav-buttons {
+  margin: 0 0.5rem;
+
   a.btn,
   button {
     // See: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/730
@@ -249,7 +248,6 @@
   }
 
   .commit-row-description {
-    @extend %commit-description-base;
     display: none;
     flex: 1;
   }

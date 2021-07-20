@@ -1,4 +1,4 @@
-import { GlDropdownItem, GlSegmentedControl } from '@gitlab/ui';
+import { GlDropdownItem, GlSegmentedControl, GlSprintf } from '@gitlab/ui';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
@@ -13,14 +13,15 @@ import {
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { groupLabels } from '../../mock_data';
 
 const selectedLabelIds = [groupLabels[0].id];
 
-const findSubjectFilters = (ctx) => ctx.find(GlSegmentedControl);
+const findSubjectFilters = (ctx) => ctx.findComponent(GlSegmentedControl);
 const findSelectedSubjectFilters = (ctx) => findSubjectFilters(ctx).attributes('checked');
-const findDropdownLabels = (ctx) => ctx.find(LabelsSelector).findAll(GlDropdownItem);
+const findDropdownLabels = (ctx) =>
+  ctx.findComponent(LabelsSelector).findAllComponents(GlDropdownItem);
 
 const selectLabelAtIndex = (ctx, index) => {
   findDropdownLabels(ctx).at(index).trigger('click');
@@ -56,6 +57,7 @@ function createComponent({ props = {}, mountFn = shallowMount } = {}) {
     },
     stubs: {
       LabelsSelector,
+      GlSprintf,
     },
   });
 }
@@ -63,7 +65,10 @@ function createComponent({ props = {}, mountFn = shallowMount } = {}) {
 describe('TasksByTypeFilters', () => {
   let wrapper = null;
   let mock = null;
-  const selectedFilterText = (count = 1) => `Showing Issues and ${count} labels`;
+  const selectedFilterText = (count = 1) => {
+    const affix = count > 1 ? 'labels' : 'label';
+    return `Showing Issues and ${count} ${affix}`;
+  };
 
   beforeEach(() => {
     mock = mockGroupLabelsRequest();
@@ -110,13 +115,13 @@ describe('TasksByTypeFilters', () => {
       return waitForPromises();
     });
 
-    it('emits the `updateFilter` event when a label is selected', () => {
-      expect(wrapper.emitted('updateFilter')).toBeUndefined();
+    it('emits the `update-filter` event when a label is selected', () => {
+      expect(wrapper.emitted('update-filter')).toBeUndefined();
 
-      wrapper.find(LabelsSelector).vm.$emit('selectLabel', groupLabels[0].id);
+      wrapper.findComponent(LabelsSelector).vm.$emit('select-label', groupLabels[0].id);
 
-      expect(wrapper.emitted('updateFilter')).toBeDefined();
-      expect(wrapper.emitted('updateFilter')[0]).toEqual([
+      expect(wrapper.emitted('update-filter')).toBeDefined();
+      expect(wrapper.emitted('update-filter')[0]).toEqual([
         { filter: TASKS_BY_TYPE_FILTERS.LABEL, value: groupLabels[0].id },
       ]);
     });
@@ -157,7 +162,7 @@ describe('TasksByTypeFilters', () => {
         });
 
         return waitForPromises().then(() => {
-          wrapper.find(LabelsSelector).vm.$emit('selectLabel', groupLabels[2].id);
+          wrapper.findComponent(LabelsSelector).vm.$emit('select-label', groupLabels[2].id);
         });
       });
 
@@ -166,14 +171,14 @@ describe('TasksByTypeFilters', () => {
       });
 
       it('should not allow selecting another label', () => {
-        expect(wrapper.emitted('updateFilter')).toBeUndefined();
+        expect(wrapper.emitted('update-filter')).toBeUndefined();
       });
 
       it('should display a message', () => {
-        expect(createFlash).toHaveBeenCalledWith(
-          'Only 2 labels can be selected at this time',
-          'notice',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Only 2 labels can be selected at this time',
+          type: 'notice',
+        });
       });
     });
   });
@@ -183,15 +188,15 @@ describe('TasksByTypeFilters', () => {
       expect(findSelectedSubjectFilters(wrapper)).toBe(TASKS_BY_TYPE_SUBJECT_ISSUE);
     });
 
-    it('emits the `updateFilter` event when a subject filter is clicked', () => {
+    it('emits the `update-filter` event when a subject filter is clicked', () => {
       wrapper = createComponent({ mountFn: mount });
-      expect(wrapper.emitted('updateFilter')).toBeUndefined();
+      expect(wrapper.emitted('update-filter')).toBeUndefined();
 
       findSubjectFilters(wrapper).findAll('label:not(.active)').at(0).trigger('click');
 
       return wrapper.vm.$nextTick(() => {
-        expect(wrapper.emitted('updateFilter')).toBeDefined();
-        expect(wrapper.emitted('updateFilter')[0]).toEqual([
+        expect(wrapper.emitted('update-filter')).toBeDefined();
+        expect(wrapper.emitted('update-filter')[0]).toEqual([
           {
             filter: TASKS_BY_TYPE_FILTERS.SUBJECT,
             value: TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST,

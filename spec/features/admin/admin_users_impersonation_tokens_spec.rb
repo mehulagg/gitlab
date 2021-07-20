@@ -28,10 +28,10 @@ RSpec.describe 'Admin > Users > Impersonation Tokens', :js do
       name = 'Hello World'
 
       visit admin_user_impersonation_tokens_path(user_id: user.username)
-      fill_in "Name", with: name
+      fill_in "Token name", with: name
 
       # Set date to 1st of next month
-      find_field("Expires at").click
+      find_field("Expiration date").click
       find(".pika-next").click
       click_on "1"
 
@@ -75,7 +75,7 @@ RSpec.describe 'Admin > Users > Impersonation Tokens', :js do
     end
 
     it "removes expired tokens from 'active' section" do
-      impersonation_token.update(expires_at: 5.days.ago)
+      impersonation_token.update!(expires_at: 5.days.ago)
 
       visit admin_user_impersonation_tokens_path(user_id: user.username)
 

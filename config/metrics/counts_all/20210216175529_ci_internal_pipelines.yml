@@ -1,0 +1,19 @@
+---
+data_category: Optional
+key_path: usage_activity_by_stage.verify.ci_internal_pipelines
+description: Total pipelines in GitLab repositories
+product_section: ops
+product_stage: verify
+product_group: group::pipeline execution
+product_category: continuous_integration
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ce
+- ee
+tier:
+- free
+- premium
+- ultimate

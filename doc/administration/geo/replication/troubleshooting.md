@@ -25,8 +25,12 @@ Before attempting more advanced troubleshooting:
 
 ### Check the health of the **secondary** node
 
-Visit the **primary** node's **Admin Area > Geo** (`/admin/geo/nodes`) in
-your browser. We perform the following health checks on each **secondary** node
+On the **primary** node:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Geo > Nodes**.
+
+We perform the following health checks on each **secondary** node
 to help identify if something is wrong:
 
 - Is the node running?
@@ -35,7 +39,7 @@ to help identify if something is wrong:
 - Is the node's secondary tracking database connected?
 - Is the node's secondary tracking database up-to-date?
 
-![Geo health check](img/geo_node_dashboard.png)
+![Geo health check](img/geo_node_health_v14_0.png)
 
 For information on how to resolve common errors reported from the UI, see
 [Fixing Common Errors](#fixing-common-errors).
@@ -129,7 +133,8 @@ Geo finds the current machine's Geo node name in `/etc/gitlab/gitlab.rb` by:
 - Using the `gitlab_rails['geo_node_name']` setting.
 - If that is not defined, using the `external_url` setting.
 
-This name is used to look up the node with the same **Name** in **Admin Area > Geo**.
+This name is used to look up the node with the same **Name** in the **Geo Nodes**
+dashboard.
 
 To check if the current machine has a node name that matches a node in the
 database, run the check task:
@@ -322,7 +327,7 @@ Slots where `active` is `f` are not active.
 - When this slot should be active, because you have a **secondary** node configured using that slot,
   log in to that **secondary** node and check the PostgreSQL logs why the replication is not running.
 
-- If you are no longer using the slot (e.g. you no longer have Geo enabled), you can remove it with in the
+- If you are no longer using the slot (for example, you no longer have Geo enabled), you can remove it with in the
   PostgreSQL console session:
 
   ```sql
@@ -373,7 +378,7 @@ This happens on wrongly-formatted addresses in `postgresql['md5_auth_cidr_addres
 ```
 
 To fix this, update the IP addresses in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
-to respect the CIDR format (i.e. `1.2.3.4/32`).
+to respect the CIDR format (that is, `1.2.3.4/32`).
 
 ### Message: `LOG:  invalid IP mask "md5": Name or service not known`
 
@@ -385,7 +390,7 @@ This happens when you have added IP addresses without a subnet mask in `postgres
 ```
 
 To fix this, add the subnet mask in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
-to respect the CIDR format (i.e. `1.2.3.4/32`).
+to respect the CIDR format (that is, `1.2.3.4/32`).
 
 ### Message: `Found data in the gitlabhq_production database!` when running `gitlab-ctl replicate-geo-database`
 
@@ -428,7 +433,7 @@ To solve this:
 
 1. Log into the secondary Geo node.
 
-1. Back up [the `.git` folder](../../repository_storage_types.md#translating-hashed-storage-paths).
+1. Back up [the `.git` folder](../../repository_storage_types.md#translate-hashed-storage-paths).
 
 1. Optional: [Spot-check](../../troubleshooting/log_parsing.md#find-all-projects-affected-by-a-fatal-git-problem))
    a few of those IDs whether they indeed correspond
@@ -558,6 +563,7 @@ to start again from scratch, there are a few steps that can help you:
    mv /var/opt/gitlab/gitlab-rails/uploads /var/opt/gitlab/gitlab-rails/uploads.old
    mkdir -p /var/opt/gitlab/gitlab-rails/uploads
 
+   gitlab-ctl start postgresql
    gitlab-ctl start geo-postgresql
    ```
 
@@ -582,63 +588,74 @@ to start again from scratch, there are a few steps that can help you:
    gitlab-ctl start
    ```
 
-## Fixing errors during a PostgreSQL upgrade or downgrade
+### Design repository failures on mirrored projects and project imports
 
-### Message: `ERROR: psql: FATAL:  role "gitlab-consul" does not exist`
+On the top bar, under **Menu >** **{admin}** **Admin > Geo > Nodes**,
+if the Design repositories progress bar shows
+`Synced` and `Failed` greater than 100%, and negative `Queued`, then the instance
+is likely affected by
+[a bug in GitLab 13.2 and 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/241668).
+It was [fixed in 13.4+](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40643).
 
-When
-[upgrading PostgreSQL on a Geo instance](https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-geo-instance), you might encounter the
-following error:
-
-```plaintext
-$ sudo gitlab-ctl pg-upgrade --target-version=11
-Checking for an omnibus managed postgresql: OK
-Checking if postgresql['version'] is set: OK
-Checking if we already upgraded: NOT OK
-Checking for a newer version of PostgreSQL to install
-Upgrading PostgreSQL to 11.7
-Checking if PostgreSQL bin files are symlinked to the expected location: OK
-Waiting 30 seconds to ensure tasks complete before PostgreSQL upgrade.
-See https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server for details
-If you do not want to upgrade the PostgreSQL server at this time, enter Ctrl-C and see the documentation for details
-
-Please hit Ctrl-C now if you want to cancel the operation.
-..............................Detected an HA cluster.
-Error running command: /opt/gitlab/embedded/bin/psql -qt -d gitlab_repmgr -h /var/opt/gitlab/postgresql -p 5432 -c "SELECT name FROM repmgr_gitlab_cluster.repl_nodes WHERE type='master' AND active != 'f'" -U gitlab-consul
-ERROR: psql: FATAL:  role "gitlab-consul" does not exist
-Traceback (most recent call last):
-    10: from /opt/gitlab/embedded/bin/omnibus-ctl:23:in `<main>'
-      9: from /opt/gitlab/embedded/bin/omnibus-ctl:23:in `load'
-      8: from /opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/omnibus-ctl-0.6.0/bin/omnibus-ctl:31:in `<top (required)>'
-      7: from /opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/omnibus-ctl-0.6.0/lib/omnibus-ctl.rb:746:in `run'
-      6: from /opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/omnibus-ctl-0.6.0/lib/omnibus-ctl.rb:204:in `block in add_command_under_category'
-      5: from /opt/gitlab/embedded/service/omnibus-ctl/pg-upgrade.rb:171:in `block in load_file'
-      4: from /opt/gitlab/embedded/service/omnibus-ctl-ee/lib/repmgr.rb:248:in `is_master?'
-      3: from /opt/gitlab/embedded/service/omnibus-ctl-ee/lib/repmgr.rb:100:in `execute_psql'
-      2: from /opt/gitlab/embedded/service/omnibus-ctl-ee/lib/repmgr.rb:113:in `cmd'
-      1: from /opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/mixlib-shellout-3.0.9/lib/mixlib/shellout.rb:287:in `error!'
-/opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/mixlib-shellout-3.0.9/lib/mixlib/shellout.rb:300:in `invalid!': Expected process to exit with [0], but received '2' (Mixlib::ShellOut::ShellCommandFailed)
----- Begin output of /opt/gitlab/embedded/bin/psql -qt -d gitlab_repmgr -h /var/opt/gitlab/postgresql -p 5432 -c "SELECT name FROM repmgr_gitlab_cluster.repl_nodes WHERE type='master' AND active != 'f'" -U gitlab-consul ----
-STDOUT:
-STDERR: psql: FATAL:  role "gitlab-consul" does not exist
----- End output of /opt/gitlab/embedded/bin/psql -qt -d gitlab_repmgr -h /var/opt/gitlab/postgresql -p 5432 -c "SELECT name FROM repmgr_gitlab_cluster.repl_nodes WHERE type='master' AND active != 'f'" -U gitlab-consul ----
-Ran /opt/gitlab/embedded/bin/psql -qt -d gitlab_repmgr -h /var/opt/gitlab/postgresql -p 5432 -c "SELECT name FROM repmgr_gitlab_cluster.repl_nodes WHERE type='master' AND active != 'f'" -U gitlab-consul returned 2
-```
-
-If you are upgrading the PostgreSQL read-replica of a Geo secondary node, and
-you are not using `consul` or `repmgr`, you may need to disable `consul` and/or
-`repmgr` services in `gitlab.rb`:
+To determine the actual replication status of design repositories in
+a [Rails console](../../operations/rails_console.md):
 
 ```ruby
-consul['enable'] = false
-repmgr['enable'] = false
+secondary = Gitlab::Geo.current_node
+counts = {}
+secondary.designs.select("projects.id").find_each do |p|
+  registry = Geo::DesignRegistry.find_by(project_id: p.id)
+  state = registry ? "#{registry.state}" : "registry does not exist yet"
+  # puts "Design ID##{p.id}: #{state}" # uncomment this for granular information
+  counts[state] ||= 0
+  counts[state] += 1
+end
+puts "\nCounts:", counts
 ```
 
-Then reconfigure GitLab:
+Example output:
 
-```shell
-sudo gitlab-ctl reconfigure
+```plaintext
+Design ID#5: started
+Design ID#6: synced
+Design ID#7: failed
+Design ID#8: pending
+Design ID#9: synced
+
+Counts:
+{"started"=>1, "synced"=>2, "failed"=>1, "pending"=>1}
 ```
+
+Example output if there are actually zero design repository replication failures:
+
+```plaintext
+Design ID#5: synced
+Design ID#6: synced
+Design ID#7: synced
+
+Counts:
+{"synced"=>3}
+```
+
+#### If you are promoting a Geo secondary site running on a single server
+
+`gitlab-ctl promotion-preflight-checks` will fail due to the existence of
+`failed` rows in the `geo_design_registry` table. Use the
+[previous snippet](#design-repository-failures-on-mirrored-projects-and-project-imports) to
+determine the actual replication status of Design repositories.
+
+`gitlab-ctl promote-to-primary-node` will fail since it runs preflight checks.
+If the [previous snippet](#design-repository-failures-on-mirrored-projects-and-project-imports)
+shows that all designs are synced, then you can use the
+`--skip-preflight-checks` option or the `--force` option to move forward with
+promotion.
+
+#### If you are promoting a Geo secondary site running on multiple servers
+
+`gitlab-ctl promotion-preflight-checks` will fail due to the existence of
+`failed` rows in the `geo_design_registry` table. Use the
+[previous snippet](#design-repository-failures-on-mirrored-projects-and-project-imports) to
+determine the actual replication status of Design repositories.
 
 ## Fixing errors during a failover or when promoting a secondary to a primary node
 
@@ -755,6 +772,31 @@ this command reports `ERROR - Replication is not up-to-date` even if
 replication is actually up-to-date. If replication and verification output
 shows that it is complete, you can add `--skip-preflight-checks` to make the command complete promotion. This bug was fixed in GitLab 13.8 and later.
 
+### Errors when using `--skip-preflight-checks` or `--force`
+
+Before GitLab 13.5, you could bump into one of the following errors when using
+`--skip-preflight-checks` or `--force`:
+
+```plaintext
+get_ctl_options': invalid option: --skip-preflight-checks (OptionParser::InvalidOption)
+
+get_ctl_options': invalid option: --force (OptionParser::InvalidOption)
+```
+
+This can happen with XFS or filesystems that list files in lexical order, because the
+load order of the Omnibus command files can be different than expected, and a global function would get redefined.
+More details can be found in [the related issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6076).
+
+The workaround is to manually run the preflight checks and promote the database, by running
+the following commands on the Geo secondary site:
+
+```shell
+sudo gitlab-ctl promotion-preflight-checks
+sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
+sudo gitlab-ctl reconfigure
+sudo gitlab-rake geo:set_secondary_as_primary
+```
+
 ## Expired artifacts
 
 If you notice for some reason there are more artifacts on the Geo
@@ -772,8 +814,11 @@ If you are able to log in to the **primary** node, but you receive this error
 when attempting to log into a **secondary**, you should check that the Geo
 node's URL matches its external URL.
 
-1. On the primary, visit **Admin Area > Geo**.
-1. Find the affected **secondary** and click **Edit**.
+On the **primary** node:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Geo > Nodes**.
+1. Find the affected **secondary** site and select **Edit**.
 1. Ensure the **URL** field matches the value found in `/etc/gitlab/gitlab.rb`
    in `external_url "https://gitlab.example.com"` on the frontend server(s) of
    the **secondary** node.
@@ -819,7 +864,7 @@ PostgreSQL instances:
 
 The most common problems that prevent the database from replicating correctly are:
 
-- **Secondary** nodes cannot reach the **primary** node. Check credentials, firewall rules, etc.
+- **Secondary** nodes cannot reach the **primary** node. Check credentials, firewall rules, and so on.
 - SSL certificate problems. Make sure you copied `/etc/gitlab/gitlab-secrets.json` from the **primary** node.
 - Database storage disk is full.
 - Database replication slot is misconfigured.
@@ -852,6 +897,17 @@ To resolve this issue:
   using IPv6 to send its status to the **primary** node. If it is, add an entry to
   the **primary** node using IPv4 in the `/etc/hosts` file. Alternatively, you should
   [enable IPv6 on the **primary** node](https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-address-or-addresses).
+
+### Geo Admin Area shows 'Unknown' for health status and 'Request failed with status code 401'
+
+If using a load balancer, ensure that the load balancer's URL is set as the `external_url` in the
+`/etc/gitlab/gitlab.rb` of the nodes behind the load balancer.
+
+### GitLab Pages return 404 errors after promoting
+
+This is due to [Pages data not being managed by Geo](datatypes.md#limitations-on-replicationverification).
+Find advice to resolve those errors in the
+[Pages administration documentation](../../../administration/pages/index.md#404-error-after-promoting-a-geo-secondary-to-a-primary-node).
 
 ## Fixing client errors
 

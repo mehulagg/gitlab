@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe CustomProjectTemplatesFinder do
   let_it_be(:user) { create(:user) }
+
   let(:base_params) { { current_user: user } }
   let(:params) { {} }
 
@@ -25,6 +26,12 @@ RSpec.describe CustomProjectTemplatesFinder do
       expect(subject.execute).to be_empty
     end
 
+    it 'ignores pages permissions as they are not exported' do
+      project = create(:project, :internal, :metrics_dashboard_enabled, namespace: group, pages_access_level: ProjectFeature::PRIVATE)
+
+      expect(subject.execute).to eq([project])
+    end
+
     context 'when the group has projects' do
       using RSpec::Parameterized::TableSyntax
 
@@ -33,12 +40,12 @@ RSpec.describe CustomProjectTemplatesFinder do
       let_it_be_with_reload(:public_project) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public' }
 
       where(:issues_access_level, :minimal_user_access, :available_templates) do
-        :disabled | :no_access | %w[public]
+        :disabled | :no_access | %w[public internal]
         :disabled | :guest     | %w[public internal private]
         :private  | :guest     | %w[public internal private]
         :private  | :no_access | %w[]
         :enabled  | :guest     | %w[public internal private]
-        :enabled  | :no_access | %w[public]
+        :enabled  | :no_access | %w[public internal]
       end
 
       with_them do

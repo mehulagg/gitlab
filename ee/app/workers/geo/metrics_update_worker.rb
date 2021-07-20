@@ -3,6 +3,8 @@
 module Geo
   class MetricsUpdateWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include ExclusiveLeaseGuard
     # rubocop:disable Scalability/CronWorkerContext
     # This worker does not perform work scoped to a context
@@ -10,6 +12,7 @@ module Geo
     # rubocop:enable Scalability/CronWorkerContext
 
     feature_category :geo_replication
+    tags :exclude_from_gitlab_com
 
     LEASE_TIMEOUT = 5.minutes
 

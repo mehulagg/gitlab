@@ -1,25 +1,26 @@
+import {
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from '~/cycle_analytics/constants';
+
 export default () => ({
   featureFlags: {},
   defaultStageConfig: [],
 
-  startDate: null,
-  endDate: null,
+  createdAfter: null,
+  createdBefore: null,
 
   isLoading: false,
   isLoadingStage: false,
 
-  isEmptyStage: false,
   errorCode: null,
-
-  isSavingStageOrder: false,
-  errorSavingStageOrder: false,
 
   currentGroup: null,
   selectedProjects: [],
   selectedStage: null,
   selectedValueStream: null,
 
-  currentStageEvents: [],
+  selectedStageEvents: [],
 
   isLoadingValueStreams: false,
   isCreatingValueStream: false,
@@ -30,8 +31,17 @@ export default () => ({
   deleteValueStreamError: null,
 
   stages: [],
+  formEvents: [],
   selectedStageError: '',
   summary: [],
   medians: {},
   valueStreams: [],
+
+  pagination: {
+    page: null,
+    hasNextPage: false,
+    sort: PAGINATION_SORT_FIELD_END_EVENT,
+    direction: PAGINATION_SORT_DIRECTION_DESC,
+  },
+  stageCounts: {},
 });

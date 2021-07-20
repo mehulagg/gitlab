@@ -49,7 +49,7 @@ Each time you implement a new feature/endpoint, whether it is at UI, API or Grap
 - Do not forget **abuse cases**: write specs that **make sure certain things can't happen**
   - A lot of specs are making sure things do happen and coverage percentage doesn't take into account permissions as same piece of code is used.
   - Make assertions that certain actors cannot perform actions
-- Naming convention to ease auditability: to be defined, e.g. a subfolder containing those specific permission tests or a `#permissions` block
+- Naming convention to ease auditability: to be defined, for example, a subfolder containing those specific permission tests or a `#permissions` block
 
 Be careful to **also test [visibility levels](https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/doc/development/permissions.md#feature-specific-permissions)** and not only project access rights.
 
@@ -59,13 +59,13 @@ Some example of well implemented access controls and tests:
 1. [example2](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/2511/diffs#ed3aaab1510f43b032ce345909a887e5b167e196_142_155)
 1. [example3](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/3170/diffs?diff_id=17494)
 
-**NB:** any input from development team is welcome, e.g. about Rubocop rules.
+**NB:** any input from development team is welcome, for example, about Rubocop rules.
 
 ## Regular Expressions guidelines
 
 ### Anchors / Multi line
 
-Unlike other programming languages (e.g. Perl or Python) Regular Expressions are matching multi-line by default in Ruby. Consider the following example in Python:
+Unlike other programming languages (for example, Perl or Python) Regular Expressions are matching multi-line by default in Ruby. Consider the following example in Python:
 
 ```python
 import re
@@ -129,7 +129,7 @@ way that increases execution time by several orders of magnitude.
 
 ### Impact
 
-The resource, for example Unicorn, Puma, or Sidekiq, can be made to hang as it takes
+The resource, for example Puma, or Sidekiq, can be made to hang as it takes
 a long time to evaluate the bad regex match. The evaluation time may require manual
 termination of the resource.
 
@@ -195,7 +195,7 @@ Go's [`regexp`](https://golang.org/pkg/regexp/) package uses `re2` and isn't vul
 - [Rubular](https://rubular.com/) is a nice online tool to fiddle with Ruby Regexps.
 - [Runaway Regular Expressions](https://www.regular-expressions.info/catastrophic.html)
 - [The impact of regular expression denial of service (ReDoS) in practice: an empirical study at the ecosystem scale](https://people.cs.vt.edu/~davisjam/downloads/publications/DavisCoghlanServantLee-EcosystemREDOS-ESECFSE18.pdf). This research paper discusses approaches to automatically detect ReDoS vulnerabilities.
-- [Freezing the web: A study of redos vulnerabilities in JavaScript-based web servers](https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-staicu.pdf). Another research paper about detecting ReDoS vulnerabilities.
+- [Freezing the web: A study of ReDoS vulnerabilities in JavaScript-based web servers](https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-staicu.pdf). Another research paper about detecting ReDoS vulnerabilities.
 
 ## Server Side Request Forgery (SSRF)
 
@@ -384,7 +384,7 @@ References:
 ### Select examples of past XSS issues affecting GitLab
 
 - [Stored XSS in user status](https://gitlab.com/gitlab-org/gitlab-foss/issues/55320)
-- [XSS vulnerability on custom project templates form](https://gitlab.com/gitlab-org/gitlab/issues/197302)
+- [XSS vulnerability on custom project templates form](https://gitlab.com/gitlab-org/gitlab/-/issues/197302)
 - [Stored XSS in branch names](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55320)
 - [Stored XSS in merge request pages](https://gitlab.com/gitlab-org/gitlab/-/issues/35096)
 
@@ -565,7 +565,7 @@ In some scenarios such as [this one](https://gitlab.com/gitlab-org/gitlab/-/issu
         return unless user
 
         # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
-        Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Feature.enabled?(:user_mode_in_session)
+        Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Gitlab::CurrentSettings.admin_mode
 
         unless api_access_allowed?(user)
           forbidden!(api_access_denied_message(user))
@@ -581,7 +581,7 @@ In order to prevent this from happening, it is recommended to use the method `us
         user = find_user_from_sources
         return unless user
 
-        if user.is_a?(User) && Feature.enabled?(:user_mode_in_session)
+        if user.is_a?(User) && Gitlab::CurrentSettings.admin_mode
           # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
           Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)
         end

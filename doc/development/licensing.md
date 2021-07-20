@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Licensing and Compatibility
 
-[GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss/) (CE) is licensed [under the terms of the MIT License](https://gitlab.com/gitlab-org/gitlab-foss/blob/master/LICENSE). [GitLab Enterprise Edition](https://gitlab.com/gitlab-org/gitlab/) (EE) is licensed under "[The GitLab Enterprise Edition (EE) license](https://gitlab.com/gitlab-org/gitlab/blob/master/LICENSE)" wherein there are more restrictions.
+[GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss/) (CE) is licensed [under the terms of the MIT License](https://gitlab.com/gitlab-org/gitlab-foss/blob/master/LICENSE). [GitLab Enterprise Edition](https://gitlab.com/gitlab-org/gitlab/) (EE) is licensed under "[The GitLab Enterprise Edition (EE) license](https://gitlab.com/gitlab-org/gitlab/-/blob/master/LICENSE)" wherein there are more restrictions.
 
 ## Automated Testing
 
@@ -17,9 +17,6 @@ There are some limitations with the automated testing, however. CSS, JavaScript,
 Some gems may not include their license information in their `gemspec` file, and some node modules may not include their license information in their `package.json` file. These aren't detected by License Finder, and must be verified manually.
 
 ### License Finder commands
-
-NOTE:
-License Finder currently uses GitLab misused terms of `whitelist` and `blacklist`. As a result, the commands below reference those terms. We've created an [issue on their project](https://github.com/pivotal/LicenseFinder/issues/745) to propose that they rename their commands.
 
 There are a few basic commands License Finder provides that you need in order to manage license detection.
 
@@ -32,13 +29,13 @@ bundle exec license_finder
 To allowlist a new license:
 
 ```shell
-license_finder whitelist add MIT
+license_finder permitted_licenses add MIT
 ```
 
 To denylist a new license:
 
 ```shell
-license_finder blacklist add Unlicense
+license_finder restricted_licenses add Unlicense
 ```
 
 To tell License Finder about a dependency's license if it isn't auto-detected:
@@ -50,6 +47,12 @@ license_finder licenses add my_unknown_dependency MIT
 For all of the above, please include `--why "Reason"` and `--who "My Name"` so the `decisions.yml` file can keep track of when, why, and who approved of a dependency.
 
 More detailed information on how the gem and its commands work is available in the [License Finder README](https://github.com/pivotal/LicenseFinder).
+
+## Encryption keys
+
+If your license was created in your local development or staging environment for Customers Portal or License App, an environment variable called `GITLAB_LICENSE_MODE` with the value `test` needs to be set to use the correct decryption key.
+
+Those projects are set to use a test license encryption key by default.
 
 ## Additional information
 

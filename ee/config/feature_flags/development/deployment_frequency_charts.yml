@@ -1,8 +1,0 @@
----
-name: deployment_frequency_charts
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50885
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/296893
-milestone: '13.8'
-type: development
-group: group::release
-default_enabled: true

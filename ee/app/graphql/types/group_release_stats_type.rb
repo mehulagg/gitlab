@@ -8,19 +8,17 @@ module Types
     authorize :read_group_release_stats
 
     field :releases_count, GraphQL::INT_TYPE, null: true,
-          description: 'Total number of releases in all descendant projects of the group. ' \
-                       'Will always return `null` if `group_level_release_statistics` feature flag is disabled'
+          description: 'Total number of releases in all descendant projects of the group.'
 
     def releases_count
-      object.releases_count if Feature.enabled?(:group_level_release_statistics, object, default_enabled: true)
+      object.releases_count
     end
 
     field :releases_percentage, GraphQL::INT_TYPE, null: true,
-          description: "Percentage of the group's descendant projects that have at least one release. " \
-                       'Will always return `null` if `group_level_release_statistics` feature flag is disabled'
+          description: "Percentage of the group's descendant projects that have at least one release."
 
     def releases_percentage
-      object.releases_percentage if Feature.enabled?(:group_level_release_statistics, object, default_enabled: true)
+      object.releases_percentage
     end
   end
 end

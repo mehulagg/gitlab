@@ -1,6 +1,6 @@
 ---
 stage: Enablement
-group: Distribution
+group: Geo
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -63,9 +63,19 @@ including:
 - Snippets
 - Group wikis **(PREMIUM)**
 
+Backups do not include:
+
+- [Terraform state files](../administration/terraform_state.md)
+- [Package registry files](../administration/packages/index.md)
+- [Mattermost data](https://docs.mattermost.com/administration/config-settings.html#file-storage)
+
 WARNING:
 GitLab does not back up any configuration files, SSL certificates, or system
 files. You are highly advised to read about [storing configuration files](#storing-configuration-files).
+
+WARNING:
+The backup command requires [additional parameters](#backup-and-restore-for-installations-using-pgbouncer) when
+your installation is using PgBouncer, for either performance reasons or when using it with a Patroni cluster.
 
 Depending on your version of GitLab, use the following command if you installed
 GitLab using the Omnibus package:
@@ -116,7 +126,7 @@ Similar to the Kubernetes case, if you have scaled out your GitLab cluster to
 use multiple application servers, you should pick a designated node (that isn't
 auto-scaled away) for running the backup Rake task. Because the backup Rake
 task is tightly coupled to the main Rails application, this is typically a node
-on which you're also running Unicorn/Puma or Sidekiq.
+on which you're also running Puma or Sidekiq.
 
 Example output:
 
@@ -339,7 +349,8 @@ sudo -u git -H GITLAB_ASSUME_YES=1 bundle exec rake gitlab:backup:restore RAILS_
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37158) in GitLab 13.3.
 
-Repositories can be backed up concurrently to help fully use CPU time. The
+When using [multiple repository storages](../administration/repository_storage_paths.md),
+repositories can be backed up concurrently to help fully use CPU time. The
 following variables are available to modify the default behavior of the Rake
 task:
 
@@ -349,7 +360,7 @@ task:
   back up at the same time on each storage. This allows the repository backups
   to be spread across storages. Defaults to `1`.
 
-For example, for Omnibus GitLab installations:
+For example, for Omnibus GitLab installations with 4 repository storages:
 
 ```shell
 sudo gitlab-backup create GITLAB_BACKUP_MAX_CONCURRENCY=4 GITLAB_BACKUP_MAX_STORAGE_CONCURRENCY=1
@@ -366,7 +377,7 @@ sudo -u git -H bundle exec rake gitlab:backup:create GITLAB_BACKUP_MAX_CONCURREN
 You can let the backup script upload (using the [Fog library](http://fog.io/))
 the `.tar` file it creates. In the following example, we use Amazon S3 for
 storage, but Fog also lets you use [other storage providers](http://fog.io/storage/).
-GitLab also [imports cloud drivers](https://gitlab.com/gitlab-org/gitlab/blob/da46c9655962df7d49caef0e2b9f6bbe88462a02/Gemfile#L113)
+GitLab also [imports cloud drivers](https://gitlab.com/gitlab-org/gitlab/-/blob/da46c9655962df7d49caef0e2b9f6bbe88462a02/Gemfile#L113)
 for AWS, Google, OpenStack Swift, Rackspace, and Aliyun. A local driver is
 [also available](#uploading-to-locally-mounted-shares).
 
@@ -629,7 +640,7 @@ directory that you want to copy the tarballs to is the root of your mounted
 directory, use `.` instead.
 
 Because file system performance may affect overall GitLab performance,
-[GitLab doesn't recommend using EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
+[GitLab doesn't recommend using cloud-based file systems for storage](../administration/nfs.md#avoid-using-cloud-based-file-systems).
 
 For Omnibus GitLab packages:
 
@@ -810,7 +821,7 @@ data into (`gitlabhq_production`). All existing data is either erased
 To restore a backup, you must restore `/etc/gitlab/gitlab-secrets.json`
 (for Omnibus packages) or `/home/git/gitlab/.secret` (for installations from
 source). This file contains the database encryption key,
-[CI/CD variables](../ci/variables/README.md), and
+[CI/CD variables](../ci/variables/index.md), and
 variables used for [two-factor authentication](../user/profile/account/two_factor_authentication.md).
 If you fail to restore this encryption key file along with the application data
 backup, users with two-factor authentication enabled and GitLab Runner
@@ -921,7 +932,6 @@ Stop the processes that are connected to the database. Leave the rest of GitLab
 running:
 
 ```shell
-sudo gitlab-ctl stop unicorn
 sudo gitlab-ctl stop puma
 sudo gitlab-ctl stop sidekiq
 # Verify
@@ -941,7 +951,7 @@ Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:back
 WARNING:
 `gitlab-rake gitlab:backup:restore` doesn't set the correct file system
 permissions on your Registry directory. This is a [known issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62759).
-On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
+In GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
 
 If there's a GitLab version mismatch between your backup tar file and the
@@ -949,8 +959,9 @@ installed version of GitLab, the restore command aborts with an error
 message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
 and then try again.
 
-NOTE:
-There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
+WARNING:
+The restore command requires [additional parameters](#backup-and-restore-for-installations-using-pgbouncer) when
+your installation is using PgBouncer, for either performance reasons or when using it with a Patroni cluster.
 
 Next, restore `/etc/gitlab/gitlab-secrets.json` if necessary,
 [as previously mentioned](#restore-prerequisites).
@@ -963,7 +974,7 @@ sudo gitlab-ctl restart
 sudo gitlab-rake gitlab:check SANITIZE=true
 ```
 
-On GitLab 13.1 and later, check [database values can be decrypted](../administration/raketasks/doctor.md)
+In GitLab 13.1 and later, check [database values can be decrypted](../administration/raketasks/doctor.md)
 especially if `/etc/gitlab/gitlab-secrets.json` was restored, or if a different server is
 the target for the restore.
 
@@ -989,7 +1000,6 @@ For Docker installations, the restore task can be run from host:
 
 ```shell
 # Stop the processes that are connected to the database
-docker exec -it <name of container> gitlab-ctl stop unicorn
 docker exec -it <name of container> gitlab-ctl stop puma
 docker exec -it <name of container> gitlab-ctl stop sidekiq
 
@@ -1011,13 +1021,13 @@ Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:back
 WARNING:
 `gitlab-rake gitlab:backup:restore` doesn't set the correct file system
 permissions on your Registry directory. This is a [known issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62759).
-On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
+In GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
 
 The GitLab Helm chart uses a different process, documented in
 [restoring a GitLab Helm chart installation](https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/backup-restore/restore.md).
 
-### Restoring only one or a few project(s) or group(s) from a backup
+### Restoring only one or a few projects or groups from a backup
 
 Although the Rake task used to restore a GitLab instance doesn't support
 restoring a single project or group, you can use a workaround by restoring
@@ -1183,11 +1193,11 @@ The secrets file is responsible for storing the encryption key for the columns
 that contain required, sensitive information. If the key is lost, GitLab can't
 decrypt those columns, preventing access to the following items:
 
-- [CI/CD variables](../ci/variables/README.md)
+- [CI/CD variables](../ci/variables/index.md)
 - [Kubernetes / GCP integration](../user/project/clusters/index.md)
 - [Custom Pages domains](../user/project/pages/custom_domains_ssl_tls_certification/index.md)
 - [Project error tracking](../operations/error_tracking.md)
-- [Runner authentication](../ci/runners/README.md)
+- [Runner authentication](../ci/runners/index.md)
 - [Project mirroring](../user/project/repository/repository_mirroring.md)
 - [Web hooks](../user/project/integrations/webhooks.md)
 
@@ -1285,6 +1295,9 @@ You may need to reconfigure or restart GitLab for the changes to take effect.
    UPDATE namespaces SET runners_token = null, runners_token_encrypted = null;
    -- Clear instance tokens
    UPDATE application_settings SET runners_registration_token_encrypted = null;
+   -- Clear key used for JWT authentication
+   -- This may break the $CI_JWT_TOKEN job variable:
+   -- https://gitlab.com/gitlab-org/gitlab/-/issues/325965
    UPDATE application_settings SET encrypted_ci_jwt_signing_key = null;
    -- Clear runner tokens
    UPDATE ci_runners SET token = null, token_encrypted = null;

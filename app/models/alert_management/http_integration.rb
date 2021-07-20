@@ -10,7 +10,7 @@ module AlertManagement
 
     attr_encrypted :token,
       mode: :per_attribute_iv,
-      key: Settings.attr_encrypted_db_key_base_truncated,
+      key: Settings.attr_encrypted_db_key_base_32,
       algorithm: 'aes-256-gcm'
 
     default_value_for(:endpoint_identifier, allows_nil: false) { SecureRandom.hex(8) }
@@ -27,6 +27,7 @@ module AlertManagement
     before_validation :prevent_token_assignment
     before_validation :prevent_endpoint_identifier_assignment
     before_validation :ensure_token
+    before_validation :ensure_payload_example_not_nil
 
     scope :for_endpoint_identifier, -> (endpoint_identifier) { where(endpoint_identifier: endpoint_identifier) }
     scope :active, -> { where(active: true) }
@@ -52,10 +53,6 @@ module AlertManagement
       endpoint_identifier == LEGACY_IDENTIFIER
     end
 
-    def token_changed?
-      attribute_changed?(:token)
-    end
-
     # Blank token assignment triggers token reset
     def prevent_token_assignment
       if token.present? && token_changed?
@@ -73,6 +70,10 @@ module AlertManagement
       if endpoint_identifier_changed? && endpoint_identifier_was.present?
         self.endpoint_identifier = endpoint_identifier_was
       end
+    end
+
+    def ensure_payload_example_not_nil
+      self.payload_example ||= {}
     end
   end
 end

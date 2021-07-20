@@ -2,15 +2,17 @@ import $ from 'jquery';
 import Visibility from 'visibilityjs';
 import Vue from 'vue';
 import Api from '~/api';
+import createFlash from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import axios from '~/lib/utils/axios_utils';
 import { __, sprintf } from '~/locale';
-import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
+import { confidentialWidget } from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
 import loadAwardsHandler from '../../awards_handler';
-import { deprecatedCreateFlash as Flash } from '../../flash';
 import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
 import Poll from '../../lib/utils/poll';
+import { create } from '../../lib/utils/recurrence';
 import { mergeUrlParams } from '../../lib/utils/url_utility';
 import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
 import TaskList from '../../task_list';
@@ -20,6 +22,7 @@ import eventHub from '../event_hub';
 import * as types from './mutation_types';
 import * as utils from './utils';
 
+const NOTES_POLLING_INTERVAL = 6000;
 let eTagPoll;
 
 export const updateLockedAttribute = ({ commit, getters }, { locked, fullPath }) => {
@@ -267,7 +270,7 @@ export const toggleStateButtonLoading = ({ commit }, value) =>
   commit(types.TOGGLE_STATE_BUTTON_LOADING, value);
 
 export const emitStateChangedEvent = ({ getters }, data) => {
-  const event = new CustomEvent('issuable_vue_app:change', {
+  const event = new CustomEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, {
     detail: {
       data,
       isClosed: getters.openState === constants.CLOSED,
@@ -309,25 +312,23 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
   $('.notes-form .flash-container').hide(); // hide previous flash notification
   commit(types.REMOVE_PLACEHOLDER_NOTES); // remove previous placeholders
 
-  if (replyId) {
-    if (hasQuickActions) {
-      placeholderText = utils.stripQuickActions(placeholderText);
-    }
+  if (hasQuickActions) {
+    placeholderText = utils.stripQuickActions(placeholderText);
+  }
 
-    if (placeholderText.length) {
-      commit(types.SHOW_PLACEHOLDER_NOTE, {
-        noteBody: placeholderText,
-        replyId,
-      });
-    }
+  if (placeholderText.length) {
+    commit(types.SHOW_PLACEHOLDER_NOTE, {
+      noteBody: placeholderText,
+      replyId,
+    });
+  }
 
-    if (hasQuickActions) {
-      commit(types.SHOW_PLACEHOLDER_NOTE, {
-        isSystemNote: true,
-        noteBody: utils.getQuickActionText(note),
-        replyId,
-      });
-    }
+  if (hasQuickActions) {
+    commit(types.SHOW_PLACEHOLDER_NOTE, {
+      isSystemNote: true,
+      noteBody: utils.getQuickActionText(note),
+      replyId,
+    });
   }
 
   const processQuickActions = (res) => {
@@ -340,9 +341,22 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     if (hasQuickActions && message) {
       eTagPoll.makeRequest();
 
+      // synchronizing the quick action with the sidebar widget
+      // this is a temporary solution until we have confidentiality real-time updates
+      if (
+        confidentialWidget.setConfidentiality &&
+        message.some((m) => m.includes('Made this issue confidential'))
+      ) {
+        confidentialWidget.setConfidentiality();
+      }
+
       $('.js-gfm-input').trigger('clear-commands-cache.atwho');
 
-      Flash(message || __('Commands applied'), 'notice', noteData.flashContainer);
+      createFlash({
+        message: message || __('Commands applied'),
+        type: 'notice',
+        parent: noteData.flashContainer,
+      });
     }
 
     return res;
@@ -363,11 +377,10 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
         awardsHandler.scrollToAwards();
       })
       .catch(() => {
-        Flash(
-          __('Something went wrong while adding your award. Please try again.'),
-          'alert',
-          noteData.flashContainer,
-        );
+        createFlash({
+          message: __('Something went wrong while adding your award. Please try again.'),
+          parent: noteData.flashContainer,
+        });
       })
       .then(() => res);
   };
@@ -385,9 +398,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
   };
 
   const removePlaceholder = (res) => {
-    if (replyId) {
-      commit(types.REMOVE_PLACEHOLDER_NOTES);
-    }
+    commit(types.REMOVE_PLACEHOLDER_NOTES);
 
     return res;
   };
@@ -405,7 +416,10 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
         const errorMsg = sprintf(__('Your comment could not be submitted because %{error}'), {
           error: base[0].toLowerCase(),
         });
-        Flash(errorMsg, 'alert', noteData.flashContainer);
+        createFlash({
+          message: errorMsg,
+          parent: noteData.flashContainer,
+        });
         return { ...data, hasFlash: true };
       }
     }
@@ -458,16 +472,22 @@ const getFetchDataParams = (state) => {
   return { endpoint, options };
 };
 
-export const fetchData = ({ commit, state, getters, dispatch }) => {
-  const { endpoint, options } = getFetchDataParams(state);
-
-  axios
-    .get(endpoint, options)
-    .then(({ data }) => pollSuccessCallBack(data, commit, state, getters, dispatch))
-    .catch(() => Flash(__('Something went wrong while fetching latest comments.')));
-};
-
 export const poll = ({ commit, state, getters, dispatch }) => {
+  const notePollOccurrenceTracking = create();
+  let flashContainer;
+
+  notePollOccurrenceTracking.handle(1, () => {
+    // Since polling halts internally after 1 failure, we manually try one more time
+    setTimeout(() => eTagPoll.restart(), NOTES_POLLING_INTERVAL);
+  });
+  notePollOccurrenceTracking.handle(2, () => {
+    // On the second failure in a row, show the alert and try one more time (hoping to succeed and clear the error)
+    flashContainer = createFlash({
+      message: __('Something went wrong while fetching latest comments.'),
+    });
+    setTimeout(() => eTagPoll.restart(), NOTES_POLLING_INTERVAL);
+  });
+
   eTagPoll = new Poll({
     resource: {
       poll: () => {
@@ -476,14 +496,21 @@ export const poll = ({ commit, state, getters, dispatch }) => {
       },
     },
     method: 'poll',
-    successCallback: ({ data }) => pollSuccessCallBack(data, commit, state, getters, dispatch),
-    errorCallback: () => Flash(__('Something went wrong while fetching latest comments.')),
+    successCallback: ({ data }) => {
+      pollSuccessCallBack(data, commit, state, getters, dispatch);
+
+      if (notePollOccurrenceTracking.count) {
+        notePollOccurrenceTracking.reset();
+      }
+      flashContainer?.close();
+    },
+    errorCallback: () => notePollOccurrenceTracking.occur(),
   });
 
   if (!Visibility.hidden()) {
     eTagPoll.makeDelayedRequest(2500);
   } else {
-    dispatch('fetchData');
+    eTagPoll.makeRequest();
   }
 
   Visibility.change(() => {
@@ -547,7 +574,9 @@ export const filterDiscussion = ({ dispatch }, { path, filter, persistFilter }) 
     .catch(() => {
       dispatch('setLoadingState', false);
       dispatch('setNotesFetchedState', true);
-      Flash(__('Something went wrong while fetching comments. Please try again.'));
+      createFlash({
+        message: __('Something went wrong while fetching comments. Please try again.'),
+      });
     });
 };
 
@@ -590,7 +619,10 @@ export const submitSuggestion = (
 
       const flashMessage = errorMessage || defaultMessage;
 
-      Flash(__(flashMessage), 'alert', flashContainer);
+      createFlash({
+        message: __(flashMessage),
+        parent: flashContainer,
+      });
     })
     .finally(() => {
       commit(types.SET_RESOLVING_DISCUSSION, false);
@@ -623,7 +655,10 @@ export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContai
 
       const flashMessage = errorMessage || defaultMessage;
 
-      Flash(__(flashMessage), 'alert', flashContainer);
+      createFlash({
+        message: __(flashMessage),
+        parent: flashContainer,
+      });
     })
     .finally(() => {
       commit(types.SET_APPLYING_BATCH_STATE, false);
@@ -662,7 +697,9 @@ export const fetchDescriptionVersion = ({ dispatch }, { endpoint, startingVersio
     })
     .catch((error) => {
       dispatch('receiveDescriptionVersionError', error);
-      Flash(__('Something went wrong while fetching description changes. Please try again.'));
+      createFlash({
+        message: __('Something went wrong while fetching description changes. Please try again.'),
+      });
     });
 };
 
@@ -694,7 +731,9 @@ export const softDeleteDescriptionVersion = (
     })
     .catch((error) => {
       dispatch('receiveDeleteDescriptionVersionError', error);
-      Flash(__('Something went wrong while deleting description changes. Please try again.'));
+      createFlash({
+        message: __('Something went wrong while deleting description changes. Please try again.'),
+      });
 
       // Throw an error here because a component like SystemNote -
       //  needs to know if the request failed to reset its internal state.
@@ -718,34 +757,4 @@ export const updateAssignees = ({ commit }, assignees) => {
 
 export const updateDiscussionPosition = ({ commit }, updatedPosition) => {
   commit(types.UPDATE_DISCUSSION_POSITION, updatedPosition);
-};
-
-export const updateConfidentialityOnIssuable = (
-  { getters, commit },
-  { confidential, fullPath },
-) => {
-  const { iid } = getters.getNoteableData;
-
-  return utils.gqClient
-    .mutate({
-      mutation: updateIssueConfidentialMutation,
-      variables: {
-        input: {
-          projectPath: fullPath,
-          iid: String(iid),
-          confidential,
-        },
-      },
-    })
-    .then(({ data }) => {
-      const {
-        issueSetConfidential: { issue, errors },
-      } = data;
-
-      if (errors?.length) {
-        Flash(errors[0], 'alert');
-      } else {
-        setConfidentiality({ commit }, issue.confidential);
-      }
-    });
 };

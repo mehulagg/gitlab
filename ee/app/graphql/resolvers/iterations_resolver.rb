@@ -25,6 +25,10 @@ module Resolvers
              required: false,
              description: 'Whether to include ancestor iterations. Defaults to true.'
 
+    argument :iteration_cadence_ids, [::Types::GlobalIDType[::Iterations::Cadence]],
+              required: false,
+              description: 'Global iteration cadence IDs by which to look up the iterations.'
+
     type Types::IterationType.connection_type, null: true
 
     def resolve(**args)
@@ -33,6 +37,7 @@ module Resolvers
       authorize!
 
       args[:id] = id_from_args(args)
+      args[:iteration_cadence_ids] = parse_iteration_cadence_ids(args[:iteration_cadence_ids])
       args[:include_ancestors] = true if args[:include_ancestors].nil? && args[:iid].nil?
 
       iterations = IterationsFinder.new(context[:current_user], iterations_finder_params(args)).execute
@@ -46,14 +51,15 @@ module Resolvers
     private
 
     def iterations_finder_params(args)
-      IterationsFinder.params_for_parent(parent, include_ancestors: args[:include_ancestors]).merge!(
+      {
+        parent: parent,
+        include_ancestors: args[:include_ancestors],
         id: args[:id],
         iid: args[:iid],
+        iteration_cadence_ids: args[:iteration_cadence_ids],
         state: args[:state] || 'all',
-        start_date: args[:start_date],
-        end_date: args[:end_date],
         search_title: args[:title]
-      )
+      }.merge(transform_timeframe_parameters(args))
     end
 
     def parent
@@ -72,6 +78,12 @@ module Resolvers
       GitlabSchema.parse_gid(args[:id], expected_type: ::Iteration).model_id
     rescue Gitlab::Graphql::Errors::ArgumentError
       args[:id]
+    end
+
+    def parse_iteration_cadence_ids(iteration_cadence_ids)
+      return unless iteration_cadence_ids.present?
+
+      iteration_cadence_ids.map { |arg| GitlabSchema.parse_gid(arg, expected_type: ::Iterations::Cadence).model_id }
     end
   end
 end

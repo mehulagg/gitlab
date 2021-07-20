@@ -17,7 +17,7 @@ module Gitlab
         copy_project_uploads
 
         true
-      rescue => e
+      rescue StandardError => e
         @shared.error(e)
         false
       end
@@ -30,7 +30,7 @@ module Gitlab
         end
 
         true
-      rescue => e
+      rescue StandardError => e
         @shared.error(e)
         false
       end
@@ -76,7 +76,7 @@ module Gitlab
       def project_uploads_except_avatar(avatar_path)
         return @project.uploads unless avatar_path
 
-        @project.uploads.where("path != ?", avatar_path)
+        @project.uploads.where.not(path: avatar_path)
       end
 
       def download_and_copy(upload)

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
+require 'rspec-parameterized'
 
 RSpec.describe ExpandVariables do
   shared_examples 'common variable expansion' do |expander|
@@ -82,6 +83,13 @@ RSpec.describe ExpandVariables do
           value: 'key$variable',
           result: 'keyvalue',
           variables: -> { [{ key: 'variable', value: 'value' }] }
+        },
+        "simple expansion using Collection": {
+          value: 'key$variable',
+          result: 'keyvalue',
+          variables: Gitlab::Ci::Variables::Collection.new([
+            { key: 'variable', value: 'value' }
+          ])
         }
       }
     end
@@ -221,43 +229,6 @@ RSpec.describe ExpandVariables do
 
           is_expected.to eq('key')
         end
-      end
-    end
-  end
-
-  describe '#possible_var_reference?' do
-    context 'table tests' do
-      using RSpec::Parameterized::TableSyntax
-
-      where do
-        {
-          "empty value": {
-            value: '',
-            result: false
-          },
-          "normal value": {
-            value: 'some value',
-            result: false
-          },
-          "simple expansions": {
-            value: 'key$variable',
-            result: true
-          },
-          "complex expansions": {
-            value: 'key${variable}${variable2}',
-            result: true
-          },
-          "complex expansions for Windows": {
-            value: 'key%variable%%variable2%',
-            result: true
-          }
-        }
-      end
-
-      with_them do
-        subject { ExpandVariables.possible_var_reference?(value) }
-
-        it { is_expected.to eq(result) }
       end
     end
   end

@@ -4,10 +4,11 @@ require 'spec_helper'
 
 RSpec.describe API::Users do
   let_it_be(:admin) { create(:admin) }
-  let_it_be(:user, reload: true) { create(:user, username: 'user.with.dot') }
+  let_it_be(:user, reload: true) { create(:user, username: 'user.withdot') }
   let_it_be(:key) { create(:key, user: user) }
   let_it_be(:gpg_key) { create(:gpg_key, user: user) }
   let_it_be(:email) { create(:email, user: user) }
+
   let(:omniauth_user) { create(:omniauth_user) }
   let(:ldap_blocked_user) { create(:omniauth_user, provider: 'ldapmain', state: 'ldap_blocked') }
   let(:private_user) { create(:user, private_profile: true) }
@@ -318,6 +319,18 @@ RSpec.describe API::Users do
         expect(response).to match_response_schema('public_api/v4/user/basics')
         expect(response).to include_pagination_headers
         expect(json_response).to all(include('state' => /(blocked|ldap_blocked)/))
+      end
+
+      it "returns an array of external users" do
+        create(:user)
+        external_user = create(:user, external: true)
+
+        get api("/users?external=true", user)
+
+        expect(response).to match_response_schema('public_api/v4/user/basics')
+        expect(response).to include_pagination_headers
+        expect(json_response.size).to eq(1)
+        expect(json_response[0]['id']).to eq(external_user.id)
       end
 
       it "returns one user" do
@@ -916,7 +929,8 @@ RSpec.describe API::Users do
     end
 
     it "creates user with random password" do
-      params = attributes_for(:user, force_random_password: true, reset_password: true)
+      params = attributes_for(:user, force_random_password: true)
+      params.delete(:password)
       post api('/users', admin), params: params
 
       expect(response).to have_gitlab_http_status(:created)
@@ -924,8 +938,7 @@ RSpec.describe API::Users do
       user_id = json_response['id']
       new_user = User.find(user_id)
 
-      expect(new_user.valid_password?(params[:password])).to eq(false)
-      expect(new_user.recently_sent_password_reset?).to eq(true)
+      expect(new_user.encrypted_password).to be_present
     end
 
     it "creates user with private profile" do
@@ -938,6 +951,18 @@ RSpec.describe API::Users do
 
       expect(new_user).not_to eq(nil)
       expect(new_user.private_profile?).to eq(true)
+    end
+
+    it "creates user with view_diffs_file_by_file" do
+      post api('/users', admin), params: attributes_for(:user, view_diffs_file_by_file: true)
+
+      expect(response).to have_gitlab_http_status(:created)
+
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+
+      expect(new_user).not_to eq(nil)
+      expect(new_user.user_preference.view_diffs_file_by_file?).to eq(true)
     end
 
     it "does not create user with invalid email" do
@@ -1254,6 +1279,13 @@ RSpec.describe API::Users do
       expect(user.reload.private_profile).to eq(true)
     end
 
+    it "updates viewing diffs file by file" do
+      put api("/users/#{user.id}", admin), params: { view_diffs_file_by_file: true }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(user.reload.user_preference.view_diffs_file_by_file?).to eq(true)
+    end
+
     it "updates private profile to false when nil is given" do
       user.update!(private_profile: true)
 
@@ -1414,6 +1446,48 @@ RSpec.describe API::Users do
 
         expect(response).to have_gitlab_http_status(:conflict)
         expect(@user.reload.username).to eq(@user.username)
+      end
+    end
+  end
+
+  describe "PUT /user/:id/credit_card_validation" do
+    let(:credit_card_validated_time) { Time.utc(2020, 1, 1) }
+
+    context 'when unauthenticated' do
+      it 'returns authentication error' do
+        put api("/user/#{user.id}/credit_card_validation"), params: { credit_card_validated_at: credit_card_validated_time }
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when authenticated as non-admin' do
+      it "does not allow updating user's credit card validation", :aggregate_failures do
+        put api("/user/#{user.id}/credit_card_validation", user), params: { credit_card_validated_at: credit_card_validated_time }
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'when authenticated as admin' do
+      it "updates user's credit card validation", :aggregate_failures do
+        put api("/user/#{user.id}/credit_card_validation", admin), params: { credit_card_validated_at: credit_card_validated_time }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(user.reload.credit_card_validated_at).to eq(credit_card_validated_time)
+      end
+
+      it "returns 400 error if credit_card_validated_at is missing" do
+        put api("/user/#{user.id}/credit_card_validation", admin), params: {}
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+
+      it 'returns 404 error if user not found' do
+        put api("/user/#{non_existing_record_id}/credit_card_validation", admin), params: { credit_card_validated_at: credit_card_validated_time }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 User Not Found')
       end
     end
   end
@@ -1764,8 +1838,7 @@ RSpec.describe API::Users do
         post api("/users/#{user.id}/emails", admin), params: email_attrs
       end.to change { user.emails.count }.by(1)
 
-      email = Email.find_by(user_id: user.id, email: email_attrs[:email])
-      expect(email).not_to be_confirmed
+      expect(json_response['confirmed_at']).to be_nil
     end
 
     it "returns a 400 for invalid ID" do
@@ -1782,8 +1855,7 @@ RSpec.describe API::Users do
 
       expect(response).to have_gitlab_http_status(:created)
 
-      email = Email.find_by(user_id: user.id, email: email_attrs[:email])
-      expect(email).to be_confirmed
+      expect(json_response['confirmed_at']).not_to be_nil
     end
   end
 
@@ -2004,6 +2076,29 @@ RSpec.describe API::Users do
 
     it_behaves_like 'get user info', 'v3'
     it_behaves_like 'get user info', 'v4'
+  end
+
+  describe "GET /user/preferences" do
+    context "when unauthenticated" do
+      it "returns authentication error" do
+        get api("/user/preferences")
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context "when authenticated" do
+      it "returns user preferences" do
+        user.user_preference.view_diffs_file_by_file = false
+        user.user_preference.show_whitespace_in_diffs = true
+        user.save!
+
+        get api("/user/preferences", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response["view_diffs_file_by_file"]).to eq(user.user_preference.view_diffs_file_by_file)
+        expect(json_response["show_whitespace_in_diffs"]).to eq(user.user_preference.show_whitespace_in_diffs)
+      end
+    end
   end
 
   describe "GET /user/keys" do
@@ -2873,6 +2968,7 @@ RSpec.describe API::Users do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project) }
     let_it_be(:group) { create(:group) }
+
     let(:requesting_user) { create(:user) }
 
     before_all do
@@ -3043,18 +3139,6 @@ RSpec.describe API::Users do
         put api('/user/status', user), params: { emoji: 'smirk', message: 'hello world', clear_status_after: 'wrong' }
 
         expect(response).to have_gitlab_http_status(:bad_request)
-      end
-
-      context 'when the clear_status_with_quick_options feature flag is disabled' do
-        before do
-          stub_feature_flags(clear_status_with_quick_options: false)
-        end
-
-        it 'does not persist clear_status_at' do
-          put api('/user/status', user), params: { emoji: 'smirk', message: 'hello world', clear_status_after: '3_hours' }
-
-          expect(user.status.reload.clear_status_at).to be_nil
-        end
       end
     end
   end

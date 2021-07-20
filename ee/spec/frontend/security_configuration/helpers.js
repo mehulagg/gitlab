@@ -28,12 +28,12 @@ export const makeEntities = (count, changes) =>
  *     generated entities.
  * @returns {Object[]}
  */
-export const makeAnalyzerEntities = (count, changes) =>
+export const makeAnalyzerEntities = (count, changes, isEnabled = true) =>
   [...Array(count).keys()].map((i) => ({
     name: `nameValue${i}`,
     label: `label${i}`,
     description: `description${i}`,
-    enabled: true,
+    enabled: isEnabled,
     ...changes,
   }));
 
@@ -43,7 +43,7 @@ export const makeAnalyzerEntities = (count, changes) =>
  * @param {number} totalEntities - The total number of entities to create.
  * @returns {SastCiConfiguration}
  */
-export const makeSastCiConfiguration = () => {
+export const makeSastCiConfiguration = (analyzerEnabled = true) => {
   // Call makeEntities just once to ensure unique fields
   const entities = makeEntities(3);
 
@@ -55,11 +55,15 @@ export const makeSastCiConfiguration = () => {
       nodes: [entities.shift()],
     },
     analyzers: {
-      nodes: makeAnalyzerEntities(1, {
-        variables: {
-          nodes: [entities.shift()],
+      nodes: makeAnalyzerEntities(
+        1,
+        {
+          variables: {
+            nodes: [entities.shift()],
+          },
         },
-      }),
+        analyzerEnabled,
+      ),
     },
   };
 };

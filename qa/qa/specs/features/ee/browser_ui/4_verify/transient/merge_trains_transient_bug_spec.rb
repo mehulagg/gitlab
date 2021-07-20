@@ -23,7 +23,7 @@ module QA
         end
       end
 
-      before do
+      let!(:ci_file) do
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
@@ -31,29 +31,23 @@ module QA
             [
               {
                 file_path: '.gitlab-ci.yml',
-                content: <<~EOF
+                content: <<~YAML
                   test:
                     tags: [#{group.name}]
                     script: echo 'OK'
                     only:
                     - merge_requests
-                EOF
+                YAML
               }
             ]
           )
         end
+      end
 
+      before do
         Flow::Login.sign_in
         project.visit!
-
-        Page::Project::Menu.perform(&:go_to_general_settings)
-        Page::Project::Settings::Main.perform do |main|
-          main.expand_merge_requests_settings do |settings|
-            settings.click_pipelines_for_merged_results_checkbox
-            settings.click_merge_trains_checkbox
-            settings.click_save_changes
-          end
-        end
+        Flow::MergeRequest.enable_merge_trains
       end
 
       after do
@@ -66,35 +60,25 @@ module QA
         Runtime::Env.transient_trials.times do |i|
           QA::Runtime::Logger.info("Transient bug test action - Trial #{i}")
 
-          random_string_for_this_trial = SecureRandom.hex(8)
-          branch_name = "merge-train-#{random_string_for_this_trial}"
           title = "merge train transient bug test #{random_string_for_this_trial}"
 
-          # Create a branch that will be merged into the default branch
-          Resource::Repository::ProjectPush.fabricate! do |project_push|
-            project_push.project = project
-            project_push.new_branch = true
-            project_push.branch_name = branch_name
-            project_push.file_name = "file-#{random_string_for_this_trial}.txt"
-            project_push.file_content = "merge me"
+          # Create a merge request to be merged to master
+          merge_request = Resource::MergeRequest.fabricate_via_api! do |merge_request|
+            merge_request.title = title
+            merge_request.project = project
+            merge_request.description = title
+            merge_request.target_new_branch = false
+            merge_request.file_name = random_string_for_this_trial
+            merge_request.file_content = random_string_for_this_trial
           end
 
-          # Create a merge request to merge the branch we just created
-          Resource::MergeRequest.fabricate_via_api! do |merge_request|
-            merge_request.project = project
-            merge_request.source_branch = branch_name
-            merge_request.no_preparation = true
-            merge_request.title = title
-          end.visit!
+          merge_request.visit!
 
           Page::MergeRequest::Show.perform do |show|
-            pipeline_passed = show.retry_until(max_attempts: 5, sleep_interval: 5) do
-              show.has_pipeline_status?(/Merged result pipeline #\d+ passed/)
-            end
-
-            expect(pipeline_passed).to be_truthy, "Expected the merged result pipeline to pass."
+            check_pipeline_status(show)
 
             show.merge_via_merge_train
+            check_merge_train_starts(show)
 
             # This is also tested in pipelines_for_merged_results_and_merge_trains_spec.rb as a regular e2e test.
             # That test reloads the page at this point to avoid the problem of the merge status failing to update
@@ -103,22 +87,48 @@ module QA
 
             merge_request = project.merge_request_with_title(title)
 
-            expect(merge_request).not_to be_nil, "There was a problem fetching the merge request"
+            expect(merge_request).not_to be_nil, 'There was a problem fetching the merge request'
+
+            # Merge train should start another pipeline and MR won't merged until this is finished
+            check_pipeline_status(show)
 
             # We use the API to wait until the MR has been merged so that we know the UI should be ready to update
             show.wait_until(reload: false) do
-              mr = Resource::MergeRequest.fabricate_via_api! do |mr|
-                mr.project = project
-                mr.id = merge_request[:iid]
-              end
-
-              mr.state == 'merged'
+              merge_request_state(merge_request) == 'merged'
             end
 
             expect(show).to be_merged, "Expected content 'The changes were merged' but it did not appear."
-            expect(show).to have_pipeline_status(/Merge train pipeline #\d+ passed/)
           end
         end
+      end
+
+      private
+
+      def random_string_for_this_trial
+        SecureRandom.hex(8)
+      end
+
+      def check_pipeline_status(page_object)
+        pipeline_passed = page_object.retry_until(max_attempts: 5, sleep_interval: 5) do
+          page_object.has_pipeline_status?('passed')
+        end
+
+        expect(pipeline_passed).to be_truthy, 'Expected the merged result pipeline to pass.'
+      end
+
+      def check_merge_train_starts(page_object)
+        train_started = page_object.wait_until(reload: false) do
+          page_object.has_content? 'started a merge train'
+        end
+
+        expect(train_started).to be_truthy, 'Expected to have system note indicating merge train has started.'
+      end
+
+      def merge_request_state(merge_request)
+        Resource::MergeRequest.fabricate_via_api! do |mr|
+          mr.project = project
+          mr.iid = merge_request[:iid]
+        end.state
       end
     end
   end

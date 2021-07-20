@@ -5,7 +5,10 @@ module Projects
     class AccessTokensController < Projects::ApplicationController
       include ProjectsHelper
 
-      before_action :check_feature_availability
+      layout 'project_settings'
+      before_action -> { check_permission(:read_resource_access_tokens) }, only: [:index]
+      before_action -> { check_permission(:destroy_resource_access_tokens) }, only: [:revoke]
+      before_action -> { check_permission(:create_resource_access_tokens) }, only: [:create]
 
       feature_category :authentication_and_authorization
 
@@ -42,18 +45,22 @@ module Projects
 
       private
 
-      def check_feature_availability
-        render_404 unless project_access_token_available?(@project)
+      def check_permission(action)
+        render_404 unless can?(current_user, action, @project)
       end
 
       def create_params
-        params.require(:project_access_token).permit(:name, :expires_at, scopes: [])
+        params.require(:project_access_token).permit(:name, :expires_at, :access_level, scopes: [])
       end
 
       def set_index_vars
+        # Loading project members so that we can fetch access level of the bot
+        # user in the project without multiple queries.
+        @project.project_members.load
+
         @scopes = Gitlab::Auth.resource_bot_scopes
-        @active_project_access_tokens = finder(state: 'active').execute
-        @inactive_project_access_tokens = finder(state: 'inactive', sort: 'expires_at_asc').execute
+        @active_project_access_tokens = finder(state: 'active').execute.preload_users
+        @inactive_project_access_tokens = finder(state: 'inactive', sort: 'expires_at_asc').execute.preload_users
         @new_project_access_token = PersonalAccessToken.redis_getdel(key_identity)
       end
 

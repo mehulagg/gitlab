@@ -4,6 +4,7 @@ module Packages
   module Go
     class ModuleVersion
       include Gitlab::Utils::StrongMemoize
+      include Gitlab::Golang
 
       VALID_TYPES = %i[ref commit pseudo].freeze
 
@@ -16,15 +17,15 @@ module Packages
       delegate :build, to: :@semver, allow_nil: true
 
       def initialize(mod, type, commit, name: nil, semver: nil, ref: nil)
-        raise ArgumentError.new("invalid type '#{type}'") unless VALID_TYPES.include? type
-        raise ArgumentError.new("mod is required") unless mod
-        raise ArgumentError.new("commit is required") unless commit
+        raise ArgumentError, "invalid type '#{type}'" unless VALID_TYPES.include? type
+        raise ArgumentError, "mod is required" unless mod
+        raise ArgumentError, "commit is required" unless commit
 
         if type == :ref
-          raise ArgumentError.new("ref is required") unless ref
+          raise ArgumentError, "ref is required" unless ref
         elsif type == :pseudo
-          raise ArgumentError.new("name is required") unless name
-          raise ArgumentError.new("semver is required") unless semver
+          raise ArgumentError, "name is required" unless name
+          raise ArgumentError, "semver is required" unless semver
         end
 
         @mod = mod
@@ -81,6 +82,9 @@ module Packages
       end
 
       def valid?
+        # assume the module version is valid if a corresponding Package exists
+        return true if ::Packages::Go::PackageFinder.new(mod.project, mod.name, name).exists?
+
         @mod.path_valid?(major) && @mod.gomod_valid?(gomod)
       end
 

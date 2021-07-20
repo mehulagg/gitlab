@@ -100,6 +100,17 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
            link_type: :image)
   end
 
+  let_it_be(:another_release) do
+    create(:release,
+           project: project,
+           tag: 'v1.2',
+           name: 'The second release',
+           author: admin,
+           description: 'An okay release :shrug:',
+           created_at: Time.zone.parse('2019-01-03'),
+           released_at: Time.zone.parse('2019-01-10'))
+  end
+
   after(:all) do
     remove_repository(project)
   end
@@ -119,28 +130,39 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
   describe GraphQL::Query, type: :request do
     include GraphqlHelpers
 
-    all_releases_query_path = 'releases/queries/all_releases.query.graphql'
-    one_release_query_path = 'releases/queries/one_release.query.graphql'
-    fragment_paths = ['releases/queries/release.fragment.graphql']
+    all_releases_query_path = 'releases/graphql/queries/all_releases.query.graphql'
+    one_release_query_path = 'releases/graphql/queries/one_release.query.graphql'
+    one_release_for_editing_query_path = 'releases/graphql/queries/one_release_for_editing.query.graphql'
 
     before(:all) do
       clean_frontend_fixtures('graphql/releases/')
     end
 
     it "graphql/#{all_releases_query_path}.json" do
-      query = get_graphql_query_as_string(all_releases_query_path, fragment_paths)
+      query = get_graphql_query_as_string(all_releases_query_path)
 
       post_graphql(query, current_user: admin, variables: { fullPath: project.full_path })
 
       expect_graphql_errors_to_be_empty
+      expect(graphql_data_at(:project, :releases)).to be_present
     end
 
     it "graphql/#{one_release_query_path}.json" do
-      query = get_graphql_query_as_string(one_release_query_path, fragment_paths)
+      query = get_graphql_query_as_string(one_release_query_path)
 
       post_graphql(query, current_user: admin, variables: { fullPath: project.full_path, tagName: release.tag })
 
       expect_graphql_errors_to_be_empty
+      expect(graphql_data_at(:project, :release)).to be_present
+    end
+
+    it "graphql/#{one_release_for_editing_query_path}.json" do
+      query = get_graphql_query_as_string(one_release_for_editing_query_path)
+
+      post_graphql(query, current_user: admin, variables: { fullPath: project.full_path, tagName: release.tag })
+
+      expect_graphql_errors_to_be_empty
+      expect(graphql_data_at(:project, :release)).to be_present
     end
   end
 end

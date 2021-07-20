@@ -1,6 +1,8 @@
 <script>
 import { GlTooltipDirective, GlIcon, GlLink, GlSafeHtmlDirective } from '@gitlab/ui';
 import { ApolloMutation } from 'vue-apollo';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { __ } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
@@ -10,6 +12,9 @@ import { findNoteId, extractDesignNoteId } from '../../utils/design_management_u
 import DesignReplyForm from './design_reply_form.vue';
 
 export default {
+  i18n: {
+    editCommentLabel: __('Edit comment'),
+  },
   components: {
     UserAvatarLink,
     TimelineEntryItem,
@@ -43,6 +48,9 @@ export default {
   computed: {
     author() {
       return this.note.author;
+    },
+    authorId() {
+      return getIdFromGraphQLId(this.author.id);
     },
     noteAnchorId() {
       return findNoteId(this.note.id);
@@ -90,7 +98,7 @@ export default {
           v-once
           :href="author.webUrl"
           class="js-user-link"
-          :data-user-id="author.id"
+          :data-user-id="authorId"
           :data-username="author.username"
         >
           <span class="note-header-author-name gl-font-weight-bold">{{ author.name }}</span>
@@ -113,7 +121,8 @@ export default {
           v-if="isEditButtonVisible"
           v-gl-tooltip
           type="button"
-          :title="__('Edit comment')"
+          :title="$options.i18n.editCommentLabel"
+          :aria-label="$options.i18n.editCommentLabel"
           class="note-action-button js-note-edit btn btn-transparent qa-note-edit-button"
           @click="isEditing = true"
         >

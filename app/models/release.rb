@@ -8,11 +8,12 @@ class Release < ApplicationRecord
 
   cache_markdown_field :description
 
-  belongs_to :project
+  belongs_to :project, touch: true
   # releases prior to 11.7 have no author
   belongs_to :author, class_name: 'User'
 
   has_many :links, class_name: 'Releases::Link'
+  has_many :sorted_links, -> { sorted }, class_name: 'Releases::Link', inverse_of: :release
 
   has_many :milestone_releases
   has_many :milestones, through: :milestone_releases
@@ -23,21 +24,25 @@ class Release < ApplicationRecord
   before_create :set_released_at
 
   validates :project, :tag, presence: true
+  validates :description, length: { maximum: Gitlab::Database::MAX_TEXT_SIZE_LIMIT }, if: :description_changed?
   validates_associated :milestone_releases, message: -> (_, obj) { obj[:value].map(&:errors).map(&:full_messages).join(",") }
   validates :links, nested_attributes_duplicates: { scope: :release, child_attributes: %i[name url filepath] }
 
   scope :sorted, -> { order(released_at: :desc) }
-  scope :preloaded, -> { includes(:evidences, :milestones, project: [:project_feature, :route, { namespace: :route }]) }
+  scope :preloaded, -> {
+    includes(:author, :evidences, :milestones, :links, :sorted_links,
+             project: [:project_feature, :route, { namespace: :route }])
+  }
   scope :with_project_and_namespace, -> { includes(project: :namespace) }
   scope :recent, -> { sorted.limit(MAX_NUMBER_TO_DISPLAY) }
   scope :without_evidence, -> { left_joins(:evidences).where(::Releases::Evidence.arel_table[:id].eq(nil)) }
   scope :released_within_2hrs, -> { where(released_at: Time.zone.now - 1.hour..Time.zone.now + 1.hour) }
 
   # Sorting
-  scope :order_created, -> { reorder('created_at ASC') }
-  scope :order_created_desc, -> { reorder('created_at DESC') }
-  scope :order_released, -> { reorder('released_at ASC') }
-  scope :order_released_desc, -> { reorder('released_at DESC') }
+  scope :order_created, -> { reorder(created_at: :asc) }
+  scope :order_created_desc, -> { reorder(created_at: :desc) }
+  scope :order_released, -> { reorder(released_at: :asc) }
+  scope :order_released_desc, -> { reorder(released_at: :desc) }
 
   delegate :repository, to: :project
 
@@ -58,8 +63,8 @@ class Release < ApplicationRecord
   end
 
   def assets_count(except: [])
-    links_count = links.count
-    sources_count = except.include?(:sources) ? 0 : sources.count
+    links_count = links.size
+    sources_count = except.include?(:sources) ? 0 : sources.size
 
     links_count + sources_count
   end
@@ -123,4 +128,4 @@ class Release < ApplicationRecord
   end
 end
 
-Release.prepend_if_ee('EE::Release')
+Release.prepend_mod_with('Release')

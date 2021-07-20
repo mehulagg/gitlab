@@ -20,7 +20,7 @@ RSpec.describe Issues::CloseService do
   end
 
   describe '#execute' do
-    let(:service) { described_class.new(project, user) }
+    let(:service) { described_class.new(project: project, current_user: user) }
 
     it 'checks if the user is authorized to update the issue' do
       expect(service).to receive(:can?).with(user, :update_issue, issue)
@@ -81,35 +81,35 @@ RSpec.describe Issues::CloseService do
   describe '#close_issue' do
     context 'with external issue' do
       context 'with an active external issue tracker supporting close_issue' do
-        let!(:external_issue_tracker) { create(:jira_service, project: project) }
+        let!(:external_issue_tracker) { create(:jira_integration, project: project) }
 
         it 'closes the issue on the external issue tracker' do
           project.reload
           expect(project.external_issue_tracker).to receive(:close_issue)
 
-          described_class.new(project, user).close_issue(external_issue)
+          described_class.new(project: project, current_user: user).close_issue(external_issue)
         end
       end
 
-      context 'with innactive external issue tracker supporting close_issue' do
-        let!(:external_issue_tracker) { create(:jira_service, project: project, active: false) }
+      context 'with inactive external issue tracker supporting close_issue' do
+        let!(:external_issue_tracker) { create(:jira_integration, project: project, active: false) }
 
         it 'does not close the issue on the external issue tracker' do
           project.reload
           expect(project.external_issue_tracker).not_to receive(:close_issue)
 
-          described_class.new(project, user).close_issue(external_issue)
+          described_class.new(project: project, current_user: user).close_issue(external_issue)
         end
       end
 
       context 'with an active external issue tracker not supporting close_issue' do
-        let!(:external_issue_tracker) { create(:bugzilla_service, project: project) }
+        let!(:external_issue_tracker) { create(:bugzilla_integration, project: project) }
 
         it 'does not close the issue on the external issue tracker' do
           project.reload
           expect(project.external_issue_tracker).not_to receive(:close_issue)
 
-          described_class.new(project, user).close_issue(external_issue)
+          described_class.new(project: project, current_user: user).close_issue(external_issue)
         end
       end
     end
@@ -117,7 +117,7 @@ RSpec.describe Issues::CloseService do
     context "closed by a merge request", :sidekiq_might_not_need_inline do
       subject(:close_issue) do
         perform_enqueued_jobs do
-          described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request)
+          described_class.new(project: project, current_user: user).close_issue(issue, closed_via: closing_merge_request)
         end
       end
 
@@ -186,7 +186,7 @@ RSpec.describe Issues::CloseService do
     context "closed by a commit", :sidekiq_might_not_need_inline do
       it 'mentions closure via a commit' do
         perform_enqueued_jobs do
-          described_class.new(project, user).close_issue(issue, closed_via: closing_commit)
+          described_class.new(project: project, current_user: user).close_issue(issue, closed_via: closing_commit)
         end
 
         email = ActionMailer::Base.deliveries.last
@@ -200,7 +200,7 @@ RSpec.describe Issues::CloseService do
         it 'does not mention the commit id' do
           project.project_feature.update_attribute(:repository_access_level, ProjectFeature::DISABLED)
           perform_enqueued_jobs do
-            described_class.new(project, user).close_issue(issue, closed_via: closing_commit)
+            described_class.new(project: project, current_user: user).close_issue(issue, closed_via: closing_commit)
           end
 
           email = ActionMailer::Base.deliveries.last
@@ -216,8 +216,16 @@ RSpec.describe Issues::CloseService do
     context "valid params" do
       subject(:close_issue) do
         perform_enqueued_jobs do
-          described_class.new(project, user).close_issue(issue)
+          described_class.new(project: project, current_user: user).close_issue(issue)
         end
+      end
+
+      it 'verifies the number of queries' do
+        recorded = ActiveRecord::QueryRecorder.new { close_issue }
+        expected_queries = 24
+
+        expect(recorded.count).to be <= expected_queries
+        expect(recorded.cached_count).to eq(0)
       end
 
       it 'closes the issue' do
@@ -230,7 +238,7 @@ RSpec.describe Issues::CloseService do
       it 'records closed user' do
         close_issue
 
-        expect(issue.closed_by_id).to be(user.id)
+        expect(issue.reload.closed_by_id).to be(user.id)
       end
 
       it 'sends email to user2 about assign of new issue', :sidekiq_might_not_need_inline do
@@ -252,6 +260,16 @@ RSpec.describe Issues::CloseService do
         close_issue
 
         expect(todo.reload).to be_done
+      end
+
+      context 'when closing the issue fails' do
+        it 'does not assign a closed_by value for the issue' do
+          allow(issue).to receive(:close).and_return(false)
+
+          close_issue
+
+          expect(issue.closed_by_id).to be_nil
+        end
       end
 
       context 'when there is an associated Alert Management Alert' do
@@ -305,9 +323,9 @@ RSpec.describe Issues::CloseService do
     context 'when issue is not confidential' do
       it 'executes issue hooks' do
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :issue_hooks)
-        expect(project).to receive(:execute_services).with(an_instance_of(Hash), :issue_hooks)
+        expect(project).to receive(:execute_integrations).with(an_instance_of(Hash), :issue_hooks)
 
-        described_class.new(project, user).close_issue(issue)
+        described_class.new(project: project, current_user: user).close_issue(issue)
       end
     end
 
@@ -316,9 +334,9 @@ RSpec.describe Issues::CloseService do
         issue = create(:issue, :confidential, project: project)
 
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :confidential_issue_hooks)
-        expect(project).to receive(:execute_services).with(an_instance_of(Hash), :confidential_issue_hooks)
+        expect(project).to receive(:execute_integrations).with(an_instance_of(Hash), :confidential_issue_hooks)
 
-        described_class.new(project, user).close_issue(issue)
+        described_class.new(project: project, current_user: user).close_issue(issue)
       end
     end
 

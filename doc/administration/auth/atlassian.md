@@ -5,13 +5,13 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Atlassian OmniAuth Provider
+# Atlassian OmniAuth Provider **(FREE SELF)**
 
 To enable the Atlassian OmniAuth provider for passwordless authentication you must register an application with Atlassian.
 
 ## Atlassian application registration
 
-1. Go to <https://developer.atlassian.com/apps/> and sign-in with the Atlassian
+1. Go to <https://developer.atlassian.com/console/myapps/> and sign-in with the Atlassian
    account that will administer the application.
 
 1. Click **Create a new app**.

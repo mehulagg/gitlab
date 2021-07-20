@@ -77,7 +77,11 @@ module LoginHelpers
 
   # Requires Javascript driver.
   def gitlab_disable_admin_mode
-    click_on 'Leave Admin Mode'
+    open_top_nav
+
+    within_top_nav do
+      click_on 'Leave Admin Mode'
+    end
   end
 
   private
@@ -237,4 +241,4 @@ module LoginHelpers
   end
 end
 
-LoginHelpers.prepend_if_ee('EE::LoginHelpers')
+LoginHelpers.prepend_mod_with('LoginHelpers')

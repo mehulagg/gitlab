@@ -27,14 +27,14 @@ involves:
 ## Prerequisites
 
 1. Install
-   [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+   [`kubectl`](https://kubernetes.io/docs/tasks/tools/).
 1. Ensure that you can access your Kubernetes cluster using `kubectl`.
    This varies based on Kubernetes providers.
 1. Prepare for downtime. The steps below include taking the application offline
    so that the in-cluster database does not get modified after the database dump is created.
 1. Ensure you have not set `POSTGRES_ENABLED` to `false`, as this setting deletes
    any existing channel 1 database. For more information, see
-   [Detected an existing PostgreSQL database](index.md#detected-an-existing-postgresql-database).
+   [Detected an existing PostgreSQL database](troubleshooting.md#detected-an-existing-postgresql-database).
 
 NOTE:
 If you have configured Auto DevOps to have staging,
@@ -195,7 +195,7 @@ higher*. This is the
    remove the variables, or rename the variables temporarily to
    `XDB_INITIALIZE` or the `XDB_MIGRATE` to effectively disable them.
 1. Run a new CI pipeline for the branch. In this case, we run a new CI
-   pipeline for `master`.
+   pipeline for `main`.
 1. After the pipeline is successful, your application is upgraded
    with the new PostgreSQL installed. Zero replicas exist at this time, so
    no traffic is served for your application (to prevent
@@ -250,5 +250,5 @@ steps to reinstate your application:
    removed or disabled.
 1. Restore the `PRODUCTION_REPLICAS` or `REPLICAS` variable to its original value.
 1. Run a new CI pipeline for the branch. In this case, we run a new CI
-   pipeline for `master`. After the pipeline is successful, your
+   pipeline for `main`. After the pipeline is successful, your
    application should be serving traffic as before.

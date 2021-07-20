@@ -2,49 +2,115 @@
 
 require 'spec_helper'
 
-RSpec.describe 'groups/show.html.haml' do
-  let_it_be(:user) { build(:user) }
-  let_it_be(:group) { create(:group) }
+RSpec.describe 'groups/edit.html.haml' do
+  include Devise::Test::ControllerHelpers
 
-  before do
-    assign(:group, group)
-  end
+  describe '"Share with group lock" setting' do
+    let(:root_owner) { create(:user) }
+    let(:root_group) { create(:group) }
 
-  context 'when rendering with the layout' do
-    subject(:render_page) { render template: 'groups/show.html.haml', layout: 'layouts/group' }
+    before do
+      root_group.add_owner(root_owner)
+    end
 
-    describe 'invite team members' do
-      before do
-        allow(view).to receive(:session).and_return({})
-        allow(view).to receive(:current_user_mode).and_return(Gitlab::Auth::CurrentUserMode.new(user))
-        allow(view).to receive(:current_user).and_return(user)
-        allow(view).to receive(:experiment_enabled?).and_return(false)
-        allow(view).to receive(:group_path).and_return('')
-        allow(view).to receive(:group_shared_path).and_return('')
-        allow(view).to receive(:group_archived_path).and_return('')
+    shared_examples_for '"Share with group lock" setting' do |checkbox_options|
+      it 'has the correct label, help text, and checkbox options' do
+        assign(:group, test_group)
+        allow(view).to receive(:can?).with(test_user, :admin_group, test_group).and_return(true)
+        allow(view).to receive(:can_change_group_visibility_level?).and_return(false)
+        allow(view).to receive(:current_user).and_return(test_user)
+        expect(view).to receive(:can_change_share_with_group_lock?).and_return(!checkbox_options[:disabled])
+        expect(view).to receive(:share_with_group_lock_help_text).and_return('help text here')
+
+        render
+
+        expect(rendered).to have_content("Prevent sharing a project within #{test_group.name} with other groups")
+        expect(rendered).to have_css('.js-descr', text: 'help text here')
+        expect(rendered).to have_field('group_share_with_group_lock', **checkbox_options)
+      end
+    end
+
+    context 'for a root group' do
+      let(:test_group) { root_group }
+      let(:test_user) { root_owner }
+
+      it_behaves_like '"Share with group lock" setting', { disabled: false, checked: false }
+    end
+
+    context 'for a subgroup' do
+      let!(:subgroup) { create(:group, parent: root_group) }
+      let(:sub_owner) { create(:user) }
+      let(:test_group) { subgroup }
+
+      context 'when the root_group has "Share with group lock" disabled' do
+        context 'when the subgroup has "Share with group lock" disabled' do
+          context 'as the root_owner' do
+            let(:test_user) { root_owner }
+
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: false }
+          end
+
+          context 'as the sub_owner' do
+            let(:test_user) { sub_owner }
+
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: false }
+          end
+        end
+
+        context 'when the subgroup has "Share with group lock" enabled' do
+          before do
+            subgroup.update_column(:share_with_group_lock, true)
+          end
+
+          context 'as the root_owner' do
+            let(:test_user) { root_owner }
+
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: true }
+          end
+
+          context 'as the sub_owner' do
+            let(:test_user) { sub_owner }
+
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: true }
+          end
+        end
       end
 
-      context 'when invite team members is not available in sidebar' do
+      context 'when the root_group has "Share with group lock" enabled' do
         before do
-          allow(view).to receive(:can_invite_members_for_group?).and_return(false)
+          root_group.update_column(:share_with_group_lock, true)
         end
 
-        it 'does not display the js-invite-members-trigger' do
-          render_page
+        context 'when the subgroup has "Share with group lock" disabled (parent overridden)' do
+          context 'as the root_owner' do
+            let(:test_user) { root_owner }
 
-          expect(rendered).not_to have_selector('.js-invite-members-trigger')
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: false }
+          end
+
+          context 'as the sub_owner' do
+            let(:test_user) { sub_owner }
+
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: false }
+          end
         end
-      end
 
-      context 'when invite team members is available' do
-        before do
-          allow(view).to receive(:can_invite_members_for_group?).and_return(true)
-        end
+        context 'when the subgroup has "Share with group lock" enabled (same as parent)' do
+          before do
+            subgroup.update_column(:share_with_group_lock, true)
+          end
 
-        it 'includes the div for js-invite-members-trigger' do
-          render_page
+          context 'as the root_owner' do
+            let(:test_user) { root_owner }
 
-          expect(rendered).to have_selector('.js-invite-members-trigger')
+            it_behaves_like '"Share with group lock" setting', { disabled: false, checked: true }
+          end
+
+          context 'as the sub_owner' do
+            let(:test_user) { sub_owner }
+
+            it_behaves_like '"Share with group lock" setting', { disabled: true, checked: true }
+          end
         end
       end
     end

@@ -1,0 +1,18 @@
+---
+key_path: historical_max_users
+description: The peak active user count. Active is defined in UsersStatistics model.
+product_section: fulfillment
+product_stage: fulfillment
+product_group: group::license
+product_category: license
+value_type: number
+status: data_available
+time_frame: none
+data_source: database
+data_category: Subscription
+distribution:
+- ee
+tier:
+- premium
+- ultimate
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/557

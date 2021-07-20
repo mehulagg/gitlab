@@ -6,9 +6,10 @@ RSpec.describe RequirementsManagement::CreateRequirementService do
   let_it_be(:project) { create(:project)}
   let_it_be(:user) { create(:user) }
   let_it_be(:other_user) { create(:user) }
+
   let(:params) { { title: 'foo', author_id: other_user.id, created_at: 2.days.ago } }
 
-  subject { described_class.new(project, user, params).execute }
+  subject { described_class.new(project: project, current_user: user, params: params).execute }
 
   describe '#execute' do
     before do

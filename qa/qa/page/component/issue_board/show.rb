@@ -11,6 +11,7 @@ module QA
 
           view 'app/assets/javascripts/boards/components/board_form.vue' do
             element :board_name_field
+            element :save_changes_button
           end
 
           view 'app/assets/javascripts/boards/components/board_list.vue' do
@@ -23,24 +24,24 @@ module QA
             element :create_new_board_button
           end
 
-          view 'app/assets/javascripts/vue_shared/components/deprecated_modal.vue' do
-            element :save_changes_button
-          end
-
-          view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select/base.vue' do
+          view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select_vue/dropdown_contents.vue' do
             element :labels_dropdown_content
           end
 
-          view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select/dropdown_title.vue' do
+          view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select_vue/dropdown_title.vue' do
             element :labels_edit_button
           end
 
-          view 'app/views/shared/boards/_show.html.haml' do
+          view 'app/assets/javascripts/boards/components/board_content.vue' do
             element :boards_list
           end
 
           view 'app/assets/javascripts/boards/components/toggle_focus.vue' do
             element :focus_mode_button
+          end
+
+          view 'app/assets/javascripts/boards/components/config_toggle.vue' do
+            element :boards_config_button
           end
 
           # The `focused_board` method does not use `find_element` with an element defined
@@ -80,6 +81,10 @@ module QA
                 find_element(:board_card)
               end
             end
+          end
+
+          def click_boards_config_button
+            click_element(:boards_config_button)
           end
 
           def click_boards_dropdown_button
@@ -132,4 +137,4 @@ module QA
   end
 end
 
-QA::Page::Component::IssueBoard::Show.prepend_if_ee('QA::EE::Page::Component::IssueBoard::Show')
+QA::Page::Component::IssueBoard::Show.prepend_mod_with('Page::Component::IssueBoard::Show', namespace: QA)

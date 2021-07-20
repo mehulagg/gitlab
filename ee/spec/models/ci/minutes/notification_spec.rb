@@ -7,6 +7,7 @@ RSpec.describe Ci::Minutes::Notification do
   let(:shared_runners_enabled) { true }
   let!(:project) { create(:project, :repository, namespace: group, shared_runners_enabled: shared_runners_enabled) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:injected_group) { group }
   let(:injected_project) { project }
 

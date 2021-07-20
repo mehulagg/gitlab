@@ -13,7 +13,7 @@ module EE
       # ::SystemNoteService wants the methods to be available as both class and
       # instance methods. This removes the need for having to both `include` and
       # `extend` this module everywhere it is used.
-      extend_if_ee('EE::SystemNoteService') # rubocop: disable Cop/InjectEnterpriseEditionModule
+      extend_mod_with('SystemNoteService') # rubocop: disable Cop/InjectEnterpriseEditionModule
     end
 
     def epic_issue(epic, issue, user, type)
@@ -112,6 +112,10 @@ module EE
       issuables_service(noteable, project, author).publish_issue_to_status_page
     end
 
+    def notify_via_escalation(noteable, project, recipients, escalation_policy, oncall_schedule)
+      escalations_service(noteable, project).notify_via_escalation(recipients, escalation_policy: escalation_policy, oncall_schedule: oncall_schedule)
+    end
+
     private
 
     def issuables_service(noteable, project, author)
@@ -119,15 +123,19 @@ module EE
     end
 
     def epics_service(noteable, author)
-      EE::SystemNotes::EpicsService.new(noteable: noteable, author: author)
+      ::SystemNotes::EpicsService.new(noteable: noteable, author: author)
     end
 
     def merge_trains_service(noteable, project, author)
-      EE::SystemNotes::MergeTrainService.new(noteable: noteable, project: project, author: author)
+      ::SystemNotes::MergeTrainService.new(noteable: noteable, project: project, author: author)
     end
 
     def vulnerabilities_service(noteable, project, author)
-      EE::SystemNotes::VulnerabilitiesService.new(noteable: noteable, project: project, author: author)
+      ::SystemNotes::VulnerabilitiesService.new(noteable: noteable, project: project, author: author)
+    end
+
+    def escalations_service(noteable, project)
+      ::SystemNotes::EscalationsService.new(noteable: noteable, project: project)
     end
   end
 end

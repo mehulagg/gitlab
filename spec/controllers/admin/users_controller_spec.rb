@@ -30,9 +30,27 @@ RSpec.describe Admin::UsersController do
       expect(assigns(:users).first.association(:authorized_projects)).to be_loaded
     end
 
-    it_behaves_like 'tracking unique visits', :index do
-      let(:target_id) { 'i_analytics_cohorts' }
-      let(:request_params) { { tab: 'cohorts' } }
+    context 'pagination' do
+      context 'when number of users is over the pagination limit' do
+        before do
+          stub_const('Admin::UsersController::PAGINATION_WITH_COUNT_LIMIT', 5)
+          allow(Gitlab::Database::Count).to receive(:approximate_counts).with([User]).and_return({ User => 6 })
+        end
+
+        it 'marks the relation for pagination without counts' do
+          get :index
+
+          expect(assigns(:users)).to be_a(Kaminari::PaginatableWithoutCount)
+        end
+      end
+
+      context 'when number of users is below the pagination limit' do
+        it 'marks the relation for pagination with counts' do
+          get :index
+
+          expect(assigns(:users)).not_to be_a(Kaminari::PaginatableWithoutCount)
+        end
+      end
     end
   end
 
@@ -341,6 +359,56 @@ RSpec.describe Admin::UsersController do
     end
   end
 
+  describe 'PUT ban/:id' do
+    context 'when ban_user_feature_flag is enabled' do
+      it 'bans user' do
+        put :ban, params: { id: user.username }
+
+        user.reload
+        expect(user.banned?).to be_truthy
+        expect(flash[:notice]).to eq _('Successfully banned')
+      end
+
+      context 'when unsuccessful' do
+        let(:user) { create(:user, :blocked) }
+
+        it 'does not ban user' do
+          put :ban, params: { id: user.username }
+
+          user.reload
+          expect(user.banned?).to be_falsey
+          expect(flash[:alert]).to eq _('Error occurred. User was not banned')
+        end
+      end
+    end
+
+    context 'when ban_user_feature_flag is not enabled' do
+      before do
+        stub_feature_flags(ban_user_feature_flag: false)
+      end
+
+      it 'does not ban user, renders 404' do
+        put :ban, params: { id: user.username }
+
+        user.reload
+        expect(user.banned?).to be_falsey
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
+  describe 'PUT unban/:id' do
+    let(:banned_user) { create(:user, :banned) }
+
+    it 'unbans user' do
+      put :unban, params: { id: banned_user.username }
+
+      banned_user.reload
+      expect(banned_user.banned?).to be_falsey
+      expect(flash[:notice]).to eq _('Successfully unbanned')
+    end
+  end
+
   describe 'PUT unlock/:id' do
     before do
       request.env["HTTP_REFERER"] = "/"
@@ -575,6 +643,95 @@ RSpec.describe Admin::UsersController do
         }
 
         expect { post :update, params: params }.to change { user.reload.note }.to(note)
+      end
+    end
+
+    context 'when updating credit card validation for user account' do
+      let(:params) do
+        {
+          id: user.to_param,
+          user: user_params
+        }
+      end
+
+      shared_examples 'no credit card validation param' do
+        let(:user_params) { { name: 'foo' } }
+
+        it 'does not change credit card validation' do
+          expect { post :update, params: params }.not_to change(Users::CreditCardValidation, :count)
+        end
+      end
+
+      context 'when user has a credit card validation' do
+        before do
+          user.create_credit_card_validation!(credit_card_validated_at: Time.zone.now)
+        end
+
+        context 'with unchecked credit card validation' do
+          let(:user_params) do
+            { credit_card_validation_attributes: { credit_card_validated_at: '0' } }
+          end
+
+          it 'deletes credit_card_validation' do
+            expect { post :update, params: params }.to change { Users::CreditCardValidation.count }.by(-1)
+          end
+        end
+
+        context 'with checked credit card validation' do
+          let(:user_params) do
+            { credit_card_validation_attributes: { credit_card_validated_at: '1' } }
+          end
+
+          it 'does not change credit_card_validated_at' do
+            expect { post :update, params: params }.not_to change { user.credit_card_validated_at }
+          end
+        end
+
+        it_behaves_like 'no credit card validation param'
+      end
+
+      context 'when user does not have a credit card validation' do
+        context 'with checked credit card validation' do
+          let(:user_params) do
+            { credit_card_validation_attributes: { credit_card_validated_at: '1' } }
+          end
+
+          it 'creates new credit card validation' do
+            expect { post :update, params: params }.to change { Users::CreditCardValidation.count }.by 1
+          end
+        end
+
+        context 'with unchecked credit card validation' do
+          let(:user_params) do
+            { credit_card_validation_attributes: { credit_card_validated_at: '0' } }
+          end
+
+          it 'does not blow up' do
+            expect { post :update, params: params }.not_to change(Users::CreditCardValidation, :count)
+          end
+        end
+
+        it_behaves_like 'no credit card validation param'
+      end
+
+      context 'invalid parameters' do
+        let(:user_params) do
+          { credit_card_validation_attributes: { credit_card_validated_at: Time.current.iso8601 } }
+        end
+
+        it_behaves_like 'no credit card validation param'
+      end
+
+      context 'with non permitted params' do
+        let(:user_params) do
+          { credit_card_validation_attributes: { _destroy: true } }
+        end
+
+        before do
+          user.create_credit_card_validation!(credit_card_validated_at: Time.zone.now)
+        end
+
+        it_behaves_like 'no credit card validation param'
       end
     end
   end

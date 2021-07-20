@@ -82,6 +82,7 @@ module EE
             super
 
             verify_mirror_attrs!(project, attrs)
+            verify_issuable_default_templates_attrs!(project, attrs)
           end
 
           def verify_mirror_attrs!(project, attrs)
@@ -89,6 +90,13 @@ module EE
               ::Projects::UpdateService::PULL_MIRROR_ATTRIBUTES.each do |attr_name|
                 attrs.delete(attr_name)
               end
+            end
+          end
+
+          def verify_issuable_default_templates_attrs!(project, attrs)
+            unless project.feature_available?(:issuable_default_templates)
+              attrs.delete(:issues_template)
+              attrs.delete(:merge_requests_template)
             end
           end
 

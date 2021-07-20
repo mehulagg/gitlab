@@ -2,11 +2,13 @@
 
 class PipelineHooksWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include PipelineQueue
 
   queue_namespace :pipeline_hooks
-  urgency :high
   worker_resource_boundary :cpu
+  data_consistency :delayed
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(pipeline_id)

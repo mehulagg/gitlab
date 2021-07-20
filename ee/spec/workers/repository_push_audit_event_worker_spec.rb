@@ -67,7 +67,7 @@ RSpec.describe RepositoryPushAuditEventWorker do
       end
 
       it 'does not create events' do
-        expect_next_instance_of(EE::AuditEvents::RepositoryPushAuditEventService) do |instance|
+        expect_next_instance_of(AuditEvents::RepositoryPushAuditEventService) do |instance|
           expect(instance).to receive(:enabled?) { false }
         end
 

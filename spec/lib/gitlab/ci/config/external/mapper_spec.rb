@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Ci::Config::External::Mapper do
 
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:local_file) { '/lib/gitlab/ci/templates/non-existent-file.yml' }
   let(:remote_url) { 'https://gitlab.com/gitlab-org/gitlab-foss/blob/1234/.gitlab-ci-1.yml' }
   let(:template_file) { 'Auto-DevOps.gitlab-ci.yml' }
@@ -321,6 +322,40 @@ RSpec.describe Gitlab::Ci::Config::External::Mapper do
           expect(ExpandVariables).not_to receive(:expand).with(project.id, context_params[:variables])
 
           expect { subject }.to raise_error(described_class::AmbigiousSpecificationError)
+        end
+      end
+    end
+
+    context 'when local file path has wildcard' do
+      let(:project) { create(:project, :repository) }
+
+      let(:values) do
+        { include: 'myfolder/*.yml' }
+      end
+
+      before do
+        allow_next_instance_of(Repository) do |repository|
+          allow(repository).to receive(:search_files_by_wildcard_path).with('myfolder/*.yml', '123456') do
+            ['myfolder/file1.yml', 'myfolder/file2.yml']
+          end
+        end
+      end
+
+      it 'includes the matched local files' do
+        expect(subject).to contain_exactly(an_instance_of(Gitlab::Ci::Config::External::File::Local),
+                                           an_instance_of(Gitlab::Ci::Config::External::File::Local))
+
+        expect(subject.map(&:location)).to contain_exactly('myfolder/file1.yml', 'myfolder/file2.yml')
+      end
+
+      context 'when the FF ci_wildcard_file_paths is disabled' do
+        before do
+          stub_feature_flags(ci_wildcard_file_paths: false)
+        end
+
+        it 'cannot find any file returns an error message' do
+          expect(subject).to contain_exactly(an_instance_of(Gitlab::Ci::Config::External::File::Local))
+          expect(subject[0].errors).to eq(['Local file `myfolder/*.yml` does not exist!'])
         end
       end
     end

@@ -68,12 +68,13 @@ RSpec.describe MergeRequests::MergeToRefService do
   end
 
   let_it_be(:user) { create(:user) }
+
   let(:merge_request) { create(:merge_request, :simple) }
   let(:project) { merge_request.project }
 
   describe '#execute' do
     let(:service) do
-      described_class.new(project, user, **params)
+      described_class.new(project: project, current_user: user, params: params)
     end
 
     let(:params) { { commit_message: 'Awesome message', should_remove_source_branch: true, sha: merge_request.diff_head_sha } }
@@ -93,7 +94,7 @@ RSpec.describe MergeRequests::MergeToRefService do
 
     it 'returns an error when Gitlab::Git::CommandError is raised during merge' do
       allow(project.repository).to receive(:merge_to_ref) do
-        raise Gitlab::Git::CommandError.new('Failed to create merge commit')
+        raise Gitlab::Git::CommandError, 'Failed to create merge commit'
       end
 
       result = service.execute(merge_request)
@@ -110,11 +111,11 @@ RSpec.describe MergeRequests::MergeToRefService do
       end
 
       let(:merge_ref_service) do
-        described_class.new(project, user, {})
+        described_class.new(project: project, current_user: user)
       end
 
       let(:merge_service) do
-        MergeRequests::MergeService.new(project, user, { sha: merge_request.diff_head_sha })
+        MergeRequests::MergeService.new(project: project, current_user: user, params: { sha: merge_request.diff_head_sha })
       end
 
       context 'when merge commit' do
@@ -226,6 +227,7 @@ RSpec.describe MergeRequests::MergeToRefService do
 
     describe 'cascading merge refs' do
       let_it_be(:project) { create(:project, :repository) }
+
       let(:params) { { commit_message: 'Cascading merge', first_parent_ref: first_parent_ref, target_ref: target_ref, sha: merge_request.diff_head_sha } }
 
       context 'when first merge happens' do
@@ -257,8 +259,9 @@ RSpec.describe MergeRequests::MergeToRefService do
       let(:params) { { allow_conflicts: true } }
 
       it 'calls merge_to_ref with allow_conflicts param' do
-        expect(project.repository).to receive(:merge_to_ref)
-          .with(anything, anything, anything, anything, anything, anything, true)
+        expect(project.repository).to receive(:merge_to_ref) do |user, **kwargs|
+          expect(kwargs[:allow_conflicts]).to eq(true)
+        end.and_call_original
 
         service.execute(merge_request)
       end

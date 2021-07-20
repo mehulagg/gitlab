@@ -8,4 +8,4 @@
   %p
     = _("Restoring the group will prevent the group, its subgroups and projects from being removed on this date.")
     = form_tag(group_restore_path(group), method: :post) do
-      = button_to _('Restore group'), '#', class: "btn btn-warning"
+      = button_to _('Restore group'), '#', class: "gl-button btn btn-default"

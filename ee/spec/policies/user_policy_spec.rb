@@ -84,6 +84,18 @@ RSpec.describe UserPolicy do
           context 'when admin mode disabled' do
             it { is_expected.not_to be_allowed(:update_name) }
           end
+
+          context 'when admin mode is disabled, and then enabled following sessionless login' do
+            def policy
+              # method, because we want a fresh cache each time.
+              described_class.new(current_user, user)
+            end
+
+            it 'changes from prevented to allowed', :request_store do
+              expect { Gitlab::Auth::CurrentUserMode.bypass_session!(current_user.id) }
+                .to change { policy.allowed?(:update_name) }.from(false).to(true)
+            end
+          end
         end
       end
     end

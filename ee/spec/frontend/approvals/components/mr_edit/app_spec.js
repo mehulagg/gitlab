@@ -41,6 +41,15 @@ describe('EE Approvals MREditApp', () => {
     axiosMock.restore();
   });
 
+  it('renders CODEOWNERS tip', () => {
+    store.state.settings.canUpdateApprovers = true;
+    store.state.settings.showCodeOwnerTip = true;
+
+    factory(true);
+
+    expect(wrapper.find('[data-testid="codeowners-tip"]').exists()).toBe(true);
+  });
+
   describe('with empty rules', () => {
     beforeEach(() => {
       store.modules.approvals.state.rules = [];

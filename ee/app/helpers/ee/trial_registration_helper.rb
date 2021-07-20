@@ -2,12 +2,11 @@
 
 module EE
   module TrialRegistrationHelper
-    def social_signin_experiment_enabled?
-      ::Gitlab.com? &&
+    def social_signin_enabled?
+      ::Gitlab.dev_env_or_com? &&
         omniauth_enabled? &&
         devise_mapping.omniauthable? &&
-        button_based_providers_enabled? &&
-        experiment_enabled?(:trial_registration_with_social_signin)
+        button_based_providers_enabled?
     end
   end
 end

@@ -8,42 +8,55 @@ module BulkImports
       MarkedAsFailedError = Class.new(StandardError)
 
       def run
-        raise MarkedAsFailedError if marked_as_failed?
+        raise MarkedAsFailedError if context.entity.failed?
 
         info(message: 'Pipeline started')
 
         extracted_data = extracted_data_from
 
-        extracted_data&.each do |entry|
-          transformers.each do |transformer|
-            entry = run_pipeline_step(:transformer, transformer.class.name) do
-              transformer.transform(context, entry)
+        if extracted_data
+          extracted_data.each do |entry|
+            transformers.each do |transformer|
+              entry = run_pipeline_step(:transformer, transformer.class.name) do
+                transformer.transform(context, entry)
+              end
+            end
+
+            run_pipeline_step(:loader, loader.class.name) do
+              loader.load(context, entry)
             end
           end
 
-          run_pipeline_step(:loader, loader.class.name) do
-            loader.load(context, entry)
+          tracker.update!(
+            has_next_page: extracted_data.has_next_page?,
+            next_page: extracted_data.next_page
+          )
+
+          run_pipeline_step(:after_run) do
+            after_run(extracted_data)
           end
         end
 
-        after_run(extracted_data) if respond_to?(:after_run)
-
         info(message: 'Pipeline finished')
       rescue MarkedAsFailedError
-        log_skip
+        skip!('Skipping pipeline due to failed entity')
       end
 
       private # rubocop:disable Lint/UselessAccessModifier
 
-      def run_pipeline_step(step, class_name)
-        raise MarkedAsFailedError if marked_as_failed?
+      def run_pipeline_step(step, class_name = nil)
+        raise MarkedAsFailedError if context.entity.failed?
 
         info(pipeline_step: step, step_class: class_name)
 
         yield
       rescue MarkedAsFailedError
-        log_skip(step => class_name)
-      rescue => e
+        skip!(
+          'Skipping pipeline due to failed entity',
+          pipeline_step: step,
+          step_class: class_name
+        )
+      rescue StandardError => e
         log_import_failure(e, step)
 
         mark_as_failed if abort_on_failure?
@@ -57,25 +70,21 @@ module BulkImports
         end
       end
 
+      def after_run(extracted_data)
+        run if extracted_data.has_next_page?
+      end
+
       def mark_as_failed
-        warn(message: 'Pipeline failed', pipeline_class: pipeline)
+        warn(message: 'Pipeline failed')
 
         context.entity.fail_op!
+        tracker.fail_op!
       end
 
-      def marked_as_failed?
-        return true if context.entity.failed?
+      def skip!(message, extra = {})
+        warn({ message: message }.merge(extra))
 
-        false
-      end
-
-      def log_skip(extra = {})
-        log = {
-          message: 'Skipping due to failed pipeline status',
-          pipeline_class: pipeline
-        }.merge(extra)
-
-        info(log)
+        tracker.skip!
       end
 
       def log_import_failure(exception, step)
@@ -88,23 +97,39 @@ module BulkImports
           correlation_id_value: Labkit::Correlation::CorrelationId.current_or_new_id
         }
 
+        error(
+          pipeline_step: step,
+          exception_class: exception.class.to_s,
+          exception_message: exception.message
+        )
+
         BulkImports::Failure.create(attributes)
       end
 
-      def warn(extra = {})
-        logger.warn(log_base_params.merge(extra))
-      end
-
       def info(extra = {})
-        logger.info(log_base_params.merge(extra))
+        logger.info(log_params(extra))
       end
 
-      def log_base_params
-        {
+      def warn(extra = {})
+        logger.warn(log_params(extra))
+      end
+
+      def error(extra = {})
+        logger.error(log_params(extra))
+      end
+
+      def log_params(extra)
+        defaults = {
+          bulk_import_id: context.bulk_import.id,
           bulk_import_entity_id: context.entity.id,
           bulk_import_entity_type: context.entity.source_type,
-          pipeline_class: pipeline
+          pipeline_class: pipeline,
+          context_extra: context.extra
         }
+
+        defaults
+          .merge(extra)
+          .reject { |_key, value| value.blank? }
       end
 
       def logger

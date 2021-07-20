@@ -40,6 +40,10 @@ FactoryBot.define do
       end
     end
 
+    trait :created do
+      status { :created }
+    end
+
     factory :ci_pipeline do
       transient { ci_ref_presence { true } }
 
@@ -51,10 +55,6 @@ FactoryBot.define do
         status { :failed }
         yaml_errors { 'invalid YAML' }
         failure_reason { :config_error }
-      end
-
-      trait :created do
-        status { :created }
       end
 
       trait :preparing do
@@ -79,6 +79,10 @@ FactoryBot.define do
 
       trait :failed do
         status { :failed }
+      end
+
+      trait :unlocked do
+        locked { Ci::Pipeline.lockeds[:unlocked] }
       end
 
       trait :protected do
@@ -237,7 +241,7 @@ FactoryBot.define do
       trait :merged_result_pipeline do
         detached_merge_request_pipeline
 
-        sha { 'test-merge-sha'}
+        sha { 'mergeSha' }
         ref { merge_request.merge_ref_path }
         source_sha { merge_request.source_branch_sha }
         target_sha { merge_request.target_branch_sha }

@@ -1,5 +1,0 @@
----
-title: Forbid git pushes to group wikis when repo is read only
-merge_request: 52801
-author:
-type: added

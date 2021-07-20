@@ -4,7 +4,7 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Pages domain names, URLs, and base URLs
+# GitLab Pages domain names, URLs, and base URLs **(FREE)**
 
 On this document, learn how to name your project for GitLab Pages
 according to your intended website's URL.
@@ -81,7 +81,7 @@ To understand Pages domains clearly, read the examples below.
 ## URLs and base URLs
 
 NOTE:
-The `baseurl` option might be called named differently in some static site generators.
+The `baseurl` option might be named differently in some static site generators.
 
 Every Static Site Generator (SSG) default configuration expects
 to find your website under a (sub)domain (`example.com`), not

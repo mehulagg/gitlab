@@ -2,6 +2,8 @@
 
 class ExpireBuildArtifactsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   # rubocop:disable Scalability/CronWorkerContext
   # This worker does not perform work scoped to a context
   include CronjobQueue
@@ -10,7 +12,7 @@ class ExpireBuildArtifactsWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :continuous_integration
 
   def perform
-    service = Ci::DestroyExpiredJobArtifactsService.new
+    service = Ci::JobArtifacts::DestroyAllExpiredService.new
     artifacts_count = service.execute
     log_extra_metadata_on_done(:destroyed_job_artifacts_count, artifacts_count)
   end

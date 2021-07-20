@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative '../concerns/saml_authorization.rb'
+require_relative '../concerns/saml_authorization'
 
 class Groups::SamlProvidersController < Groups::ApplicationController
   include SamlAuthorization
@@ -47,7 +47,7 @@ class Groups::SamlProvidersController < Groups::ApplicationController
   end
 
   def saml_provider_params
-    allowed_params = %i[sso_url certificate_fingerprint enabled enforced_sso default_membership_role]
+    allowed_params = %i[sso_url certificate_fingerprint enabled enforced_sso default_membership_role git_check_enforced]
 
     if Feature.enabled?(:group_managed_accounts, group)
       allowed_params += [:enforced_group_managed_accounts, :prohibited_outer_forks]

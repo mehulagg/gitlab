@@ -9,7 +9,7 @@ class RegistrationsController < Devise::RegistrationsController
   layout 'devise'
 
   prepend_before_action :check_captcha, only: :create
-  before_action :whitelist_query_limiting, :ensure_destroy_prerequisites_met, only: [:destroy]
+  before_action :ensure_destroy_prerequisites_met, only: [:destroy]
   before_action :load_recaptcha, only: :new
   before_action :set_invite_params, only: :new
 
@@ -101,7 +101,7 @@ class RegistrationsController < Devise::RegistrationsController
     Gitlab::AppLogger.info(user_created_message)
     return new_user_session_path(anchor: 'login-pane') if resource.blocked_pending_approval?
 
-    Feature.enabled?(:soft_email_confirmation) ? dashboard_projects_path : users_almost_there_path
+    Feature.enabled?(:soft_email_confirmation) ? dashboard_projects_path : users_almost_there_path(email: resource.email)
   end
 
   private
@@ -155,15 +155,19 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def resource
-    @resource ||= Users::BuildService.new(current_user, sign_up_params).execute
+    @resource ||= Users::RegistrationsBuildService
+                    .new(current_user, sign_up_params.merge({ skip_confirmation: skip_email_confirmation? }))
+                    .execute
   end
 
   def devise_mapping
     @devise_mapping ||= Devise.mappings[:user]
   end
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42380')
+  def skip_email_confirmation?
+    invite_email = session.delete(:invite_email)
+
+    sign_up_params[:email] == invite_email
   end
 
   def load_recaptcha
@@ -183,6 +187,24 @@ class RegistrationsController < Devise::RegistrationsController
   def set_invite_params
     @invite_email = ActionController::Base.helpers.sanitize(params[:invite_email])
   end
+
+  def after_pending_invitations_hook
+    member_id = session.delete(:originating_member_id)
+
+    return unless member_id
+
+    # if invited multiple times to different projects, only the email clicked will be counted as accepted
+    # for the specific member on a project or group
+    member = resource.members.find_by(id: member_id) # rubocop: disable CodeReuse/ActiveRecord
+
+    return unless member
+
+    experiment('members/invite_email', actor: member).track(:accepted)
+  end
+
+  def context_user
+    current_user
+  end
 end
 
-RegistrationsController.prepend_if_ee('EE::RegistrationsController')
+RegistrationsController.prepend_mod_with('RegistrationsController')

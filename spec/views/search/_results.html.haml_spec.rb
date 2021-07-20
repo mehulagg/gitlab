@@ -28,6 +28,22 @@ RSpec.describe 'search/_results' do
     expect(rendered).to have_content('Showing 1 - 2 of 3 issues for foo')
   end
 
+  context 'when searching notes which contain quotes in markdown' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:issue) { create(:issue, project: project, title: '*') }
+    let_it_be(:note) { create(:discussion_note_on_issue, noteable: issue, project: issue.project, note: '```"helloworld"```') }
+
+    let(:scope) { 'notes' }
+    let(:search_objects) { Note.page(1).per(2) }
+    let(:term) { 'helloworld' }
+
+    it 'renders plain quotes' do
+      render
+
+      expect(rendered).to include('"<mark>helloworld</mark>"')
+    end
+  end
+
   context 'when search results do not have a count' do
     before do
       @search_objects = @search_objects.without_count
@@ -46,7 +62,7 @@ RSpec.describe 'search/_results' do
     let_it_be(:merge_request) { create(:merge_request, title: '*', source_project: project, target_project: project) }
     let_it_be(:milestone) { create(:milestone, title: '*', project: project) }
     let_it_be(:note) { create(:discussion_note_on_issue, project: project, note: '*') }
-    let_it_be(:wiki_blob) { create(:wiki_page, project: project, content: '*') }
+    let_it_be(:wiki_blob) { create(:wiki_page, wiki: project.wiki, content: '*') }
     let_it_be(:user) { create(:admin) }
 
     %w[issues merge_requests].each do |search_scope|

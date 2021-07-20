@@ -30,3 +30,5 @@ module Admin
     end
   end
 end
+
+Admin::UserEntity.prepend_mod_with('Admin::UserEntity')

@@ -3,8 +3,8 @@
 - ref = local_assigns.fetch(:ref) { merge_request&.source_branch }
 - can_update_merge_request = can?(current_user, :update_merge_request, @merge_request)
 
-- commits = @commits
-- context_commits = @context_commits
+- commits = @commits&.map { |commit| commit.present(current_user: current_user) }
+- context_commits = @context_commits&.map { |commit| commit.present(current_user: current_user) }
 - hidden = @hidden_commit_count
 
 - commits.chunk { |c| c.committed_date.in_time_zone.to_date }.each do |day, daily_commits|
@@ -14,26 +14,34 @@
 
   %li.commits-row{ data: { day: day } }
     %ul.content-list.commit-list.flex-list
-      = render partial: 'projects/commits/commit', collection: daily_commits, locals: { project: project, ref: ref, merge_request: merge_request }
+      - if Feature.enabled?(:cached_commits, project, default_enabled: :yaml)
+        = render partial: 'projects/commits/commit', collection: daily_commits, locals: { project: project, ref: ref, merge_request: merge_request }, cached: -> (commit) { commit_partial_cache_key(commit, ref: ref, merge_request: merge_request, request: request) }
+      - else
+        = render partial: 'projects/commits/commit', collection: daily_commits, locals: { project: project, ref: ref, merge_request: merge_request }
 
 - if context_commits.present?
   %li.commit-header.js-commit-header
     %span.font-weight-bold= n_("%d previously merged commit", "%d previously merged commits", context_commits.count) % context_commits.count
     - if project.context_commits_enabled? && can_update_merge_request
-      %button.btn.btn-default.ml-3.add-review-item-modal-trigger{ type: "button", data: { context_commits_empty: 'false' } }
+      %button.gl-button.btn.btn-default.ml-3.add-review-item-modal-trigger{ type: "button", data: { context_commits_empty: 'false' } }
         = _('Add/remove')
 
   %li.commits-row
     %ul.content-list.commit-list.flex-list
-      = render partial: 'projects/commits/commit', collection: context_commits, locals: { project: project, ref: ref, merge_request: merge_request }
+      - if Feature.enabled?(:cached_commits, project, default_enabled: :yaml)
+        = render partial: 'projects/commits/commit', collection: context_commits, locals: { project: project, ref: ref, merge_request: merge_request }, cached: -> (commit) { commit_partial_cache_key(commit, ref: ref, merge_request: merge_request, request: request) }
+      - else
+        = render partial: 'projects/commits/commit', collection: context_commits, locals: { project: project, ref: ref, merge_request: merge_request }
 
 - if hidden > 0
   %li.gl-alert.gl-alert-warning
-    = sprite_icon('warning', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-    = n_('%s additional commit has been omitted to prevent performance issues.', '%s additional commits have been omitted to prevent performance issues.', hidden) % number_with_delimiter(hidden)
+    .gl-alert-container
+      = sprite_icon('warning', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+      .gl-alert-content
+        = n_('%s additional commit has been omitted to prevent performance issues.', '%s additional commits have been omitted to prevent performance issues.', hidden) % number_with_delimiter(hidden)
 
 - if project.context_commits_enabled? && can_update_merge_request && context_commits&.empty?
-  %button.btn.btn-default.mt-3.add-review-item-modal-trigger{ type: "button", data: { context_commits_empty: 'true' } }
+  %button.gl-button.btn.btn-default.mt-3.add-review-item-modal-trigger{ type: "button", data: { context_commits_empty: 'true' } }
     = _('Add previously merged commits')
 
 - if commits.size == 0 && context_commits.nil?

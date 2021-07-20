@@ -18,10 +18,13 @@ module Analytics
       end
 
       def time_summary
-        @time_summary ||=
-          Gitlab::Analytics::CycleAnalytics::Summary::Group::StageTimeSummary
-          .new(group, options: options)
-          .data
+        @time_summary ||= begin
+          stage = ::Analytics::CycleAnalytics::GroupStage.new(group: group)
+
+          Gitlab::Analytics::CycleAnalytics::Summary::StageTimeSummary
+            .new(stage, options: options)
+            .data
+        end
       end
     end
   end

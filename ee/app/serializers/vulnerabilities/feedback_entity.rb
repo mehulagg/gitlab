@@ -49,6 +49,8 @@ class Vulnerabilities::FeedbackEntity < Grape::Entity
   end
   expose :project_fingerprint
 
+  expose :dismissal_reason
+
   alias_method :feedback, :object
 
   private

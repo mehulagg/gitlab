@@ -38,6 +38,7 @@ module Gitlab
       # * Get unique counts per user: Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_dashboard', start_date: 28.days.ago, end_date: Date.current)
       class << self
         include Gitlab::Utils::UsageData
+        include Gitlab::Usage::TimeFrame
 
         # Track unique events
         #
@@ -98,14 +99,6 @@ module Gitlab
           end
         end
 
-        def weekly_time_range
-          { start_date: 7.days.ago.to_date, end_date: Date.current }
-        end
-
-        def monthly_time_range
-          { start_date: 4.weeks.ago.to_date, end_date: Date.current }
-        end
-
         def known_event?(event_name)
           event_for(event_name).present?
         end
@@ -124,14 +117,22 @@ module Gitlab
         private
 
         def track(values, event_name, context: '', time: Time.zone.now)
-          return unless Gitlab::CurrentSettings.usage_ping_enabled?
+          return unless usage_ping_enabled?
 
           event = event_for(event_name)
-          raise UnknownEvent, "Unknown event #{event_name}" unless event.present?
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(UnknownEvent.new("Unknown event #{event_name}")) unless event.present?
 
           return unless feature_enabled?(event)
 
           Gitlab::Redis::HLL.add(key: redis_key(event, time, context), value: values, expiry: expiry(event))
+        rescue StandardError => e
+          # Ignore any exceptions unless is dev or test env
+          # The application flow should not be blocked by erros in tracking
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
+        end
+
+        def usage_ping_enabled?
+          Gitlab::CurrentSettings.usage_ping_enabled?
         end
 
         # The array of valid context on which we allow tracking
@@ -147,13 +148,16 @@ module Gitlab
           aggregation = events.first[:aggregation]
 
           keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date, context: context)
+
+          return FALLBACK unless keys.any?
+
           redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
         end
 
         def feature_enabled?(event)
           return true if event[:feature_flag].blank?
 
-          Feature.enabled?(event[:feature_flag], default_enabled: :yaml)
+          Feature.enabled?(event[:feature_flag], default_enabled: :yaml) && Feature.enabled?(:redis_hll_tracking, type: :ops, default_enabled: :yaml)
         end
 
         # Allow to add totals for events that are in the same redis slot, category and have the same aggregation level
@@ -225,8 +229,8 @@ module Gitlab
 
         # Compose the key in order to store events daily or weekly
         def redis_key(event, time, context = '')
-          raise UnknownEvent.new("Unknown event #{event[:name]}") unless known_events_names.include?(event[:name].to_s)
-          raise UnknownAggregation.new("Use :daily or :weekly aggregation") unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
+          raise UnknownEvent, "Unknown event #{event[:name]}" unless known_events_names.include?(event[:name].to_s)
+          raise UnknownAggregation, "Use :daily or :weekly aggregation" unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
 
           key = apply_slot(event)
           key = apply_time_aggregation(key, time, event)
@@ -270,4 +274,4 @@ module Gitlab
   end
 end
 
-Gitlab::UsageDataCounters::HLLRedisCounter.prepend_if_ee('EE::Gitlab::UsageDataCounters::HLLRedisCounter')
+Gitlab::UsageDataCounters::HLLRedisCounter.prepend_mod_with('Gitlab::UsageDataCounters::HLLRedisCounter')

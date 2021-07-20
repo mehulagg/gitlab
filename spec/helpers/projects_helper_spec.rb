@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
   include ProjectForksHelper
+  include AfterNextHelpers
 
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be_with_refind(:project_with_repo) { create(:project, :repository) }
@@ -84,6 +85,7 @@ RSpec.describe ProjectsHelper do
 
   describe "can_change_visibility_level?" do
     let_it_be(:user) { create(:project_member, :reporter, user: create(:user), project: project).user }
+
     let(:forked_project) { fork_project(project, user) }
 
     it "returns false if there are no appropriate permissions" do
@@ -136,7 +138,7 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe "#project_list_cache_key", :clean_gitlab_redis_shared_state do
+  describe "#project_list_cache_key", :clean_gitlab_redis_cache do
     let(:project) { project_with_repo }
 
     before do
@@ -385,155 +387,6 @@ RSpec.describe ProjectsHelper do
       expect(user).to receive(:recent_push).with(project).and_return(event)
 
       expect(helper.last_push_event).to eq(event)
-    end
-  end
-
-  describe '#get_project_nav_tabs' do
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-      allow(helper).to receive(:can?) { true }
-    end
-
-    subject do
-      helper.send(:get_project_nav_tabs, project, user)
-    end
-
-    context 'Security & Compliance tabs' do
-      before do
-        stub_feature_flags(secure_security_and_compliance_configuration_page_on_ce: feature_flag_enabled)
-        allow(helper).to receive(:can?).with(user, :read_security_configuration, project).and_return(can_read_security_configuration)
-      end
-
-      context 'when user cannot read security configuration' do
-        let(:can_read_security_configuration) { false }
-
-        context 'when feature flag is disabled' do
-          let(:feature_flag_enabled) { false }
-
-          it { is_expected.not_to include(:security_configuration) }
-        end
-
-        context 'when feature flag is enabled' do
-          let(:feature_flag_enabled) { true }
-
-          it { is_expected.not_to include(:security_configuration) }
-        end
-      end
-
-      context 'when user can read security configuration' do
-        let(:can_read_security_configuration) { true }
-
-        context 'when feature flag is disabled' do
-          let(:feature_flag_enabled) { false }
-
-          it { is_expected.not_to include(:security_configuration) }
-        end
-
-        context 'when feature flag is enabled' do
-          let(:feature_flag_enabled) { true }
-
-          it { is_expected.to include(:security_configuration) }
-        end
-      end
-    end
-
-    context 'when builds feature is enabled' do
-      before do
-        allow(project).to receive(:builds_enabled?).and_return(true)
-      end
-
-      it "does include pipelines tab" do
-        is_expected.to include(:pipelines)
-      end
-    end
-
-    context 'when builds feature is disabled' do
-      before do
-        allow(project).to receive(:builds_enabled?).and_return(false)
-      end
-
-      context 'when user has access to builds' do
-        it "does include pipelines tab" do
-          is_expected.to include(:pipelines)
-        end
-      end
-
-      context 'when user does not have access to builds' do
-        before do
-          allow(helper).to receive(:can?) { false }
-        end
-
-        it "does not include pipelines tab" do
-          is_expected.not_to include(:pipelines)
-        end
-      end
-    end
-
-    context 'when project has external wiki' do
-      it 'includes external wiki tab' do
-        project.create_external_wiki_service(active: true, properties: { 'external_wiki_url' => 'https://gitlab.com' })
-        project.reload
-
-        is_expected.to include(:external_wiki)
-      end
-    end
-
-    context 'when project does not have external wiki' do
-      it 'does not include external wiki tab' do
-        expect(project.external_wiki).to be_nil
-        is_expected.not_to include(:external_wiki)
-      end
-    end
-
-    context 'when project has confluence enabled' do
-      before do
-        allow(project).to receive(:has_confluence?).and_return(true)
-      end
-
-      it { is_expected.to include(:confluence) }
-      it { is_expected.not_to include(:wiki) }
-    end
-
-    context 'when project does not have confluence enabled' do
-      it { is_expected.not_to include(:confluence) }
-      it { is_expected.to include(:wiki) }
-    end
-  end
-
-  describe '#can_view_operations_tab?' do
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-      allow(helper).to receive(:can?).and_return(false)
-    end
-
-    subject { helper.send(:can_view_operations_tab?, user, project) }
-
-    where(:ability) do
-      [
-        :metrics_dashboard,
-        :read_alert_management_alert,
-        :read_environment,
-        :read_issue,
-        :read_sentry_issue,
-        :read_cluster
-      ]
-    end
-
-    with_them do
-      it 'includes operations tab' do
-        allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
-
-        is_expected.to be(true)
-      end
-
-      context 'when operations feature is disabled' do
-        it 'does not include operations tab' do
-          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
-          project.project_feature.update_attribute(:operations_access_level, ProjectFeature::DISABLED)
-
-          is_expected.to be(false)
-        end
-      end
     end
   end
 
@@ -1019,6 +872,37 @@ RSpec.describe ProjectsHelper do
         let(:exception) { GRPC::DeadlineExceeded }
 
         it_behaves_like 'returns nil and tracks exception'
+      end
+    end
+  end
+
+  describe '#show_terraform_banner?' do
+    let_it_be(:ruby) { create(:programming_language, name: 'Ruby') }
+    let_it_be(:hcl) { create(:programming_language, name: 'HCL') }
+
+    subject { helper.show_terraform_banner?(project) }
+
+    before do
+      create(:repository_language, project: project, programming_language: language, share: 1)
+    end
+
+    context 'the project does not contain terraform files' do
+      let(:language) { ruby }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'the project contains terraform files' do
+      let(:language) { hcl }
+
+      it { is_expected.to be_truthy }
+
+      context 'the project already has a terraform state' do
+        before do
+          create(:terraform_state, project: project)
+        end
+
+        it { is_expected.to be_falsey }
       end
     end
   end

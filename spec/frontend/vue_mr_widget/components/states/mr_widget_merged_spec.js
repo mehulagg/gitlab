@@ -37,10 +37,10 @@ describe('MRWidgetMerged', () => {
           avatarUrl:
             'http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon',
         },
-        mergedAt: 'Jan 24, 2018 1:02pm GMT+0000',
+        mergedAt: 'Jan 24, 2018 1:02pm UTC',
         readableMergedAt: '',
         closedBy: {},
-        closedAt: 'Jan 24, 2018 1:02pm GMT+0000',
+        closedAt: 'Jan 24, 2018 1:02pm UTC',
         readableClosedAt: '',
       },
       updatedAt: 'mergedUpdatedAt',
@@ -217,7 +217,6 @@ describe('MRWidgetMerged', () => {
     vm.mr.sourceBranchRemoved = false;
 
     Vue.nextTick(() => {
-      expect(vm.$el.innerText).toContain('You can delete the source branch now');
       expect(vm.$el.innerText).not.toContain('The source branch has been deleted');
       done();
     });
@@ -229,13 +228,12 @@ describe('MRWidgetMerged', () => {
 
     Vue.nextTick(() => {
       expect(vm.$el.innerText).toContain('The source branch is being deleted');
-      expect(vm.$el.innerText).not.toContain('You can delete the source branch now');
       expect(vm.$el.innerText).not.toContain('The source branch has been deleted');
       done();
     });
   });
 
   it('should use mergedEvent mergedAt as tooltip title', () => {
-    expect(vm.$el.querySelector('time').getAttribute('title')).toBe('Jan 24, 2018 1:02pm GMT+0000');
+    expect(vm.$el.querySelector('time').getAttribute('title')).toBe('Jan 24, 2018 1:02pm UTC');
   });
 });

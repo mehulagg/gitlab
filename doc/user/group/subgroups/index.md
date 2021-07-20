@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto, concepts
 ---
@@ -67,8 +67,6 @@ Another example of GitLab as a company would be the following:
     - (project) Chef cookbooks
   - Category Subgroup - Executive team
 
----
-
 When performing actions such as transferring or importing a project between
 subgroups, the behavior is the same as when performing these actions at the
 `group/project` level.
@@ -85,13 +83,20 @@ By default, groups created in:
 
 The setting can be changed for any group by:
 
-- A group owner. Select the group, and navigate to **Settings > General > Permissions, LFS, 2FA**.
-- An administrator. Navigate to **Admin Area > Overview > Groups**, select the group, and choose **Edit**.
+- A group owner:
+  1. Select the group.
+  1. On the left sidebar, select **Settings > General**.
+  1. Expand the **Permissions, LFS, 2FA** section.
+- An administrator:
+  1. On the top bar, select **Menu >** **{admin}** **Admin**.
+  1. On the left sidebar, select **Overview > Groups**.
+  1. Select the group, and select **Edit**.
 
-For more information check the
-[permissions table](../../permissions.md#group-members-permissions). For a list
-of words that are not allowed to be used as group names see the
-[reserved names](../../reserved_names.md).
+For:
+
+- More information, check the [permissions table](../../permissions.md#group-members-permissions).
+- A list of words that are not allowed to be used as group names, see the
+  [reserved names](../../reserved_names.md).
 
 Users can always create subgroups if they are explicitly added as an Owner (or
 Maintainer, if that setting is enabled) to an immediate parent group, even if group
@@ -117,10 +122,10 @@ Follow the same process to create any subsequent groups.
 ## Membership
 
 When you add a member to a group, that member is also added to all subgroups.
-Permission level is inherited from the group’s parent. This model allows access to
+Permission level is inherited from the group's parent. This model allows access to
 subgroups if you have membership in one of its parents.
 
-Jobs for pipelines in subgroups can use [runners](../../../ci/runners/README.md) registered to the parent group(s).
+Jobs for pipelines in subgroups can use [runners](../../../ci/runners/index.md) registered to the parent group(s).
 This means secrets configured for the parent group are available to subgroup jobs.
 
 In addition, maintainers of projects that belong to subgroups can see the details of runners registered to parent group(s).
@@ -147,7 +152,7 @@ From the image above, we can deduce the following things:
 - Administrator is the Owner and member of **all** subgroups and for that reason,
   as with User 3, the **Source** column indicates **Direct member**.
 
-Members can be [filtered by inherited or direct membership](../index.md#membership-filter).
+Members can be [filtered by inherited or direct membership](../index.md#filter-a-group).
 
 ### Overriding the ancestor group membership
 
@@ -163,7 +168,7 @@ added to), add the user to the new subgroup again with a higher set of permissio
 
 For example, if User 1 was first added to group `one/two` with Developer
 permissions, then they inherit those permissions in every other subgroup
-of `one/two`. To give them Maintainer access to group `one/two/three/four`,
+of `one/two`. To give them the [Maintainer role](../../permissions.md) for group `one/two/three/four`,
 you would add them again in that group as Maintainer. Removing them from that group,
 the permissions fall back to those of the ancestor group.
 

@@ -11,10 +11,12 @@ import {
 } from '@gitlab/ui';
 import mrWidgetPipelineMixin from 'ee_else_ce/vue_merge_request_widget/mixins/mr_widget_pipeline';
 import { s__, n__ } from '~/locale';
+import PipelineMiniGraph from '~/pipelines/components/pipelines_list/pipeline_mini_graph.vue';
 import PipelineArtifacts from '~/pipelines/components/pipelines_list/pipelines_artifacts.vue';
-import PipelineStage from '~/pipelines/components/pipelines_list/stage.vue';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
+import { MT_MERGE_STRATEGY } from '../constants';
 
 export default {
   name: 'MRWidgetPipeline',
@@ -26,7 +28,8 @@ export default {
     GlSprintf,
     GlTooltip,
     PipelineArtifacts,
-    PipelineStage,
+    PipelineMiniGraph,
+    TimeAgoTooltip,
     TooltipOnTruncate,
     LinkedPipelinesMiniList: () =>
       import('ee_component/vue_shared/components/linked_pipelines_mini_list.vue'),
@@ -80,6 +83,11 @@ export default {
       type: String,
       required: true,
     },
+    mergeStrategy: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     hasPipeline() {
@@ -94,21 +102,19 @@ export default {
         : {};
     },
     hasStages() {
-      return (
-        this.pipeline.details && this.pipeline.details.stages && this.pipeline.details.stages.length
-      );
+      return this.pipeline?.details?.stages?.length > 0;
     },
     hasCommitInfo() {
       return this.pipeline.commit && Object.keys(this.pipeline.commit).length > 0;
-    },
-    hasArtifacts() {
-      return this.pipeline?.details?.artifacts?.length > 0;
     },
     isMergeRequestPipeline() {
       return Boolean(this.pipeline.flags && this.pipeline.flags.merge_request_pipeline);
     },
     showSourceBranch() {
       return Boolean(this.pipeline.ref.branch);
+    },
+    finishedAt() {
+      return this.pipeline?.details?.finished_at;
     },
     coverageDeltaClass() {
       const delta = this.pipelineCoverageDelta;
@@ -123,12 +129,25 @@ export default {
     pipelineCoverageJobNumberText() {
       return n__('from %d job', 'from %d jobs', this.buildsWithCoverage.length);
     },
+    pipelineCoverageTooltipDeltaDescription() {
+      const delta = parseFloat(this.pipelineCoverageDelta) || 0;
+      if (delta > 0) {
+        return s__('Pipeline|This change will increase the overall test coverage if merged.');
+      }
+      if (delta < 0) {
+        return s__('Pipeline|This change will decrease the overall test coverage if merged.');
+      }
+      return s__('Pipeline|This change will not change the overall test coverage if merged.');
+    },
     pipelineCoverageTooltipDescription() {
       return n__(
-        'Coverage value for this pipeline was calculated by the coverage value of %d job.',
-        'Coverage value for this pipeline was calculated by averaging the resulting coverage values of %d jobs.',
+        'Test coverage value for this pipeline was calculated by the coverage value of %d job.',
+        'Test coverage value for this pipeline was calculated by averaging the resulting coverage values of %d jobs.',
         this.buildsWithCoverage.length,
       );
+    },
+    isMergeTrain() {
+      return this.mergeStrategy === MT_MERGE_STRATEGY;
     },
   },
   errorText: s__(
@@ -141,7 +160,7 @@ export default {
   <div class="ci-widget media">
     <template v-if="hasCIError">
       <gl-icon name="status_failed" class="gl-text-red-500" :size="24" />
-      <p class="gl-flex-fill-1 gl-ml-5 gl-mb-0" data-testid="ci-error-message">
+      <p class="gl-flex-grow-1 gl-ml-5 gl-mb-0" data-testid="ci-error-message">
         <gl-sprintf :message="$options.errorText">
           <template #link="{ content }">
             <gl-link :href="mrTroubleshootingDocsPath">{{ content }}</gl-link>
@@ -152,7 +171,7 @@ export default {
     <template v-else-if="!hasPipeline">
       <gl-loading-icon size="md" />
       <p
-        class="gl-flex-fill-1 gl-display-flex gl-ml-5 gl-mb-0"
+        class="gl-flex-grow-1 gl-display-flex gl-ml-3 gl-mb-0"
         data-testid="monitoring-pipeline-message"
       >
         {{ $options.monitoringPipelineText }}
@@ -171,7 +190,7 @@ export default {
       </p>
     </template>
     <template v-else-if="hasPipeline">
-      <a :href="status.details_path" class="align-self-start gl-mr-3">
+      <a :href="status.details_path" class="gl-align-self-center gl-mr-3">
         <ci-icon :status="status" :size="24" />
       </a>
       <div class="ci-widget-container d-flex">
@@ -209,15 +228,24 @@ export default {
                   class="label-branch label-truncate gl-font-weight-normal"
                 />
               </template>
+              <template v-if="finishedAt">
+                <time-ago-tooltip
+                  :time="finishedAt"
+                  tooltip-placement="bottom"
+                  data-testid="finished-at"
+                />
+              </template>
             </div>
             <div v-if="pipeline.coverage" class="coverage" data-testid="pipeline-coverage">
-              {{ s__('Pipeline|Coverage') }} {{ pipeline.coverage }}%
+              {{ s__('Pipeline|Test coverage') }} {{ pipeline.coverage }}%
               <span
                 v-if="pipelineCoverageDelta"
+                ref="pipelineCoverageDelta"
                 :class="coverageDeltaClass"
                 data-testid="pipeline-coverage-delta"
-                >({{ pipelineCoverageDelta }}%)</span
               >
+                ({{ pipelineCoverageDelta }}%)
+              </span>
               {{ pipelineCoverageJobNumberText }}
               <span ref="pipelineCoverageQuestion">
                 <gl-icon name="question" :size="12" />
@@ -235,6 +263,12 @@ export default {
                   {{ build.name }} ({{ build.coverage }}%)
                 </div>
               </gl-tooltip>
+              <gl-tooltip
+                :target="() => $refs.pipelineCoverageDelta"
+                data-testid="pipeline-coverage-delta-tooltip"
+              >
+                {{ pipelineCoverageTooltipDeltaDescription }}
+              </gl-tooltip>
             </div>
           </div>
         </div>
@@ -242,26 +276,16 @@ export default {
           <span class="mr-widget-pipeline-graph">
             <span class="stage-cell">
               <linked-pipelines-mini-list v-if="triggeredBy.length" :triggered-by="triggeredBy" />
-              <template v-if="hasStages">
-                <div
-                  v-for="(stage, i) in pipeline.details.stages"
-                  :key="i"
-                  :class="{
-                    'has-downstream': hasDownstream(i),
-                  }"
-                  class="stage-container dropdown mr-widget-pipeline-stages"
-                  data-testid="widget-mini-pipeline-graph"
-                >
-                  <pipeline-stage :stage="stage" />
-                </div>
-              </template>
+              <pipeline-mini-graph
+                v-if="hasStages"
+                class="gl-display-inline-block"
+                stages-class="mr-widget-pipeline-stages"
+                :stages="pipeline.details.stages"
+                :is-merge-train="isMergeTrain"
+              />
             </span>
             <linked-pipelines-mini-list v-if="triggered.length" :triggered="triggered" />
-            <pipeline-artifacts
-              v-if="hasArtifacts"
-              :artifacts="pipeline.details.artifacts"
-              class="gl-ml-3"
-            />
+            <pipeline-artifacts :pipeline-id="pipeline.id" class="gl-ml-3" />
           </span>
         </div>
       </div>

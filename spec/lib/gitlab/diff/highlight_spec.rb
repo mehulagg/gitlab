@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe Gitlab::Diff::Highlight do
   include RepoHelpers
 
-  let(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository) }
+
   let(:commit) { project.commit(sample_commit.id) }
   let(:diff) { commit.raw_diffs.first }
   let(:diff_file) { Gitlab::Diff::File.new(diff, diff_refs: commit.diff_refs, repository: project.repository) }
@@ -50,7 +51,7 @@ RSpec.describe Gitlab::Diff::Highlight do
       end
 
       it 'highlights and marks added lines' do
-        code = %Q{+<span id="LC9" class="line" lang="ruby">      <span class="k">raise</span> <span class="no"><span class="idiff left">RuntimeError</span></span><span class="p"><span class="idiff">,</span></span><span class="idiff right"> </span><span class="s2">"System commands must be given as an array of strings"</span></span>\n}
+        code = %Q{+<span id="LC9" class="line" lang="ruby">      <span class="k">raise</span> <span class="no"><span class="idiff left addition">RuntimeError</span></span><span class="p"><span class="idiff addition">,</span></span><span class="idiff right addition"> </span><span class="s2">"System commands must be given as an array of strings"</span></span>\n}
 
         expect(subject[5].rich_text).to eq(code)
       end
@@ -93,7 +94,7 @@ RSpec.describe Gitlab::Diff::Highlight do
       end
 
       it 'marks added lines' do
-        code = %q{+      raise <span class="idiff left right">RuntimeError, </span>&quot;System commands must be given as an array of strings&quot;}
+        code = %q{+      raise <span class="idiff left right addition">RuntimeError, </span>&quot;System commands must be given as an array of strings&quot;}
 
         expect(subject[5].rich_text).to eq(code)
         expect(subject[5].rich_text).to be_html_safe
@@ -120,8 +121,49 @@ RSpec.describe Gitlab::Diff::Highlight do
         end
       end
 
+      context 'when `use_marker_ranges` feature flag is disabled' do
+        it 'returns the same result' do
+          with_feature_flag = described_class.new(diff_file, repository: project.repository).highlight
+
+          stub_feature_flags(use_marker_ranges: false)
+
+          without_feature_flag = described_class.new(diff_file, repository: project.repository).highlight
+
+          expect(with_feature_flag.map(&:rich_text)).to eq(without_feature_flag.map(&:rich_text))
+        end
+      end
+
       context 'when no inline diffs' do
         it_behaves_like 'without inline diffs'
+      end
+    end
+
+    context 'when blob is too large' do
+      let(:subject) { described_class.new(diff_file, repository: project.repository).highlight }
+
+      before do
+        allow(Gitlab::Highlight).to receive(:too_large?).and_return(true)
+      end
+
+      it 'blobs are highlighted as plain text without loading all data' do
+        expect(diff_file.blob).not_to receive(:load_all_data!)
+
+        expect(subject[2].rich_text).to eq(%Q{ <span id="LC7" class="line" lang="">  def popen(cmd, path=nil)</span>\n})
+        expect(subject[2].rich_text).to be_html_safe
+      end
+
+      context 'when limited_diff_highlighting is disabled' do
+        before do
+          stub_feature_flags(limited_diff_highlighting: false)
+          stub_feature_flags(diff_line_syntax_highlighting: false)
+        end
+
+        it 'blobs are highlighted as plain text with loading all data' do
+          expect(diff_file.blob).to receive(:load_all_data!).twice
+
+          code = %Q{ <span id="LC7" class="line" lang="">  def popen(cmd, path=nil)</span>\n}
+          expect(subject[2].rich_text).to eq(code)
+        end
       end
     end
   end

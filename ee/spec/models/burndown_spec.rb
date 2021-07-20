@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Burndown do
   let_it_be(:user) { create(:user) }
+
   let(:start_date) { "2017-03-01" }
   let(:due_date) { "2017-03-03" }
 
@@ -236,12 +237,12 @@ RSpec.describe Burndown do
   end
 
   def close_issue(issue)
-    Issues::CloseService.new(issue.project, user, {}).execute(issue)
+    Issues::CloseService.new(project: issue.project, current_user: user).execute(issue)
     adjust_issue_event_creation_time(issue.events.last)
   end
 
   def reopen_issue(issue)
-    Issues::ReopenService.new(issue.project, user, {}).execute(issue)
+    Issues::ReopenService.new(project: issue.project, current_user: user).execute(issue)
     adjust_issue_event_creation_time(issue.events.last)
   end
 

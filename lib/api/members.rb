@@ -93,16 +93,19 @@ module API
           requires :access_level, type: Integer, desc: 'A valid access level (defaults: `30`, developer access level)'
           requires :user_id, types: [Integer, String], desc: 'The user ID of the new member or multiple IDs separated by commas.'
           optional :expires_at, type: DateTime, desc: 'Date string in the format YEAR-MONTH-DAY'
+          optional :invite_source, type: String, desc: 'Source that triggered the member creation process', default: 'members-api'
         end
         # rubocop: disable CodeReuse/ActiveRecord
         post ":id/members" do
+          ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/333434')
+
           source = find_source(source_type, params[:id])
           authorize_admin_source!(source_type, source)
 
           if params[:user_id].to_s.include?(',')
-            create_service_params = params.except(:user_id).merge({ user_ids: params[:user_id] })
+            create_service_params = params.except(:user_id).merge({ user_ids: params[:user_id], source: source })
 
-            ::Members::CreateService.new(current_user, create_service_params).execute(source)
+            ::Members::CreateService.new(current_user, create_service_params).execute
           elsif params[:user_id].present?
             member = source.members.find_by(user_id: params[:user_id])
             conflict!('Member already exists') if member
@@ -116,6 +119,7 @@ module API
               not_allowed! # This currently can only be reached in EE
             elsif member.valid? && member.persisted?
               present_members(member)
+              Gitlab::Tracking.event(::Members::CreateService.name, 'create_member', label: params[:invite_source], property: 'existing_user', user: current_user)
             else
               render_validation_error!(member)
             end
@@ -155,6 +159,8 @@ module API
         desc 'Removes a user from a group or project.'
         params do
           requires :user_id, type: Integer, desc: 'The user ID of the member'
+          optional :skip_subresources, type: Boolean, default: false,
+                   desc: 'Flag indicating if the deletion of direct memberships of the removed member in subgroups and projects should be skipped'
           optional :unassign_issuables, type: Boolean, default: false,
                    desc: 'Flag indicating if the removed member should be unassigned from any issues or merge requests within given group or project'
         end
@@ -164,7 +170,7 @@ module API
           member = source_members(source).find_by!(user_id: params[:user_id])
 
           destroy_conditionally!(member) do
-            ::Members::DestroyService.new(current_user).execute(member, unassign_issuables: params[:unassign_issuables])
+            ::Members::DestroyService.new(current_user).execute(member, skip_subresources: params[:skip_subresources], unassign_issuables: params[:unassign_issuables])
           end
         end
         # rubocop: enable CodeReuse/ActiveRecord
@@ -173,4 +179,4 @@ module API
   end
 end
 
-API::Members.prepend_if_ee('EE::API::Members')
+API::Members.prepend_mod_with('API::Members')

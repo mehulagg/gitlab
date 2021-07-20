@@ -31,10 +31,6 @@ RSpec.describe ProjectsFinder do
     let(:use_cte) { true }
     let(:finder) { described_class.new(params: params.merge(use_cte: use_cte), current_user: current_user, project_ids_relation: project_ids_relation) }
 
-    before do
-      stub_feature_flags(project_finder_similarity_sort: false)
-    end
-
     subject { finder.execute }
 
     shared_examples 'ProjectFinder#execute examples' do
@@ -129,17 +125,54 @@ RSpec.describe ProjectsFinder do
 
           it { is_expected.to eq([public_project]) }
         end
+
+        context 'as string' do
+          let(:params) { { visibility_level: Gitlab::VisibilityLevel::INTERNAL.to_s } }
+
+          it { is_expected.to eq([internal_project]) }
+        end
       end
 
-      describe 'filter by tags' do
+      describe 'filter by tags (deprecated)' do
         before do
-          public_project.tag_list.add('foo')
+          public_project.topic_list = 'foo'
           public_project.save!
         end
 
         let(:params) { { tag: 'foo' } }
 
         it { is_expected.to eq([public_project]) }
+      end
+
+      describe 'filter by topics' do
+        before do
+          public_project.topic_list = 'foo, bar'
+          public_project.save!
+        end
+
+        context 'single topic' do
+          let(:params) { { topic: 'foo' } }
+
+          it { is_expected.to eq([public_project]) }
+        end
+
+        context 'multiple topics' do
+          let(:params) { { topic: 'bar, foo' } }
+
+          it { is_expected.to eq([public_project]) }
+        end
+
+        context 'one topic matches, other one does not' do
+          let(:params) { { topic: 'foo, xyz' } }
+
+          it { is_expected.to eq([]) }
+        end
+
+        context 'no matching topic' do
+          let(:params) { { topic: 'xyz' } }
+
+          it { is_expected.to eq([]) }
+        end
       end
 
       describe 'filter by personal' do
@@ -331,32 +364,28 @@ RSpec.describe ProjectsFinder do
       end
 
       describe 'sorting' do
+        let_it_be(:more_projects) do
+          [
+            create(:project, :internal, group: group, name: 'projA', path: 'projA'),
+            create(:project, :internal, group: group, name: 'projABC', path: 'projABC'),
+            create(:project, :internal, group: group, name: 'projAB', path: 'projAB')
+          ]
+        end
+
         context 'when sorting by a field' do
           let(:params) { { sort: 'name_asc' } }
 
-          it { is_expected.to eq([internal_project, public_project]) }
+          it { is_expected.to eq(([internal_project, public_project] + more_projects).sort_by { |p| p[:name] }) }
         end
 
         context 'when sorting by similarity' do
           let(:params) { { sort: 'similarity', search: 'pro' } }
 
-          let_it_be(:internal_project2) do
-            create(:project, :internal, group: group, name: 'projA', path: 'projA')
-          end
+          it { is_expected.to eq([more_projects[0], more_projects[2], more_projects[1]]) }
+        end
 
-          let_it_be(:internal_project3) do
-            create(:project, :internal, group: group, name: 'projABC', path: 'projABC')
-          end
-
-          let_it_be(:internal_project4) do
-            create(:project, :internal, group: group, name: 'projAB', path: 'projAB')
-          end
-
-          before do
-            stub_feature_flags(project_finder_similarity_sort: current_user)
-          end
-
-          it { is_expected.to eq([internal_project2, internal_project4, internal_project3]) }
+        context 'when no sort is provided' do
+          it { is_expected.to eq(([internal_project, public_project] + more_projects).sort_by { |p| p[:id] }.reverse) }
         end
       end
 

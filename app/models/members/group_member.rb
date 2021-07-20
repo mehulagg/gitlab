@@ -7,8 +7,8 @@ class GroupMember < Member
   SOURCE_TYPE = 'Namespace'
 
   belongs_to :group, foreign_key: 'source_id'
-
-  delegate :update_two_factor_requirement, to: :user
+  alias_attribute :namespace_id, :source_id
+  delegate :update_two_factor_requirement, to: :user, allow_nil: true
 
   # Make sure group member points only to group as it source
   default_value_for :source_type, SOURCE_TYPE
@@ -26,12 +26,16 @@ class GroupMember < Member
   after_create :update_two_factor_requirement, unless: :invite?
   after_destroy :update_two_factor_requirement, unless: :invite?
 
+  attr_accessor :last_owner, :last_blocked_owner
+
+  self.enumerate_columns_in_select_statements = true
+
   def self.access_level_roles
     Gitlab::Access.options_with_owner
   end
 
-  def self.access_levels
-    Gitlab::Access.sym_options_with_owner
+  def self.pluck_user_ids
+    pluck(:user_id)
   end
 
   def group
@@ -99,4 +103,4 @@ class GroupMember < Member
   end
 end
 
-GroupMember.prepend_if_ee('EE::GroupMember')
+GroupMember.prepend_mod_with('GroupMember')

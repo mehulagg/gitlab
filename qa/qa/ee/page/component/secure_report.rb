@@ -11,7 +11,7 @@ module QA
             super
 
             base.class_eval do
-              view 'ee/app/assets/javascripts/security_dashboard/components/filters/standard_filter.vue' do
+              view 'ee/app/assets/javascripts/security_dashboard/components/filters/simple_filter.vue' do
                 element :filter_dropdown, ':data-qa-selector="qaSelector"' # rubocop:disable QA/ElementWithPattern
                 element :filter_dropdown_content
               end

@@ -268,6 +268,7 @@ RSpec.describe Event do
     let(:design) { create(:design, issue: issue, project: project) }
     let(:note_on_commit) { create(:note_on_commit, project: project) }
     let(:note_on_issue) { create(:note_on_issue, noteable: issue, project: project) }
+    let(:confidential_note) { create(:note, noteable: issue, project: project, confidential: true) }
     let(:note_on_confidential_issue) { create(:note_on_issue, noteable: confidential_issue, project: project) }
     let(:note_on_project_snippet) { create(:note_on_project_snippet, author: author, noteable: project_snippet, project: project) }
     let(:note_on_personal_snippet) { create(:note_on_personal_snippet, author: author, noteable: personal_snippet, project: nil) }
@@ -299,11 +300,11 @@ RSpec.describe Event do
     end
 
     def visible_to_none_except(*roles)
-      visible_to_none.merge(roles.map { |role| [role, true] }.to_h)
+      visible_to_none.merge(roles.to_h { |role| [role, true] })
     end
 
     def visible_to_all_except(*roles)
-      visible_to_all.merge(roles.map { |role| [role, false] }.to_h)
+      visible_to_all.merge(roles.to_h { |role| [role, false] })
     end
 
     shared_examples 'visibility examples' do
@@ -397,6 +398,16 @@ RSpec.describe Event do
         end
 
         include_examples 'visible to assignee and author', true
+      end
+
+      context 'confidential note' do
+        let(:target) { confidential_note }
+
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_none_except(:member) }
+        end
+
+        include_examples 'visible to author', true
       end
 
       context 'private project' do
@@ -723,7 +734,7 @@ RSpec.describe Event do
         note_on_design: true,
         note_on_commit: true
       }
-      valid_target_factories.map do |kind, needs_project|
+      valid_target_factories.to_h do |kind, needs_project|
         extra_data = if kind == :merge_request
                        { source_project: project }
                      elsif needs_project
@@ -735,7 +746,7 @@ RSpec.describe Event do
         target = kind == :project ? nil : build(kind, **extra_data)
 
         [kind, build(:event, :created, author: project.owner, project: project, target: target)]
-      end.to_h
+      end
     end
 
     it 'passes a sanity check', :aggregate_failures do
@@ -967,14 +978,13 @@ RSpec.describe Event do
 
   describe '#action_name' do
     it 'handles all valid design events' do
-      created, updated, destroyed, archived = %i[created updated destroyed archived].map do |trait|
+      created, updated, destroyed = %i[created updated destroyed].map do |trait|
         build(:design_event, trait).action_name
       end
 
       expect(created).to eq('uploaded')
       expect(updated).to eq('revised')
       expect(destroyed).to eq('deleted')
-      expect(archived).to eq('archived')
     end
 
     it 'handles correct push_action' do

@@ -1,24 +1,28 @@
 import { mount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
-import Component from 'ee/subscriptions/new/components/checkout/payment_method.vue';
-import Step from 'ee/subscriptions/new/components/checkout/step.vue';
+import { STEPS } from 'ee/subscriptions/constants';
+import PaymentMethod from 'ee/subscriptions/new/components/checkout/payment_method.vue';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
+import { createMockApolloProvider } from 'ee_jest/vue_shared/purchase_flow/spec_helper';
 
 describe('Payment Method', () => {
   const localVue = createLocalVue();
   localVue.use(Vuex);
+  localVue.use(VueApollo);
 
   let store;
   let wrapper;
 
-  const createComponent = (opts = {}) => {
-    wrapper = mount(Component, {
+  function createComponent(options = {}) {
+    return mount(PaymentMethod, {
       localVue,
       store,
-      ...opts,
+      ...options,
     });
-  };
+  }
 
   beforeEach(() => {
     store = createStore();
@@ -31,7 +35,8 @@ describe('Payment Method', () => {
       credit_card_expiration_year: 2009,
     });
 
-    createComponent();
+    const mockApollo = createMockApolloProvider(STEPS);
+    wrapper = createComponent({ apolloProvider: mockApollo });
   });
 
   afterEach(() => {

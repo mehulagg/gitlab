@@ -1,12 +1,9 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 
-import {
-  parseBoolean,
-  urlParamsToObject,
-  convertObjectPropsToCamelCase,
-} from '~/lib/utils/common_utils';
-import { visitUrl, mergeUrlParams } from '~/lib/utils/url_utility';
+import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { visitUrl, mergeUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import Translate from '~/vue_shared/translate';
 
 import EpicItem from './components/epic_item.vue';
@@ -43,6 +40,7 @@ export default () => {
 
   return new Vue({
     el,
+    apolloProvider: {},
     store: createStore(),
     components: {
       roadmapApp,
@@ -66,6 +64,7 @@ export default () => {
         supportedPresetTypes.indexOf(dataset.presetType) > -1
           ? dataset.presetType
           : PRESET_TYPES.MONTHS;
+      // eslint-disable-next-line import/no-deprecated
       const rawFilterParams = urlParamsToObject(window.location.search.substring(1));
       const filterParams = {
         ...convertObjectPropsToCamelCase(rawFilterParams, {
@@ -75,6 +74,10 @@ export default () => {
         // when it is defined.
         ...(rawFilterParams.confidential && {
           confidential: parseBoolean(rawFilterParams.confidential),
+        }),
+
+        ...(rawFilterParams.epicIid && {
+          epicIid: rawFilterParams.epicIid,
         }),
       };
       const timeframe = getTimeframeForPreset(

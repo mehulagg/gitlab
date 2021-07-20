@@ -8,6 +8,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   let_it_be_with_refind(:project) { create(:project, :repository) }
   let_it_be_with_reload(:project_public_with_private_builds) { create(:project, :repository, :public, :builds_private) }
+
   let(:user) { project.owner }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
@@ -40,6 +41,32 @@ RSpec.describe Projects::MergeRequestsController do
       get :show, params: params.merge(extra_params)
     end
 
+    context 'with the invite_members_in_comment experiment', :experiment do
+      context 'when user can invite' do
+        before do
+          stub_experiments(invite_members_in_comment: :invite_member_link)
+          project.add_maintainer(user)
+        end
+
+        it 'assigns the candidate experience and tracks the event' do
+          expect(experiment(:invite_members_in_comment)).to track(:view, property: project.root_ancestor.id.to_s)
+            .for(:invite_member_link)
+            .with_context(namespace: project.root_ancestor)
+            .on_next_instance
+
+          go
+        end
+      end
+
+      context 'when user can not invite' do
+        it 'does not track the event' do
+          expect(experiment(:invite_members_in_comment)).not_to track(:view)
+
+          go
+        end
+      end
+    end
+
     context 'with view param' do
       before do
         go(view: 'parallel')
@@ -55,13 +82,19 @@ RSpec.describe Projects::MergeRequestsController do
         merge_request.mark_as_unchecked!
       end
 
-      it 'checks mergeability asynchronously' do
-        expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
-          expect(service).not_to receive(:execute)
-          expect(service).to receive(:async_execute)
+      context 'check_mergeability_async_in_widget feature flag is disabled' do
+        before do
+          stub_feature_flags(check_mergeability_async_in_widget: false)
         end
 
-        go
+        it 'checks mergeability asynchronously' do
+          expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
+            expect(service).not_to receive(:execute)
+            expect(service).to receive(:async_execute)
+          end
+
+          go
+        end
       end
     end
 
@@ -498,7 +531,7 @@ RSpec.describe Projects::MergeRequestsController do
                                      sha: merge_request.diff_head_sha,
                                      merge_request: merge_request }
 
-          expect_next_instance_of(MergeRequests::SquashService, project, user, expected_squash_params) do |squash_service|
+          expect_next_instance_of(MergeRequests::SquashService, project: project, current_user: user, params: expected_squash_params) do |squash_service|
             expect(squash_service).to receive(:execute).and_return({
               status: :success,
               squash_sha: SecureRandom.hex(20)
@@ -695,12 +728,6 @@ RSpec.describe Projects::MergeRequestsController do
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response).to eq({ 'errors' => 'Destroy confirmation not provided for merge request' })
       end
-
-      it 'delegates the update of the todos count cache to TodoService' do
-        expect_any_instance_of(TodoService).to receive(:destroy_target).with(merge_request).once
-
-        delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid, destroy_confirm: true }
-      end
     end
   end
 
@@ -831,6 +858,20 @@ RSpec.describe Projects::MergeRequestsController do
             end
           end
         end
+      end
+    end
+
+    context 'with pagination' do
+      before do
+        create(:ci_pipeline, project: merge_request.source_project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha)
+      end
+
+      it 'paginates the result' do
+        allow(Ci::Pipeline).to receive(:default_per_page).and_return(1)
+
+        get :pipelines, params: { namespace_id: project.namespace.to_param, project_id: project, id: merge_request.iid }, format: :json
+
+        expect(json_response['pipelines'].count).to eq(1)
       end
     end
   end
@@ -1804,7 +1845,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     it 'calls MergeRequests::AssignIssuesService' do
       expect(MergeRequests::AssignIssuesService).to receive(:new)
-        .with(project, user, merge_request: merge_request)
+        .with(project: project, current_user: user, params: { merge_request: merge_request })
         .and_return(double(execute: { count: 1 }))
 
       post_assign_issues
@@ -2048,21 +2089,6 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context 'with SELECT FOR UPDATE lock' do
-      before do
-        stub_feature_flags(merge_request_rebase_nowait_lock: false)
-      end
-
-      it 'executes rebase' do
-        allow_any_instance_of(MergeRequest).to receive(:with_lock).with(true).and_call_original
-        expect(RebaseWorker).to receive(:perform_async)
-
-        post_rebase
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-    end
-
     context 'with NOWAIT lock' do
       it 'returns a 409' do
         allow_any_instance_of(MergeRequest).to receive(:with_lock).with('FOR UPDATE NOWAIT').and_raise(ActiveRecord::LockWaitTimeout)
@@ -2217,7 +2243,7 @@ RSpec.describe Projects::MergeRequestsController do
       subject
 
       expect(response).to redirect_to(project_merge_requests_path(project))
-      expect(response.flash[:notice]).to match(/\AYour CSV export has started/i)
+      expect(controller).to set_flash[:notice].to match(/\AYour CSV export has started/i)
     end
 
     it 'enqueues an IssuableExportCsvWorker worker' do

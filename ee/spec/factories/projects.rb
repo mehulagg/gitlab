@@ -46,5 +46,15 @@ FactoryBot.modify do
     trait :with_sox_compliance_framework do
       association :compliance_framework_setting, :sox, factory: :compliance_framework_project_setting
     end
+
+    trait :with_cve_request do
+      transient do
+        cve_request_enabled { true }
+      end
+      after(:create) do |project, evaluator|
+        project.project_setting.cve_id_request_enabled = evaluator.cve_request_enabled
+        project.project_setting.save!
+      end
+    end
   end
 end

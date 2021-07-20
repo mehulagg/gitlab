@@ -23,6 +23,10 @@ module Types
       field :dast_scanner_profile, DastScannerProfileType, null: true,
             description: 'The associated scanner profile.'
 
+      field :branch, Dast::ProfileBranchType, null: true,
+            description: 'The associated branch.',
+            calls_gitaly: true
+
       field :edit_path, GraphQL::STRING_TYPE, null: true,
             description: 'Relative web path to the edit page of a profile.'
 

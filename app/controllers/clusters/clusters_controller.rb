@@ -60,6 +60,10 @@ class Clusters::ClustersController < Clusters::BaseController
   end
 
   def show
+    if params[:tab] == 'integrations'
+      @prometheus_integration = Clusters::IntegrationPresenter.new(@cluster.find_or_build_integration_prometheus)
+      @elastic_stack_integration = Clusters::IntegrationPresenter.new(@cluster.find_or_build_integration_elastic_stack)
+    end
   end
 
   def update
@@ -305,7 +309,8 @@ class Clusters::ClustersController < Clusters::BaseController
   def proxy_variable_substitution_service
     @empty_service ||= Class.new(BaseService) do
       def initialize(proxyable, params)
-        @proxyable, @params = proxyable, params
+        @proxyable = proxyable
+        @params = params
       end
 
       def execute
@@ -358,4 +363,4 @@ class Clusters::ClustersController < Clusters::BaseController
   end
 end
 
-Clusters::ClustersController.prepend_if_ee('EE::Clusters::ClustersController')
+Clusters::ClustersController.prepend_mod_with('Clusters::ClustersController')

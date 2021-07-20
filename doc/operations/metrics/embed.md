@@ -1,13 +1,13 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Embedding metric charts within GitLab-flavored Markdown **(FREE)**
+# Embedding metric charts within GitLab Flavored Markdown **(FREE)**
 
 You can display metrics charts within
-[GitLab Flavored Markdown](../../user/markdown.md#gitlab-flavored-markdown-gfm)
+[GitLab Flavored Markdown](../../user/markdown.md#gitlab-flavored-markdown)
 fields such as issue or merge request descriptions. The maximum number of embedded
 charts allowed in a GitLab Flavored Markdown field is 100.
 Embedding charts is useful when sharing an application incident or performance

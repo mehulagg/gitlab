@@ -86,7 +86,7 @@ Put the following code in the file:
 service: gitlab-example
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs14.x
 
 functions:
   hello:
@@ -134,7 +134,7 @@ This example code does the following:
 #### Setting up your AWS credentials with your GitLab account
 
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be defined in your GitLab settings under **Settings > CI/CD > Variables**.
-For more information please see [Create a custom variable in the UI](../../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
+For more information please see [Create a custom variable in the UI](../../../../ci/variables/index.md#custom-variables-validated-by-gitlab).
 
  The AWS credentials you provide must include IAM policies that provision correct
  access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
@@ -367,12 +367,11 @@ sam init -h
 ### Setting up your AWS credentials with your GitLab account
 
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both
-`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be set in the project's CI/CD
-variables.
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be set in the project's CI/CD variables.
 
 To set these:
 
-1. Navigate to the project's **Settings > CI / CD**.
+1. Navigate to the project's **Settings > CI/CD**.
 1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
    `AWS_SECRET_ACCESS_KEY`.
 1. Mask the credentials so they do not show in logs using the **Masked** toggle.
@@ -382,7 +381,7 @@ control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 
 ### Crafting the `.gitlab-ci.yml` file
 
-In a [`.gitlab-ci.yml`](../../../../ci/yaml/README.md) file in the root of your project,
+In a [`.gitlab-ci.yml`](../../../../ci/yaml/index.md) file in the root of your project,
 add the following and replace `<S3_bucket_name>` with the name of the S3 bucket where you
 want to store your package:
 
@@ -404,7 +403,7 @@ production:
   environment: production
 ```
 
-Let’s examine the configuration file more closely:
+Let's examine the configuration file more closely:
 
 - `image` specifies the Docker image to use for this build. This is the latest Python
   image since the sample application is written in Python.
@@ -424,8 +423,8 @@ deploys your application. If your:
   - Incompatible versions of software. For example, Python runtime version might be
     different from the Python on the build machine. Address this by installing the
     required versions of the software.
-  - You may not be able to access your AWS account from GitLab. Check the environment
-    variables you set up with AWS credentials.
+  - You may not be able to access your AWS account from GitLab. Check the CI/CD variables
+    you set up with AWS credentials.
   - You may not have permission to deploy a serverless application. Make sure you
     provide all required permissions to deploy a serverless application.
 
@@ -433,7 +432,7 @@ deploys your application. If your:
 
 To test the application you deployed, please go to the build log and follow the following steps:
 
-1. Click on “Show complete raw” on the upper right-hand corner:
+1. Click on "Show complete raw" on the upper right-hand corner:
 
    ![sam-complete-raw](img/sam-complete-raw.png)
 

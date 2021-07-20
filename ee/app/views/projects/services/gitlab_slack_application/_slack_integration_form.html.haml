@@ -1,4 +1,4 @@
-- slack_integration = @service.slack_integration
+- slack_integration = integration.slack_integration
 - if slack_integration
   %table.table
     %colgroup
@@ -22,9 +22,9 @@
         ago
       %td
         .controls
-          - project = @service.project
+          - project = integration.project
           = link_to 'Edit', edit_project_settings_slack_path(project), class: 'btn gl-button btn-default btn-sm'
           = link_to 'Remove', project_settings_slack_path(project), method: :delete, class: 'btn gl-button btn-danger btn-sm', data: { confirm: 'Are you sure?' }
 - else
   %p To set up this service press "Add to Slack"
-  = render "projects/services/#{@service.to_param}/slack_button", project: @project
+  = render "projects/services/#{integration.to_param}/slack_button", project: @project

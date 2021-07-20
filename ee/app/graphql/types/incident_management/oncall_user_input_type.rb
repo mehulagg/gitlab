@@ -2,7 +2,6 @@
 
 module Types
   module IncidentManagement
-    # rubocop: disable Graphql/AuthorizeTypes
     class OncallUserInputType < BaseInputObject
       graphql_name 'OncallUserInputType'
       description 'The rotation user and color palette'
@@ -17,8 +16,7 @@ module Types
 
       argument :color_weight, ::Types::DataVisualizationPalette::WeightEnum,
                 required: false,
-                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user.'
+                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user. Note: To view on-call schedules in GitLab, do not provide a value below 500. A value between 500 and 950 ensures sufficient contrast.'
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Admin Groups' do
   include Select2Helper
   include Spec::Support::Helpers::Features::MembersHelpers
+  include Spec::Support::Helpers::Features::InviteMembersModalHelper
 
   let(:internal) { Gitlab::VisibilityLevel::INTERNAL }
 
@@ -35,6 +36,7 @@ RSpec.describe 'Admin Groups' do
         expect(page).to have_field('group_path')
         expect(page).to have_field('group_visibility_level_0')
         expect(page).to have_field('description')
+        expect(page).to have_field('group_admin_note_attributes_note')
       end
     end
 
@@ -47,10 +49,12 @@ RSpec.describe 'Admin Groups' do
       path_component = 'gitlab'
       group_name = 'GitLab group name'
       group_description = 'Description of group for GitLab'
+      group_admin_note = 'A note about this group by an admin'
 
       fill_in 'group_path', with: path_component
       fill_in 'group_name', with: group_name
       fill_in 'group_description', with: group_description
+      fill_in 'group_admin_note_attributes_note', with: group_admin_note
       click_button "Create group"
 
       expect(current_path).to eq admin_group_path(Group.find_by(path: path_component))
@@ -61,6 +65,8 @@ RSpec.describe 'Admin Groups' do
       expect(li_texts).to match group_name
       expect(li_texts).to match path_component
       expect(li_texts).to match group_description
+      p_texts = content.all('p').collect(&:text).join('/n')
+      expect(p_texts).to match group_admin_note
     end
 
     it 'shows the visibility level radio populated with the default value' do
@@ -116,6 +122,29 @@ RSpec.describe 'Admin Groups' do
 
       expect(page).to have_link(group.name, href: group_path(group))
     end
+
+    it 'has a note if one is available' do
+      group = create(:group, :private)
+      note_text = 'A group administrator note'
+      group.update!(admin_note_attributes: { note: note_text })
+
+      visit admin_group_path(group)
+
+      expect(page).to have_text(note_text)
+    end
+
+    context 'when group has open access requests' do
+      let!(:access_request) { create(:group_member, :access_request, group: group) }
+
+      it 'shows access requests with link to manage access' do
+        visit admin_group_path(group)
+
+        page.within '[data-testid="access-requests"]' do
+          expect(page).to have_content access_request.user.name
+          expect(page).to have_link 'Manage access', href: group_group_members_path(group, tab: 'access_requests')
+        end
+      end
+    end
   end
 
   describe 'group edit' do
@@ -145,6 +174,36 @@ RSpec.describe 'Admin Groups' do
 
       expect(name_field.value).to eq original_name
     end
+
+    it 'adding an admin note to group without one' do
+      group = create(:group, :private)
+      expect(group.admin_note).to be_nil
+
+      visit admin_group_edit_path(group)
+      admin_note_text = 'A note by an administrator'
+
+      fill_in 'group_admin_note_attributes_note', with: admin_note_text
+      click_button 'Save changes'
+
+      expect(page).to have_content(admin_note_text)
+    end
+
+    it 'editing an existing group admin note' do
+      admin_note_text = 'A note by an administrator'
+      new_admin_note_text = 'A new note by an administrator'
+      group = create(:group, :private)
+      group.create_admin_note(note: admin_note_text)
+
+      visit admin_group_edit_path(group)
+
+      admin_note_field = find('#group_admin_note_attributes_note')
+      expect(admin_note_field.value).to eq(admin_note_text)
+
+      fill_in 'group_admin_note_attributes_note', with: new_admin_note_text
+      click_button 'Save changes'
+
+      expect(page).to have_content(new_admin_note_text)
+    end
   end
 
   describe 'add user into a group', :js do
@@ -157,6 +216,7 @@ RSpec.describe 'Admin Groups' do
           select2(Gitlab::Access::REPORTER, from: '#access_level')
         end
         click_button "Add users to group"
+
         page.within ".group-users-list" do
           expect(page).to have_content(user.name)
           expect(page).to have_content('Reporter')
@@ -175,19 +235,13 @@ RSpec.describe 'Admin Groups' do
 
   describe 'add admin himself to a group' do
     before do
-      stub_feature_flags(invite_members_group_modal: false)
       group.add_user(:user, Gitlab::Access::OWNER)
     end
 
     it 'adds admin a to a group as developer', :js do
       visit group_group_members_path(group)
 
-      page.within '.invite-users-form' do
-        select2(current_user.id, from: '#user_ids', multiple: true)
-        select 'Developer', from: 'access_level'
-      end
-
-      click_button 'Invite'
+      invite_member(current_user.name, role: 'Developer')
 
       page.within members_table do
         expect(page).to have_content(current_user.name)

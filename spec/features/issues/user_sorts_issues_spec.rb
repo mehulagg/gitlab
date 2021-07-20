@@ -22,11 +22,11 @@ RSpec.describe "User sorts issues" do
     create(:award_emoji, :upvote, awardable: issue2)
 
     sign_in(user)
-
-    visit(project_issues_path(project))
   end
 
   it 'keeps the sort option' do
+    visit(project_issues_path(project))
+
     find('.filter-dropdown-container .dropdown').click
 
     page.within('ul.dropdown-menu.dropdown-menu-right li') do
@@ -47,11 +47,10 @@ RSpec.describe "User sorts issues" do
   end
 
   it 'sorts by popularity', :js do
-    find('.filter-dropdown-container .dropdown').click
+    visit(project_issues_path(project))
 
-    page.within('ul.dropdown-menu.dropdown-menu-right li') do
-      click_link("Popularity")
-    end
+    click_button 'Created date'
+    click_on 'Popularity'
 
     page.within(".issues-list") do
       page.within("li.issue:nth-child(1)") do
@@ -77,7 +76,7 @@ RSpec.describe "User sorts issues" do
 
   it 'sorts by most recently updated', :js do
     issue3.updated_at = Time.now + 100
-    issue3.save
+    issue3.save!
     visit project_issues_path(project, sort: sort_value_recently_updated)
 
     expect(first_issue).to include('baz')
@@ -85,8 +84,8 @@ RSpec.describe "User sorts issues" do
 
   describe 'sorting by due date', :js do
     before do
-      issue1.update(due_date: 1.day.from_now)
-      issue2.update(due_date: 6.days.from_now)
+      issue1.update!(due_date: 1.day.from_now)
+      issue2.update!(due_date: 6.days.from_now)
     end
 
     it 'sorts by due date' do
@@ -96,7 +95,7 @@ RSpec.describe "User sorts issues" do
     end
 
     it 'sorts by due date by excluding nil due dates' do
-      issue2.update(due_date: nil)
+      issue2.update!(due_date: nil)
 
       visit project_issues_path(project, sort: sort_value_due_date)
 
@@ -111,7 +110,7 @@ RSpec.describe "User sorts issues" do
       end
 
       it 'sorts by least recently due date by excluding nil due dates' do
-        issue2.update(due_date: nil)
+        issue2.update!(due_date: nil)
 
         visit project_issues_path(project, label_names: [label.name], sort: sort_value_due_date_later)
 
@@ -122,14 +121,14 @@ RSpec.describe "User sorts issues" do
 
   describe 'filtering by due date', :js do
     before do
-      issue1.update(due_date: 1.day.from_now)
-      issue2.update(due_date: 6.days.from_now)
+      issue1.update!(due_date: 1.day.from_now)
+      issue2.update!(due_date: 6.days.from_now)
     end
 
     it 'filters by none' do
       visit project_issues_path(project, due_date: Issue::NoDueDate.name)
 
-      page.within '.issues-holder' do
+      page.within '.issues-list' do
         expect(page).not_to have_content('foo')
         expect(page).not_to have_content('bar')
         expect(page).to have_content('baz')
@@ -139,7 +138,7 @@ RSpec.describe "User sorts issues" do
     it 'filters by any' do
       visit project_issues_path(project, due_date: Issue::AnyDueDate.name)
 
-      page.within '.issues-holder' do
+      page.within '.issues-list' do
         expect(page).to have_content('foo')
         expect(page).to have_content('bar')
         expect(page).to have_content('baz')
@@ -147,13 +146,13 @@ RSpec.describe "User sorts issues" do
     end
 
     it 'filters by due this week' do
-      issue1.update(due_date: Date.today.beginning_of_week + 2.days)
-      issue2.update(due_date: Date.today.end_of_week)
-      issue3.update(due_date: Date.today - 8.days)
+      issue1.update!(due_date: Date.today.beginning_of_week + 2.days)
+      issue2.update!(due_date: Date.today.end_of_week)
+      issue3.update!(due_date: Date.today - 8.days)
 
       visit project_issues_path(project, due_date: Issue::DueThisWeek.name)
 
-      page.within '.issues-holder' do
+      page.within '.issues-list' do
         expect(page).to have_content('foo')
         expect(page).to have_content('bar')
         expect(page).not_to have_content('baz')
@@ -161,13 +160,13 @@ RSpec.describe "User sorts issues" do
     end
 
     it 'filters by due this month' do
-      issue1.update(due_date: Date.today.beginning_of_month + 2.days)
-      issue2.update(due_date: Date.today.end_of_month)
-      issue3.update(due_date: Date.today - 50.days)
+      issue1.update!(due_date: Date.today.beginning_of_month + 2.days)
+      issue2.update!(due_date: Date.today.end_of_month)
+      issue3.update!(due_date: Date.today - 50.days)
 
       visit project_issues_path(project, due_date: Issue::DueThisMonth.name)
 
-      page.within '.issues-holder' do
+      page.within '.issues-list' do
         expect(page).to have_content('foo')
         expect(page).to have_content('bar')
         expect(page).not_to have_content('baz')
@@ -175,13 +174,13 @@ RSpec.describe "User sorts issues" do
     end
 
     it 'filters by overdue' do
-      issue1.update(due_date: Date.today + 2.days)
-      issue2.update(due_date: Date.today + 20.days)
-      issue3.update(due_date: Date.yesterday)
+      issue1.update!(due_date: Date.today + 2.days)
+      issue2.update!(due_date: Date.today + 20.days)
+      issue3.update!(due_date: Date.yesterday)
 
       visit project_issues_path(project, due_date: Issue::Overdue.name)
 
-      page.within '.issues-holder' do
+      page.within '.issues-list' do
         expect(page).not_to have_content('foo')
         expect(page).not_to have_content('bar')
         expect(page).to have_content('baz')
@@ -189,13 +188,13 @@ RSpec.describe "User sorts issues" do
     end
 
     it 'filters by due next month and previous two weeks' do
-      issue1.update(due_date: Date.today - 4.weeks)
-      issue2.update(due_date: (Date.today + 2.months).beginning_of_month)
-      issue3.update(due_date: Date.yesterday)
+      issue1.update!(due_date: Date.today - 4.weeks)
+      issue2.update!(due_date: (Date.today + 2.months).beginning_of_month)
+      issue3.update!(due_date: Date.yesterday)
 
       visit project_issues_path(project, due_date: Issue::DueNextMonthAndPreviousTwoWeeks.name)
 
-      page.within '.issues-holder' do
+      page.within '.issues-list' do
         expect(page).not_to have_content('foo')
         expect(page).not_to have_content('bar')
         expect(page).to have_content('baz')
@@ -206,9 +205,9 @@ RSpec.describe "User sorts issues" do
   describe 'sorting by milestone', :js do
     before do
       issue1.milestone = newer_due_milestone
-      issue1.save
+      issue1.save!
       issue2.milestone = later_due_milestone
-      issue2.save
+      issue2.save!
     end
 
     it 'sorts by milestone' do
@@ -224,9 +223,9 @@ RSpec.describe "User sorts issues" do
 
     before do
       issue1.assignees << user2
-      issue1.save
+      issue1.save!
       issue2.assignees << user2
-      issue2.save
+      issue2.save!
     end
 
     it 'sorts with a filter applied' do

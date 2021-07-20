@@ -11,12 +11,14 @@ RSpec.describe Namespace do
   let(:default_plan) { create(:default_plan) }
   let(:free_plan) { create(:free_plan) }
   let!(:bronze_plan) { create(:bronze_plan) }
-  let!(:silver_plan) { create(:silver_plan) }
-  let!(:gold_plan) { create(:gold_plan) }
+  let!(:premium_plan) { create(:premium_plan) }
+  let!(:ultimate_plan) { create(:ultimate_plan) }
 
   it { is_expected.to have_one(:namespace_statistics) }
   it { is_expected.to have_one(:namespace_limit) }
   it { is_expected.to have_one(:elasticsearch_indexed_namespace) }
+  it { is_expected.to have_one :upcoming_reconciliation }
+  it { is_expected.to have_many(:ci_minutes_additional_packs) }
 
   it { is_expected.to delegate_method(:shared_runners_seconds).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:namespace_statistics) }
@@ -26,6 +28,7 @@ RSpec.describe Namespace do
   it { is_expected.to delegate_method(:trial_days_remaining).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:trial_percentage_complete).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:upgradable?).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_extended_or_reactivated?).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:email).to(:owner).with_prefix.allow_nil }
   it { is_expected.to delegate_method(:additional_purchased_storage_size).to(:namespace_limit) }
   it { is_expected.to delegate_method(:additional_purchased_storage_size=).to(:namespace_limit).with_arguments(:args) }
@@ -59,6 +62,25 @@ RSpec.describe Namespace do
   described_class::PLANS.each do |namespace_plan|
     describe "#{namespace_plan}_plan?" do
       it_behaves_like 'plan helper', namespace_plan
+    end
+  end
+
+  describe '#free_personal?' do
+    where(:user, :paid, :expected) do
+      true  | false | true
+      false | false | false
+      false | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:user?).and_return(user)
+        allow(namespace).to receive(:paid?).and_return(paid)
+      end
+
+      it 'returns expected boolean value' do
+        expect(namespace.free_personal?).to eq(expected)
+      end
     end
   end
 
@@ -166,22 +188,11 @@ RSpec.describe Namespace do
       end
 
       context 'when there is a subscription' do
-        let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan_id: gold_plan.id) }
+        let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan_id: ultimate_plan.id) }
 
         it 'returns namespace with subscription set' do
-          is_expected.to eq(gold_plan.id)
+          is_expected.to eq(ultimate_plan.id)
         end
-      end
-    end
-
-    describe '.top_most' do
-      let_it_be(:namespace) { create(:namespace) }
-      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
-
-      subject { described_class.top_most.ids }
-
-      it 'only contains root namespace' do
-        is_expected.to eq([namespace.id])
       end
     end
 
@@ -207,11 +218,13 @@ RSpec.describe Namespace do
       subject { described_class.in_default_plan.ids }
 
       where(:plan_name, :expect_in_default_plan) do
-        ::Plan::FREE | true
-        ::Plan::DEFAULT | true
-        ::Plan::BRONZE | false
-        ::Plan::SILVER | false
-        ::Plan::GOLD | false
+        ::Plan::FREE     | true
+        ::Plan::DEFAULT  | true
+        ::Plan::BRONZE   | false
+        ::Plan::SILVER   | false
+        ::Plan::PREMIUM  | false
+        ::Plan::GOLD     | false
+        ::Plan::ULTIMATE | false
       end
 
       with_them do
@@ -226,75 +239,6 @@ RSpec.describe Namespace do
         namespace = create(:namespace)
 
         is_expected.to eq([namespace.id])
-      end
-    end
-
-    describe '.eligible_for_subscription' do
-      let_it_be(:namespace) { create :namespace }
-      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
-
-      subject { described_class.eligible_for_subscription.ids }
-
-      context 'when there is no subscription' do
-        it { is_expected.to eq([namespace.id]) }
-      end
-
-      context 'when there is a subscription' do
-        context 'with a plan that is eligible for a trial' do
-          where(plan: ::Plan::PLANS_ELIGIBLE_FOR_TRIAL)
-
-          with_them do
-            context 'and has not yet been trialed' do
-              before do
-                create :gitlab_subscription, plan, namespace: namespace
-                create :gitlab_subscription, plan, namespace: sub_namespace
-              end
-
-              it { is_expected.to eq([namespace.id]) }
-            end
-
-            context 'but has already had a trial' do
-              before do
-                create :gitlab_subscription, plan, :expired_trial, namespace: namespace
-                create :gitlab_subscription, plan, :expired_trial, namespace: sub_namespace
-              end
-
-              it { is_expected.to eq([namespace.id]) }
-            end
-
-            context 'but is currently being trialed' do
-              before do
-                create :gitlab_subscription, plan, :active_trial, namespace: namespace
-                create :gitlab_subscription, plan, :active_trial, namespace: sub_namespace
-              end
-
-              it { is_expected.to eq([namespace.id]) }
-            end
-          end
-        end
-
-        context 'in active trial gold plan' do
-          before do
-            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: namespace
-            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: sub_namespace
-          end
-
-          it { is_expected.to eq([namespace.id]) }
-        end
-
-        context 'with a paid plan and not in trial' do
-          where(plan: ::Plan::PAID_HOSTED_PLANS)
-
-          with_them do
-            context 'and has not yet been trialed' do
-              before do
-                create :gitlab_subscription, plan, namespace: namespace
-              end
-
-              it { is_expected.to be_empty }
-            end
-          end
-        end
       end
     end
 
@@ -364,22 +308,23 @@ RSpec.describe Namespace do
     describe '#validate_shared_runner_minutes_support' do
       context 'when changing :shared_runners_minutes_limit' do
         before do
-          namespace.shared_runners_minutes_limit = 100
+          group.shared_runners_minutes_limit = 100
         end
 
-        context 'when group is subgroup' do
-          let_it_be(:root_ancestor) { create(:group) }
-          let(:namespace) { create(:namespace, parent: root_ancestor) }
+        context 'when group is a subgroup' do
+          let(:group) { create(:group, :nested) }
 
           it 'is invalid' do
-            expect(namespace).not_to be_valid
-            expect(namespace.errors[:shared_runners_minutes_limit]).to include('is not supported for this namespace')
+            expect(group).not_to be_valid
+            expect(group.errors[:shared_runners_minutes_limit]).to include('is not supported for this namespace')
           end
         end
 
         context 'when group is root' do
+          let(:group) { create(:group) }
+
           it 'is valid' do
-            expect(namespace).to be_valid
+            expect(group).to be_valid
           end
         end
       end
@@ -390,6 +335,7 @@ RSpec.describe Namespace do
     context 'when running on a primary node' do
       let_it_be(:primary) { create(:geo_node, :primary) }
       let_it_be(:secondary) { create(:geo_node) }
+
       let(:gitlab_shell) { Gitlab::Shell.new }
       let(:parent_group) { create(:group) }
       let(:child_group) { create(:group, name: 'child', path: 'child', parent: parent_group) }
@@ -453,7 +399,7 @@ RSpec.describe Namespace do
     it 'only checks the plan once' do
       expect(group).to receive(:load_feature_available).once.and_call_original
 
-      2.times { group.feature_available?(:push_rules) }
+      2.times { group.licensed_feature_available?(:push_rules) }
     end
 
     context 'when checking namespace plan' do
@@ -466,7 +412,7 @@ RSpec.describe Namespace do
       end
 
       context 'when feature available on the plan' do
-        let(:hosted_plan) { create(:gold_plan) }
+        let(:hosted_plan) { create(:ultimate_plan) }
 
         context 'when feature available for current group' do
           it 'returns true' do
@@ -478,7 +424,7 @@ RSpec.describe Namespace do
           let(:child_group) { create :group, parent: group }
 
           it 'child group has feature available' do
-            expect(child_group.feature_available?(feature)).to be_truthy
+            expect(child_group.licensed_feature_available?(feature)).to be_truthy
           end
         end
       end
@@ -492,26 +438,10 @@ RSpec.describe Namespace do
         end
       end
     end
-
-    context 'when feature is disabled by a feature flag' do
-      it 'returns false' do
-        stub_feature_flags(feature => false)
-
-        is_expected.to eq(false)
-      end
-    end
-
-    context 'when feature is enabled by a feature flag' do
-      it 'returns true' do
-        stub_feature_flags(feature => true)
-
-        is_expected.to eq(true)
-      end
-    end
   end
 
   describe '#feature_available?' do
-    subject { group.feature_available?(feature) }
+    subject { group.licensed_feature_available?(feature) }
 
     it_behaves_like 'feature available'
   end
@@ -595,7 +525,7 @@ RSpec.describe Namespace do
         end
 
         context 'when subscription plan is defined in the system' do
-          let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+          let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
           context 'when limits are not set for the plan' do
             it_behaves_like 'uses an implied configuration'
@@ -604,7 +534,7 @@ RSpec.describe Namespace do
           context 'when limits are set for the plan' do
             let!(:subscription_limits) do
               create(:plan_limits,
-                plan: gold_plan,
+                plan: ultimate_plan,
                 ci_active_pipelines: 5,
                 ci_pipeline_size: 6,
                 ci_active_jobs: 7)
@@ -700,49 +630,54 @@ RSpec.describe Namespace do
         allow(Gitlab).to receive(:com?).and_return(true)
       end
 
-      context 'when namespace has a subscription associated' do
-        before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan, start_date: start_date)
-        end
+      context 'for personal namespaces' do
+        context 'when namespace has a subscription associated' do
+          before do
+            create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan, start_date: start_date)
+          end
 
-        context 'when this subscription was purchased before EoA rollout (legacy)' do
-          let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date - 3.days }
+          context 'when this subscription was purchased before EoA rollout (legacy)' do
+            let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date - 3.days }
 
-          it 'returns the legacy plan from the subscription' do
-            expect(namespace.actual_plan).to eq(gold_plan)
-            expect(namespace.gitlab_subscription).to be_present
+            it 'returns the legacy plan from the subscription' do
+              expect(namespace.actual_plan).to eq(ultimate_plan)
+              expect(namespace.gitlab_subscription).to be_present
+            end
+          end
+
+          context 'when this subscription was purchase after EoA rollout (new plan)' do
+            let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date + 3.days }
+
+            it 'returns the new plan from the subscription' do
+              expect(namespace.actual_plan).to be_an_instance_of(Subscriptions::NewPlanPresenter)
+              expect(namespace.gitlab_subscription).to be_present
+            end
           end
         end
 
-        context 'when this subscription was purchase after EoA rollout (new plan)' do
-          let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date + 3.days }
-
-          it 'returns the new plan from the subscription' do
-            expect(namespace.actual_plan).to be_an_instance_of(Subscriptions::NewPlanPresenter)
+        context 'when namespace does not have a subscription associated' do
+          it 'generates a subscription and returns free plan' do
+            expect(namespace.actual_plan).to eq(Plan.free)
             expect(namespace.gitlab_subscription).to be_present
+          end
+
+          context 'when free plan does exist' do
+            before do
+              free_plan
+            end
+
+            it 'generates a subscription' do
+              expect(namespace.actual_plan).to eq(free_plan)
+              expect(namespace.gitlab_subscription).to be_present
+            end
           end
         end
       end
 
-      context 'when namespace does not have a subscription associated' do
-        it 'generates a subscription and returns free plan' do
-          expect(namespace.actual_plan).to eq(Plan.free)
-          expect(namespace.gitlab_subscription).to be_present
-        end
-
-        context 'when free plan does exist' do
-          before do
-            free_plan
-          end
-
-          it 'generates a subscription' do
-            expect(namespace.actual_plan).to eq(free_plan)
-            expect(namespace.gitlab_subscription).to be_present
-          end
-        end
-
-        context 'when namespace is a subgroup with a parent' do
-          let(:subgroup) { create(:namespace, parent: namespace) }
+      context 'for groups' do
+        context 'when the group is a subgroup with a parent' do
+          let(:parent) { create(:group) }
+          let(:subgroup) { create(:group, parent: parent) }
 
           context 'when free plan does exist' do
             before do
@@ -755,18 +690,34 @@ RSpec.describe Namespace do
             end
           end
 
-          context 'when namespace has a subscription associated' do
+          context 'when parent group has a subscription associated' do
             before do
-              create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+              create(:gitlab_subscription, namespace: parent, hosted_plan: ultimate_plan)
             end
 
             it 'returns the plan from the subscription' do
-              expect(subgroup.actual_plan).to eq(gold_plan)
+              expect(subgroup.actual_plan).to eq(ultimate_plan)
               expect(subgroup.gitlab_subscription).not_to be_present
             end
           end
         end
       end
+    end
+  end
+
+  describe '#paid?' do
+    it 'returns true for a root namespace with a paid plan' do
+      create(:gitlab_subscription, :ultimate, namespace: namespace)
+
+      expect(namespace.paid?).to eq(true)
+    end
+
+    it 'returns false for a subgroup of a group with a paid plan' do
+      group = create(:group)
+      subgroup = create(:group, parent: group)
+      create(:gitlab_subscription, :ultimate, namespace: group)
+
+      expect(subgroup.paid?).to eq(false)
     end
   end
 
@@ -782,38 +733,43 @@ RSpec.describe Namespace do
         allow(Gitlab).to receive(:com?).and_return(true)
       end
 
-      context 'when namespace has a subscription associated' do
-        before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
-        end
-
-        it 'returns an associated plan name' do
-          expect(namespace.actual_plan_name).to eq 'gold'
-        end
-      end
-
-      context 'when namespace does not have subscription associated' do
-        it 'returns a free plan name' do
-          expect(namespace.actual_plan_name).to eq 'free'
-        end
-      end
-
-      context 'when namespace is a subgroup with a parent' do
-        let(:subgroup) { create(:namespace, parent: namespace) }
-
+      context 'for personal namespaces' do
         context 'when namespace has a subscription associated' do
           before do
-            create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+            create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
           end
 
           it 'returns an associated plan name' do
-            expect(subgroup.actual_plan_name).to eq 'gold'
+            expect(namespace.actual_plan_name).to eq 'ultimate'
           end
         end
 
         context 'when namespace does not have subscription associated' do
           it 'returns a free plan name' do
-            expect(subgroup.actual_plan_name).to eq 'free'
+            expect(namespace.actual_plan_name).to eq 'free'
+          end
+        end
+      end
+
+      context 'for groups' do
+        context 'when the group is a subgroup with a parent' do
+          let(:parent) { create(:group) }
+          let(:subgroup) { create(:group, parent: parent) }
+
+          context 'when parent group has a subscription associated' do
+            before do
+              create(:gitlab_subscription, namespace: parent, hosted_plan: ultimate_plan)
+            end
+
+            it 'returns an associated plan name' do
+              expect(subgroup.actual_plan_name).to eq 'ultimate'
+            end
+          end
+
+          context 'when parent group does not have subscription associated' do
+            it 'returns a free plan name' do
+              expect(subgroup.actual_plan_name).to eq 'free'
+            end
           end
         end
       end
@@ -833,7 +789,14 @@ RSpec.describe Namespace do
       let(:user) { create(:user) }
 
       it 'returns 1' do
-        expect(user.namespace.billed_user_ids).to eq([user.id])
+        expect(user.namespace.billed_user_ids.keys).to eq([
+          :user_ids,
+          :group_member_user_ids,
+          :project_member_user_ids,
+          :shared_group_user_ids,
+          :shared_project_user_ids
+        ])
+        expect(user.namespace.billed_user_ids[:user_ids]).to eq([user.id])
       end
     end
 
@@ -848,13 +811,25 @@ RSpec.describe Namespace do
         group.add_guest(guest)
       end
 
-      context 'with a gold plan' do
+      subject(:billed_user_ids) { group.billed_user_ids }
+
+      it 'returns a breakdown of billable user ids' do
+        expect(billed_user_ids.keys).to eq([
+          :user_ids,
+          :group_member_user_ids,
+          :project_member_user_ids,
+          :shared_group_user_ids,
+          :shared_project_user_ids
+        ])
+      end
+
+      context 'with a ultimate plan' do
         before do
-          create(:gitlab_subscription, namespace: group, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: group, hosted_plan: ultimate_plan)
         end
 
         it 'does not include guest users and only active users' do
-          expect(group.billed_user_ids).to match_array([developer.id])
+          expect(billed_user_ids[:user_ids]).to match_array([developer.id])
         end
 
         context 'when group has a project and users are invited to it' do
@@ -868,14 +843,19 @@ RSpec.describe Namespace do
             project.add_developer(create(:user, :blocked))
           end
 
-          it 'includes invited active users except guests to the group' do
-            expect(group.billed_user_ids).to match_array([project_developer.id, developer.id])
+          it 'includes invited active users except guests to the group', :aggregate_failures do
+            expect(billed_user_ids[:user_ids]).to match_array([project_developer.id, developer.id])
+            expect(billed_user_ids[:project_member_user_ids]).to match_array([project_developer.id, developer.id])
+            expect(billed_user_ids[:group_member_user_ids]).to match_array([developer.id])
+            expect(billed_user_ids[:shared_group_user_ids]).to match_array([])
+            expect(billed_user_ids[:shared_project_user_ids]).to match_array([])
           end
 
           context 'with project bot users' do
             include_context 'project bot users'
 
-            it { expect(group.billed_user_ids).not_to include(project_bot.id) }
+            it { expect(billed_user_ids[:user_ids]).not_to include(project_bot.id) }
+            it { expect(billed_user_ids[:project_member_user_ids]).not_to include(project_bot.id) }
           end
 
           context 'when group is invited to the project' do
@@ -894,8 +874,12 @@ RSpec.describe Namespace do
                 create(:project_group_link, project: project, group: invited_group)
               end
 
-              it 'includes the only active users except guests of the invited groups' do
-                expect(group.billed_user_ids).to match_array([invited_group_developer.id, project_developer.id, developer.id])
+              it 'includes only active users except guests of the invited groups', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([invited_group_developer.id, project_developer.id, developer.id])
+                expect(billed_user_ids[:shared_group_user_ids]).to match_array([])
+                expect(billed_user_ids[:shared_project_user_ids]).to match_array([invited_group_developer.id, developer.id])
+                expect(billed_user_ids[:group_member_user_ids]).to match_array([developer.id])
+                expect(billed_user_ids[:project_member_user_ids]).to match_array([developer.id, project_developer.id])
               end
             end
 
@@ -904,8 +888,9 @@ RSpec.describe Namespace do
                 create(:project_group_link, :guest, project: project, group: invited_group)
               end
 
-              it 'does not include any members from the invited group' do
-                expect(group.billed_user_ids).to match_array([project_developer.id, developer.id])
+              it 'does not include any members from the invited group', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([project_developer.id, developer.id])
+                expect(billed_user_ids[:shared_project_user_ids]).to be_empty
               end
             end
           end
@@ -925,8 +910,9 @@ RSpec.describe Namespace do
           end
 
           it 'includes active users from the shared group to the billed members', :aggregate_failures do
-            expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id])
-            expect(shared_group.billed_user_ids).not_to include([developer.id])
+            expect(billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, developer.id])
+            expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id])
+            expect(shared_group.billed_user_ids[:user_ids]).not_to include([developer.id])
           end
 
           context 'when subgroup invited another group to collaborate' do
@@ -947,9 +933,10 @@ RSpec.describe Namespace do
               end
 
               it 'includes all the active and non guest users from the shared group', :aggregate_failures do
-                expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id, another_shared_group_developer.id])
-                expect(shared_group.billed_user_ids).not_to include([developer.id])
-                expect(another_shared_group.billed_user_ids).not_to include([developer.id, shared_group_developer.id])
+                expect(billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, developer.id, another_shared_group_developer.id])
+                expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id, another_shared_group_developer.id])
+                expect(shared_group.billed_user_ids[:user_ids]).not_to include([developer.id])
+                expect(another_shared_group.billed_user_ids[:user_ids]).not_to include([developer.id, shared_group_developer.id])
               end
             end
 
@@ -960,8 +947,9 @@ RSpec.describe Namespace do
                                                     shared_group: subgroup })
               end
 
-              it 'does not includes any user from the shared group from the subgroup' do
-                expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id])
+              it 'does not includes any user from the shared group from the subgroup', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, developer.id])
+                expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id])
               end
             end
           end
@@ -969,10 +957,13 @@ RSpec.describe Namespace do
       end
 
       context 'with other plans' do
-        %i[bronze_plan silver_plan].each do |plan|
-          it 'includes active guest users' do
+        %i[bronze_plan premium_plan].each do |plan|
+          subject(:billed_user_ids) { group.billed_user_ids }
+
+          it 'includes active guest users', :aggregate_failures do
             create(:gitlab_subscription, namespace: group, hosted_plan: send(plan))
-            expect(group.billed_user_ids).to match_array([guest.id, developer.id])
+            expect(billed_user_ids[:user_ids]).to match_array([guest.id, developer.id])
+            expect(billed_user_ids[:group_member_user_ids]).to match_array([guest.id, developer.id])
           end
 
           context 'when group has a project and users invited to it' do
@@ -988,14 +979,16 @@ RSpec.describe Namespace do
               project.add_developer(developer)
             end
 
-            it 'includes invited active users to the group' do
-              expect(group.billed_user_ids).to match_array([guest.id, developer.id, project_guest.id, project_developer.id])
+            it 'includes invited active users to the group', :aggregate_failures do
+              expect(billed_user_ids[:user_ids]).to match_array([guest.id, developer.id, project_guest.id, project_developer.id])
+              expect(billed_user_ids[:project_member_user_ids]).to match_array([developer.id, project_guest.id, project_developer.id])
             end
 
             context 'with project bot users' do
               include_context 'project bot users'
 
-              it { expect(group.billed_user_ids).not_to include(project_bot.id) }
+              it { expect(billed_user_ids[:user_ids]).not_to include(project_bot.id) }
+              it { expect(billed_user_ids[:project_member_user_ids]).not_to include(project_bot.id) }
             end
 
             context 'when group is invited to the project' do
@@ -1011,13 +1004,21 @@ RSpec.describe Namespace do
                 create(:project_group_link, project: project, group: invited_group)
               end
 
-              it 'includes the unique active users and guests of the invited groups' do
-                expect(group.billed_user_ids).to match_array([guest.id,
-                                                              developer.id,
-                                                              project_guest.id,
-                                                              project_developer.id,
-                                                              invited_group_developer.id,
-                                                              invited_group_guest.id])
+              it 'includes the unique active users and guests of the invited groups', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([
+                  guest.id,
+                  developer.id,
+                  project_guest.id,
+                  project_developer.id,
+                  invited_group_developer.id,
+                  invited_group_guest.id
+                ])
+
+                expect(billed_user_ids[:shared_project_user_ids]).to match_array([
+                  developer.id,
+                  invited_group_developer.id,
+                  invited_group_guest.id
+                ])
               end
             end
           end
@@ -1038,8 +1039,9 @@ RSpec.describe Namespace do
             end
 
             it 'includes active users from the shared group including guests', :aggregate_failures do
-              expect(group.billed_user_ids).to match_array([developer.id, guest.id, shared_group_developer.id, shared_group_guest.id])
-              expect(shared_group.billed_user_ids).to match_array([shared_group_developer.id, shared_group_guest.id])
+              expect(billed_user_ids[:user_ids]).to match_array([developer.id, guest.id, shared_group_developer.id, shared_group_guest.id])
+              expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id, shared_group_guest.id])
+              expect(shared_group.billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, shared_group_guest.id])
             end
           end
         end
@@ -1066,9 +1068,9 @@ RSpec.describe Namespace do
         group.add_guest(create(:user))
       end
 
-      context 'with a gold plan' do
+      context 'with a ultimate plan' do
         before do
-          create(:gitlab_subscription, namespace: group, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: group, hosted_plan: ultimate_plan)
         end
 
         it 'does not count guest users and counts only active users' do
@@ -1131,7 +1133,7 @@ RSpec.describe Namespace do
       end
 
       context 'with other plans' do
-        %i[bronze_plan silver_plan].each do |plan|
+        %i[bronze_plan premium_plan].each do |plan|
           it 'counts active guest users' do
             create(:gitlab_subscription, namespace: group, hosted_plan: send(plan))
             expect(group.billable_members_count).to eq(2)
@@ -1227,6 +1229,88 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#can_extend_trial?' do
+    subject { namespace.can_extend_trial? }
+
+    context 'feature flag is disabled' do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(true)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(false)
+
+        stub_feature_flags(allow_extend_reactivate_trial: false)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when feature flag is enabled' do
+      where(:trial_active, :trial_extended_or_reactivated, :can_extend_trial) do
+        false | false | false
+        false | true  | false
+        true  | false | true
+        true  | true  | false
+      end
+
+      with_them do
+        before do
+          allow(namespace).to receive(:trial_active?).and_return(trial_active)
+          allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+        end
+
+        it { is_expected.to be can_extend_trial }
+      end
+    end
+  end
+
+  describe '#can_reactivate_trial?' do
+    subject { namespace.can_reactivate_trial? }
+
+    context 'when feature flag is disabled' do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(false)
+        allow(namespace).to receive(:never_had_trial?).and_return(false)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(false)
+        allow(namespace).to receive(:free_plan?).and_return(true)
+
+        stub_feature_flags(allow_extend_reactivate_trial: false)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when feature flag is enabled' do
+      where(:trial_active, :never_had_trial, :trial_extended_or_reactivated, :free_plan, :can_reactivate_trial) do
+        false | false | false | false | false
+        false | false | false | true  | true
+        false | false | true  | false | false
+        false | false | true  | true  | false
+        false | true  | false | false | false
+        false | true  | false | true  | false
+        false | true  | true  | false | false
+        false | true  | true  | true  | false
+        true  | false | false | false | false
+        true  | false | false | true  | false
+        true  | false | true  | false | false
+        true  | false | true  | true  | false
+        true  | true  | false | false | false
+        true  | true  | false | true  | false
+        true  | true  | true  | false | false
+        true  | true  | true  | true  | false
+      end
+
+      with_them do
+        before do
+          allow(namespace).to receive(:trial_active?).and_return(trial_active)
+          allow(namespace).to receive(:never_had_trial?).and_return(never_had_trial)
+          allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+          allow(namespace).to receive(:free_plan?).and_return(free_plan)
+        end
+
+        it { is_expected.to be can_reactivate_trial }
+      end
+    end
+  end
+
   describe '#file_template_project_id' do
     it 'is cleared before validation' do
       project = create(:project, namespace: namespace)
@@ -1258,7 +1342,7 @@ RSpec.describe Namespace do
     subject { namespace.store_security_reports_available? }
 
     context 'when at least one security report feature is enabled' do
-      where(report_type: [:sast, :secret_detection, :dast, :dependency_scanning, :container_scanning])
+      where(report_type: [:sast, :secret_detection, :dast, :dependency_scanning, :container_scanning, :cluster_image_scanning])
 
       with_them do
         before do
@@ -1582,46 +1666,64 @@ RSpec.describe Namespace do
   end
 
   describe '#closest_gitlab_subscription' do
-    subject { namespace.closest_gitlab_subscription }
+    subject { group.closest_gitlab_subscription }
 
     context 'when there is a root ancestor' do
-      let(:namespace) { create(:namespace, parent: root) }
+      let(:group) { create(:group, parent: root) }
 
       context 'when root has a subscription' do
-        let(:root) { create(:namespace_with_plan) }
+        let(:root) { create(:group_with_plan) }
 
         it { is_expected.to be_a(GitlabSubscription) }
       end
 
       context 'when root has no subscription' do
-        let(:root) { create(:namespace) }
+        let(:root) { create(:group) }
 
         it { is_expected.to be_nil }
       end
     end
 
     context 'when there is no root ancestor' do
-      context 'has a subscription' do
-        let(:namespace) { create(:namespace_with_plan) }
+      context 'for groups' do
+        context 'has a subscription' do
+          let(:group) { create(:group_with_plan) }
 
-        it { is_expected.to be_a(GitlabSubscription) }
+          it { is_expected.to be_a(GitlabSubscription) }
+        end
+
+        context 'it has no subscription' do
+          let(:group) { create(:group) }
+
+          it { is_expected.to be_nil }
+        end
       end
 
-      context 'it has no subscription' do
-        let(:namespace) { create(:namespace) }
+      context 'for personal namespaces' do
+        subject { namespace.closest_gitlab_subscription }
 
-        it { is_expected.to be_nil }
+        context 'has a subscription' do
+          let(:namespace) { create(:namespace_with_plan) }
+
+          it { is_expected.to be_a(GitlabSubscription) }
+        end
+
+        context 'it has no subscription' do
+          let(:namespace) { create(:namespace) }
+
+          it { is_expected.to be_nil }
+        end
       end
     end
   end
 
   describe '#namespace_limit' do
-    let(:namespace) { create(:namespace, parent: parent) }
+    let(:group) { create(:group, parent: parent) }
 
-    subject(:namespace_limit) { namespace.namespace_limit }
+    subject(:namespace_limit) { group.namespace_limit }
 
     context 'when there is a parent namespace' do
-      let_it_be(:parent) { create(:namespace) }
+      let_it_be(:parent) { create(:group) }
 
       context 'with a namespace limit' do
         it 'returns the parent namespace limit' do
@@ -1643,19 +1745,43 @@ RSpec.describe Namespace do
     context 'when there is no parent ancestor' do
       let(:parent) { nil }
 
-      context 'with a namespace limit' do
-        it 'returns the namespace limit' do
-          limit = create(:namespace_limit, namespace: namespace)
+      context 'for personal namespaces' do
+        let(:namespace) { create(:namespace, parent: parent) }
 
-          expect(namespace_limit).to be_persisted
-          expect(namespace_limit).to eq limit
+        subject(:namespace_limit) { namespace.namespace_limit }
+
+        context 'with a namespace limit' do
+          it 'returns the namespace limit' do
+            limit = create(:namespace_limit, namespace: namespace)
+
+            expect(namespace_limit).to be_persisted
+            expect(namespace_limit).to eq limit
+          end
+        end
+
+        context 'with no namespace limit' do
+          it 'builds namespace limit' do
+            expect(namespace_limit).to be_present
+            expect(namespace_limit).not_to be_persisted
+          end
         end
       end
 
-      context 'with no namespace limit' do
-        it 'builds namespace limit' do
-          expect(namespace_limit).to be_present
-          expect(namespace_limit).not_to be_persisted
+      context 'for groups' do
+        context 'with a namespace limit' do
+          it 'returns the namespace limit' do
+            limit = create(:namespace_limit, namespace: group)
+
+            expect(namespace_limit).to be_persisted
+            expect(namespace_limit).to eq limit
+          end
+        end
+
+        context 'with no namespace limit' do
+          it 'builds namespace limit' do
+            expect(namespace_limit).to be_present
+            expect(namespace_limit).not_to be_persisted
+          end
         end
       end
     end

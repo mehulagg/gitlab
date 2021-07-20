@@ -1,0 +1,159 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JiraIssuesListRoot when request succeeds renders issuable-list component with correct props 1`] = `
+Object {
+  "currentPage": 1,
+  "currentTab": "opened",
+  "defaultPageSize": 2,
+  "enableLabelPermalinks": true,
+  "hasNextPage": false,
+  "hasPreviousPage": false,
+  "initialFilterValue": Array [
+    Object {
+      "type": "filtered-search-term",
+      "value": Object {
+        "data": "",
+      },
+    },
+  ],
+  "initialSortBy": "created_desc",
+  "isManualOrdering": false,
+  "issuableSymbol": "#",
+  "issuables": Array [
+    Object {
+      "assignees": Array [
+        Object {
+          "avatarUrl": null,
+          "name": "Kushal Pandya",
+          "webUrl": "https://gitlab-jira.atlassian.net/people/1920938475",
+        },
+      ],
+      "author": Object {
+        "avatarUrl": null,
+        "name": "jhope",
+        "webUrl": "https://gitlab-jira.atlassian.net/people/5e32f803e127810e82875bc1",
+      },
+      "closedAt": null,
+      "createdAt": "2020-03-19T14:31:51.281Z",
+      "externalTracker": "jira",
+      "gitlabWebUrl": "",
+      "id": 31596,
+      "labels": Array [
+        Object {
+          "color": "#0052CC",
+          "name": "backend",
+          "textColor": "#FFFFFF",
+          "title": "backend",
+        },
+      ],
+      "projectId": 1,
+      "references": Object {
+        "relative": "IG-31596",
+      },
+      "status": "Selected for Development",
+      "title": "Eius fuga voluptates.",
+      "updatedAt": "2020-10-20T07:01:45.865Z",
+      "webUrl": "https://gitlab-jira.atlassian.net/browse/IG-31596",
+    },
+    Object {
+      "assignees": Array [],
+      "author": Object {
+        "avatarUrl": null,
+        "name": "Gabe Weaver",
+        "webUrl": "https://gitlab-jira.atlassian.net/people/5e320a31fe03e20c9d1dccde",
+      },
+      "closedAt": null,
+      "createdAt": "2020-03-19T14:31:50.677Z",
+      "externalTracker": "jira",
+      "gitlabWebUrl": "",
+      "id": 31595,
+      "labels": Array [],
+      "projectId": 1,
+      "references": Object {
+        "relative": "IG-31595",
+      },
+      "status": "Backlog",
+      "title": "Hic sit sint ducimus ea et sint.",
+      "updatedAt": "2020-03-19T14:31:50.677Z",
+      "webUrl": "https://gitlab-jira.atlassian.net/browse/IG-31595",
+    },
+    Object {
+      "assignees": Array [],
+      "author": Object {
+        "avatarUrl": null,
+        "name": "Gabe Weaver",
+        "webUrl": "https://gitlab-jira.atlassian.net/people/5e320a31fe03e20c9d1dccde",
+      },
+      "closedAt": null,
+      "createdAt": "2020-03-19T14:31:50.012Z",
+      "externalTracker": "jira",
+      "gitlabWebUrl": "",
+      "id": 31594,
+      "labels": Array [],
+      "projectId": 1,
+      "references": Object {
+        "relative": "IG-31594",
+      },
+      "status": "Backlog",
+      "title": "Alias ut modi est labore.",
+      "updatedAt": "2020-03-19T14:31:50.012Z",
+      "webUrl": "https://gitlab-jira.atlassian.net/browse/IG-31594",
+    },
+  ],
+  "issuablesLoading": false,
+  "labelFilterParam": "labels",
+  "namespace": "gitlab-org/gitlab-test",
+  "nextPage": 2,
+  "previousPage": 0,
+  "recentSearchesStorageKey": "jira_issues",
+  "searchInputPlaceholder": "Search Jira issues",
+  "searchTokens": Array [],
+  "showBulkEditSidebar": false,
+  "showPaginationControls": true,
+  "sortOptions": Array [
+    Object {
+      "id": 1,
+      "sortDirection": Object {
+        "ascending": "created_asc",
+        "descending": "created_desc",
+      },
+      "title": "Created date",
+    },
+    Object {
+      "id": 2,
+      "sortDirection": Object {
+        "ascending": "updated_asc",
+        "descending": "updated_desc",
+      },
+      "title": "Last updated",
+    },
+  ],
+  "tabCounts": null,
+  "tabs": Array [
+    Object {
+      "id": "state-opened",
+      "name": "opened",
+      "title": "Open",
+      "titleTooltip": "Filter by issues that are currently opened.",
+    },
+    Object {
+      "id": "state-closed",
+      "name": "closed",
+      "title": "Closed",
+      "titleTooltip": "Filter by issues that are currently closed.",
+    },
+    Object {
+      "id": "state-all",
+      "name": "all",
+      "title": "All",
+      "titleTooltip": "Show all issues.",
+    },
+  ],
+  "totalItems": 3,
+  "urlParams": Object {
+    "labels[]": undefined,
+    "search": undefined,
+  },
+  "useKeysetPagination": false,
+}
+`;

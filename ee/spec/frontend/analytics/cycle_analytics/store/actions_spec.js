@@ -1,16 +1,20 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { OVERVIEW_STAGE_CONFIG } from 'ee/analytics/cycle_analytics/constants';
 import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import {
+  createdAfter,
+  createdBefore,
+  currentGroup,
+  selectedProjects,
+} from 'jest/cycle_analytics/mock_data';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
-  currentGroup,
   allowedStages as stages,
-  startDate,
-  endDate,
   customizableStagesAndEvents,
   endpoints,
   valueStreams,
@@ -44,28 +48,19 @@ const mockGetters = {
   currentValueStreamId: () => selectedValueStream.id,
 };
 
-const stageEndpoint = ({ stageId }) =>
-  `/groups/${currentGroup.fullPath}/-/analytics/value_stream_analytics/value_streams/${selectedValueStream.id}/stages/${stageId}`;
-
 jest.mock('~/flash');
 
 describe('Value Stream Analytics actions', () => {
   let state;
+  let stateWithOverview = null;
   let mock;
-
-  const shouldFlashAMessage = (msg, type = null) => {
-    const args = type ? [msg, type] : [msg];
-    expect(createFlash).toHaveBeenCalledWith(...args);
-  };
 
   beforeEach(() => {
     state = {
-      startDate,
-      endDate,
+      createdAfter,
+      createdBefore,
       stages: [],
-      featureFlags: {
-        hasDurationChart: true,
-      },
+      featureFlags: {},
       activeStages,
       selectedValueStream,
       ...mockGetters,
@@ -79,10 +74,8 @@ describe('Value Stream Analytics actions', () => {
   });
 
   it.each`
-    action                   | type                       | stateKey                | payload
-    ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ hasDurationChart: true }}
-    ${'setSelectedProjects'} | ${'SET_SELECTED_PROJECTS'} | ${'selectedProjectIds'} | ${[10, 20, 30, 40]}
-    ${'setSelectedStage'}    | ${'SET_SELECTED_STAGE'}    | ${'selectedStage'}      | ${{ id: 'someStageId' }}
+    action               | type                   | stateKey          | payload
+    ${'setFeatureFlags'} | ${'SET_FEATURE_FLAGS'} | ${'featureFlags'} | ${{ someFeatureFlag: true }}
   `('$action should set $stateKey with $payload and type $type', ({ action, type, payload }) => {
     return testAction(
       actions[action],
@@ -96,6 +89,53 @@ describe('Value Stream Analytics actions', () => {
       ],
       [],
     );
+  });
+
+  describe('setSelectedProjects', () => {
+    describe('with `overview` stage selected', () => {
+      beforeEach(() => {
+        stateWithOverview = { ...state, isOverviewStageSelected: () => true };
+      });
+
+      it('will dispatch the "fetchCycleAnalyticsData" action', () => {
+        return testAction(
+          actions.setSelectedProjects,
+          selectedProjects,
+          stateWithOverview,
+          [{ type: types.SET_SELECTED_PROJECTS, payload: selectedProjects }],
+          [{ type: 'fetchCycleAnalyticsData' }],
+        );
+      });
+    });
+
+    describe('with non overview stage selected', () => {
+      beforeEach(() => {
+        state = { ...state, selectedStage };
+      });
+
+      it('will dispatch the "fetchStageData" and "fetchCycleAnalyticsData" actions', () => {
+        return testAction(
+          actions.setSelectedProjects,
+          selectedProjects,
+          state,
+          [{ type: types.SET_SELECTED_PROJECTS, payload: selectedProjects }],
+          [
+            { type: 'fetchStageData', payload: selectedStage.id },
+            { type: 'fetchCycleAnalyticsData' },
+          ],
+        );
+      });
+    });
+  });
+
+  describe('setSelectedStage', () => {
+    const data = { id: 'someStageId' };
+
+    it(`dispatches the ${types.SET_SELECTED_STAGE} and ${types.SET_PAGINATION} actions`, () => {
+      return testAction(actions.setSelectedStage, data, { ...state, selectedValueStream: {} }, [
+        { type: types.SET_SELECTED_STAGE, payload: data },
+      ]);
+    });
   });
 
   describe('setSelectedValueStream', () => {
@@ -133,41 +173,63 @@ describe('Value Stream Analytics actions', () => {
     });
   });
 
-  describe('setDateRange', () => {
-    const payload = { startDate, endDate };
-
-    it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(
-        actions.setDateRange,
-        payload,
-        state,
-        [{ type: types.SET_DATE_RANGE, payload: { startDate, endDate } }],
-        [{ type: 'fetchCycleAnalyticsData' }],
-      );
-    });
-  });
-
   describe('fetchStageData', () => {
+    const headers = {
+      'X-Next-Page': 2,
+      'X-Page': 1,
+    };
+
     beforeEach(() => {
       state = { ...state, currentGroup };
       mock = new MockAdapter(axios);
-      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, { events: [] });
+      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, stageData, headers);
     });
 
-    it('dispatches receiveStageDataSuccess with received data on success', () => {
+    it(`commits ${types.RECEIVE_STAGE_DATA_SUCCESS} with received data and headers on success`, () => {
       return testAction(
         actions.fetchStageData,
         selectedStageSlug,
         state,
-        [],
         [
-          { type: 'requestStageData' },
           {
-            type: 'receiveStageDataSuccess',
-            payload: { events: [] },
+            type: types.RECEIVE_STAGE_DATA_SUCCESS,
+            payload: stageData,
+          },
+          {
+            type: types.SET_PAGINATION,
+            payload: { page: headers['X-Page'], hasNextPage: true },
           },
         ],
+        [{ type: 'requestStageData' }],
       );
+    });
+
+    describe('without a next page', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios);
+        mock
+          .onGet(endpoints.stageData)
+          .reply(httpStatusCodes.OK, { events: [] }, { ...headers, 'X-Next-Page': null });
+      });
+
+      it('sets hasNextPage to false', () => {
+        return testAction(
+          actions.fetchStageData,
+          selectedStageSlug,
+          state,
+          [
+            {
+              type: types.RECEIVE_STAGE_DATA_SUCCESS,
+              payload: { events: [] },
+            },
+            {
+              type: types.SET_PAGINATION,
+              payload: { page: headers['X-Page'], hasNextPage: false },
+            },
+          ],
+          [{ type: 'requestStageData' }],
+        );
+      });
     });
 
     describe('with a failing request', () => {
@@ -194,18 +256,6 @@ describe('Value Stream Analytics actions', () => {
         );
       });
     });
-
-    describe('receiveStageDataSuccess', () => {
-      it(`commits the ${types.RECEIVE_STAGE_DATA_SUCCESS} mutation`, () => {
-        return testAction(
-          actions.receiveStageDataSuccess,
-          { ...stageData },
-          state,
-          [{ type: types.RECEIVE_STAGE_DATA_SUCCESS, payload: { events: [] } }],
-          [],
-        );
-      });
-    });
   });
 
   describe('receiveStageDataError', () => {
@@ -228,7 +278,9 @@ describe('Value Stream Analytics actions', () => {
 
     it('will flash an error message', () => {
       actions.receiveStageDataError({ commit: () => {} }, {});
-      shouldFlashAMessage('There was an error fetching data for the selected stage');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching data for the selected stage',
+      });
     });
   });
 
@@ -255,7 +307,7 @@ describe('Value Stream Analytics actions', () => {
     }
 
     beforeEach(() => {
-      state = { ...state, currentGroup, startDate, endDate };
+      state = { ...state, currentGroup, createdAfter, createdBefore };
     });
 
     it(`dispatches actions for required value stream analytics analytics data`, () => {
@@ -295,7 +347,9 @@ describe('Value Stream Analytics actions', () => {
           commit: () => {},
         })
         .then(() => {
-          shouldFlashAMessage('There was an error fetching median data for stages');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching median data for stages',
+          });
         });
     });
 
@@ -319,15 +373,15 @@ describe('Value Stream Analytics actions', () => {
           commit: () => {},
         })
         .then(() => {
-          shouldFlashAMessage('There was an error fetching value stream analytics stages.');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching value stream analytics stages.',
+          });
         });
     });
   });
 
   describe('receiveCycleAnalyticsDataError', () => {
-    beforeEach(() => {});
-
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a 403 response`, () => {
+    it(`commits the ${types.RECEIVE_VALUE_STREAM_DATA_ERROR} mutation on a 403 response`, () => {
       const response = { status: 403 };
       return testAction(
         actions.receiveCycleAnalyticsDataError,
@@ -335,7 +389,7 @@ describe('Value Stream Analytics actions', () => {
         state,
         [
           {
-            type: types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR,
+            type: types.RECEIVE_VALUE_STREAM_DATA_ERROR,
             payload: response.status,
           },
         ],
@@ -343,7 +397,7 @@ describe('Value Stream Analytics actions', () => {
       );
     });
 
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a non 403 error response`, () => {
+    it(`commits the ${types.RECEIVE_VALUE_STREAM_DATA_ERROR} mutation on a non 403 error response`, () => {
       const response = { status: 500 };
       return testAction(
         actions.receiveCycleAnalyticsDataError,
@@ -351,7 +405,7 @@ describe('Value Stream Analytics actions', () => {
         state,
         [
           {
-            type: types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR,
+            type: types.RECEIVE_VALUE_STREAM_DATA_ERROR,
             payload: response.status,
           },
         ],
@@ -368,14 +422,12 @@ describe('Value Stream Analytics actions', () => {
         { response },
       );
 
-      shouldFlashAMessage(flashErrorMessage);
+      expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
     });
   });
 
   describe('receiveGroupStagesSuccess', () => {
-    beforeEach(() => {});
-
-    it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage'`, () => {
+    it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation'`, () => {
       return testAction(
         actions.receiveGroupStagesSuccess,
         { ...customizableStagesAndEvents.stages },
@@ -386,274 +438,20 @@ describe('Value Stream Analytics actions', () => {
             payload: { ...customizableStagesAndEvents.stages },
           },
         ],
-        [{ type: 'setDefaultSelectedStage' }],
+        [],
       );
     });
   });
 
   describe('setDefaultSelectedStage', () => {
-    it("dispatches the 'fetchStageData' action", () => {
+    it("dispatches the 'setSelectedStage' with the overview stage", () => {
       return testAction(
         actions.setDefaultSelectedStage,
         null,
         state,
         [],
-        [
-          { type: 'setSelectedStage', payload: selectedStage },
-          { type: 'fetchStageData', payload: selectedStageSlug },
-        ],
+        [{ type: 'setSelectedStage', payload: OVERVIEW_STAGE_CONFIG }],
       );
-    });
-
-    it.each`
-      data
-      ${[]}
-      ${null}
-    `('with $data will flash an error', ({ data }) => {
-      actions.setDefaultSelectedStage({ getters: { activeStages: data }, dispatch: () => {} }, {});
-      shouldFlashAMessage(flashErrorMessage);
-    });
-
-    it('will select the first active stage', () => {
-      return testAction(
-        actions.setDefaultSelectedStage,
-        null,
-        state,
-        [],
-        [
-          { type: 'setSelectedStage', payload: stages[1] },
-          { type: 'fetchStageData', payload: stages[1].slug },
-        ],
-      );
-    });
-  });
-
-  describe('updateStage', () => {
-    const stageId = 'cool-stage';
-    const payload = { hidden: true };
-
-    beforeEach(() => {
-      mock.onPut(stageEndpoint({ stageId }), payload).replyOnce(httpStatusCodes.OK, payload);
-    });
-
-    it('dispatches receiveUpdateStageSuccess and customStages/setSavingCustomStage', () => {
-      return testAction(
-        actions.updateStage,
-        {
-          id: stageId,
-          ...payload,
-        },
-        state,
-        [],
-        [
-          { type: 'requestUpdateStage' },
-          { type: 'customStages/setSavingCustomStage' },
-          {
-            type: 'receiveUpdateStageSuccess',
-            payload,
-          },
-        ],
-      );
-    });
-
-    describe('with a failed request', () => {
-      beforeEach(() => {
-        mock = new MockAdapter(axios);
-        mock.onPut(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.NOT_FOUND);
-      });
-
-      it('dispatches receiveUpdateStageError', () => {
-        const data = {
-          id: stageId,
-          name: 'issue',
-          ...payload,
-        };
-        return testAction(
-          actions.updateStage,
-          data,
-          state,
-          [],
-          [
-            { type: 'requestUpdateStage' },
-            { type: 'customStages/setSavingCustomStage' },
-            {
-              type: 'receiveUpdateStageError',
-              payload: {
-                status: httpStatusCodes.NOT_FOUND,
-                data,
-              },
-            },
-          ],
-        );
-      });
-
-      it('flashes an error if the stage name already exists', () => {
-        return actions
-          .receiveUpdateStageError(
-            {
-              commit: () => {},
-              dispatch: () => Promise.resolve(),
-              state,
-            },
-            {
-              status: httpStatusCodes.UNPROCESSABLE_ENTITY,
-              responseData: {
-                errors: { name: ['is reserved'] },
-              },
-              data: {
-                name: stageId,
-              },
-            },
-          )
-          .then(() => {
-            shouldFlashAMessage(`'${stageId}' stage already exists`);
-          });
-      });
-
-      it('flashes an error message', () => {
-        return actions
-          .receiveUpdateStageError(
-            {
-              dispatch: () => Promise.resolve(),
-              commit: () => {},
-              state,
-            },
-            { status: httpStatusCodes.BAD_REQUEST },
-          )
-          .then(() => {
-            shouldFlashAMessage('There was a problem saving your custom stage, please try again');
-          });
-      });
-    });
-
-    describe('receiveUpdateStageSuccess', () => {
-      const response = {
-        title: 'NEW - COOL',
-      };
-
-      it('will dispatch fetchGroupStagesAndEvents', () =>
-        testAction(
-          actions.receiveUpdateStageSuccess,
-          response,
-          state,
-          [{ type: types.RECEIVE_UPDATE_STAGE_SUCCESS }],
-          [
-            { type: 'fetchGroupStagesAndEvents' },
-            { type: 'customStages/showEditForm', payload: response },
-          ],
-        ));
-
-      it('will flash a success message', () => {
-        return actions
-          .receiveUpdateStageSuccess(
-            {
-              dispatch: () => {},
-              commit: () => {},
-            },
-            response,
-          )
-          .then(() => {
-            shouldFlashAMessage('Stage data updated', 'notice');
-          });
-      });
-
-      describe('with an error', () => {
-        it('will flash an error message', () =>
-          actions
-            .receiveUpdateStageSuccess(
-              {
-                dispatch: () => Promise.reject(),
-                commit: () => {},
-              },
-              response,
-            )
-            .then(() => {
-              shouldFlashAMessage('There was a problem refreshing the data, please try again');
-            }));
-      });
-    });
-  });
-
-  describe('removeStage', () => {
-    const stageId = 'cool-stage';
-
-    beforeEach(() => {
-      mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
-    });
-
-    it('dispatches receiveRemoveStageSuccess with put request response data', () => {
-      return testAction(
-        actions.removeStage,
-        stageId,
-        state,
-        [],
-        [
-          { type: 'requestRemoveStage' },
-          {
-            type: 'receiveRemoveStageSuccess',
-          },
-        ],
-      );
-    });
-
-    describe('with a failed request', () => {
-      beforeEach(() => {
-        mock = new MockAdapter(axios);
-        mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.NOT_FOUND);
-      });
-
-      it('dispatches receiveRemoveStageError', () => {
-        return testAction(
-          actions.removeStage,
-          stageId,
-          state,
-          [],
-          [
-            { type: 'requestRemoveStage' },
-            {
-              type: 'receiveRemoveStageError',
-              payload: error,
-            },
-          ],
-        );
-      });
-
-      it('flashes an error message', () => {
-        actions.receiveRemoveStageError({ commit: () => {}, state }, {});
-        shouldFlashAMessage('There was an error removing your custom stage, please try again');
-      });
-    });
-  });
-
-  describe('receiveRemoveStageSuccess', () => {
-    const stageId = 'cool-stage';
-
-    beforeEach(() => {
-      mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
-      state = { currentGroup };
-    });
-
-    it('dispatches fetchCycleAnalyticsData', () => {
-      return testAction(
-        actions.receiveRemoveStageSuccess,
-        stageId,
-        state,
-        [{ type: 'RECEIVE_REMOVE_STAGE_RESPONSE' }],
-        [{ type: 'fetchCycleAnalyticsData' }],
-      );
-    });
-
-    it('flashes a success message', () => {
-      return actions
-        .receiveRemoveStageSuccess(
-          {
-            dispatch: () => Promise.resolve(),
-            commit: () => {},
-            state,
-          },
-          {},
-        )
-        .then(() => shouldFlashAMessage('Stage removed', 'notice'));
     });
   });
 
@@ -753,7 +551,37 @@ describe('Value Stream Analytics actions', () => {
 
     it('will flash an error message', () => {
       actions.receiveStageMedianValuesError({ commit: () => {} });
-      shouldFlashAMessage('There was an error fetching median data for stages');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching median data for stages',
+      });
+    });
+  });
+
+  describe('fetchStageCountValues', () => {
+    const fetchCountResponse = activeStages.map(({ slug: id }) => ({ events: [], id }));
+
+    beforeEach(() => {
+      state = {
+        ...state,
+        stages,
+        currentGroup,
+        featureFlags: state.featureFlags,
+      };
+      mock = new MockAdapter(axios);
+      mock.onGet(endpoints.stageCount).reply(httpStatusCodes.OK, { events: [] });
+    });
+
+    it('dispatches receiveStageCountValuesSuccess with received data on success', () => {
+      return testAction(
+        actions.fetchStageCountValues,
+        null,
+        state,
+        [
+          { type: types.REQUEST_STAGE_COUNTS },
+          { type: types.RECEIVE_STAGE_COUNTS_SUCCESS, payload: fetchCountResponse },
+        ],
+        [],
+      );
     });
   });
 
@@ -789,9 +617,9 @@ describe('Value Stream Analytics actions', () => {
     });
 
     describe('with only group in initialData', () => {
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+      it('commits "INITIALIZE_VSA"', async () => {
         await actions.initializeCycleAnalytics(store, { group });
-        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', { group });
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', { group });
       });
 
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
@@ -818,96 +646,56 @@ describe('Value Stream Analytics actions', () => {
         expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
       });
 
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+      describe('with a selected stage', () => {
+        it('dispatches "setSelectedStage" and "fetchStageData"', async () => {
+          const stage = { id: 2, title: 'plan' };
+          await actions.initializeCycleAnalytics(store, {
+            ...initialData,
+            stage,
+          });
+          expect(mockDispatch).toHaveBeenCalledWith('setSelectedStage', stage);
+          expect(mockDispatch).toHaveBeenCalledWith('fetchStageData', stage.id);
+        });
+      });
+
+      describe('with pagination parameters', () => {
+        it('dispatches "setSelectedStage" and "fetchStageData"', async () => {
+          const stage = { id: 2, title: 'plan' };
+          const pagination = { sort: 'end_event', direction: 'desc', page: 1337 };
+          const payload = { ...initialData, stage, pagination };
+          await actions.initializeCycleAnalytics(store, payload);
+          expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', payload);
+        });
+      });
+
+      describe('without a selected stage', () => {
+        it('dispatches "setDefaultSelectedStage"', async () => {
+          await actions.initializeCycleAnalytics(store, {
+            ...initialData,
+            stage: null,
+          });
+          expect(mockDispatch).not.toHaveBeenCalledWith('setSelectedStage');
+          expect(mockDispatch).not.toHaveBeenCalledWith('fetchStageData');
+          expect(mockDispatch).toHaveBeenCalledWith('setDefaultSelectedStage');
+        });
+      });
+
+      it('commits "INITIALIZE_VSA"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
-        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', initialData);
       });
     });
   });
 
   describe('initializeCycleAnalyticsSuccess', () => {
-    it(`commits the ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS} mutation`, () =>
+    it(`commits the ${types.INITIALIZE_VALUE_STREAM_SUCCESS} mutation`, () =>
       testAction(
         actions.initializeCycleAnalyticsSuccess,
         null,
         state,
-        [{ type: types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS }],
+        [{ type: types.INITIALIZE_VALUE_STREAM_SUCCESS }],
         [],
       ));
-  });
-
-  describe('reorderStage', () => {
-    const stageId = 'cool-stage';
-    const payload = { id: stageId, move_after_id: '2', move_before_id: '8' };
-
-    describe('with no errors', () => {
-      beforeEach(() => {
-        mock.onPut(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
-      });
-
-      it(`dispatches the ${types.REQUEST_REORDER_STAGE} and ${types.RECEIVE_REORDER_STAGE_SUCCESS} actions`, () => {
-        return testAction(
-          actions.reorderStage,
-          payload,
-          state,
-          [],
-          [{ type: 'requestReorderStage' }, { type: 'receiveReorderStageSuccess' }],
-        );
-      });
-    });
-
-    describe('with errors', () => {
-      beforeEach(() => {
-        mock.onPut(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.NOT_FOUND);
-      });
-
-      it(`dispatches the ${types.REQUEST_REORDER_STAGE} and ${types.RECEIVE_REORDER_STAGE_ERROR} actions `, () => {
-        return testAction(
-          actions.reorderStage,
-          payload,
-          state,
-          [],
-          [
-            { type: 'requestReorderStage' },
-            { type: 'receiveReorderStageError', payload: { status: httpStatusCodes.NOT_FOUND } },
-          ],
-        );
-      });
-    });
-  });
-
-  describe('receiveReorderStageError', () => {
-    beforeEach(() => {});
-
-    it(`commits the ${types.RECEIVE_REORDER_STAGE_ERROR} mutation and flashes an error`, () => {
-      return testAction(
-        actions.receiveReorderStageError,
-        null,
-        state,
-        [
-          {
-            type: types.RECEIVE_REORDER_STAGE_ERROR,
-          },
-        ],
-        [],
-      ).then(() => {
-        shouldFlashAMessage(
-          'There was an error updating the stage order. Please try reloading the page.',
-        );
-      });
-    });
-  });
-
-  describe('receiveReorderStageSuccess', () => {
-    it(`commits the ${types.RECEIVE_REORDER_STAGE_SUCCESS} mutation`, () => {
-      return testAction(
-        actions.receiveReorderStageSuccess,
-        null,
-        state,
-        [{ type: types.RECEIVE_REORDER_STAGE_SUCCESS }],
-        [],
-      );
-    });
   });
 
   describe('createValueStream', () => {
@@ -1143,7 +931,7 @@ describe('Value Stream Analytics actions', () => {
     });
 
     describe('receiveValueStreamsSuccess', () => {
-      it(`with a selectedValueStream in state commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'fetchValueStreamData'`, () => {
+      it(`with a selectedValueStream in state commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'fetchValueStreamData' and 'fetchStageCountValues'`, () => {
         return testAction(
           actions.receiveValueStreamsSuccess,
           valueStreams,
@@ -1154,11 +942,11 @@ describe('Value Stream Analytics actions', () => {
               payload: valueStreams,
             },
           ],
-          [{ type: 'fetchValueStreamData' }],
+          [{ type: 'fetchValueStreamData' }, { type: 'fetchStageCountValues' }],
         );
       });
 
-      it(`commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'setSelectedValueStream'`, () => {
+      it(`commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'setSelectedValueStream' and 'fetchStageCountValues'`, () => {
         return testAction(
           actions.receiveValueStreamsSuccess,
           valueStreams,
@@ -1172,7 +960,10 @@ describe('Value Stream Analytics actions', () => {
               payload: valueStreams,
             },
           ],
-          [{ type: 'setSelectedValueStream', payload: selectedValueStream }],
+          [
+            { type: 'setSelectedValueStream', payload: selectedValueStream },
+            { type: 'fetchStageCountValues' },
+          ],
         );
       });
     });
@@ -1207,9 +998,32 @@ describe('Value Stream Analytics actions', () => {
     });
   });
 
-  describe('setFilters', () => {
+  describe.each`
+    targetAction            | payload                            | mutations
+    ${actions.setDateRange} | ${{ createdAfter, createdBefore }} | ${[{ type: 'SET_DATE_RANGE', payload: { createdAfter, createdBefore } }]}
+    ${actions.setFilters}   | ${''}                              | ${[]}
+  `('$action', ({ targetAction, payload, mutations }) => {
+    beforeEach(() => {
+      stateWithOverview = { ...state, isOverviewStageSelected: () => true };
+    });
+
     it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(actions.setFilters, null, state, [], [{ type: 'fetchCycleAnalyticsData' }]);
+      return testAction(targetAction, payload, stateWithOverview, mutations, [
+        { type: 'fetchCycleAnalyticsData' },
+      ]);
+    });
+
+    describe('with a stage selected', () => {
+      beforeEach(() => {
+        stateWithOverview = { ...state, selectedStage };
+      });
+
+      it('dispatches the fetchStageData action', () => {
+        return testAction(targetAction, payload, stateWithOverview, mutations, [
+          { type: 'fetchStageData', payload: selectedStage.id },
+          { type: 'fetchCycleAnalyticsData' },
+        ]);
+      });
     });
   });
 });

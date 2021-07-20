@@ -3,6 +3,8 @@
 require_relative '../qa'
 require 'rspec/retry'
 require 'rspec-parameterized'
+require 'active_support/core_ext/hash'
+require 'active_support/core_ext/object/blank'
 
 if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
   require 'knapsack'
@@ -10,8 +12,8 @@ if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
 end
 
 QA::Runtime::Browser.configure!
-
-QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes) if QA::Runtime::Env.runtime_scenario_attributes
+QA::Runtime::AllureReport.configure!
+QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes)
 
 Dir[::File.join(__dir__, "support/helpers/*.rb")].sort.each { |f| require f }
 Dir[::File.join(__dir__, "support/matchers/*.rb")].sort.each { |f| require f }
@@ -22,6 +24,7 @@ RSpec.configure do |config|
   config.include ::Matchers
 
   QA::Specs::Helpers::Quarantine.configure_rspec
+  QA::Specs::Helpers::ContextSelector.configure_rspec
 
   config.before do |example|
     QA::Runtime::Logger.debug("\nStarting test: #{example.full_description}\n")

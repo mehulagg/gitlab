@@ -4,11 +4,11 @@ module EE
   module GroupsHelper
     extend ::Gitlab::Utils::Override
 
-    def group_epics_count(state:)
-      EpicsFinder
-        .new(current_user, group_id: @group.id, state: state)
-        .execute(skip_visibility_check: true)
-        .count
+    override :issuables_count_service_class
+    def issuables_count_service_class(type)
+      return super unless type == :epics
+
+      ::Groups::EpicsCountService
     end
 
     def group_nav_link_paths
@@ -28,9 +28,9 @@ module EE
     end
 
     def size_limit_message_for_group(group)
-      show_lfs = group.lfs_enabled? ? 'and their respective LFS files' : ''
+      show_lfs = group.lfs_enabled? ? 'including LFS files' : ''
 
-      "Repositories within this group #{show_lfs} will be restricted to this maximum size. Can be overridden inside each project. 0 for unlimited. Leave empty to inherit the global value."
+      "Max size for repositories within this group #{show_lfs}. Can be overridden inside each project. For no limit, enter 0. To inherit the global value, leave blank."
     end
 
     override :group_packages_nav_link_paths
@@ -57,7 +57,7 @@ module EE
 
     override :remove_group_message
     def remove_group_message(group)
-      return super unless group.feature_available?(:adjourned_deletion_for_projects_and_groups)
+      return super unless group.licensed_feature_available?(:adjourned_deletion_for_projects_and_groups)
 
       date = permanent_deletion_date(Time.now.utc)
 
@@ -76,7 +76,7 @@ module EE
     def show_discover_group_security?(group)
       !!current_user &&
         ::Gitlab.com? &&
-        !@group.feature_available?(:security_dashboard) &&
+        !@group.licensed_feature_available?(:security_dashboard) &&
         can?(current_user, :admin_group, @group)
     end
 
@@ -109,7 +109,7 @@ module EE
     end
 
     def show_delayed_project_removal_setting?(group)
-      group.feature_available?(:adjourned_deletion_for_projects_and_groups)
+      group.licensed_feature_available?(:adjourned_deletion_for_projects_and_groups)
     end
 
     private
@@ -131,7 +131,7 @@ module EE
         links << :epics
       end
 
-      if @group.feature_available?(:issues_analytics)
+      if @group.licensed_feature_available?(:issues_analytics)
         links << :analytics
       end
 
@@ -139,16 +139,24 @@ module EE
         links << :group_insights
       end
 
-      if @group.feature_available?(:productivity_analytics) && can?(current_user, :view_productivity_analytics, @group)
+      if @group.licensed_feature_available?(:productivity_analytics) && can?(current_user, :view_productivity_analytics, @group)
         links << :productivity_analytics
       end
 
-      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
-        links << :iterations
+      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.licensed_feature_available?(:iterations)
+        if ::Feature.enabled?(:iteration_cadences, @group, default_enabled: :yaml) && can?(current_user, :read_iteration_cadence, @group)
+          links << :iteration_cadences
+        elsif can?(current_user, :read_iteration, @group)
+          links << :iterations
+        end
       end
 
-      if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
+      if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.licensed_feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
         links << :group_ci_cd_analytics
+      end
+
+      if can?(current_user, :view_group_devops_adoption, @group)
+        links << :group_devops_adoption
       end
 
       links

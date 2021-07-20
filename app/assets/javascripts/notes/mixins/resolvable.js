@@ -1,24 +1,11 @@
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
-  mixins: [glFeatureFlagsMixin()],
   computed: {
     discussionResolved() {
       if (this.discussion) {
-        const { notes, resolved } = this.discussion;
-
-        if (this.glFeatures.removeResolveNote) {
-          return Boolean(resolved);
-        }
-
-        if (notes) {
-          // Decide resolved state using store. Only valid for discussions.
-          return notes.filter((note) => !note.system).every((note) => note.resolved);
-        }
-
-        return resolved;
+        return Boolean(this.discussion.resolved);
       }
 
       return this.note.resolved;
@@ -47,7 +34,7 @@ export default {
       let endpoint =
         discussion && this.discussion ? this.discussion.resolve_path : `${this.note.path}/resolve`;
 
-      if (this.glFeatures.removeResolveNote && this.discussionResolvePath) {
+      if (this.discussionResolvePath) {
         endpoint = this.discussionResolvePath;
       }
 
@@ -59,7 +46,10 @@ export default {
           this.isResolving = false;
 
           const msg = __('Something went wrong while resolving this discussion. Please try again.');
-          Flash(msg, 'alert', this.$el);
+          createFlash({
+            message: msg,
+            parent: this.$el,
+          });
         });
     },
   },

@@ -1,23 +1,21 @@
 <script>
 import filesQuery from 'shared_queries/repository/files.query.graphql';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '../../locale';
+import { TREE_PAGE_SIZE, TREE_INITIAL_FETCH_COUNT, TREE_PAGE_LIMIT } from '../constants';
 import getRefMixin from '../mixins/get_ref';
 import projectPathQuery from '../queries/project_path.query.graphql';
 import { readmeFile } from '../utils/readme';
 import FilePreview from './preview/index.vue';
 import FileTable from './table/index.vue';
 
-const LIMIT = 1000;
-const PAGE_SIZE = 100;
-export const INITIAL_FETCH_COUNT = LIMIT / PAGE_SIZE;
-
 export default {
   components: {
     FileTable,
     FilePreview,
   },
-  mixins: [getRefMixin],
+  mixins: [getRefMixin, glFeatureFlagMixin()],
   apollo: {
     projectPath: {
       query: projectPathQuery,
@@ -39,6 +37,7 @@ export default {
     return {
       projectPath: '',
       nextPageCursor: '',
+      pagesLoaded: 1,
       entries: {
         trees: [],
         submodules: [],
@@ -47,16 +46,28 @@ export default {
       isLoadingFiles: false,
       isOverLimit: false,
       clickedShowMore: false,
-      pageSize: PAGE_SIZE,
       fetchCounter: 0,
     };
   },
   computed: {
+    pageSize() {
+      // we want to exponentially increase the page size to reduce the load on the frontend
+      const exponentialSize = (TREE_PAGE_SIZE / TREE_INITIAL_FETCH_COUNT) * (this.fetchCounter + 1);
+      return exponentialSize < TREE_PAGE_SIZE && this.glFeatures.increasePageSizeExponentially
+        ? exponentialSize
+        : TREE_PAGE_SIZE;
+    },
+    totalEntries() {
+      return Object.values(this.entries).flat().length;
+    },
     readme() {
       return readmeFile(this.entries.blobs);
     },
+    pageLimitReached() {
+      return this.totalEntries / this.pagesLoaded >= TREE_PAGE_LIMIT;
+    },
     hasShowMore() {
-      return !this.clickedShowMore && this.fetchCounter === INITIAL_FETCH_COUNT;
+      return !this.clickedShowMore && this.pageLimitReached;
     },
   },
 
@@ -107,14 +118,16 @@ export default {
           if (pageInfo?.hasNextPage) {
             this.nextPageCursor = pageInfo.endCursor;
             this.fetchCounter += 1;
-            if (this.fetchCounter < INITIAL_FETCH_COUNT || this.clickedShowMore) {
+            if (!this.pageLimitReached || this.clickedShowMore) {
               this.fetchFiles();
               this.clickedShowMore = false;
             }
           }
         })
         .catch((error) => {
-          createFlash(__('An error occurred while fetching folder content.'));
+          createFlash({
+            message: __('An error occurred while fetching folder content.'),
+          });
           throw error;
         });
     },
@@ -128,6 +141,7 @@ export default {
     },
     handleShowMore() {
       this.clickedShowMore = true;
+      this.pagesLoaded += 1;
       this.fetchFiles();
     },
   },

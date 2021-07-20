@@ -6,12 +6,12 @@ RSpec.describe ::Packages::Maven::PackageFinder do
   let_it_be(:user)    { create(:user) }
   let_it_be(:group)   { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
-  let_it_be(:package) { create(:maven_package, project: project) }
+  let_it_be_with_refind(:package) { create(:maven_package, project: project) }
 
   let(:param_path) { nil }
-  let(:param_project) { nil }
-  let(:param_group) { nil }
-  let(:finder) { described_class.new(param_path, user, project: param_project, group: param_group) }
+  let(:project_or_group) { nil }
+  let(:param_order_by_package_file) { false }
+  let(:finder) { described_class.new(user, project_or_group, path: param_path, order_by_package_file: param_order_by_package_file) }
 
   before do
     group.add_developer(user)
@@ -34,16 +34,26 @@ RSpec.describe ::Packages::Maven::PackageFinder do
           expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
         end
       end
+
+      context 'with an uninstallable package' do
+        let(:param_path) { package.maven_metadatum.path }
+
+        before do
+          package.update_column(:status, 1)
+        end
+
+        it { expect { subject }.to raise_error(ActiveRecord::RecordNotFound) }
+      end
     end
 
     context 'within the project' do
-      let(:param_project) { project }
+      let(:project_or_group) { project }
 
       it_behaves_like 'handling valid and invalid paths'
     end
 
     context 'within a group' do
-      let(:param_group) { group }
+      let(:project_or_group) { group }
 
       it_behaves_like 'handling valid and invalid paths'
     end
@@ -65,7 +75,7 @@ RSpec.describe ::Packages::Maven::PackageFinder do
       let_it_be(:package2) { create(:maven_package, project: project2, name: package_name, version: nil) }
       let_it_be(:package3) { create(:maven_package, project: project3, name: package_name, version: nil) }
 
-      let(:param_group) { group }
+      let(:project_or_group) { group }
       let(:param_path) { package_name }
 
       before do
@@ -75,7 +85,21 @@ RSpec.describe ::Packages::Maven::PackageFinder do
         create(:package_file, :xml, package: package2)
       end
 
-      it { is_expected.to eq(package2) }
+      context 'without order by package file' do
+        it { is_expected.to eq(package3) }
+      end
+
+      context 'with order by package file' do
+        let(:param_order_by_package_file) { true }
+
+        it { is_expected.to eq(package2) }
+      end
     end
+  end
+
+  it 'uses CTE in the query' do
+    sql = described_class.new(user, group, path: package.maven_metadatum.path).send(:packages).to_sql
+
+    expect(sql).to include('WITH "maven_metadata_by_path" AS')
   end
 end

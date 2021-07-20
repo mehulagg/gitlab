@@ -28,8 +28,6 @@ RSpec.describe 'Epic show', :js do
   let_it_be(:child_issue_a) { create(:epic_issue, epic: epic, issue: public_issue, relative_position: 1) }
 
   before do
-    stub_feature_flags(remove_comment_close_reopen: false)
-
     group.add_developer(user)
     stub_licensed_features(epics: true, subepics: true)
     sign_in(user)
@@ -127,7 +125,7 @@ RSpec.describe 'Epic show', :js do
     it 'shows epic status, date and author in header' do
       page.within('.epic-page-container .detail-page-header-body') do
         expect(find('.issuable-status-box > span')).to have_content('Open')
-        expect(find('.issuable-meta')).to have_content('Opened')
+        expect(find('.issuable-meta')).to have_content('Created')
         expect(find('.issuable-meta .js-user-avatar-link-username')).to have_content('Rick Sanchez')
       end
     end
@@ -167,11 +165,7 @@ RSpec.describe 'Epic show', :js do
           end
         end
 
-        it 'shows comments in the correct order', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225637' do
-          page.within('[data-testid="sort-discussion-filter"]') do
-            expect(find('.js-newest-first')).to have_content('Newest first')
-          end
-
+        it 'shows comments in the correct order' do
           items = all('.timeline-entry .timeline-discussion-body .note-text')
           expect(items[0]).to have_content(notes[1].note)
           expect(items[1]).to have_content(notes[0].note)
@@ -294,15 +288,9 @@ RSpec.describe 'Epic show', :js do
     end
 
     describe 'when open' do
-      let(:open_epic) { create(:epic, group: group) }
-
-      it_behaves_like 'page with comment and close button', 'Close epic' do
-        def setup
-          visit group_epic_path(group, open_epic)
-        end
-      end
-
       context 'when clicking the top `Close epic` button', :aggregate_failures do
+        let(:open_epic) { create(:epic, group: group) }
+
         before do
           visit group_epic_path(group, open_epic)
         end
@@ -311,6 +299,8 @@ RSpec.describe 'Epic show', :js do
       end
 
       context 'when clicking the bottom `Close epic` button', :aggregate_failures do
+        let(:open_epic) { create(:epic, group: group) }
+
         before do
           visit group_epic_path(group, open_epic)
         end
@@ -320,15 +310,9 @@ RSpec.describe 'Epic show', :js do
     end
 
     describe 'when closed' do
-      let(:closed_epic) { create(:epic, group: group, state: 'closed') }
-
-      it_behaves_like 'page with comment and close button', 'Reopen epic' do
-        def setup
-          visit group_epic_path(group, closed_epic)
-        end
-      end
-
       context 'when clicking the top `Reopen epic` button', :aggregate_failures do
+        let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
         before do
           visit group_epic_path(group, closed_epic)
         end
@@ -337,6 +321,8 @@ RSpec.describe 'Epic show', :js do
       end
 
       context 'when clicking the bottom `Reopen epic` button', :aggregate_failures do
+        let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
         before do
           visit group_epic_path(group, closed_epic)
         end

@@ -25,16 +25,22 @@ module Mutations
                  required: true,
                  description: 'The start date and time of the on-call rotation, in the timezone of the on-call schedule.'
 
+        argument :ends_at, Types::IncidentManagement::OncallRotationDateInputType,
+                 required: false,
+                 description: 'The end date and time of the on-call rotation, in the timezone of the on-call schedule.'
+
         argument :rotation_length, Types::IncidentManagement::OncallRotationLengthInputType,
                  required: true,
                  description: 'The rotation length of the on-call rotation.'
 
+        argument :active_period, Types::IncidentManagement::OncallRotationActivePeriodInputType,
+                 required: false,
+                 description: 'The active period of time that the on-call rotation should take place.'
+
         argument :participants,
                  [Types::IncidentManagement::OncallUserInputType],
                  required: true,
-                 description: 'The usernames of users participating in the on-call rotation.'
-
-        MAXIMUM_PARTICIPANTS = 100
+                 description: 'The usernames of users participating in the on-call rotation. A maximum limit of 100 participants applies.'
 
         def resolve(iid:, project_path:, participants:, **args)
           project = Project.find_by_full_path(project_path)
@@ -51,66 +57,13 @@ module Mutations
             schedule,
             project,
             current_user,
-            create_service_params(schedule, participants, args)
+            parsed_params(schedule, participants, args)
           ).execute
 
           response(result)
 
         rescue ActiveRecord::RecordInvalid => e
           raise Gitlab::Graphql::Errors::ArgumentError, e.message
-        end
-
-        private
-
-        def create_service_params(schedule, participants, args)
-          rotation_length = args[:rotation_length][:length]
-          rotation_length_unit = args[:rotation_length][:unit]
-          starts_at = parse_start_time(schedule, args)
-
-          args.slice(:name).merge(
-            length: rotation_length,
-            length_unit: rotation_length_unit,
-            starts_at: starts_at,
-            participants: find_participants(participants)
-          )
-        end
-
-        def parse_start_time(schedule, args)
-          args[:starts_at].asctime.in_time_zone(schedule.timezone)
-        end
-
-        def find_participants(user_array)
-          raise_too_many_users_error if user_array.size > MAXIMUM_PARTICIPANTS
-
-          usernames = user_array.map {|h| h[:username] }
-          raise_duplicate_users_error if usernames.size != usernames.uniq.size
-
-          matched_users = UsersFinder.new(current_user, username: usernames).execute.order_by(:username)
-          raise_user_not_found if matched_users.size != user_array.size
-
-          user_array = user_array.sort_by! { |h| h[:username] }
-
-          user_array.map.with_index { |param, i| param.to_h.merge(user: matched_users[i]) }
-        end
-
-        def raise_project_not_found
-          raise Gitlab::Graphql::Errors::ArgumentError, 'The project could not be found'
-        end
-
-        def raise_schedule_not_found
-          raise Gitlab::Graphql::Errors::ArgumentError, 'The schedule could not be found'
-        end
-
-        def raise_too_many_users_error
-          raise Gitlab::Graphql::Errors::ArgumentError, "A maximum of #{MAXIMUM_PARTICIPANTS} participants can be added"
-        end
-
-        def raise_duplicate_users_error
-          raise Gitlab::Graphql::Errors::ArgumentError, "A duplicate username is included in the participant list"
-        end
-
-        def raise_user_not_found
-          raise Gitlab::Graphql::Errors::ArgumentError, "A provided username couldn't be matched to a user"
         end
       end
     end

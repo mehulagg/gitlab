@@ -1,3 +1,3 @@
-import initTabs from 'ee/admin/dev_ops_report/tabs';
+import initDevopAdoption from 'ee/analytics/devops_report/devops_adoption';
 
-document.addEventListener('DOMContentLoaded', () => initTabs());
+initDevopAdoption();

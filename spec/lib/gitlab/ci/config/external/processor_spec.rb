@@ -8,6 +8,7 @@ RSpec.describe Gitlab::Ci::Config::External::Processor do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:another_project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:sha) { '12345' }
   let(:context_params) { { project: project, sha: sha, user: user } }
   let(:context) { Gitlab::Ci::Config::External::Context.new(**context_params) }
@@ -362,6 +363,41 @@ RSpec.describe Gitlab::Ci::Config::External::Processor do
       end
 
       it 'appends the file to the values' do
+        output = processor.perform
+        expect(output.keys).to match_array([:image, :my_build, :my_test])
+      end
+    end
+
+    context 'when local file path has wildcard' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      let(:values) do
+        { include: 'myfolder/*.yml', image: 'ruby:2.7' }
+      end
+
+      before do
+        allow_next_instance_of(Repository) do |repository|
+          allow(repository).to receive(:search_files_by_wildcard_path).with('myfolder/*.yml', sha) do
+            ['myfolder/file1.yml', 'myfolder/file2.yml']
+          end
+
+          allow(repository).to receive(:blob_data_at).with(sha, 'myfolder/file1.yml') do
+            <<~HEREDOC
+              my_build:
+                script: echo Hello World
+            HEREDOC
+          end
+
+          allow(repository).to receive(:blob_data_at).with(sha, 'myfolder/file2.yml') do
+            <<~HEREDOC
+              my_test:
+                script: echo Hello World
+            HEREDOC
+          end
+        end
+      end
+
+      it 'fetches the matched files' do
         output = processor.perform
         expect(output.keys).to match_array([:image, :my_build, :my_test])
       end

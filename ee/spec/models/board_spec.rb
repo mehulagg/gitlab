@@ -18,10 +18,6 @@ RSpec.describe Board do
     it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
   end
 
-  describe 'validations' do
-    it { is_expected.to validate_presence_of(:name) }
-  end
-
   context 'validations' do
     context 'when group is present' do
       subject { described_class.new(group: create(:group)) }

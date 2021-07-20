@@ -134,7 +134,9 @@ RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
     end
 
     it 'does not duplicate same vulnerability for dependency' do
-      vulnerabilities = [{ name: 'problem', severity: 'high' }, { name: 'problem2', severity: 'medium' }]
+      vulnerabilities = [{ name: 'problem', severity: 'high', id: 2, url: 'some_url_2' },
+                         { name: 'problem2', severity: 'medium', id: 4, url: 'some_url_4' }]
+
       dependency[:vulnerabilities] = [vulnerabilities.first]
       with_extra_vuln_from_another_report = dependency.dup.merge(vulnerabilities: vulnerabilities)
 
@@ -145,12 +147,12 @@ RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
 
     it 'stores a dependency' do
       dependency[:packager] = 'Ruby (Bundler)'
-      dependency[:vulnerabilities] = [{ name: 'abc', severity: 'high' }]
+      dependency[:vulnerabilities] = [{ name: 'abc', severity: 'high', id: 5, url: 'some_url_5' }]
 
       report.add_dependency(dependency)
       expect(report.dependencies.size).to eq(1)
       expect(report.dependencies.first[:packager]).to eq('Ruby (Bundler)')
-      expect(report.dependencies.first[:vulnerabilities]).to eq([{ name: 'abc', severity: 'high' }])
+      expect(report.dependencies.first[:vulnerabilities]).to eq([{ name: 'abc', severity: 'high', id: 5, url: 'some_url_5' }])
     end
   end
 

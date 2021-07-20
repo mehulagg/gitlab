@@ -2,7 +2,11 @@
 
 module Subscriptions
   class CreateService
+    include Gitlab::Utils::StrongMemoize
+
     attr_reader :current_user, :customer_params, :subscription_params
+
+    CUSTOMERS_OAUTH_APP_ID_CACHE_KEY = 'customers_oauth_app_id'
 
     def initialize(current_user, group:, customer_params:, subscription_params:)
       @current_user = current_user
@@ -15,6 +19,8 @@ module Subscriptions
       response = client.create_customer(create_customer_params)
 
       return response unless response[:success]
+
+      oauth_token&.save
 
       # We can't use an email from GL.com because it may differ from the billing email.
       # Instead we use the email received from the CustomersDot as a billing email.
@@ -41,10 +47,10 @@ module Subscriptions
       }
     end
 
-    # Return an empty hash for now, because the Customers API requires the credentials attribute to be present,
-    # although it does not require the actual values. Remove this once the Customers API has been updated.
     def credentials_attrs
-      {}
+      {
+        token: oauth_token&.token
+      }
     end
 
     def customer_attrs
@@ -78,7 +84,8 @@ module Subscriptions
         },
         gl_namespace_id: @group.id,
         gl_namespace_name: @group.name,
-        preview: 'false'
+        preview: 'false',
+        source: subscription_params[:source]
       }
     end
 
@@ -88,6 +95,32 @@ module Subscriptions
 
     def client
       Gitlab::SubscriptionPortal::Client
+    end
+
+    def customers_oauth_app_id
+      Rails.cache.fetch(CUSTOMERS_OAUTH_APP_ID_CACHE_KEY, expires_in: 1.hour) do
+        response = client.customers_oauth_app_id
+
+        response.dig(:data, 'oauth_app_id')
+      end
+    end
+
+    def oauth_token
+      strong_memoize(:oauth_token) do
+        next unless customers_oauth_app_id
+
+        application = Doorkeeper::Application.find_by_uid(customers_oauth_app_id)
+        existing_token = Doorkeeper::AccessToken.matching_token_for(application, current_user.id, application.scopes)
+
+        next existing_token if existing_token
+
+        Doorkeeper::AccessToken.new(
+          application_id: customers_oauth_app_id,
+          resource_owner_id: current_user.id,
+          token: Doorkeeper::OAuth::Helpers::UniqueToken.generate,
+          scopes: application.scopes.to_s
+        )
+      end
     end
   end
 end

@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
@@ -22,7 +22,7 @@ Parameters:
 
 | Attribute      | Type           | Required | Description                                                                  |
 |:---------------|:---------------|:---------|:-----------------------------------------------------------------------------|
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `dashboard_path` | string        | yes      | URL-encoded path to file defining the dashboard which should be marked as favorite.   |
 
 ```shell
@@ -53,7 +53,7 @@ Parameters:
 
 | Attribute      | Type           | Required | Description                                                                  |
 |:---------------|:---------------|:---------|:-----------------------------------------------------------------------------|
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `dashboard_path` | string        | no      | URL-encoded path to file defining the dashboard which should no longer be marked as favorite. When not supplied, all dashboards within given projects are removed from favorites.   |
 
 ```shell

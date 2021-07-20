@@ -1,37 +1,44 @@
-%section.saml_provider#js-saml-settings-form.gl-mt-3
-  = form_for [group, saml_provider], url: group_saml_providers_path do |f|
+%section.saml_provider.gl-mt-5
+  = form_for [group, saml_provider], url: group_saml_providers_path, html: { id: 'js-saml-settings-form' } do |f|
     .form-group
       = form_errors(saml_provider)
-      %label.gl-mt-2.mb-0.js-group-saml-enabled-toggle-area
-        = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.enabled?, label: s_("GroupSAML|Toggle SAML authentication"), class_list: "js-project-feature-toggle project-feature-toggle d-inline" do
-          = f.hidden_field :enabled, { class: 'js-group-saml-enabled-input js-project-feature-toggle-input'}
-        %span.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enable SAML authentication for this group.')
+      .gl-form-checkbox.custom-control.custom-checkbox
+        = f.check_box :enabled, { class: 'custom-control-input js-group-saml-enabled-input' }
+        = f.label :enabled, { class: 'custom-control-label' } do
+          = s_('GroupSAML|Enable SAML authentication for this group')
     .form-group
-      %label.gl-mt-2.mb-0.js-group-saml-enforced-sso-toggle-area
-        = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.enforced_sso, disabled: !saml_provider.enabled?, label: s_("GroupSAML|Enforced SSO"), class_list: "js-project-feature-toggle js-group-saml-enforced-sso-toggle project-feature-toggle d-inline", data: { qa_selector: 'enforced_sso_toggle_button' } do
-          = f.hidden_field :enforced_sso, { class: 'js-group-saml-enforced-sso-input js-project-feature-toggle-input'}
-        %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enforce SSO-only authentication for this group.')
-      .form-text.text-muted.js-helper-text{ style: "display: #{'none' if saml_provider.enabled?} #{'block' unless saml_provider.enabled?}" }
-        %span
-          = s_('GroupSAML|To be able to enable enforced SSO, you first need to enable SAML authentication.')
+      .gl-form-checkbox.custom-control.custom-checkbox
+        = f.check_box :enforced_sso, { checked: saml_provider.new_record? || saml_provider.enforced_sso?, class: 'custom-control-input js-group-saml-enforced-sso-input', data: { qa_selector: 'enforced_sso_checkbox' } }
+        = f.label :enforced_sso, { class: 'custom-control-label' } do
+          = s_('GroupSAML|Enforce SSO-only authentication for web activity for this group')
+          %p.help-text.js-helper-text{ class: saml_provider.enabled? && 'gl-display-none' }
+            = s_('GroupSAML|Before enforcing SSO, enable SAML authentication.')
+          %p.help-text.js-warning{ class: saml_provider.enforced_sso? && 'gl-display-none' }
+            - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/group/saml_sso/index', anchor: 'sso-enforcement') }
+            = html_escape(s_('GroupSAML|%{strongOpen}Warning%{strongClose} - Enabling %{linkStart}SSO enforcement%{linkEnd} can reduce security risks.')) % { strongOpen: '<strong>'.html_safe, strongClose: '</strong>'.html_safe, linkStart: link_start, linkEnd: '</a>'.html_safe }
+    .form-group
+      .gl-form-checkbox.custom-control.custom-checkbox
+        = f.check_box :git_check_enforced, { class: 'custom-control-input js-group-saml-enforced-git-check-input' }
+        = f.label :git_check_enforced, { class: 'custom-control-label' } do
+          = s_('GroupSAML|Enforce SSO-only authentication for Git activity for this group')
+          %p.help-text.js-helper-text{ class: saml_provider.enabled? && 'gl-display-none' }
+            = s_('GroupSAML|Before enforcing SSO-only authentication for Git activity, enable SSO-only authentication for web activity.')
     - if Feature.enabled?(:group_managed_accounts, group)
       .form-group
-        %label.gl-mt-2.mb-0.js-group-saml-enforced-group-managed-accounts-toggle-area
-          = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.enforced_group_managed_accounts, disabled: !saml_provider.enforced_sso?, label: s_("GroupSAML|Enforced SSO"), class_list: "js-project-feature-toggle js-group-saml-enforced-group-managed-accounts-toggle project-feature-toggle d-inline", data: { qa_selector: 'group_managed_accounts_toggle_button' } do
-            = f.hidden_field :enforced_group_managed_accounts, { class: 'js-group-saml-enforced-group-managed-accounts-input js-project-feature-toggle-input'}
-          %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enforce users to have dedicated group managed accounts for this group.')
-        .form-text.text-muted.js-helper-text{ style: "display: #{'none' if saml_provider.enforced_sso?} #{'block' unless saml_provider.enforced_sso?}" }
-          %span
-            = s_('GroupSAML|To be able to enable group managed accounts, you first need to enable enforced SSO.')
+        .gl-form-checkbox.custom-control.custom-checkbox
+          = f.check_box :enforced_group_managed_accounts, { class: 'custom-control-input js-group-saml-enforced-group-managed-accounts-input', data: { qa_selector: 'group_managed_accounts_checkbox' } }
+          = f.label :enforced_group_managed_accounts, { class: 'custom-control-label' } do
+            = s_('GroupSAML|Enforce users to have dedicated group-managed accounts for this group')
+            %p.help-text.js-helper-text{ class: saml_provider.enforced_sso? && 'gl-display-none' }
+              = s_('GroupSAML|To be able to enable group-managed accounts, you first need to enable enforced SSO.')
       .form-group
-        %label.gl-mt-2.mb-0.js-group-saml-prohibited-outer-forks-toggle-area
-          = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.prohibited_outer_forks, disabled: !saml_provider.enforced_group_managed_accounts?, label: s_("GroupSAML|Prohibit outer forks"), class_list: "js-project-feature-toggle js-group-saml-prohibited-outer-forks-toggle project-feature-toggle d-inline", data: { qa_selector: 'prohibited_outer_forks_toggle_button' } do
-            = f.hidden_field :prohibited_outer_forks, { class: 'js-group-saml-prohibited-outer-forks-input js-project-feature-toggle-input'}
-          %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Prohibit outer forks for this group.')
-        .form-text.text-muted.js-helper-text{ style: "display: #{'none' if saml_provider.enforced_group_managed_accounts?} #{'block' unless saml_provider.enforced_group_managed_accounts?}" }
-          %span
-            = s_('GroupSAML|To be able to prohibit outer forks, you first need to enforce dedicate group managed accounts.')
-        .bs-callout.bs-callout-info.js-callout{ style: "display: #{'block' if saml_provider.enforced_group_managed_accounts?} #{'none' unless saml_provider.enforced_group_managed_accounts?}" }
+        .gl-form-checkbox.custom-control.custom-checkbox
+          = f.check_box :prohibited_outer_forks, { class: 'custom-control-input js-group-saml-prohibited-outer-forks-input' }
+          = f.label :prohibited_outer_forks, { class: 'custom-control-label' } do
+            = s_('GroupSAML|Prohibit outer forks for this group')
+            %p.help-text.js-helper-text{ class: saml_provider.enforced_group_managed_accounts? && 'gl-display-none' }
+              = s_('GroupSAML|To be able to prohibit outer forks, you first need to enforce dedicate group managed accounts.')
+        .bs-callout.bs-callout-info.js-callout{ class: !saml_provider.enforced_group_managed_accounts? && 'gl-display-none' }
           = s_('GroupSAML|With prohibit outer forks flag enabled group members will be able to fork project only inside your group.')
     .well-segment.borderless.mb-3.col-12.col-lg-9.p-0
       = f.label :sso_url, class: 'label-bold' do
@@ -55,6 +62,6 @@
         = s_('GroupSAML|This will be set as the access level of users added to the group.')
 
     .mt-3
-      = f.submit _("Save changes"), class: 'btn btn-success', data: { qa_selector: 'save_changes_button' }
+      = f.submit _("Save changes"), class: 'gl-button btn btn-confirm', data: { qa_selector: 'save_changes_button' }
       #js-saml-test-button.has-tooltip.float-right
         = render 'test_button', saml_provider: @saml_provider

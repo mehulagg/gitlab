@@ -4,7 +4,7 @@ module ProtectedRef
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :project
+    belongs_to :project, touch: true
 
     validates :name, presence: true
     validates :project, presence: true
@@ -40,26 +40,20 @@ module ProtectedRef
     end
 
     def protected_ref_accessible_to?(ref, user, project:, action:, protected_refs: nil)
-      all_matching_rules_allow?(ref, action: action, protected_refs: protected_refs) do |access_level|
+      access_levels_for_ref(ref, action: action, protected_refs: protected_refs).any? do |access_level|
         access_level.check_access(user)
       end
     end
 
     def developers_can?(action, ref, protected_refs: nil)
-      all_matching_rules_allow?(ref, action: action, protected_refs: protected_refs) do |access_level|
+      access_levels_for_ref(ref, action: action, protected_refs: protected_refs).any? do |access_level|
         access_level.access_level == Gitlab::Access::DEVELOPER
       end
     end
 
-    def all_matching_rules_allow?(ref, action:, protected_refs: nil, &block)
-      access_levels_groups =
-        self.matching(ref, protected_refs: protected_refs).map(&:"#{action}_access_levels")
-
-      return false if access_levels_groups.blank?
-
-      access_levels_groups.all? do |access_levels|
-        access_levels.any?(&block)
-      end
+    def access_levels_for_ref(ref, action:, protected_refs: nil)
+      self.matching(ref, protected_refs: protected_refs)
+        .flat_map(&:"#{action}_access_levels")
     end
 
     # Returns all protected refs that match the given ref name.
@@ -84,4 +78,4 @@ end
 # since these are defined in a ClassMethods constant. As such, we prepend the
 # module directly into ProtectedRef::ClassMethods, instead of prepending it into
 # ProtectedRef.
-ProtectedRef::ClassMethods.prepend_if_ee('EE::ProtectedRef')
+ProtectedRef::ClassMethods.prepend_mod_with('ProtectedRef')

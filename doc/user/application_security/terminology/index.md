@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Secure and Protect terminology
+# Secure and Protect terminology **(FREE)**
 
 This terminology list for GitLab Secure and Protect aims to:
 
@@ -78,6 +78,8 @@ An asset that has the potential to be vulnerable, identified in a project by an 
 include but are not restricted to source code, binary packages, containers, dependencies, networks,
 applications, and infrastructure.
 
+Findings are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a [vulnerability](#vulnerability).
+
 ### Insignificant finding
 
 A legitimate finding that a particular customer doesn't care about.
@@ -99,7 +101,7 @@ of the finding's [first identifier](https://gitlab.com/gitlab-org/security-produ
 combine to create the value.
 
 Examples of primary identifiers include `PluginID` for OWASP Zed Attack Proxy (ZAP), or `CVE` for
-Klar. Note that the identifier must be stable. Subsequent scans must return the same value for the
+Trivy. Note that the identifier must be stable. Subsequent scans must return the same value for the
 same finding, even if the location has slightly changed.
 
 ### Report finding
@@ -116,11 +118,12 @@ The type of scan. This must be one of the following:
 - `dependency_scanning`
 - `dast`
 - `sast`
+- `cluster_image_scanning`
 
 ### Scanner
 
 Software that can scan for vulnerabilities. The resulting scan report is typically not in the
-[Secure report format](#secure-report-format). Examples include ESLint, Klar, and ZAP.
+[Secure report format](#secure-report-format). Examples include ESLint, Trivy, and ZAP.
 
 ### Secure product
 
@@ -152,6 +155,8 @@ is listed as GitLab.
 A flaw that has a negative impact on the security of its environment. Vulnerabilities describe the
 error or weakness, and don't describe where the error is located (see [finding](#finding)).
 Each vulnerability maps to a unique finding.
+
+Vulnerabilities exist in the default branch. Findings (see [finding](#finding)) are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability.
 
 ### Vulnerability finding
 

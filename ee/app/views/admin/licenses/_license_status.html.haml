@@ -7,6 +7,6 @@
     %strong.has-tooltip{ title: @license.expires_at.to_formatted_s(:long), data: { placement: 'top' } }
       = _('Free trial will expire in %{days}' % { days: pluralize(@license.remaining_days, 'day') })
   - else
-    %strong= time_ago_with_tooltip(@license.expires_at)
+    %strong= l(@license.expires_at.to_time.in_time_zone, format: :timeago_tooltip)
 - else
   %strong= _('Never')

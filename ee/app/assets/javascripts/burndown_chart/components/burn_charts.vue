@@ -1,14 +1,14 @@
 <script>
-import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlButton, GlButtonGroup } from '@gitlab/ui';
 import dateFormat from 'dateformat';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import BurnupQuery from 'shared_queries/burndown_chart/burnup.query.graphql';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BurndownChartData from '../burn_chart_data';
 import { Namespace } from '../constants';
-import BurnupQuery from '../graphql/burnup.query.graphql';
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
 import OpenTimeboxSummary from './open_timebox_summary.vue';
@@ -21,7 +21,6 @@ export default {
     GlButtonGroup,
     BurndownChart,
     BurnupChart,
-    GlSprintf,
     OpenTimeboxSummary,
     TimeboxSummaryCards,
   },
@@ -116,7 +115,6 @@ export default {
         },
       },
       useLegacyBurndown: false,
-      showInfo: this.showNewOldBurndownToggle,
       error: '',
     };
   },
@@ -183,7 +181,9 @@ export default {
         })
         .catch(() => {
           this.fetchedLegacyData = false;
-          createFlash(__('Error loading burndown chart data'));
+          createFlash({
+            message: __('Error loading burndown chart data'),
+          });
         });
     },
     pluckBurnupDataProperties(total, completed) {
@@ -279,19 +279,6 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="showInfo" variant="info" class="col-12 gl-mt-3" @dismiss="showInfo = false">
-      <gl-sprintf
-        :message="
-          __(
-            `Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button.`,
-          )
-        "
-      >
-        <template #strong="{ content }">
-          <strong>{{ content }}</strong>
-        </template>
-      </gl-sprintf>
-    </gl-alert>
     <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
       <strong ref="filterLabel">{{ __('Filter by') }}</strong>
       <gl-button-group>
@@ -351,12 +338,9 @@ export default {
         :namespace-type="namespaceType"
         :display-value="displayValue"
       >
-        <timebox-summary-cards
-          slot-scope="{ columns: openColumns, loading: summaryLoading, total }"
-          :columns="openColumns"
-          :loading="summaryLoading"
-          :total="total"
-        />
+        <template #default="{ columns: openColumns, loading: summaryLoading, total }">
+          <timebox-summary-cards :columns="openColumns" :loading="summaryLoading" :total="total" />
+        </template>
       </open-timebox-summary>
     </template>
     <div class="row">

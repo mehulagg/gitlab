@@ -25,7 +25,7 @@ module Gitlab
           json_writer.write_relation_array('groups', '_all', all_groups)
 
           true
-        rescue => e
+        rescue StandardError => e
           @shared.error(e)
           false
         ensure
@@ -42,7 +42,7 @@ module Gitlab
         end
 
         def serialize(group)
-          ImportExport::JSON::StreamingSerializer.new(
+          ImportExport::Json::StreamingSerializer.new(
             group,
             group_tree,
             json_writer,
@@ -64,7 +64,7 @@ module Gitlab
         end
 
         def json_writer
-          @json_writer ||= ImportExport::JSON::NdjsonWriter.new(@full_path)
+          @json_writer ||= ImportExport::Json::NdjsonWriter.new(@full_path)
         end
       end
     end

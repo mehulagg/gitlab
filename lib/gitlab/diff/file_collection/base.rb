@@ -19,6 +19,7 @@ module Gitlab
 
           @diffable = diffable
           @include_stats = diff_options.delete(:include_stats)
+          @pagination_data = diff_options.delete(:pagination_data)
           @project = project
           @diff_options = diff_options
           @diff_refs = diff_refs
@@ -47,11 +48,7 @@ module Gitlab
         end
 
         def pagination_data
-          {
-            current_page: nil,
-            next_page: nil,
-            total_pages: nil
-          }
+          @pagination_data || empty_pagination_data
         end
 
         # This mutates `diff_files` lines.
@@ -88,7 +85,15 @@ module Gitlab
           # No-op
         end
 
+        def overflow?
+          raw_diff_files.overflow?
+        end
+
         private
+
+        def empty_pagination_data
+          { total_pages: nil }
+        end
 
         def diff_stats_collection
           strong_memoize(:diff_stats) do
@@ -117,8 +122,6 @@ module Gitlab
         end
 
         def sort_diffs(diffs)
-          return diffs unless Feature.enabled?(:sort_diffs, project, default_enabled: false)
-
           Gitlab::Diff::FileCollectionSorter.new(diffs).sort
         end
       end

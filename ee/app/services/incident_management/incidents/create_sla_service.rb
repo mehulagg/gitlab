@@ -12,6 +12,7 @@ module IncidentManagement
       def execute
         return not_enabled_success unless issuable.sla_available?
         return not_enabled_success unless incident_setting&.sla_timer?
+        return success(sla: issuable.issuable_sla) if issuable.issuable_sla
 
         sla = issuable.build_issuable_sla(
           due_at: issuable.created_at + incident_setting.sla_timer_minutes.minutes

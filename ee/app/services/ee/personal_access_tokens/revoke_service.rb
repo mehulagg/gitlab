@@ -22,7 +22,6 @@ module EE
 
       def managed_user_revocation_allowed?
         return unless token.present?
-        return unless ::Feature.enabled?(:revoke_managed_users_token, group)
 
         token.user&.group_managed_account? &&
           token.user&.managing_group == group &&

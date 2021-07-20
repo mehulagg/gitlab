@@ -15,7 +15,7 @@ RSpec.describe Projects::Settings::SlacksController do
     def redirect_url(project)
       edit_project_service_path(
         project,
-        project.build_gitlab_slack_application_service
+        project.build_gitlab_slack_application_integration
       )
     end
 

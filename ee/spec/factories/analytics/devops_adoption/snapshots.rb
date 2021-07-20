@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :devops_adoption_snapshot, class: 'Analytics::DevopsAdoption::Snapshot' do
-    association :segment, factory: :devops_adoption_segment
+    association :namespace
 
     recorded_at { Time.zone.now }
     end_time { 1.month.ago.end_of_month }

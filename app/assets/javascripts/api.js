@@ -1,9 +1,9 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import axios from './lib/utils/axios_utils';
 import { joinPaths } from './lib/utils/url_utility';
 
-const DEFAULT_PER_PAGE = 20;
+export const DEFAULT_PER_PAGE = 20;
 
 /**
  * Slow deprecation Notice: Please rather use for new calls
@@ -18,12 +18,16 @@ const Api = {
   groupMembersPath: '/api/:version/groups/:id/members',
   groupMilestonesPath: '/api/:version/groups/:id/milestones',
   subgroupsPath: '/api/:version/groups/:id/subgroups',
+  descendantGroupsPath: '/api/:version/groups/:id/descendant_groups',
   namespacesPath: '/api/:version/namespaces.json',
   groupInvitationsPath: '/api/:version/groups/:id/invitations',
   groupPackagesPath: '/api/:version/groups/:id/packages',
   projectPackagesPath: '/api/:version/projects/:id/packages',
   projectPackagePath: '/api/:version/projects/:id/packages/:package_id',
+  projectPackageFilePath:
+    '/api/:version/projects/:id/packages/:package_id/package_files/:package_file_id',
   groupProjectsPath: '/api/:version/groups/:id/projects.json',
+  groupSharePath: '/api/:version/groups/:id/share',
   projectsPath: '/api/:version/projects.json',
   projectPath: '/api/:version/projects/:id',
   forkedProjectsPath: '/api/:version/projects/:id/forks',
@@ -39,10 +43,11 @@ const Api = {
   projectRunnersPath: '/api/:version/projects/:id/runners',
   projectProtectedBranchesPath: '/api/:version/projects/:id/protected_branches',
   projectSearchPath: '/api/:version/projects/:id/search',
+  projectSharePath: '/api/:version/projects/:id/share',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
   projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
   mergeRequestsPath: '/api/:version/merge_requests',
-  groupLabelsPath: '/groups/:namespace_path/-/labels',
+  groupLabelsPath: '/api/:version/groups/:namespace_path/labels',
   issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
   issuableTemplatesPath: '/:namespace_path/:project_path/templates/:type',
   projectTemplatePath: '/api/:version/projects/:id/templates/:type/:key',
@@ -77,8 +82,9 @@ const Api = {
   issuePath: '/api/:version/projects/:id/issues/:issue_iid',
   tagsPath: '/api/:version/projects/:id/repository/tags',
   freezePeriodsPath: '/api/:version/projects/:id/freeze_periods',
-  usageDataIncrementCounterPath: '/api/:version/usage_data/increment_counter',
-  usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
+  freezePeriodPath: '/api/:version/projects/:id/freeze_periods/:freeze_period_id',
+  serviceDataIncrementCounterPath: '/api/:version/usage_data/increment_counter',
+  serviceDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
   containerRegistryDetailsPath: '/api/:version/registry/repositories/:id/',
@@ -118,6 +124,15 @@ const Api = {
 
   deleteProjectPackage(projectId, packageId) {
     const url = this.buildProjectPackageUrl(projectId, packageId);
+    return axios.delete(url);
+  },
+
+  deleteProjectPackageFile(projectId, packageId, fileId) {
+    const url = Api.buildUrl(this.projectPackageFilePath)
+      .replace(':id', projectId)
+      .replace(':package_id', packageId)
+      .replace(':package_file_id', fileId);
+
     return axios.delete(url);
   },
 
@@ -280,7 +295,7 @@ const Api = {
   },
 
   /**
-   * Get all Merge Requests for a project, eventually filtering based on
+   * Get all merge requests for a project, eventually filtering based on
    * supplied parameters
    * @param projectPath
    * @param params
@@ -304,7 +319,7 @@ const Api = {
     return axios.post(url, options);
   },
 
-  // Return Merge Request for project
+  // Return merge request for project
   projectMergeRequest(projectPath, mergeRequestId, params = {}) {
     const url = Api.buildUrl(Api.projectMergeRequestPath)
       .replace(':id', encodeURIComponent(projectPath))
@@ -365,6 +380,16 @@ const Api = {
     });
   },
 
+  projectShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.projectSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
+  },
+
   projectMilestones(id, params = {}) {
     const url = Api.buildUrl(Api.projectMilestonesPath).replace(':id', encodeURIComponent(id));
 
@@ -389,18 +414,29 @@ const Api = {
 
   newLabel(namespacePath, projectPath, data, callback) {
     let url;
+    let payload;
 
     if (projectPath) {
       url = Api.buildUrl(Api.projectLabelsPath)
         .replace(':namespace_path', namespacePath)
         .replace(':project_path', projectPath);
+      payload = {
+        label: data,
+      };
     } else {
       url = Api.buildUrl(Api.groupLabelsPath).replace(':namespace_path', namespacePath);
+
+      // groupLabelsPath uses public API which accepts
+      // `name` and `color` props.
+      payload = {
+        name: data.title,
+        color: data.color,
+      };
     }
 
     return axios
       .post(url, {
-        label: data,
+        ...payload,
       })
       .then((res) => callback(res.data))
       .catch((e) => callback(e.response.data));
@@ -419,11 +455,23 @@ const Api = {
       })
       .then(({ data }) => (callback ? callback(data) : data))
       .catch(() => {
-        flash(__('Something went wrong while fetching projects'));
+        createFlash({
+          message: __('Something went wrong while fetching projects'),
+        });
         if (callback) {
           callback();
         }
       });
+  },
+
+  groupShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.groupSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
   },
 
   commit(id, sha, params = {}) {
@@ -446,7 +494,7 @@ const Api = {
 
   applySuggestion(id, message = '') {
     const url = Api.buildUrl(Api.applySuggestionPath).replace(':id', encodeURIComponent(id));
-    const params = gon.features?.suggestionsCustomCommit ? { commit_message: message } : false;
+    const params = { commit_message: message };
 
     return axios.put(url, params);
   },
@@ -597,7 +645,11 @@ const Api = {
         params: { ...defaults, ...options },
       })
       .then(({ data }) => callback(data))
-      .catch(() => flash(__('Something went wrong while fetching projects')));
+      .catch(() =>
+        createFlash({
+          message: __('Something went wrong while fetching projects'),
+        }),
+      );
   },
 
   branches(id, query = '', options = {}) {
@@ -762,7 +814,7 @@ const Api = {
     return axios.delete(url, { data });
   },
 
-  getRawFile(id, path, params = { ref: 'master' }) {
+  getRawFile(id, path, params = {}) {
     const url = Api.buildUrl(this.rawFilePath)
       .replace(':id', encodeURIComponent(id))
       .replace(':path', encodeURIComponent(path));
@@ -810,12 +862,20 @@ const Api = {
     return axios.post(url, freezePeriod);
   },
 
+  updateFreezePeriod(id, freezePeriod = {}) {
+    const url = Api.buildUrl(this.freezePeriodPath)
+      .replace(':id', encodeURIComponent(id))
+      .replace(':freeze_period_id', encodeURIComponent(freezePeriod.id));
+
+    return axios.put(url, freezePeriod);
+  },
+
   trackRedisCounterEvent(event) {
     if (!gon.features?.usageDataApi) {
       return null;
     }
 
-    const url = Api.buildUrl(this.usageDataIncrementCounterPath);
+    const url = Api.buildUrl(this.serviceDataIncrementCounterPath);
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -824,11 +884,11 @@ const Api = {
   },
 
   trackRedisHllUserEvent(event) {
-    if (!gon.features?.usageDataApi) {
+    if (!gon.current_user_id || !gon.features?.usageDataApi) {
       return null;
     }
 
-    const url = Api.buildUrl(this.usageDataIncrementUniqueUsersPath);
+    const url = Api.buildUrl(this.serviceDataIncrementUniqueUsersPath);
     const headers = {
       'Content-Type': 'application/json',
     };

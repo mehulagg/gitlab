@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Issue do
   include ExternalAuthorizationServiceHelpers
 
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:user) { create(:user) }
   let_it_be(:reusable_project) { create(:project) }
 
@@ -85,18 +87,14 @@ RSpec.describe Issue do
   describe 'callbacks' do
     describe '#ensure_metrics' do
       it 'creates metrics after saving' do
-        issue = create(:issue, project: reusable_project)
-
-        expect(issue.metrics).to be_persisted
+        expect(subject.metrics).to be_persisted
         expect(Issue::Metrics.count).to eq(1)
       end
 
       it 'does not create duplicate metrics for an issue' do
-        issue = create(:issue, project: reusable_project)
+        subject.close!
 
-        issue.close!
-
-        expect(issue.metrics).to be_persisted
+        expect(subject.metrics).to be_persisted
         expect(Issue::Metrics.count).to eq(1)
       end
 
@@ -105,6 +103,20 @@ RSpec.describe Issue do
 
         create(:issue, project: reusable_project)
       end
+
+      context 'when metrics record is missing' do
+        before do
+          subject.metrics.delete
+          subject.reload
+          subject.metrics # make sure metrics association is cached (currently nil)
+        end
+
+        it 'creates the metrics record' do
+          subject.update!(title: 'title')
+
+          expect(subject.metrics).to be_present
+        end
+      end
     end
 
     describe '#record_create_action' do
@@ -112,6 +124,24 @@ RSpec.describe Issue do
         expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_created_action)
 
         create(:issue)
+      end
+    end
+  end
+
+  context 'order by upvotes' do
+    let!(:issue) { create(:issue) }
+    let!(:issue2) { create(:issue) }
+    let!(:award_emoji) { create(:award_emoji, :upvote, awardable: issue2) }
+
+    describe '.order_upvotes_desc' do
+      it 'orders on upvotes' do
+        expect(described_class.order_upvotes_desc.to_a).to eq [issue2, issue]
+      end
+    end
+
+    describe '.order_upvotes_asc' do
+      it 'orders on upvotes' do
+        expect(described_class.order_upvotes_asc.to_a).to eq [issue, issue2]
       end
     end
   end
@@ -232,16 +262,36 @@ RSpec.describe Issue do
 
       expect { issue.close }.to change { issue.state_id }.from(open_state).to(closed_state)
     end
+
+    context 'when an argument is provided' do
+      context 'and the argument is a User' do
+        it 'changes closed_by to the given user' do
+          expect { issue.close(user) }.to change { issue.closed_by }.from(nil).to(user)
+        end
+      end
+
+      context 'and the argument is a not a User' do
+        it 'does not change closed_by' do
+          expect { issue.close("test") }.not_to change { issue.closed_by }
+        end
+      end
+    end
+
+    context 'when an argument is not provided' do
+      it 'does not change closed_by' do
+        expect { issue.close }.not_to change { issue.closed_by }
+      end
+    end
   end
 
   describe '#reopen' do
     let(:issue) { create(:issue, project: reusable_project, state: 'closed', closed_at: Time.current, closed_by: user) }
 
-    it 'sets closed_at to nil when an issue is reopend' do
+    it 'sets closed_at to nil when an issue is reopened' do
       expect { issue.reopen }.to change { issue.closed_at }.to(nil)
     end
 
-    it 'sets closed_by to nil when an issue is reopend' do
+    it 'sets closed_by to nil when an issue is reopened' do
       expect { issue.reopen }.to change { issue.closed_by }.from(user).to(nil)
     end
 
@@ -287,7 +337,7 @@ RSpec.describe Issue do
       end
 
       context 'when cross-project in different namespace' do
-        let(:another_namespace) { build(:namespace, path: 'another-namespace') }
+        let(:another_namespace) { build(:namespace, id: non_existing_record_id, path: 'another-namespace') }
         let(:another_namespace_project) { build(:project, path: 'another-project', namespace: another_namespace) }
 
         it 'returns complete path to the issue' do
@@ -327,7 +377,7 @@ RSpec.describe Issue do
     end
 
     it 'returns true for a user that is the author of an issue' do
-      issue.update(author: user)
+      issue.update!(author: user)
 
       expect(issue.assignee_or_author?(user)).to be_truthy
     end
@@ -665,7 +715,7 @@ RSpec.describe Issue do
       expect(user2.assigned_open_issues_count).to eq(0)
 
       issue.assignees = [user2]
-      issue.save
+      issue.save!
 
       expect(user1.assigned_open_issues_count).to eq(0)
       expect(user2.assigned_open_issues_count).to eq(1)
@@ -897,7 +947,7 @@ RSpec.describe Issue do
         let(:private_project) { build(:project, :private)}
 
         before do
-          issue.update(project: private_project) # move issue to private project
+          issue.update!(project: private_project) # move issue to private project
         end
 
         shared_examples 'issue visible if user has guest access' do
@@ -1019,27 +1069,57 @@ RSpec.describe Issue do
 
   describe '#check_for_spam?' do
     using RSpec::Parameterized::TableSyntax
+    let_it_be(:support_bot) { ::User.support_bot }
 
-    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | false
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | false
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
-      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | false
-      Gitlab::VisibilityLevel::PRIVATE  | false | { description: 'woo' } | false
+    where(:support_bot?, :visibility_level, :confidential, :new_attributes, :check_for_spam?) do
+      ### non-support-bot cases
+      # spammable attributes changing
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'new' } | true
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'new' } | true
+      # confidential to non-confidential
+      false | Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
+      # non-confidential to confidential
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { confidential: true } | false
+      # spammable attributes changing on confidential
+      false | Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'new' } | false
+      # spammable attributes changing while changing to confidential
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'new', confidential: true } | false
+      # spammable attribute not changing
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      # non-spammable attribute changing
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { weight: 3 } | false
+      # spammable attributes changing on non-public
+      false | Gitlab::VisibilityLevel::INTERNAL | false | { description: 'new' } | false
+      false | Gitlab::VisibilityLevel::PRIVATE  | false | { description: 'new' } | false
+
+      ### support-bot cases
+      # confidential to non-confidential
+      true | Gitlab::VisibilityLevel::PUBLIC    | true  | { confidential: false } | true
+      # non-confidential to confidential
+      true | Gitlab::VisibilityLevel::PUBLIC    | false | { confidential: true } | false
+      # spammable attributes changing on confidential
+      true  | Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'new' } | true
+      # spammable attributes changing while changing to confidential
+      true  | Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'new', confidential: true } | true
+      # spammable attributes changing on non-public
+      true  | Gitlab::VisibilityLevel::INTERNAL | false | { description: 'new' } | true
+      true  | Gitlab::VisibilityLevel::PRIVATE  | false | { title: 'new' } | true
+      # spammable attribute not changing
+      true  | Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      # non-spammable attribute changing
+      true  | Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
     end
 
     with_them do
-      it 'checks for spam on issues that can be seen anonymously' do
+      it 'checks for spam when necessary' do
+        active_user = support_bot? ? support_bot : user
         project = reusable_project
-        project.update(visibility_level: visibility_level)
-        issue = create(:issue, project: project, confidential: confidential, description: 'original description')
+        project.update!(visibility_level: visibility_level)
+        issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: support_bot)
 
         issue.assign_attributes(new_attributes)
 
-        expect(issue.check_for_spam?).to eq(check_for_spam?)
+        expect(issue.check_for_spam?(user: active_user)).to eq(check_for_spam?)
       end
     end
   end
@@ -1048,7 +1128,7 @@ RSpec.describe Issue do
     it 'refreshes the number of open issues of the project' do
       project = subject.project
 
-      expect { subject.destroy }
+      expect { subject.destroy! }
         .to change { project.open_issues_count }.from(1).to(0)
     end
   end
@@ -1111,10 +1191,36 @@ RSpec.describe Issue do
   end
 
   context "relative positioning" do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:issue1) { create(:issue, project: project, relative_position: nil) }
+    let_it_be(:issue2) { create(:issue, project: project, relative_position: nil) }
+
     it_behaves_like "a class that supports relative positioning" do
       let_it_be(:project) { reusable_project }
       let(:factory) { :issue }
       let(:default_params) { { project: project } }
+    end
+
+    it 'is not blocked for repositioning by default' do
+      expect(issue1.blocked_for_repositioning?).to eq(false)
+    end
+
+    context 'when block_issue_repositioning flag is enabled for group' do
+      before do
+        stub_feature_flags(block_issue_repositioning: group)
+      end
+
+      it 'is blocked for repositioning' do
+        expect(issue1.blocked_for_repositioning?).to eq(true)
+      end
+
+      it 'does not move issues with null position' do
+        payload = [issue1, issue2]
+
+        expect { described_class.move_nulls_to_end(payload) }.to raise_error(Gitlab::RelativePositioning::IssuePositioningDisabled)
+        expect { described_class.move_nulls_to_start(payload) }.to raise_error(Gitlab::RelativePositioning::IssuePositioningDisabled)
+      end
     end
   end
 
@@ -1231,15 +1337,33 @@ RSpec.describe Issue do
       end
     end
 
-    let(:project) { build_stubbed(:project_empty_repo) }
-    let(:issue) { build_stubbed(:issue, relative_position: 100, project: project) }
+    shared_examples 'schedules issues rebalancing' do
+      let(:issue) { build_stubbed(:issue, relative_position: 100, project: project) }
 
-    it 'schedules rebalancing if we time-out when moving' do
-      lhs = build_stubbed(:issue, relative_position: 99, project: project)
-      to_move = build(:issue, project: project)
-      expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+      it 'schedules rebalancing if we time-out when moving' do
+        lhs = build_stubbed(:issue, relative_position: 99, project: project)
+        to_move = build(:issue, project: project)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project_id, namespace_id)
 
-      expect { to_move.move_between(lhs, issue) }.to raise_error(ActiveRecord::QueryCanceled)
+        expect { to_move.move_between(lhs, issue) }.to raise_error(ActiveRecord::QueryCanceled)
+      end
+    end
+
+    context 'when project in user namespace' do
+      let(:project) { build_stubbed(:project_empty_repo) }
+      let(:project_id) { project.id }
+      let(:namespace_id) { nil }
+
+      it_behaves_like 'schedules issues rebalancing'
+    end
+
+    context 'when project in a group namespace' do
+      let(:group) { create(:group) }
+      let(:project) { build_stubbed(:project_empty_repo, group: group) }
+      let(:project_id) { nil }
+      let(:namespace_id) { group.id }
+
+      it_behaves_like 'schedules issues rebalancing'
     end
   end
 
@@ -1256,6 +1380,45 @@ RSpec.describe Issue do
 
     it 'raises error when feature is invalid' do
       expect { issue.issue_type_supports?(:unkown_feature) }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe '#supports_time_tracking?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    where(:issue_type, :supports_time_tracking) do
+      :issue | true
+      :incident | true
+    end
+
+    with_them do
+      before do
+        issue.update!(issue_type: issue_type)
+      end
+
+      it do
+        expect(issue.supports_time_tracking?).to eq(supports_time_tracking)
+      end
+    end
+  end
+
+  describe '#email_participants_emails' do
+    let_it_be(:issue) { create(:issue) }
+
+    it 'returns a list of emails' do
+      participant1 = issue.issue_email_participants.create!(email: 'a@gitlab.com')
+      participant2 = issue.issue_email_participants.create!(email: 'b@gitlab.com')
+
+      expect(issue.email_participants_emails).to contain_exactly(participant1.email, participant2.email)
+    end
+  end
+
+  describe '#email_participants_downcase' do
+    it 'returns a list of emails with all uppercase letters replaced with their lowercase counterparts' do
+      participant = create(:issue_email_participant, email: 'SomEoNe@ExamPLe.com')
+
+      expect(participant.issue.email_participants_emails_downcase).to match([participant.email.downcase])
     end
   end
 end

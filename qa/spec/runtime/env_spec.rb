@@ -54,10 +54,10 @@ RSpec.describe QA::Runtime::Env do
       default: false
   end
 
-  describe '.chrome_headless?' do
+  describe '.webdriver_headless?' do
     it_behaves_like 'boolean method',
-      method: :chrome_headless?,
-      env_key: 'CHROME_HEADLESS',
+      method: :webdriver_headless?,
+      env_key: 'WEBDRIVER_HEADLESS',
       default: true
   end
 
@@ -232,6 +232,7 @@ RSpec.describe QA::Runtime::Env do
 
   describe '.require_admin_access_token!' do
     it 'raises ArgumentError if GITLAB_QA_ADMIN_ACCESS_TOKEN is not specified' do
+      described_class.instance_variable_set(:@admin_personal_access_token, nil)
       stub_env('GITLAB_QA_ADMIN_ACCESS_TOKEN', nil)
 
       expect { described_class.require_admin_access_token! }.to raise_error(ArgumentError)
@@ -338,58 +339,6 @@ RSpec.describe QA::Runtime::Env do
 
         expect(described_class.remote_grid).to eq('http://localhost:4444/wd/hub')
       end
-    end
-  end
-
-  describe '.context_matches?' do
-    it 'returns true when url has .com' do
-      QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
-
-      expect(described_class.dot_com?).to be_truthy
-    end
-
-    it 'returns false when url does not have .com' do
-      QA::Runtime::Scenario.define(:gitlab_address, "https://gitlab.test")
-
-      expect(described_class.dot_com?).to be_falsey
-    end
-
-    context 'with arguments' do
-      it 'returns true when :subdomain is set' do
-        QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
-
-        expect(described_class.dot_com?(subdomain: :staging)).to be_truthy
-      end
-
-      it 'matches multiple subdomains' do
-        QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
-
-        expect(described_class.context_matches?(subdomain: [:release, :staging])).to be_truthy
-        expect(described_class.context_matches?(:production, subdomain: [:release, :staging])).to be_truthy
-      end
-
-      it 'matches :production' do
-        QA::Runtime::Scenario.define(:gitlab_address, "https://gitlab.com/")
-
-        expect(described_class.context_matches?(:production)).to be_truthy
-      end
-
-      it 'doesnt match with mismatching switches' do
-        QA::Runtime::Scenario.define(:gitlab_address, 'https://gitlab.test')
-
-        aggregate_failures do
-          expect(described_class.context_matches?(tld: '.net')).to be_falsey
-          expect(described_class.context_matches?(:production)).to be_falsey
-          expect(described_class.context_matches?(subdomain: [:staging])).to be_falsey
-          expect(described_class.context_matches?(domain: 'example')).to be_falsey
-        end
-      end
-    end
-
-    it 'returns false for mismatching' do
-      QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
-
-      expect(described_class.context_matches?(:production)).to be_falsey
     end
   end
 end

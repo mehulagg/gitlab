@@ -7,6 +7,9 @@ class ProtectedBranch < ApplicationRecord
   scope :requiring_code_owner_approval,
         -> { where(code_owner_approval_required: true) }
 
+  scope :allowing_force_push,
+        -> { where(allow_force_push: true) }
+
   protected_ref_access_levels :merge, :push
 
   def self.protected_ref_accessible_to?(ref, user, project:, action:, protected_refs: nil)
@@ -24,6 +27,10 @@ class ProtectedBranch < ApplicationRecord
     return true if project.empty_repo? && project.default_branch_protected?
 
     self.matching(ref_name, protected_refs: protected_refs(project)).present?
+  end
+
+  def self.allow_force_push?(project, ref_name)
+    project.protected_branches.allowing_force_push.matching(ref_name).any?
   end
 
   def self.any_protected?(project, ref_names)
@@ -54,4 +61,4 @@ class ProtectedBranch < ApplicationRecord
   end
 end
 
-ProtectedBranch.prepend_if_ee('EE::ProtectedBranch')
+ProtectedBranch.prepend_mod_with('ProtectedBranch')

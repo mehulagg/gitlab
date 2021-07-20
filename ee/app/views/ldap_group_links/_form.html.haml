@@ -13,7 +13,7 @@
             = f.label :cn, "Sync method"
           .col-sm-10
             .form-check
-              = radio_button_tag :sync_method, :group, true, class: 'form-check-input'
+              = radio_button_tag :sync_method, :group, true, class: 'form-check-input', data: { qa_selector: 'ldap_sync_group_radio' }
               = label_tag :sync_method_group, class: 'form-check-label' do
                 LDAP Group cn
             .form-check
@@ -36,7 +36,7 @@
           .col-sm-2.col-form-label
             = f.label :filter, "LDAP User filter"
           .col-sm-10
-            = f.text_field :filter, placeholder: 'Ex. (&(objectCategory=person)(objectClass=developer))', class: 'form-control xxlarge input-mn-300 qa-ldap-user-filter-text-field'
+            = f.text_field :filter, placeholder: 'Ex. (&(objectCategory=person)(objectClass=developer))', class: 'form-control xxlarge input-mn-300', data: { qa_selector: 'ldap_user_filter_field' }
             .form-text.text-muted
               - ldap_link = link_to 'LDAP Search Filter Syntax', 'https://msdn.microsoft.com/en-us/library/aa746475(v=vs.85).aspx'
               This query must use valid #{ldap_link}. Synchronize #{group.name}'s members with this LDAP user filter.
@@ -54,4 +54,4 @@
             You can manage permission levels for individual group members in the Members tab.
 
     .form-actions.gl-mb-5
-      = f.submit 'Add synchronization', class: 'btn btn-success qa-add-sync-button'
+      = f.submit 'Add synchronization', class: 'gl-button btn btn-confirm qa-add-sync-button'

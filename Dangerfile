@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 
-require_relative 'tooling/gitlab_danger'
-require_relative 'tooling/danger/request_helper'
+require 'gitlab-dangerfiles'
 
-Dir["danger/plugins/*.rb"].sort.each { |f| danger.import_plugin(f) }
+gitlab_dangerfiles = Gitlab::Dangerfiles::Engine.new(self)
+gitlab_dangerfiles.import_plugins
 
 return if helper.release_automation?
 
-gitlab_danger = GitlabDanger.new(helper.gitlab_helper)
+danger.import_plugin('danger/plugins/*.rb')
 
-gitlab_danger.rule_names.each do |file|
-  danger.import_dangerfile(path: File.join('danger', file))
+gitlab_dangerfiles.import_dangerfiles
+
+project_helper.rule_names.each do |rule|
+  danger.import_dangerfile(path: File.join('danger', rule))
 end
 
 anything_to_post = status_report.values.any? { |data| data.any? }
 
-if gitlab_danger.ci? && anything_to_post
+if helper.ci? && anything_to_post
   markdown("**If needed, you can retry the [`danger-review` job](#{ENV['CI_JOB_URL']}) that generated this comment.**")
 end

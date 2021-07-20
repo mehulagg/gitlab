@@ -1,13 +1,13 @@
 <script>
-import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
-import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelector from './profile_selector.vue';
+import SiteProfileSummary from './site_profile_summary.vue';
 
 export default {
   name: 'OnDemandScansSiteProfileSelector',
   components: {
     ProfileSelector,
+    SiteProfileSummary,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: {
@@ -24,19 +24,23 @@ export default {
       required: false,
       default: () => [],
     },
+    selectedProfile: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    hasConflict: {
+      type: Boolean,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     formattedProfiles() {
       return this.profiles.map((profile) => {
-        const isValidated = profile.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
-        const suffix = isValidated
-          ? s__('DastProfiles|Validated')
-          : s__('DastProfiles|Not Validated');
-        const addSuffix = (str) =>
-          this.glFeatures.securityOnDemandScansSiteValidation ? `${str} (${suffix})` : str;
         return {
           ...profile,
-          dropdownLabel: addSuffix(`${profile.profileName}: ${profile.targetUrl}`),
+          dropdownLabel: `${profile.profileName}: ${profile.targetUrl}`,
         };
       });
     },
@@ -62,7 +66,11 @@ export default {
     <template #new-profile>{{ s__('OnDemandScans|Create new site profile') }}</template>
     <template #manage-profile>{{ s__('OnDemandScans|Manage site profiles') }}</template>
     <template #summary>
-      <slot name="summary"></slot>
+      <site-profile-summary
+        v-if="selectedProfile"
+        :profile="selectedProfile"
+        :has-conflict="hasConflict"
+      />
     </template>
   </profile-selector>
 </template>

@@ -1,6 +1,6 @@
-import * as getters from '~/releases/stores/modules/detail/getters';
+import * as getters from '~/releases/stores/modules/edit_new/getters';
 
-describe('Release detail getters', () => {
+describe('Release edit/new getters', () => {
   describe('isExistingRelease', () => {
     it('returns true if the release is an existing release that already exists in the database', () => {
       const state = { tagName: 'test-tag-name' };
@@ -255,6 +255,95 @@ describe('Release detail getters', () => {
 
         expect(getters.isValid(state, mockGetters)).toBe(false);
       });
+    });
+  });
+
+  describe.each([
+    [
+      'returns all the data needed for the releaseUpdate GraphQL query',
+      {
+        projectPath: 'projectPath',
+        release: {
+          tagName: 'release.tagName',
+          name: 'release.name',
+          description: 'release.description',
+          milestones: ['release.milestone[0].title'],
+        },
+      },
+      {
+        projectPath: 'projectPath',
+        tagName: 'release.tagName',
+        name: 'release.name',
+        description: 'release.description',
+        milestones: ['release.milestone[0].title'],
+      },
+    ],
+    [
+      'trims whitespace from the release name',
+      { release: { name: '  name  \t\n' } },
+      { name: 'name' },
+    ],
+    [
+      'returns the name as null if the name is nothing but whitespace',
+      { release: { name: '  \t\n' } },
+      { name: null },
+    ],
+    ['returns the name as null if the name is undefined', { release: {} }, { name: null }],
+    [
+      'returns just the milestone titles even if the release includes full milestone objects',
+      { release: { milestones: [{ title: 'release.milestone[0].title' }] } },
+      { milestones: ['release.milestone[0].title'] },
+    ],
+  ])('releaseUpdateMutatationVariables', (description, state, expectedVariables) => {
+    it(description, () => {
+      const expectedVariablesObject = { input: expect.objectContaining(expectedVariables) };
+
+      const actualVariables = getters.releaseUpdateMutatationVariables(state);
+
+      expect(actualVariables).toEqual(expectedVariablesObject);
+    });
+  });
+
+  describe('releaseCreateMutatationVariables', () => {
+    it('returns all the data needed for the releaseCreate GraphQL query', () => {
+      const state = {
+        createFrom: 'main',
+      };
+
+      const otherGetters = {
+        releaseUpdateMutatationVariables: {
+          input: {
+            name: 'release.name',
+          },
+        },
+        releaseLinksToCreate: [
+          {
+            name: 'link.name',
+            url: 'link.url',
+            linkType: 'link.linkType',
+          },
+        ],
+      };
+
+      const expectedVariables = {
+        input: {
+          name: 'release.name',
+          ref: 'main',
+          assets: {
+            links: [
+              {
+                name: 'link.name',
+                url: 'link.url',
+                linkType: 'LINK.LINKTYPE',
+              },
+            ],
+          },
+        },
+      };
+
+      const actualVariables = getters.releaseCreateMutatationVariables(state, otherGetters);
+
+      expect(actualVariables).toEqual(expectedVariables);
     });
   });
 });

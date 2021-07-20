@@ -10,11 +10,10 @@ RSpec.describe Ci::CreatePipelineService do
     let(:ref)      { 'refs/heads/master' }
     let(:source)   { :push }
     let(:service)  { described_class.new(project, user, { ref: ref }) }
-    let(:pipeline) { service.execute(source) }
+    let(:pipeline) { service.execute(source).payload }
 
     before do
       stub_ci_pipeline_yaml_file(config)
-      stub_feature_flags(ci_raise_job_rules_without_workflow_rules_warning: true)
     end
 
     context 'when created successfully' do
@@ -34,18 +33,6 @@ RSpec.describe Ci::CreatePipelineService do
           expect(pipeline.warning_messages.map(&:content)).to contain_exactly(
             /jobs:test may allow multiple pipelines to run/
           )
-        end
-
-        context 'when feature flag is disabled for the particular warning' do
-          before do
-            stub_feature_flags(ci_raise_job_rules_without_workflow_rules_warning: false)
-          end
-
-          it 'does not contain warnings' do
-            expect(pipeline.error_messages.map(&:content)).to be_empty
-
-            expect(pipeline.warning_messages.map(&:content)).to be_empty
-          end
         end
       end
 
@@ -82,7 +69,7 @@ RSpec.describe Ci::CreatePipelineService do
         end
 
         it 'contains both errors and warnings' do
-          error_message = 'build job: need test is not defined in prior stages'
+          error_message = 'build job: need test is not defined in current or prior stages'
           warning_message = /jobs:test may allow multiple pipelines to run/
 
           expect(pipeline.yaml_errors).to eq(error_message)

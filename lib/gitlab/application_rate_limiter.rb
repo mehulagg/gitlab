@@ -34,6 +34,7 @@ module Gitlab
           group_import:                 { threshold: -> { application_settings.group_import_limit }, interval: 1.minute },
           group_testing_hook:           { threshold: 5, interval: 1.minute },
           profile_add_new_email:        { threshold: 5, interval: 1.minute },
+          web_hook_calls:               { interval: 1.minute },
           profile_resend_email_confirmation:  { threshold: 5, interval: 1.minute },
           update_environment_canary_ingress:  { threshold: 1, interval: 1.minute },
           auto_rollback_deployment:           { threshold: 1, interval: 3.minutes }
@@ -47,7 +48,7 @@ module Gitlab
       # @option scope [Array<ActiveRecord>] Array of ActiveRecord models to scope throttling to a specific request (e.g. per user per project)
       # @option threshold [Integer] Optional threshold value to override default one registered in `.rate_limits`
       # @option interval [Integer] Optional interval value to override default one registered in `.rate_limits`
-      # @option users_allowlist [Array<String>] Optional list of usernames to excepted from the limit. This param will only be functional if Scope includes a current user.
+      # @option users_allowlist [Array<String>] Optional list of usernames to exclude from the limit. This param will only be functional if Scope includes a current user.
       #
       # @return [Boolean] Whether or not a request should be throttled
       def throttled?(key, **options)

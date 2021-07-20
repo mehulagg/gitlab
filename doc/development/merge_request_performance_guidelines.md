@@ -18,7 +18,7 @@ To measure the impact of a merge request you can use
 the following guides:
 
 - [Performance Guidelines](performance.md)
-- [What requires downtime?](what_requires_downtime.md)
+- [Avoiding downtime in migrations](avoiding_downtime_in_migrations.md)
 
 ## Definition
 
@@ -158,6 +158,58 @@ objects_to_update.update_all(some_field: some_value)
 This uses ActiveRecord's `update_all` method to update all rows in a single
 query. This in turn makes it much harder for this code to overload a database.
 
+## Use read replicas when possible
+
+In a DB cluster we have many read replicas and one primary. A classic use of scaling the DB is to have read-only actions be performed by the replicas. We use [load balancing](../administration/database_load_balancing.md) to distribute this load. This allows for the replicas to grow as the pressure on the DB grows.
+
+By default, queries use read-only replicas, but due to
+[primary sticking](../administration/database_load_balancing.md#primary-sticking), GitLab uses the
+primary for some time and reverts to secondaries after they have either caught up or after 30 seconds.
+Doing this can lead to a considerable amount of unnecessary load on the primary.
+To prevent switching to the primary [merge request 56849](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56849) introduced the
+`without_sticky_writes` block. Typically, this method can be applied to prevent primary stickiness
+after a trivial or insignificant write which doesn't affect the following queries in the same session.
+
+To learn when a usage timestamp update can lead the session to stick to the primary and how to
+prevent it by using `without_sticky_writes`, see [merge request 57328](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57328)
+
+As a counterpart of the `without_sticky_writes` utility,
+[merge request 59167](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59167) introduced
+`use_replicas_for_read_queries`. This method forces all read-only queries inside its block to read
+replicas regardless of the current primary stickiness.
+This utility is reserved for cases where queries can tolerate replication lag.
+
+Internally, our database load balancer classifies the queries based on their main statement (`select`, `update`, `delete`, and so on). When in doubt, it redirects the queries to the primary database. Hence, there are some common cases the load balancer sends the queries to the primary unnecessarily:
+
+- Custom queries (via `exec_query`, `execute_statement`, `execute`, and so on)
+- Read-only transactions
+- In-flight connection configuration set
+- Sidekiq background jobs
+
+After the above queries are executed, GitLab
+[sticks to the primary](../administration/database_load_balancing.md#primary-sticking).
+To make the inside queries prefer using the replicas,
+[merge request 59086](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59086) introduced
+`fallback_to_replicas_for_ambiguous_queries`. This MR is also an example of how we redirected a
+costly, time-consuming query to the replicas.
+
+## Use CTEs wisely
+
+Read about [complex queries on the relation object](iterating_tables_in_batches.md#complex-queries-on-the-relation-object) for considerations on how to use CTEs. We have found in some situations that CTEs can become problematic in use (similar to the n+1 problem above). In particular, hierarchical recursive CTE queries such as the CTE in [AuthorizedProjectsWorker](https://gitlab.com/gitlab-org/gitlab/-/issues/325688) are very difficult to optimize and don't scale. We should avoid them when implementing new features that require any kind of hierarchical structure.
+
+CTEs have been effectively used as an optimization fence in many simpler cases,
+such as this [example](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/43242#note_61416277).
+Beginning in PostgreSQL 12, CTEs are inlined then [optimized by default](https://paquier.xyz/postgresql-2/postgres-12-with-materialize/).
+Keeping the old behavior requires marking CTEs with the keyword `MATERIALIZED`.
+
+When building CTE statements, use the `Gitlab::SQL::CTE` class [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56976) in GitLab 13.11.
+By default, this `Gitlab::SQL::CTE` class forces materialization through adding the `MATERIALIZED` keyword for PostgreSQL 12 and higher.
+`Gitlab::SQL::CTE` automatically omits materialization when PostgreSQL 11 is running
+(this behavior is implemented using a custom arel node `Gitlab::Database::AsWithMaterialized` under the surface).
+
+WARNING:
+We plan to drop the support for PostgreSQL 11. Upgrading to GitLab 14.0 requires PostgreSQL 12 or higher.
+
 ## Cached Queries
 
 **Summary:** a merge request **should not** execute duplicated cached queries.
@@ -251,13 +303,13 @@ in a batch style.
 
 **Summary:** You should set a reasonable timeout when the system invokes HTTP calls
 to external services (such as Kubernetes), and it should be executed in Sidekiq, not
-in Puma/Unicorn threads.
+in Puma threads.
 
 Often, GitLab needs to communicate with an external service such as Kubernetes
 clusters. In this case, it's hard to estimate when the external service finishes
 the requested process, for example, if it's a user-owned cluster that's inactive for some reason,
 GitLab might wait for the response forever ([Example](https://gitlab.com/gitlab-org/gitlab/-/issues/31475)).
-This could result in Puma/Unicorn timeout and should be avoided at all cost.
+This could result in Puma timeout and should be avoided at all cost.
 
 You should set a reasonable timeout, gracefully handle exceptions and surface the
 errors in UI or logging internally.
@@ -385,6 +437,8 @@ Take into consideration the following when choosing a pagination strategy:
    The database has to sort and iterate all previous items, and this operation usually
    can result in substantial load put on database.
 
+You can find useful tips related to pagination in the [pagination guidelines](database/pagination_guidelines.md).
+
 ## Badge counters
 
 Counters should always be truncated. It means that we don't want to present
@@ -459,7 +513,7 @@ Performance deficiencies should be addressed right away after we merge initial
 changes.
 
 Read more about when and how feature flags should be used in
-[Feature flags in GitLab development](feature_flags/process.md#feature-flags-in-gitlab-development).
+[Feature flags in GitLab development](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#feature-flags-in-gitlab-development).
 
 ## Storage
 
@@ -513,7 +567,7 @@ to work with you to possibly discover a better solution.
 The usage of local storage is a desired solution to use,
 especially since we work on deploying applications to Kubernetes clusters.
 When you would like to use `Dir.mktmpdir`? In a case when you want for example
-to extract/create archives, perform extensive manipulation of existing data, etc.
+to extract/create archives, perform extensive manipulation of existing data, and so on.
 
 ```ruby
 Dir.mktmpdir('designs') do |path|
@@ -555,10 +609,10 @@ Each feature that accepts data uploads or allows to download them needs to use
 saved directly to Object Storage by Workhorse, and all downloads needs to be served
 by Workhorse.
 
-Performing uploads/downloads via Unicorn/Puma is an expensive operation,
-as it blocks the whole processing slot (worker or thread) for the duration of the upload.
+Performing uploads/downloads via Puma is an expensive operation,
+as it blocks the whole processing slot (thread) for the duration of the upload.
 
-Performing uploads/downloads via Unicorn/Puma also has a problem where the operation
+Performing uploads/downloads via Puma also has a problem where the operation
 can time out, which is especially problematic for slow clients. If clients take a long time
 to upload/download the processing slot might be killed due to request processing
 timeout (usually between 30s-60s).

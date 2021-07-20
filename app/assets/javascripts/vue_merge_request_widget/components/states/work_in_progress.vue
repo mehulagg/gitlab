@@ -2,7 +2,7 @@
 import { GlButton } from '@gitlab/ui';
 import { produce } from 'immer';
 import $ from 'jquery';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import MergeRequest from '~/merge_request';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -70,13 +70,15 @@ export default {
               data: {
                 mergeRequestSetWip: {
                   errors,
-                  mergeRequest: { workInProgress, title },
+                  mergeRequest: { mergeableDiscussionsState, workInProgress, title },
                 },
               },
             },
           ) {
             if (errors?.length) {
-              createFlash(__('Something went wrong. Please try again.'));
+              createFlash({
+                message: __('Something went wrong. Please try again.'),
+              });
 
               return;
             }
@@ -87,9 +89,8 @@ export default {
             });
 
             const data = produce(sourceData, (draftState) => {
-              // eslint-disable-next-line no-param-reassign
+              draftState.project.mergeRequest.mergeableDiscussionsState = mergeableDiscussionsState;
               draftState.project.mergeRequest.workInProgress = workInProgress;
-              // eslint-disable-next-line no-param-reassign
               draftState.project.mergeRequest.title = title;
             });
 
@@ -107,6 +108,7 @@ export default {
               errors: [],
               mergeRequest: {
                 __typename: 'MergeRequest',
+                mergeableDiscussionsState: true,
                 title: this.mr.title,
                 workInProgress: false,
               },
@@ -121,11 +123,18 @@ export default {
               },
             },
           }) => {
-            createFlash(__('The merge request can now be merged.'), 'notice');
+            createFlash({
+              message: __('The merge request can now be merged.'),
+              type: 'notice',
+            });
             $('.merge-request .detail-page-description .title').text(title);
           },
         )
-        .catch(() => createFlash(__('Something went wrong. Please try again.')))
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          }),
+        )
         .finally(() => {
           this.isMakingRequest = false;
         });
@@ -144,7 +153,9 @@ export default {
           })
           .catch(() => {
             this.isMakingRequest = false;
-            createFlash(__('Something went wrong. Please try again.'));
+            createFlash({
+              message: __('Something went wrong. Please try again.'),
+            });
           });
       }
     },

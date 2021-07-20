@@ -1,0 +1,15 @@
+type Step {
+  id: ID
+}
+
+extend type Query {
+  activeStep: Step
+}
+
+extend type Query {
+  stepList: [Step]
+}
+
+extend type Mutation {
+  updateActiveStep(id: ID!): Boolean
+}

@@ -1,61 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'conan ping endpoint' do
-  it 'responds with 401 Unauthorized when no token provided' do
+  it 'responds with 200 OK when no token provided' do
     get api(url)
 
-    expect(response).to have_gitlab_http_status(:unauthorized)
-  end
-
-  it 'responds with 200 OK when valid token is provided' do
-    jwt = build_jwt(personal_access_token)
-    get api(url), headers: build_token_auth_header(jwt.encoded)
-
     expect(response).to have_gitlab_http_status(:ok)
     expect(response.headers['X-Conan-Server-Capabilities']).to eq("")
-  end
-
-  it 'responds with 200 OK when valid job token is provided' do
-    jwt = build_jwt_from_job(job)
-    get api(url), headers: build_token_auth_header(jwt.encoded)
-
-    expect(response).to have_gitlab_http_status(:ok)
-    expect(response.headers['X-Conan-Server-Capabilities']).to eq("")
-  end
-
-  it 'responds with 200 OK when valid deploy token is provided' do
-    jwt = build_jwt_from_deploy_token(deploy_token)
-    get api(url), headers: build_token_auth_header(jwt.encoded)
-
-    expect(response).to have_gitlab_http_status(:ok)
-    expect(response.headers['X-Conan-Server-Capabilities']).to eq("")
-  end
-
-  it 'responds with 401 Unauthorized when invalid access token ID is provided' do
-    jwt = build_jwt(double(id: 12345), user_id: personal_access_token.user_id)
-    get api(url), headers: build_token_auth_header(jwt.encoded)
-
-    expect(response).to have_gitlab_http_status(:unauthorized)
-  end
-
-  it 'responds with 401 Unauthorized when invalid user is provided' do
-    jwt = build_jwt(personal_access_token, user_id: 12345)
-    get api(url), headers: build_token_auth_header(jwt.encoded)
-
-    expect(response).to have_gitlab_http_status(:unauthorized)
-  end
-
-  it 'responds with 401 Unauthorized when the provided JWT is signed with different secret' do
-    jwt = build_jwt(personal_access_token, secret: SecureRandom.base64(32))
-    get api(url), headers: build_token_auth_header(jwt.encoded)
-
-    expect(response).to have_gitlab_http_status(:unauthorized)
-  end
-
-  it 'responds with 401 Unauthorized when invalid JWT is provided' do
-    get api(url), headers: build_token_auth_header('invalid-jwt')
-
-    expect(response).to have_gitlab_http_status(:unauthorized)
   end
 
   context 'packages feature disabled' do
@@ -72,7 +22,10 @@ RSpec.shared_examples 'conan search endpoint' do
   before do
     project.update_column(:visibility_level, Gitlab::VisibilityLevel::PUBLIC)
 
-    get api(url), headers: headers, params: params
+    # Do not pass the HTTP_AUTHORIZATION header,
+    # in order to test that this public project's packages
+    # are visible to anonymous search.
+    get api(url), params: params
   end
 
   subject { json_response['results'] }
@@ -109,6 +62,33 @@ RSpec.shared_examples 'conan authenticate endpoint' do
     end
   end
 
+  it 'responds with 401 Unauthorized when an invalid access token ID is provided' do
+    jwt = build_jwt(double(id: 12345), user_id: personal_access_token.user_id)
+    get api(url), headers: build_token_auth_header(jwt.encoded)
+
+    expect(response).to have_gitlab_http_status(:unauthorized)
+  end
+
+  it 'responds with 401 Unauthorized when invalid user is provided' do
+    jwt = build_jwt(personal_access_token, user_id: 12345)
+    get api(url), headers: build_token_auth_header(jwt.encoded)
+
+    expect(response).to have_gitlab_http_status(:unauthorized)
+  end
+
+  it 'responds with 401 Unauthorized when the provided JWT is signed with different secret' do
+    jwt = build_jwt(personal_access_token, secret: SecureRandom.base64(32))
+    get api(url), headers: build_token_auth_header(jwt.encoded)
+
+    expect(response).to have_gitlab_http_status(:unauthorized)
+  end
+
+  it 'responds with 401 UnauthorizedOK when invalid JWT is provided' do
+    get api(url), headers: build_token_auth_header('invalid-jwt')
+
+    expect(response).to have_gitlab_http_status(:unauthorized)
+  end
+
   context 'when valid JWT access token is provided' do
     it 'responds with 200' do
       subject
@@ -126,7 +106,7 @@ RSpec.shared_examples 'conan authenticate endpoint' do
         expect(payload['user_id']).to eq(personal_access_token.user_id)
 
         duration = payload['exp'] - payload['iat']
-        expect(duration).to eq(1.hour)
+        expect(duration).to eq(::Gitlab::ConanToken::CONAN_TOKEN_EXPIRE_TIME)
       end
     end
   end
@@ -225,6 +205,14 @@ RSpec.shared_examples 'empty recipe for not found package' do
       'aa/bb/%{project}/ccc' % { project: ::Packages::Conan::Metadatum.package_username_from(full_path: project.full_path) }
     end
 
+    let(:presenter) { double('::Packages::Conan::PackagePresenter') }
+
+    before do
+      allow(::Packages::Conan::PackagePresenter).to receive(:new)
+        .with(package, user, package.project, any_args)
+        .and_return(presenter)
+    end
+
     it 'returns not found' do
       allow(::Packages::Conan::PackagePresenter).to receive(:new)
         .with(
@@ -268,8 +256,6 @@ RSpec.shared_examples 'recipe download_urls' do
       'conanmanifest.txt' => "#{url_prefix}/packages/conan/v1/files/#{package.conan_recipe_path}/0/export/conanmanifest.txt"
     }
 
-    allow(presenter).to receive(:recipe_urls) { expected_response }
-
     subject
 
     expect(json_response).to eq(expected_response)
@@ -287,8 +273,6 @@ RSpec.shared_examples 'package download_urls' do
       'conanmanifest.txt' => "#{url_prefix}/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conanmanifest.txt",
       'conan_package.tgz' => "#{url_prefix}/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conan_package.tgz"
     }
-
-    allow(presenter).to receive(:package_urls) { expected_response }
 
     subject
 
@@ -310,16 +294,6 @@ RSpec.shared_examples 'rejects invalid upload_url params' do
   end
 end
 
-RSpec.shared_examples 'successful response when using Unicorn' do
-  context 'on Unicorn', :unicorn do
-    it 'returns successfully' do
-      subject
-
-      expect(response).to have_gitlab_http_status(:ok)
-    end
-  end
-end
-
 RSpec.shared_examples 'recipe snapshot endpoint' do
   subject { get api(url), headers: headers }
 
@@ -329,12 +303,13 @@ RSpec.shared_examples 'recipe snapshot endpoint' do
 
   context 'with existing package' do
     it 'returns a hash of files with their md5 hashes' do
-      expected_response = {
-        'conanfile.py'      => 'md5hash1',
-        'conanmanifest.txt' => 'md5hash2'
-      }
+      conan_file_file = package.package_files.find_by(file_name: 'conanfile.py')
+      conan_manifest_file = package.package_files.find_by(file_name: 'conanmanifest.txt')
 
-      allow(presenter).to receive(:recipe_snapshot) { expected_response }
+      expected_response = {
+        'conanfile.py'      => conan_file_file.file_md5,
+        'conanmanifest.txt' => conan_manifest_file.file_md5
+      }
 
       subject
 
@@ -353,12 +328,10 @@ RSpec.shared_examples 'package snapshot endpoint' do
   context 'with existing package' do
     it 'returns a hash of md5 values for the files' do
       expected_response = {
-        'conaninfo.txt'     => "md5hash1",
-        'conanmanifest.txt' => "md5hash2",
-        'conan_package.tgz' => "md5hash3"
+        'conaninfo.txt'     => "12345abcde",
+        'conanmanifest.txt' => "12345abcde",
+        'conan_package.tgz' => "12345abcde"
       }
-
-      allow(presenter).to receive(:package_snapshot) { expected_response }
 
       subject
 
@@ -389,7 +362,6 @@ RSpec.shared_examples 'recipe upload_urls endpoint' do
 
   it_behaves_like 'rejects invalid recipe'
   it_behaves_like 'rejects invalid upload_url params'
-  it_behaves_like 'successful response when using Unicorn'
 
   it 'returns a set of upload urls for the files requested' do
     subject
@@ -451,7 +423,6 @@ RSpec.shared_examples 'package upload_urls endpoint' do
 
   it_behaves_like 'rejects invalid recipe'
   it_behaves_like 'rejects invalid upload_url params'
-  it_behaves_like 'successful response when using Unicorn'
 
   it 'returns a set of upload urls for the files requested' do
     expected_response = {
@@ -507,19 +478,37 @@ RSpec.shared_examples 'delete package endpoint' do
   end
 end
 
+RSpec.shared_examples 'allows download with no token' do
+  context 'with no private token' do
+    let(:headers) { {} }
+
+    it 'returns 200' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+  end
+end
+
 RSpec.shared_examples 'denies download with no token' do
   context 'with no private token' do
     let(:headers) { {} }
 
-    it 'returns 400' do
+    it 'returns 404' do
       subject
 
-      expect(response).to have_gitlab_http_status(:unauthorized)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 end
 
 RSpec.shared_examples 'a public project with packages' do
+  before do
+    project.update_column(:visibility_level, Gitlab::VisibilityLevel::PUBLIC)
+  end
+
+  it_behaves_like 'allows download with no token'
+
   it 'returns the file' do
     subject
 
@@ -660,7 +649,7 @@ RSpec.shared_examples 'workhorse package file upload endpoint' do
 end
 
 RSpec.shared_examples 'creates build_info when there is a job' do
-  context 'with job token' do
+  context 'with job token', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/294047' do
     let(:jwt) { build_jwt_from_job(job) }
 
     it 'creates a build_info record' do

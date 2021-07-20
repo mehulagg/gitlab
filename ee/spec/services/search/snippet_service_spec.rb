@@ -14,14 +14,14 @@ RSpec.describe Search::SnippetService do
     let(:service) { described_class.new(user, params) }
   end
 
-  describe '#execute', :elastic, :sidekiq_inline do
+  describe '#execute' do
     include_context 'ProjectPolicyTable context'
 
     before do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
     end
 
-    context 'visibility' do
+    context 'visibility', :elastic_delete_by_query, :clean_gitlab_redis_shared_state, :sidekiq_inline do
       include_context 'ProjectPolicyTable context'
       include ProjectHelpers
 

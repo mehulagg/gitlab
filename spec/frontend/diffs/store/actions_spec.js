@@ -8,9 +8,6 @@ import {
   DIFF_VIEW_COOKIE_NAME,
   INLINE_DIFF_VIEW_TYPE,
   PARALLEL_DIFF_VIEW_TYPE,
-  DIFFS_PER_PAGE,
-  DIFF_WHITESPACE_COOKIE_NAME,
-  SHOW_WHITESPACE,
 } from '~/diffs/constants';
 import {
   setBaseConfig,
@@ -54,7 +51,8 @@ import {
 } from '~/diffs/store/actions';
 import * as types from '~/diffs/store/mutation_types';
 import * as utils from '~/diffs/store/utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as workerUtils from '~/diffs/utils/workers';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
@@ -80,7 +78,7 @@ describe('DiffsStoreActions', () => {
     jest.spyOn(utils, 'idleCallback').mockImplementation(() => null);
     ['requestAnimationFrame', 'requestIdleCallback'].forEach((method) => {
       global[method] = (cb) => {
-        cb();
+        cb({ timeRemaining: () => 10 });
       };
     });
   });
@@ -155,16 +153,16 @@ describe('DiffsStoreActions', () => {
 
     it('should fetch batch diff files', (done) => {
       const endpointBatch = '/fetch/diffs_batch';
-      const res1 = { diff_files: [{ file_hash: 'test' }], pagination: { next_page: 2 } };
-      const res2 = { diff_files: [{ file_hash: 'test2' }], pagination: {} };
+      const res1 = { diff_files: [{ file_hash: 'test' }], pagination: { total_pages: 7 } };
+      const res2 = { diff_files: [{ file_hash: 'test2' }], pagination: { total_pages: 7 } };
       mock
         .onGet(
           mergeUrlParams(
             {
               w: '1',
               view: 'inline',
-              page: 1,
-              per_page: DIFFS_PER_PAGE,
+              page: 0,
+              per_page: 5,
             },
             endpointBatch,
           ),
@@ -175,8 +173,8 @@ describe('DiffsStoreActions', () => {
             {
               w: '1',
               view: 'inline',
-              page: 2,
-              per_page: DIFFS_PER_PAGE,
+              page: 5,
+              per_page: 7,
             },
             endpointBatch,
           ),
@@ -198,7 +196,7 @@ describe('DiffsStoreActions', () => {
           { type: types.VIEW_DIFF_FILE, payload: 'test2' },
           { type: types.SET_RETRIEVING_BATCHES, payload: false },
         ],
-        [],
+        [{ type: 'startRenderDiffsQueue' }, { type: 'startRenderDiffsQueue' }],
         done,
       );
     });
@@ -251,6 +249,11 @@ describe('DiffsStoreActions', () => {
           { type: types.SET_LOADING, payload: false },
           { type: types.SET_MERGE_REQUEST_DIFFS, payload: diffMetadata.merge_request_diffs },
           { type: types.SET_DIFF_METADATA, payload: noFilesData },
+          // Workers are synchronous in Jest environment (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58805)
+          {
+            type: types.SET_TREE_DATA,
+            payload: workerUtils.generateTreeList(diffMetadata.diff_files),
+          },
         ],
         [],
         () => {
@@ -291,7 +294,9 @@ describe('DiffsStoreActions', () => {
 
       testAction(fetchCoverageFiles, {}, { endpointCoverage }, [], [], () => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('Something went wrong'));
+        expect(createFlash).toHaveBeenCalledWith({
+          message: expect.stringMatching('Something went wrong'),
+        });
         done();
       });
     });
@@ -1011,14 +1016,29 @@ describe('DiffsStoreActions', () => {
   });
 
   describe('setShowWhitespace', () => {
+    const endpointUpdateUser = 'user/prefs';
+    let putSpy;
+    let mock;
+    let gon;
+
     beforeEach(() => {
+      mock = new MockAdapter(axios);
+      putSpy = jest.spyOn(axios, 'put');
+      gon = window.gon;
+
+      mock.onPut(endpointUpdateUser).reply(200, {});
       jest.spyOn(eventHub, '$emit').mockImplementation();
+    });
+
+    afterEach(() => {
+      mock.restore();
+      window.gon = gon;
     });
 
     it('commits SET_SHOW_WHITESPACE', (done) => {
       testAction(
         setShowWhitespace,
-        { showWhitespace: true },
+        { showWhitespace: true, updateDatabase: false },
         {},
         [{ type: types.SET_SHOW_WHITESPACE, payload: true }],
         [],
@@ -1026,32 +1046,33 @@ describe('DiffsStoreActions', () => {
       );
     });
 
-    it('sets cookie', () => {
-      setShowWhitespace({ commit() {} }, { showWhitespace: true });
+    it('saves to the database when the user is logged in', async () => {
+      window.gon = { current_user_id: 12345 };
 
-      expect(Cookies.get(DIFF_WHITESPACE_COOKIE_NAME)).toEqual(SHOW_WHITESPACE);
+      await setShowWhitespace(
+        { state: { endpointUpdateUser }, commit() {} },
+        { showWhitespace: true, updateDatabase: true },
+      );
+
+      expect(putSpy).toHaveBeenCalledWith(endpointUpdateUser, { show_whitespace_in_diffs: true });
     });
 
-    it('calls history pushState', () => {
-      setShowWhitespace({ commit() {} }, { showWhitespace: true, pushState: true });
+    it('does not try to save to the API if the user is not logged in', async () => {
+      window.gon = {};
 
-      expect(window.history.pushState).toHaveBeenCalled();
+      await setShowWhitespace(
+        { state: { endpointUpdateUser }, commit() {} },
+        { showWhitespace: true, updateDatabase: true },
+      );
+
+      expect(putSpy).not.toHaveBeenCalled();
     });
 
-    it('calls history pushState with merged params', () => {
-      window.history.pushState({}, '', '?test=1');
-
-      setShowWhitespace({ commit() {} }, { showWhitespace: true, pushState: true });
-
-      expect(
-        window.history.pushState.mock.calls[window.history.pushState.mock.calls.length - 1][2],
-      ).toMatch(/(.*)\?test=1&w=0/);
-
-      window.history.pushState({}, '', '?');
-    });
-
-    it('emits eventHub event', () => {
-      setShowWhitespace({ commit() {} }, { showWhitespace: true, pushState: true });
+    it('emits eventHub event', async () => {
+      await setShowWhitespace(
+        { state: {}, commit() {} },
+        { showWhitespace: true, updateDatabase: false },
+      );
 
       expect(eventHub.$emit).toHaveBeenCalledWith('refetchDiffData');
     });
@@ -1459,19 +1480,42 @@ describe('DiffsStoreActions', () => {
   });
 
   describe('setFileByFile', () => {
+    const updateUserEndpoint = 'user/prefs';
+    let putSpy;
+    let mock;
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      putSpy = jest.spyOn(axios, 'put');
+
+      mock.onPut(updateUserEndpoint).reply(200, {});
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
     it.each`
       value
       ${true}
       ${false}
-    `('commits SET_FILE_BY_FILE with the new value $value', ({ value }) => {
-      return testAction(
-        setFileByFile,
-        { fileByFile: value },
-        { viewDiffsFileByFile: null },
-        [{ type: types.SET_FILE_BY_FILE, payload: value }],
-        [],
-      );
-    });
+    `(
+      'commits SET_FILE_BY_FILE and persists the File-by-File user preference with the new value $value',
+      async ({ value }) => {
+        await testAction(
+          setFileByFile,
+          { fileByFile: value },
+          {
+            viewDiffsFileByFile: null,
+            endpointUpdateUser: updateUserEndpoint,
+          },
+          [{ type: types.SET_FILE_BY_FILE, payload: value }],
+          [],
+        );
+
+        expect(putSpy).toHaveBeenCalledWith(updateUserEndpoint, { view_diffs_file_by_file: value });
+      },
+    );
   });
 
   describe('reviewFile', () => {

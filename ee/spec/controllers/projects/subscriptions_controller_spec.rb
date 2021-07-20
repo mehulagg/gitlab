@@ -45,7 +45,7 @@ RSpec.describe Projects::SubscriptionsController do
               it 'sets the flash' do
                 post_create
 
-                expect(response).to set_flash[:notice].to('Subscription successfully created.')
+                expect(controller).to set_flash[:notice].to('Subscription successfully created.')
               end
 
               it 'redirects to ci_cd settings' do
@@ -67,7 +67,7 @@ RSpec.describe Projects::SubscriptionsController do
               it 'sets the flash' do
                 post_create
 
-                expect(response).to set_flash[:alert].to(['Maximum number of ci project subscriptions (2) exceeded'])
+                expect(controller).to set_flash[:alert].to(['Maximum number of ci project subscriptions (2) exceeded'])
               end
 
               it 'redirects to ci_cd settings' do
@@ -90,7 +90,7 @@ RSpec.describe Projects::SubscriptionsController do
             it 'sets the flash' do
               post_create
 
-              expect(response).to set_flash[:alert].to(['Upstream project needs to be public'])
+              expect(controller).to set_flash[:alert].to(['Upstream project needs to be public'])
             end
 
             it 'redirects to ci_cd settings' do
@@ -109,7 +109,7 @@ RSpec.describe Projects::SubscriptionsController do
           it 'sets the flash' do
             post_create
 
-            expect(response).to set_flash[:warning].to('This project path either does not exist or you do not have access.')
+            expect(controller).to set_flash[:warning].to('This project path either does not exist or you do not have access.')
           end
 
           it 'redirects to ci_cd settings' do
@@ -174,7 +174,7 @@ RSpec.describe Projects::SubscriptionsController do
         it 'sets the flash' do
           delete_destroy
 
-          expect(response).to set_flash[:notice].to('Subscription successfully deleted.')
+          expect(controller).to set_flash[:notice].to('Subscription successfully deleted.')
         end
 
         it 'redirects to ci_cd settings' do

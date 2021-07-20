@@ -17,8 +17,8 @@
       "anomalous": { "type": ["array"] }
     },
     "interval": { "type": "string" },
-    "from": { "type": "date" },
-    "to": { "type": "date" },
+    "from": { "type": "string", "format": "date-time" },
+    "to": { "type": "string", "format": "date-time" },
     "status": { "type": "string", "enum": ["success", "failure"] }
   },
   "additionalProperties": false

@@ -63,6 +63,9 @@ module Gitlab
         op = build_op(ref, proxy)
 
         submit(ref, { index: op }, proxy.as_indexed_json)
+      rescue ::Elastic::Latest::DocumentShouldBeDeletedFromIndexError => error
+        logger.warn(message: error.message, record_id: error.record_id, class_name: error.class_name)
+        delete(ref)
       end
 
       def delete(ref)
@@ -134,7 +137,7 @@ module Gitlab
 
       def try_send_bulk
         process_errors(client.bulk(body: body))
-      rescue => err
+      rescue StandardError => err
         # If an exception is raised, treat the entire bulk as failed
         logger.error(message: 'bulk_exception', error_class: err.class.to_s, error_message: err.message)
 

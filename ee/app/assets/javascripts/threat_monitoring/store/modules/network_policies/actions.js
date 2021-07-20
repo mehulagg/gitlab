@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as createFlash, FLASH_TYPES } from '~/flash';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { s__, sprintf } from '~/locale';
@@ -8,34 +8,13 @@ export const setEndpoints = ({ commit }, endpoints) => {
   commit(types.SET_ENDPOINT, endpoints.networkPoliciesEndpoint);
 };
 
-const commitReceivePoliciesError = (commit, data) => {
-  const error =
-    data?.error || s__('NetworkPolicies|Something went wrong, unable to fetch policies');
-  const policies = data?.payload?.length ? data.payload : [];
-  commit(types.RECEIVE_POLICIES_ERROR, policies);
-  createFlash(error);
-};
-
-export const fetchPolicies = ({ state, commit }, environmentId) => {
-  if (!state.policiesEndpoint) return commitReceivePoliciesError(commit);
-
-  commit(types.REQUEST_POLICIES);
-
-  const params = environmentId ? { params: { environment_id: environmentId } } : {};
-
-  return axios
-    .get(state.policiesEndpoint, params)
-    .then(({ data }) => commit(types.RECEIVE_POLICIES_SUCCESS, data))
-    .catch(({ response }) => {
-      commitReceivePoliciesError(commit, response?.data);
-    });
-};
-
 const commitPolicyError = (commit, type, payload) => {
   const error =
     payload?.error || s__('NetworkPolicies|Something went wrong, failed to update policy');
   commit(type, error);
-  createFlash(error);
+  createFlash({
+    message: error,
+  });
 };
 
 export const createPolicy = ({ state, commit }, { environmentId, policy }) => {
@@ -52,12 +31,13 @@ export const createPolicy = ({ state, commit }, { environmentId, policy }) => {
     })
     .then(({ data }) => {
       commit(types.RECEIVE_CREATE_POLICY_SUCCESS, data);
-      createFlash(
-        sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
+      createFlash({
+        message: sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
           policyName: policy.name,
         }),
-        FLASH_TYPES.SUCCESS,
-      );
+
+        type: FLASH_TYPES.SUCCESS,
+      });
     })
     .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_CREATE_POLICY_ERROR, error?.response?.data),
@@ -82,12 +62,13 @@ export const updatePolicy = ({ state, commit }, { environmentId, policy }) => {
         policy,
         updatedPolicy: data,
       });
-      createFlash(
-        sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
+      createFlash({
+        message: sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
           policyName: policy.name,
         }),
-        FLASH_TYPES.SUCCESS,
-      );
+
+        type: FLASH_TYPES.SUCCESS,
+      });
     })
     .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_UPDATE_POLICY_ERROR, error?.response?.data),

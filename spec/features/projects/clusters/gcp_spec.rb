@@ -119,7 +119,7 @@ RSpec.describe 'Gcp Cluster', :js do
       context 'when user disables the cluster' do
         before do
           page.find(:css, '.js-cluster-enable-toggle-area .js-project-feature-toggle').click
-          page.within('.js-cluster-integration-form') { click_button 'Save changes' }
+          page.within('.js-cluster-details-form') { click_button 'Save changes' }
         end
 
         it 'user sees the successful message' do
@@ -214,7 +214,7 @@ RSpec.describe 'Gcp Cluster', :js do
     it 'user does not see the offer' do
       page.within('.as-third-party-offers') do
         click_button 'Expand'
-        check 'Do not display offers from third parties within GitLab'
+        check 'Do not display offers from third parties'
         click_button 'Save changes'
       end
 

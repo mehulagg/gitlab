@@ -107,16 +107,6 @@ RSpec.describe 'Querying an Iteration' do
           let(:expected_web_url) { /#{expected_web_path}$/ }
         end
       end
-
-      describe 'project-owned iteration' do
-        it_behaves_like 'scoped path' do
-          let(:queried_iteration) { project_iteration }
-          let(:expected_scope_path) { project_iteration_path(project, project_iteration.id) }
-          let(:expected_scope_url) { /#{expected_scope_path}$/ }
-          let(:expected_web_path) { project_iteration_path(project, project_iteration.id) }
-          let(:expected_web_url) { /#{expected_web_path}$/ }
-        end
-      end
     end
 
     context 'inside a group context' do

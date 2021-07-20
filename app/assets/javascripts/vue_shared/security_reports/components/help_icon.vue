@@ -34,7 +34,7 @@ export default {
   <span v-if="discoverProjectSecurityPath">
     <gl-button
       ref="discoverProjectSecurity"
-      icon="information-o"
+      icon="question-o"
       category="tertiary"
       :aria-label="$options.i18n.upgradeToManageVulnerabilities"
     />
@@ -53,6 +53,6 @@ export default {
   </span>
 
   <gl-link v-else target="_blank" :href="helpPath" :aria-label="$options.i18n.securityReportsHelp">
-    <gl-icon name="question" />
+    <gl-icon name="question-o" />
   </gl-link>
 </template>

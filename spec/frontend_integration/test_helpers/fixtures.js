@@ -31,8 +31,20 @@ export const getBranch = factory.json(() =>
 export const getMergeRequests = factory.json(() =>
   require('test_fixtures/api/merge_requests/get.json'),
 );
+export const getMergeRequestWithChanges = factory.json(() =>
+  require('test_fixtures/api/merge_requests/changes.json'),
+);
+export const getMergeRequestVersions = factory.json(() =>
+  require('test_fixtures/api/merge_requests/versions.json'),
+);
 export const getRepositoryFiles = factory.json(() =>
   require('test_fixtures/projects_json/files.json'),
+);
+export const getDiffsMetadata = factory.json(() =>
+  require('test_fixtures/merge_request_diffs/diffs_metadata.json'),
+);
+export const getDiffsBatch = factory.json(() =>
+  require('test_fixtures/merge_request_diffs/diffs_batch.json'),
 );
 export const getPipelinesEmptyResponse = factory.json(() =>
   require('test_fixtures/projects_json/pipelines_empty.json'),

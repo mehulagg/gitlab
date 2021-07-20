@@ -1,24 +1,47 @@
-import { shallowMount } from '@vue/test-utils';
+import '~/commons';
+import { mount } from '@vue/test-utils';
 import EmptyState from '~/pipelines/components/pipelines_list/empty_state.vue';
+import PipelinesCiTemplates from '~/pipelines/components/pipelines_list/pipelines_ci_templates.vue';
 
 describe('Pipelines Empty State', () => {
   let wrapper;
 
-  const findGetStartedButton = () => wrapper.find('[data-testid="get-started-pipelines"]');
-  const findInfoText = () => wrapper.find('[data-testid="info-text"]').text();
-  const createWrapper = () => {
-    wrapper = shallowMount(EmptyState, {
+  const findIllustration = () => wrapper.find('img');
+  const findButton = () => wrapper.find('a');
+  const pipelinesCiTemplates = () => wrapper.findComponent(PipelinesCiTemplates);
+
+  const createWrapper = (props = {}) => {
+    wrapper = mount(EmptyState, {
+      provide: {
+        pipelineEditorPath: '',
+        suggestedCiTemplates: [],
+      },
       propsData: {
-        helpPagePath: 'foo',
-        emptyStateSvgPath: 'foo',
+        emptyStateSvgPath: 'foo.svg',
         canSetCi: true,
+        ...props,
       },
     });
   };
 
-  describe('renders', () => {
+  describe('when user can configure CI', () => {
     beforeEach(() => {
-      createWrapper();
+      createWrapper({}, mount);
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      wrapper = null;
+    });
+
+    it('should render the CI/CD templates', () => {
+      expect(pipelinesCiTemplates()).toExist();
+    });
+  });
+
+  describe('when user cannot configure CI', () => {
+    beforeEach(() => {
+      createWrapper({ canSetCi: false }, mount);
     });
 
     afterEach(() => {
@@ -27,26 +50,15 @@ describe('Pipelines Empty State', () => {
     });
 
     it('should render empty state SVG', () => {
-      expect(wrapper.find('img').attributes('src')).toBe('foo');
+      expect(findIllustration().attributes('src')).toBe('foo.svg');
     });
 
     it('should render empty state header', () => {
-      expect(wrapper.find('[data-testid="header-text"]').text()).toBe('Build with confidence');
+      expect(wrapper.text()).toBe('This project is not currently set up to run pipelines.');
     });
 
-    it('should render a link with provided help path', () => {
-      expect(findGetStartedButton().attributes('href')).toBe('foo');
-    });
-
-    it('should render empty state information', () => {
-      expect(findInfoText()).toContain(
-        'GitLab CI/CD can automatically build, test, and deploy your code. Let GitLab take care of time',
-        'consuming tasks, so you can spend more time creating',
-      );
-    });
-
-    it('should render button text', () => {
-      expect(findGetStartedButton().text()).toBe('Get started with CI/CD');
+    it('should not render a link', () => {
+      expect(findButton().exists()).toBe(false);
     });
   });
 });

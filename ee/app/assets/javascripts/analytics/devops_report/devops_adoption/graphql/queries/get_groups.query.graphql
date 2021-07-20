@@ -1,0 +1,3 @@
+query getGroups($search: String) {
+  groups(search: $search) @client
+}

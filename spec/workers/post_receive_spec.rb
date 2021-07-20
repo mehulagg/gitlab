@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe PostReceive do
   include AfterNextHelpers
-  include ServicesHelper
 
   let(:changes) { "123456 789012 refs/heads/tést\n654321 210987 refs/tags/tag" }
   let(:wrongly_encoded_changes) { changes.encode("ISO-8859-1").force_encoding("UTF-8") }
@@ -93,6 +92,14 @@ RSpec.describe PostReceive do
 
         perform
       end
+
+      it 'tracks an event for the empty_repo_upload experiment', :experiment do
+        expect_next_instance_of(EmptyRepoUploadExperiment) do |e|
+          expect(e).to receive(:track_initial_write)
+        end
+
+        perform
+      end
     end
 
     shared_examples 'not updating remote mirrors' do
@@ -159,7 +166,7 @@ RSpec.describe PostReceive do
         end
 
         it 'expires the status cache' do
-          expect(project.repository).to receive(:empty?).and_return(true)
+          expect(project.repository).to receive(:empty?).at_least(:once).and_return(true)
           expect(project.repository).to receive(:expire_status_cache)
 
           perform
@@ -226,7 +233,7 @@ RSpec.describe PostReceive do
         end
 
         it 'calls Git::ProcessRefChangesService' do
-          expect_execution_of(Git::ProcessRefChangesService)
+          expect(Git::ProcessRefChangesService).to get_executed
 
           perform
         end
@@ -261,7 +268,7 @@ RSpec.describe PostReceive do
           allow(Gitlab::DataBuilder::Repository).to receive(:update).and_return(fake_hook_data)
           # silence hooks so we can isolate
           allow_next(Key).to receive(:post_create_hook).and_return(true)
-          expect_execution_of(Git::ProcessRefChangesService)
+          expect(Git::ProcessRefChangesService).to get_executed
         end
 
         it 'calls SystemHooksService' do
@@ -367,11 +374,11 @@ RSpec.describe PostReceive do
 
     it 'asks the project to trigger all hooks' do
       create(:project_hook, push_events: true, tag_push_events: true, project: project)
-      create(:custom_issue_tracker_service, push_events: true, merge_requests_events: false, project: project)
+      create(:custom_issue_tracker_integration, push_events: true, merge_requests_events: false, project: project)
       allow(Project).to receive(:find_by).and_return(project)
 
       expect(project).to receive(:execute_hooks).twice
-      expect(project).to receive(:execute_services).twice
+      expect(project).to receive(:execute_integrations).twice
 
       perform
     end

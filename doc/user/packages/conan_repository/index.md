@@ -4,9 +4,9 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Conan packages in the Package Registry
+# Conan packages in the Package Registry **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8248) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8248) in GitLab Premium 12.6.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 Publish Conan packages in your project's Package Registry. Then install the
@@ -17,6 +17,9 @@ remote and authenticate with it.
 
 Then you can run `conan` commands and publish your package to the
 Package Registry.
+
+For documentation of the specific API endpoints that the Conan package manager
+client uses, see the [Conan API documentation](../../../api/packages/conan.md).
 
 ## Build a Conan package
 
@@ -125,7 +128,7 @@ To add the remote:
    For example:
 
    ```shell
-   conan search Hello* --all --remote=gitlab
+   conan search Hello* --remote=gitlab
    ```
 
 ### Add a remote for your instance
@@ -171,6 +174,10 @@ convention.
 
 ## Authenticate to the Package Registry
 
+GitLab requires authentication to upload packages, and to install packages
+from private and internal projects. (You can, however, install packages
+from public projects without authentication.)
+
 To authenticate to the Package Registry, you need one of the following:
 
 - A [personal access token](../../../user/profile/personal_access_tokens.md)
@@ -178,6 +185,10 @@ To authenticate to the Package Registry, you need one of the following:
 - A [deploy token](../../project/deploy_tokens/index.md) with the
   scope set to `read_package_registry`, `write_package_registry`, or both.
 - A [CI job token](#publish-a-conan-package-by-using-cicd).
+
+NOTE:
+Packages from private and internal projects are hidden if you are not
+authenticated. If you try to search or download a package from a private or internal project without authenticating, you will receive the error `unable to find the package in remote` in the Conan client.
 
 ### Add your credentials to the GitLab remote
 
@@ -258,7 +269,7 @@ conan upload Hello/0.1@mycompany/beta --all
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11678) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.7.
 
-To work with Conan commands in [GitLab CI/CD](../../../ci/README.md), you can
+To work with Conan commands in [GitLab CI/CD](../../../ci/index.md), you can
 use `CI_JOB_TOKEN` in place of the personal access token in your commands.
 
 You can provide the `CONAN_LOGIN_USERNAME` and `CONAN_PASSWORD` with each Conan
@@ -270,7 +281,7 @@ image: conanio/gcc7
 create_package:
   stage: deploy
   script:
-    - conan remote add gitlab https://gitlab.example.com/api/v4/packages/conan
+    - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan
     - conan new <package-name>/0.1 -t
     - conan create . <group-name>+<project-name>/stable
     - CONAN_LOGIN_USERNAME=ci_user CONAN_PASSWORD=${CI_JOB_TOKEN} conan upload <package-name>/0.1@<group-name>+<project-name>/stable --all --remote=gitlab
@@ -302,8 +313,9 @@ file.
 Prerequisites:
 
 - The Conan remote [must be configured](#add-the-package-registry-as-a-conan-remote).
-- [Authentication](#authenticate-to-the-package-registry) with the
-  Package Registry must be configured.
+- For private and internal projects, you must configure
+  [Authentication](#authenticate-to-the-package-registry)
+  with the Package Registry.
 
 1. In the project where you want to install the package as a dependency, open
    `conanfile.txt`. Or, in the root of your project, create a file called
@@ -397,16 +409,3 @@ The GitLab Conan repository supports the following Conan CLI commands:
   packages you have permission to view.
 - `conan info`: View the information on a given package from the Package Registry.
 - `conan remove`: Delete the package from the Package Registry.
-
-## Troubleshooting Conan packages
-
-### `ERROR: <package> was not found in remote <remote>`
-
-When you attempt to install a Conan package, you might receive a `404` error
-like `ERROR: <package> was not found in remote <remote>`.
-
-This issue occurs when you request a download from the project-level Conan API.
-The resulting URL is missing is project's `/<id>` and Conan commands, like
-`conan install`, fail.
-
-For more information, see [issue 270129](https://gitlab.com/gitlab-org/gitlab/-/issues/270129).

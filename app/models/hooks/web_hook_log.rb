@@ -5,6 +5,11 @@ class WebHookLog < ApplicationRecord
   include Presentable
   include DeleteWithLimit
   include CreatedAtFilterable
+  include PartitionedTable
+
+  self.primary_key = :id
+
+  partitioned_by :created_at, strategy: :monthly, retain_for: 3.months
 
   belongs_to :web_hook
 

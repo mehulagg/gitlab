@@ -15,11 +15,17 @@ turn communicate with the servers.
 GitLab Premium includes a bundled version of [Consul](https://www.consul.io/)
 a service networking solution that you can manage by using `/etc/gitlab/gitlab.rb`.
 
+## Prerequisites
+
+Before configuring Consul:
+
+1. Review the [reference architecture](reference_architectures/index.md#available-reference-architectures)
+   documentation to determine the number of Consul server nodes you should have.
+1. If necessary, ensure the [appropriate ports are open](https://docs.gitlab.com/omnibus/package-information/defaults.html#ports) in your firewall.
+
 ## Configure the Consul nodes
 
-After you review the [reference architecture](reference_architectures/index.md#available-reference-architectures)
-documentation to determine the number of Consul server nodes you should have,
-on _each_ Consul server node:
+On _each_ Consul server node:
 
 1. Follow the instructions to [install](https://about.gitlab.com/install/)
    GitLab by choosing your preferred platform, but do not supply the
@@ -80,10 +86,19 @@ within each node. The command will return an empty array if the cluster is healt
 curl "http://127.0.0.1:8500/v1/health/state/critical"
 ```
 
+If the Consul version has changed, you'll see a notice at the end of `gitlab-ctl reconfigure`
+informing you that Consul needs to be restarted for the new version to be used.
+
+Restart Consul one node at a time:
+
+```shell
+sudo gitlab-ctl restart consul
+```
+
 Consul nodes communicate using the raft protocol. If the current leader goes
 offline, there needs to be a leader election. A leader node must exist to facilitate
 synchronization across the cluster. If too many nodes go offline at the same time,
-the cluster will lose quorum and not elect a leader due to
+the cluster loses quorum and doesn't elect a leader due to
 [broken consensus](https://www.consul.io/docs/architecture/consensus).
 
 Consult the [troubleshooting section](#troubleshooting-consul) if the cluster is not
@@ -122,19 +137,19 @@ db-a            XX.XX.X.Y:8301        alive   client  0.9.0  2         gitlab_co
 db-b            XX.XX.X.Y:8301        alive   client  0.9.0  2         gitlab_consul
 ```
 
-Ideally all nodes will have a `Status` of `alive`.
+Ideally all nodes have a `Status` of `alive`.
 
 ### Restart Consul
 
 If it is necessary to restart Consul, it is important to do this in
 a controlled manner to maintain quorum. If quorum is lost, to recover the cluster,
-you will need to follow the Consul [outage recovery](#outage-recovery) process.
+you follow the Consul [outage recovery](#outage-recovery) process.
 
 To be safe, it's recommended that you only restart Consul in one node at a time to
 ensure the cluster remains intact. For larger clusters, it is possible to restart
 multiple nodes at a time. See the
 [Consul consensus document](https://www.consul.io/docs/architecture/consensus#deployment-table)
-for how many failures it can tolerate. This will be the number of simultaneous
+for the number of failures it can tolerate. This will be the number of simultaneous
 restarts it can sustain.
 
 To restart Consul:
@@ -145,13 +160,13 @@ sudo gitlab-ctl restart consul
 
 ### Consul nodes unable to communicate
 
-By default, Consul will attempt to
-[bind](https://www.consul.io/docs/agent/options.html#_bind) to `0.0.0.0`, but
-it will advertise the first private IP address on the node for other Consul nodes
+By default, Consul attempts to
+[bind](https://www.consul.io/docs/agent/options#_bind) to `0.0.0.0`, but
+it advertises the first private IP address on the node for other Consul nodes
 to communicate with it. If the other nodes cannot communicate with a node on
-this address, then the cluster will have a failed status.
+this address, then the cluster has a failed status.
 
-If you are running into this issue, you will see messages like the following in `gitlab-ctl tail consul` output:
+If you run into this issue, then messages like the following are output in `gitlab-ctl tail consul`:
 
 ```plaintext
 2017-09-25_19:53:39.90821     2017/09/25 19:53:39 [WARN] raft: no known peers, aborting election
@@ -181,10 +196,10 @@ If you still see the errors, you may have to
 
 ### Consul does not start - multiple private IPs
 
-In case that a node has multiple private IPs, Consul will be confused as to
-which of the private addresses to advertise, and then immediately exit on start.
+If a node has multiple private IPs, Consul doesn't know about
+which of the private addresses to advertise, and then it immediately exits on start.
 
-You will see messages like the following in `gitlab-ctl tail consul` output:
+Messages like the following are output in `gitlab-ctl tail consul`:
 
 ```plaintext
 2017-11-09_17:41:45.52876 ==> Starting Consul agent...
@@ -211,8 +226,8 @@ To fix this:
 
 ### Outage recovery
 
-If you lost enough Consul nodes in the cluster to break quorum, then the cluster
-is considered failed, and it will not function without manual intervention.
+If you have lost enough Consul nodes in the cluster to break quorum, then the cluster
+is considered to have failed and cannot function without manual intervention.
 In that case, you can either recreate the nodes from scratch or attempt a
 recover.
 

@@ -6,7 +6,7 @@ module Gitlab
       class RelationFactory
         include Gitlab::Utils::StrongMemoize
 
-        IMPORTED_OBJECT_MAX_RETRIES = 5.freeze
+        IMPORTED_OBJECT_MAX_RETRIES = 5
 
         OVERRIDES = {}.freeze
         EXISTING_OBJECT_RELATIONS = %i[].freeze
@@ -44,8 +44,9 @@ module Gitlab
           relation_name.to_s.constantize
         end
 
-        def initialize(relation_sym:, relation_hash:, members_mapper:, object_builder:, user:, importable:, excluded_keys: [])
+        def initialize(relation_sym:, relation_index:, relation_hash:, members_mapper:, object_builder:, user:, importable:, excluded_keys: [])
           @relation_name = self.class.overrides[relation_sym]&.to_sym || relation_sym
+          @relation_index = relation_index
           @relation_hash = relation_hash.except('noteable_id')
           @members_mapper = members_mapper
           @object_builder = object_builder
@@ -68,6 +69,7 @@ module Gitlab
         # the relation_hash, updating references with new object IDs, mapping users using
         # the "members_mapper" object, also updating notes if required.
         def create
+          return @relation_hash if author_relation?
           return if invalid_relation? || predefined_relation?
 
           setup_base_models
@@ -92,6 +94,10 @@ module Gitlab
 
         def predefined_relation?
           relation_class.try(:predefined_id?, @relation_hash['id'])
+        end
+
+        def author_relation?
+          @relation_name == :author
         end
 
         def setup_models

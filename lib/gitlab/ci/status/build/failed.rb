@@ -20,13 +20,19 @@ module Gitlab
             scheduler_failure: 'scheduler failure',
             data_integrity_failure: 'data integrity failure',
             forward_deployment_failure: 'forward deployment failure',
+            pipeline_loop_detected: 'job would create infinitely looping pipelines',
             invalid_bridge_trigger: 'downstream pipeline trigger definition is invalid',
             downstream_bridge_project_not_found: 'downstream project could not be found',
             insufficient_bridge_permissions: 'no permissions to trigger downstream pipeline',
             bridge_pipeline_is_child_pipeline: 'creation of child pipeline not allowed from another child pipeline',
             downstream_pipeline_creation_failed: 'downstream pipeline can not be created',
             secrets_provider_not_found: 'secrets provider can not be found',
-            reached_max_descendant_pipelines_depth: 'reached maximum depth of child pipelines'
+            reached_max_descendant_pipelines_depth: 'reached maximum depth of child pipelines',
+            project_deleted: 'pipeline project was deleted',
+            user_blocked: 'pipeline user was blocked',
+            ci_quota_exceeded: 'no more CI minutes available',
+            no_matching_runner: 'no matching runner available',
+            trace_size_exceeded: 'log size limit exceeded'
           }.freeze
 
           private_constant :REASONS
@@ -66,4 +72,4 @@ module Gitlab
   end
 end
 
-Gitlab::Ci::Status::Build::Failed.prepend_if_ee('::EE::Gitlab::Ci::Status::Build::Failed')
+Gitlab::Ci::Status::Build::Failed.prepend_mod_with('Gitlab::Ci::Status::Build::Failed')

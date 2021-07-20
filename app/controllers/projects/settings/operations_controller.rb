@@ -3,12 +3,9 @@
 module Projects
   module Settings
     class OperationsController < Projects::ApplicationController
+      layout 'project_settings'
       before_action :authorize_admin_operations!
       before_action :authorize_read_prometheus_alerts!, only: [:reset_alerting_token]
-
-      before_action do
-        push_frontend_feature_flag(:multiple_http_integrations_custom_mapping, @project)
-      end
 
       respond_to :json, only: [:reset_alerting_token, :reset_pagerduty_token]
 
@@ -68,7 +65,7 @@ module Projects
         return unless external_url_previous_change
         return unless external_url_previous_change[0].blank? && external_url_previous_change[1].present?
 
-        ::Gitlab::Tracking.event('project:operations:tracing', 'external_url_populated')
+        ::Gitlab::Tracking.event('project:operations:tracing', 'external_url_populated', user: current_user, project: project, namespace: project.namespace)
       end
 
       def alerting_params
@@ -158,4 +155,4 @@ module Projects
   end
 end
 
-Projects::Settings::OperationsController.prepend_if_ee('::EE::Projects::Settings::OperationsController')
+Projects::Settings::OperationsController.prepend_mod_with('Projects::Settings::OperationsController')

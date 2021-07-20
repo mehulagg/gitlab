@@ -3,6 +3,8 @@
 module QA
   module Resource
     module KubernetesCluster
+      # TODO: This resource is currently broken, since one-click apps have been removed.
+      #       See https://gitlab.com/gitlab-org/gitlab/-/issues/333818
       class ProjectCluster < Base
         attr_writer :cluster,
                     :install_ingress, :install_prometheus, :install_runner, :domain
@@ -11,23 +13,23 @@ module QA
           Resource::Project.fabricate!
         end
 
-        attribute :ingress_ip do
-          Page::Project::Operations::Kubernetes::Show.perform(&:ingress_ip)
+        def ingress_ip
+          @ingress_ip ||= @cluster.fetch_external_ip_for_ingress
         end
 
         def fabricate!
           project.visit!
 
           Page::Project::Menu.perform(
-            &:go_to_operations_kubernetes)
+            &:go_to_infrastructure_kubernetes)
 
-          Page::Project::Operations::Kubernetes::Index.perform(
+          Page::Project::Infrastructure::Kubernetes::Index.perform(
             &:add_kubernetes_cluster)
 
-          Page::Project::Operations::Kubernetes::Add.perform(
+          Page::Project::Infrastructure::Kubernetes::Add.perform(
             &:add_existing_cluster)
 
-          Page::Project::Operations::Kubernetes::AddExisting.perform do |cluster_page|
+          Page::Project::Infrastructure::Kubernetes::AddExisting.perform do |cluster_page|
             cluster_page.set_cluster_name(@cluster.cluster_name)
             cluster_page.set_api_url(@cluster.api_url)
             cluster_page.set_ca_certificate(@cluster.ca_certificate)
@@ -36,20 +38,9 @@ module QA
             cluster_page.add_cluster!
           end
 
-          Page::Project::Operations::Kubernetes::Show.perform do |show|
+          Page::Project::Infrastructure::Kubernetes::Show.perform do |show|
             # We must wait a few seconds for permissions to be set up correctly for new cluster
             sleep 25
-
-            # Open applications tab
-            show.open_applications
-
-            show.install!(:ingress) if @install_ingress
-            show.install!(:prometheus) if @install_prometheus
-            show.install!(:runner) if @install_runner
-
-            show.await_installed(:ingress) if @install_ingress
-            show.await_installed(:prometheus) if @install_prometheus
-            show.await_installed(:runner) if @install_runner
 
             if @install_ingress
               populate(:ingress_ip)

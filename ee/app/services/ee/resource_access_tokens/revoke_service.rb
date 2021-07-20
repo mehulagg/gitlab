@@ -13,18 +13,20 @@ module EE
 
       def audit_event_service(token, response)
         message = if response.success?
-                    "Revoked #{resource.class.name.downcase} access token with token_id: #{access_token.id}"
+                    "Revoked #{resource.class.name.downcase} access token with token_id: #{token.id}"
                   else
-                    "Attempted to revoke #{resource.class.name.downcase} access token with token_id: #{access_token.id}, but failed with message: #{response.message}"
+                    "Attempted to revoke #{resource.class.name.downcase} access token with token_id: #{token.id}, " \
+                    "but failed with message: #{response.message}"
                   end
 
         ::AuditEventService.new(
           current_user,
           resource,
-          target_details: access_token.user.name,
+          target_id: token.id,
+          target_type: token.class.name,
+          target_details: token.user.name,
           action: :custom,
-          custom_message: message,
-          ip_address: current_user.current_sign_in_ip
+          custom_message: message
         ).security_event
       end
     end

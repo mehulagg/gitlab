@@ -5,16 +5,21 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: index, reference, howto
 ---
 
-# Search through GitLab
+# Search through GitLab **(FREE)**
 
 ## Issues and merge requests
 
 To search through issues and merge requests in multiple projects, use the **Issues** or **Merge Requests** links
 in the top-right part of your screen. These instructions are valid for both.
 
-The number displayed on their right represents the number of issues and merge requests assigned to you:
+The numbers in the right-hand side of the top menu indicate how many issues, merge requests,
+and to-do items are assigned to you:
 
-![issues and MRs dashboard links](img/dashboard_links.png)
+![issues and MRs dashboard links](img/dashboard_links_v13_11.png)
+
+- **{issues}** **Issues**: The open issues assigned to you.
+- **{merge-request-open}** **Merge requests**: The [merge requests](../project/merge_requests/index.md) assigned to you.
+- **{todo-done}** **To-do items**: The [to-do items](../todos.md) assigned to you.
 
 When you click **Issues**, GitLab shows the opened issues assigned to you:
 
@@ -34,9 +39,9 @@ in the search field in the upper right corner:
 
 ### Filtering issue and merge request lists
 
-> - Filtering by Epics was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195704) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
-> - Filtering by child Epics was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9029) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.0.
-> - Filtering by Iterations was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in GitLab 13.6. [Moved](../../subscriptions/bronze_starter.md) to GitLab Premium in 13.9.
+> - Filtering by Epics was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195704) in GitLab Ultimate 12.9.
+> - Filtering by child Epics was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9029) in GitLab Ultimate 13.0.
+> - Filtering by Iterations was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in GitLab 13.6. Moved to GitLab Premium in 13.9.
 
 Follow these steps to filter the **Issues** and **Merge Requests** list pages in projects and
 groups:
@@ -102,7 +107,7 @@ You can filter the **Issues** list to individual instances by their ID. For exam
 ### Filtering merge requests by approvers **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9468) in GitLab 11.9.
-> - [Moved](../../subscriptions/bronze_starter.md) to GitLab Premium in 13.9.
+> - Moved to GitLab Premium in 13.9.
 
 To filter merge requests by an individual approver, you can type (or select from
 the dropdown) **Approver** and select the user.
@@ -112,7 +117,7 @@ the dropdown) **Approver** and select the user.
 ### Filtering merge requests by "approved by" **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30335) in GitLab 13.0.
-> - [Moved](../../subscriptions/bronze_starter.md) to GitLab Premium in 13.9.
+> - Moved to GitLab Premium in 13.9.
 
 To filter merge requests already approved by a specific individual, you can type (or select from
 the dropdown) **Approved-By** and select the user.
@@ -189,7 +194,7 @@ author, type, and action. Also, you can sort them by
 
 ## Projects
 
-You can search through your projects from the left menu, by clicking the menu bar, then **Projects**.
+You can search through your projects from the top bar, by selecting **Menu > Projects**.
 On the field **Filter by name**, type the project or group name you want to find, and GitLab
 filters them for you as you type.
 
@@ -247,7 +252,7 @@ You can also type in this search bar to see autocomplete suggestions for:
 - Recently viewed issues (try and type some word from the title of a recently viewed issue)
 - Recently viewed merge requests (try and type some word from the title of a recently viewed merge request)
 - Recently viewed epics (try and type some word from the title of a recently viewed epic)
-- [GitLab Flavored Markdown](../markdown.md#special-gitlab-references) (GFM) for issues in a project (try and type a GFM reference for an issue)
+- [GitLab Flavored Markdown](../markdown.md#gitlab-specific-references) (GFM) for issues in a project (try and type a GFM reference for an issue)
 
 ## Basic search
 
@@ -282,7 +287,6 @@ search, or choose a specific group or project.
 To search through code or other documents in a single project, you can use
 the search field on the top-right of your screen while the project page is open.
 
-![code search dropdown](img/project_search_dropdown.png)
 ![code search results](img/project_code_search.png)
 
 ### SHA search
@@ -298,46 +302,16 @@ redirected to the commit result and given the option to return to the search res
 Leverage Elasticsearch for faster, more advanced code search across your entire
 GitLab instance.
 
-[Learn how to use the Advanced Search.](advanced_global_search.md)
+[Learn how to use the Advanced Search.](advanced_search.md)
 
-## Advanced Search Syntax **(PREMIUM)**
+## Search settings
 
-Use advanced queries for more targeted search results.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/292941) in GitLab 13.8 behind a feature flag, disabled by default.
+> - [Added to Group, Admin, and User settings](https://gitlab.com/groups/gitlab-org/-/epics/4842) in GitLab 13.9.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/294025) in GitLab 13.11.
 
-[Learn how to use the Advanced Search Syntax.](advanced_search_syntax.md)
-
-## Search project settings
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/292941) in GitLab 13.8.
-> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-search-project-settings). **(FREE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-You can search inside the project’s settings sections by entering a search
-term in the search box located at the top of the page. The search results
+You can search inside a Project, Group, Admin, or User's settings by entering
+a search term in the search box located at the top of the page. The search results
 appear highlighted in the sections that match the search term.
 
 ![Search project settings](img/project_search_general_settings_v13_8.png)
-
-### Enable or disable Search project settings **(FREE SELF)**
-
-Search project settings is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:search_settings_in_page)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:search_settings_in_page)
-```

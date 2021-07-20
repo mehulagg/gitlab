@@ -3,12 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe API::Namespaces do
+  include AfterNextHelpers
+
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
 
   let_it_be(:group1, reload: true) { create(:group, name: 'test.test-group.2') }
   let_it_be(:group2) { create(:group, :nested) }
-  let_it_be(:gold_plan) { create(:gold_plan) }
+  let_it_be(:ultimate_plan) { create(:ultimate_plan) }
 
   describe "GET /namespaces" do
     context "when authenticated as admin" do
@@ -99,9 +101,9 @@ RSpec.describe API::Namespaces do
         end
       end
 
-      context 'when requesting silver plan' do
+      context 'when requesting premium plan' do
         it 'counts guest members' do
-          get api("/namespaces?requested_hosted_plan=silver", user)
+          get api("/namespaces?requested_hosted_plan=premium", user)
 
           expect(json_response.first['billable_members_count']).to eq(3)
         end
@@ -123,22 +125,34 @@ RSpec.describe API::Namespaces do
         create(:gitlab_subscription, namespace: group1, max_seats_used: 1, seats_in_use: 1)
       end
 
-      it "avoids additional N+1 database queries" do
-        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/namespaces", user) }
+      # We seem to have some N+1 queries.
+      # The saml_provider association adds one for each group (saml_provider is
+      #   an association on group, not namespace).
+      # The route adds one for each namespace.
+      # And more...
+      context "avoids additional N+1 database queries" do
+        let(:control) { ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/namespaces", user) } }
 
-        create(:gitlab_subscription, namespace: group2, max_seats_used: 2)
-        group2.add_guest(user)
+        before do
+          create(:gitlab_subscription, namespace: group2, max_seats_used: 2)
+          group2.add_guest(user)
 
-        group3 = create(:group)
-        create(:gitlab_subscription, namespace: group3, max_seats_used: 3)
-        group3.add_guest(user)
+          group3 = create(:group)
+          create(:gitlab_subscription, namespace: group3, max_seats_used: 3)
+          group3.add_guest(user)
+        end
 
-        # We seem to have some N+1 queries.
-        # The saml_provider association adds one for each group (saml_provider is
-        #   an association on group, not namespace).
-        # The route adds one for each namespace.
-        # And more...
-        expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(7)
+        context 'traversal_sync_ids feature flag is false' do
+          before do
+            stub_feature_flags(sync_traversal_ids: false)
+          end
+
+          it { expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(7) }
+        end
+
+        context 'traversal_sync_ids feature flag is true' do
+          it { expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(8) }
+        end
       end
 
       it 'includes max_seats_used' do
@@ -206,6 +220,34 @@ RSpec.describe API::Namespaces do
         expect(json_response['additional_purchased_storage_size']).to eq(params[:additional_purchased_storage_size])
         expect(json_response['additional_purchased_storage_ends_on']).to eq(params[:additional_purchased_storage_ends_on])
       end
+
+      it 'expires the CI minutes CachedQuota' do
+        expect_next(Gitlab::Ci::Minutes::CachedQuota).to receive(:expire!)
+
+        put api("/namespaces/#{group1.id}", admin), params: params
+      end
+
+      context 'when request has extra_shared_runners_minutes_limit param' do
+        before do
+          params[:extra_shared_runners_minutes_limit] = 1000
+          params.delete(:shared_runners_minutes_limit)
+        end
+
+        it 'expires the CI minutes CachedQuota' do
+          expect_next(Gitlab::Ci::Minutes::CachedQuota).to receive(:expire!)
+
+          put api("/namespaces/#{group1.id}", admin), params: params
+        end
+      end
+
+      context 'when neither minutes limit params is provided' do
+        it 'does not expire the CI minutes CachedQuota' do
+          params.delete(:shared_runners_minutes_limit)
+          expect(Gitlab::Ci::Minutes::CachedQuota).not_to receive(:new)
+
+          put api("/namespaces/#{group1.id}", admin), params: params
+        end
+      end
     end
 
     context 'when not authenticated as admin' do
@@ -272,13 +314,14 @@ RSpec.describe API::Namespaces do
         {
           start_date: '2019-06-01',
           end_date: '2020-06-01',
-          plan_code: 'gold',
+          plan_code: 'ultimate',
           seats: 20,
           max_seats_used: 10,
           auto_renew: true,
           trial: true,
           trial_ends_on: '2019-05-01',
-          trial_starts_on: '2019-06-01'
+          trial_starts_on: '2019-06-01',
+          trial_extension_type: GitlabSubscription.trial_extension_types[:reactivated]
         }
       end
 
@@ -298,7 +341,8 @@ RSpec.describe API::Namespaces do
           auto_renew: true,
           trial: true,
           trial_starts_on: Date.parse(gitlab_subscription[:trial_starts_on]),
-          trial_ends_on: Date.parse(gitlab_subscription[:trial_ends_on])
+          trial_ends_on: Date.parse(gitlab_subscription[:trial_ends_on]),
+          trial_extension_type: 'reactivated'
         )
       end
 
@@ -392,11 +436,11 @@ RSpec.describe API::Namespaces do
       get api("/namespaces/#{namespace.id}/gitlab_subscription", current_user)
     end
 
-    let_it_be(:silver_plan) { create(:silver_plan) }
+    let_it_be(:premium_plan) { create(:premium_plan) }
     let_it_be(:owner) { create(:user) }
     let_it_be(:developer) { create(:user) }
     let_it_be(:namespace) { create(:group) }
-    let_it_be(:gitlab_subscription) { create(:gitlab_subscription, hosted_plan: silver_plan, namespace: namespace) }
+    let_it_be(:gitlab_subscription) { create(:gitlab_subscription, hosted_plan: premium_plan, namespace: namespace) }
 
     before do
       namespace.add_owner(owner)
@@ -429,8 +473,8 @@ RSpec.describe API::Namespaces do
 
         expect(json_response.keys).to match_array(%w[plan usage billing])
         expect(json_response['plan'].keys).to match_array(%w[name code trial upgradable auto_renew])
-        expect(json_response['plan']['name']).to eq('Silver')
-        expect(json_response['plan']['code']).to eq('silver')
+        expect(json_response['plan']['name']).to eq('Premium')
+        expect(json_response['plan']['code']).to eq('premium')
         expect(json_response['plan']['trial']).to eq(false)
         expect(json_response['plan']['upgradable']).to eq(true)
         expect(json_response['usage'].keys).to match_array(%w[seats_in_subscription seats_in_use max_seats_used seats_owed])
@@ -444,14 +488,14 @@ RSpec.describe API::Namespaces do
       put api("/namespaces/#{namespace_id}/gitlab_subscription", current_user), params: payload
     end
 
-    let_it_be(:silver_plan) { create(:silver_plan) }
+    let_it_be(:premium_plan) { create(:premium_plan) }
     let_it_be(:namespace) { create(:group, name: 'test.test-group.22') }
     let_it_be(:gitlab_subscription) { create(:gitlab_subscription, namespace: namespace) }
 
     let(:params) do
       {
         seats: 150,
-        plan_code: 'silver',
+        plan_code: 'premium',
         start_date: '01/01/2018',
         end_date: '01/01/2019'
       }
@@ -499,8 +543,8 @@ RSpec.describe API::Namespaces do
           expect(response).to have_gitlab_http_status(:ok)
           expect(gitlab_subscription.reload.seats).to eq(150)
           expect(gitlab_subscription.max_seats_used).to eq(0)
-          expect(gitlab_subscription.plan_name).to eq('silver')
-          expect(gitlab_subscription.plan_title).to eq('Silver')
+          expect(gitlab_subscription.plan_name).to eq('premium')
+          expect(gitlab_subscription.plan_title).to eq('Premium')
         end
 
         it 'is successful using full_path when namespace path contains dots' do
@@ -519,6 +563,12 @@ RSpec.describe API::Namespaces do
             seats: 20,
             max_seats_used: 42
           )
+        end
+
+        it 'updates the timestamp when the attributes are the same' do
+          expect do
+            do_put(namespace.id, admin, gitlab_subscription.attributes)
+          end.to change { gitlab_subscription.reload.updated_at }
         end
       end
     end

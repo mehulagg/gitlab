@@ -9,8 +9,14 @@ import {
   GlButton,
 } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { s__ } from '~/locale';
 
 export default {
+  i18n: {
+    toggleLabel: s__(
+      "ClusterIntegration|Enable or disable GitLab's connection to your Kubernetes cluster.",
+    ),
+  },
   components: {
     GlFormGroup,
     GlToggle,
@@ -35,17 +41,10 @@ export default {
       toggleEnabled: true,
       envScope: '*',
       baseDomainField: '',
-      externalIp: '',
     };
   },
   computed: {
-    ...mapState([
-      'enabled',
-      'editable',
-      'environmentScope',
-      'baseDomain',
-      'applicationIngressExternalIp',
-    ]),
+    ...mapState(['enabled', 'editable', 'environmentScope', 'baseDomain']),
     canSubmit() {
       return (
         this.enabled !== this.toggleEnabled ||
@@ -58,7 +57,6 @@ export default {
     this.toggleEnabled = this.enabled;
     this.envScope = this.environmentScope;
     this.baseDomainField = this.baseDomain;
-    this.externalIp = this.applicationIngressExternalIp;
   },
 };
 </script>
@@ -79,11 +77,9 @@ export default {
             data-qa-selector="integration_status_toggle"
             aria-describedby="toggleCluster"
             :disabled="!editable"
-            :title="
-              s__(
-                'ClusterIntegration|Enable or disable GitLab\'s connection to your Kubernetes cluster.',
-              )
-            "
+            :label="$options.i18n.toggleLabel"
+            label-position="hidden"
+            :title="$options.i18n.toggleLabel"
           />
         </div>
       </div>
@@ -131,13 +127,6 @@ export default {
             <gl-link :href="autoDevopsHelpPath" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
-        <div v-if="applicationIngressExternalIp" class="js-ingress-domain-help-text inline">
-          {{ s__('ClusterIntegration|Alternatively, ') }}
-          <gl-sprintf :message="s__('ClusterIntegration|%{externalIp}.nip.io')">
-            <template #externalIp>{{ externalIp }}</template>
-          </gl-sprintf>
-          {{ s__('ClusterIntegration|can be used instead of a custom domain. ') }}
-        </div>
         <gl-sprintf
           class="inline"
           :message="s__('ClusterIntegration|%{linkStart}More information%{linkEnd}')"

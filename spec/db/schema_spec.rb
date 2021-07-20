@@ -4,7 +4,7 @@ require 'spec_helper'
 require Rails.root.join('ee', 'spec', 'db', 'schema_support') if Gitlab.ee?
 
 RSpec.describe 'Database schema' do
-  prepend_if_ee('EE::DB::SchemaSupport')
+  prepend_mod_with('DB::SchemaSupport')
 
   let(:connection) { ActiveRecord::Base.connection }
   let(:tables) { connection.tables }
@@ -19,13 +19,13 @@ RSpec.describe 'Database schema' do
     approver_groups: %w[target_id],
     approvers: %w[target_id user_id],
     audit_events: %w[author_id entity_id target_id],
-    audit_events_archived: %w[author_id entity_id target_id],
     award_emoji: %w[awardable_id user_id],
     aws_roles: %w[role_external_id],
     boards: %w[milestone_id iteration_id],
     chat_names: %w[chat_id team_id user_id],
     chat_teams: %w[team_id],
     ci_builds: %w[erased_by_id runner_id trigger_request_id user_id],
+    ci_namespace_monthly_usages: %w[namespace_id],
     ci_pipelines: %w[user_id],
     ci_runner_projects: %w[runner_id],
     ci_trigger_requests: %w[commit_id],
@@ -34,7 +34,7 @@ RSpec.describe 'Database schema' do
     compliance_management_frameworks: %w[group_id],
     commit_user_mentions: %w[commit_id],
     deploy_keys_projects: %w[deploy_key_id],
-    deployments: %w[deployable_id environment_id user_id],
+    deployments: %w[deployable_id user_id],
     draft_notes: %w[discussion_id commit_id],
     epics: %w[updated_by_id last_edited_by_id state_id],
     events: %w[target_id],
@@ -54,9 +54,9 @@ RSpec.describe 'Database schema' do
     keys: %w[user_id],
     label_links: %w[target_id],
     ldap_group_links: %w[group_id],
-    lfs_objects_projects: %w[lfs_object_id project_id],
     members: %w[source_id created_by_id],
     merge_requests: %w[last_edited_by_id state_id],
+    merge_request_diff_commits: %w[commit_author_id committer_id],
     namespaces: %w[owner_id parent_id],
     notes: %w[author_id commit_id noteable_id updated_by_id resolved_by_id confirmed_by_id discussion_id],
     notification_settings: %w[source_id],
@@ -75,6 +75,7 @@ RSpec.describe 'Database schema' do
     slack_integrations: %w[team_id user_id],
     snippets: %w[author_id],
     spam_logs: %w[user_id],
+    status_check_responses: %w[external_approval_rule_id],
     subscriptions: %w[user_id subscribable_id],
     suggestions: %w[commit_id],
     taggings: %w[tag_id taggable_id tagger_id],
@@ -85,8 +86,7 @@ RSpec.describe 'Database schema' do
     users: %w[color_scheme_id created_by_id theme_id email_opted_in_source_id],
     users_star_projects: %w[user_id],
     vulnerability_identifiers: %w[external_id],
-    vulnerability_scanners: %w[external_id],
-    web_hooks: %w[group_id]
+    vulnerability_scanners: %w[external_id]
   }.with_indifferent_access.freeze
 
   context 'for table' do
@@ -101,14 +101,19 @@ RSpec.describe 'Database schema' do
         context 'all foreign keys' do
           # for index to be effective, the FK constraint has to be at first place
           it 'are indexed' do
-            first_indexed_column = indexes.map(&:columns).map(&:first)
+            first_indexed_column = indexes.map(&:columns).map do |columns|
+              # In cases of complex composite indexes, a string is returned eg:
+              # "lower((extern_uid)::text), group_id"
+              columns = columns.split(',') if columns.is_a?(String)
+              columns.first.chomp
+            end
             foreign_keys_columns = foreign_keys.map(&:column)
 
             # Add the primary key column to the list of indexed columns because
             # postgres and mysql both automatically create an index on the primary
             # key. Also, the rails connection.indexes() method does not return
             # automatically generated indexes (like the primary key index).
-            first_indexed_column = first_indexed_column.push(primary_key_column)
+            first_indexed_column.push(primary_key_column)
 
             expect(first_indexed_column.uniq).to include(*foreign_keys_columns)
           end
@@ -260,13 +265,25 @@ RSpec.describe 'Database schema' do
     end
   end
 
+  context 'index names' do
+    it 'disallows index names with a _ccnew[0-9]* suffix' do
+      # During REINDEX operations, Postgres generates a temporary index with a _ccnew[0-9]* suffix
+      # Since indexes are being considered temporary and subject to removal if they stick around for longer. See Gitlab::Database::Reindexing.
+      #
+      # Hence we disallow adding permanent indexes with this suffix.
+      problematic_indexes = Gitlab::Database::PostgresIndex.match("#{Gitlab::Database::Reindexing::ReindexConcurrently::TEMPORARY_INDEX_PATTERN}$").all
+
+      expect(problematic_indexes).to be_empty
+    end
+  end
+
   private
 
   def retrieve_columns_name_with_jsonb
     sql = <<~SQL
         SELECT table_name, column_name, data_type
           FROM information_schema.columns
-        WHERE table_catalog = '#{ApplicationRecord.connection_config[:database]}'
+        WHERE table_catalog = '#{ApplicationRecord.connection_db_config.database}'
           AND table_schema = 'public'
           AND table_name NOT LIKE 'pg_%'
           AND data_type = 'jsonb'

@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import {
   parseIntPagination,
   normalizeHeaders,
@@ -17,11 +17,11 @@ export const requestReplicableItems = ({ commit }) => commit(types.REQUEST_REPLI
 export const receiveReplicableItemsSuccess = ({ commit }, data) =>
   commit(types.RECEIVE_REPLICABLE_ITEMS_SUCCESS, data);
 export const receiveReplicableItemsError = ({ state, commit }) => {
-  createFlash(
-    sprintf(__('There was an error fetching the %{replicableType}'), {
+  createFlash({
+    message: sprintf(__('There was an error fetching the %{replicableType}'), {
       replicableType: state.replicableType,
     }),
-  );
+  });
   commit(types.RECEIVE_REPLICABLE_ITEMS_ERROR);
 };
 
@@ -115,11 +115,11 @@ export const receiveInitiateAllReplicableSyncsSuccess = (
   dispatch('fetchReplicableItems');
 };
 export const receiveInitiateAllReplicableSyncsError = ({ state, commit }) => {
-  createFlash(
-    sprintf(__('There was an error syncing the %{replicableType}'), {
+  createFlash({
+    message: sprintf(__('There was an error syncing the %{replicableType}'), {
       replicableType: state.replicableType,
     }),
-  );
+  });
   commit(types.RECEIVE_INITIATE_ALL_REPLICABLE_SYNCS_ERROR);
 };
 
@@ -142,7 +142,9 @@ export const receiveInitiateReplicableSyncSuccess = ({ commit, dispatch }, { nam
   dispatch('fetchReplicableItems');
 };
 export const receiveInitiateReplicableSyncError = ({ commit }, { name }) => {
-  createFlash(sprintf(__('There was an error syncing project %{name}'), { name }));
+  createFlash({
+    message: sprintf(__('There was an error syncing project %{name}'), { name }),
+  });
   commit(types.RECEIVE_INITIATE_REPLICABLE_SYNC_ERROR);
 };
 

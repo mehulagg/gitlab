@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Tooltips on .timeago dates', :js do
   let_it_be(:user)      { create(:user) }
   let_it_be(:project)   { create(:project, name: 'test', namespace: user.namespace) }
+
   let(:created_date)    { 1.day.ago.beginning_of_minute - 1.hour }
 
   before_all do
@@ -13,7 +14,7 @@ RSpec.describe 'Tooltips on .timeago dates', :js do
 
   context 'on the activity tab' do
     before do
-      Event.create( project: project, author_id: user.id, action: :joined,
+      Event.create!( project: project, author_id: user.id, action: :joined,
                     updated_at: created_date, created_at: created_date)
 
       sign_in user

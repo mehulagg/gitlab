@@ -5,14 +5,14 @@ require 'spec_helper'
 RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
-  let(:package) { create(:nuget_package) }
+  let(:package) { create(:nuget_package, :processing, :with_symbol_package) }
   let(:package_file) { package.package_files.first }
   let(:service) { described_class.new(package_file) }
   let(:package_name) { 'DummyProject.DummyPackage' }
   let(:package_version) { '1.0.0' }
   let(:package_file_name) { 'dummyproject.dummypackage.1.0.0.nupkg' }
 
-  RSpec.shared_examples 'raising an' do |error_class|
+  shared_examples 'raising an' do |error_class|
     it "raises an #{error_class}" do
       expect { subject }.to raise_error(error_class)
     end
@@ -21,11 +21,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
   describe '#execute' do
     subject { service.execute }
 
-    before do
-      stub_package_file_object_storage(enabled: true, direct_upload: true)
-    end
-
-    RSpec.shared_examples 'taking the lease' do
+    shared_examples 'taking the lease' do
       before do
         allow(service).to receive(:lease_release?).and_return(false)
       end
@@ -39,7 +35,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
       end
     end
 
-    RSpec.shared_examples 'not updating the package if the lease is taken' do
+    shared_examples 'not updating the package if the lease is taken' do
       context 'without obtaining the exclusive lease' do
         let(:lease_key) { "packages:nuget:update_package_from_metadata_service:package:#{package_id}" }
         let(:metadata) { { package_name: package_name, package_version: package_version } }
@@ -60,6 +56,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
             .to change { ::Packages::Package.count }.by(0)
             .and change { Packages::DependencyLink.count }.by(0)
           expect(package_file.reload.file_name).not_to eq(package_file_name)
+          expect(package_file.package).to be_processing
           expect(package_file.package.reload.name).not_to eq(package_name)
           expect(package_file.package.version).not_to eq(package_version)
         end
@@ -78,6 +75,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
 
         expect(package.reload.name).to eq(package_name)
         expect(package.version).to eq(package_version)
+        expect(package).to be_default
         expect(package_file.reload.file_name).to eq(package_file_name)
         # hard reset needed to properly reload package_file.file
         expect(Packages::PackageFile.find(package_file.id).file.size).not_to eq 0
@@ -115,9 +113,10 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
       let(:expected_tags) { %w(foo bar test tag1 tag2 tag3 tag4 tag5) }
 
       before do
-        allow_any_instance_of(Packages::Nuget::MetadataExtractionService)
-          .to receive(:nuspec_file)
-          .and_return(fixture_file(nuspec_filepath))
+        allow_next_instance_of(Packages::Nuget::MetadataExtractionService) do |service|
+          allow(service)
+            .to receive(:nuspec_file_content).and_return(fixture_file(nuspec_filepath))
+        end
       end
 
       it 'creates tags' do
@@ -170,9 +169,10 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
       let(:package_file_name) { 'test.package.3.5.2.nupkg' }
 
       before do
-        allow_any_instance_of(Packages::Nuget::MetadataExtractionService)
-          .to receive(:nuspec_file)
-          .and_return(fixture_file(nuspec_filepath))
+        allow_next_instance_of(Packages::Nuget::MetadataExtractionService) do |service|
+          allow(service)
+            .to receive(:nuspec_file_content).and_return(fixture_file(nuspec_filepath))
+        end
       end
 
       it 'updates package and package file' do
@@ -184,6 +184,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
 
         expect(package.reload.name).to eq(package_name)
         expect(package.version).to eq(package_version)
+        expect(package).to be_default
         expect(package_file.reload.file_name).to eq(package_file_name)
         # hard reset needed to properly reload package_file.file
         expect(Packages::PackageFile.find(package_file.id).file.size).not_to eq 0
@@ -192,10 +193,47 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
 
     context 'with package file not containing a nuspec file' do
       before do
-        allow_any_instance_of(Zip::File).to receive(:glob).and_return([])
+        allow_next_instance_of(Zip::File) do |file|
+          allow(file).to receive(:glob).and_return([])
+        end
       end
 
       it_behaves_like 'raising an', ::Packages::Nuget::MetadataExtractionService::ExtractionError
+    end
+
+    context 'with a symbol package' do
+      let(:package_file) { package.package_files.last }
+      let(:package_file_name) { 'dummyproject.dummypackage.1.0.0.snupkg' }
+
+      context 'with no existing package' do
+        let(:package_id) { package.id }
+
+        it_behaves_like 'raising an', ::Packages::Nuget::UpdatePackageFromMetadataService::InvalidMetadataError
+      end
+
+      context 'with existing package' do
+        let!(:existing_package) { create(:nuget_package, project: package.project, name: package_name, version: package_version) }
+        let(:package_id) { existing_package.id }
+
+        it 'link existing package and updates package file', :aggregate_failures do
+          expect(service).to receive(:try_obtain_lease).and_call_original
+          expect(::Packages::Nuget::SyncMetadatumService).not_to receive(:new)
+          expect(::Packages::UpdateTagsService).not_to receive(:new)
+
+          expect { subject }
+            .to change { ::Packages::Package.count }.by(-1)
+            .and change { Packages::Dependency.count }.by(0)
+            .and change { Packages::DependencyLink.count }.by(0)
+            .and change { Packages::Nuget::DependencyLinkMetadatum.count }.by(0)
+            .and change { ::Packages::Nuget::Metadatum.count }.by(0)
+          expect(package_file.reload.file_name).to eq(package_file_name)
+          expect(package_file.package).to eq(existing_package)
+        end
+
+        it_behaves_like 'taking the lease'
+
+        it_behaves_like 'not updating the package if the lease is taken'
+      end
     end
 
     context 'with an invalid package name' do

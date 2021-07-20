@@ -11,7 +11,7 @@ module Gitlab
       DirectPathAccessError = Class.new(StandardError)
       InvalidConfigurationError = Class.new(StandardError)
 
-      INVALID_STORAGE_MESSAGE = <<~MSG.freeze
+      INVALID_STORAGE_MESSAGE = <<~MSG
         Storage is invalid because it has no `path` key.
 
         For source installations, update your config/gitlab.yml Refer to gitlab.yml.example for an updated example.
@@ -23,7 +23,6 @@ module Gitlab
 
       MUTEX = Mutex.new
 
-      DISK_ACCESS_DENIED_FLAG = :deny_disk_access
       ALLOW_KEY = :allow_disk_access
 
       # If your code needs this method then your code needs to be fixed.
@@ -34,8 +33,8 @@ module Gitlab
       def self.disk_access_denied?
         return false if rugged_enabled?
 
-        !temporarily_allowed?(ALLOW_KEY) && Feature::Gitaly.enabled?(DISK_ACCESS_DENIED_FLAG)
-      rescue
+        !temporarily_allowed?(ALLOW_KEY)
+      rescue StandardError
         false # Err on the side of caution, don't break gitlab for people
       end
 
@@ -53,7 +52,7 @@ module Gitlab
         @legacy_disk_path = File.expand_path(storage['path'], Rails.root) if storage['path']
 
         storage['path'] = Deprecated
-        @hash = storage.with_indifferent_access
+        @hash = ActiveSupport::HashWithIndifferentAccess.new(storage)
       end
 
       def gitaly_address
@@ -61,8 +60,9 @@ module Gitlab
       end
 
       def legacy_disk_path
-        if self.class.disk_access_denied?
-          raise DirectPathAccessError, "git disk access denied via the gitaly_#{DISK_ACCESS_DENIED_FLAG} feature"
+        # Do not use self.class due to Spring reloading issues
+        if Gitlab::GitalyClient::StorageSettings.disk_access_denied?
+          raise DirectPathAccessError, "git disk access denied"
         end
 
         @legacy_disk_path

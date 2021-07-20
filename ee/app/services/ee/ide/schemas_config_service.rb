@@ -12,7 +12,7 @@ module EE
 
         check_access_and_load_config!
         success(schema: schema_from_config_for(params[:filename]) || {})
-      rescue => e
+      rescue StandardError => e
         error(e.message)
       end
 

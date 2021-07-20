@@ -10,25 +10,25 @@ type: reference
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53016) in GitLab 13.9.
 
 Group repositories can be moved between storages. This can be useful when
-[migrating to Gitaly Cluster](../administration/gitaly/praefect.md#migrate-existing-repositories-to-gitaly-cluster),
-for example, or to migrate a Group Wiki.
+[migrating to Gitaly Cluster](../administration/gitaly/praefect.md#migrate-to-gitaly-cluster), for
+example, or to migrate a Group Wiki.
 
 As group repository storage moves are processed, they transition through different states. Values
 of `state` are:
 
-- `initial`
-- `scheduled`
-- `started`
-- `finished`
-- `failed`
-- `replicated`
-- `cleanup failed`
+- `initial`: The record has been created but the background job has not yet been scheduled.
+- `scheduled`: The background job has been scheduled.
+- `started`: The group repositories are being copied to the destination storage.
+- `replicated`: The group has been moved.
+- `failed`: The group repositories failed to copy or the checksums did not match.
+- `finished`: The group has been moved and the repositories on the source storage have been deleted.
+- `cleanup failed`: The group has been moved but the repositories on the source storage could not be deleted.
 
 To ensure data integrity, groups are put in a temporary read-only state for the
 duration of the move. During this time, users receive a `The repository is temporarily
 read-only. Please try again later.` message if they try to push new commits.
 
-This API requires you to [authenticate yourself](README.md#authentication) as an administrator.
+This API requires you to [authenticate yourself](index.md#authentication) as an administrator.
 
 For other type of repositories you can read:
 
@@ -42,7 +42,7 @@ GET /group_repository_storage_moves
 ```
 
 By default, `GET` requests return 20 results at a time because the API results
-are [paginated](README.md#pagination).
+are [paginated](index.md#pagination).
 
 Example request:
 
@@ -78,7 +78,7 @@ GET /groups/:group_id/repository_storage_moves
 ```
 
 By default, `GET` requests return 20 results at a time because the API results
-are [paginated](README.md#pagination).
+are [paginated](index.md#pagination).
 
 Supported attributes:
 
@@ -197,13 +197,15 @@ Supported attributes:
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `group_id` | integer | yes | ID of the group. |
-| `destination_storage_name` | string | no | Name of the destination storage shard. In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/3209), the storage is selected automatically if not provided. |
+| `destination_storage_name` | string | no | Name of the destination storage shard. In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/3209), the storage is selected [automatically based on storage weights](../administration/repository_storage_paths.md#configure-where-new-repositories-are-stored) if not provided. |
 
 Example request:
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
---data '{"destination_storage_name":"storage2"}' "https://gitlab.example.com/api/v4/groups/1/repository_storage_moves"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --header "Content-Type: application/json" \
+     --data '{"destination_storage_name":"storage2"}' \
+     "https://gitlab.example.com/api/v4/groups/1/repository_storage_moves"
 ```
 
 Example response:
@@ -236,13 +238,15 @@ Supported attributes:
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `source_storage_name` | string | yes | Name of the source storage shard. |
-| `destination_storage_name` | string | no | Name of the destination storage shard. The storage is selected automatically if not provided. |
+| `destination_storage_name` | string | no | Name of the destination storage shard. The storage is selected [automatically based on storage weights](../administration/repository_storage_paths.md#configure-where-new-repositories-are-stored) if not provided. |
 
 Example request:
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
---data '{"source_storage_name":"default"}' "https://gitlab.example.com/api/v4/group_repository_storage_moves"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --header "Content-Type: application/json" \
+     --data '{"source_storage_name":"default"}' \
+     "https://gitlab.example.com/api/v4/group_repository_storage_moves"
 ```
 
 Example response:

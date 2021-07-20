@@ -88,9 +88,9 @@ module Gitlab
         when 'Project'
           @exportable.disk_path
         when 'Group'
-          @exportable.full_path
+          Storage::Hashed.new(@exportable, prefix: Storage::Hashed::GROUP_REPOSITORY_PATH_PREFIX).disk_path
         else
-          raise Gitlab::ImportExport::Error.new("Unsupported Exportable Type #{@exportable&.class}")
+          raise Gitlab::ImportExport::Error, "Unsupported Exportable Type #{@exportable&.class}"
         end
       end
 

@@ -29,27 +29,3 @@ export const receiveSubscriptionError = ({ commit }) => {
   });
   commit(types.RECEIVE_SUBSCRIPTION_ERROR);
 };
-
-/**
- * Billable Members
- */
-export const fetchHasBillableGroupMembers = ({ dispatch, state }) => {
-  dispatch('requestHasBillableGroupMembers');
-
-  return Api.fetchBillableGroupMembersList(state.namespaceId, { per_page: 1, page: 1 })
-    .then((data) => dispatch('receiveHasBillableGroupMembersSuccess', data))
-    .catch(() => dispatch('receiveHasBillableGroupMembersError'));
-};
-
-export const requestHasBillableGroupMembers = ({ commit }) =>
-  commit(types.REQUEST_HAS_BILLABLE_MEMBERS);
-
-export const receiveHasBillableGroupMembersSuccess = ({ commit }, response) =>
-  commit(types.RECEIVE_HAS_BILLABLE_MEMBERS_SUCCESS, response);
-
-export const receiveHasBillableGroupMembersError = ({ commit }) => {
-  createFlash({
-    message: s__('SubscriptionTable|An error occurred while loading billable members list'),
-  });
-  commit(types.RECEIVE_HAS_BILLABLE_MEMBERS_ERROR);
-};

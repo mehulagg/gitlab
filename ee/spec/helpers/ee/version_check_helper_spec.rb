@@ -12,7 +12,7 @@ RSpec.describe EE::VersionCheckHelper do
       end
 
       it 'links to an ee-commit' do
-        expect(helper.link_to_version).to include('https://gitlab.com/gitlab-org/gitlab/-/commits/deadbeef')
+        expect(helper.link_to_version).to include("#{helper.source_host_url}/#{helper.source_code_group}/gitlab/-/commits/deadbeef")
       end
     end
 
@@ -22,7 +22,7 @@ RSpec.describe EE::VersionCheckHelper do
       end
 
       it 'links to an ee-tag' do
-        expect(helper.link_to_version).to include('https://gitlab.com/gitlab-org/gitlab/-/tags/v8.0.2-ee')
+        expect(helper.link_to_version).to include("#{helper.source_host_url}/#{helper.source_code_group}/gitlab/-/tags/v8.0.2-ee")
       end
     end
   end

@@ -18,13 +18,13 @@ describe('Multi-file store utils', () => {
       };
 
       const state = {
-        currentBranchId: 'master',
+        currentBranchId: 'main',
         currentProjectId: 'test/test',
       };
 
       utils.setPageTitleForFile(state, f);
 
-      expect(document.title).toBe('README.md · master · test/test · GitLab');
+      expect(document.title).toBe('README.md · main · test/test · GitLab');
     });
   });
 
@@ -52,10 +52,10 @@ describe('Multi-file store utils', () => {
           { ...file('deletedFile'), path: 'deletedFile', deleted: true },
           { ...file('renamedFile'), path: 'renamedFile', prevPath: 'prevPath' },
         ],
-        currentBranchId: 'master',
+        currentBranchId: 'main',
       };
       const payload = utils.createCommitPayload({
-        branch: 'master',
+        branch: 'main',
         newBranch: false,
         state,
         rootState,
@@ -63,7 +63,7 @@ describe('Multi-file store utils', () => {
       });
 
       expect(payload).toEqual({
-        branch: 'master',
+        branch: 'main',
         commit_message: 'commit message',
         actions: [
           {
@@ -122,10 +122,10 @@ describe('Multi-file store utils', () => {
             lastCommitSha: '123456789',
           },
         ],
-        currentBranchId: 'master',
+        currentBranchId: 'main',
       };
       const payload = utils.createCommitPayload({
-        branch: 'master',
+        branch: 'main',
         newBranch: false,
         state: {},
         rootState,
@@ -135,7 +135,7 @@ describe('Multi-file store utils', () => {
       });
 
       expect(payload).toEqual({
-        branch: 'master',
+        branch: 'main',
         commit_message: 'prebuilt test commit message',
         actions: [
           {
@@ -377,7 +377,7 @@ describe('Multi-file store utils', () => {
     let localState;
     let branchInfo;
     const currentProjectId = '123-foo';
-    const currentBranchId = 'master';
+    const currentBranchId = 'main';
 
     beforeEach(() => {
       localState = {
@@ -604,7 +604,7 @@ describe('Multi-file store utils', () => {
     let entries;
 
     beforeEach(() => {
-      const img = { content: '/base64/encoded/image+' };
+      const img = { content: 'png-gibberish', rawPath: 'blob:1234' };
       mdFile = { path: 'path/to/some/directory/myfile.md' };
       entries = {
         // invalid (or lack of) extensions are also supported as long as there's
@@ -637,14 +637,14 @@ describe('Multi-file store utils', () => {
       ${'* ![img](img.png "title here")'}     | ${'png'}  | ${'img'}         | ${'title here'}
     `(
       'correctly transforms markdown with uncommitted images: $markdownBefore',
-      ({ markdownBefore, ext, imgAlt, imgTitle }) => {
+      ({ markdownBefore, imgAlt, imgTitle }) => {
         mdFile.content = markdownBefore;
 
         expect(utils.extractMarkdownImagesFromEntries(mdFile, entries)).toEqual({
           content: '* {{gl_md_img_1}}',
           images: {
             '{{gl_md_img_1}}': {
-              src: `data:image/${ext};base64,/base64/encoded/image+`,
+              src: 'blob:1234',
               alt: imgAlt,
               title: imgTitle,
             },

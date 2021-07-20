@@ -7,6 +7,8 @@ class Wiki
   include Gitlab::Utils::StrongMemoize
   include GlobalID::Identification
 
+  extend ActiveModel::Naming
+
   MARKUPS = { # rubocop:disable Style/MultilineIfModifier
     'Markdown' => :markdown,
     'RDoc'     => :rdoc,
@@ -86,9 +88,10 @@ class Wiki
 
   def create_wiki_repository
     repository.create_if_not_exists
+    change_head_to_default_branch
 
     raise CouldNotCreateWikiError unless repository_exists?
-  rescue => err
+  rescue StandardError => err
     Gitlab::ErrorTracking.track_exception(err, wiki: {
       container_type: container.class.name,
       container_id: container.id,
@@ -159,14 +162,20 @@ class Wiki
     find_page(SIDEBAR, version)
   end
 
-  def find_file(name, version = nil)
-    wiki.file(name, version)
+  def find_file(name, version = 'HEAD', load_content: true)
+    data_limit = load_content ? -1 : 0
+    blobs = repository.blobs_at([[version, name]], blob_size_limit: data_limit)
+
+    return if blobs.empty?
+
+    Gitlab::Git::WikiFile.new(blobs.first)
   end
 
   def create_page(title, content, format = :markdown, message = nil)
     commit = commit_details(:created, message, title)
 
     wiki.write_page(title, format.to_sym, content, commit)
+    repository.expire_status_cache if repository.empty?
     after_wiki_activity
 
     true
@@ -187,10 +196,13 @@ class Wiki
   def delete_page(page, message = nil)
     return unless page
 
-    wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
-    after_wiki_activity
+    capture_git_error(:deleted) do
+      repository.delete_file(user, page.path, **multi_commit_options(:deleted, message, page.title))
 
-    true
+      after_wiki_activity
+
+      true
+    end
   end
 
   def page_title_and_dir(title)
@@ -238,7 +250,7 @@ class Wiki
 
   override :default_branch
   def default_branch
-    wiki.class.default_ref
+    super || Gitlab::Git::Wiki.default_ref(container)
   end
 
   def wiki_base_path
@@ -265,10 +277,35 @@ class Wiki
     @repository = nil
   end
 
+  def capture_git_error(action, &block)
+    yield block
+  rescue Gitlab::Git::Index::IndexError,
+         Gitlab::Git::CommitError,
+         Gitlab::Git::PreReceiveError,
+         Gitlab::Git::CommandError,
+         ArgumentError => error
+
+    Gitlab::ErrorTracking.log_exception(error, action: action, wiki_id: id)
+
+    false
+  end
+
   private
 
+  def multi_commit_options(action, message = nil, title = nil)
+    commit_message = build_commit_message(action, message, title)
+    git_user = Gitlab::Git::User.from_gitlab(user)
+
+    {
+      branch_name: repository.root_ref,
+      message: commit_message,
+      author_email: git_user.email,
+      author_name: git_user.name
+    }
+  end
+
   def commit_details(action, message = nil, title = nil)
-    commit_message = message.presence || default_message(action, title)
+    commit_message = build_commit_message(action, message, title)
     git_user = Gitlab::Git::User.from_gitlab(user)
 
     Gitlab::Git::Wiki::CommitDetails.new(user.id,
@@ -278,9 +315,23 @@ class Wiki
                                          commit_message)
   end
 
+  def build_commit_message(action, message, title)
+    message.presence || default_message(action, title)
+  end
+
   def default_message(action, title)
     "#{user.username} #{action} page: #{title}"
   end
+
+  def change_head_to_default_branch
+    # If the wiki has commits in the 'HEAD' branch means that the current
+    # HEAD is pointing to the right branch. If not, it could mean that either
+    # the repo has just been created or that 'HEAD' is pointing
+    # to the wrong branch and we need to rewrite it
+    return if repository.raw_repository.commit_count('HEAD') != 0
+
+    repository.raw_repository.write_ref('HEAD', "refs/heads/#{default_branch}")
+  end
 end
 
-Wiki.prepend_if_ee('EE::Wiki')
+Wiki.prepend_mod_with('Wiki')

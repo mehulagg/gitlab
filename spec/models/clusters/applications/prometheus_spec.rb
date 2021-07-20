@@ -13,16 +13,13 @@ RSpec.describe Clusters::Applications::Prometheus do
   include_examples 'cluster application initial status specs'
 
   describe 'after_destroy' do
-    context 'cluster type is project' do
-      let(:cluster) { create(:cluster, :with_installed_helm) }
-      let(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
+    let(:cluster) { create(:cluster, :with_installed_helm) }
+    let(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
 
-      it 'deactivates prometheus_service after destroy' do
-        expect(Clusters::Applications::DeactivateServiceWorker)
-          .to receive(:perform_async).with(cluster.id, 'prometheus')
+    it 'disables the corresponding integration' do
+      application.destroy!
 
-        application.destroy!
-      end
+      expect(cluster.integration_prometheus).not_to be_enabled
     end
   end
 
@@ -31,11 +28,22 @@ RSpec.describe Clusters::Applications::Prometheus do
     let(:cluster) { create(:cluster, :with_installed_helm) }
     let(:application) { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
 
-    it 'schedules post installation job' do
-      expect(Clusters::Applications::ActivateServiceWorker)
-        .to receive(:perform_async).with(cluster.id, 'prometheus')
-
+    it 'enables the corresponding integration' do
       application.make_installed
+
+      expect(cluster.integration_prometheus).to be_enabled
+    end
+  end
+
+  describe 'transition to externally_installed' do
+    let(:project) { create(:project) }
+    let(:cluster) { create(:cluster, :with_installed_helm) }
+    let(:application) { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
+
+    it 'enables the corresponding integration' do
+      application.make_externally_installed!
+
+      expect(cluster.integration_prometheus).to be_enabled
     end
   end
 
@@ -52,6 +60,26 @@ RSpec.describe Clusters::Applications::Prometheus do
     end
   end
 
+  describe '#managed_prometheus?' do
+    subject { prometheus.managed_prometheus? }
+
+    let(:prometheus) { build(:clusters_applications_prometheus) }
+
+    it { is_expected.to be_truthy }
+
+    context 'externally installed' do
+      let(:prometheus) { build(:clusters_applications_prometheus, :externally_installed) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'uninstalled' do
+      let(:prometheus) { build(:clusters_applications_prometheus, :uninstalled) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#can_uninstall?' do
     let(:prometheus) { create(:clusters_applications_prometheus) }
 
@@ -61,85 +89,8 @@ RSpec.describe Clusters::Applications::Prometheus do
   end
 
   describe '#prometheus_client' do
-    shared_examples 'exception caught for prometheus client' do
-      before do
-        allow(kube_client).to receive(:proxy_url).and_raise(exception)
-      end
-
-      it 'returns nil' do
-        expect(subject.prometheus_client).to be_nil
-      end
-    end
-
-    context 'cluster is nil' do
-      it 'returns nil' do
-        expect(subject.cluster).to be_nil
-        expect(subject.prometheus_client).to be_nil
-      end
-    end
-
-    context "cluster doesn't have kubeclient" do
-      let(:cluster) { create(:cluster) }
-
-      subject { create(:clusters_applications_prometheus, cluster: cluster) }
-
-      it 'returns nil' do
-        expect(subject.prometheus_client).to be_nil
-      end
-    end
-
-    context 'cluster has kubeclient' do
-      let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
-      let(:kubernetes_url) { subject.cluster.platform_kubernetes.api_url }
-      let(:kube_client) { subject.cluster.kubeclient.core_client }
-
-      subject { create(:clusters_applications_prometheus, cluster: cluster) }
-
-      before do
-        subject.cluster.platform_kubernetes.namespace = 'a-namespace'
-        stub_kubeclient_discover(cluster.platform_kubernetes.api_url)
-
-        create(:cluster_kubernetes_namespace,
-               cluster: cluster,
-               cluster_project: cluster.cluster_project,
-               project: cluster.cluster_project.project)
-      end
-
-      it 'creates proxy prometheus_client' do
-        expect(subject.prometheus_client).to be_instance_of(Gitlab::PrometheusClient)
-      end
-
-      it 'merges proxy_url, options and headers from kube client with prometheus_client options' do
-        expect(Gitlab::PrometheusClient)
-          .to(receive(:new))
-          .with(a_valid_url, kube_client.rest_client.options.merge({
-            headers: kube_client.headers,
-            timeout: PrometheusAdapter::DEFAULT_PROMETHEUS_REQUEST_TIMEOUT_SEC
-          }))
-        subject.prometheus_client
-      end
-
-      context 'when cluster is not reachable' do
-        it_behaves_like 'exception caught for prometheus client' do
-          let(:exception) { Kubeclient::HttpError.new(401, 'Unauthorized', nil) }
-        end
-      end
-
-      context 'when there is a socket error while contacting cluster' do
-        it_behaves_like 'exception caught for prometheus client' do
-          let(:exception) { Errno::ECONNREFUSED }
-        end
-
-        it_behaves_like 'exception caught for prometheus client' do
-          let(:exception) { Errno::ECONNRESET }
-        end
-      end
-
-      context 'when the network is unreachable' do
-        it_behaves_like 'exception caught for prometheus client' do
-          let(:exception) { Errno::ENETUNREACH }
-        end
-      end
+    include_examples '#prometheus_client shared' do
+      let(:factory) { :clusters_applications_prometheus }
     end
   end
 
@@ -382,42 +333,10 @@ RSpec.describe Clusters::Applications::Prometheus do
   describe 'alert manager token' do
     subject { create(:clusters_applications_prometheus) }
 
-    context 'when not set' do
-      it 'is empty by default' do
-        expect(subject.alert_manager_token).to be_nil
-        expect(subject.encrypted_alert_manager_token).to be_nil
-        expect(subject.encrypted_alert_manager_token_iv).to be_nil
-      end
-
-      describe '#generate_alert_manager_token!' do
-        it 'generates a token' do
-          subject.generate_alert_manager_token!
-
-          expect(subject.alert_manager_token).to match(/\A\h{32}\z/)
-        end
-      end
-    end
-
-    context 'when set' do
-      let(:token) { SecureRandom.hex }
-
-      before do
-        subject.update!(alert_manager_token: token)
-      end
-
-      it 'reads the token' do
-        expect(subject.alert_manager_token).to eq(token)
-        expect(subject.encrypted_alert_manager_token).not_to be_nil
-        expect(subject.encrypted_alert_manager_token_iv).not_to be_nil
-      end
-
-      describe '#generate_alert_manager_token!' do
-        it 'does not re-generate the token' do
-          subject.generate_alert_manager_token!
-
-          expect(subject.alert_manager_token).to eq(token)
-        end
-      end
+    it 'is autogenerated on creation' do
+      expect(subject.alert_manager_token).to match(/\A\h{32}\z/)
+      expect(subject.encrypted_alert_manager_token).not_to be_nil
+      expect(subject.encrypted_alert_manager_token_iv).not_to be_nil
     end
   end
 end

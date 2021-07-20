@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::TreeSummary do
-  let_it_be(:project) { create(:project, :custom_repo, files: { 'a.txt' => '' }) }
+  let_it_be_with_refind(:project) { create(:project, :custom_repo, files: { 'a.txt' => '' }) }
   let_it_be(:path_lock) { create(:path_lock, project: project, path: 'a.txt') }
   let_it_be(:user) { create(:user) }
 
@@ -21,7 +21,7 @@ RSpec.describe Gitlab::TreeSummary do
 
   context 'when file_locks feature is unavailable' do
     before do
-      stub_feature_flags(file_locks: false)
+      stub_licensed_features(file_locks: false)
     end
 
     it 'does not fill lock labels' do

@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import Vue from 'vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import api from '~/api';
+import createFlash from '~/flash';
 import { diffViewerModes } from '~/ide/constants';
 import axios from '~/lib/utils/axios_utils';
 import { handleLocationHash, historyPushState, scrollToElement } from '~/lib/utils/common_utils';
@@ -24,10 +25,6 @@ import {
   MIN_RENDERING_MS,
   START_RENDERING_INDEX,
   INLINE_DIFF_LINES_KEY,
-  DIFFS_PER_PAGE,
-  DIFF_WHITESPACE_COOKIE_NAME,
-  SHOW_WHITESPACE,
-  NO_SHOW_WHITESPACE,
   DIFF_FILE_MANUAL_COLLAPSE,
   DIFF_FILE_AUTOMATIC_COLLAPSE,
   EVT_PERF_MARK_FILE_TREE_START,
@@ -36,6 +33,18 @@ import {
   DIFF_VIEW_FILE_BY_FILE,
   DIFF_VIEW_ALL_FILES,
   DIFF_FILE_BY_FILE_COOKIE_NAME,
+  TRACKING_CLICK_DIFF_VIEW_SETTING,
+  TRACKING_DIFF_VIEW_INLINE,
+  TRACKING_DIFF_VIEW_PARALLEL,
+  TRACKING_CLICK_FILE_BROWSER_SETTING,
+  TRACKING_FILE_BROWSER_TREE,
+  TRACKING_FILE_BROWSER_LIST,
+  TRACKING_CLICK_WHITESPACE_SETTING,
+  TRACKING_WHITESPACE_SHOW,
+  TRACKING_WHITESPACE_HIDE,
+  TRACKING_CLICK_SINGLE_FILE_SETTING,
+  TRACKING_SINGLE_FILE_MODE,
+  TRACKING_MULTIPLE_FILES_MODE,
 } from '../constants';
 import eventHub from '../event_hub';
 import { isCollapsed } from '../utils/diff_file';
@@ -49,7 +58,6 @@ import {
   convertExpandLines,
   idleCallback,
   allDiscussionWrappersExpanded,
-  prepareDiffData,
   prepareLineForRenamedFile,
 } from './utils';
 
@@ -59,6 +67,7 @@ export const setBaseConfig = ({ commit }, options) => {
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
+    endpointUpdateUser,
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
@@ -71,6 +80,7 @@ export const setBaseConfig = ({ commit }, options) => {
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
+    endpointUpdateUser,
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
@@ -81,22 +91,18 @@ export const setBaseConfig = ({ commit }, options) => {
 };
 
 export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
-  const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
-  let perPage = DIFFS_PER_PAGE;
+  let perPage = state.viewDiffsFileByFile ? 1 : 5;
   let increaseAmount = 1.4;
-
-  if (diffsGradualLoad) {
-    perPage = state.viewDiffsFileByFile ? 1 : 5;
-  }
-
-  const startPage = diffsGradualLoad ? 0 : 1;
+  const startPage = 0;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
   const urlParams = {
     w: state.showWhitespace ? '0' : '1',
     view: 'inline',
   };
+  const hash = window.location.hash.replace('#', '').split('diff-content-').pop();
   let totalLoaded = 0;
+  let scrolledVirtualScroller = false;
 
   commit(types.SET_BATCH_LOADING, true);
   commit(types.SET_RETRIEVING_BATCHES, true);
@@ -111,6 +117,18 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
         commit(types.SET_DIFF_DATA_BATCH, { diff_files });
         commit(types.SET_BATCH_LOADING, false);
 
+        if (window.gon?.features?.diffsVirtualScrolling && !scrolledVirtualScroller) {
+          const index = state.diffFiles.findIndex(
+            (f) =>
+              f.file_hash === hash || f[INLINE_DIFF_LINES_KEY].find((l) => l.line_code === hash),
+          );
+
+          if (index >= 0) {
+            eventHub.$emit('scrollToIndex', index);
+            scrolledVirtualScroller = true;
+          }
+        }
+
         if (!isNoteLink && !state.currentDiffFileId) {
           commit(types.VIEW_DIFF_FILE, diff_files[0].file_hash);
         }
@@ -119,11 +137,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           dispatch('setCurrentDiffFileIdFromNote', id.split('_').pop());
         }
 
-        if (
-          (diffsGradualLoad &&
-            (totalLoaded === pagination.total_pages || pagination.total_pages === null)) ||
-          (!diffsGradualLoad && !pagination.next_page)
-        ) {
+        if (totalLoaded === pagination.total_pages || pagination.total_pages === null) {
           commit(types.SET_RETRIEVING_BATCHES, false);
 
           // We need to check that the currentDiffFileId points to a file that exists
@@ -153,21 +167,25 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           return null;
         }
 
-        if (diffsGradualLoad) {
-          const nextPage = page + perPage;
-          perPage = Math.min(Math.ceil(perPage * increaseAmount), 30);
-          increaseAmount = Math.min(increaseAmount + 0.2, 2);
+        const nextPage = page + perPage;
+        perPage = Math.min(Math.ceil(perPage * increaseAmount), 30);
+        increaseAmount = Math.min(increaseAmount + 0.2, 2);
 
-          return nextPage;
+        return nextPage;
+      })
+      .then((nextPage) => {
+        dispatch('startRenderDiffsQueue');
+
+        if (nextPage) {
+          return getBatch(nextPage);
         }
 
-        return pagination.next_page;
+        return null;
       })
-      .then((nextPage) => nextPage && getBatch(nextPage))
       .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
 
   return getBatch()
-    .then(handleLocationHash)
+    .then(() => !window.gon?.features?.diffsVirtualScrolling && handleLocationHash())
     .catch(() => null);
 };
 
@@ -197,13 +215,7 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
       commit(types.SET_MERGE_REQUEST_DIFFS, data.merge_request_diffs || []);
       commit(types.SET_DIFF_METADATA, strippedData);
 
-      worker.postMessage(
-        prepareDiffData({
-          diff: data,
-          priorFiles: state.diffFiles,
-          meta: true,
-        }),
-      );
+      worker.postMessage(data.diff_files);
 
       return data;
     })
@@ -224,7 +236,10 @@ export const fetchCoverageFiles = ({ commit, state }) => {
         coveragePoll.stop();
       }
     },
-    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again!')),
+    errorCallback: () =>
+      createFlash({
+        message: __('Something went wrong on our end. Please try again!'),
+      }),
   });
 
   coveragePoll.makeRequest();
@@ -234,6 +249,8 @@ export const setHighlightedRow = ({ commit }, lineCode) => {
   const fileHash = lineCode.split('_')[0];
   commit(types.SET_HIGHLIGHTED_ROW, lineCode);
   commit(types.VIEW_DIFF_FILE, fileHash);
+
+  handleLocationHash();
 };
 
 // This is adding line discussions to the actual lines in the diff tree
@@ -304,33 +321,41 @@ export const renderFileForDiscussionId = ({ commit, rootState, state }, discussi
 };
 
 export const startRenderDiffsQueue = ({ state, commit }) => {
-  const checkItem = () =>
-    new Promise((resolve) => {
-      const nextFile = state.diffFiles.find(
-        (file) =>
-          !file.renderIt &&
-          file.viewer &&
-          (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text),
-      );
+  const diffFilesToRender = state.diffFiles.filter(
+    (file) =>
+      !file.renderIt &&
+      file.viewer &&
+      (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text),
+  );
+  let currentDiffFileIndex = 0;
 
-      if (nextFile) {
-        requestAnimationFrame(() => {
-          commit(types.RENDER_FILE, nextFile);
+  const checkItem = () => {
+    const nextFile = diffFilesToRender[currentDiffFileIndex];
+
+    if (nextFile) {
+      let retryCount = 0;
+      currentDiffFileIndex += 1;
+      commit(types.RENDER_FILE, nextFile);
+
+      const requestIdle = () =>
+        requestIdleCallback((idleDeadline) => {
+          // Wait for at least 5ms before trying to render
+          // or for 5 tries and then force render the file
+          if (idleDeadline.timeRemaining() >= 5 || retryCount > 4) {
+            checkItem();
+          } else {
+            requestIdle();
+            retryCount += 1;
+          }
         });
-        requestIdleCallback(
-          () => {
-            checkItem()
-              .then(resolve)
-              .catch(() => {});
-          },
-          { timeout: 1000 },
-        );
-      } else {
-        resolve();
-      }
-    });
 
-  return checkItem();
+      requestIdle();
+    }
+  };
+
+  if (diffFilesToRender.length) {
+    checkItem();
+  }
 };
 
 export const setRenderIt = ({ commit }, file) => commit(types.RENDER_FILE, file);
@@ -341,6 +366,11 @@ export const setInlineDiffViewType = ({ commit }) => {
   Cookies.set(DIFF_VIEW_COOKIE_NAME, INLINE_DIFF_VIEW_TYPE);
   const url = mergeUrlParams({ view: INLINE_DIFF_VIEW_TYPE }, window.location.href);
   historyPushState(url);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_DIFF_VIEW_SETTING);
+    api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_INLINE);
+  }
 };
 
 export const setParallelDiffViewType = ({ commit }) => {
@@ -349,6 +379,11 @@ export const setParallelDiffViewType = ({ commit }) => {
   Cookies.set(DIFF_VIEW_COOKIE_NAME, PARALLEL_DIFF_VIEW_TYPE);
   const url = mergeUrlParams({ view: PARALLEL_DIFF_VIEW_TYPE }, window.location.href);
   historyPushState(url);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_DIFF_VIEW_SETTING);
+    api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_PARALLEL);
+  }
 };
 
 export const showCommentForm = ({ commit }, { lineCode, fileHash }) => {
@@ -470,7 +505,11 @@ export const saveDiffDiscussion = ({ state, dispatch }, { note, formData }) => {
     .then((discussion) => dispatch('assignDiscussionsToDiff', [discussion]))
     .then(() => dispatch('updateResolvableDiscussionsCounts', null, { root: true }))
     .then(() => dispatch('closeDiffFileCommentForm', formData.diffFile.file_hash))
-    .catch(() => createFlash(s__('MergeRequests|Saving the comment failed')));
+    .catch(() =>
+      createFlash({
+        message: s__('MergeRequests|Saving the comment failed'),
+      }),
+    );
 };
 
 export const toggleTreeOpen = ({ commit }, path) => {
@@ -485,9 +524,18 @@ export const scrollToFile = ({ state, commit }, path) => {
   if (!state.treeEntries[path]) return;
 
   const { fileHash } = state.treeEntries[path];
-  document.location.hash = fileHash;
 
   commit(types.VIEW_DIFF_FILE, fileHash);
+
+  if (window.gon?.features?.diffsVirtualScrolling) {
+    eventHub.$emit('scrollToFileHash', fileHash);
+
+    setTimeout(() => {
+      window.history.replaceState(null, null, `#${fileHash}`);
+    });
+  } else {
+    document.location.hash = fileHash;
+  }
 };
 
 export const setShowTreeList = ({ commit }, { showTreeList, saving = true }) => {
@@ -516,19 +564,38 @@ export const setRenderTreeList = ({ commit }, renderTreeList) => {
   commit(types.SET_RENDER_TREE_LIST, renderTreeList);
 
   localStorage.setItem(TREE_LIST_STORAGE_KEY, renderTreeList);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_FILE_BROWSER_SETTING);
+
+    if (renderTreeList) {
+      api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_TREE);
+    } else {
+      api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_LIST);
+    }
+  }
 };
 
-export const setShowWhitespace = ({ commit }, { showWhitespace, pushState = false }) => {
-  commit(types.SET_SHOW_WHITESPACE, showWhitespace);
-  const w = showWhitespace ? SHOW_WHITESPACE : NO_SHOW_WHITESPACE;
-
-  Cookies.set(DIFF_WHITESPACE_COOKIE_NAME, w);
-
-  if (pushState) {
-    historyPushState(mergeUrlParams({ w }, window.location.href));
+export const setShowWhitespace = async (
+  { state, commit },
+  { url, showWhitespace, updateDatabase = true },
+) => {
+  if (updateDatabase && Boolean(window.gon?.current_user_id)) {
+    await axios.put(url || state.endpointUpdateUser, { show_whitespace_in_diffs: showWhitespace });
   }
 
+  commit(types.SET_SHOW_WHITESPACE, showWhitespace);
   notesEventHub.$emit('refetchDiffData');
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_WHITESPACE_SETTING);
+
+    if (showWhitespace) {
+      api.trackRedisHllUserEvent(TRACKING_WHITESPACE_SHOW);
+    } else {
+      api.trackRedisHllUserEvent(TRACKING_WHITESPACE_HIDE);
+    }
+  }
 };
 
 export const toggleFileFinder = ({ commit }, visible) => {
@@ -541,7 +608,9 @@ export const cacheTreeListWidth = (_, size) => {
 
 export const receiveFullDiffError = ({ commit }, filePath) => {
   commit(types.RECEIVE_FULL_DIFF_ERROR, filePath);
-  createFlash(s__('MergeRequest|Error loading full diff. Please try again.'));
+  createFlash({
+    message: s__('MergeRequest|Error loading full diff. Please try again.'),
+  });
 };
 
 export const setExpandedDiffLines = ({ commit }, { file, data }) => {
@@ -673,7 +742,9 @@ export const setSuggestPopoverDismissed = ({ commit, state }) =>
       commit(types.SET_SHOW_SUGGEST_POPOVER);
     })
     .catch(() => {
-      createFlash(s__('MergeRequest|Error dismissing suggestion popover. Please try again.'));
+      createFlash({
+        message: s__('MergeRequest|Error dismissing suggestion popover. Please try again.'),
+      });
     });
 
 export function changeCurrentCommit({ dispatch, commit, state }, { commitId }) {
@@ -738,15 +809,32 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
 
-export const setFileByFile = ({ commit }, { fileByFile }) => {
+export const setFileByFile = ({ state, commit }, { fileByFile }) => {
   const fileViewMode = fileByFile ? DIFF_VIEW_FILE_BY_FILE : DIFF_VIEW_ALL_FILES;
   commit(types.SET_FILE_BY_FILE, fileByFile);
-
   Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fileViewMode);
 
-  historyPushState(
-    mergeUrlParams({ [DIFF_FILE_BY_FILE_COOKIE_NAME]: fileViewMode }, window.location.href),
-  );
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_SINGLE_FILE_SETTING);
+
+    if (fileByFile) {
+      api.trackRedisHllUserEvent(TRACKING_SINGLE_FILE_MODE);
+    } else {
+      api.trackRedisHllUserEvent(TRACKING_MULTIPLE_FILES_MODE);
+    }
+  }
+
+  return axios
+    .put(state.endpointUpdateUser, {
+      view_diffs_file_by_file: fileByFile,
+    })
+    .then(() => {
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/326961
+      // We can't even do a simple console warning here because
+      // the pipeline will fail. However, the issue above will
+      // eventually handle errors appropriately.
+      // console.warn('Saving the file-by-fil user preference failed.');
+    });
 };
 
 export function reviewFile({ commit, state }, { file, reviewed = true }) {

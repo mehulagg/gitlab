@@ -9,7 +9,7 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
-    MIRROR_REMOTE = "upstream".freeze
+    MIRROR_REMOTE = "upstream"
 
     prepended do
       include Elastic::RepositoriesSearch
@@ -34,6 +34,17 @@ module EE
     end
 
     def fetch_upstream(url, forced: false, check_tags_changed: false)
+      if ::Feature.enabled?(:fetch_remote_params, project, default_enabled: :yaml)
+        return fetch_remote(
+          MIRROR_REMOTE,
+          url: url,
+          refmap: ["+refs/heads/*:refs/remotes/#{MIRROR_REMOTE}/*"],
+          ssh_auth: project&.import_data,
+          forced: forced,
+          check_tags_changed: check_tags_changed
+        )
+      end
+
       add_remote(MIRROR_REMOTE, url)
 
       fetch_remote(MIRROR_REMOTE, ssh_auth: project&.import_data, forced: forced, check_tags_changed: check_tags_changed)
@@ -81,13 +92,22 @@ module EE
       ::Geo::RepositoryUpdatedService.new(self).execute
     end
 
-    def code_owners_blob(ref: 'HEAD')
+    def code_owners_blob(ref:)
       possible_code_owner_blobs = ::Gitlab::CodeOwners::FILE_PATHS.map { |path| [ref, path] }
       blobs_at(possible_code_owner_blobs).compact.first
     end
 
     def insights_config_for(sha)
       blob_data_at(sha, ::Gitlab::Insights::CONFIG_FILE_PATH)
+    end
+
+    # Update the default branch querying the remote to determine its HEAD
+    def update_root_ref(remote, remote_url, authorization)
+      root_ref = find_remote_root_ref(remote, remote_url, authorization)
+      change_head(root_ref) if root_ref.present?
+    rescue ::Gitlab::Git::Repository::NoRepository => e
+      ::Gitlab::AppLogger.error("Error updating root ref for repository #{full_path} (#{container.id}): #{e.message}.")
+      nil
     end
 
     private

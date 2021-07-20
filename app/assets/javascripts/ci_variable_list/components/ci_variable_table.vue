@@ -2,6 +2,7 @@
 import { GlTable, GlButton, GlModalDirective, GlIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { s__, __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { ADD_CI_VARIABLE_MODAL_ID } from '../constants';
 import CiVariablePopover from './ci_variable_popover.vue';
 
@@ -59,8 +60,9 @@ export default {
   directives: {
     GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   computed: {
-    ...mapState(['variables', 'valuesHidden', 'isGroup', 'isLoading', 'isDeleting']),
+    ...mapState(['variables', 'valuesHidden', 'isLoading', 'isDeleting']),
     valuesButtonText() {
       return this.valuesHidden ? __('Reveal values') : __('Hide values');
     },
@@ -68,9 +70,6 @@ export default {
       return this.variables && this.variables.length > 0;
     },
     fields() {
-      if (this.isGroup) {
-        return this.$options.fields.filter((field) => field.key !== 'environment_scope');
-      }
       return this.$options.fields;
     },
   },
@@ -84,7 +83,7 @@ export default {
 </script>
 
 <template>
-  <div class="ci-variable-table">
+  <div class="ci-variable-table" data-testid="ci-variable-table">
     <gl-table
       :fields="fields"
       :items="variables"
@@ -163,22 +162,25 @@ export default {
         </p>
       </template>
     </gl-table>
-    <div class="ci-variable-actions" :class="{ 'justify-content-center': !tableIsNotEmpty }">
+    <div
+      class="ci-variable-actions gl-display-flex"
+      :class="{ 'justify-content-center': !tableIsNotEmpty }"
+    >
+      <gl-button
+        ref="add-ci-variable"
+        v-gl-modal-directive="$options.modalId"
+        class="gl-mr-3"
+        data-qa-selector="add_ci_variable_button"
+        variant="confirm"
+        category="primary"
+        >{{ __('Add variable') }}</gl-button
+      >
       <gl-button
         v-if="tableIsNotEmpty"
         ref="secret-value-reveal-button"
         data-qa-selector="reveal_ci_variable_value_button"
-        class="gl-mr-3"
         @click="toggleValues(!valuesHidden)"
         >{{ valuesButtonText }}</gl-button
-      >
-      <gl-button
-        ref="add-ci-variable"
-        v-gl-modal-directive="$options.modalId"
-        data-qa-selector="add_ci_variable_button"
-        variant="success"
-        category="primary"
-        >{{ __('Add Variable') }}</gl-button
       >
     </div>
   </div>

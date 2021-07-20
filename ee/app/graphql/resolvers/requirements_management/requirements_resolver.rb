@@ -14,9 +14,9 @@ module Resolvers
 
       argument :iids, [GraphQL::ID_TYPE],
                required: false,
-               description: 'List of IIDs of requirements, e.g., [1, 2].'
+               description: 'List of IIDs of requirements, e.g., `[1, 2]`.'
 
-      argument :last_test_report_state, ::Types::RequirementsManagement::TestReportStateEnum,
+      argument :last_test_report_state, ::Types::RequirementsManagement::RequirementStatusFilterEnum,
                required: false,
                description: 'The state of latest requirement test report.'
 
@@ -37,8 +37,8 @@ module Resolvers
 
       def preloads
         {
-          last_test_report_manually_created: [:test_reports],
-          last_test_report_state: [:test_reports, { test_reports: [:build] }]
+          last_test_report_manually_created: [:recent_test_reports],
+          last_test_report_state: [:recent_test_reports, { recent_test_reports: [:build] }]
         }
       end
 

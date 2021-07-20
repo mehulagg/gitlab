@@ -19,6 +19,14 @@ module Elastic
       raise NotImplementedError, 'Please extend Elastic::Migration'
     end
 
+    def space_required_bytes
+      raise NotImplementedError, 'Please extend Elastic::Migration'
+    end
+
+    def obsolete?
+      false
+    end
+
     private
 
     def helper
@@ -34,11 +42,9 @@ module Elastic
     end
 
     def fail_migration_halt_error!(retry_attempt: 0)
-      set_migration_state(
-        retry_attempt: retry_attempt,
-        halted: true,
-        halted_indexing_unpaused: false
-      )
+      log "Halting migration on retry_attempt #{retry_attempt}"
+
+      migration_record.halt!(retry_attempt: retry_attempt)
     end
 
     def log(message)

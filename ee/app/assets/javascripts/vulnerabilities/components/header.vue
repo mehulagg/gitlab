@@ -3,7 +3,7 @@ import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
@@ -80,11 +80,11 @@ export default {
         };
       },
       error() {
-        createFlash(
-          s__(
+        createFlash({
+          message: s__(
             'VulnerabilityManagement|Something went wrong while trying to refresh the vulnerability. Please try again later.',
           ),
-        );
+        });
       },
       skip() {
         return !this.shouldRefreshVulnerability;
@@ -155,7 +155,9 @@ export default {
             this.user = userData;
           })
           .catch(() => {
-            createFlash(s__('VulnerabilityManagement|Something went wrong, could not get user.'));
+            createFlash({
+              message: s__('VulnerabilityManagement|Something went wrong, could not get user.'),
+            });
           })
           .finally(() => {
             this.isLoadingUser = false;
@@ -188,11 +190,13 @@ export default {
         this.$emit('vulnerability-state-change');
       } catch (error) {
         createFlash({
-          error,
-          captureError: true,
-          message: s__(
-            'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
-          ),
+          message: {
+            error,
+            captureError: true,
+            message: s__(
+              'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
+            ),
+          },
         });
       } finally {
         this.isLoadingVulnerability = false;
@@ -228,9 +232,11 @@ export default {
         })
         .catch(() => {
           this.isProcessingAction = false;
-          createFlash(
-            s__('ciReport|There was an error creating the merge request. Please try again.'),
-          );
+          createFlash({
+            message: s__(
+              'ciReport|There was an error creating the merge request. Please try again.',
+            ),
+          });
         });
     },
     downloadPatch() {
@@ -255,8 +261,11 @@ export default {
       :default-branch-name="vulnerability.projectDefaultBranch"
     />
     <div class="detail-page-header">
-      <div class="detail-page-header-body align-items-center">
-        <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
+      <div
+        class="detail-page-header-body align-items-center"
+        data-testid="vulnerability-detail-body"
+      >
+        <gl-loading-icon v-if="isLoadingVulnerability" size="sm" class="mr-2" />
         <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}
         </gl-badge>
@@ -272,7 +281,7 @@ export default {
 
       <div class="detail-page-header-actions align-items-center">
         <label class="mb-0 mx-2">{{ __('Status') }}</label>
-        <gl-loading-icon v-if="isLoadingVulnerability" class="d-inline" />
+        <gl-loading-icon v-if="isLoadingVulnerability" size="sm" class="d-inline" />
         <vulnerability-state-dropdown
           v-else
           :initial-state="vulnerability.state"

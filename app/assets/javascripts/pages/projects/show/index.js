@@ -7,16 +7,14 @@ import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
 import leaveByUrl from '~/namespaces/leave_by_url';
 import initVueNotificationsDropdown from '~/notifications';
-import NotificationsForm from '~/notifications_form';
+import { initUploadFileTrigger } from '~/projects/upload_file_experiment';
 import initReadMore from '~/read_more';
 import UserCallout from '~/user_callout';
-import notificationsDropdown from '../../../notifications_dropdown';
 import Star from '../../../star';
 
 initReadMore();
 new Star(); // eslint-disable-line no-new
 
-new NotificationsForm(); // eslint-disable-line no-new
 // eslint-disable-next-line no-new
 new UserCallout({
   setCalloutPerProject: false,
@@ -24,9 +22,12 @@ new UserCallout({
 });
 
 // Project show page loads different overview content based on user preferences
-const treeSlider = document.getElementById('js-tree-list');
-if (treeSlider) {
+
+if (document.querySelector('.js-upload-blob-form')) {
   initUploadForm();
+}
+
+if (document.getElementById('js-tree-list')) {
   initTree();
 }
 
@@ -40,15 +41,10 @@ if (document.querySelector('.project-show-activity')) {
 
 leaveByUrl('project');
 
-if (gon.features?.vueNotificationDropdown) {
-  initVueNotificationsDropdown();
-} else {
-  notificationsDropdown();
-}
-
 initVueNotificationsDropdown();
 
 new ShortcutsNavigation(); // eslint-disable-line no-new
 
-initInviteMembersTrigger();
+initUploadFileTrigger();
 initInviteMembersModal();
+initInviteMembersTrigger();

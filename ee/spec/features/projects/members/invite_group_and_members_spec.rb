@@ -2,15 +2,37 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Project > Members > Invite group and members', :js do
+RSpec.describe 'Project > Members > Invite group and members' do
   include Select2Helper
   include ActionView::Helpers::DateHelper
   include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:maintainer) { create(:user) }
 
-  before do
-    stub_feature_flags(invite_members_group_modal: false)
+  using RSpec::Parameterized::TableSyntax
+
+  where(:invite_members_group_modal_enabled, :expected_invite_member_selector, :expected_invite_group_selector, :expected_import_button_text) do
+    true  | '.js-invite-members-trigger' | '.js-invite-group-trigger' | 'Import a project'
+    false | '#invite-member-tab'         | '#invite-group-tab'        | 'Import'
+  end
+
+  with_them do
+    before do
+      stub_feature_flags(invite_members_group_modal: invite_members_group_modal_enabled)
+    end
+
+    it 'displays either the invite modal button triggers or the form with tabs based on the feature flag' do
+      project = create(:project, namespace: create(:group))
+
+      project.add_maintainer(maintainer)
+      sign_in(maintainer)
+
+      visit project_project_members_path(project)
+
+      expect(page).to have_selector(expected_invite_member_selector)
+      expect(page).to have_selector(expected_invite_group_selector)
+      expect(page).to have_link(expected_import_button_text)
+    end
   end
 
   describe 'Share group lock' do
@@ -18,10 +40,8 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
       it 'user is only able to share with members' do
         visit project_project_members_path(project)
 
-        expect(page).not_to have_selector('#invite-member-tab')
-        expect(page).not_to have_selector('#invite-group-tab')
-        expect(page).not_to have_selector('.invite-group')
-        expect(page).to have_selector('.invite-member')
+        expect(page).not_to have_selector('.js-invite-group-trigger')
+        expect(page).to have_selector('.js-invite-members-trigger')
       end
     end
 
@@ -29,32 +49,26 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
       it 'user is only able to share with groups' do
         visit project_project_members_path(project)
 
-        expect(page).not_to have_selector('#invite-member-tab')
-        expect(page).not_to have_selector('#invite-group-tab')
-        expect(page).not_to have_selector('.invite-member')
-        expect(page).to have_selector('.invite-group')
+        expect(page).not_to have_selector('.js-invite-members-trigger')
+        expect(page).to have_selector('.js-invite-group-trigger')
       end
     end
 
     shared_examples 'the project cannot be shared with groups and members' do
-      it 'no tabs or share content exists' do
+      it 'no invite member or invite group exists' do
         visit project_project_members_path(project)
 
-        expect(page).not_to have_selector('#invite-member-tab')
-        expect(page).not_to have_selector('#invite-group-tab')
-        expect(page).not_to have_selector('.invite-member')
-        expect(page).not_to have_selector('.invite-group')
+        expect(page).not_to have_selector('.js-invite-members-trigger')
+        expect(page).not_to have_selector('.js-invite-group-trigger')
       end
     end
 
     shared_examples 'the project can be shared with groups and members' do
-      it 'both member and group tabs exist' do
+      it 'both member and group buttons exist' do
         visit project_project_members_path(project)
 
-        expect(page).not_to have_selector('.invite-member')
-        expect(page).not_to have_selector('.invite-group')
-        expect(page).to have_selector('#invite-member-tab')
-        expect(page).to have_selector('#invite-group-tab')
+        expect(page).to have_selector('.js-invite-members-trigger')
+        expect(page).to have_selector('.js-invite-group-trigger')
       end
     end
 
@@ -70,46 +84,6 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
       context 'when the group has "Share with group lock" and "Member lock" disabled' do
         it_behaves_like 'the project can be shared with groups and members'
-
-        context 'when `vue_project_members_list` feature flag is enabled' do
-          it 'allows the project to be shared with another group' do
-            visit project_project_members_path(project)
-
-            click_on 'invite-group-tab'
-
-            select2 group_to_share_with.id, from: '#link_group_id'
-            page.find('body').click
-            find('.btn-success').click
-
-            click_link 'Groups'
-
-            page.within(members_table) do
-              expect(page).to have_content(group_to_share_with.name)
-            end
-          end
-        end
-
-        context 'when `vue_project_members_list` feature flag is disabled' do
-          before do
-            stub_feature_flags(vue_project_members_list: false)
-          end
-
-          it 'allows the project to be shared with another group' do
-            visit project_project_members_path(project)
-
-            click_on 'invite-group-tab'
-
-            select2 group_to_share_with.id, from: '#link_group_id'
-            page.find('body').click
-            find('.btn-success').click
-
-            click_link 'Groups'
-
-            page.within('[data-testid="project-member-groups"]') do
-              expect(page).to have_content(group_to_share_with.name)
-            end
-          end
-        end
       end
 
       context 'when the group has "Share with group lock" enabled' do

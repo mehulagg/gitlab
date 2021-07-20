@@ -1,12 +1,11 @@
 import dateFormat from 'dateformat';
+import { dateFormats } from '~/analytics/shared/constants';
 import {
   getMonthNames,
-  dateFromParams,
   getDateInPast,
   getDayDifference,
   secondsToDays,
 } from '~/lib/utils/datetime_utility';
-import { dateFormats } from '../shared/constants';
 import { THROUGHPUT_CHART_STRINGS, DEFAULT_NUMBER_OF_DAYS, UNITS } from './constants';
 
 /**
@@ -32,8 +31,8 @@ export const computeMonthRangeData = (startDate, endDate, format = dateFormats.i
     const monthIndex = dateCursor.getMonth();
     const year = dateCursor.getFullYear();
 
-    const mergedAfter = dateFromParams(year, monthIndex, 1);
-    const mergedBefore = dateFromParams(year, monthIndex + 1, 1);
+    const mergedAfter = new Date(year, monthIndex, 1);
+    const mergedBefore = new Date(year, monthIndex + 1, 1);
 
     monthData.unshift({
       year,

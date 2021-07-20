@@ -2,16 +2,18 @@
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
 import {
   GlAlert,
-  GlButton,
   GlCard,
   GlIcon,
   GlLink,
   GlLoadingIcon,
+  GlButton,
   GlSafeHtmlDirective as SafeHtml,
   GlSprintf,
 } from '@gitlab/ui';
+import CreateJiraIssue from 'ee/vue_shared/security_reports/components/create_jira_issue.vue';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export const i18n = {
   cardHeading: s__('VulnerabilityManagement|Related Jira issues'),
@@ -27,8 +29,9 @@ export default {
   i18n,
   jiraLogo,
   components: {
-    GlAlert,
     GlButton,
+    CreateJiraIssue,
+    GlAlert,
     GlCard,
     GlIcon,
     GlLink,
@@ -38,6 +41,7 @@ export default {
   directives: {
     SafeHtml,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     createJiraIssueUrl: {
       default: '',
@@ -51,6 +55,7 @@ export default {
     jiraIntegrationSettingsPath: {
       default: '',
     },
+    vulnerabilityId: { required: true },
   },
   data() {
     return {
@@ -58,6 +63,9 @@ export default {
       hasFetchIssuesError: false,
       isFetchErrorDismissed: false,
       relatedIssues: [],
+      showCreateJiraIssueErrorAlertMessage: '',
+      isCreateJiraIssueErrorDismissed: false,
+      hasCreateJiraIssueError: false,
     };
   },
   computed: {
@@ -74,11 +82,18 @@ export default {
     showFetchErrorAlert() {
       return this.hasFetchIssuesError && !this.isFetchErrorDismissed;
     },
+    showCreateJiraIssueErrorAlert() {
+      return this.hasCreateJiraIssueError && !this.isCreateJiraIssueErrorDismissed;
+    },
   },
   created() {
     this.fetchRelatedIssues();
   },
   methods: {
+    createJiraIssueErrorHandler(value) {
+      this.hasCreateJiraIssueError = true;
+      this.showCreateJiraIssueErrorAlertMessage = value;
+    },
     // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
     // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
     async fetchRelatedIssues() {
@@ -111,6 +126,15 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
+    <gl-alert
+      v-if="showCreateJiraIssueErrorAlert"
+      data-testid="create-jira-issue-error-alert"
+      variant="danger"
+      class="gl-mb-4"
+      @dismiss="isCreateJiraIssueErrorDismissed = true"
+    >
+      {{ showCreateJiraIssueErrorAlertMessage }}
+    </gl-alert>
     <gl-card
       :header-class="[
         'gl-py-3',
@@ -129,7 +153,7 @@ export default {
           target="_blank"
           class="gl-display-flex gl-align-items-center gl-ml-2 gl-text-gray-500"
         >
-          <gl-icon name="question" :size="12" role="text" />
+          <gl-icon name="question" :size="12" />
         </gl-link>
         <span
           class="gl-display-inline-flex gl-align-items-center gl-ml-4"
@@ -138,14 +162,22 @@ export default {
           <gl-icon name="issues" class="gl-mr-2 gl-text-gray-500" />
           {{ issuesCount }}
         </span>
+        <create-jira-issue
+          v-if="glFeatures.createVulnerabilityJiraIssueViaGraphql"
+          class="gl-ml-auto"
+          :vulnerability-id="vulnerabilityId"
+          @create-jira-issue-error="createJiraIssueErrorHandler"
+          @mutated="fetchRelatedIssues"
+        />
         <gl-button
+          v-else
           variant="success"
           category="secondary"
           :href="createJiraIssueUrl"
           icon="external-link"
           target="_blank"
           class="gl-ml-auto"
-          data-testid="create-new-jira-issue"
+          data-testid="create-new-jira-issue-link"
         >
           {{ $options.i18n.createNewIssueLinkText }}
         </gl-button>
@@ -159,6 +191,7 @@ export default {
           <gl-loading-icon
             v-if="isFetchingRelatedIssues"
             ref="loadingIcon"
+            size="sm"
             :label="$options.i18n.loadingStateLabel"
             class="gl-my-3"
           />

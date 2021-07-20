@@ -53,6 +53,9 @@ For example:
 GET /users?username=jack_smith
 ```
 
+NOTE:
+Username search is case insensitive.
+
 In addition, you can filter users based on the states `blocked` and `active`.
 It does not support `active=false` or `blocked=false`. The list of billable users
 is the total number of users minus the blocked users.
@@ -65,17 +68,33 @@ GET /users?active=true
 GET /users?blocked=true
 ```
 
+In addition, you can search for external users only with `external=true`.
+It does not support `external=false`.
+
+```plaintext
+GET /users?external=true
+```
+
 GitLab supports bot users such as the [alert bot](../operations/incident_management/integrations.md)
 or the [support bot](../user/project/service_desk.md#support-bot-user).
-To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
+You can exclude the following types of [internal users](../development/internal_users.md#internal-users)
+from the users' list, with the `exclude_internal=true` parameter,
 ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
+
+- Alert bot
+- Support bot
+
+However, this action does not exclude [project bot users](../user/project/settings/project_access_tokens.md#project-bot-users).
 
 ```plaintext
 GET /users?exclude_internal=true
 ```
 
-NOTE:
-Username search is case insensitive.
+In addition, to exclude external users from the users' list, you can use the parameter `exclude_external=true`.
+
+```plaintext
+GET /users?exclude_external=true
+```
 
 ### For admins
 
@@ -171,7 +190,7 @@ GET /users
 ]
 ```
 
-Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, `extra_shared_runners_minutes_limit`, and `using_license_seat` parameters.
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, `extra_shared_runners_minutes_limit`, `is_auditor`, and `using_license_seat` parameters.
 
 ```json
 [
@@ -180,6 +199,7 @@ Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see 
     ...
     "shared_runners_minutes_limit": 133,
     "extra_shared_runners_minutes_limit": 133,
+    "is_auditor": false,
     "using_license_seat": true
     ...
   }
@@ -187,7 +207,7 @@ Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see 
 ```
 
 Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
-the `group_saml` provider option:
+the `group_saml` provider option and `provisioned_by_group_id` parameter:
 
 ```json
 [
@@ -200,6 +220,7 @@ the `group_saml` provider option:
       {"provider": "google_oauth2", "extern_uid": "8776128412476123468721346"},
       {"provider": "group_saml", "extern_uid": "123789", "saml_provider_id": 10}
     ],
+    "provisioned_by_group_id": 123789
     ...
   }
 ]
@@ -216,10 +237,6 @@ For example:
 ```plaintext
 GET /users?extern_uid=1234567&provider=github
 ```
-
-Instance administrators can search for users who are external with: `/users?external=true`
-
-You cannot search for external users if you are not an instance administrator. 
 
 You can search users by creation date time range with:
 
@@ -331,6 +348,7 @@ Example Responses:
   "two_factor_enabled": true,
   "external": false,
   "private_profile": false,
+  "commit_email": "john-codes@example.com",
   "current_sign_in_ip": "196.165.1.102",
   "last_sign_in_ip": "172.127.2.22",
   "plan": "gold",
@@ -343,12 +361,13 @@ NOTE:
 The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
 
 Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
-the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` parameters.
+the `shared_runners_minutes_limit`, `is_auditor`, and `extra_shared_runners_minutes_limit` parameters.
 
 ```json
 {
   "id": 1,
   "username": "john_smith",
+  "is_auditor": false,
   "shared_runners_minutes_limit": 133,
   "extra_shared_runners_minutes_limit": 133,
   ...
@@ -356,7 +375,7 @@ the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` par
 ```
 
 Users on GitLab.com [Premium or higher](https://about.gitlab.com/pricing/) also
-see the `group_saml` option:
+see the `group_saml` option and `provisioned_by_group_id` parameter:
 
 ```json
 {
@@ -370,6 +389,7 @@ see the `group_saml` option:
     {"provider": "google_oauth2", "extern_uid": "8776128412476123468721346"},
     {"provider": "group_saml", "extern_uid": "123789", "saml_provider_id": 10}
   ],
+  "provisioned_by_group_id": 123789
   ...
 }
 ```
@@ -425,7 +445,6 @@ Parameters:
 | `private_profile`                    | No       | User's profile is private - true, false (default), or null (is converted to false)                                                                 |
 | `projects_limit`                     | No       | Number of projects user can create                                                                                                                      |
 | `provider`                           | No       | External provider name                                                                                                                                  |
-| `public_email`                       | No       | The public email of the user                                                                                                                            |
 | `reset_password`                     | No       | Send user password reset link - true or false(default)                                                                                                  |
 | `shared_runners_minutes_limit`       | No       | Pipeline minutes quota for this user (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` **(STARTER)**                                                                                                      |
 | `skip_confirmation`                  | No       | Skip confirmation - true or false (default)                                                                                                             |
@@ -433,6 +452,7 @@ Parameters:
 | `theme_id`                           | No       | The GitLab theme for the user (see [the user preference docs](../user/profile/preferences.md#navigation-theme) for more information)                    |
 | `twitter`                            | No       | Twitter account                                                                                                                                         |
 | `username`                           | Yes      | Username                                                                                                                                                |
+| `view_diffs_file_by_file`            | No       | Flag indicating the user sees only one file diff per page                                                                                               |
 | `website_url`                        | No       | Website URL                                                                                                                                             |
 
 ## User modification
@@ -467,13 +487,14 @@ Parameters:
 | `private_profile`                    | No       | User's profile is private - true, false (default), or null (is converted to false)                                                                 |
 | `projects_limit`                     | No       | Limit projects each user can create                                                                                                                     |
 | `provider`                           | No       | External provider name                                                                                                                                  |
-| `public_email`                       | No       | The public email of the user                                                                                                                            |
+| `public_email`                       | No       | The public email of the user (must be already verified)                                                                                                                            |
 | `shared_runners_minutes_limit`       | No       | Pipeline minutes quota for this user (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` **(STARTER)**                                                                                                      |
 | `skip_reconfirmation`                | No       | Skip reconfirmation - true or false (default)                                                                                                           |
 | `skype`                              | No       | Skype ID                                                                                                                                                |
 | `theme_id`                           | No       | The GitLab theme for the user (see [the user preference docs](../user/profile/preferences.md#navigation-theme) for more information)                    |
 | `twitter`                            | No       | Twitter account                                                                                                                                         |
 | `username`                           | No       | Username                                                                                                                                                |
+| `view_diffs_file_by_file`            | No       | Flag indicating the user sees only one file diff per page                                                                                               |
 | `website_url`                        | No       | Website URL                                                                                                                                             |
 
 On password update, the user is forced to change it upon next login.
@@ -605,10 +626,20 @@ GET /user
   "two_factor_enabled": true,
   "external": false,
   "private_profile": false,
+  "commit_email": "john-codes@example.com",
   "current_sign_in_ip": "196.165.1.102",
   "last_sign_in_ip": "172.127.2.22"
 }
 ```
+
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see these
+parameters:
+
+- `shared_runners_minutes_limit`
+- `extra_shared_runners_minutes_limit`
+- `is_auditor`
+- `provisioned_by_group_id`
+- `using_license_seat`
 
 ## User status
 
@@ -627,8 +658,10 @@ Example response:
 ```json
 {
   "emoji":"coffee",
+  "availability":"busy",
   "message":"I crave coffee :coffee:",
-  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>"
+  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>",
+  "clear_status_at": null
 }
 ```
 
@@ -653,10 +686,59 @@ Example response:
 ```json
 {
   "emoji":"coffee",
+  "availability":"busy",
   "message":"I crave coffee :coffee:",
-  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>"
+  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>",
+  "clear_status_at": null
 }
 ```
+
+## Get user preferences
+
+Get a list of currently authenticated user's preferences.
+
+```plaintext
+GET /user/preferences
+```
+
+Example response:
+
+```json
+{
+  "id": 1,
+    "user_id": 1
+      "view_diffs_file_by_file": true,
+      "show_whitespace_in_diffs": false
+}
+```
+
+Parameters:
+
+- **none**
+
+## User preference modification
+
+Update the current user's preferences.
+
+```plaintext
+PUT /user/preferences
+```
+
+```json
+{
+  "id": 1,
+    "user_id": 1
+      "view_diffs_file_by_file": true,
+      "show_whitespace_in_diffs": false
+}
+```
+
+Parameters:
+
+| Attribute                    | Required | Description                                                 |
+| :--------------------------- | :------- | :---------------------------------------------------------- |
+| `view_diffs_file_by_file`    | Yes      | Flag indicating the user sees only one file diff per page.  |
+| `show_whitespace_in_diffs`   | Yes      | Flag indicating the user sees whitespace changes in diffs.  |
 
 ## Set user status
 
@@ -666,15 +748,17 @@ Set the status of the current user.
 PUT /user/status
 ```
 
-| Attribute | Type   | Required | Description                                                                                                                                                                                                             |
-| --------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `emoji`   | string | no       | The name of the emoji to use as status. If omitted `speech_balloon` is used. Emoji name can be one of the specified names in the [Gemojione index](https://github.com/bonusly/gemojione/blob/master/config/index.json). |
-| `message` | string | no       | The message to set as a status. It can also contain emoji codes.                                                                                                                                                        |
+| Attribute            | Type   | Required | Description                                                                                                                                                                                                             |
+| -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `emoji`              | string | no       | The name of the emoji to use as status. If omitted `speech_balloon` is used. Emoji name can be one of the specified names in the [Gemojione index](https://github.com/bonusly/gemojione/blob/master/config/index.json). |
+| `message`            | string | no       | The message to set as a status. It can also contain emoji codes.                                                                                                                                                        |
+| `clear_status_after` | string | no       | Automatically clean up the status after a given time interval, allowed values: `30_minutes`, `3_hours`, `8_hours`, `1_day`, `3_days`, `7_days`, `30_days`
 
-When both parameters `emoji` and `message` are empty, the status is cleared.
+When both parameters `emoji` and `message` are empty, the status is cleared. When the `clear_status_after` parameter is missing from the request, the previously set value for `"clear_status_after` is cleared.
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "emoji=coffee" --data "message=I crave coffee" "https://gitlab.example.com/api/v4/user/status"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "clear_status_after=1_day" --data "emoji=coffee" \
+     --data "message=I crave coffee" "https://gitlab.example.com/api/v4/user/status"
 ```
 
 Example responses
@@ -683,7 +767,8 @@ Example responses
 {
   "emoji":"coffee",
   "message":"I crave coffee",
-  "message_html": "I crave coffee"
+  "message_html": "I crave coffee",
+  "clear_status_at":"2021-02-15T10:49:01.311Z"
 }
 ```
 
@@ -1008,7 +1093,8 @@ Parameters:
 | key       | string | yes      | The new GPG key |
 
 ```shell
-curl --data "key=-----BEGIN PGP PUBLIC KEY BLOCK-----\r\n\r\nxsBNBFV..."  --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/user/gpg_keys"
+curl --data "key=-----BEGIN PGP PUBLIC KEY BLOCK-----\r\n\r\nxsBNBFV..." \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/user/gpg_keys"
 ```
 
 Example response:
@@ -1119,7 +1205,8 @@ Parameters:
 | `key_id`  | integer | yes      | The ID of the GPG key |
 
 ```shell
-curl --data "key=-----BEGIN PGP PUBLIC KEY BLOCK-----\r\n\r\nxsBNBFV..."  --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/2/gpg_keys"
+curl --data "key=-----BEGIN PGP PUBLIC KEY BLOCK-----\r\n\r\nxsBNBFV..." \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/2/gpg_keys"
 ```
 
 Example response:
@@ -1169,11 +1256,13 @@ GET /user/emails
 [
   {
     "id": 1,
-    "email": "email@example.com"
+    "email": "email@example.com",
+    "confirmed_at" : "2021-03-26T19:07:56.248Z"
   },
   {
     "id": 3,
-    "email": "email2@example.com"
+    "email": "email2@example.com",
+    "confirmed_at" : null
   }
 ]
 ```
@@ -1213,7 +1302,8 @@ Parameters:
 ```json
 {
   "id": 1,
-  "email": "email@example.com"
+  "email": "email@example.com",
+  "confirmed_at" : "2021-03-26T19:07:56.248Z"
 }
 ```
 
@@ -1232,7 +1322,8 @@ Parameters:
 ```json
 {
   "id": 4,
-  "email": "email@example.com"
+  "email": "email@example.com",
+  "confirmed_at" : "2021-03-26T19:07:56.248Z"
 }
 ```
 
@@ -1261,7 +1352,7 @@ Parameters:
 
 - `id` (required) - ID of specified user
 - `email` (required) - email address
-- `skip_confirmation` (optional) - Skip confirmation and assume e-mail is verified - true or false (default)
+- `skip_confirmation` (optional) - Skip confirmation and assume email is verified - true or false (default)
 
 ## Delete email for current user
 
@@ -1525,7 +1616,8 @@ POST /users/:user_id/impersonation_tokens
 | `scopes`     | array   | yes      | The array of scopes of the impersonation token (`api`, `read_user`)         |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=mytoken" --data "expires_at=2017-04-04" --data "scopes[]=api" "https://gitlab.example.com/api/v4/users/42/impersonation_tokens"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=mytoken" --data "expires_at=2017-04-04" \
+     --data "scopes[]=api" "https://gitlab.example.com/api/v4/users/42/impersonation_tokens"
 ```
 
 Example response:
@@ -1589,7 +1681,8 @@ POST /users/:user_id/personal_access_tokens
 | `scopes`     | array   | yes      | The array of scopes of the personal access token (`api`, `read_user`, `read_api`, `read_repository`, `write_repository`) |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=mytoken" --data "expires_at=2017-04-04" --data "scopes[]=api" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=mytoken" --data "expires_at=2017-04-04" \
+     --data "scopes[]=api" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens"
 ```
 
 Example response:
@@ -1712,6 +1805,6 @@ Example response:
     "source_name": "Group three",
     "source_type": "Namespace",
     "access_level": "20"
-  },
+  }
 ]
 ```

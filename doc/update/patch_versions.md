@@ -5,11 +5,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 comments: false
 ---
 
-# Universal update guide for patch versions of source installations
+# Universal update guide for patch versions of source installations **(FREE SELF)**
 
 ## Select Version to Install
 
-Make sure you view [this update guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/update/patch_versions.md) from the tag (version) of GitLab you would like to install.
+Make sure you view [this update guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/update/patch_versions.md) from the tag (version) of GitLab you would like to install.
 In most cases this should be the highest numbered production tag (without `rc` in it).
 You can select the tag in the version dropdown in the top left corner of GitLab (below the menu bar).
 
@@ -43,7 +43,12 @@ sudo -u git -H git checkout LATEST_TAG -b LATEST_TAG
 ```shell
 cd /home/git/gitlab
 
-sudo -u git -H bundle install --without development test mysql --deployment
+# If you haven't done so during installation or a previous upgrade already
+sudo -u git -H bundle config set --local deployment 'true'
+sudo -u git -H bundle config set --local without 'development test mysql aws kerberos'
+
+# Update gems
+sudo -u git -H bundle install
 
 # Optional: clean up old gems
 sudo -u git -H bundle clean
@@ -124,3 +129,8 @@ sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
 If all items are green, then congratulations upgrade complete!
+
+### 11. Make sure background migrations are finished
+
+[Check the status of background migrations](../user/admin_area/monitoring/background_migrations.md#check-the-status-of-background-migrations)
+and make sure they are finished.

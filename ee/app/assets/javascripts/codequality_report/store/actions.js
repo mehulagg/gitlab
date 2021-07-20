@@ -1,9 +1,9 @@
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 
-import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_comparison';
+import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_parser';
 import { VIEW_EVENT_FEATURE_FLAG, VIEW_EVENT_NAME } from './constants';
 import * as types from './mutation_types';
 
@@ -33,6 +33,8 @@ export const fetchReport = ({ state, dispatch }) => {
     })
     .catch((error) => {
       dispatch('receiveReportError', error);
-      createFlash(s__('ciReport|There was an error fetching the codequality report.'));
+      createFlash({
+        message: s__('ciReport|There was an error fetching the codequality report.'),
+      });
     });
 };

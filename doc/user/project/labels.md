@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Labels
+# Labels **(FREE)**
 
 As your count of issues, merge requests, and epics grows in GitLab, it's more and more challenging
 to keep track of those items. Especially as your organization grows from just a few people to
@@ -59,7 +59,7 @@ and edit labels.
 
 > Showing all inherited labels [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241990) in GitLab 13.5.
 
-To view a project's available labels, in the project, go to **Issues > Labels**.
+To view a project's available labels, in the project, go to **Project information > Labels**.
 Its list of labels includes both the labels defined at the project level, and
 all labels defined by its ancestor groups. For each label, you can see the
 project or group path from where it was created. You can filter the list by
@@ -68,7 +68,7 @@ icon (**{search}**).
 
 To create a new project label:
 
-1. In your project, go to **Issues > Labels**.
+1. In your project, go to **Project information > Labels**.
 1. Select the **New label** button.
 1. In the **Title** field, enter a short, descriptive name for the label. You
    can also use this field to create [scoped, mutually exclusive labels](#scoped-labels).
@@ -118,18 +118,18 @@ Promoting a label is a permanent action, and cannot be reversed.
 
 To promote a project label to a group label:
 
-1. Navigate to **Issues > Labels** in the project.
+1. Navigate to **Project information > Labels** in the project.
 1. Click on the three dots (**{ellipsis_v}**) next to the **Subscribe** button and
    select **Promote to group label**.
 
 ### Group labels
 
-To view the group labels list, navigate to the group and click **Issues > Labels**.
+To view the group labels list, navigate to the group and click **Group information > Labels**.
 The list includes all labels that are defined at the group level only. It does not
 list any labels that are defined in projects. You can filter the list by entering
 a search query at the top and clicking search (**{search}**).
 
-To create a **group label**, navigate to **Issues > Labels** in the group and
+To create a **group label**, navigate to **Group information > Labels** in the group and
 follow the same process as [creating a project label](#project-labels).
 
 #### Create group labels from epics **(ULTIMATE)**
@@ -162,7 +162,7 @@ Scoped labels allow teams to use the label feature to annotate issues, merge req
 and epics with mutually exclusive labels. This can enable more complicated workflows
 by preventing certain labels from being used together.
 
-A label is scoped when it uses a special double-colon (`::`) syntax in the label’s
+A label is scoped when it uses a special double-colon (`::`) syntax in the label's
 title, for example:
 
 ![Scoped labels](img/labels_key_value_v13_5.png)
@@ -282,4 +282,4 @@ To resolve the duplication, [in GitLab 13.2](https://gitlab.com/gitlab-org/gitla
 and later, some duplicate labels have `_duplicate<number>` appended to their titles.
 
 You can safely change these labels' titles if you prefer.
-For details of the original problem, see [issue 30390](https://gitlab.com/gitlab-org/gitlab/issues/30390).
+For details of the original problem, see [issue 30390](https://gitlab.com/gitlab-org/gitlab/-/issues/30390).

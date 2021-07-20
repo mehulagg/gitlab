@@ -99,7 +99,7 @@ module Gitlab
             # Allow it to mark as WIP on MR creation page _or_ through MR notes.
             (quick_action_target.new_record? || current_user.can?(:"update_#{quick_action_target.to_ability_name}", quick_action_target))
         end
-        command :draft, :wip do
+        command :draft do
           @updates[:wip_event] = quick_action_target.work_in_progress? ? 'unwip' : 'wip'
         end
 
@@ -148,7 +148,7 @@ module Gitlab
           quick_action_target.persisted? && quick_action_target.can_be_approved_by?(current_user)
         end
         command :approve do
-          success = MergeRequests::ApprovalService.new(quick_action_target.project, current_user).execute(quick_action_target)
+          success = MergeRequests::ApprovalService.new(project: quick_action_target.project, current_user: current_user).execute(quick_action_target)
 
           next unless success
 

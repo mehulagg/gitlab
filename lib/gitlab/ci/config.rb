@@ -17,11 +17,14 @@ module Gitlab
         Config::Yaml::Tags::TagError
       ].freeze
 
-      attr_reader :root
+      attr_reader :root, :context, :ref, :source
 
-      def initialize(config, project: nil, sha: nil, user: nil, parent_pipeline: nil)
+      def initialize(config, project: nil, sha: nil, user: nil, parent_pipeline: nil, ref: nil, source: nil)
         @context = build_context(project: project, sha: sha, user: user, parent_pipeline: parent_pipeline)
         @context.set_deadline(TIMEOUT_SECONDS)
+
+        @ref = ref
+        @source = source
 
         @config = expand_config(config)
 
@@ -94,15 +97,21 @@ module Gitlab
         initial_config = Config::External::Processor.new(initial_config, @context).perform
         initial_config = Config::Extendable.new(initial_config).to_hash
         initial_config = Config::Yaml::Tags::Resolver.new(initial_config).to_hash
-        initial_config = Config::EdgeStagesInjector.new(initial_config).to_hash
+        Config::EdgeStagesInjector.new(initial_config).to_hash
+      end
 
-        initial_config
+      def find_sha(project)
+        branches = project&.repository&.branches || []
+
+        unless branches.empty?
+          project.repository.root_ref_sha
+        end
       end
 
       def build_context(project:, sha:, user:, parent_pipeline:)
         Config::External::Context.new(
           project: project,
-          sha: sha || project&.repository&.root_ref_sha,
+          sha: sha || find_sha(project),
           user: user,
           parent_pipeline: parent_pipeline,
           variables: project&.predefined_variables&.to_runner_variables)
@@ -120,4 +129,4 @@ module Gitlab
   end
 end
 
-Gitlab::Ci::Config.prepend_if_ee('EE::Gitlab::Ci::ConfigEE')
+Gitlab::Ci::Config.prepend_mod_with('Gitlab::Ci::ConfigEE')

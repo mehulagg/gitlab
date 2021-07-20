@@ -5,24 +5,159 @@ require "spec_helper"
 RSpec.describe License do
   using RSpec::Parameterized::TableSyntax
 
-  let(:gl_license) { build(:gitlab_license) }
-  let(:license)    { build(:license, data: gl_license.export) }
+  subject(:license) { build(:license, data: gl_license.export) }
 
-  describe "Validation" do
-    describe "Valid license" do
-      context "when the license is provided" do
-        it "is valid" do
-          expect(license).to be_valid
-        end
+  let(:gl_license) { build(:gitlab_license) }
+
+  describe 'validations' do
+    describe '#valid_license' do
+      context 'when the license is provided' do
+        it { is_expected.to be_valid }
       end
 
-      context "when no license is provided" do
+      context 'when no license is provided' do
         before do
           license.data = nil
         end
 
-        it "is invalid" do
+        it { is_expected.not_to be_valid }
+      end
+    end
+
+    describe '#check_trueup' do
+      let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
+      let(:date)              { described_class.current.starts_at }
+
+      before do
+        create(:historical_data, recorded_at: date, active_user_count: active_user_count)
+      end
+
+      context 'when reconciliation_completed is true on the license' do
+        before do
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, reconciliation_completed: true)
+        end
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'when reconciliation_completed is false on the license' do
+        it 'adds errors for invalid true up figures' do
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8, reconciliation_completed: false)
+
           expect(license).not_to be_valid
+          expect(license.errors.full_messages.to_sentence)
+            .to include 'You have applied a True-up for 8 users but you need one for 10 users'
+        end
+      end
+
+      context 'when reconciliation_completed is not present on the license' do
+        it 'adds errors for invalid true up figures' do
+          set_restrictions(restricted_user_count: 10, trueup_quantity: 8)
+
+          expect(license).not_to be_valid
+          expect(license.errors.full_messages.to_sentence)
+            .to include 'You have applied a True-up for 8 users but you need one for 10 users'
+        end
+      end
+
+      context 'when quantity is ok' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 10)
+        end
+
+        it { is_expected.to be_valid }
+
+        context 'but active users exceeds restricted user count' do
+          before do
+            create_list(:user, 6)
+          end
+
+          it { is_expected.not_to be_valid }
+        end
+      end
+
+      context 'when quantity is wrong' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 8)
+        end
+
+        it { is_expected.not_to be_valid }
+      end
+
+      context 'when previous user count is not present' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 7)
+        end
+
+        it 'uses current active user count to calculate the expected true-up' do
+          create_list(:user, 3)
+
+          expect(license).to be_valid
+        end
+
+        context 'with wrong true-up quantity' do
+          before do
+            create_list(:user, 2)
+          end
+
+          it { is_expected.not_to be_valid }
+        end
+      end
+
+      context 'when previous user count is present' do
+        before do
+          set_restrictions(restricted_user_count: 5, trueup_quantity: 6, previous_user_count: 4)
+        end
+
+        it { is_expected.to be_valid }
+      end
+    end
+
+    describe '#check_restricted_user_count' do
+      context 'when reconciliation_completed is true' do
+        context 'when restricted_user_count is equal or more than active_user_count' do
+          before do
+            set_restrictions(restricted_user_count: 10, reconciliation_completed: true)
+          end
+
+          it { is_expected.to be_valid }
+        end
+
+        context 'when the restricted_user_count is less than active_user_count' do
+          before do
+            set_restrictions(restricted_user_count: 2, reconciliation_completed: true)
+            create_list(:user, 6)
+            create(:historical_data, recorded_at: described_class.current.starts_at, active_user_count: 100)
+          end
+
+          it 'add limit error' do
+            expect(license.valid?).to be_falsey
+
+            expect(license.errors.full_messages.to_sentence).to include(
+              'This GitLab installation currently has 6 active users, exceeding this license\'s limit of 2 by 4 users'
+            )
+            expect(license.errors.full_messages.to_sentence).not_to include(
+              'During the year before this license started'
+            )
+          end
+        end
+      end
+
+      context 'when reconciliation_completed is false' do
+        context 'when the restricted_user_count is less than active_user_count' do
+          before do
+            set_restrictions(restricted_user_count: 2, reconciliation_completed: false)
+            create_list(:user, 6)
+            create(:historical_data, recorded_at: described_class.current.starts_at, active_user_count: 100)
+          end
+
+          it 'add limit error' do
+            expect(license.valid?).to be_falsey
+
+            expect(license.errors.full_messages.to_sentence).to include(
+              'During the year before this license started'
+            )
+          end
         end
       end
     end
@@ -68,14 +203,13 @@ RSpec.describe License do
 
       context 'threshold for users overage' do
         let(:current_active_users_count) { 0 }
-        let(:new_license) do
-          gl_license = build(
+        let(:new_license) { build(:license, data: gitlab_license.export) }
+        let(:gitlab_license) do
+          build(
             :gitlab_license,
             starts_at: Date.current,
             restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
           )
-
-          build(:license, data: gl_license.export)
         end
 
         context 'when current active users count is above the limit set by the license' do
@@ -101,6 +235,21 @@ RSpec.describe License do
               it 'does not accept the license' do
                 expect(new_license).not_to be_valid
               end
+
+              context 'when license is a cloud license' do
+                let(:gitlab_license) do
+                  build(
+                    :gitlab_license,
+                    cloud_licensing_enabled: true,
+                    starts_at: Date.current,
+                    restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
+                  )
+                end
+
+                it 'accepts the license' do
+                  expect(new_license).to be_valid
+                end
+              end
             end
           end
 
@@ -117,193 +266,115 @@ RSpec.describe License do
           end
         end
       end
-    end
 
-    describe "Historical active user count" do
-      let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
-      let(:date)              { described_class.current.starts_at }
-      let!(:historical_data)  { HistoricalData.create!(recorded_at: date, active_user_count: active_user_count) }
+      describe 'Historical active user count' do
+        let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
+        let(:date)              { described_class.current.starts_at }
+        let!(:historical_data)  { create(:historical_data, recorded_at: date, active_user_count: active_user_count) }
 
-      context "when there is no active user count restriction" do
-        it "is valid" do
-          expect(license).to be_valid
-        end
-      end
-
-      context 'without historical data' do
-        before do
-          create_list(:user, 2)
-
-          gl_license.restrictions = {
-            previous_user_count: 1,
-            active_user_count: described_class.current.daily_billable_users_count - 1
-          }
-
-          HistoricalData.delete_all
+        context 'when there is no active user count restriction' do
+          it { is_expected.to be_valid }
         end
 
-        context 'with previous_user_count and active users above of license limit' do
-          it 'is invalid' do
-            expect(license).to be_invalid
-          end
-
-          it 'shows the proper error message' do
-            license.valid?
-
-            error_msg = "This GitLab installation currently has 2 active users, exceeding this license's limit of 1 by 1 user. " \
-                        "Please upload a license for at least 2 users or contact sales at renewals@gitlab.com"
-
-            expect(license.errors[:base].first).to eq(error_msg)
-          end
-        end
-      end
-
-      context "when the active user count restriction is exceeded" do
-        before do
-          gl_license.restrictions = { active_user_count: active_user_count - 1 }
-        end
-
-        context "when the license started" do
-          it "is invalid" do
-            expect(license).not_to be_valid
-          end
-        end
-
-        context "after the license started" do
-          let(:date) { Date.current }
-
-          it "is valid" do
-            expect(license).to be_valid
-          end
-        end
-
-        context "in the year before the license started" do
-          let(:date) { described_class.current.starts_at - 6.months }
-
-          it "is invalid" do
-            expect(license).not_to be_valid
-          end
-        end
-
-        context "earlier than a year before the license started" do
-          let(:date) { described_class.current.starts_at - 2.years }
-
-          it "is valid" do
-            expect(license).to be_valid
-          end
-        end
-      end
-
-      context "when the active user count restriction is not exceeded" do
-        before do
-          gl_license.restrictions = { active_user_count: active_user_count + 1 }
-        end
-
-        it "is valid" do
-          expect(license).to be_valid
-        end
-      end
-
-      context "when the active user count is met exactly" do
-        it "is valid" do
-          active_user_count = 100
-          gl_license.restrictions = { active_user_count: active_user_count }
-
-          expect(license).to be_valid
-        end
-      end
-
-      context 'with true-up info' do
-        context 'when quantity is ok' do
+        context 'without historical data' do
           before do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 10)
+            create_list(:user, 2)
+
+            gl_license.restrictions = {
+              previous_user_count: 1,
+              active_user_count: described_class.current.daily_billable_users_count - 1
+            }
+
+            HistoricalData.delete_all
           end
 
+          context 'with previous_user_count and active users above of license limit' do
+            it { is_expected.not_to be_valid }
+
+            it 'shows the proper error message' do
+              license.valid?
+
+              error_msg = "This GitLab installation currently has 2 active users, exceeding this license's limit of 1 by 1 user. " \
+                        "Please upload a license for at least 2 users or contact sales at https://about.gitlab.com/sales/"
+
+              expect(license.errors[:base].first).to eq(error_msg)
+            end
+          end
+        end
+
+        context 'when the active user count restriction is exceeded' do
+          before do
+            gl_license.restrictions = { active_user_count: active_user_count - 1 }
+          end
+
+          context 'when the license started' do
+            it { is_expected.not_to be_valid }
+          end
+
+          context 'after the license started' do
+            let(:date) { Date.current }
+
+            it { is_expected.to be_valid }
+          end
+
+          context 'in the year before the license started' do
+            let(:date) { described_class.current.starts_at - 6.months }
+
+            it { is_expected.not_to be_valid }
+          end
+
+          context 'earlier than a year before the license started' do
+            let(:date) { described_class.current.starts_at - 2.years }
+
+            it { is_expected.to be_valid }
+          end
+        end
+
+        context 'when the active user count restriction is not exceeded' do
+          before do
+            gl_license.restrictions = { active_user_count: active_user_count + 1 }
+          end
+
+          it { is_expected.to be_valid }
+        end
+
+        context 'when the active user count is met exactly' do
           it 'is valid' do
-            expect(license).to be_valid
-          end
+            active_user_count = 100
+            gl_license.restrictions = { active_user_count: active_user_count }
 
-          context 'but active users exceeds restricted user count' do
-            it 'is invalid' do
-              create_list(:user, 6)
-
-              expect(license).not_to be_valid
-            end
-          end
-        end
-
-        context 'when quantity is wrong' do
-          it 'is invalid' do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 8)
-
-            expect(license).not_to be_valid
-          end
-        end
-
-        context 'when previous user count is not present' do
-          before do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 7)
-          end
-
-          it 'uses current active user count to calculate the expected true-up' do
-            create_list(:user, 3)
-
-            expect(license).to be_valid
-          end
-
-          context 'with wrong true-up quantity' do
-            it 'is invalid' do
-              create_list(:user, 2)
-
-              expect(license).not_to be_valid
-            end
-          end
-        end
-
-        context 'when previous user count is present' do
-          before do
-            set_restrictions(restricted_user_count: 5, trueup_quantity: 6, previous_user_count: 4)
-          end
-
-          it 'uses it to calculate the expected true-up' do
             expect(license).to be_valid
           end
         end
       end
     end
 
-    describe "Not expired" do
+    describe '#not_expired' do
       context "when the license doesn't expire" do
-        it "is valid" do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
 
-      context "when the license has expired" do
+      context 'when the license has expired' do
         before do
           gl_license.expires_at = Date.yesterday
         end
 
-        it "is invalid" do
-          expect(license).not_to be_valid
-        end
+        it { is_expected.not_to be_valid }
       end
 
-      context "when the license has yet to expire" do
+      context 'when the license has yet to expire' do
         before do
           gl_license.expires_at = Date.tomorrow
         end
 
-        it "is valid" do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
     end
 
     describe 'downgrade' do
       context 'when more users were added in previous period' do
         before do
-          HistoricalData.create!(recorded_at: described_class.current.starts_at - 6.months, active_user_count: 15)
+          create(:historical_data, recorded_at: described_class.current.starts_at - 6.months, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 5, previous_user_count: 10)
         end
@@ -315,19 +386,57 @@ RSpec.describe License do
 
       context 'when no users were added in the previous period' do
         before do
-          HistoricalData.create!(recorded_at: 6.months.ago, active_user_count: 15)
+          create(:historical_data, recorded_at: 6.months.ago, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 10, previous_user_count: 15)
         end
 
-        it 'is valid' do
-          expect(license).to be_valid
-        end
+        it { is_expected.to be_valid }
       end
     end
   end
 
   describe 'Callbacks' do
+    describe '#reset_current', :request_store do
+      def current_license_cached_value
+        License.cache.read(License::CACHE_KEY, License)
+      end
+
+      before do
+        License.current # Set cache up front
+      end
+
+      context 'when a license is created' do
+        it 'expires the current_license cached value' do
+          expect(current_license_cached_value).to be_present
+
+          create(:license)
+
+          expect(current_license_cached_value).to be_nil
+        end
+      end
+
+      context 'when a license is updated' do
+        it 'expires the current_license cached value' do
+          expect(current_license_cached_value).to be_present
+
+          License.last.update!(updated_at: Time.current)
+
+          expect(current_license_cached_value).to be_nil
+        end
+      end
+
+      context 'when a license is destroyed' do
+        it 'expires the current_license cached value' do
+          expect(current_license_cached_value).to be_present
+
+          License.last.destroy!
+
+          expect(current_license_cached_value).to be_nil
+        end
+      end
+    end
+
     describe '#reset_future_dated', :request_store do
       let!(:future_dated_license) { create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export) }
 
@@ -385,6 +494,20 @@ RSpec.describe License do
     end
   end
 
+  describe 'Scopes' do
+    describe '.cloud' do
+      it 'includes cloud licenses' do
+        create(:license)
+        cloud_license_1 = create(:license, cloud: true)
+        cloud_license_2 = create(:license, cloud: true)
+
+        result = described_class.cloud
+
+        expect(result).to contain_exactly(cloud_license_1, cloud_license_2)
+      end
+    end
+  end
+
   describe "Class methods" do
     before do
       described_class.reset_current
@@ -414,34 +537,26 @@ RSpec.describe License do
       context 'when addon included' do
         let(:plan) { 'premium' }
 
-        it 'returns true' do
-          is_expected.to eq(true)
-        end
+        it { is_expected.to eq(true) }
       end
 
       context 'when addon not included' do
         let(:plan) { 'starter' }
 
-        it 'returns false' do
-          is_expected.to eq(false)
-        end
+        it { is_expected.to eq(false) }
       end
 
       context 'when plan is not set' do
         let(:plan) { nil }
 
-        it 'returns false' do
-          is_expected.to eq(false)
-        end
+        it { is_expected.to eq(false) }
       end
 
       context 'when feature does not exists' do
         let(:plan) { 'premium' }
         let(:feature) { nil }
 
-        it 'returns false' do
-          is_expected.to eq(false)
-        end
+        it { is_expected.to eq(false) }
       end
     end
 
@@ -492,57 +607,6 @@ RSpec.describe License do
           travel_to(61.seconds.from_now) do
             expect(described_class).to receive(:load_license).once.and_call_original
             expect(described_class.current).to eq(current_license)
-          end
-        end
-      end
-    end
-
-    describe '.future_dated_only?' do
-      before do
-        described_class.reset_future_dated
-      end
-
-      context 'when licenses table does not exist' do
-        it 'returns false' do
-          allow(described_class).to receive(:table_exists?).and_return(false)
-
-          expect(described_class.future_dated_only?).to be_falsey
-        end
-      end
-
-      context 'when there is no license' do
-        it 'returns false' do
-          allow(described_class).to receive(:last_hundred).and_return([])
-
-          expect(described_class.future_dated_only?).to be_falsey
-        end
-      end
-
-      context 'when the license is invalid' do
-        it 'returns false' do
-          license = build(:license, data: build(:gitlab_license, starts_at: Date.current + 1.month).export)
-
-          allow(described_class).to receive(:last_hundred).and_return([license])
-          allow(license).to receive(:valid?).and_return(false)
-
-          expect(described_class.future_dated_only?).to be_falsey
-        end
-      end
-
-      context 'when the license is valid' do
-        context 'when there is a current license' do
-          it 'returns the false' do
-            expect(described_class.future_dated_only?).to be_falsey
-          end
-        end
-
-        context 'when the license is future-dated' do
-          it 'returns the true' do
-            create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
-
-            allow(described_class).to receive(:current).and_return(nil)
-
-            expect(described_class.future_dated_only?).to be_truthy
           end
         end
       end
@@ -739,6 +803,59 @@ RSpec.describe License do
         end
       end
     end
+
+    describe '.current_cloud_license?' do
+      subject { described_class.current_cloud_license?(license_key) }
+
+      let(:license_key) { 'test-key' }
+
+      before do
+        allow(License).to receive(:current).and_return(current_license)
+      end
+
+      context 'when current license is not set' do
+        let(:current_license) { nil }
+
+        it { is_expected.to be(false) }
+      end
+
+      context 'when current license is not a cloud license' do
+        let(:current_license) { create(:license) }
+
+        it { is_expected.to be(false) }
+      end
+
+      context 'when current license is a cloud license but key does not match current' do
+        let(:current_license) { create_current_license(cloud_licensing_enabled: true) }
+
+        it { is_expected.to be(false) }
+      end
+
+      context 'when current license is a cloud license and key matches current' do
+        let(:current_license) { create_current_license(cloud_licensing_enabled: true) }
+        let(:license_key) { current_license.data }
+
+        it { is_expected.to be(true) }
+      end
+    end
+  end
+
+  describe "#data_filename" do
+    subject { license.data_filename }
+
+    context 'when licensee includes company information' do
+      let(:gl_license) do
+        build(:gitlab_license, licensee: { 'Company' => ' Example & Partner Inc. 2 ', 'Name' => 'User Example' })
+      end
+
+      it { is_expected.to eq('ExamplePartnerInc2.gitlab-license') }
+    end
+
+    context 'when licensee does not include company information' do
+      let(:gl_license) { build(:gitlab_license, licensee: { 'Name' => 'User Example' }) }
+
+      it { is_expected.to eq('UserExample.gitlab-license') }
+    end
   end
 
   describe "#md5" do
@@ -874,26 +991,6 @@ RSpec.describe License do
           end
         end
       end
-
-      context 'when feature is disabled by a feature flag' do
-        it 'returns false' do
-          feature = license.features.first
-          stub_feature_flags(feature => false)
-
-          expect(license.features).not_to receive(:include?)
-
-          expect(license.feature_available?(feature)).to eq(false)
-        end
-      end
-
-      context 'when feature is enabled by a feature flag' do
-        it 'returns true' do
-          feature = license.features.first
-          stub_feature_flags(feature => true)
-
-          expect(license.feature_available?(feature)).to eq(true)
-        end
-      end
     end
 
     def build_license_with_add_ons(add_ons, plan: nil)
@@ -964,6 +1061,150 @@ RSpec.describe License do
     end
   end
 
+  describe '#historical_data' do
+    subject(:historical_data_count) { license.historical_data.count }
+
+    let_it_be(:now) { DateTime.new(2014, 12, 15) }
+    let_it_be(:license) { create(:license, starts_at: Date.new(2014, 7, 1), expires_at: Date.new(2014, 12, 31)) }
+
+    before_all do
+      (1..12).each do |i|
+        create(:historical_data, recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+      end
+
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 1)
+      create(:historical_data, recorded_at: license.expires_at + 1.day, active_user_count: 2)
+      create(:historical_data, recorded_at: now - 1.year - 1.day, active_user_count: 3)
+      create(:historical_data, recorded_at: now + 1.day, active_user_count: 4)
+    end
+
+    around do |example|
+      travel_to(now) { example.run }
+    end
+
+    context 'with using parameters' do
+      it 'returns correct number of records within the given range' do
+        from = Date.new(2014, 8, 1)
+        to = Date.new(2014, 11, 30)
+
+        expect(license.historical_data(from: from, to: to).count).to eq(4)
+      end
+    end
+
+    context 'with a license that has a start and end date' do
+      it 'returns correct number of records within the license range' do
+        expect(historical_data_count).to eq(7)
+      end
+    end
+
+    context 'with a license that has no start date' do
+      let_it_be(:license) { create(:license, starts_at: nil, expires_at: Date.new(2014, 12, 31)) }
+
+      it 'returns correct number of records starting a year ago to license\s expiration date' do
+        expect(historical_data_count).to eq(14)
+      end
+    end
+
+    context 'with a license that has no end date' do
+      let_it_be(:license) { create(:license, starts_at: Date.new(2014, 7, 1), expires_at: nil) }
+
+      it 'returns correct number of records from the license\'s start date to today' do
+        expect(historical_data_count).to eq(6)
+      end
+    end
+  end
+
+  describe '#historical_max' do
+    subject(:historical_max) { license.historical_max }
+
+    let(:license) { create(:license, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month) }
+
+    context 'when using parameters' do
+      before do
+        (1..12).each do |i|
+          create(:historical_data, recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+        end
+      end
+
+      it 'returns max user count for the given time range' do
+        from = Date.new(2014, 6, 1)
+        to = Date.new(2014, 9, 1)
+
+        expect(license.historical_max(from: from, to: to)).to eq(900)
+      end
+    end
+
+    context 'with different plans for the license' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:gl_plan, :expected_count) do
+        ::License::STARTER_PLAN  | 2
+        ::License::PREMIUM_PLAN  | 2
+        ::License::ULTIMATE_PLAN | 1
+      end
+
+      with_them do
+        let(:plan) { gl_plan }
+        let(:license) do
+          create(:license, plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
+        end
+
+        before do
+          license
+
+          create(:group_member, :guest)
+          create(:group_member, :reporter)
+
+          HistoricalData.track!
+        end
+
+        it 'does not count guest users' do
+          expect(historical_max).to eq(expected_count)
+        end
+      end
+    end
+
+    context 'with data inside and outside of the license period' do
+      before do
+        create(:historical_data, recorded_at: license.starts_at.ago(2.days), active_user_count: 20)
+        create(:historical_data, recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+        create(:historical_data, recorded_at: license.starts_at.in(5.days), active_user_count: 15)
+        create(:historical_data, recorded_at: license.expires_at.in(2.days), active_user_count: 25)
+      end
+
+      it 'returns max value for active_user_count for within the license period only' do
+        expect(historical_max).to eq(15)
+      end
+    end
+
+    context 'when license has no start date' do
+      let(:license) { create(:license, starts_at: nil, expires_at: Date.current + 1.month) }
+
+      before do
+        create(:historical_data, recorded_at: Date.yesterday.ago(1.year), active_user_count: 15)
+        create(:historical_data, recorded_at: Date.current.ago(1.year), active_user_count: 12)
+        create(:historical_data, recorded_at: license.expires_at.ago(2.days), active_user_count: 10)
+      end
+
+      it 'returns max value for active_user_count from up to a year ago' do
+        expect(historical_max).to eq(12)
+      end
+    end
+
+    context 'when license has no expiration date' do
+      let(:license) { create(:license, starts_at: Date.current.ago(1.month), expires_at: nil) }
+
+      before do
+        create(:historical_data, recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+        create(:historical_data, recorded_at: Date.tomorrow, active_user_count: 15)
+      end
+
+      it 'returns max value for active_user_count until today' do
+        expect(historical_max).to eq(10)
+      end
+    end
+  end
+
   describe '#maximum_user_count' do
     let(:now) { Date.current }
 
@@ -978,28 +1219,28 @@ RSpec.describe License do
     end
 
     it 'returns the billable users count' do
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 2)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 2)
 
       expect(license.maximum_user_count).to eq(2)
     end
 
     it 'returns the daily billable users count when it is higher than historical data' do
       create(:historical_data, active_user_count: 50)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(100)
     end
 
     it 'returns historical data when it is higher than the billable users count' do
       create(:historical_data, active_user_count: 100)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 50)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 50)
 
       expect(license.maximum_user_count).to eq(100)
     end
 
     it 'returns the correct value when historical data and billable users are equal' do
       create(:historical_data, active_user_count: 100)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(100)
     end
@@ -1013,9 +1254,9 @@ RSpec.describe License do
     end
 
     it 'uses only the most recent billable users entry' do
-      create(:instance_statistics_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
+      create(:usage_trends_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
       create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 140)
-      create(:instance_statistics_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(140)
     end
@@ -1085,9 +1326,9 @@ RSpec.describe License do
           gl_license.expires_at = Date.tomorrow
         end
 
-        it 'returns nil' do
-          updated = license.update_trial_setting
-          expect(updated).to be_nil
+        it 'does nothing' do
+          license.save
+
           expect(ApplicationSetting.current.license_trial_ends_on).to be_nil
         end
       end
@@ -1104,10 +1345,9 @@ RSpec.describe License do
           expect(described_class.eligible_for_trial?).to be_truthy
         end
 
-        it 'updates the trial setting' do
-          updated = license.update_trial_setting
+        it 'updates the trial setting during create' do
+          license.save
 
-          expect(updated).to be_truthy
           expect(described_class.eligible_for_trial?).to be_falsey
           expect(ApplicationSetting.current.license_trial_ends_on).to eq(tomorrow)
         end
@@ -1123,8 +1363,8 @@ RSpec.describe License do
         end
 
         it 'does not update existing trial setting' do
-          updated = license.update_trial_setting
-          expect(updated).to be_falsey
+          license.save
+
           expect(ApplicationSetting.current.license_trial_ends_on).to eq(yesterday)
         end
 
@@ -1193,8 +1433,9 @@ RSpec.describe License do
       previous_user_count: opts[:previous_user_count],
       trueup_quantity: opts[:trueup_quantity],
       trueup_from: (date - 1.year).to_s,
-      trueup_to: date.to_s
-    }
+      trueup_to: date.to_s,
+      reconciliation_completed: opts[:reconciliation_completed]
+    }.compact
   end
 
   describe '#paid?' do
@@ -1249,6 +1490,68 @@ RSpec.describe License do
       it do
         is_expected.to eq(result)
       end
+    end
+  end
+
+  describe '#cloud_license?' do
+    subject { license.cloud_license? }
+
+    context 'when no license provided' do
+      before do
+        license.data = nil
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license has cloud licensing disabled' do
+      let(:gl_license) { build(:gitlab_license, cloud_licensing_enabled: false) }
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license has cloud licensing enabled' do
+      let(:gl_license) { build(:gitlab_license, cloud_licensing_enabled: true) }
+
+      it { is_expected.to be true }
+    end
+  end
+
+  describe '#customer_service_enabled?' do
+    subject { license.customer_service_enabled? }
+
+    context 'when no license provided' do
+      before do
+        license.data = nil
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license has usage ping required metrics disabled' do
+      let(:gl_license) { build(:gitlab_license, operational_metrics_enabled: false) }
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license has usage ping required metrics enabled' do
+      let(:gl_license) { build(:gitlab_license, operational_metrics_enabled: true) }
+
+      it { is_expected.to be true }
+    end
+  end
+
+  describe '#license_type' do
+    subject { license.license_type }
+
+    context 'when the license is not a cloud license' do
+      it { is_expected.to eq(described_class::LICENSE_FILE_TYPE) }
+    end
+
+    context 'when the license is a cloud license' do
+      let(:gl_license) { build(:gitlab_license, cloud_licensing_enabled: true) }
+
+      it { is_expected.to eq(described_class::CLOUD_LICENSE_TYPE) }
     end
   end
 
@@ -1324,6 +1627,51 @@ RSpec.describe License do
       end
 
       it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#licensee_name' do
+    subject { license.licensee_name }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Name' => 'User Example' }) }
+
+    it { is_expected.to eq('User Example') }
+  end
+
+  describe '#licensee_email' do
+    subject { license.licensee_email }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Email' => 'user@example.com' }) }
+
+    it { is_expected.to eq('user@example.com') }
+  end
+
+  describe '#licensee_company' do
+    subject { license.licensee_company }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Company' => 'Example Inc.' }) }
+
+    it { is_expected.to eq('Example Inc.') }
+  end
+
+  describe '#activated_at' do
+    subject { license.activated_at }
+
+    let(:license) do
+      gl_license = build(:gitlab_license, activated_at: activated_at)
+      build(:license, data: gl_license.export, created_at: 5.days.ago)
+    end
+
+    context 'when activated_at is set within the license data' do
+      let(:activated_at) { Date.yesterday.to_datetime }
+
+      it { is_expected.to eq(activated_at) }
+    end
+
+    context 'when activated_at is not set within the license data' do
+      let(:activated_at) { nil }
+
+      it { is_expected.to eq(license.created_at) }
     end
   end
 end

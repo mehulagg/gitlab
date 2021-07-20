@@ -1,8 +1,10 @@
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import RuleInput from 'ee/approvals/components/mr_edit/rule_input.vue';
 import ProjectRules from 'ee/approvals/components/project_settings/project_rules.vue';
 import RuleName from 'ee/approvals/components/rule_name.vue';
+import Rules from 'ee/approvals/components/rules.vue';
 import UnconfiguredSecurityRules from 'ee/approvals/components/security_configuration/unconfigured_security_rules.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
@@ -11,8 +13,7 @@ import { createProjectRules } from '../../mocks';
 
 const TEST_RULES = createProjectRules();
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const findCell = (tr, name) => tr.find(`td.js-${name}`);
 
@@ -35,7 +36,6 @@ describe('Approvals ProjectRules', () => {
     wrapper = mount(ProjectRules, {
       propsData: props,
       store: new Vuex.Store(store),
-      localVue,
       ...options,
     });
   };
@@ -57,7 +57,10 @@ describe('Approvals ProjectRules', () => {
     it('renders row for each rule', () => {
       factory();
 
-      const rows = wrapper.findAll('tbody tr').filter((tr, index) => index !== 0);
+      const rows = wrapper
+        .findComponent(Rules)
+        .findAll('tbody tr')
+        .filter((tr, index) => index !== 0);
       const data = rows.wrappers.map(getRowData);
 
       expect(data).toEqual(
@@ -68,7 +71,7 @@ describe('Approvals ProjectRules', () => {
         })),
       );
 
-      expect(wrapper.findAll(RuleName).length).toBe(rows.length);
+      expect(wrapper.findComponent(Rules).findAll(RuleName).length).toBe(rows.length);
     });
 
     it('should always have any_approver rule', () => {
@@ -91,12 +94,12 @@ describe('Approvals ProjectRules', () => {
 
       factory();
 
-      row = wrapper.find('tbody tr');
+      row = wrapper.findComponent(Rules).find('tbody tr');
     });
 
     it('does not render name', () => {
       expect(findCell(row, 'name').exists()).toBe(false);
-      expect(wrapper.find(RuleName).exists()).toBe(false);
+      expect(wrapper.findComponent(Rules).find(RuleName).exists()).toBe(false);
     });
 
     it('should only display 1 rule', () => {
@@ -116,7 +119,7 @@ describe('Approvals ProjectRules', () => {
 
     beforeEach(() => {
       factory();
-      rows = wrapper.findAll('tbody tr');
+      rows = wrapper.find(Rules).findAll('tbody tr');
     });
 
     it('should not render the popover for a standard approval group', () => {
@@ -126,35 +129,23 @@ describe('Approvals ProjectRules', () => {
       expect(nameCell.find('.js-help').exists()).toBeFalsy();
     });
 
-    it('should not render the unconfigured-security-rules component', () => {
-      expect(wrapper.find(UnconfiguredSecurityRules).exists()).toBe(false);
+    it('should render the unconfigured-security-rules component', () => {
+      expect(wrapper.find(UnconfiguredSecurityRules).exists()).toBe(true);
     });
   });
 
-  describe.each([true, false])(
-    'when the approvalSuggestions feature flag is %p',
-    (approvalSuggestions) => {
-      beforeEach(() => {
-        const rules = createProjectRules();
-        rules[0].name = 'Vulnerability-Check';
-        store.modules.approvals.state.rules = rules;
-        store.state.settings.allowMultiRule = true;
+  describe('approval suggestions', () => {
+    beforeEach(() => {
+      const rules = createProjectRules();
+      rules[0].name = 'Vulnerability-Check';
+      store.modules.approvals.state.rules = rules;
+      store.state.settings.allowMultiRule = true;
 
-        factory(
-          {},
-          {
-            provide: {
-              glFeatures: { approvalSuggestions },
-            },
-          },
-        );
-      });
+      factory();
+    });
 
-      it(`should ${
-        approvalSuggestions ? '' : 'not'
-      } render the unconfigured-security-rules component`, () => {
-        expect(wrapper.find(UnconfiguredSecurityRules).exists()).toBe(approvalSuggestions);
-      });
-    },
-  );
+    it(`should render the unconfigured-security-rules component`, () => {
+      expect(wrapper.find(UnconfiguredSecurityRules).exists()).toBe(true);
+    });
+  });
 });

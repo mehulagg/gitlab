@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Finding relevant log entries with a correlation ID
+# Finding relevant log entries with a correlation ID **(FREE SELF)**
 
 In GitLab 11.6 and later, a unique request tracking ID, known as the "correlation ID" has been
 logged by the GitLab instance for most requests. Each individual request to GitLab gets
@@ -27,7 +27,7 @@ activity with the site that you're visiting. See the links below for network mon
 documentation for some popular browsers.
 
 - [Network Monitor - Firefox Developer Tools](https://developer.mozilla.org/en-US/docs/Tools/Network_Monitor)
-- [Inspect Network Activity In Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/network/)
+- [Inspect Network Activity In Chrome DevTools](https://developer.chrome.com/docs/devtools/network)
 - [Safari Web Development Tools](https://developer.apple.com/safari/tools/)
 - [Microsoft Edge Network panel](https://docs.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/network/)
 

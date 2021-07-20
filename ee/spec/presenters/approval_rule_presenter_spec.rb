@@ -6,6 +6,7 @@ RSpec.describe ApprovalRulePresenter do
   let_it_be(:user) { create(:user) }
   let_it_be(:public_group) { create(:group) }
   let_it_be(:private_group) { create(:group, :private) }
+
   let(:groups) { [public_group, private_group] }
 
   subject(:presenter) { described_class.new(rule, current_user: user) }

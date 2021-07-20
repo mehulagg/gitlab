@@ -1,29 +1,61 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Events
+# Events API
 
 ## Filter parameters
 
 ### Action Types
 
-Available action types for the `action` parameter are:
+Available types for the `action` parameter, and the resources that might be affected:
 
 - `approved`
-- `created`
-- `updated`
+  - Merge request
 - `closed`
-- `reopened`
-- `pushed`
-- `commented`
-- `merged`
-- `joined`
-- `left`
+  - Epic
+  - Issue
+  - Merge request
+  - Milestone
+- `commented` on any `Noteable` record.
+  - Alert
+  - Commit
+  - Design
+  - Issue
+  - Merge request
+  - Snippet
+- `created`
+  - Design
+  - Epic
+  - Issue
+  - Merge request
+  - Milestone
+  - Project
+  - Wiki page
 - `destroyed`
+  - Design
+  - Milestone
+  - Wiki page
 - `expired`
+  - Project membership
+- `joined`
+  - Project membership
+- `left`
+  - Project membership
+- `merged`
+  - Merge request
+- `pushed` commits to (or deleted commits from) a repository, individually or in bulk.
+  - Project
+- `reopened`
+  - Epic
+  - Issue
+  - Merge request
+  - Milestone
+- `updated`
+  - Design
+  - Wiki page
 
 Note that these options are in lower case.
 
@@ -71,10 +103,10 @@ Parameters:
 | --------- | ---- | -------- | ----------- |
 | `action` | string | no | Include only events of a particular [action type](#action-types) |
 | `target_type` | string | no | Include only events of a particular [target type](#target-types) |
-| `before` | date | no |  Include only events created before a particular date. Please see [here for the supported format](#date-formatting) |
-| `after` | date | no |  Include only events created after a particular date. Please see [here for the supported format](#date-formatting)  |
+| `before` | date | no |  Include only events created before a particular date. [View how to format dates](#date-formatting). |
+| `after` | date | no |  Include only events created after a particular date. [View how to format dates](#date-formatting).  |
 | `scope` | string | no | Include all events across a user's projects. |
-| `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc` |
+| `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc`. |
 
 Example request:
 
@@ -148,9 +180,11 @@ Parameters:
 | `id` | integer | yes | The ID or Username of the user |
 | `action` | string | no | Include only events of a particular [action type](#action-types) |
 | `target_type` | string | no | Include only events of a particular [target type](#target-types) |
-| `before` | date | no |  Include only events created before a particular date. Please see [here for the supported format](#date-formatting) |
-| `after` | date | no |  Include only events created after a particular date. Please see [here for the supported format](#date-formatting)  |
-| `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc` |
+| `before` | date | no |  Include only events created before a particular date. [View how to format dates](#date-formatting). |
+| `after` | date | no |  Include only events created after a particular date. [View how to format dates](#date-formatting). |
+| `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc`. |
+| `page` | integer | no | The page of results to return. Defaults to 1. |
+| `per_page` | integer | no | The number of results per page. Defaults to 20. |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/:id/events"
@@ -281,12 +315,12 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `project_id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `project_id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `action` | string | no | Include only events of a particular [action type](#action-types) |
 | `target_type` | string | no | Include only events of a particular [target type](#target-types) |
-| `before` | date | no |  Include only events created before a particular date. Please see [here for the supported format](#date-formatting) |
-| `after` | date | no |  Include only events created after a particular date. Please see [here for the supported format](#date-formatting)  |
-| `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc` |
+| `before` | date | no |  Include only events created before a particular date. [View how to format dates](#date-formatting). |
+| `after` | date | no |  Include only events created after a particular date. [View how to format dates](#date-formatting).  |
+| `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc`. |
 
 Example request:
 
@@ -299,7 +333,7 @@ Example response:
 ```json
 [
   {
-    "id": 8
+    "id": 8,
     "title":null,
     "project_id":1,
     "action_name":"opened",

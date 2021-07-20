@@ -36,6 +36,10 @@ module Types
           resolver: Resolvers::MetadataResolver,
           description: 'Metadata about GitLab.'
 
+    field :query_complexity, Types::QueryComplexityType,
+          null: true,
+          description: 'Information about the complexity of the GraphQL query.'
+
     field :snippets,
           Types::SnippetType.connection_type,
           null: true,
@@ -55,7 +59,10 @@ module Types
     field :container_repository, Types::ContainerRepositoryDetailsType,
           null: true,
           description: 'Find a container repository.' do
-            argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository.'
+            argument :id,
+                     type: ::Types::GlobalIDType[::ContainerRepository],
+                     required: true,
+                     description: 'The global ID of the container repository.'
           end
 
     field :package,
@@ -72,37 +79,57 @@ module Types
           description: 'Find users.',
           resolver: Resolvers::UsersResolver
 
-    field :echo, GraphQL::STRING_TYPE, null: false,
-          description: 'Text to echo back.',
-          resolver: Resolvers::EchoResolver
+    field :echo, resolver: Resolvers::EchoResolver
 
     field :issue, Types::IssueType,
           null: true,
           description: 'Find an issue.' do
-            argument :id, ::Types::GlobalIDType[::Issue], required: true, description: 'The global ID of the Issue.'
+            argument :id, ::Types::GlobalIDType[::Issue], required: true, description: 'The global ID of the issue.'
           end
 
-    field :instance_statistics_measurements, Types::Admin::Analytics::InstanceStatistics::MeasurementType.connection_type,
+    field :merge_request, Types::MergeRequestType,
+          null: true,
+          description: 'Find a merge request.' do
+            argument :id, ::Types::GlobalIDType[::MergeRequest], required: true, description: 'The global ID of the merge request.'
+          end
+
+    field :instance_statistics_measurements,
+          type: Types::Admin::Analytics::UsageTrends::MeasurementType.connection_type,
           null: true,
           description: 'Get statistics on the instance.',
-          resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
+          resolver: Resolvers::Admin::Analytics::UsageTrends::MeasurementsResolver,
+          deprecated: {
+            reason: :renamed,
+            replacement: 'Query.usageTrendsMeasurements',
+            milestone: '13.10'
+          }
+
+    field :usage_trends_measurements, Types::Admin::Analytics::UsageTrends::MeasurementType.connection_type,
+          null: true,
+          description: 'Get statistics on the instance.',
+          resolver: Resolvers::Admin::Analytics::UsageTrends::MeasurementsResolver
 
     field :ci_application_settings, Types::Ci::ApplicationSettingType,
           null: true,
           description: 'CI related settings that apply to the entire instance.'
 
-    field :runner_platforms, Types::Ci::RunnerPlatformType.connection_type,
-      null: true, description: 'Supported runner platforms.',
-      resolver: Resolvers::Ci::RunnerPlatformsResolver
+    field :runner_platforms, resolver: Resolvers::Ci::RunnerPlatformsResolver
+    field :runner_setup, resolver: Resolvers::Ci::RunnerSetupResolver
 
-    field :runner_setup, Types::Ci::RunnerSetupType, null: true,
-      description: 'Get runner setup instructions.',
-      resolver: Resolvers::Ci::RunnerSetupResolver
+    field :runner, Types::Ci::RunnerType,
+          null: true,
+          resolver: Resolvers::Ci::RunnerResolver,
+          extras: [:lookahead],
+          description: "Find a runner.",
+          feature_flag: :runner_graphql_query
 
-    field :ci_config, Types::Ci::Config::ConfigType, null: true,
-      description: 'Get linted and processed contents of a CI config. Should not be requested more than once per request.',
-      resolver: Resolvers::Ci::ConfigResolver,
-      complexity: 126 # AUTHENTICATED_COMPLEXITY / 2 + 1
+    field :runners, Types::Ci::RunnerType.connection_type,
+          null: true,
+          resolver: Resolvers::Ci::RunnersResolver,
+          description: "Find runners visible to the current user.",
+          feature_flag: :runner_graphql_query
+
+    field :ci_config, resolver: Resolvers::Ci::ConfigResolver, complexity: 126 # AUTHENTICATED_COMPLEXITY / 2 + 1
 
     def design_management
       DesignManagementObject.new(nil)
@@ -112,6 +139,13 @@ module Types
       # TODO: remove this line when the compatibility layer is removed
       # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
       id = ::Types::GlobalIDType[::Issue].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
+
+    def merge_request(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::MergeRequest].coerce_isolated_input(id)
       GitlabSchema.find_by_gid(id)
     end
 
@@ -140,7 +174,11 @@ module Types
     def application_settings
       Gitlab::CurrentSettings.current_application_settings
     end
+
+    def query_complexity
+      context.query
+    end
   end
 end
 
-Types::QueryType.prepend_if_ee('EE::Types::QueryType')
+Types::QueryType.prepend_mod_with('Types::QueryType')

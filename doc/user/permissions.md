@@ -4,20 +4,17 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Permissions
+# Permissions and roles
 
-Users have different abilities depending on the access level they have in a
+Users have different abilities depending on the role they have in a
 particular group or project. If a user is both in a project's group and the
-project itself, the highest permission level is used.
+project itself, the highest role is used.
 
-On public and internal projects, the Guest role is not enforced. All users can:
+On [public and internal projects](../api/projects.md#project-visibility-level), the Guest role
+(not to be confused with [Guest user](#free-guest-users)) is not enforced.
 
-- Create issues.
-- Leave comments.
-- Clone or download the project code.
-
-When a member leaves a team's project, all the assigned [Issues](project/issues/index.md) and [Merge Requests](project/merge_requests/index.md)
-are unassigned automatically.
+When a member leaves a team's project, all the assigned [issues](project/issues/index.md) and
+[merge requests](project/merge_requests/index.md) are automatically unassigned.
 
 GitLab [administrators](../administration/index.md) receive all permissions.
 
@@ -39,20 +36,23 @@ usernames. A GitLab administrator can configure the GitLab instance to
 NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
-While Maintainer is the highest project-level role, some actions can only be performed by a personal namespace or group owner,
-or an instance administrator, who receives all permissions. For more information, see [projects members documentation](project/members/index.md).
+The Owner role is only available at the group or personal namespace level (and for instance administrators) and is inherited by its projects.
+While Maintainer is the highest project-level role, some actions can only be performed by a personal namespace or group owner, or an instance administrator, who receives all permissions.
+For more information, see [projects members documentation](project/members/index.md).
 
-The following table depicts the various user permission levels in a project.
+The following table lists project permissions available for each role:
 
-| Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner (*10*) |
+| Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner  |
 |---------------------------------------------------|---------|------------|-------------|----------|--------|
 | Download project                                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | Leave comments                                    | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View allowed and denied licenses **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View License Compliance reports **(ULTIMATE)**    | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View Security reports **(ULTIMATE)**              | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| View Dependency list **(ULTIMATE)**               | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View License list **(ULTIMATE)**                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
+| View Dependency list **(ULTIMATE)**               |         |            | ✓           | ✓        | ✓      |
+| View License list **(ULTIMATE)**                  |         | ✓          | ✓           | ✓        | ✓      |
+| View [Threats list](application_security/threat_monitoring/#threat-monitoring) **(ULTIMATE)** |         |            | ✓           | ✓        | ✓      |
+| Create and run [on-demand DAST scans](application_security/dast/#on-demand-scans) |         |            | ✓           | ✓        | ✓      |
 | View licenses in Dependency list **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View [Design Management](project/issues/design_management.md) pages | ✓   | ✓   | ✓    | ✓        | ✓      |
 | View project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
@@ -61,16 +61,16 @@ The following table depicts the various user permission levels in a project.
 | View wiki pages                                   | ✓       | ✓          | ✓           | ✓        | ✓      |
 | See a list of jobs                                | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | See a job log                                     | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| See a job with [debug logging](../ci/variables/README.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
+| See a job with [debug logging](../ci/variables/index.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
 | Download and browse job artifacts                 | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | Create confidential issue                         | ✓       | ✓          | ✓           | ✓        | ✓      |
 | Create new issue                                  | ✓       | ✓          | ✓           | ✓        | ✓      |
-| See related issues                                | ✓       | ✓          | ✓           | ✓        | ✓      |
+| See linked issues                                 | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View [Releases](project/releases/index.md)        | ✓ (*6*) | ✓          | ✓           | ✓        | ✓      |
 | View requirements **(ULTIMATE)**                  | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Insights **(ULTIMATE)**                      | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Issue analytics **(PREMIUM)**                | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Merge Request analytics **(STARTER)**        | ✓       | ✓          | ✓           | ✓        | ✓      |
+| View Merge Request analytics **(PREMIUM)**        | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Value Stream analytics                       | ✓       | ✓          | ✓           | ✓        | ✓      |
 | Manage user-starred metrics dashboards (*7*)      | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View confidential issues                          | (*2*)   | ✓          | ✓           | ✓        | ✓      |
@@ -78,20 +78,22 @@ The following table depicts the various user permission levels in a project.
 | Assign reviewers                                  |         | ✓          | ✓           | ✓        | ✓      |
 | Label issues                                      |         | ✓          | ✓           | ✓        | ✓      |
 | Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
+| [Set issue estimate and record time spent](project/time_tracking.md) | | ✓ | ✓         | ✓        | ✓      |
+| View a time tracking report                       | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | Lock issue threads                                |         | ✓          | ✓           | ✓        | ✓      |
 | Manage issue tracker                              |         | ✓          | ✓           | ✓        | ✓      |
-| Manage related issues                             |         | ✓          | ✓           | ✓        | ✓      |
+| Manage linked issues                              |         | ✓          | ✓           | ✓        | ✓      |
 | Manage labels                                     |         | ✓          | ✓           | ✓        | ✓      |
 | Create code snippets                              |         | ✓          | ✓           | ✓        | ✓      |
 | See a commit status                               |         | ✓          | ✓           | ✓        | ✓      |
 | See a container registry                          |         | ✓          | ✓           | ✓        | ✓      |
 | See environments                                  |         | ✓          | ✓           | ✓        | ✓      |
+| See [DORA metrics](analytics/ci_cd_analytics.md)  |         | ✓          | ✓           | ✓        | ✓      |
 | See a list of merge requests                      |         | ✓          | ✓           | ✓        | ✓      |
 | View CI/CD analytics                              |         | ✓          | ✓           | ✓        | ✓      |
-| View Code Review analytics **(STARTER)**          |         | ✓          | ✓           | ✓        | ✓      |
+| View Code Review analytics **(PREMIUM)**          |         | ✓          | ✓           | ✓        | ✓      |
 | View Repository analytics                         |         | ✓          | ✓           | ✓        | ✓      |
 | View Error Tracking list                          |         | ✓          | ✓           | ✓        | ✓      |
-| Create new merge request                          |         | ✓          | ✓           | ✓        | ✓      |
 | View metrics dashboard annotations                |         | ✓          | ✓           | ✓        | ✓      |
 | Archive/reopen requirements **(ULTIMATE)**        |         | ✓          | ✓           | ✓        | ✓      |
 | Create/edit requirements **(ULTIMATE)**           |         | ✓          | ✓           | ✓        | ✓      |
@@ -101,10 +103,13 @@ The following table depicts the various user permission levels in a project.
 | Move [test case](../ci/test_cases/index.md)       |         | ✓          | ✓           | ✓        | ✓      |
 | Reopen [test case](../ci/test_cases/index.md)     |         | ✓          | ✓           | ✓        | ✓      |
 | Pull [packages](packages/index.md)                |         | ✓          | ✓           | ✓        | ✓      |
+| View project statistics                           |         | ✓          | ✓           | ✓        | ✓      |
 | Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
 | Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
 | Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
-| Create/edit/delete [Releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
+| Create/edit/delete [releases](project/releases/index.md)|   |            | ✓ (*13*)    | ✓ (*13*) | ✓ (*13*) |
+| Manage merge approval rules (project settings)    |         |            |             | ✓        | ✓      |
+| Create new merge request                          |         |            | ✓           | ✓        | ✓      |
 | Create new branches                               |         |            | ✓           | ✓        | ✓      |
 | Push to non-protected branches                    |         |            | ✓           | ✓        | ✓      |
 | Force push to non-protected branches              |         |            | ✓           | ✓        | ✓      |
@@ -114,7 +119,6 @@ The following table depicts the various user permission levels in a project.
 | Lock merge request threads                        |         |            | ✓           | ✓        | ✓      |
 | Approve merge requests (*9*)                      |         |            | ✓           | ✓        | ✓      |
 | Manage/Accept merge requests                      |         |            | ✓           | ✓        | ✓      |
-| View project statistics                           |         |            | ✓           | ✓        | ✓      |
 | Create new environments                           |         |            | ✓           | ✓        | ✓      |
 | Stop environments                                 |         |            | ✓           | ✓        | ✓      |
 | Enable Review Apps                                |         |            | ✓           | ✓        | ✓      |
@@ -166,13 +170,16 @@ The following table depicts the various user permission levels in a project.
 | Manage Project Operations                         |         |            |             | ✓        | ✓      |
 | Manage Terraform state                            |         |            |             | ✓        | ✓      |
 | Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
+| Manage security policy **(ULTIMATE)**             |         |            | ✓           | ✓        | ✓      |
+| Create or assign security policy project **(ULTIMATE)**     |         |            |             |          | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
-| Reposition comments on images (posted by any user)|✓ (*11*) | ✓ (*11*)   |  ✓ (*11*)   | ✓        | ✓      |
+| Reposition comments on images (posted by any user)|✓ (*10*) | ✓ (*10*)   |  ✓ (*10*)   | ✓        | ✓      |
 | Manage Error Tracking                             |         |            |             | ✓        | ✓      |
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
-| View project Audit Events                         |         |            |  ✓ (*12*)   | ✓        | ✓      |
+| View project Audit Events                         |         |            |  ✓ (*11*)   | ✓        | ✓      |
 | Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
-| Manage [project access tokens](project/settings/project_access_tokens.md) **(FREE SELF)** |         |            |             | ✓        | ✓      |
+| Manage [project access tokens](project/settings/project_access_tokens.md) **(FREE SELF)** **(PREMIUM SAAS)** (*12*) |         |            |             | ✓        | ✓      |
+| View 2FA status of members                        |         |            |             | ✓        | ✓      |
 | Switch visibility level                           |         |            |             |          | ✓      |
 | Transfer project to another namespace             |         |            |             |          | ✓      |
 | Rename project                                    |         |            |             |          | ✓      |
@@ -191,21 +198,23 @@ The following table depicts the various user permission levels in a project.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [protected branches](project/protected_branches.md).
-1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
+1. If the [branch is protected](project/protected_branches.md), this depends on the access Developers and Maintainers are given.
 1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
 1. Actions are limited only to records owned (referenced) by user.
-1. When [Share Group Lock](group/index.md#share-with-group-lock) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
+1. When [Share Group Lock](group/index.md#prevent-a-project-from-being-shared-with-groups) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
 1. For information on eligible approvers for merge requests, see
-   [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
-1. Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
+   [Eligible approvers](project/merge_requests/approvals/rules.md#eligible-approvers).
 1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 1. Users can only view events based on their individual actions.
+1. Project access tokens are supported for self-managed instances on Free and above. They are also
+   supported on GitLab SaaS Premium and above (excluding [trial licenses](https://about.gitlab.com/free-trial/)).
+1. If the [tag is protected](#release-permissions-with-protected-tags), this depends on the access Developers and Maintainers are given.
 
 ## Project features permissions
 
 ### Wiki and issues
 
-Project features like wiki and issues can be hidden from users depending on
+Project features like [wikis](project/wiki/index.md) and issues can be hidden from users depending on
 which visibility level you select on project settings.
 
 - Disabled: disabled for everyone
@@ -218,7 +227,7 @@ which visibility level you select on project settings.
 Additional restrictions can be applied on a per-branch basis with [protected branches](project/protected_branches.md).
 Additionally, you can customize permissions to allow or prevent project
 Maintainers and Developers from pushing to a protected branch. Read through the documentation on
-[Allowed to Merge and Allowed to Push settings](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings)
+[protected branches](project/protected_branches.md)
 to learn more.
 
 ### Value Stream Analytics permissions
@@ -249,61 +258,66 @@ NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 Any user can remove themselves from a group, unless they are the last Owner of
-the group. The following table depicts the various user permission levels in a
-group.
+the group.
+
+The following table lists group permissions available for each role:
 
 | Action                                                 | Guest | Reporter | Developer | Maintainer | Owner |
 |--------------------------------------------------------|-------|----------|-----------|------------|-------|
 | Browse group                                           | ✓     | ✓        | ✓         | ✓          | ✓     |
+| Edit SAML SSO Billing **(PREMIUM SAAS)**               | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
+| View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
+| View group epic **(PREMIUM)**                          | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View group wiki pages **(PREMIUM)**                    | ✓ (6) | ✓        | ✓         | ✓          | ✓     |
+| View Insights **(ULTIMATE)**                           | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Insights charts **(ULTIMATE)**                    | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View group epic **(PREMIUM)**                         | ✓     | ✓        | ✓         | ✓          | ✓     |
-| Create/edit group epic **(PREMIUM)**                  |       | ✓        | ✓         | ✓          | ✓     |
+| View Issue analytics **(PREMIUM)**                     | ✓     | ✓        | ✓         | ✓          | ✓     |
+| View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
+| Create/edit group epic **(PREMIUM)**                   |       | ✓        | ✓         | ✓          | ✓     |
+| Create/edit/delete epic boards **(PREMIUM)**           |       | ✓        | ✓         | ✓          | ✓     |
 | Manage group labels                                    |       | ✓        | ✓         | ✓          | ✓     |
-| See a container registry                               |       | ✓        | ✓         | ✓          | ✓     |
 | Pull [packages](packages/index.md)                     |       | ✓        | ✓         | ✓          | ✓     |
-| Publish [packages](packages/index.md)                  |       |          | ✓         | ✓          | ✓     |
+| View a container registry                              |       | ✓        | ✓         | ✓          | ✓     |
+| View Group DevOps Adoption **(ULTIMATE)**              |       | ✓        | ✓         | ✓          | ✓     |
 | View metrics dashboard annotations                     |       | ✓        | ✓         | ✓          | ✓     |
+| View Productivity analytics **(PREMIUM)**              |       | ✓        | ✓         | ✓          | ✓     |
+| Create and edit group wiki pages **(PREMIUM)**         |       |          | ✓         | ✓          | ✓     |
 | Create project in group                                |       |          | ✓ (3)(5)  | ✓ (3)      | ✓ (3) |
-| Share (invite) groups with groups                      |       |          |           |            | ✓     |
 | Create/edit/delete group milestones                    |       |          | ✓         | ✓          | ✓     |
 | Create/edit/delete iterations                          |       |          | ✓         | ✓          | ✓     |
-| Enable/disable a dependency proxy                      |       |          | ✓         | ✓          | ✓     |
-| Create and edit group wiki pages **(PREMIUM)**         |       |          | ✓         | ✓          | ✓     |
-| Use security dashboard **(ULTIMATE)**                  |       |          | ✓         | ✓          | ✓     |
 | Create/edit/delete metrics dashboard annotations       |       |          | ✓         | ✓          | ✓     |
-| View/manage group-level Kubernetes cluster             |       |          |           | ✓          | ✓     |
+| Enable/disable a dependency proxy                      |       |          | ✓         | ✓          | ✓     |
+| Publish [packages](packages/index.md)                  |       |          | ✓         | ✓          | ✓     |
+| Use security dashboard **(ULTIMATE)**                  |       |          | ✓         | ✓          | ✓     |
+| View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
 | Create subgroup                                        |       |          |           | ✓ (1)      | ✓     |
 | Delete group wiki pages **(PREMIUM)**                  |       |          |           | ✓          | ✓     |
 | Edit epic comments (posted by any user) **(ULTIMATE)** |       |          |           | ✓ (2)      | ✓ (2) |
-| Edit group settings                                    |       |          |           |            | ✓     |
-| Manage group level CI/CD variables                     |       |          |           |            | ✓     |
 | List group deploy tokens                               |       |          |           | ✓          | ✓     |
+| Manage [group push rules](group/index.md#group-push-rules) **(PREMIUM)** | | |        | ✓          | ✓     |
+| View/manage group-level Kubernetes cluster             |       |          |           | ✓          | ✓     |
+| Administer project compliance frameworks               |       |          |           |            | ✓     |
 | Create/Delete group deploy tokens                      |       |          |           |            | ✓     |
-| Manage group members                                   |       |          |           |            | ✓     |
 | Delete group                                           |       |          |           |            | ✓     |
-| Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
-| Edit SAML SSO Billing **(PREMIUM SAAS)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
-| View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
+| Delete group epic **(PREMIUM)**                        |       |          |           |            | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
-| View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Insights **(ULTIMATE)**                           | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Issue analytics **(PREMIUM)**                     | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Productivity analytics **(PREMIUM)**              |       | ✓        | ✓         | ✓          | ✓     |
-| View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
+| Edit group settings                                    |       |          |           |            | ✓     |
+| Filter members by 2FA status                           |       |          |           |            | ✓     |
+| Manage group level CI/CD variables                     |       |          |           |            | ✓     |
+| Manage group members                                   |       |          |           |            | ✓     |
+| Share (invite) groups with groups                      |       |          |           |            | ✓     |
+| View 2FA status of members                             |       |          |           |            | ✓     |
 | View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
 | View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
-| Filter members by 2FA status                           |       |          |           |            | ✓     |
-| Administer project compliance frameworks               |       |          |           |            | ✓     |
 
 1. Groups can be set to [allow either Owners or Owners and
   Maintainers to create subgroups](group/subgroups/index.md#creating-a-subgroup)
 1. Introduced in GitLab 12.2.
 1. Default project creation role can be changed at:
    - The [instance level](admin_area/settings/visibility_and_access_controls.md#default-project-creation-protection).
-   - The [group level](group/index.md#default-project-creation-level).
+   - The [group level](group/index.md#specify-who-can-add-projects-to-a-group).
 1. Does not apply to subgroups.
-1. Developers can push commits to the default branch of a new project only if the [default branch protection](group/index.md#changing-the-default-branch-protection-of-a-group) is set to "Partially protected" or "Not protected".
+1. Developers can push commits to the default branch of a new project only if the [default branch protection](group/index.md#change-the-default-branch-protection-of-a-group) is set to "Partially protected" or "Not protected".
 1. In addition, if your group is public or internal, all users who can see the group can also see group wiki pages.
 1. Users can only view events based on their individual actions.
 
@@ -325,7 +339,7 @@ project and should only have access to that project.
 
 External users:
 
-- Cannot create projects (including forks), groups, or personal snippets.
+- Can only create projects (including forks), subgroups, and snippets within the top-level group to which they belong.
 - Can only access public projects and projects to which they are explicitly granted access,
   thus hiding all other internal or private ones from them (like being
   logged out).
@@ -349,10 +363,11 @@ External users still count towards a license seat.
 
 An administrator can flag a user as external by either of the following methods:
 
-- Either [through the API](../api/users.md#user-modification).
-- Or by navigating to the **Admin Area > Overview > Users** to create a new user
-  or edit an existing one. There, you can find the option to flag the user as
-  external.
+- [Through the API](../api/users.md#user-modification).
+- Using the GitLab UI:
+  1. On the top bar, select **Menu >** **{admin}** **Admin**.
+  1. On the left sidebar, select **Overview > Users** to create a new user or edit an existing one.
+     There, you can find the option to flag the user as external.
 
 Additionally users can be set as external users using [SAML groups](../integration/saml.md#external-groups)
 and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
@@ -360,7 +375,11 @@ and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
 ### Setting new users to external
 
 By default, new users are not set as external users. This behavior can be changed
-by an administrator on the **Admin Area > Settings > General** page, under **Account and limit**.
+by an administrator:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > General**.
+1. Expand the **Account and limit** section.
 
 If you change the default behavior of creating new users as external, you
 have the option to narrow it down by defining a set of internal users.
@@ -417,8 +436,8 @@ with the permissions described on the documentation on [auditor users permission
 
 >[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40942) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 
-Administrators can add members with a "minimal access" role to a parent group. Such users don't
-automatically have access to projects and subgroups underneath. To support such access, administrators must explicitly add these "minimal access" users to the specific subgroups/projects.
+Owners can add members with a "minimal access" role to a parent group. Such users don't
+automatically have access to projects and subgroups underneath. To support such access, owners must explicitly add these "minimal access" users to the specific subgroups/projects.
 
 Users with minimal access can list the group in the UI and through the API. However, they cannot see
 details such as projects or subgroups. They do not have access to the group's page or list any of its subgroups or projects.
@@ -445,42 +464,37 @@ NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 GitLab CI/CD permissions rely on the role the user has in GitLab. There are four
-permission levels in total:
+roles:
 
-- admin
-- maintainer
-- developer
-- guest/reporter
+- Administrator
+- Maintainer
+- Developer
+- Guest/Reporter
 
-The admin user can perform any action on GitLab CI/CD in scope of the GitLab
-instance and project. In addition, all admins can use the admin interface under
-`/admin/runners`.
+The Administrator role can perform any action on GitLab CI/CD in scope of the GitLab
+instance and project.
 
-| Action                                | Guest, Reporter | Developer   |Maintainer| Admin  |
-|---------------------------------------|-----------------|-------------|----------|--------|
-| See commits and jobs                  | ✓               | ✓           | ✓        | ✓      |
-| Retry or cancel job                   |                 | ✓           | ✓        | ✓      |
-| Erase job artifacts and job logs      |                 | ✓ (*1*)     | ✓        | ✓      |
-| Delete project                        |                 |             | ✓        | ✓      |
-| Create project                        |                 |             | ✓        | ✓      |
-| Change project configuration          |                 |             | ✓        | ✓      |
-| Add specific runners                  |                 |             | ✓        | ✓      |
-| Add shared runners                    |                 |             |          | ✓      |
-| See events in the system              |                 |             |          | ✓      |
-| Admin interface                       |                 |             |          | ✓      |
+| Action                                | Guest, Reporter | Developer   |Maintainer| Administrator |
+|---------------------------------------|-----------------|-------------|----------|---------------|
+| See commits and jobs                  | ✓               | ✓           | ✓        | ✓             |
+| Retry or cancel job                   |                 | ✓           | ✓        | ✓             |
+| Erase job artifacts and job logs      |                 | ✓ (*1*)     | ✓        | ✓             |
+| Delete project                        |                 |             | ✓        | ✓             |
+| Create project                        |                 |             | ✓        | ✓             |
+| Change project configuration           |                 |             | ✓        | ✓             |
+| Add specific runners                   |                 |             | ✓        | ✓             |
+| Add shared runners                    |                 |             |          | ✓             |
+| See events in the system              |                 |             |          | ✓             |
+| Admin Area                            |                 |             |          | ✓             |
 
 1. Only if the job was:
    - Triggered by the user
-   - [In GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/35069) and later, not run for a protected branch
+   - [In GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/35069) and later, run for a non-protected branch.
 
 ### Job permissions
 
 NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
-
-NOTE:
-GitLab 8.12 has a completely redesigned job permissions system.
-Read all about the [new model and its implications](project/new_ci_build_permissions_model.md).
 
 This table shows granted privileges for jobs triggered by specific types of
 users:
@@ -503,11 +517,6 @@ users:
 1. Only if the user is not an external one
 1. Only if the user is a member of the project
 
-### New CI job permissions model
-
-GitLab 8.12 has a completely redesigned job permissions system. To learn more,
-read through the documentation on the [new CI/CD permissions model](project/new_ci_build_permissions_model.md#new-ci-job-permissions-model).
-
 ## Running pipelines on protected branches
 
 The permission to merge or push to protected branches is used to define if a user can
@@ -515,6 +524,14 @@ run CI/CD pipelines and execute actions on jobs that are related to those branch
 
 See [Security on protected branches](../ci/pipelines/index.md#pipeline-security-on-protected-branches)
 for details about the pipelines security model.
+
+## Release permissions with protected tags
+
+[The permission to create tags](project/protected_tags.md) is used to define if a user can
+create, edit, and delete [Releases](project/releases/index.md).
+
+See [Release permissions](project/releases/index.md#release-permissions)
+for more information.
 
 ## LDAP users permissions
 

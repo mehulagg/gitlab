@@ -5,7 +5,7 @@ module DastSites
     PermissionsError = Class.new(StandardError)
 
     def execute!(url:)
-      raise PermissionsError.new('Insufficient permissions') unless allowed?
+      raise PermissionsError, 'Insufficient permissions' unless allowed?
 
       find_or_create_by!(url)
     end

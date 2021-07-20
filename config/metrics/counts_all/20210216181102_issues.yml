@@ -1,0 +1,20 @@
+---
+data_category: Operational
+key_path: counts.issues
+description: Count of Issues created
+product_section: dev
+product_stage: plan
+product_group: group::plan
+product_category: issue_tracking
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+instrumentation_class: CountIssuesMetric
+distribution:
+- ce
+- ee
+tier:
+- free
+- premium
+- ultimate

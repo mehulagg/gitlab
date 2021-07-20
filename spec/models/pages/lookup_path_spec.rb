@@ -47,21 +47,7 @@ RSpec.describe Pages::LookupPath do
   describe '#source' do
     let(:source) { lookup_path.source }
 
-    shared_examples 'uses disk storage' do
-      it 'uses disk storage', :aggregate_failures do
-        expect(source[:type]).to eq('file')
-        expect(source[:path]).to eq(project.full_path + "/public/")
-      end
-    end
-
-    include_examples 'uses disk storage'
-
-    it 'return nil when legacy storage is disabled and there is no deployment' do
-      stub_feature_flags(pages_serve_from_legacy_storage: false)
-      expect(Gitlab::ErrorTracking).to receive(:track_exception)
-                                         .with(described_class::LegacyStorageDisabledError)
-                                         .and_call_original
-
+    it 'returns nil' do
       expect(source).to eq(nil)
     end
 
@@ -107,22 +93,6 @@ RSpec.describe Pages::LookupPath do
             )
           end
         end
-
-        context 'when pages_serve_with_zip_file_protocol feature flag is disabled' do
-          before do
-            stub_feature_flags(pages_serve_with_zip_file_protocol: false)
-          end
-
-          include_examples 'uses disk storage'
-        end
-      end
-
-      context 'when pages_serve_from_deployments feature flag is disabled' do
-        before do
-          stub_feature_flags(pages_serve_from_deployments: false)
-        end
-
-        include_examples 'uses disk storage'
       end
 
       context 'when deployment were created during migration' do
@@ -143,14 +113,6 @@ RSpec.describe Pages::LookupPath do
                  })
             )
           end
-        end
-
-        context 'when pages_serve_from_migrated_zip feature flag is disabled' do
-          before do
-            stub_feature_flags(pages_serve_from_migrated_zip: false)
-          end
-
-          include_examples 'uses disk storage'
         end
       end
     end

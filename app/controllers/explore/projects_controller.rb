@@ -97,7 +97,7 @@ class Explore::ProjectsController < Explore::ApplicationController
   end
 
   def default_sort_order
-    sort_value_name
+    sort_value_latest_activity
   end
 
   def sorting_field
@@ -122,4 +122,4 @@ class Explore::ProjectsController < Explore::ApplicationController
   end
 end
 
-Explore::ProjectsController.prepend_if_ee('EE::Explore::ProjectsController')
+Explore::ProjectsController.prepend_mod_with('Explore::ProjectsController')

@@ -23,9 +23,7 @@ module QA
           cluster&.remove!
         end
 
-        it 'runs auto devops', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/702' do
-          skip('Test requires tunnel: see https://gitlab.com/gitlab-org/gitlab/-/issues/251090')
-
+        it 'runs auto devops', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1715' do
           Flow::Login.sign_in
 
           # Set an application secret CI variable (prefixed with K8S_SECRET_)
@@ -83,11 +81,11 @@ module QA
             job.click_element(:pipeline_path)
           end
 
-          Page::Project::Menu.perform(&:go_to_operations_environments)
-          Page::Project::Operations::Environments::Index.perform do |index|
+          Page::Project::Menu.perform(&:go_to_deployments_environments)
+          Page::Project::Deployments::Environments::Index.perform do |index|
             index.click_environment_link('production')
           end
-          Page::Project::Operations::Environments::Show.perform do |show|
+          Page::Project::Deployments::Environments::Show.perform do |show|
             show.view_deployment do
               expect(page).to have_content('Hello World!')
               expect(page).to have_content('you_can_see_this_variable')
@@ -117,7 +115,7 @@ module QA
         end
       end
 
-      it 'runs an AutoDevOps pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1277' do
+      it 'runs an AutoDevOps pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1847' do
         Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|

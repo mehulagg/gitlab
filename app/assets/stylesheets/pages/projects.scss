@@ -79,150 +79,8 @@
   }
 }
 
-.project-home-panel {
-  .home-panel-avatar {
-    flex-basis: $home-panel-title-row-height;
-  }
-
-  .home-panel-title {
-    .icon {
-      vertical-align: -1px;
-    }
-
-    .home-panel-topic-list {
-      .icon {
-        top: 3px;
-      }
-    }
-  }
-
-  .home-panel-title-row {
-    @include media-breakpoint-down(sm) {
-      .home-panel-avatar {
-        width: $home-panel-avatar-mobile-size;
-        height: $home-panel-avatar-mobile-size;
-        flex-basis: $home-panel-avatar-mobile-size;
-
-        .avatar {
-          font-size: 20px;
-          line-height: 46px;
-        }
-      }
-
-      .home-panel-title {
-        margin-top: 4px;
-        margin-bottom: 2px;
-        font-size: $gl-font-size;
-        line-height: $gl-font-size-large;
-      }
-
-      .home-panel-topic-list,
-      .home-panel-metadata {
-        font-size: $gl-font-size-small;
-      }
-    }
-  }
-
-  .home-panel-description {
-    @include media-breakpoint-up(md) {
-      font-size: $gl-font-size-large;
-    }
-  }
-}
-
 .nav > .project-buttons {
   margin-top: 0;
-}
-
-.project-repo-buttons {
-  .btn {
-    &:last-child {
-      margin-left: 0;
-    }
-
-    svg {
-      fill: $layout-link-gray;
-    }
-
-    .notifications-icon {
-      top: 1px;
-      margin-right: 0;
-    }
-  }
-
-  .icon {
-    top: 0;
-  }
-
-  .count-badge,
-  .btn-xs {
-    height: 24px;
-  }
-
-  .home-panel-action-button,
-  .project-action-button {
-    margin: $gl-padding $gl-padding-8 0 0;
-    vertical-align: top;
-  }
-
-  .notification-dropdown .dropdown-menu {
-    @extend .dropdown-menu-right;
-  }
-
-  .download-button {
-    @include media-breakpoint-down(md) {
-      margin-left: 0;
-    }
-  }
-
-  .count-buttons {
-    display: inline-block;
-    vertical-align: top;
-    margin-top: $gl-padding;
-
-    .count-badge-count,
-    .count-badge-button {
-      border: 1px solid $border-color;
-      line-height: 1;
-    }
-
-    .count,
-    .count-badge-button {
-      color: $gl-text-color;
-    }
-
-    .count-badge-count {
-      padding: 0 12px;
-      background: $gray-light;
-      border-radius: 0 $border-radius-base $border-radius-base 0;
-    }
-
-    .count-badge-button {
-      border-right: 0;
-      border-radius: $border-radius-base 0 0 $border-radius-base;
-    }
-  }
-
-  .project-clone-holder {
-    display: inline-block;
-    margin: $gl-padding 0 0;
-
-    input {
-      height: $input-height;
-    }
-  }
-
-  .clone-options-dropdown {
-    min-width: 240px;
-
-    .dropdown-menu-inner-content {
-      min-width: 320px;
-    }
-  }
-
-  .mobile-git-clone {
-    margin-top: $gl-padding-8;
-  }
 }
 
 .save-project-loader {
@@ -298,11 +156,6 @@
   line-height: 34px;
   margin: 0;
 
-  > li + li::before {
-    padding: 0 3px;
-    color: $gray-300;
-  }
-
   a {
     color: $gl-text-color;
   }
@@ -313,7 +166,6 @@
 }
 
 .fork-thumbnail {
-  height: 200px;
   width: calc((100% / 2) - #{$gl-padding * 2});
 
   @include media-breakpoint-up(md) {
@@ -887,10 +739,6 @@ pre.light-well {
 }
 
 .git-clone-holder {
-  .btn-clipboard {
-    border: 1px solid $border-color;
-  }
-
   .clone-options {
     display: table-cell;
 
@@ -900,7 +748,7 @@ pre.light-well {
   }
 
   .form-control {
-    @extend .monospace;
+    @include gl-font-monospace;
     background-color: $white;
     border-color: $border-color;
     font-size: 14px;
@@ -923,13 +771,6 @@ pre.light-well {
   label {
     margin-top: 6px;
     font-weight: $gl-font-weight-normal;
-  }
-}
-
-.project-tip-command {
-  > .input-group-prepend:first-child,
-  > .input-group-append:first-child {
-    width: auto;
   }
 }
 
@@ -958,8 +799,7 @@ pre.light-well {
   }
 }
 
-.project-refs-form .dropdown-menu,
-.dropdown-menu-projects {
+.project-refs-form .dropdown-menu {
   width: 300px;
 
   @include media-breakpoint-up(sm) {
@@ -1005,6 +845,18 @@ pre.light-well {
   // https://gitlab.com/gitlab-org/gitlab/-/issues/300405
   .gl-new-dropdown-button-text {
     @include str-truncated;
+  }
+}
+
+.compare-revision-cards {
+  @media (min-width: $breakpoint-lg) {
+    .gl-card {
+      width: calc(50% - 15px);
+    }
+
+    .compare-ellipsis {
+      width: 30px;
+    }
   }
 }
 
@@ -1084,11 +936,6 @@ pre.light-well {
     margin: 32px 0;
     border-color: $border-color;
   }
-}
-
-.issuable-footer {
-  padding-top: $gl-padding;
-  padding-bottom: 37px;
 }
 
 .project-ci-linter {

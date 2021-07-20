@@ -5,8 +5,8 @@ module EE
     module AfterCreateService
       extend ::Gitlab::Utils::Override
 
-      override :execute
-      def execute(merge_request)
+      override :prepare_merge_request
+      def prepare_merge_request(merge_request)
         super
 
         schedule_sync_for(merge_request.head_pipeline_id)
@@ -15,7 +15,7 @@ module EE
       private
 
       def schedule_sync_for(pipeline_id)
-        ::SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline_id) if pipeline_id
+        ::Ci::SyncReportsToReportApprovalRulesWorker.perform_async(pipeline_id) if pipeline_id
       end
     end
   end

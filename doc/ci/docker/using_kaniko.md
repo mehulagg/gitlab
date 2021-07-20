@@ -1,11 +1,11 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Building images with kaniko and GitLab CI/CD
+# Use kaniko to build Docker images **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45512) in GitLab 11.2. Requires GitLab Runner 11.2 and above.
 
@@ -49,7 +49,7 @@ In the following example, kaniko is used to:
 
 The job runs only when a tag is pushed. A `config.json` file is created under
 `/kaniko/.docker` with the needed GitLab Container Registry credentials taken from the
-[predefined CI/CD variables](../variables/README.md#predefined-cicd-variables)
+[predefined CI/CD variables](../variables/index.md#predefined-cicd-variables)
 GitLab CI/CD provides.
 
 In the last step, kaniko uses the `Dockerfile` under the
@@ -99,8 +99,8 @@ build:
        KANIKOCFG="${KANIKOCFG} }"
        echo "${KANIKOCFG}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile $KANIKOPROXYBUILDARGS --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-  only:
-    - tags
+  rules:
+    - if: $CI_COMMIT_TAG
 ```
 
 ## Using a registry with a custom certificate
@@ -133,7 +133,7 @@ The [Least Privilege Container Builds with Kaniko on GitLab](https://www.youtube
 video is a walkthrough of the [Kaniko Docker Build](https://gitlab.com/guided-explorations/containers/kaniko-docker-build)
 Guided Exploration project pipeline. It was tested on:
 
-- [GitLab.com shared runners](../../user/gitlab_com/index.md#shared-runners)
+- [GitLab.com shared runners](../runners/index.md)
 - [The Kubernetes runner executor](https://docs.gitlab.com/runner/executors/kubernetes.html)
 
 The example can be copied to your own group or instance for testing. More details

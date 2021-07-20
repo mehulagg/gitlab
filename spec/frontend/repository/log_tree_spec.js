@@ -1,6 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
+import { createMockClient } from 'helpers/mock_apollo_helper';
 import axios from '~/lib/utils/axios_utils';
 import { resolveCommit, fetchLogsTree } from '~/repository/log_tree';
+import commitsQuery from '~/repository/queries/commits.query.graphql';
+import projectPathQuery from '~/repository/queries/project_path.query.graphql';
+import refQuery from '~/repository/queries/ref.query.graphql';
 
 const mockData = [
   {
@@ -10,6 +14,7 @@ const mockData = [
       committed_date: '2019-01-01',
     },
     commit_path: `https://test.com`,
+    commit_title_html: 'commit title',
     file_name: 'index.js',
     type: 'blob',
   },
@@ -50,28 +55,39 @@ describe('fetchLogsTree', () => {
 
     global.gon = { relative_url_root: '' };
 
-    client = {
-      readQuery: () => ({
-        projectPath: 'gitlab-org/gitlab-foss',
-        escapedRef: 'master',
-        commits: [],
-      }),
-      writeQuery: jest.fn(),
-    };
-
     resolver = {
       entry: { name: 'index.js', type: 'blob' },
       resolve: jest.fn(),
     };
+
+    client = createMockClient();
+    client.writeQuery({ query: projectPathQuery, data: { projectPath: 'gitlab-org/gitlab-foss' } });
+    client.writeQuery({ query: refQuery, data: { ref: 'main', escapedRef: 'main' } });
+    client.writeQuery({ query: commitsQuery, data: { commits: [] } });
   });
 
   afterEach(() => {
     mock.restore();
   });
 
+  it('persists the offset for a given page if offset is larger than maximum offset', async () => {
+    await fetchLogsTree(client, 'path', '1000', resolver, 900).then(() => {});
+
+    await fetchLogsTree(client, 'path', '1100', resolver, 1200).then(() => {
+      expect(axios.get).toHaveBeenCalledWith('/gitlab-org/gitlab-foss/-/refs/main/logs_tree/path', {
+        params: { format: 'json', offset: 975 },
+      });
+    });
+  });
+
+  it('does not call axios get if offset is larger than the maximum offset', () =>
+    fetchLogsTree(client, '', '1000', resolver, 900).then(() => {
+      expect(axios.get).not.toHaveBeenCalled();
+    }));
+
   it('calls axios get', () =>
     fetchLogsTree(client, '', '0', resolver).then(() => {
-      expect(axios.get).toHaveBeenCalledWith('/gitlab-org/gitlab-foss/-/refs/master/logs_tree/', {
+      expect(axios.get).toHaveBeenCalledWith('/gitlab-org/gitlab-foss/-/refs/main/logs_tree/', {
         params: { format: 'json', offset: '0' },
       });
     }));
@@ -110,25 +126,19 @@ describe('fetchLogsTree', () => {
 
   it('writes query to client', async () => {
     await fetchLogsTree(client, '', '0', resolver);
-    expect(client.writeQuery).toHaveBeenCalledWith({
-      query: expect.anything(),
-      data: {
-        projectPath: 'gitlab-org/gitlab-foss',
-        escapedRef: 'master',
-        commits: [
-          expect.objectContaining({
-            __typename: 'LogTreeCommit',
-            commitPath: 'https://test.com',
-            committedDate: '2019-01-01',
-            fileName: 'index.js',
-            filePath: '/index.js',
-            message: 'testing message',
-            sha: '123',
-            titleHtml: undefined,
-            type: 'blob',
-          }),
-        ],
-      },
+    expect(client.readQuery({ query: commitsQuery })).toEqual({
+      commits: [
+        expect.objectContaining({
+          commitPath: 'https://test.com',
+          committedDate: '2019-01-01',
+          fileName: 'index.js',
+          filePath: '/index.js',
+          message: 'testing message',
+          sha: '123',
+          titleHtml: 'commit title',
+          type: 'blob',
+        }),
+      ],
     });
   });
 });

@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState, GlIcon, GlLoadingIcon, GlSprintf, GlLink, GlButton } from '@gitlab/ui';
+import { GlEmptyState, GlIcon, GlLoadingIcon, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { __ } from '~/locale';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
@@ -18,7 +18,6 @@ export default {
     GlLoadingIcon,
     GlSprintf,
     GlLink,
-    GlButton,
     DependencyListIncompleteAlert,
     DependencyListJobFailedAlert,
     PaginatedDependenciesTable,
@@ -79,7 +78,7 @@ export default {
           description: __(
             'The dependency list details information about the components used within your project.',
           ),
-          buttonLabel: __('Learn more about the dependency list'),
+          linkText: __('More Information'),
           link: this.documentationPath,
         },
         [REPORT_STATUS.noDependencies]: {
@@ -87,7 +86,7 @@ export default {
           description: __(
             'It seems like the Dependency Scanning job ran successfully, but no dependencies have been detected in your project.',
           ),
-          buttonLabel: __('View supported languages and frameworks'),
+          linkText: __('View supported languages and frameworks'),
           link: this.supportDocumentationPath,
         },
       };
@@ -122,13 +121,14 @@ export default {
   <gl-empty-state
     v-else-if="showEmptyState"
     :title="emptyStateOptions.title"
-    :description="emptyStateOptions.description"
     :svg-path="emptyStateSvgPath"
+    data-qa-selector="dependency_list_empty_state_description_content"
   >
-    <template #actions>
-      <gl-button variant="info" :href="emptyStateOptions.link">
-        {{ emptyStateOptions.buttonLabel }}
-      </gl-button>
+    <template #description>
+      {{ emptyStateOptions.description }}
+      <gl-link target="_blank" :href="emptyStateOptions.link">
+        {{ emptyStateOptions.linkText }}
+      </gl-link>
     </template>
   </gl-empty-state>
 
@@ -146,9 +146,10 @@ export default {
 
     <header class="d-md-flex align-items-end my-3">
       <div class="mr-auto">
-        <h2 class="h4 mb-1 mt-0">
+        <h2 class="h4 mb-1 mt-0 gl-display-flex gl-align-items-center">
           {{ __('Dependencies') }}
           <gl-link
+            class="gl-ml-3"
             target="_blank"
             :href="documentationPath"
             :aria-label="__('Dependencies help page link')"

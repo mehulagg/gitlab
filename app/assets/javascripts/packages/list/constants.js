@@ -71,7 +71,7 @@ export const PACKAGE_TYPES = [
     type: PackageType.MAVEN,
   },
   {
-    title: s__('PackageRegistry|NPM'),
+    title: s__('PackageRegistry|npm'),
     type: PackageType.NPM,
   },
   {
@@ -82,6 +82,18 @@ export const PACKAGE_TYPES = [
     title: s__('PackageRegistry|PyPI'),
     type: PackageType.PYPI,
   },
+  {
+    title: s__('PackageRegistry|RubyGems'),
+    type: PackageType.RUBYGEMS,
+  },
+  {
+    title: s__('PackageRegistry|Debian'),
+    type: PackageType.DEBIAN,
+  },
+  {
+    title: s__('PackageRegistry|Helm'),
+    type: PackageType.HELM,
+  },
 ];
 
 export const LIST_TITLE_TEXT = s__('PackageRegistry|Package Registry');
@@ -89,3 +101,5 @@ export const LIST_TITLE_TEXT = s__('PackageRegistry|Package Registry');
 export const LIST_INTRO_TEXT = s__(
   'PackageRegistry|Publish and share packages for a variety of common package managers. %{docLinkStart}More information%{docLinkEnd}',
 );
+
+export const TERRAFORM_SEARCH_TYPE = Object.freeze({ value: { data: 'terraform_module' } });

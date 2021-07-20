@@ -1,4 +1,5 @@
-import { uniqWith, isEqual } from 'lodash';
+import { memoize } from 'lodash';
+import { createSankey } from './dag/drawing_utils';
 
 /*
     The following functions are the main engine in transforming the data as
@@ -54,28 +55,32 @@ export const createNodeDict = (nodes) => {
 export const makeLinksFromNodes = (nodes, nodeDict) => {
   const constantLinkValue = 10; // all links are the same weight
   return nodes
-    .map((group) => {
-      return group.jobs.map((job) => {
-        if (!job.needs) {
-          return [];
-        }
+    .map(({ jobs, name: groupName }) =>
+      jobs.map(({ needs = [] }) =>
+        needs.reduce((acc, needed) => {
+          // It's possible that we have an optional job, which
+          // is being needed by another job. In that scenario,
+          // the needed job doesn't exist, so we don't want to
+          // create link for it.
+          if (nodeDict[needed]?.name) {
+            acc.push({
+              source: nodeDict[needed].name,
+              target: groupName,
+              value: constantLinkValue,
+            });
+          }
 
-        return job.needs.map((needed) => {
-          return {
-            source: nodeDict[needed]?.name,
-            target: group.name,
-            value: constantLinkValue,
-          };
-        });
-      });
-    })
+          return acc;
+        }, []),
+      ),
+    )
     .flat(2);
 };
 
 export const getAllAncestors = (nodes, nodeDict) => {
   const needs = nodes
     .map((node) => {
-      return nodeDict[node].needs || '';
+      return nodeDict[node]?.needs || '';
     })
     .flat()
     .filter(Boolean);
@@ -108,11 +113,24 @@ export const filterByAncestors = (links, nodeDict) =>
     return !allAncestors.includes(source);
   });
 
+/*
+  A peformant alternative to lodash's isEqual. Because findIndex always finds
+  the first instance of a match, if the found index is not the first, we know
+  it is in fact a duplicate.
+*/
+const deduplicate = (item, itemIndex, arr) => {
+  const foundIdx = arr.findIndex((test) => {
+    return test.source === item.source && test.target === item.target;
+  });
+
+  return foundIdx === itemIndex;
+};
+
 export const parseData = (nodes) => {
   const nodeDict = createNodeDict(nodes);
   const allLinks = makeLinksFromNodes(nodes, nodeDict);
   const filteredLinks = filterByAncestors(allLinks, nodeDict);
-  const links = uniqWith(filteredLinks, isEqual);
+  const links = filteredLinks.filter(deduplicate);
 
   return { nodes, links };
 };
@@ -144,3 +162,51 @@ export const getMaxNodes = (nodes) => {
 export const removeOrphanNodes = (sankeyfiedNodes) => {
   return sankeyfiedNodes.filter((node) => node.sourceLinks.length || node.targetLinks.length);
 };
+
+/*
+  This utility accepts unwrapped pipeline data in the format returned from
+  our standard pipeline GraphQL query and returns a list of names by layer
+  for the layer view. It can be combined with the stageLookup on the pipeline
+  to generate columns by layer.
+*/
+
+export const listByLayers = ({ stages }) => {
+  const arrayOfJobs = stages.flatMap(({ groups }) => groups);
+  const parsedData = parseData(arrayOfJobs);
+  const dataWithLayers = createSankey()(parsedData);
+
+  return dataWithLayers.nodes.reduce((acc, { layer, name }) => {
+    /* sort groups by layer */
+
+    if (!acc[layer]) {
+      acc[layer] = [];
+    }
+
+    acc[layer].push(name);
+
+    return acc;
+  }, []);
+};
+
+export const generateColumnsFromLayersListBare = ({ stages, stagesLookup }, pipelineLayers) => {
+  return pipelineLayers.map((layers, idx) => {
+    /*
+      Look up the groups in each layer,
+      then add each set of layer groups to a stage-like object.
+    */
+
+    const groups = layers.map((id) => {
+      const { stageIdx, groupIdx } = stagesLookup[id];
+      return stages[stageIdx]?.groups?.[groupIdx];
+    });
+
+    return {
+      name: '',
+      id: `layer-${idx}`,
+      status: { action: null },
+      groups: groups.filter(Boolean),
+    };
+  });
+};
+
+export const generateColumnsFromLayersListMemoized = memoize(generateColumnsFromLayersListBare);

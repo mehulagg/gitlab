@@ -53,7 +53,7 @@ module Enums
   end
 end
 
-Enums::Pipeline.prepend_if_ee('EE::Enums::Pipeline')
+Enums::Pipeline.prepend_mod_with('Enums::Pipeline')
 ```
 
 ```ruby
@@ -113,4 +113,42 @@ class Pipeline < ApplicationRecord
     activity_limit_exceeded: 2
   }
 end
+```
+
+## Add new values in the gap
+
+After merging some EE and FOSS enums, there might be a gap between the two groups of values:
+
+```ruby
+module Enums
+  module Ci
+    module CommitStatus
+      def self.failure_reasons
+        {
+          # ...
+          data_integrity_failure: 12,
+          forward_deployment_failure: 13,
+          insufficient_bridge_permissions: 1_001,
+          downstream_bridge_project_not_found: 1_002,
+          # ...
+        }
+      end
+    end
+  end
+end
+```
+
+To add new values, you should fill the gap first.
+In the example above add `14` instead of `1_003`:
+
+```ruby
+{
+  # ...
+  data_integrity_failure: 12,
+  forward_deployment_failure: 13,
+  a_new_value: 14,
+  insufficient_bridge_permissions: 1_001,
+  downstream_bridge_project_not_found: 1_002,
+  # ...
+}
 ```

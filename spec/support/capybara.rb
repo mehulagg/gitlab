@@ -21,7 +21,8 @@ JS_CONSOLE_FILTER = Regexp.union([
   '"[WDS] Hot Module Replacement enabled."',
   '"[WDS] Live Reloading enabled."',
   'Download the Vue Devtools extension',
-  'Download the Apollo DevTools'
+  'Download the Apollo DevTools',
+  "Unrecognized feature: 'interest-cohort'"
 ])
 
 CAPYBARA_WINDOW_SIZE = [1366, 768].freeze
@@ -59,8 +60,8 @@ Capybara.register_driver :chrome do |app|
   # Chrome won't work properly in a Docker container in sandbox mode
   options.add_argument("no-sandbox")
 
-  # Run headless by default unless CHROME_HEADLESS specified
-  options.add_argument("headless") unless ENV['CHROME_HEADLESS'] =~ /^(false|no|0)$/i
+  # Run headless by default unless WEBDRIVER_HEADLESS specified
+  options.add_argument("headless") unless ENV['WEBDRIVER_HEADLESS'] =~ /^(false|no|0)$/i || ENV['CHROME_HEADLESS'] =~ /^(false|no|0)$/i
 
   # Disable /dev/shm use in CI. See https://gitlab.com/gitlab-org/gitlab/issues/4252
   options.add_argument("disable-dev-shm-usage") if ENV['CI'] || ENV['CI_SERVER']
@@ -79,8 +80,30 @@ Capybara.register_driver :chrome do |app|
   )
 end
 
+Capybara.register_driver :firefox do |app|
+  capabilities = Selenium::WebDriver::Remote::Capabilities.firefox(
+    log: {
+      level: :trace
+    }
+  )
+
+  options = Selenium::WebDriver::Firefox::Options.new(log_level: :trace)
+
+  options.add_argument("--window-size=#{CAPYBARA_WINDOW_SIZE.join(',')}")
+
+  # Run headless by default unless WEBDRIVER_HEADLESS specified
+  options.add_argument("--headless") unless ENV['WEBDRIVER_HEADLESS'] =~ /^(false|no|0)$/i
+
+  Capybara::Selenium::Driver.new(
+    app,
+    browser: :firefox,
+    desired_capabilities: capabilities,
+    options: options
+  )
+end
+
 Capybara.server = :puma_via_workhorse
-Capybara.javascript_driver = :chrome
+Capybara.javascript_driver = ENV.fetch('WEBDRIVER', :chrome).to_sym
 Capybara.default_max_wait_time = timeout
 Capybara.ignore_hidden_elements = true
 Capybara.default_normalize_ws = true
@@ -135,7 +158,7 @@ RSpec.configure do |config|
     unless session.current_window.size == CAPYBARA_WINDOW_SIZE
       begin
         session.current_window.resize_to(*CAPYBARA_WINDOW_SIZE)
-      rescue # ?
+      rescue StandardError # ?
       end
     end
   end
@@ -148,14 +171,16 @@ RSpec.configure do |config|
     Capybara.raise_server_errors = false
 
     example.run
-
-    if example.metadata[:screenshot]
-      screenshot = example.metadata[:screenshot][:image] || example.metadata[:screenshot][:html]
-      example.metadata[:stdout] = %{[[ATTACHMENT|#{screenshot}]]}
-    end
-
   ensure
     Capybara.raise_server_errors = true
+  end
+
+  config.append_after do |example|
+    if example.metadata[:screenshot]
+      screenshot = example.metadata[:screenshot][:image] || example.metadata[:screenshot][:html]
+      screenshot&.delete_prefix!(ENV.fetch('CI_PROJECT_DIR', ''))
+      example.metadata[:stdout] = %{[[ATTACHMENT|#{screenshot}]]}
+    end
   end
 
   config.after(:example, :js) do |example|
@@ -172,7 +197,7 @@ RSpec.configure do |config|
           raise JSConsoleError, message
         end
       rescue Selenium::WebDriver::Error::WebDriverError => error
-        if error.message =~ /unknown command: session\/[0-9a-zA-Z]+(?:\/se)?\/log/
+        if error.message =~ %r{unknown command: session/[0-9a-zA-Z]+(?:/se)?/log}
           message = "Unable to access Chrome javascript console logs. You may be using an outdated version of ChromeDriver."
           raise JSConsoleError, message
         else

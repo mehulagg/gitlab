@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Groups::ContributionAnalyticsController < Groups::ApplicationController
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
   before_action :group
   before_action :check_contribution_analytics_available!
@@ -9,7 +9,7 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
 
   layout 'group'
 
-  track_unique_visits :show, target_id: 'g_analytics_contribution'
+  track_redis_hll_event :show, name: 'g_analytics_contribution'
 
   feature_category :planning_analytics
 
@@ -40,7 +40,7 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
   end
 
   def authorize_read_contribution_analytics!
-    render_403 unless user_has_access_to_feature?
+    render_promotion unless user_has_access_to_feature?
   end
 
   def render_promotion
@@ -52,7 +52,7 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
   end
 
   def group_has_access_to_feature?
-    @group.feature_available?(:contribution_analytics)
+    @group.licensed_feature_available?(:contribution_analytics)
   end
 
   def user_has_access_to_feature?

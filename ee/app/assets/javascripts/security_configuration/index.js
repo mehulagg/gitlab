@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
+import { initRedesignedSecurityConfiguration } from '~/security_configuration';
 import SecurityConfigurationApp from './components/app.vue';
 
 export const initSecurityConfiguration = (el) => {
@@ -7,11 +8,14 @@ export const initSecurityConfiguration = (el) => {
     return null;
   }
 
+  if (gon.features?.securityConfigurationRedesignEE) {
+    return initRedesignedSecurityConfiguration(el);
+  }
+
   const {
     autoDevopsHelpPagePath,
     autoDevopsPath,
     features,
-    helpPagePath,
     latestPipelinePath,
     autoFixEnabled,
     autoFixHelpPath,
@@ -19,7 +23,7 @@ export const initSecurityConfiguration = (el) => {
     containerScanningHelpPath,
     dependencyScanningHelpPath,
     toggleAutofixSettingEndpoint,
-    createSastMergeRequestPath,
+    projectPath,
     gitlabCiHistoryPath,
   } = el.dataset;
 
@@ -28,15 +32,16 @@ export const initSecurityConfiguration = (el) => {
     components: {
       SecurityConfigurationApp,
     },
+    provide: {
+      projectPath,
+    },
     render(createElement) {
       return createElement(SecurityConfigurationApp, {
         props: {
           autoDevopsHelpPagePath,
           autoDevopsPath,
           features: JSON.parse(features),
-          helpPagePath,
           latestPipelinePath,
-          createSastMergeRequestPath,
           ...parseBooleanDataAttributes(el, [
             'autoDevopsEnabled',
             'canEnableAutoDevops',

@@ -34,12 +34,24 @@ RSpec.describe Boards::CreateService, services: true do
       end
     end
 
-    it_behaves_like 'setting a milestone scope' do
-      subject { described_class.new(parent, double, milestone_id: milestone.id).execute.payload }
-    end
+    context 'when setting a timebox' do
+      let(:user) { create(:user) }
 
-    it_behaves_like 'setting an iteration scope' do
-      subject { described_class.new(parent, nil, iteration_id: iteration.id).execute.payload }
+      before do
+        parent.add_reporter(user)
+      end
+
+      it_behaves_like 'setting a milestone scope' do
+        before do
+          parent.add_reporter(user)
+        end
+
+        subject { described_class.new(parent, user, milestone_id: milestone.id).execute.payload }
+      end
+
+      it_behaves_like 'setting an iteration scope' do
+        subject { described_class.new(parent, user, iteration_id: iteration.id).execute.payload }
+      end
     end
   end
 end

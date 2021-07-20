@@ -7,7 +7,7 @@ RSpec.describe ProtectedEnvironments::DestroyService, '#execute' do
   let!(:protected_environment) { create(:protected_environment, project: project) }
   let(:deploy_access_level) { protected_environment.deploy_access_levels.first }
 
-  subject { described_class.new(project, user).execute(protected_environment) }
+  subject { described_class.new(container: project, current_user: user).execute(protected_environment) }
 
   context 'when the Protected Environment is deleted' do
     it { is_expected.to be_truthy }

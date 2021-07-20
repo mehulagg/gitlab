@@ -8,11 +8,14 @@ RSpec.describe 'Query.vulnerabilities.issueLinks' do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user, security_dashboard_projects: [project]) }
   let_it_be(:vulnerability) { create(:vulnerability, project: project) }
-  let_it_be(:related_issue) { create(:vulnerabilities_issue_link, :related, vulnerability: vulnerability) }
-  let_it_be(:created_issue) { create(:vulnerabilities_issue_link, :created, vulnerability: vulnerability) }
+  let_it_be(:created_issue) { create(:issue, project: project) }
+  let_it_be(:related_issue) { create(:issue, project: project) }
+  let_it_be(:related_issue_link) { create(:vulnerabilities_issue_link, :related, vulnerability: vulnerability, issue: related_issue) }
+  let_it_be(:created_issue_link) { create(:vulnerabilities_issue_link, :created, vulnerability: vulnerability, issue: created_issue) }
 
   before do
     project.add_developer(user)
+
     stub_licensed_features(security_dashboard: true)
   end
 
@@ -46,13 +49,13 @@ RSpec.describe 'Query.vulnerabilities.issueLinks' do
     it 'returns a list of VulnerabilityIssueLink with `CREATED` linkType' do
       query_issue_links('CREATED')
 
-      expect_issue_links_response(created_issue)
+      expect_issue_links_response(created_issue_link)
     end
 
     it 'returns a list of VulnerabilityIssueLink with `RELATED` linkType' do
       query_issue_links('RELATED')
 
-      expect_issue_links_response(related_issue)
+      expect_issue_links_response(related_issue_link)
     end
   end
 
@@ -60,7 +63,7 @@ RSpec.describe 'Query.vulnerabilities.issueLinks' do
     it 'returns a list of all VulnerabilityIssueLink' do
       query_issue_links
 
-      expect_issue_links_response(related_issue, created_issue)
+      expect_issue_links_response(related_issue_link, created_issue_link)
     end
   end
 

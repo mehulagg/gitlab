@@ -148,7 +148,7 @@ export default {
       @hide="handleDropdownHide"
     >
       <template #button-content
-        ><gl-loading-icon v-if="moveInProgress" class="gl-mr-3" />{{
+        ><gl-loading-icon v-if="moveInProgress" size="sm" class="gl-mr-3" />{{
           dropdownButtonTitle
         }}</template
       >
@@ -164,6 +164,7 @@ export default {
             variant="link"
             icon="close"
             class="gl-mr-2 gl-w-auto! gl-p-2!"
+            :aria-label="__('Close')"
             @click.prevent="handleDropdownCloseClick"
           />
         </div>

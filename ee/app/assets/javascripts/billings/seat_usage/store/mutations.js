@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import {
   HEADER_TOTAL_ENTRIES,
   HEADER_PAGE_NUMBER,
@@ -31,7 +32,7 @@ export default {
     state.search = searchString ?? '';
   },
 
-  [types.RESET_MEMBERS](state) {
+  [types.RESET_BILLABLE_MEMBERS](state) {
     state.members = [];
 
     state.total = null;
@@ -39,5 +40,53 @@ export default {
     state.perPage = null;
 
     state.isLoading = false;
+  },
+
+  [types.SET_BILLABLE_MEMBER_TO_REMOVE](state, memberToRemove) {
+    if (!memberToRemove) {
+      state.billableMemberToRemove = null;
+    } else {
+      state.billableMemberToRemove = state.members.find(
+        (member) => member.id === memberToRemove.id,
+      );
+    }
+  },
+
+  [types.REMOVE_BILLABLE_MEMBER](state) {
+    state.isLoading = true;
+    state.hasError = false;
+  },
+
+  [types.REMOVE_BILLABLE_MEMBER_SUCCESS](state) {
+    state.isLoading = false;
+    state.hasError = false;
+    state.billableMemberToRemove = null;
+  },
+
+  [types.REMOVE_BILLABLE_MEMBER_ERROR](state) {
+    state.isLoading = false;
+    state.hasError = true;
+    state.billableMemberToRemove = null;
+  },
+
+  [types.FETCH_BILLABLE_MEMBER_DETAILS](state, { memberId }) {
+    Vue.set(state.userDetails, memberId, {
+      isLoading: true,
+      items: [],
+    });
+  },
+
+  [types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS](state, { memberId, memberships }) {
+    Vue.set(state.userDetails, memberId, {
+      isLoading: false,
+      items: memberships,
+    });
+  },
+
+  [types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR](state, { memberId }) {
+    Vue.set(state.userDetails, memberId, {
+      isLoading: false,
+      items: [],
+    });
   },
 };

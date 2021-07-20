@@ -14,13 +14,19 @@ export default {
       required: true,
     },
   },
+  computed: {
+    hasPackages() {
+      return Boolean(this.issue.packages.length);
+    },
+  },
   methods: { ...mapActions(LICENSE_MANAGEMENT, ['setLicenseInModal']) },
 };
 </script>
 
 <template>
   <div class="report-block-info license-item">
-    <gl-link :href="issue.url" target="_blank">{{ issue.name }}</gl-link>
-    <license-packages :packages="issue.packages" class="text-secondary" />
+    <gl-link v-if="issue.url" :href="issue.url" target="_blank">{{ issue.name }}</gl-link>
+    <span v-else data-testid="license-copy">{{ issue.name }}</span>
+    <license-packages v-if="hasPackages" :packages="issue.packages" class="text-secondary" />
   </div>
 </template>

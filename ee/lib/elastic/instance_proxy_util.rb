@@ -10,7 +10,11 @@ module Elastic
       super(target)
 
       const_name = if use_separate_indices
-                     "#{target.class.name}Config"
+                     if target.class.superclass.abstract_class?
+                       "#{target.class.name}Config"
+                     else
+                       "#{target.class.superclass.name}Config"
+                     end
                    else
                      'Config'
                    end
@@ -49,14 +53,16 @@ module Elastic
     def safely_read_attribute_for_elasticsearch(attr_name)
       result = target.send(attr_name) # rubocop:disable GitlabSecurity/PublicSend
       apply_field_limit(result)
-    rescue => err
+    rescue StandardError => err
       target.logger.warn("Elasticsearch failed to read #{attr_name} for #{target.class} #{target.id}: #{err}")
       nil
     end
 
-    # protect against missing project_feature and set visibility to PRIVATE
+    # protect against missing project and project_feature and set visibility to PRIVATE
     # if the project_feature is missing on a project
     def safely_read_project_feature_for_elasticsearch(feature)
+      return ProjectFeature::DISABLED unless target.project
+
       if target.project.project_feature
         target.project.project_feature.access_level(feature)
       else

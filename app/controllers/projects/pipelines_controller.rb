@@ -2,9 +2,9 @@
 
 class Projects::PipelinesController < Projects::ApplicationController
   include ::Gitlab::Utils::StrongMemoize
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
-  before_action :whitelist_query_limiting, only: [:create, :retry]
+  before_action :disable_query_limiting, only: [:create, :retry]
   before_action :pipeline, except: [:index, :new, :create, :charts, :config_variables]
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
@@ -13,39 +13,43 @@ class Projects::PipelinesController < Projects::ApplicationController
   before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
-    push_frontend_feature_flag(:pipelines_security_report_summary, project)
-    push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: true)
+    push_frontend_feature_flag(:pipeline_graph_layers_view, project, type: :development, default_enabled: :yaml)
     push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: :yaml)
     push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
-    push_frontend_feature_flag(:ci_mini_pipeline_gl_dropdown, project, type: :development, default_enabled: :yaml)
-    push_frontend_feature_flag(:jira_for_vulnerabilities, project, type: :development, default_enabled: :yaml)
   end
-  before_action :ensure_pipeline, only: [:show]
+  before_action :ensure_pipeline, only: [:show, :downloadable_artifacts]
 
   # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
   before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
-  track_unique_visits :charts, target_id: 'p_analytics_pipelines'
+  track_redis_hll_event :charts, name: 'p_analytics_pipelines'
 
   wrap_parameters Ci::Pipeline
 
   POLLING_INTERVAL = 10_000
 
-  feature_category :continuous_integration
+  feature_category :continuous_integration, [
+                     :charts, :show, :config_variables, :stage, :cancel, :retry,
+                     :builds, :dag, :failures, :status, :downloadable_artifacts,
+                     :index, :create, :new, :destroy
+                   ]
+  feature_category :code_testing, [:test_report]
 
   def index
     @pipelines = Ci::PipelinesFinder
       .new(project, current_user, index_params)
       .execute
       .page(params[:page])
-      .per(20)
 
     @pipelines_count = limited_pipelines_count(project)
 
     respond_to do |format|
-      format.html
+      format.html do
+        enable_code_quality_walkthrough_experiment
+        enable_ci_runner_templates_experiment
+      end
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -64,20 +68,22 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def create
-    @pipeline = Ci::CreatePipelineService
+    service_response = Ci::CreatePipelineService
       .new(project, current_user, create_params)
       .execute(:web, ignore_skip_ci: true, save_on_errors: false)
 
+    @pipeline = service_response.payload
+
     respond_to do |format|
       format.html do
-        if @pipeline.created_successfully?
+        if service_response.success?
           redirect_to project_pipeline_path(project, @pipeline)
         else
           render 'new', status: :bad_request
         end
       end
       format.json do
-        if @pipeline.created_successfully?
+        if service_response.success?
           render json: PipelineSerializer
                          .new(project: project, current_user: current_user)
                          .represent(@pipeline),
@@ -93,10 +99,10 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def show
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
 
     respond_to do |format|
-      format.html
+      format.html { render_show }
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -151,17 +157,8 @@ class Projects::PipelinesController < Projects::ApplicationController
       .represent(@stage, details: true, retried: params[:retried])
   end
 
-  # TODO: This endpoint is used by mini-pipeline-graph
-  # TODO: This endpoint should be migrated to `stage.json`
-  def stage_ajax
-    @stage = pipeline.legacy_stage(params[:stage])
-    return not_found unless @stage
-
-    render json: { html: view_to_html_string('projects/pipelines/_stage') }
-  end
-
   def retry
-    pipeline.retry_failed(current_user)
+    ::Ci::RetryPipelineWorker.perform_async(pipeline.id, current_user.id) # rubocop:disable CodeReuse/Worker
 
     respond_to do |format|
       format.html do
@@ -186,10 +183,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def test_report
     respond_to do |format|
-      format.html do
-        render 'show'
-      end
-
+      format.html { render_show }
       format.json do
         render json: TestReportSerializer
           .new(current_user: @current_user)
@@ -208,16 +202,25 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
+  def downloadable_artifacts
+    render json: Ci::DownloadableArtifactSerializer.new(
+      project: project,
+      current_user: current_user
+    ).represent(@pipeline)
+  end
+
   private
 
   def serialize_pipelines
     PipelineSerializer
       .new(project: @project, current_user: @current_user)
       .with_pagination(request, response)
-      .represent(@pipelines, disable_coverage: true, preload: true)
+      .represent(@pipelines, disable_coverage: true, preload: true, code_quality_walkthrough: params[:code_quality_walkthrough].present?)
   end
 
   def render_show
+    @stages = @pipeline.stages
+
     respond_to do |format|
       format.html do
         render 'show'
@@ -270,9 +273,9 @@ class Projects::PipelinesController < Projects::ApplicationController
             &.present(current_user: current_user)
   end
 
-  def whitelist_query_limiting
-    # Also see https://gitlab.com/gitlab-org/gitlab-foss/issues/42343
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42339')
+  def disable_query_limiting
+    # Also see https://gitlab.com/gitlab-org/gitlab/-/issues/20785
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20784')
   end
 
   def authorize_update_pipeline!
@@ -296,6 +299,33 @@ class Projects::PipelinesController < Projects::ApplicationController
   def index_params
     params.permit(:scope, :username, :ref, :status)
   end
+
+  def enable_code_quality_walkthrough_experiment
+    experiment(:code_quality_walkthrough, namespace: project.root_ancestor) do |e|
+      e.exclude! unless current_user
+      e.exclude! unless can?(current_user, :create_pipeline, project)
+      e.exclude! unless project.root_ancestor.recent?
+      e.exclude! if @pipelines_count.to_i > 0
+      e.exclude! if helpers.has_gitlab_ci?(project)
+
+      e.control {}
+      e.candidate {}
+      e.record!
+    end
+  end
+
+  def enable_ci_runner_templates_experiment
+    experiment(:ci_runner_templates, namespace: project.root_ancestor) do |e|
+      e.exclude! unless current_user
+      e.exclude! unless can?(current_user, :create_pipeline, project)
+      e.exclude! if @pipelines_count.to_i > 0
+      e.exclude! if helpers.has_gitlab_ci?(project)
+
+      e.control {}
+      e.candidate {}
+      e.record!
+    end
+  end
 end
 
-Projects::PipelinesController.prepend_if_ee('EE::Projects::PipelinesController')
+Projects::PipelinesController.prepend_mod_with('Projects::PipelinesController')

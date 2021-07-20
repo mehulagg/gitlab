@@ -1,13 +1,12 @@
 import * as constants from 'ee/subscriptions/new/constants';
 import createState from 'ee/subscriptions/new/store/state';
 
-constants.STEPS = ['firstStep', 'secondStep'];
 constants.TAX_RATE = 0;
 
 describe('projectsSelector default state', () => {
   const availablePlans = [
     { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'Bronze Plan' },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver Plan' },
+    { id: 'secondPlanId', code: 'premium', price_per_year: 228, name: 'Premium Plan' },
   ];
 
   const groupData = [
@@ -23,6 +22,7 @@ describe('projectsSelector default state', () => {
     setupForCompany: 'true',
     fullName: 'Full Name',
     newUser: 'true',
+    source: 'some_source',
   };
 
   const currentDate = new Date('2020-01-07T12:44:08.135Z');
@@ -31,15 +31,11 @@ describe('projectsSelector default state', () => {
 
   const state = createState(initialData);
 
-  it('sets the currentStep to the first item of the STEPS constant', () => {
-    expect(state.currentStep).toEqual('firstStep');
-  });
-
   describe('availablePlans', () => {
     it('sets the availablePlans to the provided parsed availablePlans', () => {
       expect(state.availablePlans).toEqual([
         { value: 'firstPlanId', text: 'Bronze Plan', pricePerUserPerYear: 48 },
-        { value: 'secondPlanId', text: 'Silver Plan', pricePerUserPerYear: 228 },
+        { value: 'secondPlanId', text: 'Premium Plan', pricePerUserPerYear: 228 },
       ]);
     });
 
@@ -167,6 +163,10 @@ describe('projectsSelector default state', () => {
 
   it('sets the startDate to the current date', () => {
     expect(state.startDate).toEqual(currentDate);
+  });
+
+  it('sets the source to the initial value', () => {
+    expect(state.source).toEqual('some_source');
   });
 
   it('sets the paymentFormParams to an empty object', () => {

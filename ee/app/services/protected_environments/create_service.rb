@@ -2,7 +2,7 @@
 module ProtectedEnvironments
   class CreateService < ProtectedEnvironments::BaseService
     def execute
-      project.protected_environments.create(sanitized_params)
+      container.protected_environments.create(sanitized_params)
     end
   end
 end

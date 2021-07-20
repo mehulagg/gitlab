@@ -5,8 +5,8 @@
   .settings-header
     %h4
       = _('Slack application')
-    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
-      = expanded ? 'Collapse' : 'Expand'
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
+      = expanded ? _('Collapse') : _('Expand')
     %p
       = _('Slack integration allows you to interact with GitLab via slash commands in a chat window.')
   .settings-content
@@ -31,4 +31,4 @@
           = f.label :slack_app_verification_token, 'Verification token', class: 'label-bold'
           = f.text_field :slack_app_verification_token, class: 'form-control gl-form-input'
 
-      = f.submit _('Save changes'), class: "gl-button btn btn-success"
+      = f.submit _('Save changes'), class: "gl-button btn btn-confirm"

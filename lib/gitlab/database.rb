@@ -2,9 +2,19 @@
 
 module Gitlab
   module Database
+    CI_DATABASE_NAME = 'ci'
+
+    # This constant is used when renaming tables concurrently.
+    # If you plan to rename a table using the `rename_table_safely` method, add your table here one milestone before the rename.
+    # Example:
+    # TABLES_TO_BE_RENAMED = {
+    #   'old_name' => 'new_name'
+    # }.freeze
+    TABLES_TO_BE_RENAMED = {}.freeze
+
     # Minimum PostgreSQL version requirement per documentation:
     # https://docs.gitlab.com/ee/install/requirements.html#postgresql-requirements
-    MINIMUM_POSTGRES_VERSION = 11
+    MINIMUM_POSTGRES_VERSION = 12
 
     # https://www.postgresql.org/docs/9.2/static/datatype-numeric.html
     MAX_INT_VALUE = 2147483647
@@ -35,8 +45,46 @@ module Gitlab
     # It does not include the default public schema
     EXTRA_SCHEMAS = [DYNAMIC_PARTITIONS_SCHEMA, STATIC_PARTITIONS_SCHEMA].freeze
 
+    DEFAULT_POOL_HEADROOM = 10
+
+    # We configure the database connection pool size automatically based on the
+    # configured concurrency. We also add some headroom, to make sure we don't run
+    # out of connections when more threads besides the 'user-facing' ones are
+    # running.
+    #
+    # Read more about this in doc/development/database/client_side_connection_pool.md
+    def self.default_pool_size
+      headroom = (ENV["DB_POOL_HEADROOM"].presence || DEFAULT_POOL_HEADROOM).to_i
+
+      Gitlab::Runtime.max_threads + headroom
+    end
+
     def self.config
-      ActiveRecord::Base.configurations[Rails.env]
+      default_config_hash = ActiveRecord::Base.configurations.find_db_config(Rails.env)&.configuration_hash || {}
+
+      default_config_hash.with_indifferent_access.tap do |hash|
+        # Match config/initializers/database_config.rb
+        hash[:pool] ||= default_pool_size
+      end
+    end
+
+    def self.has_config?(database_name)
+      Gitlab::Application.config.database_configuration[Rails.env].include?(database_name.to_s)
+    end
+
+    def self.main_database?(name)
+      # The database is `main` if it is a first entry in `database.yml`
+      # Rails internally names them `primary` to avoid confusion
+      # with broad `primary` usage we use `main` instead
+      #
+      # TODO: The explicit `== 'main'` is needed in a transition period till
+      # the `database.yml` is not migrated into `main:` syntax
+      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/65243
+      ActiveRecord::Base.configurations.primary?(name.to_s) || name.to_s == 'main'
+    end
+
+    def self.ci_database?(name)
+      name.to_s == CI_DATABASE_NAME
     end
 
     def self.username
@@ -57,6 +105,11 @@ module Gitlab
       else
         'Unknown'
       end
+    end
+
+    # Disables prepared statements for the current database connection.
+    def self.disable_prepared_statements
+      ActiveRecord::Base.establish_connection(config.merge(prepared_statements: false))
     end
 
     # @deprecated
@@ -113,7 +166,7 @@ module Gitlab
           is required for this version of GitLab.
           <% if Rails.env.development? || Rails.env.test? %>
           If using gitlab-development-kit, please find the relevant steps here:
-            https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/postgresql.md#upgrade-postgresql
+            https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/postgresql.md#upgrade-postgresql
           <% end %>
           Please upgrade your environment to a supported PostgreSQL version, see
           https://docs.gitlab.com/ee/install/requirements.html#database for details.
@@ -121,6 +174,16 @@ module Gitlab
       EOS
     rescue ActiveRecord::ActiveRecordError, PG::Error
       # ignore - happens when Rake tasks yet have to create a database, e.g. for testing
+    end
+
+    def self.nulls_order(field, direction = :asc, nulls_order = :nulls_last)
+      raise ArgumentError unless [:nulls_last, :nulls_first].include?(nulls_order)
+      raise ArgumentError unless [:asc, :desc].include?(direction)
+
+      case nulls_order
+      when :nulls_last then nulls_last_order(field, direction)
+      when :nulls_first then nulls_first_order(field, direction)
+      end
     end
 
     def self.nulls_last_order(field, direction = 'ASC')
@@ -204,23 +267,13 @@ module Gitlab
     # pool_size - The size of the DB pool.
     # host - An optional host name to use instead of the default one.
     def self.create_connection_pool(pool_size, host = nil, port = nil)
-      env = Rails.env
-      original_config = ActiveRecord::Base.configurations.to_h
+      original_config = Gitlab::Database.config
 
-      env_config = original_config[env].merge('pool' => pool_size)
-      env_config['host'] = host if host
-      env_config['port'] = port if port
+      env_config = original_config.merge(pool: pool_size)
+      env_config[:host] = host if host
+      env_config[:port] = port if port
 
-      config = ActiveRecord::DatabaseConfigurations.new(
-        original_config.merge(env => env_config)
-      )
-
-      spec =
-        ActiveRecord::
-          ConnectionAdapters::
-          ConnectionSpecification::Resolver.new(config).spec(env.to_sym)
-
-      ActiveRecord::ConnectionAdapters::ConnectionPool.new(spec)
+      ActiveRecord::ConnectionAdapters::ConnectionHandler.new.establish_connection(env_config)
     end
 
     def self.connection
@@ -246,7 +299,7 @@ module Gitlab
       connection
 
       true
-    rescue
+    rescue StandardError
       false
     end
 
@@ -256,11 +309,28 @@ module Gitlab
       row['system_identifier']
     end
 
+    # @param [ActiveRecord::Connection] ar_connection
+    # @return [String]
     def self.get_write_location(ar_connection)
-      row = ar_connection
-        .select_all("SELECT pg_current_wal_insert_lsn()::text AS location")
-        .first
+      use_new_load_balancer_query = Gitlab::Utils.to_boolean(ENV['USE_NEW_LOAD_BALANCER_QUERY'], default: true)
 
+      sql = if use_new_load_balancer_query
+              <<~NEWSQL
+                SELECT CASE
+                    WHEN pg_is_in_recovery() = true AND EXISTS (SELECT 1 FROM pg_stat_get_wal_senders())
+                      THEN pg_last_wal_replay_lsn()::text
+                    WHEN pg_is_in_recovery() = false
+                      THEN pg_current_wal_insert_lsn()::text
+                      ELSE NULL
+                    END AS location;
+              NEWSQL
+            else
+              <<~SQL
+                SELECT pg_current_wal_insert_lsn()::text AS location
+              SQL
+            end
+
+      row = ar_connection.select_all(sql).first
       row['location'] if row
     end
 
@@ -280,6 +350,16 @@ module Gitlab
           ActiveRecord::Migrator.migrations_paths << path
         end
       end
+    end
+
+    def self.dbname(ar_connection)
+      if ar_connection.respond_to?(:pool) &&
+          ar_connection.pool.respond_to?(:db_config) &&
+          ar_connection.pool.db_config.respond_to?(:database)
+        return ar_connection.pool.db_config.database
+      end
+
+      'unknown'
     end
 
     # inside_transaction? will return true if the caller is running within a transaction. Handles special cases
@@ -313,31 +393,21 @@ module Gitlab
       ActiveRecord::Base.prepend(ActiveRecordBaseTransactionMetrics)
     end
 
-    # observe_transaction_duration is called from ActiveRecordBaseTransactionMetrics.transaction and used to
-    # record transaction durations.
-    def self.observe_transaction_duration(duration_seconds)
-      if current_transaction = ::Gitlab::Metrics::Transaction.current
-        current_transaction.observe(:gitlab_database_transaction_seconds, duration_seconds) do
-          docstring "Time spent in database transactions, in seconds"
-        end
-      end
-    rescue Prometheus::Client::LabelSetValidator::LabelSetError => err
-      # Ensure that errors in recording these metrics don't affect the operation of the application
-      Gitlab::AppLogger.error("Unable to observe database transaction duration: #{err}")
-    end
-
     # MonkeyPatch for ActiveRecord::Base for adding observability
     module ActiveRecordBaseTransactionMetrics
-      # A monkeypatch over ActiveRecord::Base.transaction.
-      # It provides observability into transactional methods.
-      def transaction(options = {}, &block)
-        start_time = Gitlab::Metrics::System.monotonic_time
-        super(options, &block)
-      ensure
-        Gitlab::Database.observe_transaction_duration(Gitlab::Metrics::System.monotonic_time - start_time)
+      extend ActiveSupport::Concern
+
+      class_methods do
+        # A monkeypatch over ActiveRecord::Base.transaction.
+        # It provides observability into transactional methods.
+        def transaction(**options, &block)
+          ActiveSupport::Notifications.instrument('transaction.active_record', { connection: connection }) do
+            super(**options, &block)
+          end
+        end
       end
     end
   end
 end
 
-Gitlab::Database.prepend_if_ee('EE::Gitlab::Database')
+Gitlab::Database.prepend_mod_with('Gitlab::Database')

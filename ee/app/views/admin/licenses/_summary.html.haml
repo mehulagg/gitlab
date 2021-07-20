@@ -11,7 +11,7 @@
           = render 'admin/licenses/license_status'
         %span.gl-ml-5
           = _('Licensed to:')
-          %strong= @license.licensee['Name']
-          = "(#{@license.licensee['Email']})"
+          %strong= @license.licensee_name
+          = "(#{@license.licensee_email})"
     %div
-      = link_to 'View details', admin_license_path, class: "gl-button btn btn-default"
+      = link_to 'View details', admin_subscription_path, class: "gl-button btn btn-default"

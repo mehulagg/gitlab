@@ -1,0 +1,19 @@
+---
+data_category: Optional
+key_path: redis_hll_counters.incident_management_oncall.i_incident_management_oncall_notification_sent_weekly
+description: Count of unique users to receive a notification while on-call
+product_section: ops
+product_stage: monitor
+product_group: group::monitor
+product_category: incident_management
+value_type: number
+status: data_available
+milestone: "13.11"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58606
+time_frame: 7d
+data_source: redis_hll
+distribution:
+- ee
+tier:
+- premium
+- ultimate

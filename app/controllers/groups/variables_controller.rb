@@ -2,11 +2,11 @@
 
 module Groups
   class VariablesController < Groups::ApplicationController
-    before_action :authorize_admin_build!
+    before_action :authorize_admin_group!
 
     skip_cross_project_access_check :show, :update
 
-    feature_category :continuous_integration
+    feature_category :pipeline_authoring
 
     def show
       respond_to do |format|
@@ -56,3 +56,5 @@ module Groups
     end
   end
 end
+
+Groups::VariablesController.prepend_mod_with('Groups::VariablesController')

@@ -1,15 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AddEditScheduleForm renders modal layout 1`] = `
-<gl-form-stub
-  modalid="modalId"
->
+exports[`AddEditScheduleForm renders form layout 1`] = `
+<gl-form-stub>
   <gl-form-group-stub
     invalid-feedback="Can't be empty"
     label="Name"
     label-for="schedule-name"
     label-size="sm"
-    requried=""
+    labeldescription=""
+    required=""
     state="true"
   >
     <gl-form-input-stub
@@ -22,6 +21,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
     label="Description (optional)"
     label-for="schedule-description"
     label-size="sm"
+    labeldescription=""
   >
     <gl-form-input-stub
       id="schedule-description"
@@ -35,7 +35,8 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
     label="Timezone"
     label-for="schedule-timezone"
     label-size="sm"
-    requried=""
+    labeldescription=""
+    required=""
     state="true"
   >
     <gl-dropdown-stub
@@ -45,9 +46,10 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
       hideheaderborder="true"
       id="schedule-timezone"
       size="medium"
-      text="(UTC -12:00) -12 International Date Line West"
+      text=""
       variant="default"
     >
+       
       <gl-search-box-by-type-stub
         clearbuttontitle="Clear"
         value=""
@@ -66,7 +68,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -12:00) -12 International Date Line West
+          (UTC -12:00) -12 International Date Line West
         </span>
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
@@ -81,7 +83,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -11:00) SST American Samoa
+          (UTC -11:00) SST American Samoa
         </span>
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
@@ -96,7 +98,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -11:00) SST Midway Island
+          (UTC -11:00) SST Midway Island
         </span>
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
@@ -111,7 +113,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -10:00) HST Hawaii
+          (UTC -7:00) PT Pacific Time (US & Canada)
         </span>
       </gl-dropdown-item-stub>
        

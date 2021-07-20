@@ -1,7 +1,7 @@
 <script>
 import { GlSearchBoxByType } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { mapActions, mapState } from 'vuex';
+import { mapVuexModuleActions, mapVuexModuleState } from '~/lib/utils/vuex_module_mappers';
 import Tracking from '~/tracking';
 import frequentItemsMixin from './frequent_items_mixin';
 
@@ -12,13 +12,14 @@ export default {
     GlSearchBoxByType,
   },
   mixins: [frequentItemsMixin, trackingMixin],
+  inject: ['vuexModule'],
   data() {
     return {
       searchQuery: '',
     };
   },
   computed: {
-    ...mapState(['dropdownType']),
+    ...mapVuexModuleState((vm) => vm.vuexModule, ['dropdownType']),
     translations() {
       return this.getTranslations(['searchInputPlaceholder']);
     },
@@ -32,13 +33,13 @@ export default {
     }, 500),
   },
   methods: {
-    ...mapActions(['setSearchQuery']),
+    ...mapVuexModuleActions((vm) => vm.vuexModule, ['setSearchQuery']),
   },
 };
 </script>
 
 <template>
-  <div class="search-input-container d-none d-sm-block">
+  <div class="search-input-container">
     <gl-search-box-by-type
       v-model="searchQuery"
       :placeholder="translations.searchInputPlaceholder"

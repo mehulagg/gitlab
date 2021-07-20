@@ -2,14 +2,16 @@
 
 exports[`IncidentsSettingTabs should render the component 1`] = `
 <section
-  class="settings no-animate qa-incident-management-settings"
+  class="settings no-animate"
   data-qa-selector="incidents_settings_content"
   id="incident-management-settings"
 >
   <div
     class="settings-header"
   >
-    <h4>
+    <h4
+      class="settings-title js-settings-toggle js-settings-toggle-trigger-only"
+    >
       
       Incidents
     
@@ -28,7 +30,7 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
      
     <p>
       
-      Set up integrations with external tools to help better manage incidents.
+      Fine-tune incident settings and set up integrations with external tools to help better manage incidents.
     
     </p>
   </div>
@@ -37,17 +39,12 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
     class="settings-content"
   >
     <gl-tabs-stub
+      queryparamname="tab"
       theme="indigo"
+      value="0"
     >
-      <gl-tab-stub
-        title="Alert integration"
-        titlelinkclass=""
-      >
-        <alertssettingsform-stub
-          class="gl-pt-3"
-          data-testid="AlertsSettingsForm-tab"
-        />
-      </gl-tab-stub>
+      <!---->
+       
       <gl-tab-stub
         title="PagerDuty integration"
         titlelinkclass=""
@@ -57,9 +54,6 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
           data-testid="PagerDutySettingsForm-tab"
         />
       </gl-tab-stub>
-      <!---->
-       
-      <!---->
     </gl-tabs-stub>
   </div>
 </section>

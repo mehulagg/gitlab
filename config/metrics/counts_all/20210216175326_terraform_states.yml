@@ -1,0 +1,18 @@
+---
+data_category: Optional
+key_path: counts.terraform_states
+description: Count of GitLab Managed Terraform States
+product_section: ops
+product_stage: configure
+product_group: group::configure
+product_category: infrastructure_as_code
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ce
+tier:
+- free
+- premium
+- ultimate

@@ -23,9 +23,9 @@ module GraphHelper
     ratio.to_i
   end
 
-  def should_render_deployment_frequency_charts
+  def should_render_dora_charts
     false
   end
 end
 
-GraphHelper.prepend_if_ee('EE::GraphHelper')
+GraphHelper.prepend_mod_with('GraphHelper')

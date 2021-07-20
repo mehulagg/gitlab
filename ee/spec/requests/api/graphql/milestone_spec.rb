@@ -7,6 +7,7 @@ RSpec.describe 'Querying a Milestone' do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
+  let_it_be(:group) { create(:group) }
   let_it_be(:milestone) { create(:milestone, project: project, start_date: '2020-01-01', due_date: '2020-01-15') }
 
   let(:query) do
@@ -74,6 +75,84 @@ RSpec.describe 'Querying a Milestone' do
           }
         })
       end
+    end
+  end
+
+  shared_examples 'milestones queried by timeframe' do
+    describe 'query for milestones by timeframe' do
+      context 'without start' do
+        it 'returns error' do
+          post_graphql(milestones_query(parent, "timeframe: { end: \"#{3.days.ago.to_date}\" }"), current_user: current_user)
+
+          expect(graphql_errors).to include(a_hash_including('message' => "Argument 'start' on InputObject 'Timeframe' is required. Expected type Date!"))
+        end
+      end
+
+      context 'without end date' do
+        it 'returns error' do
+          post_graphql(milestones_query(parent, "timeframe: { start: \"#{3.days.ago.to_date}\" }"), current_user: current_user)
+
+          expect(graphql_errors).to include(a_hash_including('message' => "Argument 'end' on InputObject 'Timeframe' is required. Expected type Date!"))
+        end
+      end
+
+      context 'with start and end date' do
+        it 'does not have errors' do
+          post_graphql(milestones_query(parent, "timeframe: { start: \"#{3.days.ago.to_date}\", end: \"#{3.days.from_now.to_date}\" }"), current_user: current_user)
+
+          expect(graphql_errors).to be_nil
+        end
+      end
+    end
+  end
+
+  context 'group milestones' do
+    it_behaves_like 'milestones queried by timeframe' do
+      let(:parent) { group }
+    end
+  end
+
+  context 'project milestones' do
+    it_behaves_like 'milestones queried by timeframe' do
+      let(:parent) { project }
+    end
+  end
+
+  def project_milestones_query(project, milestone_query)
+    <<~QUERY
+      query {
+        project(fullPath: "#{project.full_path}") {
+          id,
+          #{milestone_query}
+        }
+      }
+    QUERY
+  end
+
+  def group_milestones_query(group, milestone_query)
+    <<~QUERY
+      query {
+        group(fullPath: "#{group.full_path}") {
+          id,
+          #{milestone_query}
+        }
+      }
+    QUERY
+  end
+
+  def milestones_query(parent, field_queries)
+    query = <<~Q
+      milestones(#{field_queries}) {
+        nodes {
+          id
+        }
+      }
+    Q
+
+    if parent.is_a?(Group)
+      group_milestones_query(parent, query)
+    else
+      project_milestones_query(parent, query)
     end
   end
 end

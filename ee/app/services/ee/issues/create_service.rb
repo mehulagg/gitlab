@@ -7,7 +7,7 @@ module EE
 
       override :filter_params
       def filter_params(issue)
-        handle_epic(issue)
+        filter_epic(issue)
 
         super
       end
@@ -19,21 +19,6 @@ module EE
             ::Epics::UpdateDatesService.new([issue.epic_issue.epic]).execute
           end
         end
-      end
-
-      override :after_create
-      def after_create(issue)
-        super
-
-        add_issue_sla(issue)
-      end
-
-      private
-
-      def add_issue_sla(issue)
-        return unless issue.sla_available?
-
-        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
       end
     end
   end

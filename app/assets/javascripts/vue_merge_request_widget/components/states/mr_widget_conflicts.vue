@@ -1,9 +1,5 @@
 <script>
 import { GlButton, GlModalDirective, GlSkeletonLoader } from '@gitlab/ui';
-import $ from 'jquery';
-import { escape } from 'lodash';
-import { s__, sprintf } from '~/locale';
-import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import userPermissionsQuery from '../../queries/permissions.query.graphql';
@@ -94,59 +90,10 @@ export default {
 
       return this.mr.sourceBranchProtected;
     },
-    popoverTitle() {
-      return s__(
-        'mrWidget|This feature merges changes from the target branch to the source branch. You cannot use this feature since the source branch is protected.',
-      );
-    },
     showResolveButton() {
-      return this.mr.conflictResolutionPath && this.canPushToSourceBranch;
-    },
-    showPopover() {
-      return this.showResolveButton && this.sourceBranchProtected;
-    },
-  },
-  watch: {
-    showPopover: {
-      handler(newVal) {
-        if (newVal) {
-          this.$nextTick(this.initPopover);
-        }
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    initPopover() {
-      const $el = $(this.$refs.popover);
-
-      $el
-        .popover({
-          html: true,
-          trigger: 'focus',
-          container: 'body',
-          placement: 'top',
-          template:
-            '<div class="popover" role="tooltip"><div class="arrow"></div><p class="popover-header"></p><div class="popover-body"></div></div>',
-          title: s__(
-            'mrWidget|This feature merges changes from the target branch to the source branch. You cannot use this feature since the source branch is protected.',
-          ),
-          content: sprintf(
-            s__('mrWidget|%{link_start}Learn more about resolving conflicts%{link_end}'),
-            {
-              link_start: `<a href="${escape(
-                this.mr.conflictsDocsPath,
-              )}" target="_blank" rel="noopener noreferrer">`,
-              link_end: '</a>',
-            },
-            false,
-          ),
-        })
-        .on('mouseenter', mouseenter)
-        .on('mouseleave', debouncedMouseleave(300))
-        .on('show.bs.popover', () => {
-          window.addEventListener('scroll', togglePopover.bind($el, false), { once: true });
-        });
+      return (
+        this.mr.conflictResolutionPath && this.canPushToSourceBranch && !this.sourceBranchProtected
+      );
     },
   },
 };
@@ -162,10 +109,10 @@ export default {
         <rect x="250" y="7" width="84" height="16" rx="4" />
       </gl-skeleton-loader>
     </div>
-    <div v-else class="media-body space-children">
+    <div v-else class="media-body space-children gl-display-flex gl-align-items-center">
       <span v-if="shouldBeRebased" class="bold">
         {{
-          s__(`mrWidget|Fast-forward merge is not possible.
+          s__(`mrWidget|Merge blocked: fast-forward merge is not possible.
   To merge this request, first rebase locally.`)
         }}
       </span>
@@ -179,19 +126,17 @@ export default {
             }}
           </span>
         </span>
-        <span v-if="showResolveButton" ref="popover">
-          <gl-button
-            :href="!sourceBranchProtected && mr.conflictResolutionPath"
-            :disabled="sourceBranchProtected"
-            class="js-resolve-conflicts-button"
-          >
-            {{ s__('mrWidget|Resolve conflicts') }}
-          </gl-button>
-        </span>
+        <gl-button
+          v-if="showResolveButton"
+          :href="mr.conflictResolutionPath"
+          data-testid="resolve-conflicts-button"
+        >
+          {{ s__('mrWidget|Resolve conflicts') }}
+        </gl-button>
         <gl-button
           v-if="canMerge"
           v-gl-modal-directive="'modal-merge-info'"
-          class="js-merge-locally-button"
+          data-testid="merge-locally-button"
         >
           {{ s__('mrWidget|Merge locally') }}
         </gl-button>

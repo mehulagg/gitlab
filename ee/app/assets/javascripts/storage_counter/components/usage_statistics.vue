@@ -122,7 +122,7 @@ export default {
           target="_blank"
           :href="link.url"
           class="mb-0"
-          variant="success"
+          variant="confirm"
           category="primary"
           block
         >

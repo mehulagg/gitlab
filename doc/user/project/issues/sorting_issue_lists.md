@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 You can sort a list of issues several ways, including by:
 
-- Blocking
+- Blocking **(PREMIUM)**
 - Created date
 - Due date
 - Label priority
@@ -23,6 +23,12 @@ For sorting by issue priority, see [Label Priority](../labels.md#label-priority)
 
 In group and project issue lists, it is also possible to order issues manually,
 similar to [issue boards](../issue_board.md#how-gitlab-orders-issues-in-a-list).
+
+## Sorting by popularity
+
+When you select sorting by **Popularity**, the issue order changes to sort descending by the
+number of upvotes ([awarded](../../award_emojis.md) "thumbs up" emoji)
+on each issue. You can use this to identify issues that are in high demand.
 
 ## Manual sorting
 
@@ -45,7 +51,7 @@ This ordering also affects [issue boards](../issue_board.md#how-gitlab-orders-is
 Changing the order in an issue list changes the ordering in an issue board,
 and vice versa.
 
-## Sorting by blocking issues
+## Sorting by blocking issues **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34247/) in GitLab 13.7.
 

@@ -118,6 +118,7 @@ module MarkupHelper
 
   def markup(file_name, text, context = {})
     context[:project] ||= @project
+    context[:text_source] ||= :blob
     html = context.delete(:rendered) || markup_unsafe(file_name, text, context)
     prepare_for_rendering(html, context)
   end
@@ -318,4 +319,4 @@ module MarkupHelper
   extend self
 end
 
-MarkupHelper.prepend_if_ee('EE::MarkupHelper')
+MarkupHelper.prepend_mod_with('MarkupHelper')

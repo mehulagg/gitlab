@@ -13,6 +13,7 @@ RSpec.describe API::ProjectApprovalRules do
 
   describe 'GET /projects/:id/approval_rules/:approval_rule_id' do
     let_it_be(:private_project) { create(:project, :private, creator: user, namespace: user.namespace) }
+
     let!(:approval_rule) { create(:approval_project_rule, project: private_project) }
     let(:url) { "/projects/#{private_project.id}/approval_rules/#{approval_rule.id}" }
 
@@ -112,6 +113,32 @@ RSpec.describe API::ProjectApprovalRules do
 
           expect(json.size).to eq(2)
           expect(json.map { |rule| rule['name'] }).to contain_exactly(rule.name, report_approver_rule.name)
+        end
+      end
+    end
+
+    context 'when project is archived' do
+      let_it_be(:archived_project) { create(:project, :archived, creator: user) }
+
+      let(:url) { "/projects/#{archived_project.id}/approval_rules" }
+
+      context 'when user has normal permissions' do
+        it 'returns 403' do
+          archived_project.add_guest(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when user has project admin permissions' do
+        it 'allows access' do
+          archived_project.add_maintainer(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end

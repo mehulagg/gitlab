@@ -122,13 +122,14 @@ RSpec.describe Packages::GroupPackagesFinder do
       end
 
       context 'when there are processing packages' do
-        let_it_be(:package4) { create(:nuget_package, project: project, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+        let_it_be(:package4) { create(:nuget_package, :processing, project: project) }
 
         it { is_expected.to match_array([package1, package2]) }
       end
 
       context 'with package_name' do
         let_it_be(:named_package) { create(:maven_package, project: project, name: 'maven') }
+
         let(:params) { { package_name: package_name } }
 
         context 'as complete name' do
@@ -147,6 +148,7 @@ RSpec.describe Packages::GroupPackagesFinder do
       end
 
       it_behaves_like 'concerning versionless param'
+      it_behaves_like 'concerning package statuses'
     end
 
     context 'group has package of all types' do

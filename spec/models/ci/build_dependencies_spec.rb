@@ -18,12 +18,8 @@ RSpec.describe Ci::BuildDependencies do
   let!(:rubocop_test) { create(:ci_build, pipeline: pipeline, name: 'rubocop', stage_idx: 1, stage: 'test') }
   let!(:staging) { create(:ci_build, pipeline: pipeline, name: 'staging', stage_idx: 2, stage: 'deploy') }
 
-  before do
-    stub_feature_flags(ci_validate_build_dependencies_override: false)
-  end
-
-  describe '#local' do
-    subject { described_class.new(job).local }
+  context 'for local dependencies' do
+    subject { described_class.new(job).all }
 
     describe 'jobs from previous stages' do
       context 'when job is in the first stage' do
@@ -52,12 +48,30 @@ RSpec.describe Ci::BuildDependencies do
             project.add_developer(user)
           end
 
-          let(:retried_job) { Ci::Build.retry(rspec_test, user) }
+          let!(:retried_job) { Ci::Build.retry(rspec_test, user) }
 
           it 'contains the retried job instead of the original one' do
             is_expected.to contain_exactly(build, retried_job, rubocop_test)
           end
         end
+      end
+
+      context 'when needs refer to jobs from the same stage' do
+        let(:job) do
+          create(:ci_build,
+            pipeline: pipeline,
+            name: 'dag_job',
+            scheduling_type: :dag,
+            stage_idx: 2,
+            stage: 'deploy'
+          )
+        end
+
+        before do
+          create(:ci_build_need, build: job, name: 'staging', artifacts: true)
+        end
+
+        it { is_expected.to contain_exactly(staging) }
       end
     end
 
@@ -150,7 +164,7 @@ RSpec.describe Ci::BuildDependencies do
     end
   end
 
-  describe '#cross_pipeline' do
+  context 'for cross_pipeline dependencies' do
     let!(:job) do
       create(:ci_build,
         pipeline: pipeline,
@@ -160,7 +174,7 @@ RSpec.describe Ci::BuildDependencies do
 
     subject { described_class.new(job) }
 
-    let(:cross_pipeline_deps) { subject.cross_pipeline }
+    let(:cross_pipeline_deps) { subject.all }
 
     context 'when dependency specifications are valid' do
       context 'when pipeline exists in the hierarchy' do
@@ -189,15 +203,6 @@ RSpec.describe Ci::BuildDependencies do
             end
 
             it { expect(cross_pipeline_deps).to contain_exactly(upstream_job) }
-            it { is_expected.to be_valid }
-          end
-
-          context 'when feature flag `ci_cross_pipeline_artifacts_download` is disabled' do
-            before do
-              stub_feature_flags(ci_cross_pipeline_artifacts_download: false)
-            end
-
-            it { expect(cross_pipeline_deps).to be_empty }
             it { is_expected.to be_valid }
           end
         end
@@ -378,14 +383,6 @@ RSpec.describe Ci::BuildDependencies do
       end
 
       it { is_expected.to eq(false) }
-
-      context 'when ci_validate_build_dependencies_override feature flag is enabled' do
-        before do
-          stub_feature_flags(ci_validate_build_dependencies_override: job.project)
-        end
-
-        it { is_expected.to eq(true) }
-      end
     end
   end
 end

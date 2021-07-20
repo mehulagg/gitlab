@@ -3,31 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe EE::Ci::Runner do
-  describe '#tick_runner_queue' do
-    it 'sticks the runner to the primary and calls the original method' do
-      runner = create(:ci_runner)
-
-      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-        .and_return(true)
-
-      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
-        .with(:runner, runner.id)
-
-      expect(Gitlab::Workhorse).to receive(:set_key_and_notify)
-
-      runner.tick_runner_queue
-    end
-  end
-
-  describe '#minutes_cost_factor' do
-    subject { runner.minutes_cost_factor(visibility_level) }
+  describe '#cost_factor_for_project' do
+    subject { runner.cost_factor_for_project(project) }
 
     context 'with group type runner' do
       let(:runner) { create(:ci_runner, :group) }
 
       ::Gitlab::VisibilityLevel.options.each do |level_name, level_value|
         context "with #{level_name}" do
-          let(:visibility_level) {level_value}
+          let(:project) { create(:project, visibility_level: level_value) }
 
           it { is_expected.to eq(0.0) }
         end
@@ -39,7 +23,7 @@ RSpec.describe EE::Ci::Runner do
 
       ::Gitlab::VisibilityLevel.options.each do |level_name, level_value|
         context "with #{level_name}" do
-          let(:visibility_level) {level_value}
+          let(:project) { create(:project, visibility_level: level_value) }
 
           it { is_expected.to eq(0.0) }
         end
@@ -51,29 +35,47 @@ RSpec.describe EE::Ci::Runner do
         create(:ci_runner,
                :instance,
                private_projects_minutes_cost_factor: 1.1,
-               public_projects_minutes_cost_factor: 2.2)
+               public_projects_minutes_cost_factor: 0)
       end
 
       context 'with private visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::PRIVATE }
+        let(:project) { create(:project, visibility_level: ::Gitlab::VisibilityLevel::PRIVATE) }
 
         it { is_expected.to eq(1.1) }
       end
 
       context 'with public visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::PUBLIC }
+        let(:project) { create(:project, namespace: namespace, visibility_level: ::Gitlab::VisibilityLevel::PUBLIC) }
 
-        it { is_expected.to eq(2.2) }
+        context 'after the release date for public project cost factors' do
+          let(:namespace) do
+            create(:group, created_at: Date.new(2021, 7, 17))
+          end
+
+          before do
+            allow(Gitlab).to receive(:com?).and_return(true)
+          end
+
+          it { is_expected.to eq(0.008) }
+        end
+
+        context 'before the release date for public project cost factors' do
+          let(:namespace) do
+            create(:group, created_at: Date.new(2021, 7, 16))
+          end
+
+          it { is_expected.to eq(0.0) }
+        end
       end
 
       context 'with internal visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::INTERNAL }
+        let(:project) { create(:project, visibility_level: ::Gitlab::VisibilityLevel::INTERNAL) }
 
         it { is_expected.to eq(1.1) }
       end
 
       context 'with invalid visibility level' do
-        let(:visibility_level) { 123 }
+        let(:project) { create(:project, visibility_level: 123) }
 
         it 'raises an error' do
           expect { subject }.to raise_error(ArgumentError)
@@ -82,7 +84,34 @@ RSpec.describe EE::Ci::Runner do
     end
   end
 
-  describe `#visibility_levels_without_minutes_quota` do
+  describe '#cost_factor_enabled?' do
+    let_it_be(:project) do
+      namespace = create(:group, created_at: Date.new(2021, 7, 16))
+      create(:project, namespace: namespace)
+    end
+
+    context 'when the project has any cost factor' do
+      it 'returns true' do
+        runner = create(:ci_runner, :instance,
+                        private_projects_minutes_cost_factor: 1,
+                        public_projects_minutes_cost_factor: 0)
+
+        expect(runner.cost_factor_enabled?(project)).to be_truthy
+      end
+    end
+
+    context 'when the project has no cost factor' do
+      it 'returns false' do
+        runner = create(:ci_runner, :instance,
+                        private_projects_minutes_cost_factor: 0,
+                        public_projects_minutes_cost_factor: 0)
+
+        expect(runner.cost_factor_enabled?(project)).to be_falsy
+      end
+    end
+  end
+
+  describe '#visibility_levels_without_minutes_quota' do
     subject { runner.visibility_levels_without_minutes_quota }
 
     context 'with group type runner' do

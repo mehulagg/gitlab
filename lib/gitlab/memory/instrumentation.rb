@@ -21,33 +21,25 @@ module Gitlab
           Thread.current.respond_to?(:memory_allocations)
       end
 
-      # This method changes a global state
-      def self.ensure_feature_flag!
-        return unless available?
-
-        enabled = Feature.enabled?(:trace_memory_allocations)
-        return if enabled == Thread.trace_memory_allocations
-
-        MUTEX.synchronize do
-          # This enables or disables feature dynamically
-          # based on a feature flag
-          Thread.trace_memory_allocations = enabled
-        end
-      end
-
       def self.start_thread_memory_allocations
         return unless available?
 
-        ensure_feature_flag!
+        MUTEX.synchronize do
+          # This method changes a global state
+          Thread.trace_memory_allocations = true
+        end
 
         # it will return `nil` if disabled
         Thread.current.memory_allocations
       end
 
       # This method returns a hash with the following keys:
-      # - mem_objects: a number of allocated heap slots (as reflected by GC)
-      # - mem_mallocs: a number of malloc calls
-      # - mem_bytes: a number of bytes allocated with a mallocs tied to heap slots
+      # - mem_objects:     number of allocated heap slots (as reflected by GC)
+      # - mem_mallocs:     number of malloc calls
+      # - mem_bytes:       number of bytes allocated by malloc for objects that did not fit
+      #                    into a heap slot
+      # - mem_total_bytes: number of bytes allocated for both objects consuming an object slot
+      #                    and objects that required a malloc (mem_malloc_bytes)
       def self.measure_thread_memory_allocations(previous)
         return unless available?
         return unless previous
@@ -56,9 +48,13 @@ module Gitlab
         return unless current
 
         # calculate difference in a memory allocations
-        previous.to_h do |key, value|
+        result = previous.to_h do |key, value|
           [KEY_MAPPING.fetch(key), current[key].to_i - value]
         end
+
+        result[:mem_total_bytes] = result[:mem_bytes] + result[:mem_objects] * GC::INTERNAL_CONSTANTS[:RVALUE_SIZE]
+
+        result
       end
 
       def self.with_memory_allocations

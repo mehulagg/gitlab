@@ -120,7 +120,7 @@ module Gitlab
         raise "storage #{storage.inspect} is missing a gitaly_address"
       end
 
-      unless URI(address).scheme.in?(%w(tcp unix tls))
+      unless %w(tcp unix tls).include?(URI(address).scheme)
         raise "Unsupported Gitaly address: #{address.inspect} does not use URL scheme 'tcp' or 'unix' or 'tls'"
       end
 
@@ -215,7 +215,7 @@ module Gitlab
         'client_name' => CLIENT_NAME
       }
 
-      context_data = Labkit::Context.current&.to_h
+      context_data = Gitlab::ApplicationContext.current
 
       feature_stack = Thread.current[:gitaly_feature_stack]
       feature = feature_stack && feature_stack[0]
@@ -246,7 +246,7 @@ module Gitlab
     def self.route_to_primary
       return {} unless Gitlab::SafeRequestStore.active?
 
-      return {} unless Gitlab::SafeRequestStore[:gitlab_git_env]
+      return {} if Gitlab::SafeRequestStore[:gitlab_git_env].blank?
 
       { 'gitaly-route-repository-accessor-policy' => 'primary-only' }
     end

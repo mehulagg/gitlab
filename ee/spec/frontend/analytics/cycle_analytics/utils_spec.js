@@ -14,11 +14,14 @@ import {
   flattenTaskByTypeSeries,
   orderByDate,
   toggleSelectedLabel,
-  transformStagesForPathNavigation,
   prepareTimeMetricsData,
   prepareStageErrors,
+  formatMedianValuesWithOverview,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
+import { createdAfter, createdBefore, rawStageMedians } from 'jest/cycle_analytics/mock_data';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
+import { medianTimeToParsedSeconds } from '~/cycle_analytics/utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import { slugify } from '~/lib/utils/text_utility';
 import {
@@ -29,14 +32,9 @@ import {
   transformedDurationData,
   flattenedDurationData,
   durationChartPlottableData,
-  startDate,
-  endDate,
   issueStage,
   rawCustomStage,
   rawTasksByTypeData,
-  allowedStages,
-  stageMediansWithNumericIds,
-  pathNavIssueMetric,
   timeMetricsData,
 } from './mock_data';
 
@@ -141,7 +139,11 @@ describe('Value Stream Analytics utils', () => {
 
   describe('cycleAnalyticsDurationChart', () => {
     it('computes the plottable data as expected', () => {
-      const plottableData = getDurationChartData(transformedDurationData, startDate, endDate);
+      const plottableData = getDurationChartData(
+        transformedDurationData,
+        createdAfter,
+        createdBefore,
+      );
 
       expect(plottableData).toStrictEqual(durationChartPlottableData);
     });
@@ -251,7 +253,7 @@ describe('Value Stream Analytics utils', () => {
 
   describe('getTasksByTypeData', () => {
     let transformed = {};
-    const groupBy = getDatesInRange(startDate, endDate, toYmd);
+    const groupBy = getDatesInRange(createdAfter, createdBefore, toYmd);
     // only return the values, drop the date which is the first paramater
     const extractSeriesValues = ({ label: { title: name }, series }) => {
       return {
@@ -268,17 +270,23 @@ describe('Value Stream Analytics utils', () => {
     });
 
     it('will return blank arrays if given no data', () => {
-      [{ data: [], startDate, endDate }, [], {}].forEach((chartData) => {
-        transformed = getTasksByTypeData(chartData);
-        ['data', 'groupBy'].forEach((key) => {
-          expect(transformed[key]).toEqual([]);
-        });
-      });
+      [{ data: [], startDate: createdAfter, endDate: createdBefore }, [], {}].forEach(
+        (chartData) => {
+          transformed = getTasksByTypeData(chartData);
+          ['data', 'groupBy'].forEach((key) => {
+            expect(transformed[key]).toEqual([]);
+          });
+        },
+      );
     });
 
     describe('with data', () => {
       beforeEach(() => {
-        transformed = getTasksByTypeData({ data: rawTasksByTypeData, startDate, endDate });
+        transformed = getTasksByTypeData({
+          data: rawTasksByTypeData,
+          startDate: createdAfter,
+          endDate: createdBefore,
+        });
       });
 
       it('will return an object with the properties needed for the chart', () => {
@@ -293,11 +301,11 @@ describe('Value Stream Analytics utils', () => {
         });
 
         it('the start date is the first element', () => {
-          expect(transformed.groupBy[0]).toEqual(toYmd(startDate));
+          expect(transformed.groupBy[0]).toEqual(toYmd(createdAfter));
         });
 
         it('the end date is the last element', () => {
-          expect(transformed.groupBy[transformed.groupBy.length - 1]).toEqual(toYmd(endDate));
+          expect(transformed.groupBy[transformed.groupBy.length - 1]).toEqual(toYmd(createdBefore));
         });
       });
 
@@ -335,34 +343,6 @@ describe('Value Stream Analytics utils', () => {
     });
   });
 
-  describe('transformStagesForPathNavigation', () => {
-    const stages = allowedStages;
-    const response = transformStagesForPathNavigation({
-      stages,
-      medians: stageMediansWithNumericIds,
-      selectedStage: issueStage,
-    });
-
-    describe('transforms the data as expected', () => {
-      it('returns an array of stages', () => {
-        expect(Array.isArray(response)).toBe(true);
-        expect(response.length).toEqual(stages.length);
-      });
-
-      it('selects the correct stage', () => {
-        const selected = response.filter((stage) => stage.selected === true)[0];
-
-        expect(selected.title).toEqual(issueStage.title);
-      });
-
-      it('includes the correct metric for the associated stage', () => {
-        const issue = response.filter((stage) => stage.name === 'Issue')[0];
-
-        expect(issue.metric).toEqual(pathNavIssueMetric);
-      });
-    });
-  });
-
   describe('prepareTimeMetricsData', () => {
     let prepared;
     const [{ title: firstTitle }, { title: secondTitle }] = timeMetricsData;
@@ -371,7 +351,7 @@ describe('Value Stream Analytics utils', () => {
 
     beforeEach(() => {
       prepared = prepareTimeMetricsData(timeMetricsData, {
-        [firstKey]: 'Is a value that is good',
+        [firstKey]: { description: 'Is a value that is good' },
       });
     });
 
@@ -383,11 +363,25 @@ describe('Value Stream Analytics utils', () => {
       expect(prepared).toMatchObject([{ label: 'Lead Time' }, { label: 'Cycle Time' }]);
     });
 
-    it('will add a tooltip text using the key if it is provided', () => {
+    it('will add a popover description using the key if it is provided', () => {
       expect(prepared).toMatchObject([
-        { tooltipText: 'Is a value that is good' },
-        { tooltipText: '' },
+        { description: 'Is a value that is good' },
+        { description: '' },
       ]);
+    });
+  });
+
+  describe('formatMedianValuesWithOverview', () => {
+    const calculatedMedians = formatMedianValuesWithOverview(rawStageMedians);
+
+    it('returns an object with each stage and their median formatted for display', () => {
+      rawStageMedians.forEach(({ id, value }) => {
+        expect(calculatedMedians).toMatchObject({ [id]: medianTimeToParsedSeconds(value) });
+      });
+    });
+
+    it('calculates a median for the overview stage', () => {
+      expect(calculatedMedians).toMatchObject({ [OVERVIEW_STAGE_ID]: '3w' });
     });
   });
 });

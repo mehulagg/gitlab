@@ -5,22 +5,24 @@ require 'spec_helper'
 RSpec.describe 'Query.project(fullPath).dastProfiles' do
   include GraphqlHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:dast_profile1) { create(:dast_profile, project: project) }
   let_it_be(:dast_profile2) { create(:dast_profile, project: project) }
   let_it_be(:dast_profile3) { create(:dast_profile, project: project) }
   let_it_be(:dast_profile4) { create(:dast_profile, project: project) }
 
-  subject do
+  let(:query) do
     fields = all_graphql_fields_for('DastProfile')
 
-    query = graphql_query_for(
+    graphql_query_for(
       :project,
       { full_path: project.full_path },
       query_nodes(:dast_profiles, fields)
     )
+  end
 
+  subject do
     post_graphql(
       query,
       current_user: current_user,
@@ -72,14 +74,26 @@ RSpec.describe 'Query.project(fullPath).dastProfiles' do
       end
     end
 
-    context 'when the feature is disabled' do
-      it 'returns no nodes' do
-        stub_feature_flags(dast_saved_scans: false)
+    it 'includes branch information' do
+      subject
 
-        subject
+      expect(graphql_data_at(:project, :dast_profiles, :nodes, 0, 'branch')).to eq('name' => 'master', 'exists' => true)
+    end
 
-        expect(graphql_data_at(:project, :dast_profiles, :nodes)).to be_empty
+    it 'avoids N+1 queries' do
+      control = ActiveRecord::QueryRecorder.new do
+        post_graphql(
+          query,
+          current_user: current_user,
+          variables: {
+            fullPath: project.full_path
+          }
+        )
       end
+
+      create_list(:dast_profile, 2, project: project)
+
+      expect { subject }.not_to exceed_query_limit(control)
     end
   end
 

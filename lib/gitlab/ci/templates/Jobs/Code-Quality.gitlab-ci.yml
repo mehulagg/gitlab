@@ -7,7 +7,7 @@ code_quality:
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
-    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.22"
+    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.24"
   needs: []
   script:
     - export SOURCE_CODE=$PWD
@@ -36,6 +36,7 @@ code_quality:
           REPORT_STDOUT \
           REPORT_FORMAT \
           ENGINE_MEMORY_LIMIT_BYTES \
+          CODECLIMATE_PREFIX \
         ) \
         --volume "$PWD":/code \
         --volume /var/run/docker.sock:/var/run/docker.sock \

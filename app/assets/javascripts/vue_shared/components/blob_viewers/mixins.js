@@ -5,11 +5,27 @@ export default {
   props: {
     content: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
+    },
+    richViewer: {
+      type: String,
+      default: '',
+      required: false,
     },
     type: {
       type: String,
       required: true,
+    },
+    isRawContent: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
+    fileName: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   mounted() {

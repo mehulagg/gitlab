@@ -11,36 +11,39 @@ RSpec.describe Resolvers::IssuesResolver do
 
   context "with a project" do
     describe '#resolve' do
+      let_it_be(:epic1) { create :epic, group: group }
+      let_it_be(:epic2) { create :epic, group: group }
+
+      let_it_be(:iteration1) { create(:iteration, group: group, start_date: 2.weeks.ago, due_date: 1.week.ago) }
+      let_it_be(:current_iteration) { create(:iteration, group: group, start_date: Date.yesterday, due_date: 1.day.from_now) }
+
+      let_it_be(:issue1) { create :issue, project: project, epic: epic1, iteration: iteration1, blocking_issues_count: 2 }
+      let_it_be(:issue2) { create :issue, project: project, epic: epic2, weight: 1, blocking_issues_count: 2 }
+      let_it_be(:issue3) { create :issue, project: project, weight: 3, iteration: current_iteration, blocking_issues_count: 4 }
+      let_it_be(:issue4) { create :issue, :published, project: project }
+
       before do
         project.add_developer(current_user)
       end
 
       describe 'sorting' do
         context 'when sorting by weight' do
-          let_it_be(:weight_issue1) { create(:issue, project: project, weight: 5) }
-          let_it_be(:weight_issue2) { create(:issue, project: project, weight: nil) }
-          let_it_be(:weight_issue3) { create(:issue, project: project, weight: 1) }
-          let_it_be(:weight_issue4) { create(:issue, project: project, weight: nil) }
-
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :weight_asc).to_a).to eq [weight_issue3, weight_issue1, weight_issue4, weight_issue2]
+            expect(resolve_issues(sort: :weight_asc).to_a).to eq [issue2, issue3, issue4, issue1]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :weight_desc).to_a).to eq [weight_issue1, weight_issue3, weight_issue4, weight_issue2]
+            expect(resolve_issues(sort: :weight_desc).to_a).to eq [issue3, issue2, issue4, issue1]
           end
         end
 
         context 'when sorting by published' do
-          let_it_be(:not_published) { create(:issue, project: project) }
-          let_it_be(:published) { create(:issue, :published, project: project) }
-
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :published_asc).to_a).to eq [not_published, published]
+            expect(resolve_issues(sort: :published_asc).to_a).to eq [issue3, issue2, issue1, issue4]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :published_desc).to_a).to eq [published, not_published]
+            expect(resolve_issues(sort: :published_desc).to_a).to eq [issue4, issue3, issue2, issue1]
           end
         end
 
@@ -61,35 +64,131 @@ RSpec.describe Resolvers::IssuesResolver do
             expect(resolve_issues(sort: :sla_due_at_desc).to_a).to eq [sla_due_last, sla_due_first]
           end
         end
+
+        context 'when sorting by blocking issues count (ties broken by id in desc order)' do
+          it 'sorts issues ascending' do
+            expect(resolve_issues(sort: :blocking_issues_asc).to_a).to eq [issue4, issue2, issue1, issue3]
+          end
+
+          it 'sorts issues descending' do
+            expect(resolve_issues(sort: :blocking_issues_desc).to_a).to eq [issue3, issue2, issue1, issue4]
+          end
+        end
       end
 
       describe 'filtering by iteration' do
-        let_it_be(:iteration1) { create(:iteration, group: group) }
-        let_it_be(:issue_with_iteration) { create(:issue, project: project, iteration: iteration1) }
+        let_it_be(:iteration1) { create(:iteration, group: group, start_date: 4.weeks.ago, due_date: 3.weeks.ago) }
+        let_it_be(:iteration2) { create(:iteration, group: group, start_date: 6.weeks.ago, due_date: 5.weeks.ago) }
+        let_it_be(:issue_with_iteration1) { create(:issue, project: project, iteration: iteration1) }
+        let_it_be(:issue_with_iteration2) { create(:issue, project: project, iteration: iteration2) }
         let_it_be(:issue_without_iteration) { create(:issue, project: project) }
 
-        it 'returns issues with iteration' do
-          expect(resolve_issues(iteration_id: [iteration1.id])).to contain_exactly(issue_with_iteration)
+        it 'returns issues with iteration using raw id' do
+          expect(resolve_issues(iteration_id: [iteration1.id])).to contain_exactly(issue_with_iteration1)
+        end
+
+        it 'returns issues with iteration using global id' do
+          expect(resolve_issues(iteration_id: [iteration1.to_global_id])).to contain_exactly(issue_with_iteration1)
+        end
+
+        it 'returns issues with list iterations using global id' do
+          expect(resolve_issues(iteration_id: [iteration1.to_global_id, iteration2.to_global_id]))
+            .to contain_exactly(issue_with_iteration1, issue_with_iteration2)
+        end
+
+        it 'returns issues with list iterations using a mix' do
+          expect(resolve_issues(iteration_id: [iteration1.id, iteration2.to_global_id]))
+            .to contain_exactly(issue_with_iteration1, issue_with_iteration2)
+        end
+      end
+
+      describe 'filtering by iteration wildcard' do
+        it 'returns issues with current iteration' do
+          expect(resolve_issues(iteration_wildcard_id: 'CURRENT')).to contain_exactly(issue3)
+        end
+
+        it 'returns issues with any iteration' do
+          expect(resolve_issues(iteration_wildcard_id: 'ANY')).to contain_exactly(issue1, issue3)
+        end
+
+        it 'returns issues with no iteration' do
+          expect(resolve_issues(iteration_wildcard_id: 'NONE')).to contain_exactly(issue2, issue4)
+        end
+
+        it 'raises a mutually exclusive filter error when wildcard and list are provided' do
+          expect do
+            resolve_issues(iteration_id: [iteration1.to_global_id], iteration_wildcard_id: 'CURRENT')
+          end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'only one of [iterationId, iterationWildcardId] arguments is allowed at the same time.')
         end
       end
 
       describe 'filter by epic' do
-        let_it_be(:epic) { create :epic, group: group }
-        let_it_be(:epic2) { create :epic, group: group }
-        let_it_be(:issue1) { create :issue, project: project, epic: epic }
-        let_it_be(:issue2) { create :issue, project: project, epic: epic2 }
-        let_it_be(:issue3) { create :issue, project: project }
-
         it 'returns issues without epic when epic_id is "none"' do
-          expect(resolve_issues(epic_id: 'none')).to match_array([issue3])
+          expect(resolve_issues(epic_id: 'none')).to contain_exactly(issue4, issue3)
         end
 
         it 'returns issues with any epic when epic_id is "any"' do
-          expect(resolve_issues(epic_id: 'any')).to match_array([issue1, issue2])
+          expect(resolve_issues(epic_id: 'any')).to contain_exactly(issue1, issue2)
         end
 
         it 'returns issues with any epic when epic_id is specific' do
-          expect(resolve_issues(epic_id: epic.id)).to match_array([issue1])
+          expect(resolve_issues(epic_id: epic1.id.to_s)).to contain_exactly(issue1)
+        end
+      end
+
+      describe 'filter by weight' do
+        context 'when filtering by any weight' do
+          it 'only returns issues that have a weight assigned' do
+            expect(resolve_issues(weight: 'any')).to contain_exactly(issue2, issue3)
+          end
+        end
+
+        context 'when filtering by no weight' do
+          it 'only returns issues that have no weight assigned' do
+            expect(resolve_issues(weight: 'none')).to contain_exactly(issue1, issue4)
+          end
+        end
+
+        context 'when filtering by specific weight' do
+          it 'only returns issues that have the specified weight assigned' do
+            expect(resolve_issues(weight: '3')).to contain_exactly(issue3)
+          end
+        end
+      end
+
+      describe 'filtering by negated params' do
+        describe 'filter by negated epic' do
+          it 'returns issues without the specified epic_id' do
+            expect(resolve_issues(not: { epic_id: epic2.id.to_s })).to contain_exactly(issue1, issue3, issue4)
+          end
+        end
+
+        describe 'filtering by negated weight' do
+          it 'only returns issues that do not have the specified weight assigned' do
+            expect(resolve_issues(not: { weight: '3' })).to contain_exactly(issue1, issue2, issue4)
+          end
+        end
+
+        describe 'filtering by negated iteration' do
+          it 'returns issues without iteration using RAW id' do
+            expect(resolve_issues(not: { iteration_id: [iteration1.id.to_s] })).to contain_exactly(issue2, issue3, issue4)
+          end
+
+          it 'works with global IDs' do
+            expect(resolve_issues(not: { iteration_id: [iteration1.to_global_id] })).to contain_exactly(issue2, issue3, issue4)
+          end
+
+          it 'raises a mutually exclusive filter error when wildcard and list are provided' do
+            expect do
+              resolve_issues(not: { iteration_id: [iteration1.to_global_id], iteration_wildcard_id: 'CURRENT' })
+            end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'only one of [iterationId, iterationWildcardId] arguments is allowed at the same time.')
+          end
+        end
+
+        describe 'filtering by negated iteration wildcard' do
+          it 'returns issues not in the current iteration' do
+            expect(resolve_issues(not: { iteration_wildcard_id: 'CURRENT' })).to contain_exactly(issue1, issue2, issue4)
+          end
         end
       end
     end

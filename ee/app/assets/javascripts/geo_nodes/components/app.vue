@@ -1,239 +1,131 @@
 <script>
-import { GlLoadingIcon, GlModal } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '~/flash';
-import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
-import { __, s__ } from '~/locale';
-import SmartInterval from '~/smart_interval';
-
-import { NODE_ACTIONS } from '../constants';
-import eventHub from '../event_hub';
-
-import GeoNodeItem from './geo_node_item.vue';
+import { GlLink, GlButton, GlLoadingIcon, GlModal, GlSprintf } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { s__, __ } from '~/locale';
+import { GEO_INFO_URL, REMOVE_NODE_MODAL_ID } from '../constants';
+import GeoNodes from './geo_nodes.vue';
+import GeoNodesEmptyState from './geo_nodes_empty_state.vue';
 
 export default {
+  name: 'GeoNodesApp',
+  i18n: {
+    geoSites: s__('Geo|Geo sites'),
+    helpText: s__(
+      'Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere. %{linkStart}Learn more%{linkEnd}',
+    ),
+    addSite: s__('Geo|Add site'),
+    modalTitle: s__('Geo|Remove secondary node'),
+    modalBody: s__(
+      'Geo|Removing a Geo secondary node stops the synchronization to that node. Are you sure?',
+    ),
+    primarySite: s__('Geo|Primary site'),
+    secondarySite: s__('Geo|Secondary site'),
+  },
   components: {
-    GlModal,
-    GeoNodeItem,
+    GlLink,
+    GlButton,
     GlLoadingIcon,
+    GeoNodes,
+    GeoNodesEmptyState,
+    GlModal,
+    GlSprintf,
   },
   props: {
-    store: {
-      type: Object,
+    newNodeUrl: {
+      type: String,
       required: true,
     },
-    service: {
-      type: Object,
-      required: true,
-    },
-    nodeActionsAllowed: {
-      type: Boolean,
-      required: true,
-    },
-    nodeEditAllowed: {
-      type: Boolean,
-      required: true,
-    },
-    geoTroubleshootingHelpPath: {
+    geoNodesEmptyStateSvg: {
       type: String,
       required: true,
     },
   },
-  data() {
-    return {
-      isLoading: true,
-      hasError: false,
-      targetNode: null,
-      targetNodeActionType: '',
-      modalTitle: '',
-      modalKind: 'warning',
-      modalMessage: '',
-      modalActionLabel: '',
-      modalId: 'node-action',
-    };
-  },
   computed: {
-    nodes() {
-      return this.store.getNodes();
+    ...mapState(['nodes', 'isLoading']),
+    noNodes() {
+      return !this.nodes || this.nodes.length === 0;
+    },
+    primaryNodes() {
+      return this.nodes.filter((n) => n.primary);
+    },
+    secondaryNodes() {
+      return this.nodes.filter((n) => !n.primary);
     },
   },
   created() {
-    eventHub.$on('pollNodeDetails', this.initNodeDetailsPolling);
-    eventHub.$on('showNodeActionModal', this.showNodeActionModal);
-    eventHub.$on('repairNode', this.repairNode);
-  },
-  mounted() {
-    this.fetchGeoNodes();
-  },
-  beforeDestroy() {
-    eventHub.$off('pollNodeDetails', this.initNodeDetailsPolling);
-    eventHub.$off('showNodeActionModal', this.showNodeActionModal);
-    eventHub.$off('repairNode', this.repairNode);
-    if (this.nodePollingInterval) {
-      this.nodePollingInterval.stopTimer();
-    }
+    this.fetchNodes();
   },
   methods: {
-    setNodeActionStatus(node, status) {
-      Object.assign(node, { nodeActionActive: status });
-    },
-    initNodeDetailsPolling(node) {
-      this.nodePollingInterval = new SmartInterval({
-        callback: this.fetchNodeDetails.bind(this, node),
-        startingInterval: 30000,
-        maxInterval: 120000,
-        hiddenInterval: 240000,
-        incrementByFactorOf: 15000,
-        immediateExecution: true,
-      });
-    },
-    fetchGeoNodes() {
-      return this.service
-        .getGeoNodes()
-        .then((res) => res.data)
-        .then((nodes) => {
-          this.store.setNodes(nodes);
-          this.isLoading = false;
-        })
-        .catch(() => {
-          this.isLoading = false;
-          Flash(s__('GeoNodes|Something went wrong while fetching nodes'));
-        });
-    },
-    fetchNodeDetails(node) {
-      const nodeId = node.id;
-      return this.service
-        .getGeoNodeDetails(node)
-        .then((res) => res.data)
-        .then((nodeDetails) => {
-          const primaryNodeVersion = this.store.getPrimaryNodeVersion();
-          const updatedNodeDetails = Object.assign(nodeDetails, {
-            primaryVersion: primaryNodeVersion.version,
-            primaryRevision: primaryNodeVersion.revision,
-          });
-          this.store.setNodeDetails(nodeId, updatedNodeDetails);
-          eventHub.$emit('nodeDetailsLoaded', this.store.getNodeDetails(nodeId));
-        })
-        .catch((err) => {
-          this.store.setNodeDetails(nodeId, {
-            geo_node_id: nodeId,
-            health: err.message,
-            health_status: __('Unknown'),
-            missing_oauth_application: null,
-            sync_status_unavailable: true,
-            storage_shards_match: null,
-          });
-          eventHub.$emit('nodeDetailsLoaded', this.store.getNodeDetails(nodeId));
-        });
-    },
-    repairNode(targetNode) {
-      this.setNodeActionStatus(targetNode, true);
-      return this.service
-        .repairNode(targetNode)
-        .then(() => {
-          this.setNodeActionStatus(targetNode, false);
-          this.$toast.show(s__('GeoNodes|Node Authentication was successfully repaired.'));
-        })
-        .catch(() => {
-          this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Something went wrong while repairing node'));
-        });
-    },
-    toggleNode(targetNode) {
-      this.setNodeActionStatus(targetNode, true);
-      return this.service
-        .toggleNode(targetNode)
-        .then((res) => res.data)
-        .then((node) => {
-          Object.assign(targetNode, {
-            enabled: node.enabled,
-            nodeActionActive: false,
-          });
-        })
-        .catch(() => {
-          this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Something went wrong while changing node status'));
-        });
-    },
-    removeNode(targetNode) {
-      this.setNodeActionStatus(targetNode, true);
-      return this.service
-        .removeNode(targetNode)
-        .then(() => {
-          this.store.removeNode(targetNode);
-          this.$toast.show(s__('GeoNodes|Node was successfully removed.'));
-        })
-        .catch(() => {
-          this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Something went wrong while removing node'));
-        });
-    },
-    handleNodeAction() {
-      this.hideNodeActionModal();
-
-      if (this.targetNodeActionType === NODE_ACTIONS.TOGGLE) {
-        this.toggleNode(this.targetNode);
-      } else if (this.targetNodeActionType === NODE_ACTIONS.REMOVE) {
-        this.removeNode(this.targetNode);
-      }
-    },
-    showNodeActionModal({
-      actionType,
-      node,
-      modalKind = 'warning',
-      modalMessage,
-      modalActionLabel,
-      modalTitle,
-    }) {
-      this.targetNode = node;
-      this.targetNodeActionType = actionType;
-      this.modalKind = modalKind;
-      this.modalMessage = modalMessage;
-      this.modalActionLabel = modalActionLabel;
-      this.modalTitle = modalTitle;
-
-      if (actionType === NODE_ACTIONS.TOGGLE && !node.enabled) {
-        this.toggleNode(this.targetNode);
-      } else {
-        this.$root.$emit(BV_SHOW_MODAL, this.modalId);
-      }
-    },
-    hideNodeActionModal() {
-      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
-    },
-    nodeRemovalAllowed(node) {
-      return !node.primary || this.nodes.length <= 1;
+    ...mapActions(['fetchNodes', 'cancelNodeRemoval', 'removeNode']),
+  },
+  GEO_INFO_URL,
+  MODAL_PRIMARY_ACTION: {
+    text: s__('Geo|Remove node'),
+    attributes: {
+      variant: 'danger',
     },
   },
+  MODAL_CANCEL_ACTION: {
+    text: __('Cancel'),
+  },
+  REMOVE_NODE_MODAL_ID,
 };
 </script>
 
 <template>
-  <div class="geo-nodes-container">
-    <gl-loading-icon
-      v-if="isLoading"
-      :label="s__('GeoNodes|Loading nodes')"
-      size="md"
-      class="loading-animation prepend-top-20 append-bottom-20"
-    />
-    <geo-node-item
-      v-for="(node, index) in nodes"
-      :key="index"
-      :node="node"
-      :primary-node="node.primary"
-      :node-actions-allowed="nodeActionsAllowed"
-      :node-edit-allowed="nodeEditAllowed"
-      :node-removal-allowed="nodeRemovalAllowed(node)"
-      :geo-troubleshooting-help-path="geoTroubleshootingHelpPath"
-    />
-    <gl-modal
-      :modal-id="modalId"
-      :title="modalTitle"
-      :ok-variant="modalKind"
-      :ok-title="modalActionLabel"
-      @cancel="hideNodeActionModal"
-      @ok="handleNodeAction"
+  <section>
+    <h3>{{ $options.i18n.geoSites }}</h3>
+    <div
+      class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-md-align-items-center gl-pb-5 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
     >
-      {{ modalMessage }}
+      <div class="gl-mr-5">
+        <gl-sprintf :message="$options.i18n.helpText">
+          <template #link="{ content }">
+            <gl-link :href="$options.GEO_INFO_URL" target="_blank">
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </div>
+      <gl-button
+        v-if="!noNodes"
+        class="gl-w-full gl-md-w-auto gl-ml-auto gl-mr-5 gl-mt-5 gl-md-mt-0"
+        variant="confirm"
+        :href="newNodeUrl"
+        target="_blank"
+        data-qa-selector="add_site_button"
+        >{{ $options.i18n.addSite }}
+      </gl-button>
+    </div>
+    <gl-loading-icon v-if="isLoading" size="xl" class="gl-mt-5" />
+    <template v-if="!isLoading">
+      <div v-if="!noNodes">
+        <h4 class="gl-font-lg gl-my-5">{{ $options.i18n.primarySite }}</h4>
+        <geo-nodes
+          v-for="node in primaryNodes"
+          :key="node.id"
+          :node="node"
+          data-testid="primary-nodes"
+        />
+        <h4 class="gl-font-lg gl-my-5">{{ $options.i18n.secondarySite }}</h4>
+        <geo-nodes
+          v-for="node in secondaryNodes"
+          :key="node.id"
+          :node="node"
+          data-testid="secondary-nodes"
+        />
+      </div>
+      <geo-nodes-empty-state v-else :svg-path="geoNodesEmptyStateSvg" />
+    </template>
+    <gl-modal
+      :modal-id="$options.REMOVE_NODE_MODAL_ID"
+      :title="$options.i18n.modalTitle"
+      :action-primary="$options.MODAL_PRIMARY_ACTION"
+      :action-cancel="$options.MODAL_CANCEL_ACTION"
+      @primary="removeNode"
+      @cancel="cancelNodeRemoval"
+    >
+      {{ $options.i18n.modalBody }}
     </gl-modal>
-  </div>
+  </section>
 </template>

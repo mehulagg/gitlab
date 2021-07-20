@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe BillingPlansHelper do
+RSpec.describe BillingPlansHelper, skip: Gitlab.jh? do
+  include Devise::Test::ControllerHelpers
+
   describe '#subscription_plan_data_attributes' do
     let(:customer_portal_url) { "#{EE::SUBSCRIPTIONS_URL}/subscriptions" }
 
@@ -21,13 +23,13 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
-                 is_group: "true",
                  add_seats_href: add_seats_href,
                  plan_upgrade_href: upgrade_href,
                  plan_renew_href: renew_href,
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
-                 plan_name: plan.name)
+                 plan_name: plan.name,
+                 free_personal_namespace: 'false')
       end
     end
 
@@ -51,12 +53,12 @@ RSpec.describe BillingPlansHelper do
           .to eq(add_seats_href:  add_seats_href,
                  billable_seats_href: billable_seats_href,
                  customer_portal_url: customer_portal_url,
-                 is_group: "true",
                  namespace_id: nil,
                  namespace_name: group.name,
                  plan_renew_href: renew_href,
                  plan_upgrade_href: nil,
-                 plan_name: nil)
+                 plan_name: nil,
+                 free_personal_namespace: 'false')
       end
     end
 
@@ -71,23 +73,54 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
-                 is_group: "true",
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
                  add_seats_href: add_seats_href,
                  plan_renew_href: renew_href,
                  plan_upgrade_href: nil,
-                 plan_name: plan.name)
+                 plan_name: plan.name,
+                 free_personal_namespace: 'false')
       end
     end
 
-    context 'when namespace is passed in' do
-      it 'returns false for is_group' do
-        namespace = build(:namespace)
+    context 'with different namespaces' do
+      subject { helper.subscription_plan_data_attributes(namespace, plan) }
 
-        result = helper.subscription_plan_data_attributes(namespace, plan)
+      context 'with namespace' do
+        let(:namespace) { build(:namespace) }
 
-        expect(result).to include(is_group: "false")
+        it 'does not return billable_seats_href' do
+          expect(subject).not_to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
+      end
+
+      context 'with group' do
+        let(:namespace) { build(:group) }
+
+        it 'returns billable_seats_href for group' do
+          expect(subject).to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
+      end
+    end
+
+    context 'when the namespace belongs to a user' do
+      let(:group) { build(:group, type: 'user') }
+
+      context 'when the namespace is free plan' do
+        it 'returns attributes with free_personal_namespace true' do
+          expect(helper.subscription_plan_data_attributes(group, plan))
+            .to include(free_personal_namespace: 'true')
+        end
+      end
+
+      context 'when the namespace is paid plan' do
+        let(:group) { build(:group, type: 'user') }
+        let!(:gitlab_subscription) { build(:gitlab_subscription, :ultimate, namespace: group) }
+
+        it 'returns attributes with free_personal_namespace false' do
+          expect(helper.subscription_plan_data_attributes(group, plan))
+            .to include(free_personal_namespace: 'false')
+        end
       end
     end
   end
@@ -99,10 +132,7 @@ RSpec.describe BillingPlansHelper do
 
     with_them do
       let_it_be(:user) { create(:user) }
-      let(:namespace) do
-        create :namespace, type: type,
-          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create("#{plan}_plan".to_sym))
-      end
+      let(:namespace) { create(:namespace_with_plan, plan: "#{plan}_plan".to_sym, type: type) }
 
       before do
         allow(helper).to receive(:current_user).and_return(user)
@@ -119,13 +149,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when the group is on a plan eligible for the new purchase flow' do
-      let(:namespace) do
-        create(
-          :namespace,
-          type: Group,
-          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create(:free_plan))
-        )
-      end
+      let(:namespace) { create(:namespace_with_plan, plan: :free_plan, type: Group) }
 
       before do
         allow(helper).to receive(:current_user).and_return(user)
@@ -156,14 +180,14 @@ RSpec.describe BillingPlansHelper do
 
     context 'when plan has a valid property' do
       where(:plan_name, :for_free, :plan_id, :result) do
-        Plan::BRONZE | true  | '123456789'  | :upgrade_for_free
-        Plan::BRONZE | true  | '987654321'  | :no_offer
-        Plan::BRONZE | true  | nil          | :no_offer
-        Plan::BRONZE | false | '123456789'  | :upgrade_for_offer
-        Plan::BRONZE | false | nil          | :no_offer
-        Plan::BRONZE | nil   | nil          | :no_offer
-        Plan::SILVER | nil   | nil          | :no_offer
-        nil          | true  | nil          | :no_offer
+        Plan::BRONZE  | true  | '123456789'  | :upgrade_for_free
+        Plan::BRONZE  | true  | '987654321'  | :no_offer
+        Plan::BRONZE  | true  | nil          | :no_offer
+        Plan::BRONZE  | false | '123456789'  | :upgrade_for_offer
+        Plan::BRONZE  | false | nil          | :no_offer
+        Plan::BRONZE  | nil   | nil          | :no_offer
+        Plan::PREMIUM | nil   | nil          | :no_offer
+        nil           | true  | nil          | :no_offer
       end
 
       with_them do
@@ -334,12 +358,37 @@ RSpec.describe BillingPlansHelper do
       group = double('Group', upgradable?: false)
 
       expect(helper).to receive(:plan_purchase_url)
-
       helper.plan_purchase_or_upgrade_url(group, plan)
     end
   end
 
-  describe '#upgrade_button_css_classe' do
+  describe "#plan_purchase_url" do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:user) { create(:user) }
+
+    let(:plan) { double('Plan', id: '123456789', purchase_link: double('PurchaseLink', href: '987654321')) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    it 'builds correct url with some source' do
+      allow(helper).to receive(:use_new_purchase_flow?).and_return(true)
+      allow(helper).to receive(:params).and_return({ source: 'some_source' })
+
+      expect(helper).to receive(:new_subscriptions_path).with(plan_id: plan.id, namespace_id: group.id, source: 'some_source')
+
+      helper.plan_purchase_url(group, plan)
+    end
+
+    it 'builds correct url for the old purchase flow' do
+      allow(helper).to receive(:use_new_purchase_flow?).and_return(false)
+
+      expect(helper.plan_purchase_url(group, plan)).to eq("#{plan.purchase_link.href}&gl_namespace_id=#{group.id}")
+    end
+  end
+
+  describe '#upgrade_button_css_classes' do
     using RSpec::Parameterized::TableSyntax
 
     let(:plan) { double('Plan', deprecated?: false) }
@@ -374,7 +423,7 @@ RSpec.describe BillingPlansHelper do
   end
 
   describe '#billing_available_plans' do
-    let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: false) }
+    let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: false) }
     let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: false) }
     let(:plans_data) { [plan, deprecated_plan] }
 
@@ -385,7 +434,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on an active plan' do
-      let(:current_plan) { OpenStruct.new(code: 'silver') }
+      let(:current_plan) { OpenStruct.new(code: 'premium') }
 
       it 'returns plans without deprecated' do
         expect(helper.billing_available_plans(plans_data, nil)).to eq([plan])
@@ -410,8 +459,8 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on a plan that has hide_deprecated_card set to true, but deprecated? is false' do
-      let(:current_plan) { OpenStruct.new(code: 'silver') }
-      let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: true) }
+      let(:current_plan) { OpenStruct.new(code: 'premium') }
+      let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: true) }
 
       it 'returns plans with the deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
@@ -422,23 +471,23 @@ RSpec.describe BillingPlansHelper do
   describe '#subscription_plan_info' do
     it 'returns the current plan' do
       other_plan = Hashie::Mash.new(code: 'bronze')
-      current_plan = Hashie::Mash.new(code: 'gold')
+      current_plan = Hashie::Mash.new(code: 'ultimate')
 
-      expect(helper.subscription_plan_info([other_plan, current_plan], 'gold')).to eq(current_plan)
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'ultimate')).to eq(current_plan)
     end
 
     it 'returns nil if no plan matches the code' do
       plan_a = Hashie::Mash.new(code: 'bronze')
-      plan_b = Hashie::Mash.new(code: 'gold')
+      plan_b = Hashie::Mash.new(code: 'ultimate')
 
       expect(helper.subscription_plan_info([plan_a, plan_b], 'default')).to be_nil
     end
 
     it 'breaks a tie with the current_subscription_plan attribute if multiple plans have the same code' do
-      other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'silver')
-      current_plan = Hashie::Mash.new(current_subscription_plan: true, code: 'silver')
+      other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'premium')
+      current_plan = Hashie::Mash.new(current_subscription_plan: true, code: 'premium')
 
-      expect(helper.subscription_plan_info([other_plan, current_plan], 'silver')).to eq(current_plan)
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'premium')).to eq(current_plan)
     end
 
     it 'returns nil if no plan matches the code even if current_subscription_plan is true' do
@@ -450,9 +499,65 @@ RSpec.describe BillingPlansHelper do
 
     it 'returns the plan matching the plan code even if current_subscription_plan is false' do
       other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'bronze')
-      current_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'silver')
+      current_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'premium')
 
-      expect(helper.subscription_plan_info([other_plan, current_plan], 'silver')).to eq(current_plan)
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'premium')).to eq(current_plan)
+    end
+  end
+
+  describe '#show_plans?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:group) { build(:group) }
+
+    where(:free_personal, :trial_active, :gold_plan, :ultimate_plan, :expectations) do
+      false |  false | false | false | true
+      false |  true  | false | false | true
+      false |  false | true  | false | false
+      false |  true  | true  | false | true
+      false |  false | false | true  | false
+      false |  true  | false | true  | true
+      false |  false | true  | true  | false
+      false |  true  | true  | true  | true
+      false |  true  | true  | true  | true
+      false |  true  | true  | true  | true
+      true  |  true  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(group).to receive(:trial_active?).and_return(trial_active)
+        allow(group).to receive(:gold_plan?).and_return(gold_plan)
+        allow(group).to receive(:ultimate_plan?).and_return(ultimate_plan)
+        allow(group).to receive(:free_personal?).and_return(free_personal)
+      end
+
+      it 'returns boolean' do
+        expect(helper.show_plans?(group)).to eql(expectations)
+      end
+    end
+  end
+
+  describe '#show_start_free_trial_messages?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:namespace) { build(:namespace) }
+
+    where(:free_personal, :eligible_for_trial, :expected) do
+      false  | true   | true
+      true   | true   | false
+      false  | false  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:free_personal?).and_return(free_personal)
+        allow(namespace).to receive(:eligible_for_trial?).and_return(eligible_for_trial)
+      end
+
+      it 'returns correct boolean value' do
+        expect(helper.show_start_free_trial_messages?(namespace)).to eql(expected)
+      end
     end
   end
 end

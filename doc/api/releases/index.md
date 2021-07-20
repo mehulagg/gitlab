@@ -10,6 +10,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - Using this API you can manipulate GitLab [Release](../../user/project/releases/index.md) entries.
 > - For manipulating links as a release asset, see [Release Links API](links.md).
 > - Release Evidences were [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.5.
+> - `description_html` became an opt-in field [with GitLab 13.12 for performance reasons](https://gitlab.com/gitlab-org/gitlab/-/issues/299447).
+    Please pass the `include_html_description` query string parameter if you need it.
+> - [The permission model for create, update and delete actions was fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/327505) in GitLab 14.1.
+    See [Release permissions](../../user/project/releases/index.md#release-permissions) for more information.
 
 ## List Releases
 
@@ -21,9 +25,10 @@ GET /projects/:id/releases
 
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../index.md#namespaced-path-encoding). |
 | `order_by`    | string         | no       | The field to use as order. Either `released_at` (default) or `created_at`. |
 | `sort`        | string         | no       | The direction of the order. Either `desc` (default) for descending order or `asc` for ascending order. |
+| `include_html_description` | boolean        | no       | If `true`, a response includes HTML rendered Markdown of the release description.   |
 
 Example request:
 
@@ -39,7 +44,6 @@ Example response:
       "tag_name":"v0.2",
       "description":"## CHANGELOG\r\n\r\n- Escape label and milestone titles to prevent XSS in GFM autocomplete. !2740\r\n- Prevent private snippets from being embeddable.\r\n- Add subresources removal to member destroy service.",
       "name":"Awesome app v0.2 beta",
-      "description_html":"\u003ch2 dir=\"auto\"\u003e\n\u003ca id=\"user-content-changelog\" class=\"anchor\" href=\"#changelog\" aria-hidden=\"true\"\u003e\u003c/a\u003eCHANGELOG\u003c/h2\u003e\n\u003cul dir=\"auto\"\u003e\n\u003cli\u003eEscape label and milestone titles to prevent XSS in GFM autocomplete. !2740\u003c/li\u003e\n\u003cli\u003ePrevent private snippets from being embeddable.\u003c/li\u003e\n\u003cli\u003eAdd subresources removal to member destroy service.\u003c/li\u003e\n\u003c/ul\u003e",
       "created_at":"2019-01-03T01:56:19.539Z",
       "released_at":"2019-01-03T01:56:19.539Z",
       "author":{
@@ -144,9 +148,9 @@ Example response:
       },
       "evidences":[
         {
-          sha: "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
-          filepath: "https://gitlab.example.com/root/awesome-app/-/releases/v0.2/evidence.json",
-          collected_at: "2019-01-03T01:56:19.539Z"
+          "sha": "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
+          "filepath": "https://gitlab.example.com/root/awesome-app/-/releases/v0.2/evidence.json",
+          "collected_at": "2019-01-03T01:56:19.539Z"
         }
      ]
    },
@@ -154,7 +158,6 @@ Example response:
       "tag_name":"v0.1",
       "description":"## CHANGELOG\r\n\r\n-Remove limit of 100 when searching repository code. !8671\r\n- Show error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\r\n- Fix a bug where internal email pattern wasn't respected. !22516",
       "name":"Awesome app v0.1 alpha",
-      "description_html":"\u003ch2 dir=\"auto\"\u003e\n\u003ca id=\"user-content-changelog\" class=\"anchor\" href=\"#changelog\" aria-hidden=\"true\"\u003e\u003c/a\u003eCHANGELOG\u003c/h2\u003e\n\u003cul dir=\"auto\"\u003e\n\u003cli\u003eRemove limit of 100 when searching repository code. !8671\u003c/li\u003e\n\u003cli\u003eShow error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\u003c/li\u003e\n\u003cli\u003eFix a bug where internal email pattern wasn't respected. !22516\u003c/li\u003e\n\u003c/ul\u003e",
       "created_at":"2019-01-03T01:55:18.203Z",
       "released_at":"2019-01-03T01:55:18.203Z",
       "author":{
@@ -208,9 +211,9 @@ Example response:
       },
       "evidences":[
         {
-          sha: "c3ffedec13af470e760d6cdfb08790f71cf52c6cde4d",
-          filepath: "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
-          collected_at: "2019-01-03T01:55:18.203Z"
+          "sha": "c3ffedec13af470e760d6cdfb08790f71cf52c6cde4d",
+          "filepath": "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
+          "collected_at": "2019-01-03T01:55:18.203Z"
         }
      ]
    }
@@ -227,8 +230,9 @@ GET /projects/:id/releases/:tag_name
 
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../index.md#namespaced-path-encoding). |
 | `tag_name`    | string         | yes      | The Git tag the release is associated with.                                         |
+| `include_html_description` | boolean        | no       | If `true`, a response includes HTML rendered Markdown of the release description.   |
 
 Example request:
 
@@ -243,7 +247,6 @@ Example response:
    "tag_name":"v0.1",
    "description":"## CHANGELOG\r\n\r\n- Remove limit of 100 when searching repository code. !8671\r\n- Show error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\r\n- Fix a bug where internal email pattern wasn't respected. !22516",
    "name":"Awesome app v0.1 alpha",
-   "description_html":"\u003ch2 dir=\"auto\"\u003e\n\u003ca id=\"user-content-changelog\" class=\"anchor\" href=\"#changelog\" aria-hidden=\"true\"\u003e\u003c/a\u003eCHANGELOG\u003c/h2\u003e\n\u003cul dir=\"auto\"\u003e\n\u003cli\u003eRemove limit of 100 when searching repository code. !8671\u003c/li\u003e\n\u003cli\u003eShow error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\u003c/li\u003e\n\u003cli\u003eFix a bug where internal email pattern wasn't respected. !22516\u003c/li\u003e\n\u003c/ul\u003e",
    "created_at":"2019-01-03T01:55:18.203Z",
    "released_at":"2019-01-03T01:55:18.203Z",
    "author":{
@@ -340,9 +343,9 @@ Example response:
    },
    "evidences":[
      {
-       sha: "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
-       filepath: "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
-       collected_at: "2019-07-16T14:00:12.256Z"
+       "sha": "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
+       "filepath": "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
+       "collected_at": "2019-07-16T14:00:12.256Z"
      }
   ]
 }
@@ -350,7 +353,7 @@ Example response:
 
 ## Create a release
 
-Create a Release. You need push access to the repository to create a Release.
+Create a release. Developer level access to the project is required to create a release.
 
 ```plaintext
 POST /projects/:id/releases
@@ -358,7 +361,7 @@ POST /projects/:id/releases
 
 | Attribute          | Type            | Required                    | Description                                                                                                                      |
 | -------------------| --------------- | --------                    | -------------------------------------------------------------------------------------------------------------------------------- |
-| `id`               | integer/string  | yes                         | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding).                                              |
+| `id`               | integer/string  | yes                         | The ID or [URL-encoded path of the project](../index.md#namespaced-path-encoding).                                              |
 | `name`             | string          | no                          | The release name.                                                                                                                |
 | `tag_name`         | string          | yes                         | The tag where the release is created from.                                                                                  |
 | `description`      | string          | no                          | The description of the release. You can use [Markdown](../../user/markdown.md).                                                  |
@@ -386,7 +389,6 @@ Example response:
    "tag_name":"v0.3",
    "description":"Super nice release",
    "name":"New release",
-   "description_html":"\u003cp dir=\"auto\"\u003eSuper nice release\u003c/p\u003e",
    "created_at":"2019-01-03T02:22:45.118Z",
    "released_at":"2019-01-03T02:22:45.118Z",
    "author":{
@@ -482,7 +484,7 @@ Example response:
          }
       ],
       "evidence_file_path":"https://gitlab.example.com/root/awesome-app/-/releases/v0.3/evidence.json"
-   },
+   }
 }
 ```
 
@@ -507,7 +509,7 @@ POST /projects/:id/releases/:tag_name/evidence
 
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../index.md#namespaced-path-encoding). |
 | `tag_name`    | string         | yes      | The Git tag the release is associated with.                                         |
 
 Example request:
@@ -524,7 +526,7 @@ Example response:
 
 ## Update a release
 
-Update a Release.
+Update a release. Developer level access to the project is required to update a release.
 
 ```plaintext
 PUT /projects/:id/releases/:tag_name
@@ -532,7 +534,7 @@ PUT /projects/:id/releases/:tag_name
 
 | Attribute     | Type            | Required | Description                                                                                                 |
 | ------------- | --------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `id`          | integer/string  | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding).                         |
+| `id`          | integer/string  | yes      | The ID or [URL-encoded path of the project](../index.md#namespaced-path-encoding).                         |
 | `tag_name`    | string          | yes      | The Git tag the release is associated with.                                                                 |
 | `name`        | string          | no       | The release name.                                                                                           |
 | `description` | string          | no       | The description of the release. You can use [Markdown](../../user/markdown.md).                             |
@@ -542,7 +544,8 @@ PUT /projects/:id/releases/:tag_name
 Example request:
 
 ```shell
-curl --header 'Content-Type: application/json' --request PUT --data '{"name": "new name", "milestones": ["v1.2"]}' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
+curl --header 'Content-Type: application/json' --request PUT --data '{"name": "new name", "milestones": ["v1.2"]}' \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
 ```
 
 Example response:
@@ -552,7 +555,6 @@ Example response:
    "tag_name":"v0.1",
    "description":"## CHANGELOG\r\n\r\n- Remove limit of 100 when searching repository code. !8671\r\n- Show error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\r\n- Fix a bug where internal email pattern wasn't respected. !22516",
    "name":"new name",
-   "description_html":"\u003ch2 dir=\"auto\"\u003e\n\u003ca id=\"user-content-changelog\" class=\"anchor\" href=\"#changelog\" aria-hidden=\"true\"\u003e\u003c/a\u003eCHANGELOG\u003c/h2\u003e\n\u003cul dir=\"auto\"\u003e\n\u003cli\u003eRemove limit of 100 when searching repository code. !8671\u003c/li\u003e\n\u003cli\u003eShow error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\u003c/li\u003e\n\u003cli\u003eFix a bug where internal email pattern wasn't respected. !22516\u003c/li\u003e\n\u003c/ul\u003e",
    "created_at":"2019-01-03T01:55:18.203Z",
    "released_at":"2019-01-03T01:55:18.203Z",
    "author":{
@@ -625,13 +627,13 @@ Example response:
 
       ],
       "evidence_file_path":"https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json"
-   },
+   }
 }
 ```
 
 ## Delete a Release
 
-Delete a Release. Deleting a Release doesn't delete the associated tag.
+Delete a release. Deleting a release doesn't delete the associated tag. Maintainer level access to the project is required to delete a release.
 
 ```plaintext
 DELETE /projects/:id/releases/:tag_name
@@ -639,7 +641,7 @@ DELETE /projects/:id/releases/:tag_name
 
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../index.md#namespaced-path-encoding). |
 | `tag_name`    | string         | yes      | The Git tag the release is associated with.                                         |
 
 Example request:
@@ -655,7 +657,6 @@ Example response:
    "tag_name":"v0.1",
    "description":"## CHANGELOG\r\n\r\n- Remove limit of 100 when searching repository code. !8671\r\n- Show error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\r\n- Fix a bug where internal email pattern wasn't respected. !22516",
    "name":"new name",
-   "description_html":"\u003ch2 dir=\"auto\"\u003e\n\u003ca id=\"user-content-changelog\" class=\"anchor\" href=\"#changelog\" aria-hidden=\"true\"\u003e\u003c/a\u003eCHANGELOG\u003c/h2\u003e\n\u003cul dir=\"auto\"\u003e\n\u003cli\u003eRemove limit of 100 when searching repository code. !8671\u003c/li\u003e\n\u003cli\u003eShow error message when attempting to reopen an MR and there is an open MR for the same branch. !16447 (Akos Gyimesi)\u003c/li\u003e\n\u003cli\u003eFix a bug where internal email pattern wasn't respected. !22516\u003c/li\u003e\n\u003c/ul\u003e",
    "created_at":"2019-01-03T01:55:18.203Z",
    "released_at":"2019-01-03T01:55:18.203Z",
    "author":{
@@ -709,7 +710,7 @@ Example response:
 
       ],
       "evidence_file_path":"https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json"
-   },
+   }
 }
 ```
 
@@ -717,6 +718,5 @@ Example response:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38105) in GitLab 12.1.
 
-A release with a `released_at` attribute set to a future date is labeled an **Upcoming Release** in the UI:
-
-![Upcoming release](img/upcoming_release_v12_1.png)
+A release with a `released_at` attribute set to a future date is labeled
+as an **Upcoming Release** [in the UI](../../user/project/releases/index.md#upcoming-releases).

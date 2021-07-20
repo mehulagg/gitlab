@@ -22,7 +22,7 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
   end
 
   describe 'the created pipeline' do
-    let(:project) do
+    let_it_be(:project) do
       create(:project, :repository, variables: [
         build(:ci_variable, key: 'CI_KUBERNETES_ACTIVE', value: 'true')
       ])
@@ -32,13 +32,14 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
     let(:default_branch) { 'master' }
     let(:pipeline_ref) { default_branch }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref) }
-    let(:pipeline) { service.execute!(:push) }
+    let(:pipeline) { service.execute!(:push).payload }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
       stub_ci_pipeline_yaml_file(template)
-
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -53,7 +54,7 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
     end
 
     context 'when project has Ultimate license' do
-      let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+      let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
       before do
         allow(License).to receive(:current).and_return(license)

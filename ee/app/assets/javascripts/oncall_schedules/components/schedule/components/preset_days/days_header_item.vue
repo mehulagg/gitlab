@@ -29,7 +29,7 @@ export default {
 
 <template>
   <span class="timeline-header-item" :style="timelineHeaderStyles">
-    <div class="item-label gl-pl-6 gl-py-4" data-testid="timeline-header-label">
+    <div class="item-label gl-pl-5 gl-py-4" data-testid="timeline-header-label">
       {{ timelineHeaderLabel }}
     </div>
     <days-header-sub-item :timeframe-item="timeframeItem" />

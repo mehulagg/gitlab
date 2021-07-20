@@ -1,4 +1,4 @@
-import { GlBadge, GlTable } from '@gitlab/ui';
+import { GlBadge, GlPagination, GlTable } from '@gitlab/ui';
 import {
   getByText as getByTextHelper,
   getByTestId as getByTestIdHelper,
@@ -6,6 +6,7 @@ import {
 } from '@testing-library/dom';
 import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import CreatedAt from '~/members/components/table/created_at.vue';
 import ExpirationDatepicker from '~/members/components/table/expiration_datepicker.vue';
 import ExpiresAt from '~/members/components/table/expires_at.vue';
@@ -14,8 +15,15 @@ import MemberAvatar from '~/members/components/table/member_avatar.vue';
 import MemberSource from '~/members/components/table/member_source.vue';
 import MembersTable from '~/members/components/table/members_table.vue';
 import RoleDropdown from '~/members/components/table/role_dropdown.vue';
+import { MEMBER_TYPES, TAB_QUERY_PARAM_VALUES } from '~/members/constants';
 import * as initUserPopovers from '~/user_popovers';
-import { member as memberMock, directMember, invite, accessRequest } from '../../mock_data';
+import {
+  member as memberMock,
+  directMember,
+  invite,
+  accessRequest,
+  pagination,
+} from '../../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -25,24 +33,37 @@ describe('MembersTable', () => {
 
   const createStore = (state = {}) => {
     return new Vuex.Store({
-      state: {
-        members: [],
-        tableFields: [],
-        tableAttrs: {
-          table: { 'data-qa-selector': 'members_list' },
-          tr: { 'data-qa-selector': 'member_row' },
+      modules: {
+        [MEMBER_TYPES.invite]: {
+          namespaced: true,
+          state: {
+            members: [],
+            tableFields: [],
+            tableAttrs: {
+              table: { 'data-qa-selector': 'members_list' },
+              tr: { 'data-qa-selector': 'member_row' },
+            },
+            pagination,
+            ...state,
+          },
         },
-        sourceId: 1,
-        currentUserId: 1,
-        ...state,
       },
     });
   };
 
-  const createComponent = (state) => {
+  const createComponent = (state, provide = {}) => {
     wrapper = mount(MembersTable, {
       localVue,
+      propsData: {
+        tabQueryParamValue: TAB_QUERY_PARAM_VALUES.invite,
+      },
       store: createStore(state),
+      provide: {
+        sourceId: 1,
+        currentUserId: 1,
+        namespace: MEMBER_TYPES.invite,
+        ...provide,
+      },
       stubs: [
         'member-avatar',
         'member-source',
@@ -56,6 +77,8 @@ describe('MembersTable', () => {
     });
   };
 
+  const url = 'https://localhost/foo-bar/-/project_members?tab=invited';
+
   const getByText = (text, options) =>
     createWrapper(getByTextHelper(wrapper.element, text, options));
 
@@ -67,6 +90,14 @@ describe('MembersTable', () => {
     getByTestId(`members-table-row-${memberId}`).find(
       `[data-label="${tableCellLabel}"][role="cell"]`,
     );
+
+  const findPagination = () => extendedWrapper(wrapper.find(GlPagination));
+
+  const expectCorrectLinkToPage2 = () => {
+    expect(findPagination().findByText('2', { selector: 'a' }).attributes('href')).toBe(
+      `${url}&invited_members_page=2`,
+    );
+  };
 
   afterEach(() => {
     wrapper.destroy();
@@ -119,7 +150,7 @@ describe('MembersTable', () => {
 
       describe('when user is not logged in', () => {
         it('does not render the "Actions" field', () => {
-          createComponent({ currentUserId: null, tableFields: ['actions'] });
+          createComponent({ tableFields: ['actions'] }, { currentUserId: null });
 
           expect(within(wrapper.element).queryByTestId('col-actions')).toBe(null);
         });
@@ -208,5 +239,81 @@ describe('MembersTable', () => {
     createComponent();
 
     expect(findTable().find('tbody tr').attributes('data-qa-selector')).toBe('member_row');
+  });
+
+  describe('when required pagination data is provided', () => {
+    beforeEach(() => {
+      delete window.location;
+    });
+
+    it('renders `gl-pagination` component with correct props', () => {
+      window.location = new URL(url);
+
+      createComponent();
+
+      const glPagination = findPagination();
+
+      expect(glPagination.exists()).toBe(true);
+      expect(glPagination.props()).toMatchObject({
+        value: pagination.currentPage,
+        perPage: pagination.perPage,
+        totalItems: pagination.totalItems,
+        prevText: 'Prev',
+        nextText: 'Next',
+        labelNextPage: 'Go to next page',
+        labelPrevPage: 'Go to previous page',
+        align: 'center',
+      });
+    });
+
+    it('uses `pagination.paramName` to generate the pagination links', () => {
+      window.location = new URL(url);
+
+      createComponent({
+        pagination: {
+          currentPage: 1,
+          perPage: 5,
+          totalItems: 10,
+          paramName: 'invited_members_page',
+        },
+      });
+
+      expectCorrectLinkToPage2();
+    });
+
+    it('removes any url params defined as `null` in the `params` attribute', () => {
+      window.location = new URL(`${url}&search_groups=foo`);
+
+      createComponent({
+        pagination: {
+          currentPage: 1,
+          perPage: 5,
+          totalItems: 10,
+          paramName: 'invited_members_page',
+          params: { search_groups: null },
+        },
+      });
+
+      expectCorrectLinkToPage2();
+    });
+  });
+
+  describe.each`
+    attribute        | value
+    ${'paramName'}   | ${null}
+    ${'currentPage'} | ${null}
+    ${'perPage'}     | ${null}
+    ${'totalItems'}  | ${0}
+  `('when pagination.$attribute is $value', ({ attribute, value }) => {
+    it('does not render `gl-pagination`', () => {
+      createComponent({
+        pagination: {
+          ...pagination,
+          [attribute]: value,
+        },
+      });
+
+      expect(findPagination().exists()).toBe(false);
+    });
   });
 });

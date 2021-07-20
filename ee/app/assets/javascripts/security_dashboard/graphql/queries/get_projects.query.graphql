@@ -7,12 +7,13 @@ query getProjects(
   $first: Int!
   $searchNamespaces: Boolean = false
   $sort: String
+  $membership: Boolean = true
 ) {
   projects(
     search: $search
     after: $after
     first: $first
-    membership: true
+    membership: $membership
     searchNamespaces: $searchNamespaces
     sort: $sort
   ) {

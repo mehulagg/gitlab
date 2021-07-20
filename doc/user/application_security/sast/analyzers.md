@@ -43,6 +43,19 @@ dedicated containers for each analysis.
 SAST is pre-configured with a set of **default images** that are maintained by
 GitLab, but users can also integrate their own **custom images**.
 
+## SAST analyzer features
+
+For an analyzer to be considered Generally Available, it is expected to minimally
+support the following features:
+
+- [Customizable configuration](index.md#available-cicd-variables)
+- [Customizable rulesets](index.md#customize-rulesets)
+- [Scan projects](index.md#supported-languages-and-frameworks)
+- [Multi-project support](index.md#multi-project-support)
+- [Offline support](index.md#running-sast-in-an-offline-environment)
+- [Emits JSON report format](index.md#reports-json-format)
+- [SELinux support](index.md#running-sast-in-selinux)
+
 ## Official default analyzers
 
 Any custom change to the official analyzers can be achieved by using a
@@ -66,27 +79,6 @@ variables:
 
 This configuration requires that your custom registry provides images for all
 the official analyzers.
-
-### Selecting specific analyzers
-
-WARNING:
-`SAST_DEFAULT_ANALYZERS` is [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50872) in GitLab 13.8,
-and is scheduled for [removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777).
-
-You can select the official analyzers you want to run. Here's how to enable
-`bandit` and `flawfinder` while disabling all the other default ones.
-In `.gitlab-ci.yml` define:
-
-```yaml
-include:
-  - template: Security/SAST.gitlab-ci.yml
-
-variables:
-  SAST_DEFAULT_ANALYZERS: "bandit,flawfinder"
-```
-
-`bandit` runs first. When merging the reports, SAST
-removes the duplicates and keeps the `bandit` entries.
 
 ### Disabling all default analyzers
 

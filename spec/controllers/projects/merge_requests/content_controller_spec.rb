@@ -11,13 +11,13 @@ RSpec.describe Projects::MergeRequests::ContentController do
     sign_in(user)
   end
 
-  def do_request(action = :cached_widget)
+  def do_request(action = :cached_widget, params = {})
     get action, params: {
       namespace_id: project.namespace.to_param,
       project_id: project,
       id: merge_request.iid,
       format: :json
-    }
+    }.merge(params)
   end
 
   context 'user has access to the project' do
@@ -42,6 +42,10 @@ RSpec.describe Projects::MergeRequests::ContentController do
     end
 
     describe 'GET widget' do
+      before do
+        merge_request.mark_as_unchecked!
+      end
+
       it 'checks whether the MR can be merged' do
         controller.instance_variable_set(:@merge_request, merge_request)
 

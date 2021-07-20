@@ -15,6 +15,10 @@ class GlobalPolicy < BasePolicy
     @user&.required_terms_not_accepted?
   end
 
+  condition(:password_expired, scope: :user) do
+    @user&.password_expired_if_applicable?
+  end
+
   condition(:project_bot, scope: :user) { @user&.project_bot? }
   condition(:migration_bot, scope: :user) { @user&.migration_bot? }
 
@@ -23,6 +27,7 @@ class GlobalPolicy < BasePolicy
     prevent :receive_notifications
     prevent :use_quick_actions
     prevent :create_group
+    prevent :execute_graphql_mutation
   end
 
   rule { default }.policy do
@@ -32,6 +37,7 @@ class GlobalPolicy < BasePolicy
     enable :receive_notifications
     enable :use_quick_actions
     enable :use_slash_commands
+    enable :execute_graphql_mutation
   end
 
   rule { inactive }.policy do
@@ -47,6 +53,8 @@ class GlobalPolicy < BasePolicy
     prevent :receive_notifications
     prevent :use_slash_commands
   end
+
+  rule { ~can?(:access_api) }.prevent :execute_graphql_mutation
 
   rule { blocked | (internal & ~migration_bot & ~security_bot) }.policy do
     prevent :access_git
@@ -67,6 +75,12 @@ class GlobalPolicy < BasePolicy
   rule { required_terms_not_accepted }.policy do
     prevent :access_api
     prevent :access_git
+  end
+
+  rule { password_expired }.policy do
+    prevent :access_api
+    prevent :access_git
+    prevent :use_slash_commands
   end
 
   rule { can_create_group }.policy do
@@ -100,7 +114,8 @@ class GlobalPolicy < BasePolicy
     enable :update_custom_attribute
     enable :approve_user
     enable :reject_user
-    enable :read_instance_statistics_measurements
+    enable :read_usage_trends_measurement
+    enable :update_runners_registration_token
   end
 
   # We can't use `read_statistics` because the user may have different permissions for different projects
@@ -109,4 +124,4 @@ class GlobalPolicy < BasePolicy
   rule { external_user }.prevent :create_snippet
 end
 
-GlobalPolicy.prepend_if_ee('EE::GlobalPolicy')
+GlobalPolicy.prepend_mod_with('GlobalPolicy')

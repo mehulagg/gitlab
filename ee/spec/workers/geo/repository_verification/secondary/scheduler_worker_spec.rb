@@ -23,7 +23,7 @@ RSpec.describe Geo::RepositoryVerification::Secondary::SchedulerWorker, :clean_g
       create(:project, :broken_storage)
 
       allow(Gitlab::GitalyClient).to receive(:call) do
-        raise GRPC::Unavailable.new('No Gitaly available')
+        raise GRPC::Unavailable, 'No Gitaly available'
       end
 
       expect(Geo::RepositoryVerification::Secondary::ShardWorker).not_to receive(:perform_async).with('broken')

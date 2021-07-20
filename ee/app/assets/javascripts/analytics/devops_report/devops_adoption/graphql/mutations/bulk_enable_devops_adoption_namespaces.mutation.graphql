@@ -1,0 +1,19 @@
+#import "../fragments/latest_snapshot.fragment.graphql"
+
+mutation($namespaceIds: [NamespaceID!]!, $displayNamespaceId: NamespaceID) {
+  bulkEnableDevopsAdoptionNamespaces(
+    input: { namespaceIds: $namespaceIds, displayNamespaceId: $displayNamespaceId }
+  ) {
+    enabledNamespaces {
+      id
+      latestSnapshot {
+        ...LatestSnapshot
+      }
+      namespace {
+        fullName
+        id
+      }
+    }
+    errors
+  }
+}

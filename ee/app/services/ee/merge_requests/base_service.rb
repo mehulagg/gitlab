@@ -9,6 +9,11 @@ module EE
 
       attr_accessor :blocking_merge_requests_params
 
+      override :execute_external_hooks
+      def execute_external_hooks(merge_request, merge_data)
+        merge_request.project.execute_external_compliance_hooks(merge_data)
+      end
+
       override :filter_params
       def filter_params(merge_request)
         unless current_user.can?(:update_approvers, merge_request)

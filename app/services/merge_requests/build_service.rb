@@ -16,17 +16,7 @@ module MergeRequests
       merge_request.source_project = find_source_project
       merge_request.target_project = find_target_project
 
-      # Force remove the source branch?
-      merge_request.merge_params['force_remove_source_branch'] = force_remove_source_branch
-
-      # Only assign merge requests params that are allowed
-      self.params = assign_allowed_merge_params(merge_request, params)
-
-      # Filter out params that are either not allowed or invalid
-      filter_params(merge_request)
-
-      # Filter out :add_label_ids and :remove_label_ids params
-      filter_label_id_params
+      process_params
 
       merge_request.compare_commits = []
       set_merge_request_target_branch
@@ -58,6 +48,7 @@ module MergeRequests
              :compare_commits,
              :wip_title,
              :description,
+             :first_multiline_commit,
              :errors,
              to: :merge_request
 
@@ -69,19 +60,39 @@ module MergeRequests
       end
     end
 
-    def filter_label_id_params
+    def filter_id_params
       # merge_request.assign_attributes(...) below is a Rails
       # method that only work if all the params it is passed have
       # corresponding fields in the database. As there are no fields
-      # in the database for :add_label_ids and :remove_label_ids, we
+      # in the database for :add_label_ids, :remove_label_ids,
+      # :add_assignee_ids and :remove_assignee_ids, we
       # need to remove them from the params before the call to
       # merge_request.assign_attributes(...)
       #
-      # IssuableBaseService#process_label_ids takes care
+      # IssuableBaseService#process_label_ids and
+      # IssuableBaseService#process_assignee_ids take care
       # of the removal.
       params[:label_ids] = process_label_ids(params, extra_label_ids: merge_request.label_ids.to_a)
 
+      params[:assignee_ids] = process_assignee_ids(params, extra_assignee_ids: merge_request.assignee_ids.to_a)
+
       merge_request.assign_attributes(params.to_h.compact)
+    end
+
+    def process_params
+      # Force remove the source branch?
+      merge_request.merge_params['force_remove_source_branch'] = force_remove_source_branch
+
+      # Only assign merge requests params that are allowed
+      self.params = assign_allowed_merge_params(merge_request, params)
+
+      # Filter out params that are either not allowed or invalid
+      filter_params(merge_request)
+
+      # Filter out the following from params:
+      #  - :add_label_ids and :remove_label_ids
+      #  - :add_assignee_ids and :remove_assignee_ids
+      filter_id_params
     end
 
     def find_source_project
@@ -196,7 +207,8 @@ module MergeRequests
     # interpreted as the user wants to close that issue on this project.
     #
     # For example:
-    # - Issue 112 exists, title: Emoji don't show up in commit title
+    # - Issue 112 exists
+    # - title: Emoji don't show up in commit title
     # - Source branch is: 112-fix-mep-mep
     #
     # Will lead to:
@@ -205,7 +217,7 @@ module MergeRequests
     #   more than one commit in the MR
     #
     def assign_title_and_description
-      assign_title_and_description_from_single_commit
+      assign_title_and_description_from_commits
       merge_request.title ||= title_from_issue if target_project.issues_enabled? || target_project.external_issue_tracker
       merge_request.title ||= source_branch.titleize.humanize
       merge_request.title = wip_title if compare_commits.empty?
@@ -240,12 +252,16 @@ module MergeRequests
       end
     end
 
-    def assign_title_and_description_from_single_commit
+    def assign_title_and_description_from_commits
       commits = compare_commits
 
-      return unless commits&.count == 1
+      if commits&.count == 1
+        commit = commits.first
+      else
+        commit = first_multiline_commit
+        return unless commit
+      end
 
-      commit = commits.first
       merge_request.title ||= commit.title
       merge_request.description ||= commit.description.try(:strip)
     end
@@ -284,4 +300,4 @@ module MergeRequests
   end
 end
 
-MergeRequests::BuildService.prepend_if_ee('EE::MergeRequests::BuildService')
+MergeRequests::BuildService.prepend_mod_with('MergeRequests::BuildService')

@@ -1,11 +1,11 @@
-import { newDate, getTimeframeWindowFrom, totalDaysInMonth } from '~/lib/utils/datetime_utility';
+import { getTimeframeWindowFrom, newDate, totalDaysInMonth } from '~/lib/utils/datetime_utility';
 
 import {
-  PRESET_TYPES,
-  PRESET_DEFAULTS,
-  EXTEND_AS,
-  TIMELINE_CELL_MIN_WIDTH,
   DAYS_IN_WEEK,
+  EXTEND_AS,
+  PRESET_DEFAULTS,
+  PRESET_TYPES,
+  TIMELINE_CELL_MIN_WIDTH,
 } from '../constants';
 
 const monthsForQuarters = {
@@ -380,7 +380,6 @@ export const getEpicsTimeframeRange = ({ presetType = '', timeframe = [] }) => {
 
   const firstTimeframe = timeframe[0];
   const lastTimeframe = timeframe[timeframe.length - 1];
-
   // Compute start and end dates from timeframe
   // based on provided presetType.
   if (presetType === PRESET_TYPES.QUARTERS) {
@@ -395,12 +394,11 @@ export const getEpicsTimeframeRange = ({ presetType = '', timeframe = [] }) => {
     due.setDate(due.getDate() + 6);
   }
 
-  const startDate = `${start.getFullYear()}-${start.getMonth() + 1}-${start.getDate()}`;
-  const dueDate = `${due.getFullYear()}-${due.getMonth() + 1}-${due.getDate()}`;
-
   return {
-    startDate,
-    dueDate,
+    timeframe: {
+      start: start.toISOString().split('T')[0],
+      end: due.toISOString().split('T')[0],
+    },
   };
 };
 

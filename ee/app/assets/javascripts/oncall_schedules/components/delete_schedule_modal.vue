@@ -10,6 +10,9 @@ export const i18n = {
   deleteScheduleMessage: s__(
     'OnCallSchedules|Are you sure you want to delete the "%{deleteSchedule}" schedule? This action cannot be undone.',
   ),
+  escalationRulesWillBeDeletedMessage: s__(
+    'OnCallScheduless|Any escalation rules that are using this schedule will also be deleted.',
+  ),
 };
 
 export default {
@@ -106,5 +109,8 @@ export default {
     <gl-sprintf :message="$options.i18n.deleteScheduleMessage">
       <template #deleteSchedule>{{ schedule.name }}</template>
     </gl-sprintf>
+    <div class="gl-mt-5">
+      {{ $options.i18n.escalationRulesWillBeDeletedMessage }}
+    </div>
   </gl-modal>
 </template>

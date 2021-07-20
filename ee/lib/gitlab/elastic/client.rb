@@ -7,12 +7,19 @@ module Gitlab
     module Client
       extend Gitlab::Utils::StrongMemoize
 
+      OPEN_TIMEOUT = 5
+
       # Takes a hash as returned by `ApplicationSetting#elasticsearch_config`,
       # and configures itself based on those parameters
       def self.build(config)
         base_config = {
           urls: config[:url],
-          request_timeout: config[:client_request_timeout],
+          transport_options: {
+            request: {
+              timeout: config[:client_request_timeout],
+              open_timeout: OPEN_TIMEOUT
+            }
+          },
           randomize_hosts: true,
           retry_on_failure: true
         }.compact

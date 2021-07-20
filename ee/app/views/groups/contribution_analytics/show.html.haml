@@ -1,6 +1,6 @@
 - page_title s_('Contribution Analytics')
 
-- if @group.feature_available?(:contribution_analytics)
+- if @group.licensed_feature_available?(:contribution_analytics)
   .mb-3
     %h3
       = s_('Contribution Analytics')
@@ -41,7 +41,7 @@
       #js_pushes_chart_vue
 
   %div{ data: { qa_selector: 'merge_request_content' } }
-    %h3= s_('ContributionAnalytics|Merge Requests')
+    %h3= s_('ContributionAnalytics|Merge requests')
     - mr_created_count = @data_collector.total_merge_requests_created_count
     - mr_merged_count = @data_collector.total_merge_requests_merged_count
     - if mr_created_count > 0 || mr_merged_count > 0

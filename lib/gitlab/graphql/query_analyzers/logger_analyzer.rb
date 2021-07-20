@@ -9,23 +9,20 @@ module Gitlab
         FIELD_USAGE_ANALYZER = GraphQL::Analysis::FieldUsage.new { |query, used_fields, used_deprecated_fields| [used_fields, used_deprecated_fields] }
         ALL_ANALYZERS = [COMPLEXITY_ANALYZER, DEPTH_ANALYZER, FIELD_USAGE_ANALYZER].freeze
 
-        def analyze?(query)
-          Feature.enabled?(:graphql_logging, default_enabled: true)
-        end
-
         def initial_value(query)
           variables = process_variables(query.provided_variables)
           default_initial_values(query).merge({
+            operation_name: query.operation_name,
             query_string: query.query_string,
             variables: variables
           })
-        rescue => e
+        rescue StandardError => e
           Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
           default_initial_values(query)
         end
 
-        def call(memo, visit_type, irep_node)
-          RequestStore.store[:graphql_logs] = memo
+        def call(memo, *)
+          memo
         end
 
         def final_value(memo)
@@ -41,8 +38,10 @@ module Gitlab
           memo[:used_fields] = field_usages.first
           memo[:used_deprecated_fields] = field_usages.second
 
+          RequestStore.store[:graphql_logs] ||= []
+          RequestStore.store[:graphql_logs] << memo
           GraphqlLogger.info(memo.except!(:time_started, :query))
-        rescue => e
+        rescue StandardError => e
           Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
         end
 

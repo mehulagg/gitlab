@@ -4,6 +4,7 @@ import eventHub from '~/ide/eventhub';
 import { createRouter } from '~/ide/ide_router';
 import { createStore } from '~/ide/stores';
 import {
+  init,
   stageAllChanges,
   unstageAllChanges,
   toggleFileFinder,
@@ -54,15 +55,15 @@ describe('Multi-file store actions', () => {
     });
   });
 
-  describe('setInitialData', () => {
-    it('commits initial data', (done) => {
-      store
-        .dispatch('setInitialData', { canCommit: true })
-        .then(() => {
-          expect(store.state.canCommit).toBeTruthy();
-          done();
-        })
-        .catch(done.fail);
+  describe('init', () => {
+    it('commits initial data and requests user callouts', () => {
+      return testAction(
+        init,
+        { canCommit: true },
+        store.state,
+        [{ type: 'SET_INITIAL_DATA', payload: { canCommit: true } }],
+        [],
+      );
     });
   });
 
@@ -776,7 +777,7 @@ describe('Multi-file store actions', () => {
 
       it('routes to the renamed file if the original file has been opened', (done) => {
         store.state.currentProjectId = 'test/test';
-        store.state.currentBranchId = 'master';
+        store.state.currentBranchId = 'main';
 
         Object.assign(store.state.entries.orig, {
           opened: true,
@@ -789,7 +790,7 @@ describe('Multi-file store actions', () => {
           })
           .then(() => {
             expect(router.push.mock.calls).toHaveLength(1);
-            expect(router.push).toHaveBeenCalledWith(`/project/test/test/tree/master/-/renamed/`);
+            expect(router.push).toHaveBeenCalledWith(`/project/test/test/tree/main/-/renamed/`);
           })
           .then(done)
           .catch(done.fail);
@@ -1018,7 +1019,7 @@ describe('Multi-file store actions', () => {
           },
           {
             projectId: 'abc/def',
-            branchId: 'master-testing',
+            branchId: 'main-testing',
           },
         ];
         dispatch = jest.fn();

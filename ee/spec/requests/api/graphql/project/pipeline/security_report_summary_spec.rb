@@ -78,7 +78,7 @@ RSpec.describe 'Query.project(fullPath).pipeline(iid).securityReportSummary' do
   it 'shows the vulnerabilitiesCount and scannedResourcesCount' do
     expect(security_report_summary.dig('dast', 'vulnerabilitiesCount')).to eq(20)
     expect(security_report_summary.dig('dast', 'scannedResourcesCount')).to eq(26)
-    expect(security_report_summary.dig('sast', 'vulnerabilitiesCount')).to eq(33)
+    expect(security_report_summary.dig('sast', 'vulnerabilitiesCount')).to eq(5)
   end
 
   it 'shows the first 20 scanned resources' do

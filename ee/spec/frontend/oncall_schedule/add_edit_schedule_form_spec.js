@@ -4,7 +4,7 @@ import AddEditScheduleForm, {
   i18n,
 } from 'ee/oncall_schedules/components/add_edit_schedule_form.vue';
 import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('AddEditScheduleForm', () => {
   let wrapper;
@@ -16,7 +16,6 @@ describe('AddEditScheduleForm', () => {
   const createComponent = ({ props = {} } = {}) => {
     wrapper = shallowMount(AddEditScheduleForm, {
       propsData: {
-        modalId: 'modalId',
         form: {
           name: mockSchedule.name,
           description: mockSchedule.description,
@@ -26,7 +25,6 @@ describe('AddEditScheduleForm', () => {
           name: true,
           timezone: true,
         },
-        schedule: mockSchedule,
         ...props,
       },
       provide: {
@@ -54,7 +52,7 @@ describe('AddEditScheduleForm', () => {
   const findTimezoneSearchBox = () => wrapper.find(GlSearchBoxByType);
   const findScheduleName = () => wrapper.find(GlFormGroup);
 
-  it('renders modal layout', () => {
+  it('renders form layout', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
@@ -84,7 +82,7 @@ describe('AddEditScheduleForm', () => {
 
     describe('timezones filtering', () => {
       it('should filter options based on search term', async () => {
-        const searchTerm = 'Hawaii';
+        const searchTerm = 'Pacific';
         findTimezoneSearchBox().vm.$emit('input', searchTerm);
         await wrapper.vm.$nextTick();
         const options = findDropdownOptions();

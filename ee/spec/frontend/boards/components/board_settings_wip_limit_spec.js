@@ -8,9 +8,6 @@ import Vuex from 'vuex';
 import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings_wip_limit.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import boardsStore from '~/boards/stores/boards_store';
-import { deprecatedCreateFlash as flash } from '~/flash';
-
-jest.mock('~/flash');
 
 const localVue = createLocalVue();
 
@@ -185,7 +182,6 @@ describe('BoardSettingsWipLimit', () => {
     });
 
     afterEach(() => {
-      flash.mockReset();
       boardsStore.removeList(listId);
     });
 
@@ -289,6 +285,7 @@ describe('BoardSettingsWipLimit', () => {
               actions: { updateListWipLimit: spy, unsetActiveId: noop },
               localState: { edit: true, currentWipLimit },
             });
+            jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
 
             triggerBlur(blurMethod);
 
@@ -296,7 +293,7 @@ describe('BoardSettingsWipLimit', () => {
           });
 
           it('calls flash with expected error', () => {
-            expect(flash).toHaveBeenCalledTimes(1);
+            expect(wrapper.vm.setError).toHaveBeenCalledTimes(1);
           });
         });
       });

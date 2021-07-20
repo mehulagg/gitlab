@@ -21,7 +21,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
 
   subject(:indexer) { described_class.new(project) }
 
-  context 'empty project', :elastic do
+  context 'empty project', :elastic, :clean_gitlab_redis_shared_state do
     let(:project) { create(:project) }
 
     it 'updates the index status without running the indexing command' do
@@ -32,7 +32,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
       expect_index_status(Gitlab::Git::BLANK_SHA)
     end
 
-    context 'when indexing an unborn head', :elastic do
+    context 'when indexing an unborn head', :elastic, :clean_gitlab_redis_shared_state do
       it 'updates the index status without running the indexing command' do
         allow(project.repository).to receive(:exists?).and_return(false)
         expect_popen.never
@@ -55,7 +55,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
     end
   end
 
-  context 'with an indexed project', :elastic do
+  context 'with an indexed project', :elastic, :clean_gitlab_redis_shared_state do
     let(:to_sha) { project.repository.commit.sha }
 
     before do
@@ -80,7 +80,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
       end
     end
 
-    context 'when indexing a HEAD commit', :elastic do
+    context 'when indexing a HEAD commit', :elastic, :clean_gitlab_redis_shared_state do
       it_behaves_like 'index up to the specified commit'
 
       it 'runs the indexing command' do
@@ -92,6 +92,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         expect_popen.with(
           [
             TestEnv.indexer_bin_path,
+            "--timeout=#{Gitlab::Elastic::Indexer::TIMEOUT}s",
             "--project-path=#{project.full_path}",
             project.id.to_s,
             "#{project.repository.disk_path}.git"
@@ -129,7 +130,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
       end
     end
 
-    context 'when indexing a non-HEAD commit', :elastic do
+    context 'when indexing a non-HEAD commit', :elastic, :clean_gitlab_redis_shared_state do
       let(:to_sha) { project.repository.commit('HEAD~1').sha }
 
       it_behaves_like 'index up to the specified commit'
@@ -200,7 +201,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
       end
     end
 
-    context "when indexing a project's wiki", :elastic do
+    context "when indexing a project's wiki", :elastic, :clean_gitlab_redis_shared_state do
       let(:project) { create(:project, :wiki_repo) }
       let(:indexer) { described_class.new(project, wiki: true) }
       let(:to_sha) { project.wiki.repository.commit('master').sha }
@@ -213,6 +214,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         expect_popen.with(
           [
             TestEnv.indexer_bin_path,
+            "--timeout=#{Gitlab::Elastic::Indexer::TIMEOUT}s",
             '--blob-type=wiki_blob',
             '--skip-commits',
             "--project-path=#{project.full_path}",
@@ -356,7 +358,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
     end
   end
 
-  context 'when a file is larger than elasticsearch_indexed_file_size_limit_kb', :elastic do
+  context 'when a file is larger than elasticsearch_indexed_file_size_limit_kb', :elastic, :clean_gitlab_redis_shared_state do
     let(:project) { create(:project, :repository) }
 
     before do
@@ -375,7 +377,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
     end
   end
 
-  context 'when a file path is larger than elasticsearch max size of 512 bytes', :elastic do
+  context 'when a file path is larger than elasticsearch max size of 512 bytes', :elastic, :clean_gitlab_redis_shared_state do
     let(:long_path) { "#{'a' * 1000}_file.txt" }
 
     before do

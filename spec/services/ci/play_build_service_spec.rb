@@ -61,6 +61,18 @@ RSpec.describe Ci::PlayBuildService, '#execute' do
       expect(build.reload.user).to eq user
     end
 
+    context 'when a subsequent job is skipped' do
+      let!(:job) { create(:ci_build, :skipped, pipeline: pipeline, stage_idx: build.stage_idx + 1) }
+
+      before do
+        create(:ci_build_need, build: job, name: build.name)
+      end
+
+      it 'marks the subsequent job as processable' do
+        expect { service.execute(build) }.to change { job.reload.status }.from('skipped').to('created')
+      end
+    end
+
     context 'when variables are supplied' do
       let(:job_variables) do
         [{ key: 'first', secret_value: 'first' },

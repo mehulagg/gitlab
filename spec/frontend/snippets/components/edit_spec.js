@@ -5,11 +5,9 @@ import { nextTick } from 'vue';
 import VueApollo, { ApolloMutation } from 'vue-apollo';
 import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import GetSnippetQuery from 'shared_queries/snippet/snippet.query.graphql';
-import CaptchaModal from '~/captcha/captcha_modal.vue';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import * as urlUtils from '~/lib/utils/url_utility';
 import SnippetEditApp from '~/snippets/components/edit.vue';
 import SnippetBlobActionsEdit from '~/snippets/components/snippet_blob_actions_edit.vue';
@@ -31,8 +29,6 @@ jest.mock('~/flash');
 const TEST_UPLOADED_FILES = ['foo/bar.txt', 'alpha/beta.js'];
 const TEST_API_ERROR = new Error('TEST_API_ERROR');
 const TEST_MUTATION_ERROR = 'Test mutation error';
-const TEST_CAPTCHA_RESPONSE = 'i-got-a-captcha';
-const TEST_CAPTCHA_SITE_KEY = 'abc123';
 const TEST_ACTIONS = {
   NO_CONTENT: merge({}, testEntries.created.diff, { content: '' }),
   NO_PATH: merge({}, testEntries.created.diff, { filePath: '' }),
@@ -59,9 +55,6 @@ const createMutationResponse = (key, obj = {}) => ({
           __typename: 'Snippet',
           webUrl: TEST_WEB_URL,
         },
-        spamLogId: null,
-        needsCaptchaResponse: false,
-        captchaSiteKey: null,
       },
       obj,
     ),
@@ -70,13 +63,6 @@ const createMutationResponse = (key, obj = {}) => ({
 
 const createMutationResponseWithErrors = (key) =>
   createMutationResponse(key, { errors: [TEST_MUTATION_ERROR] });
-
-const createMutationResponseWithRecaptcha = (key) =>
-  createMutationResponse(key, {
-    errors: ['ignored captcha error message'],
-    needsCaptchaResponse: true,
-    captchaSiteKey: TEST_CAPTCHA_SITE_KEY,
-  });
 
 const getApiData = ({
   id,
@@ -126,7 +112,6 @@ describe('Snippet Edit app', () => {
   });
 
   const findBlobActions = () => wrapper.find(SnippetBlobActionsEdit);
-  const findCaptchaModal = () => wrapper.find(CaptchaModal);
   const findSubmitButton = () => wrapper.find('[data-testid="snippet-submit-btn"]');
   const findCancelButton = () => wrapper.find('[data-testid="snippet-cancel-btn"]');
   const hasDisabledSubmit = () => Boolean(findSubmitButton().attributes('disabled'));
@@ -159,7 +144,6 @@ describe('Snippet Edit app', () => {
       stubs: {
         ApolloMutation,
         FormFooterActions,
-        CaptchaModal: stubComponent(CaptchaModal),
       },
       provide: {
         selectedLevel,
@@ -209,7 +193,6 @@ describe('Snippet Edit app', () => {
     });
 
     it('should render components', () => {
-      expect(wrapper.find(CaptchaModal).exists()).toBe(true);
       expect(wrapper.find(TitleField).exists()).toBe(true);
       expect(wrapper.find(SnippetDescriptionEdit).exists()).toBe(true);
       expect(wrapper.find(SnippetVisibilityEdit).exists()).toBe(true);
@@ -334,7 +317,9 @@ describe('Snippet Edit app', () => {
           });
 
           expect(urlUtils.redirectTo).not.toHaveBeenCalled();
-          expect(Flash).toHaveBeenCalledWith(expectMessage);
+          expect(createFlash).toHaveBeenCalledWith({
+            message: expectMessage,
+          });
         },
       );
 
@@ -352,9 +337,9 @@ describe('Snippet Edit app', () => {
 
         it('should flash', () => {
           // Apollo automatically wraps the resolver's error in a NetworkError
-          expect(Flash).toHaveBeenCalledWith(
-            `Can't update snippet: Network error: ${TEST_API_ERROR.message}`,
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: `Can't update snippet: Network error: ${TEST_API_ERROR.message}`,
+          });
         });
 
         it('should console error', () => {
@@ -365,50 +350,6 @@ describe('Snippet Edit app', () => {
             '[gitlab] unexpected error while updating snippet',
             expect.objectContaining({ message: `Network error: ${TEST_API_ERROR.message}` }),
           );
-        });
-      });
-
-      describe('when needsCaptchaResponse is true', () => {
-        let modal;
-
-        beforeEach(async () => {
-          mutateSpy
-            .mockResolvedValueOnce(createMutationResponseWithRecaptcha('updateSnippet'))
-            .mockResolvedValueOnce(createMutationResponseWithErrors('updateSnippet'));
-
-          await createComponentAndSubmit();
-
-          modal = findCaptchaModal();
-
-          mutateSpy.mockClear();
-        });
-
-        it('should display captcha modal', () => {
-          expect(urlUtils.redirectTo).not.toHaveBeenCalled();
-          expect(modal.props()).toEqual({
-            needsCaptchaResponse: true,
-            captchaSiteKey: TEST_CAPTCHA_SITE_KEY,
-          });
-        });
-
-        describe.each`
-          response                 | expectedCalls
-          ${null}                  | ${[]}
-          ${TEST_CAPTCHA_RESPONSE} | ${[['updateSnippet', { input: { ...getApiData(createSnippet()), captchaResponse: TEST_CAPTCHA_RESPONSE } }]]}
-        `('when captcha response is $response', ({ response, expectedCalls }) => {
-          beforeEach(async () => {
-            modal.vm.$emit('receivedCaptchaResponse', response);
-
-            await nextTick();
-          });
-
-          it('sets needsCaptchaResponse to false', () => {
-            expect(modal.props('needsCaptchaResponse')).toEqual(false);
-          });
-
-          it(`expected to call times = ${expectedCalls.length}`, () => {
-            expect(mutateSpy.mock.calls).toEqual(expectedCalls);
-          });
         });
       });
     });

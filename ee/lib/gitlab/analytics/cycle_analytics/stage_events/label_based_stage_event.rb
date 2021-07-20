@@ -20,13 +20,12 @@ module Gitlab
             true
           end
 
-          def timestamp_projection
-            Arel.sql("#{join_expression_name}.created_at")
+          def hash_code
+            Digest::SHA256.hexdigest("#{self.class.identifier}-#{label_id}")
           end
 
-          override :column_list
           def column_list
-            [timestamp_projection]
+            [Arel.sql("#{join_expression_name}.created_at")]
           end
 
           # rubocop: disable CodeReuse/ActiveRecord
@@ -34,6 +33,12 @@ module Gitlab
             query
               .from(Arel::Nodes::Grouping.new(Arel.sql(object_type.all.to_sql)).as(object_type.table_name)) # This is needed for the LATERAL JOIN: FROM (SELECT * FROM table) as table
               .joins("INNER JOIN LATERAL (#{subquery.to_sql}) #{join_expression_name} ON TRUE")
+          end
+          # rubocop: enable CodeReuse/ActiveRecord
+
+          # rubocop: disable CodeReuse/ActiveRecord
+          def apply_negated_query_customization(query)
+            query.where('NOT EXISTS (?)', subquery)
           end
           # rubocop: enable CodeReuse/ActiveRecord
 

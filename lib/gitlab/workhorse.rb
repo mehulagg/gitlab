@@ -32,7 +32,7 @@ module Gitlab
           GitalyServer: {
             address: Gitlab::GitalyClient.address(repository.storage),
             token: Gitlab::GitalyClient.token(repository.storage),
-            features: Feature::Gitaly.server_feature_flags
+            features: Feature::Gitaly.server_feature_flags(repository.project)
           }
         }
 
@@ -231,7 +231,7 @@ module Gitlab
         {
           address: Gitlab::GitalyClient.address(repository.shard),
           token: Gitlab::GitalyClient.token(repository.shard),
-          features: Feature::Gitaly.server_feature_flags
+          features: Feature::Gitaly.server_feature_flags(repository.project)
         }
       end
 
@@ -270,7 +270,7 @@ module Gitlab
               prefix: metadata['ArchivePrefix'],
               format: format,
               path: path.presence || "",
-              include_lfs_blobs: Feature.enabled?(:include_lfs_blobs_in_archive, default_enabled: true)
+              include_lfs_blobs: true
             ).to_proto
           )
         }

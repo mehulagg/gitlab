@@ -5,6 +5,8 @@ module Gitlab
     module Stage
       class FinishImportWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include StageMethods
 
@@ -27,7 +29,8 @@ module Gitlab
           info(
             project.id,
             message: "GitHub project import finished",
-            duration_s: duration.round(2)
+            duration_s: duration.round(2),
+            object_counts: ::Gitlab::GithubImport::ObjectCounter.summary(project)
           )
         end
 

@@ -162,7 +162,7 @@ RSpec.describe Gitlab::Utils do
 
   describe '.nlbr' do
     it 'replaces new lines with <br>' do
-      expect(described_class.nlbr("<b>hello</b>\n<i>world</i>".freeze)).to eq("hello<br>world")
+      expect(described_class.nlbr("<b>hello</b>\n<i>world</i>")).to eq("hello<br>world")
     end
   end
 
@@ -192,6 +192,7 @@ RSpec.describe Gitlab::Utils do
       expect(to_boolean('YeS')).to be(true)
       expect(to_boolean('t')).to be(true)
       expect(to_boolean('1')).to be(true)
+      expect(to_boolean(1)).to be(true)
       expect(to_boolean('ON')).to be(true)
 
       expect(to_boolean('FaLse')).to be(false)
@@ -199,6 +200,7 @@ RSpec.describe Gitlab::Utils do
       expect(to_boolean('NO')).to be(false)
       expect(to_boolean('n')).to be(false)
       expect(to_boolean('0')).to be(false)
+      expect(to_boolean(0)).to be(false)
       expect(to_boolean('oFF')).to be(false)
     end
 
@@ -349,6 +351,22 @@ RSpec.describe Gitlab::Utils do
     end
   end
 
+  describe '.deep_symbolized_access' do
+    let(:hash) do
+      { "variables" => [{ "key" => "VAR1", "value" => "VALUE2" }] }
+    end
+
+    subject { described_class.deep_symbolized_access(hash) }
+
+    it 'allows to access hash keys with symbols' do
+      expect(subject[:variables]).to be_a(Array)
+    end
+
+    it 'allows to access array keys with symbols' do
+      expect(subject[:variables].first[:key]).to eq('VAR1')
+    end
+  end
+
   describe '.try_megabytes_to_bytes' do
     context 'when the size can be converted to megabytes' do
       it 'returns the size in megabytes' do
@@ -388,8 +406,8 @@ RSpec.describe Gitlab::Utils do
 
   describe ".safe_downcase!" do
     where(:str, :result) do
-      "test".freeze | "test"
-      "Test".freeze | "test"
+      "test" | "test"
+      "Test" | "test"
       "test" | "test"
       "Test" | "test"
     end
@@ -412,6 +430,29 @@ RSpec.describe Gitlab::Utils do
 
     it 'returns nil with invalid parameter' do
       expect(described_class.parse_url(1)).to be nil
+    end
+  end
+
+  describe '.removes_sensitive_data_from_url' do
+    it 'returns string object' do
+      expect(described_class.removes_sensitive_data_from_url('http://gitlab.com')).to be_instance_of(String)
+    end
+
+    it 'returns nil when URI cannot be parsed' do
+      expect(described_class.removes_sensitive_data_from_url('://gitlab.com')).to be nil
+    end
+
+    it 'returns nil with invalid parameter' do
+      expect(described_class.removes_sensitive_data_from_url(1)).to be nil
+    end
+
+    it 'returns string with filtered access_token param' do
+      expect(described_class.removes_sensitive_data_from_url('http://gitlab.com/auth.html#access_token=secret_token')).to eq('http://gitlab.com/auth.html#access_token=filtered')
+    end
+
+    it 'returns string with filtered access_token param but other params preserved' do
+      expect(described_class.removes_sensitive_data_from_url('http://gitlab.com/auth.html#access_token=secret_token&token_type=Bearer&state=test'))
+        .to include('&token_type=Bearer', '&state=test')
     end
   end
 

@@ -10,7 +10,7 @@ RSpec.describe Admin::IntegrationsController do
   end
 
   describe '#edit' do
-    Service.available_services_names.each do |integration_name|
+    Integration.available_integration_names.each do |integration_name|
       context "#{integration_name}" do
         it 'successfully displays the template' do
           get :edit, params: { id: integration_name }
@@ -27,7 +27,7 @@ RSpec.describe Admin::IntegrationsController do
       end
 
       it 'returns 404' do
-        get :edit, params: { id: Service.available_services_names.sample }
+        get :edit, params: { id: Integration.available_integration_names.sample }
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -37,10 +37,10 @@ RSpec.describe Admin::IntegrationsController do
   describe '#update' do
     include JiraServiceHelper
 
-    let(:integration) { create(:jira_service, :instance) }
+    let(:integration) { create(:jira_integration, :instance) }
 
     before do
-      stub_jira_service_test
+      stub_jira_integration_test
       allow(PropagateIntegrationWorker).to receive(:perform_async)
 
       put :update, params: { id: integration.class.to_param, service: { url: url } }
@@ -75,8 +75,8 @@ RSpec.describe Admin::IntegrationsController do
   end
 
   describe '#reset' do
-    let_it_be(:integration) { create(:jira_service, :instance) }
-    let_it_be(:inheriting_integration) { create(:jira_service, inherit_from_id: integration.id) }
+    let_it_be(:integration) { create(:jira_integration, :instance) }
+    let_it_be(:inheriting_integration) { create(:jira_integration, inherit_from_id: integration.id) }
 
     subject do
       post :reset, params: { id: integration.class.to_param }
@@ -93,8 +93,8 @@ RSpec.describe Admin::IntegrationsController do
     end
 
     it 'deletes the integration and all inheriting integrations' do
-      expect { subject }.to change { JiraService.for_instance.count }.by(-1)
-        .and change { JiraService.inherit_from_id(integration.id).count }.by(-1)
+      expect { subject }.to change { Integrations::Jira.for_instance.count }.by(-1)
+        .and change { Integrations::Jira.inherit_from_id(integration.id).count }.by(-1)
     end
   end
 end

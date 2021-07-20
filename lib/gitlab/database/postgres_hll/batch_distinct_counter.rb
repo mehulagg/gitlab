@@ -11,17 +11,17 @@ module Gitlab
       # In order to not use a possible complex time consuming query when calculating min and max values,
       # the start and finish can be sent specifically, start and finish should contain max and min values for PRIMARY KEY of
       # relation (most cases `id` column) rather than counted attribute eg:
-      # estimate_distinct_count(start: ::Project.with_active_services.minimum(:id), finish: ::Project.with_active_services.maximum(:id))
+      # estimate_distinct_count(start: ::Project.aimed_for_deletion.minimum(:id), finish: ::Project.aimed_for_deletion.maximum(:id))
       #
       # Grouped relations are NOT supported yet.
       #
       # @example Usage
       #  ::Gitlab::Database::PostgresHllBatchDistinctCount.new(::Project, :creator_id).execute
-      #  ::Gitlab::Database::PostgresHllBatchDistinctCount.new(::Project.with_active_services.service_desk_enabled.where(time_period))
+      #  ::Gitlab::Database::PostgresHllBatchDistinctCount.new(::Project.aimed_for_deletion.service_desk_enabled.where(time_period))
       #    .execute(
       #      batch_size: 1_000,
-      #      start: ::Project.with_active_services.service_desk_enabled.where(time_period).minimum(:id),
-      #      finish: ::Project.with_active_services.service_desk_enabled.where(time_period).maximum(:id)
+      #      start: ::Project.aimed_for_deletion.service_desk_enabled.where(time_period).minimum(:id),
+      #      finish: ::Project.aimed_for_deletion.service_desk_enabled.where(time_period).maximum(:id)
       #    )
       #
       # @note HyperLogLog is an PROBABILISTIC algorithm that ESTIMATES distinct count of given attribute value for supplied relation
@@ -41,19 +41,6 @@ module Gitlab
         BUCKET_ID_MASK = (Buckets::TOTAL_BUCKETS - ZERO_OFFSET).to_s(2)
         BIT_31_MASK = "B'0#{'1' * 31}'"
         BIT_32_NORMALIZED_BUCKET_ID_MASK = "B'#{'0' * (32 - BUCKET_ID_MASK.size)}#{BUCKET_ID_MASK}'"
-        # @example source_query
-        #   SELECT CAST(('X' || md5(CAST(%{column} as text))) as bit(32)) attr_hash_32_bits
-        #   FROM %{relation}
-        #   WHERE %{pkey} >= %{batch_start}
-        #   AND %{pkey} < %{batch_end}
-        #   AND %{column} IS NOT NULL
-        BUCKETED_DATA_SQL = <<~SQL
-          WITH hashed_attributes AS (%{source_query})
-          SELECT (attr_hash_32_bits & #{BIT_32_NORMALIZED_BUCKET_ID_MASK})::int AS bucket_num,
-            (31 - floor(log(2, min((attr_hash_32_bits & #{BIT_31_MASK})::int))))::int as bucket_hash
-          FROM hashed_attributes
-          GROUP BY 1
-        SQL
 
         WRONG_CONFIGURATION_ERROR = Class.new(ActiveRecord::StatementInvalid)
 
@@ -82,10 +69,8 @@ module Gitlab
           hll_buckets = Buckets.new
 
           while batch_start <= finish
-            begin
-              hll_buckets.merge_hash!(hll_buckets_for_batch(batch_start, batch_start + batch_size))
-              batch_start += batch_size
-            end
+            hll_buckets.merge_hash!(hll_buckets_for_batch(batch_start, batch_start + batch_size))
+            batch_start += batch_size
             sleep(SLEEP_TIME_IN_SECONDS)
           end
 
@@ -103,7 +88,7 @@ module Gitlab
         def hll_buckets_for_batch(start, finish)
           @relation
             .connection
-            .execute(BUCKETED_DATA_SQL % { source_query: source_query(start, finish) })
+            .execute(bucketed_data_sql % { source_query: source_query(start, finish) })
             .map(&:values)
             .to_h
         end
@@ -138,6 +123,22 @@ module Gitlab
 
         def actual_finish(finish)
           finish || @relation.unscope(:group, :having).maximum(@relation.primary_key) || 0
+        end
+
+        # @example source_query
+        #   SELECT CAST(('X' || md5(CAST(%{column} as text))) as bit(32)) attr_hash_32_bits
+        #   FROM %{relation}
+        #   WHERE %{pkey} >= %{batch_start}
+        #   AND %{pkey} < %{batch_end}
+        #   AND %{column} IS NOT NULL
+        def bucketed_data_sql
+          <<~SQL
+            WITH hashed_attributes AS #{Gitlab::Database::AsWithMaterialized.materialized_if_supported} (%{source_query})
+            SELECT (attr_hash_32_bits & #{BIT_32_NORMALIZED_BUCKET_ID_MASK})::int AS bucket_num,
+              (31 - floor(log(2, min((attr_hash_32_bits & #{BIT_31_MASK})::int))))::int as bucket_hash
+            FROM hashed_attributes
+            GROUP BY 1
+          SQL
         end
       end
     end

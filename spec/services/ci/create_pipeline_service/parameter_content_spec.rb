@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { project.owner }
+
   let(:service) { described_class.new(project, user, { ref: 'refs/heads/master' }) }
   let(:content) do
     <<~EOY
@@ -29,7 +30,7 @@ RSpec.describe Ci::CreatePipelineService do
 
   describe '#execute' do
     context 'when source is a dangling build' do
-      subject { service.execute(:ondemand_dast_scan, content: content) }
+      subject { service.execute(:ondemand_dast_scan, content: content).payload }
 
       context 'parameter config content' do
         it 'creates a pipeline' do

@@ -15,6 +15,7 @@ module API
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
+    route_setting :authentication, job_token_allowed: true, job_token_scope: :project
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Get a project container repositories' do
         detail 'This feature was introduced in GitLab 11.8.'
@@ -30,7 +31,7 @@ module API
           user: current_user, subject: user_project
         ).execute
 
-        track_package_event('list_repositories', :container)
+        track_package_event('list_repositories', :container, user: current_user, project: user_project, namespace: user_project.namespace)
 
         present paginate(repositories), with: Entities::ContainerRegistry::Repository, tags: params[:tags], tags_count: params[:tags_count]
       end
@@ -45,7 +46,7 @@ module API
         authorize_admin_container_image!
 
         DeleteContainerRepositoryWorker.perform_async(current_user.id, repository.id) # rubocop:disable CodeReuse/Worker
-        track_package_event('delete_repository', :container)
+        track_package_event('delete_repository', :container, user: current_user, project: user_project, namespace: user_project.namespace)
 
         status :accepted
       end
@@ -62,7 +63,7 @@ module API
         authorize_read_container_image!
 
         tags = Kaminari.paginate_array(repository.tags)
-        track_package_event('list_tags', :container)
+        track_package_event('list_tags', :container, user: current_user, project: user_project, namespace: user_project.namespace)
 
         present paginate(tags), with: Entities::ContainerRegistry::Tag
       end
@@ -91,7 +92,7 @@ module API
           declared_params.except(:repository_id).merge(container_expiration_policy: false))
         # rubocop:enable CodeReuse/Worker
 
-        track_package_event('delete_tag_bulk', :container)
+        track_package_event('delete_tag_bulk', :container, user: current_user, project: user_project, namespace: user_project.namespace)
 
         status :accepted
       end
@@ -127,7 +128,7 @@ module API
           .execute(repository)
 
         if result[:status] == :success
-          track_package_event('delete_tag', :container)
+          track_package_event('delete_tag', :container, user: current_user, project: user_project, namespace: user_project.namespace)
 
           status :ok
         else

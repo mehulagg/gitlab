@@ -9,10 +9,6 @@ RSpec.describe MergeRequestDiff do
 
   let(:diff_with_commits) { create(:merge_request).merge_request_diff }
 
-  before do
-    stub_feature_flags(diffs_gradual_load: false)
-  end
-
   describe 'validations' do
     subject { diff_with_commits }
 
@@ -23,7 +19,7 @@ RSpec.describe MergeRequestDiff do
 
       expect(subject.valid?).to be false
       expect(subject.errors.count).to eq 3
-      expect(subject.errors).to all(include('is not a valid SHA'))
+      expect(subject.errors.full_messages).to all(include('is not a valid SHA'))
     end
 
     it 'does not validate uniqueness by default' do
@@ -61,7 +57,7 @@ RSpec.describe MergeRequestDiff do
 
       let_it_be(:merge_head) do
         MergeRequests::MergeToRefService
-          .new(merge_request.project, merge_request.author)
+          .new(project: merge_request.project, current_user: merge_request.author)
           .execute(merge_request)
 
         merge_request.create_merge_head_diff
@@ -115,6 +111,7 @@ RSpec.describe MergeRequestDiff do
     let(:closed_recently) { recently_closed_mr.merge_request_diff }
 
     let_it_be(:recently_merged_mr) { create(:merge_request, :merged) }
+
     let(:merged_recently) { recently_merged_mr.merge_request_diff }
 
     before do
@@ -418,8 +415,8 @@ RSpec.describe MergeRequestDiff do
       shared_examples_for 'fetching full diffs' do
         it 'returns diffs from repository comparison' do
           expect_next_instance_of(Compare) do |comparison|
-            expect(comparison).to receive(:diffs_in_batch)
-              .with(1, 10, diff_options: diff_options)
+            expect(comparison).to receive(:diffs)
+              .with(diff_options)
               .and_call_original
           end
 
@@ -436,9 +433,7 @@ RSpec.describe MergeRequestDiff do
         it 'returns empty pagination data' do
           diffs = diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options)
 
-          expect(diffs.pagination_data).to eq(current_page: nil,
-                                              next_page: nil,
-                                              total_pages: nil)
+          expect(diffs.pagination_data).to eq(total_pages: nil)
         end
       end
 
@@ -448,31 +443,29 @@ RSpec.describe MergeRequestDiff do
         end
 
         it_behaves_like 'fetching full diffs'
-      end
 
-      context 'when diff_options include ignore_whitespace_change' do
-        it_behaves_like 'fetching full diffs' do
+        context 'when diff_options include ignore_whitespace_change' do
           let(:diff_options) do
             { ignore_whitespace_change: true }
           end
+
+          it_behaves_like 'fetching full diffs'
         end
       end
 
       context 'when persisted files available' do
         it 'returns paginated diffs' do
-          diffs = diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options)
+          diffs = diff_with_commits.diffs_in_batch(0, 10, diff_options: diff_options)
 
           expect(diffs).to be_a(Gitlab::Diff::FileCollection::MergeRequestDiffBatch)
           expect(diffs.diff_files.size).to eq(10)
-          expect(diffs.pagination_data).to eq(current_page: 1,
-                                              next_page: 2,
-                                              total_pages: 2)
+          expect(diffs.pagination_data).to eq(total_pages: 20)
         end
 
         it 'sorts diff files directory first' do
           diff_with_commits.update!(sorted: false) # Mark as unsorted so it'll re-order
 
-          expect(diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options).diff_file_paths).to eq([
+          expect(diff_with_commits.diffs_in_batch(0, 10, diff_options: diff_options).diff_file_paths).to eq([
             'bar/branch-test.txt',
             'custom-highlighting/test.gitlab-custom',
             'encoding/iso8859.txt',
@@ -486,24 +479,26 @@ RSpec.describe MergeRequestDiff do
           ])
         end
 
-        context 'when sort_diffs feature flag is disabled' do
-          before do
-            stub_feature_flags(sort_diffs: false)
+        context 'when diff_options include ignore_whitespace_change' do
+          let(:diff_options) do
+            { ignore_whitespace_change: true }
           end
 
-          it 'does not sort diff files directory first' do
-            expect(diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options).diff_file_paths).to eq([
-              '.DS_Store',
-              '.gitattributes',
-              '.gitignore',
-              '.gitmodules',
-              'CHANGELOG',
-              'README',
-              'bar/branch-test.txt',
-              'custom-highlighting/test.gitlab-custom',
-              'encoding/iso8859.txt',
-              'files/.DS_Store'
-            ])
+          it 'returns pagination data from MergeRequestDiffBatch' do
+            diffs = diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options)
+            file_count = diff_with_commits.merge_request_diff_files.count
+
+            expect(diffs).to be_a(Gitlab::Diff::FileCollection::Compare)
+            expect(diffs.diff_files.size).to eq 10
+            expect(diffs.pagination_data).to eq(total_pages: file_count)
+          end
+
+          it 'returns an empty MergeRequestBatch with empty pagination data when the batch is empty' do
+            diffs = diff_with_commits.diffs_in_batch(30, 10, diff_options: diff_options)
+
+            expect(diffs).to be_a(Gitlab::Diff::FileCollection::MergeRequestDiffBatch)
+            expect(diffs.diff_files.size).to eq 0
+            expect(diffs.pagination_data).to eq(total_pages: nil)
           end
         end
       end
@@ -580,37 +575,6 @@ RSpec.describe MergeRequestDiff do
             'gitlab-grack',
             'gitlab-shell'
           ])
-        end
-
-        context 'when sort_diffs feature flag is disabled' do
-          before do
-            stub_feature_flags(sort_diffs: false)
-          end
-
-          it 'does not sort diff files directory first' do
-            expect(diff_with_commits.diffs(diff_options).diff_file_paths).to eq([
-              '.DS_Store',
-              '.gitattributes',
-              '.gitignore',
-              '.gitmodules',
-              'CHANGELOG',
-              'README',
-              'bar/branch-test.txt',
-              'custom-highlighting/test.gitlab-custom',
-              'encoding/iso8859.txt',
-              'files/.DS_Store',
-              'files/images/wm.svg',
-              'files/js/commit.coffee',
-              'files/lfs/lfs_object.iso',
-              'files/ruby/popen.rb',
-              'files/ruby/regex.rb',
-              'files/whitespace',
-              'foo/bar/.gitkeep',
-              'gitlab-grack',
-              'gitlab-shell',
-              'with space/README.md'
-            ])
-          end
         end
       end
     end
@@ -716,40 +680,6 @@ RSpec.describe MergeRequestDiff do
           'gitlab-grack',
           'gitlab-shell'
         ])
-      end
-
-      context 'when sort_diffs feature flag is disabled' do
-        before do
-          stub_feature_flags(sort_diffs: false)
-        end
-
-        it 'persists diff files unsorted by directory first' do
-          mr_diff = create(:merge_request).merge_request_diff
-          diff_files_paths = mr_diff.merge_request_diff_files.map { |file| file.new_path.presence || file.old_path }
-
-          expect(diff_files_paths).to eq([
-            '.DS_Store',
-            '.gitattributes',
-            '.gitignore',
-            '.gitmodules',
-            'CHANGELOG',
-            'README',
-            'bar/branch-test.txt',
-            'custom-highlighting/test.gitlab-custom',
-            'encoding/iso8859.txt',
-            'files/.DS_Store',
-            'files/images/wm.svg',
-            'files/js/commit.coffee',
-            'files/lfs/lfs_object.iso',
-            'files/ruby/popen.rb',
-            'files/ruby/regex.rb',
-            'files/whitespace',
-            'foo/bar/.gitkeep',
-            'gitlab-grack',
-            'gitlab-shell',
-            'with space/README.md'
-          ])
-        end
       end
 
       it 'expands collapsed diffs before saving' do
@@ -1165,6 +1095,10 @@ RSpec.describe MergeRequestDiff do
 
     it 'loads nothing if the merge request has no diff record' do
       expect(described_class.latest_diff_for_merge_requests(merge_request_3)).to be_empty
+    end
+
+    it 'loads nothing if nil was passed as merge_request' do
+      expect(described_class.latest_diff_for_merge_requests(nil)).to be_empty
     end
   end
 end

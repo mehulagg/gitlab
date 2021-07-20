@@ -1,10 +1,11 @@
+$top-nav-hover-bg: var(--indigo-900-alpha-008, $indigo-900-alpha-008) !important;
+
 .navbar-gitlab {
   padding: 0 16px;
   z-index: $header-zindex;
   margin-bottom: 0;
   min-height: $header-height;
   border: 0;
-  border-bottom: 1px solid $border-color;
   position: fixed;
   top: 0;
   left: 0;
@@ -105,7 +106,7 @@
 
     &.menu-expanded {
       @include media-breakpoint-down(xs) {
-        .title-container {
+        .hide-when-menu-expanded {
           display: none;
         }
 
@@ -255,6 +256,7 @@
       }
     }
 
+    .top-nav-toggle,
     > button {
       background: transparent;
       border: 0;
@@ -443,22 +445,22 @@
     font-weight: $gl-font-weight-normal;
     margin-left: -6px;
     font-size: 11px;
-    color: $white;
+    color: var(--gray-950, $white);
     padding: 0 5px;
     line-height: 12px;
     border-radius: 7px;
     box-shadow: 0 1px 0 rgba($gl-header-color, 0.2);
 
     &.green-badge {
-      background-color: $green-400;
+      background-color: var(--green-400, $green-400);
     }
 
     &.merge-requests-count {
-      background-color: $orange-400;
+      background-color: var(--orange-400, $orange-400);
     }
 
     &.todos-count {
-      background-color: $blue-400;
+      background-color: var(--blue-400, $blue-400);
     }
   }
 
@@ -512,7 +514,7 @@
 .header-user {
   &.show .dropdown-menu {
     margin-top: 4px;
-    color: $gl-text-color;
+    color: var(--gl-text-color, $gl-text-color);
     left: auto;
     max-height: $dropdown-max-height-lg;
 
@@ -553,7 +555,8 @@
   visibility: visible;
 }
 
-.with-performance-bar .navbar-gitlab {
+.with-performance-bar .navbar-gitlab,
+.with-performance-bar .fixed-top {
   top: $performance-bar-height;
 }
 
@@ -561,7 +564,7 @@
   justify-content: center;
   height: $header-height;
   background: $white;
-  border-bottom: 1px solid $white-normal;
+  border-bottom: 1px solid $gray-100;
 
   .tanuki-logo,
   .brand-header-logo {
@@ -581,7 +584,7 @@
   .no-emoji-placeholder,
   .clear-user-status {
     svg {
-      fill: $gl-text-color-secondary;
+      fill: var(--gray-500, $gray-500);
     }
   }
 
@@ -605,4 +608,84 @@
   }
 
   @include media-breakpoint-down(xs) { margin-right: 3px; }
+}
+
+.toggle-mobile-nav {
+  display: none;
+  background-color: transparent;
+  border: 0;
+  padding: 6px 16px;
+  margin: 0 0 0 -15px;
+  height: 46px;
+  color: $gl-text-color;
+
+  @include media-breakpoint-down(sm) {
+    display: flex;
+    align-items: center;
+
+    i {
+      font-size: 18px;
+    }
+
+    + .breadcrumbs-links {
+      padding-left: $gl-padding;
+      border-left: 1px solid $gl-text-color-quaternary;
+    }
+  }
+}
+
+.top-nav-container-view {
+  .gl-new-dropdown & .gl-search-box-by-type {
+    @include gl-m-0;
+  }
+
+  .frequent-items-list-item-container > a:hover {
+    background-color: $top-nav-hover-bg;
+  }
+}
+
+.top-nav-toggle {
+  .dropdown-icon {
+    @include gl-mr-3;
+  }
+
+  .dropdown-chevron {
+    top: 0;
+  }
+}
+
+.top-nav-menu-item {
+  color: var(--indigo-900, $theme-indigo-900) !important;
+
+  &.active,
+  &:hover {
+    background-color: $top-nav-hover-bg;
+  }
+
+  .gl-icon {
+    color: inherit !important;
+  }
+}
+
+.top-nav-responsive {
+  @include gl-display-none;
+  color: var(--indigo-900, $theme-indigo-900);
+}
+
+.top-nav-responsive-open {
+  .hide-when-top-nav-responsive-open {
+    @include media-breakpoint-down(xs) {
+      display: none !important;
+    }
+  }
+
+  .top-nav-responsive {
+    @include media-breakpoint-down(xs) {
+      @include gl-display-block;
+    }
+  }
+
+  .navbar-gitlab .header-content .title-container {
+    flex: 0;
+  }
 }

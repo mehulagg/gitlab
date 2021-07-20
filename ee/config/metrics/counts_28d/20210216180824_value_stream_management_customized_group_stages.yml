@@ -1,0 +1,18 @@
+---
+data_category: Optional
+key_path: usage_activity_by_stage_monthly.manage.value_stream_management_customized_group_stages
+description:
+product_section: dev
+product_stage:
+product_group: group::manage
+product_category:
+value_type: number
+status: data_available
+time_frame: 28d
+data_source: database
+distribution:
+- ee
+tier:
+- premium
+- ultimate
+skip_validation: true

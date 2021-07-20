@@ -1,10 +1,10 @@
 - return unless group_sidebar_link?(:epics)
 
-- epics_count = group_epics_count(state: 'opened')
+- epics_count = cached_issuables_count(group, type: :epics)
 - epics_items = ['epics#show', 'epics#index', 'epic_boards#index', 'epic_boards#show', 'roadmap#show']
 
 = nav_link(path: epics_items) do
-  = link_to group_epics_path(group), class: 'qa-group-epics-link' do
+  = link_to group_epics_path(group), class: 'qa-group-epics-link has-sub-items' do
     .nav-icon-container
       = sprite_icon('epic')
     %span.nav-item-name
@@ -20,10 +20,9 @@
       = link_to group_epics_path(group), title: 'List' do
         %span= _('List')
 
-    - if Feature.enabled?(:epic_boards, @group)
-      = nav_link(path: ['epic_boards#index', 'epic_boards#show'], html_options: { class: "home" }) do
-        = link_to group_epic_boards_path(group), title: 'Boards' do
-          %span= _('Boards')
+    = nav_link(path: ['epic_boards#index', 'epic_boards#show'], html_options: { class: "home" }) do
+      = link_to group_epic_boards_path(group), title: 'Boards' do
+        %span= _('Boards')
 
     = nav_link(path: 'roadmap#show', html_options: { class: 'home' }) do
       = link_to group_roadmap_path(group), title: 'Roadmap' do

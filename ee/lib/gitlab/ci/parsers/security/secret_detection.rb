@@ -7,7 +7,7 @@ module Gitlab
         class SecretDetection < Common
           include Security::Concerns::DeprecatedSyntax
 
-          DEPRECATED_REPORT_VERSION = "1.2".freeze
+          DEPRECATED_REPORT_VERSION = "1.2"
 
           private
 

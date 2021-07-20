@@ -16,16 +16,13 @@ class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::Ap
   before_action -> {
     authorize_view_by_action!(:view_productivity_analytics)
   }
-  before_action -> {
-    push_frontend_feature_flag(:productivity_analytics_scatterplot_enabled, default_enabled: true)
-  }
 
   before_action :validate_params, only: :show, if: -> { request.format.json? }
 
   include IssuableCollections
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
-  track_unique_visits :show, target_id: 'g_analytics_productivity'
+  track_redis_hll_event :show, name: 'g_analytics_productivity'
 
   def show
     respond_to do |format|

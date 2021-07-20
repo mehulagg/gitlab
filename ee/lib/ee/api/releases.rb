@@ -34,7 +34,7 @@ module EE
 
           override :log_release_created_audit_event
           def log_release_created_audit_event(release)
-            EE::AuditEvents::ReleaseCreatedAuditEventService.new(
+            AuditEvents::ReleaseCreatedAuditEventService.new(
               current_user,
               user_project,
               request.ip,
@@ -44,7 +44,7 @@ module EE
 
           override :log_release_updated_audit_event
           def log_release_updated_audit_event
-            EE::AuditEvents::ReleaseUpdatedAuditEventService.new(
+            AuditEvents::ReleaseUpdatedAuditEventService.new(
               current_user,
               user_project,
               request.ip,
@@ -54,7 +54,7 @@ module EE
 
           override :log_release_milestones_updated_audit_event
           def log_release_milestones_updated_audit_event
-            EE::AuditEvents::ReleaseAssociateMilestoneAuditEventService.new(
+            AuditEvents::ReleaseAssociateMilestoneAuditEventService.new(
               current_user,
               user_project,
               request.ip,

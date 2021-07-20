@@ -35,7 +35,7 @@ This section is for links to information elsewhere in the GitLab documentation.
   - Storing data in another location.
   - Destructively reseeding the GitLab database.
   - Guidance around updating packaged PostgreSQL, including how to stop it
-    happening automatically.
+    from happening automatically.
 
 - [Information about external PostgreSQL](../postgresql/external.md).
 
@@ -53,10 +53,9 @@ This section is for links to information elsewhere in the GitLab documentation.
 
 - [PostgreSQL scaling](../postgresql/replication_and_failover.md)
   - Including [troubleshooting](../postgresql/replication_and_failover.md#troubleshooting)
-    `gitlab-ctl repmgr-check-master` (or `gitlab-ctl patroni check-leader` if
-    you're using Patroni) and PgBouncer errors.
+    `gitlab-ctl patroni check-leader` and PgBouncer errors.
 
-- [Developer database documentation](../../development/README.md#database-guides),
+- [Developer database documentation](../../development/index.md#database-guides),
   some of which is absolutely not for production use. Including:
   - Understanding EXPLAIN plans.
 
@@ -87,11 +86,11 @@ This section is for links to information elsewhere in the GitLab documentation.
   ```plaintext
   ERROR: replication slots can only be used if max_replication_slots > 0
 
-  FATAL: could not start WAL streaming: ERROR: replication slot “geo_secondary_my_domain_com” does not exist
+  FATAL: could not start WAL streaming: ERROR: replication slot "geo_secondary_my_domain_com" does not exist
 
   Command exceeded allowed execution time
 
-  PANIC: could not write to file ‘pg_xlog/xlogtemp.123’: No space left on device
+  PANIC: could not write to file 'pg_xlog/xlogtemp.123': No space left on device
   ```
 
 - [Checking Geo configuration](../geo/replication/troubleshooting.md), including:

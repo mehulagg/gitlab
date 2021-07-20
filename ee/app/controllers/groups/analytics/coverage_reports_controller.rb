@@ -3,7 +3,7 @@
 class Groups::Analytics::CoverageReportsController < Groups::Analytics::ApplicationController
   feature_category :code_testing
 
-  COVERAGE_PARAM = 'coverage'.freeze
+  COVERAGE_PARAM = 'coverage'
 
   before_action :load_group
   before_action -> { check_feature_availability!(:group_coverage_reports) }
@@ -11,7 +11,7 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
   def index
     respond_to do |format|
       format.csv do
-        track_event(:download_code_coverage_csv, **download_tracker_params)
+        ::Gitlab::Tracking.event(self.class.name, 'download_code_coverage_csv', **download_tracker_params)
         send_data(render_csv(report_results), type: 'text/csv; charset=utf-8')
       end
     end
@@ -32,24 +32,29 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
   end
 
   def report_results
-    Ci::DailyBuildGroupReportResultsByGroupFinder.new(**finder_params).execute
+    ::Ci::DailyBuildGroupReportResultsFinder.new(
+      params: finder_params,
+      current_user: current_user
+    ).execute
   end
 
   def finder_params
     {
-      current_user: current_user,
       group: @group,
-      project_ids: params.permit(project_ids: [])[:project_ids],
+      coverage: true,
+      start_date: params[:start_date],
+      end_date: params[:end_date],
       ref_path: params[:ref_path],
-      start_date: Date.parse(params.require(:start_date)),
-      end_date: Date.parse(params.require(:end_date))
+      sort: true
     }
   end
 
   def download_tracker_params
     {
       label: 'group_id',
-      value: @group.id
+      value: @group.id,
+      user: current_user,
+      namespace: @group
     }
   end
 end

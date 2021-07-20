@@ -26,14 +26,19 @@ module ApplicationSettingsHelper
     end
   end
 
-  def storage_weights
-    ApplicationSetting.repository_storages_weighted_attributes.map do |attribute|
-      storage = attribute.to_s.delete_prefix('repository_storages_weighted_')
+  def kroki_available_formats
+    ApplicationSetting.kroki_formats_attributes.map do |key, value|
       {
-        name: attribute,
-        label: storage,
-        value: @application_setting.repository_storages_weighted[storage] || 0
+        name: "kroki_formats_#{key}",
+        label: value[:label],
+        value: @application_setting.kroki_formats[key] || false
       }
+    end
+  end
+
+  def storage_weights
+    Gitlab.config.repositories.storages.keys.each_with_object(OpenStruct.new) do |storage, weights|
+      weights[storage.to_sym] = @application_setting.repository_storages_weighted[storage] || 0
     end
   end
 
@@ -97,15 +102,20 @@ module ApplicationSettingsHelper
   def oauth_providers_checkboxes
     button_based_providers.map do |source|
       disabled = @application_setting.disabled_oauth_sign_in_sources.include?(source.to_s)
-      css_class = ['btn']
-      css_class << 'active' unless disabled
-      checkbox_name = 'application_setting[enabled_oauth_sign_in_sources][]'
       name = Gitlab::Auth::OAuth::Provider.label_for(source)
+      checkbox_name = 'application_setting[enabled_oauth_sign_in_sources][]'
+      checkbox_id = "application_setting_enabled_oauth_sign_in_sources_#{name.parameterize(separator: '_')}"
 
-      label_tag(checkbox_name, class: css_class.join(' ')) do
-        check_box_tag(checkbox_name, source, !disabled,
-                      autocomplete: 'off',
-                      id: name.tr(' ', '_')) + name
+      content_tag :div, class: 'form-check' do
+        check_box_tag(
+          checkbox_name,
+          source,
+          !disabled,
+          autocomplete: 'off',
+          id: checkbox_id,
+          class: 'form-check-input'
+        ) +
+        label_tag(checkbox_id, name, class: 'form-check-label')
       end
     end
   end
@@ -169,6 +179,7 @@ module ApplicationSettingsHelper
   def visible_attributes
     [
       :abuse_notification_email,
+      :admin_mode,
       :after_sign_out_path,
       :after_sign_up_text,
       :akismet_api_key,
@@ -218,7 +229,11 @@ module ApplicationSettingsHelper
       :email_author_in_body,
       :enabled_git_access_protocol,
       :enforce_terms,
+      :external_pipeline_validation_service_timeout,
+      :external_pipeline_validation_service_token,
+      :external_pipeline_validation_service_url,
       :first_day_of_week,
+      :floc_enabled,
       :force_pages_access_control,
       :gitaly_timeout_default,
       :gitaly_timeout_medium,
@@ -242,6 +257,7 @@ module ApplicationSettingsHelper
       :housekeeping_incremental_repack_period,
       :html_emails_enabled,
       :import_sources,
+      :in_product_marketing_emails_enabled,
       :invisible_captcha_enabled,
       :max_artifacts_size,
       :max_attachment_size,
@@ -259,6 +275,7 @@ module ApplicationSettingsHelper
       :personal_access_token_prefix,
       :kroki_enabled,
       :kroki_url,
+      :kroki_formats,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
@@ -286,6 +303,7 @@ module ApplicationSettingsHelper
       :sourcegraph_public_only,
       :spam_check_endpoint_enabled,
       :spam_check_endpoint_url,
+      :spam_check_api_key,
       :terminal_max_session_time,
       :terms,
       :throttle_authenticated_api_enabled,
@@ -294,9 +312,15 @@ module ApplicationSettingsHelper
       :throttle_authenticated_web_enabled,
       :throttle_authenticated_web_period_in_seconds,
       :throttle_authenticated_web_requests_per_period,
+      :throttle_authenticated_packages_api_enabled,
+      :throttle_authenticated_packages_api_period_in_seconds,
+      :throttle_authenticated_packages_api_requests_per_period,
       :throttle_unauthenticated_enabled,
       :throttle_unauthenticated_period_in_seconds,
       :throttle_unauthenticated_requests_per_period,
+      :throttle_unauthenticated_packages_api_enabled,
+      :throttle_unauthenticated_packages_api_period_in_seconds,
+      :throttle_unauthenticated_packages_api_requests_per_period,
       :throttle_protected_paths_enabled,
       :throttle_protected_paths_period_in_seconds,
       :throttle_protected_paths_requests_per_period,
@@ -307,6 +331,7 @@ module ApplicationSettingsHelper
       :unique_ips_limit_per_user,
       :unique_ips_limit_time_window,
       :usage_ping_enabled,
+      :usage_ping_features_enabled,
       :user_default_external,
       :user_show_add_ssh_key_message,
       :user_default_internal_regex,
@@ -314,9 +339,13 @@ module ApplicationSettingsHelper
       :version_check_enabled,
       :web_ide_clientside_preview_enabled,
       :diff_max_patch_bytes,
+      :diff_max_files,
+      :diff_max_lines,
       :commit_email_hostname,
       :protected_ci_variables,
       :local_markdown_version,
+      :mailgun_signing_key,
+      :mailgun_events_enabled,
       :snowplow_collector_hostname,
       :snowplow_cookie_domain,
       :snowplow_enabled,
@@ -342,8 +371,11 @@ module ApplicationSettingsHelper
       :rate_limiting_response_text,
       :container_registry_expiration_policies_worker_capacity,
       :container_registry_cleanup_tags_service_max_list_size,
-      :keep_latest_artifact
-    ]
+      :keep_latest_artifact,
+      :whats_new_variant
+    ].tap do |settings|
+      settings << :deactivate_dormant_users unless Gitlab.com?
+    end
   end
 
   def external_authorization_service_attributes
@@ -371,7 +403,7 @@ module ApplicationSettingsHelper
   end
 
   def integration_expanded?(substring)
-    @application_setting.errors.any? { |k| k.to_s.start_with?(substring) }
+    @application_setting.errors.messages.any? { |k, _| k.to_s.start_with?(substring) }
   end
 
   def instance_clusters_enabled?
@@ -408,13 +440,17 @@ module ApplicationSettingsHelper
     Feature.enabled?(:help_page_documentation_redirect)
   end
 
+  def valid_runner_registrars
+    Gitlab::CurrentSettings.valid_runner_registrars
+  end
+
   def signup_enabled?
     !!Gitlab::CurrentSettings.signup_enabled
   end
 end
 
-ApplicationSettingsHelper.prepend_if_ee('EE::ApplicationSettingsHelper')
+ApplicationSettingsHelper.prepend_mod_with('ApplicationSettingsHelper')
 
 # The methods in `EE::ApplicationSettingsHelper` should be available as both
 # instance and class methods.
-ApplicationSettingsHelper.extend_if_ee('EE::ApplicationSettingsHelper')
+ApplicationSettingsHelper.extend_mod_with('ApplicationSettingsHelper')

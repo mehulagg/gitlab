@@ -1,8 +1,8 @@
 <script>
 import { GlModal, GlSprintf, GlAlert, GlLink, GlIcon } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { __, s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import { DAST_SITE_VALIDATION_REVOKE_MODAL_ID } from '../constants';
 import dastSiteValidationRevokeMutation from '../graphql/dast_site_validation_revoke.mutation.graphql';
 

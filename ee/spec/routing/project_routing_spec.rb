@@ -37,7 +37,7 @@ RSpec.describe 'EE-specific project routing' do
   # security_namespace_project_pipeline GET /:project_id/pipelines/:id/security(.:format)
   describe Projects::PipelinesController, 'routing' do
     it 'to #security' do
-      expect(get('/gitlab/gitlabhq/pipelines/12/security')).to route_to('projects/pipelines#security', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '12')
+      expect(get('/gitlab/gitlabhq/-/pipelines/12/security')).to route_to('projects/pipelines#security', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '12')
     end
   end
 
@@ -62,6 +62,36 @@ RSpec.describe 'EE-specific project routing' do
   describe Projects::Integrations::Jira::IssuesController, 'routing', type: :routing do
     it "to #index" do
       expect(get("/gitlab/gitlabhq/-/integrations/jira/issues")).to route_to('projects/integrations/jira/issues#index', namespace_id: 'gitlab', project_id: 'gitlabhq')
+    end
+  end
+
+  describe Projects::Security::PoliciesController, 'routing' do
+    it 'to #show' do
+      expect(get('/gitlab/gitlabhq/-/security/policy')).to route_to('projects/security/policies#show', namespace_id: 'gitlab', project_id: 'gitlabhq')
+    end
+  end
+
+  describe Projects::ThreatMonitoringController, 'routing' do
+    where(:id) do
+      %w[test.1.2 test-policy test:policy]
+    end
+
+    with_them do
+      it "to #edit" do
+        expect(get("/gitlab/gitlabhq/-/threat_monitoring/policies/#{id}/edit")).to route_to('projects/threat_monitoring#edit', namespace_id: 'gitlab', project_id: 'gitlabhq', id: id)
+      end
+    end
+  end
+
+  describe Projects::Security::NetworkPoliciesController, 'routing' do
+    where(:id) do
+      %w[test.1.2 test-policy test:policy]
+    end
+
+    with_them do
+      it "to #update" do
+        expect(put("/gitlab/gitlabhq/-/security/network_policies/#{id}")).to route_to('projects/security/network_policies#update', namespace_id: 'gitlab', project_id: 'gitlabhq', id: id)
+      end
     end
   end
 end

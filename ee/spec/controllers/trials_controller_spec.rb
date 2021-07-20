@@ -12,13 +12,6 @@ RSpec.describe TrialsController do
     }
   end
 
-  let_it_be(:trial_registration_with_social_signin_context) do
-    {
-      google_signon: user.identities.select { |id| id.provider == 'google_auth2'}.present?,
-      github_signon: user.identities.select { |id| id.provider == 'github' }.present?
-    }
-  end
-
   let(:dev_env_or_com) { true }
   let(:logged_in) { true }
 
@@ -63,8 +56,6 @@ RSpec.describe TrialsController do
 
     it 'calls record_experiment_user for the experiments' do
       expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
-      expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy)
-      expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
 
       subject
     end
@@ -163,54 +154,26 @@ RSpec.describe TrialsController do
   end
 
   describe '#select' do
-    def get_select
-      get :select
-    end
-
     subject do
-      get_select
+      get :select
       response
     end
 
     it_behaves_like 'an authenticated endpoint'
     it_behaves_like 'a dot-com only feature'
-
-    context 'when the group-only trials experiment is active' do
-      before do
-        stub_experiment(group_only_trials: true)
-        stub_experiment_for_subject(group_only_trials: user_is_in_experiment?)
-      end
-
-      def expected_group_type
-        user_is_in_experiment? ? 'experimental' : 'control'
-      end
-
-      where(user_is_in_experiment?: [true, false])
-
-      with_them do
-        it 'records the user as being part of the experiment' do
-          expect { get_select }.to change { ExperimentUser.count }.by(1)
-          expect(ExperimentUser.last.group_type).to eq(expected_group_type)
-        end
-      end
-    end
-
-    context 'when the group-only trials experiment is not active' do
-      it 'does not record the user as being part of the experiment' do
-        expect { get_select }.not_to change { ExperimentUser.count }
-      end
-    end
   end
 
   describe '#apply' do
-    let_it_be(:namespace) { create(:namespace, owner_id: user.id, path: 'namespace-test') }
+    let_it_be(:namespace) { create(:group, path: 'namespace-test') }
 
     let(:apply_trial_result) { nil }
     let(:post_params) { { namespace_id: namespace.id } }
 
     before do
-      allow_any_instance_of(GitlabSubscriptions::ApplyTrialService).to receive(:execute) do
-        { success: apply_trial_result }
+      namespace.add_owner(user)
+
+      allow_next_instance_of(GitlabSubscriptions::ApplyTrialService) do |service|
+        allow(service).to receive(:execute).and_return({ success: apply_trial_result })
       end
     end
 
@@ -228,22 +191,48 @@ RSpec.describe TrialsController do
       it { is_expected.to redirect_to("/#{namespace.path}?trial=true") }
       it 'calls the record conversion method for the experiments' do
         expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: namespace.id)
-        expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy, namespace_id: namespace.id)
-        expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: namespace.id)
         expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues, namespace_id: namespace.id)
         expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
-        expect(controller).to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
-        expect(controller).to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
         expect(controller).to receive(:record_experiment_conversion_event).with(:trial_onboarding_issues)
 
         subject
+      end
+
+      context 'in discover group security flow' do
+        let(:post_params) { { namespace_id: namespace.id, glm_content: 'discover-group-security' } }
+
+        context 'with redirect_trial_user_to_feature experiment variant' do
+          before do
+            stub_experiments(redirect_trial_user_to_feature: :candidate)
+          end
+
+          it { is_expected.to redirect_to(group_security_dashboard_url(namespace, { trial: true })) }
+          it 'records the subject' do
+            expect(Experiment).to receive(:add_subject).with('redirect_trial_user_to_feature', variant: :experimental, subject: namespace)
+
+            subject
+          end
+        end
+
+        context 'with redirect_trial_user_to_feature experiment control' do
+          before do
+            stub_experiments(redirect_trial_user_to_feature: :control)
+          end
+
+          it { is_expected.to redirect_to(group_url(namespace, { trial: true })) }
+          it 'records the subject' do
+            expect(Experiment).to receive(:add_subject).with('redirect_trial_user_to_feature', variant: :control, subject: namespace)
+
+            subject
+          end
+        end
       end
 
       context 'with a new Group' do
         let(:post_params) { { new_group_name: 'GitLab' } }
 
         it 'creates the Group' do
-          expect { subject }.to change { Group.count }.to(1)
+          expect { subject }.to change { Group.count }.by(1)
         end
       end
     end
@@ -254,8 +243,6 @@ RSpec.describe TrialsController do
       it { is_expected.to render_template(:select) }
       it 'does not call the record conversion method for the experiments' do
         expect(controller).not_to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
-        expect(controller).not_to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
-        expect(controller).not_to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
 
         subject
       end
@@ -266,7 +253,7 @@ RSpec.describe TrialsController do
         it { is_expected.to render_template(:select) }
 
         it 'does not create the Group' do
-          expect { subject }.not_to change { Group.count }.from(0)
+          expect { subject }.not_to change { Group.count }
         end
       end
     end
@@ -292,6 +279,115 @@ RSpec.describe TrialsController do
     end
   end
 
+  describe '#extend_reactivate' do
+    let!(:namespace) { create(:group_with_plan, trial_ends_on: Date.tomorrow, path: 'namespace-test') }
+
+    let(:namespace_id) { namespace.id }
+    let(:trial_extension_type) { GitlabSubscription.trial_extension_types[:extended].to_s }
+    let(:put_params) { { namespace_id: namespace_id, trial_extension_type: trial_extension_type } }
+    let(:extend_reactivate_trial_result) { true }
+    let(:is_owner?) { true }
+
+    before do
+      if is_owner?
+        namespace.add_owner(user)
+      else
+        namespace.add_developer(user)
+      end
+
+      allow_next_instance_of(GitlabSubscriptions::ExtendReactivateTrialService) do |service|
+        allow(service).to receive(:execute).and_return(extend_reactivate_trial_result ? ServiceResponse.success : ServiceResponse.error(message: 'failed'))
+      end
+    end
+
+    subject do
+      put :extend_reactivate, params: put_params
+      response
+    end
+
+    it_behaves_like 'an authenticated endpoint'
+    it_behaves_like 'a dot-com only feature'
+
+    context 'on success' do
+      it { is_expected.to have_gitlab_http_status(:ok) }
+    end
+
+    context 'on failure' do
+      context 'when user is not namespace owner' do
+        let(:is_owner?) { false }
+
+        it 'returns 403' do
+          is_expected.to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when cannot find the namespace' do
+        let(:namespace_id) { 'invalid-namespace-id' }
+
+        it 'returns 404' do
+          is_expected.to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'when trial extension type is neither EXTEND nor REACTIVATE' do
+        let(:trial_extension_type) { nil }
+
+        it 'returns 403' do
+          is_expected.to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when trial extension type is EXTEND' do
+        let(:trial_extension_type) { GitlabSubscription.trial_extension_types[:extended].to_s }
+
+        it 'returns 403 if the namespace cannot extend' do
+          namespace.gitlab_subscription.update_column(:trial_extension_type, GitlabSubscription.trial_extension_types[:extended])
+
+          is_expected.to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when trial extension type is REACTIVATE' do
+        let(:trial_extension_type) { GitlabSubscription.trial_extension_types[:reactivated].to_s }
+
+        it 'returns 403 if the namespace cannot reactivate' do
+          namespace.gitlab_subscription.update_column(:trial_extension_type, GitlabSubscription.trial_extension_types[:extended])
+
+          is_expected.to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when ExtendReactivateTrialService fails' do
+        let(:extend_reactivate_trial_result) { false }
+
+        it 'returns 403' do
+          is_expected.to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+
+    it "calls the ExtendReactivateTrialService with correct parameters" do
+      gl_com_params = { gitlab_com_trial: true }
+      put_params = {
+        namespace_id: namespace.id.to_s,
+        trial_extension_type: GitlabSubscription.trial_extension_types[:extended].to_s,
+        trial_entity: 'company',
+        glm_source: 'source',
+        glm_content: 'content'
+      }
+      extend_reactivate_trial_params = {
+        uid: user.id,
+        trial_user:  ActionController::Parameters.new(put_params).permit(:namespace_id, :trial_extension_type, :trial_entity, :glm_source, :glm_content).merge(gl_com_params)
+      }
+
+      expect_next_instance_of(GitlabSubscriptions::ExtendReactivateTrialService) do |service|
+        expect(service).to receive(:execute).with(extend_reactivate_trial_params).and_return(ServiceResponse.success)
+      end
+
+      put :extend_reactivate, params: put_params
+    end
+  end
+
   describe 'confirm email warning' do
     before do
       get :new
@@ -299,7 +395,7 @@ RSpec.describe TrialsController do
 
     RSpec::Matchers.define :set_confirm_warning_for do |email|
       match do |response|
-        expect(response).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
+        expect(controller).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
       end
     end
 

@@ -4,11 +4,13 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Group Labels API
+# Group labels API **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21368) in GitLab 11.8.
 
-This API supports managing of [group labels](../user/project/labels.md#project-labels-and-group-labels). It allows to list, create, update, and delete group labels. Furthermore, users can subscribe and unsubscribe to and from group labels.
+This API supports managing [group labels](../user/project/labels.md#project-labels-and-group-labels).
+It allows users to list, create, update, and delete group labels. Furthermore, users can subscribe to and
+unsubscribe from group labels.
 
 NOTE:
 The `description_html` - was added to response JSON in [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413).
@@ -23,7 +25,7 @@ GET /groups/:id/labels
 
 | Attribute     | Type           | Required | Description                                                                                                                                                                  |
 | ---------     | ----           | -------- | -----------                                                                                                                                                                  |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user.                                                               |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user.                                                               |
 | `with_counts` | boolean        | no       | Whether or not to include issue and merge request counts. Defaults to `false`. _([Introduced in GitLab 12.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/31543))_ |
 | `include_ancestor_groups` | boolean | no | Include ancestor groups. Defaults to `true`. |
 | `include_descendant_groups` | boolean | no | Include descendant groups. Defaults to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
@@ -75,7 +77,7 @@ GET /groups/:id/labels/:label_id
 
 | Attribute     | Type           | Required | Description                                                                                                                                                                  |
 | ---------     | ----           | -------- | -----------                                                                                                                                                                  |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user.                                                               |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user.                                                               |
 | `label_id` | integer or string | yes | The ID or title of a group's label. |
 | `include_ancestor_groups` | boolean | no | Include ancestor groups. Defaults to `true`. |
 | `include_descendant_groups` | boolean | no | Include descendant groups. Defaults to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
@@ -112,13 +114,15 @@ POST /groups/:id/labels
 
 | Attribute     | Type    | Required | Description                  |
 | ------------- | ------- | -------- | ---------------------------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `name`        | string  | yes      | The name of the label        |
-| `color`       | string  | yes      | The color of the label given in 6-digit hex notation with leading '#' sign (e.g. #FFAABB) or one of the [CSS color names](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords) |
+| `color`       | string  | yes      | The color of the label given in 6-digit hex notation with leading '#' sign (for example, #FFAABB) or one of the [CSS color names](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords) |
 | `description` | string  | no       | The description of the label, |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data '{"name": "Feature Proposal", "color": "#FFA500", "description": "Describes new ideas" }' "https://gitlab.example.com/api/v4/groups/5/labels"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+     --data '{"name": "Feature Proposal", "color": "#FFA500", "description": "Describes new ideas" }' \
+     "https://gitlab.example.com/api/v4/groups/5/labels"
 ```
 
 Example response:
@@ -148,14 +152,15 @@ PUT /groups/:id/labels/:label_id
 
 | Attribute     | Type    | Required | Description                  |
 | ------------- | ------- | -------- | ---------------------------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `label_id` | integer or string | yes | The ID or title of a group's label. |
 | `new_name`    | string  | no      | The new name of the label        |
-| `color`       | string  | no      | The color of the label given in 6-digit hex notation with leading '#' sign (e.g. #FFAABB) or one of the [CSS color names](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords) |
+| `color`       | string  | no      | The color of the label given in 6-digit hex notation with leading '#' sign (for example, #FFAABB) or one of the [CSS color names](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords) |
 | `description` | string  | no       | The description of the label. |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data '{"new_name": "Feature Idea" }' "https://gitlab.example.com/api/v4/groups/5/labels/Feature%20Proposal"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+     --data '{"new_name": "Feature Idea" }' "https://gitlab.example.com/api/v4/groups/5/labels/Feature%20Proposal"
 ```
 
 Example response:
@@ -188,7 +193,7 @@ DELETE /groups/:id/labels/:label_id
 
 | Attribute | Type    | Required | Description           |
 | --------- | ------- | -------- | --------------------- |
-| `id`      | integer/string    | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`      | integer/string    | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `label_id` | integer or string | yes | The ID or title of a group's label. |
 
 ```shell
@@ -209,7 +214,7 @@ POST /groups/:id/labels/:label_id/subscribe
 
 | Attribute  | Type              | Required | Description                          |
 | ---------- | ----------------- | -------- | ------------------------------------ |
-| `id`      | integer/string    | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`      | integer/string    | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `label_id` | integer or string | yes      | The ID or title of a group's label. |
 
 ```shell
@@ -245,7 +250,7 @@ POST /groups/:id/labels/:label_id/unsubscribe
 
 | Attribute  | Type              | Required | Description                          |
 | ---------- | ----------------- | -------- | ------------------------------------ |
-| `id`      | integer/string    | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`      | integer/string    | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `label_id` | integer or string | yes      | The ID or title of a group's label. |
 
 ```shell

@@ -5,20 +5,19 @@ import MrWidgetApprovals from 'ee_else_ce/vue_merge_request_widget/components/ap
 import MRWidgetService from 'ee_else_ce/vue_merge_request_widget/services/mr_widget_service';
 import MRWidgetStore from 'ee_else_ce/vue_merge_request_widget/stores/mr_widget_store';
 import stateMaps from 'ee_else_ce/vue_merge_request_widget/stores/state_maps';
+import createFlash from '~/flash';
 import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import notify from '~/lib/utils/notify';
 import { sprintf, s__, __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import SmartInterval from '~/smart_interval';
-import { deprecatedCreateFlash as createFlash } from '../flash';
 import { setFaviconOverlay } from '../lib/utils/favicon';
 import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import GroupedCodequalityReportsApp from '../reports/codequality_report/grouped_codequality_reports_app.vue';
-import GroupedTestReportsApp from '../reports/components/grouped_test_reports_app.vue';
+import GroupedTestReportsApp from '../reports/grouped_test_report/grouped_test_reports_app.vue';
 import Loading from './components/loading.vue';
 import MrWidgetAlertMessage from './components/mr_widget_alert_message.vue';
 import WidgetHeader from './components/mr_widget_header.vue';
-import WidgetMergeHelp from './components/mr_widget_merge_help.vue';
 import MrWidgetPipelineContainer from './components/mr_widget_pipeline_container.vue';
 import WidgetRelatedLinks from './components/mr_widget_related_links.vue';
 import WidgetSuggestPipeline from './components/mr_widget_suggest_pipeline.vue';
@@ -59,7 +58,6 @@ export default {
     // ExtensionsContainer,
     'mr-widget-header': WidgetHeader,
     'mr-widget-suggest-pipeline': WidgetSuggestPipeline,
-    'mr-widget-merge-help': WidgetMergeHelp,
     MrWidgetPipelineContainer,
     'mr-widget-related-links': WidgetRelatedLinks,
     MrWidgetAlertMessage,
@@ -140,9 +138,6 @@ export default {
     componentName() {
       return stateMaps.stateToComponentMap[this.mr.state];
     },
-    shouldRenderMergeHelp() {
-      return stateMaps.statesToShowHelpWidget.indexOf(this.mr.state) > -1;
-    },
     hasPipelineMustSucceedConflict() {
       return !this.mr.hasCI && this.mr.onlyAllowMergeIfPipelineSucceeds;
     },
@@ -203,6 +198,9 @@ export default {
     formattedHumanAccess() {
       return (this.mr.humanAccess || '').toLowerCase();
     },
+    hasAlerts() {
+      return this.mr.mergeError || this.showMergePipelineForkWarning;
+    },
   },
   watch: {
     state(newVal, oldVal) {
@@ -219,7 +217,9 @@ export default {
         this.initWidget(data);
       })
       .catch(() =>
-        createFlash(__('Unable to load the merge request widget. Try reloading the page.')),
+        createFlash({
+          message: __('Unable to load the merge request widget. Try reloading the page.'),
+        }),
       );
   },
   beforeDestroy() {
@@ -300,7 +300,11 @@ export default {
             cb.call(null, data);
           }
         })
-        .catch(() => createFlash(__('Something went wrong. Please try again.')));
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          }),
+        );
     },
     setFaviconHelper() {
       if (this.mr.ciStatusFaviconPath) {
@@ -354,11 +358,11 @@ export default {
         .catch(() => this.throwDeploymentsError());
     },
     throwDeploymentsError() {
-      createFlash(
-        __(
+      createFlash({
+        message: __(
           'Something went wrong while fetching the environments for this merge request. Please try again.',
         ),
-      );
+      });
     },
     fetchActionsContent() {
       this.service
@@ -372,7 +376,11 @@ export default {
             Project.initRefSwitcher();
           }
         })
-        .catch(() => createFlash(__('Something went wrong. Please try again.')));
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          }),
+        );
     },
     handleNotification(data) {
       if (data.ci_status === this.mr.ciStatus) return;
@@ -437,7 +445,12 @@ export default {
 </script>
 <template>
   <div v-if="isLoaded" class="mr-state-widget gl-mt-3">
-    <mr-widget-header :mr="mr" />
+    <header class="gl-rounded-base gl-border-solid gl-border-1 gl-border-gray-100">
+      <mr-widget-alert-message v-if="shouldRenderCollaborationStatus" type="info">
+        {{ s__('mrWidget|Members who can merge are allowed to add commits.') }}
+      </mr-widget-alert-message>
+      <mr-widget-header :mr="mr" />
+    </header>
     <mr-widget-suggest-pipeline
       v-if="shouldSuggestPipelines"
       data-testid="mr-suggest-pipeline"
@@ -461,6 +474,25 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
+      <div v-if="hasAlerts" class="gl-overflow-hidden mr-widget-alert-container">
+        <mr-widget-alert-message v-if="mr.mergeError" type="danger" dismissible>
+          <span v-safe-html="mergeError"></span>
+        </mr-widget-alert-message>
+        <mr-widget-alert-message
+          v-if="showMergePipelineForkWarning"
+          type="warning"
+          :help-path="mr.mergeRequestPipelinesHelpPath"
+        >
+          {{
+            s__(
+              'mrWidget|If the last pipeline ran in the fork project, it may be inaccurate. Before merge, we advise running a pipeline in this project.',
+            )
+          }}
+          <template #link-content>
+            {{ __('Learn more') }}
+          </template>
+        </mr-widget-alert-message>
+      </div>
       <!-- <extensions-container :mr="mr" /> -->
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
@@ -485,6 +517,7 @@ export default {
         v-if="mr.testResultsPath"
         class="js-reports-container"
         :endpoint="mr.testResultsPath"
+        :head-blob-path="mr.headBlobPath"
         :pipeline-path="mr.pipeline.path"
       />
 
@@ -499,39 +532,14 @@ export default {
         <component :is="componentName" :mr="mr" :service="service" />
 
         <div class="mr-widget-info">
-          <section v-if="shouldRenderCollaborationStatus" class="mr-info-list mr-links">
-            <p>
-              {{ s__('mrWidget|Allows commits from members who can merge to the target branch') }}
-            </p>
-          </section>
-
           <mr-widget-related-links
             v-if="shouldRenderRelatedLinks"
             :state="mr.state"
             :related-links="mr.relatedLinks"
           />
 
-          <mr-widget-alert-message
-            v-if="showMergePipelineForkWarning"
-            type="warning"
-            :help-path="mr.mergeRequestPipelinesHelpPath"
-          >
-            {{
-              s__(
-                'mrWidget|Fork merge requests do not create merge request pipelines which validate a post merge result',
-              )
-            }}
-          </mr-widget-alert-message>
-
-          <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            <span v-safe-html="mergeError"></span>
-          </mr-widget-alert-message>
-
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
         </div>
-      </div>
-      <div v-if="shouldRenderMergeHelp" class="mr-widget-footer">
-        <mr-widget-merge-help />
       </div>
     </div>
     <mr-widget-pipeline-container

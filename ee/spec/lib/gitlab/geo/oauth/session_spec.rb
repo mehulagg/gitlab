@@ -17,7 +17,7 @@ RSpec.describe Gitlab::Geo::Oauth::Session, :geo do
 
   describe '#authorized_url' do
     it 'returns a valid url to the primary node' do
-      expect(subject.authorize_url).to start_with(primary_node.internal_url)
+      expect(subject.authorize_url).to start_with(primary_node.url)
     end
 
     context 'secondary is configured with relative URL' do
@@ -34,6 +34,15 @@ RSpec.describe Gitlab::Geo::Oauth::Session, :geo do
         stub_relative_url('secondary.host', '/relative-path')
 
         expect(subject.authorize_url).not_to include('relative-path')
+      end
+    end
+
+    context 'primary is configured with a different internal URL' do
+      it 'uses the external URL for the authorize redirect' do
+        primary_node.update!(internal_url: 'http://internal-primary')
+
+        expect(subject.authorize_url).not_to include('internal-primary')
+        expect(subject.authorize_url).to start_with(primary_node.url)
       end
     end
   end

@@ -11,6 +11,7 @@ RSpec.describe SystemNoteService do
   let_it_be(:group)    { create(:group) }
   let_it_be(:project)  { create(:project, :repository, group: group) }
   let_it_be(:author)   { create(:user) }
+
   let(:noteable) { create(:issue, project: project) }
   let(:issue)    { noteable }
 
@@ -213,15 +214,16 @@ RSpec.describe SystemNoteService do
 
   describe '.change_branch' do
     it 'calls MergeRequestsService' do
-      old_branch = double
-      new_branch = double
-      branch_type = double
+      old_branch = double('old_branch')
+      new_branch = double('new_branch')
+      branch_type = double('branch_type')
+      event_type = double('event_type')
 
       expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
-        expect(service).to receive(:change_branch).with(branch_type, old_branch, new_branch)
+        expect(service).to receive(:change_branch).with(branch_type, event_type, old_branch, new_branch)
       end
 
-      described_class.change_branch(noteable, project, author, branch_type, old_branch, new_branch)
+      described_class.change_branch(noteable, project, author, branch_type, event_type, old_branch, new_branch)
     end
   end
 
@@ -354,15 +356,15 @@ RSpec.describe SystemNoteService do
     let(:issue)           { create(:issue, project: project) }
     let(:merge_request)   { create(:merge_request, :simple, target_project: project, source_project: project) }
     let(:jira_issue)      { ExternalIssue.new("JIRA-1", project)}
-    let(:jira_tracker)    { project.jira_service }
+    let(:jira_tracker)    { project.jira_integration }
     let(:commit)          { project.commit }
     let(:comment_url)     { jira_api_comment_url(jira_issue.id) }
     let(:success_message) { "SUCCESS: Successfully posted to http://jira.example.net." }
 
     before do
-      stub_jira_service_test
+      stub_jira_integration_test
       stub_jira_urls(jira_issue.id)
-      jira_service_settings
+      jira_integration_settings
     end
 
     def cross_reference(type, link_exists = false)
@@ -776,6 +778,19 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.change_incident_severity(incident, author)
+    end
+  end
+
+  describe '.log_resolving_alert' do
+    let(:alert) { build(:alert_management_alert) }
+    let(:monitoring_tool) { 'Prometheus' }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:log_resolving_alert).with(monitoring_tool)
+      end
+
+      described_class.log_resolving_alert(alert, monitoring_tool)
     end
   end
 end

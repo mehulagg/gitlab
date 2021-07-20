@@ -12,9 +12,15 @@ module Elastic
           data[attr.to_s] = safely_read_attribute_for_elasticsearch(attr)
         end
 
-        data['assignee_id'] = safely_read_attribute_for_elasticsearch(:assignee_ids)
+        # Load them through the issue_assignees table since calling
+        # assignee_ids can't be easily preloaded and does
+        # unnecessary joins
+        data['assignee_id'] = safely_read_attribute_for_elasticsearch(:issue_assignee_user_ids)
+
         data['visibility_level'] = target.project.visibility_level
         data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues)
+
+        data['upvotes'] = target.upvotes_count
 
         data.merge(generic_attributes)
       end
@@ -22,11 +28,7 @@ module Elastic
       private
 
       def generic_attributes
-        if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
-          super.except('join_field')
-        else
-          super
-        end
+        super.except('join_field')
       end
     end
   end

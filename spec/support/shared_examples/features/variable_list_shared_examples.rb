@@ -2,13 +2,13 @@
 
 RSpec.shared_examples 'variable list' do
   it 'shows a list of variables' do
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Key"]').text).to eq(variable.key)
     end
   end
 
   it 'adds a new CI variable' do
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('key', 'key_value') do
       click_button('Add variable')
@@ -16,13 +16,13 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Key"]').text).to eq('key')
     end
   end
 
   it 'adds a new protected variable' do
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('key', 'key_value') do
       click_button('Add variable')
@@ -30,14 +30,14 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Key"]').text).to eq('key')
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Protected"] svg[data-testid="mobile-issue-close-icon"]')).to be_present
     end
   end
 
   it 'defaults to unmasked' do
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('key', 'key_value') do
       click_button('Add variable')
@@ -45,14 +45,14 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Key"]').text).to eq('key')
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Masked"] svg[data-testid="close-icon"]')).to be_present
     end
   end
 
   it 'reveals and hides variables' do
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(first('.js-ci-variable-row td[data-label="Key"]').text).to eq(variable.key)
       expect(page).to have_content('*' * 17)
 
@@ -72,7 +72,7 @@ RSpec.shared_examples 'variable list' do
   it 'deletes a variable' do
     expect(page).to have_selector('.js-ci-variable-row', count: 1)
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       click_button('Edit')
     end
 
@@ -86,7 +86,7 @@ RSpec.shared_examples 'variable list' do
   end
 
   it 'edits a variable' do
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       click_button('Edit')
     end
 
@@ -102,7 +102,7 @@ RSpec.shared_examples 'variable list' do
   end
 
   it 'edits a variable to be unmasked' do
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       click_button('Edit')
     end
 
@@ -115,13 +115,13 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Masked"] svg[data-testid="close-icon"]')).to be_present
     end
   end
 
   it 'edits a variable to be masked' do
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       click_button('Edit')
     end
 
@@ -133,7 +133,7 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       click_button('Edit')
     end
 
@@ -143,13 +143,13 @@ RSpec.shared_examples 'variable list' do
       click_button('Update variable')
     end
 
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       expect(find('.js-ci-variable-row:nth-child(1) td[data-label="Masked"] svg[data-testid="mobile-issue-close-icon"]')).to be_present
     end
   end
 
   it 'shows a validation error box about duplicate keys' do
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('key', 'key_value') do
       click_button('Add variable')
@@ -157,7 +157,7 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('key', 'key_value') do
       click_button('Add variable')
@@ -170,7 +170,7 @@ RSpec.shared_examples 'variable list' do
   end
 
   it 'prevents a variable to be added if no values are provided when a variable is set to masked' do
-    click_button('Add Variable')
+    click_button('Add variable')
 
     page.within('#add-ci-variable') do
       find('[data-qa-selector="ci_variable_key_field"] input').set('empty_mask_key')
@@ -182,7 +182,7 @@ RSpec.shared_examples 'variable list' do
   end
 
   it 'shows validation error box about unmaskable values' do
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('empty_mask_key', '???', protected: true, masked: true) do
       expect(page).to have_content('This variable can not be masked')
@@ -192,7 +192,7 @@ RSpec.shared_examples 'variable list' do
 
   it 'handles multiple edits and a deletion' do
     # Create two variables
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('akey', 'akeyvalue') do
       click_button('Add variable')
@@ -200,7 +200,7 @@ RSpec.shared_examples 'variable list' do
 
     wait_for_requests
 
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('zkey', 'zkeyvalue') do
       click_button('Add variable')
@@ -211,7 +211,7 @@ RSpec.shared_examples 'variable list' do
     expect(page).to have_selector('.js-ci-variable-row', count: 3)
 
     # Remove the `akey` variable
-    page.within('.ci-variable-table') do
+    page.within('[data-testid="ci-variable-table"]') do
       page.within('.js-ci-variable-row:first-child') do
         click_button('Edit')
       end
@@ -224,7 +224,7 @@ RSpec.shared_examples 'variable list' do
     wait_for_requests
 
     # Add another variable
-    click_button('Add Variable')
+    click_button('Add variable')
 
     fill_variable('ckey', 'ckeyvalue') do
       click_button('Add variable')
@@ -249,7 +249,7 @@ RSpec.shared_examples 'variable list' do
       end
 
       it 'defaults to protected' do
-        click_button('Add Variable')
+        click_button('Add variable')
 
         page.within('#add-ci-variable') do
           expect(find('[data-testid="ci-variable-protected-checkbox"]')).to be_checked
@@ -269,7 +269,7 @@ RSpec.shared_examples 'variable list' do
       end
 
       it 'defaults to unprotected' do
-        click_button('Add Variable')
+        click_button('Add variable')
 
         page.within('#add-ci-variable') do
           expect(find('[data-testid="ci-variable-protected-checkbox"]')).not_to be_checked
@@ -283,6 +283,8 @@ RSpec.shared_examples 'variable list' do
   end
 
   def fill_variable(key, value, protected: false, masked: false)
+    wait_for_requests
+
     page.within('#add-ci-variable') do
       find('[data-qa-selector="ci_variable_key_field"] input').set(key)
       find('[data-qa-selector="ci_variable_value_field"]').set(value) if value.present?

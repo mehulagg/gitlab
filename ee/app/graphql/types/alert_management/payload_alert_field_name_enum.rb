@@ -7,7 +7,7 @@ module Types
       description 'Values for alert field names used in the custom mapping'
 
       ::Gitlab::AlertManagement.alert_fields.each do |field|
-        value field[:name].upcase, field[:description], value: field[:name]
+        value field[:name].upcase, description: field[:description], value: field[:name]
       end
     end
   end

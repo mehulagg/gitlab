@@ -13,7 +13,7 @@ module Types
 
     present_using EpicPresenter
 
-    implements(Types::Notes::NoteableType)
+    implements(Types::Notes::NoteableInterface)
     implements(Types::CurrentUserTodos)
     implements(Types::EventableType)
 
@@ -23,8 +23,10 @@ module Types
           description: 'Internal ID of the epic.'
     field :title, GraphQL::STRING_TYPE, null: true,
           description: 'Title of the epic.'
+    markdown_field :title_html, null: true
     field :description, GraphQL::STRING_TYPE, null: true,
           description: 'Description of the epic.'
+    markdown_field :description_html, null: true
     field :state, EpicStateEnum, null: false,
           description: 'State of the epic.'
     field :confidential, GraphQL::BOOLEAN_TYPE, null: true,
@@ -82,7 +84,7 @@ module Types
 
     field :children, ::Types::EpicType.connection_type, null: true,
           description: 'Children (sub-epics) of the epic.',
-          max_page_size: 2000,
+          max_page_size: 1000,
           resolver: ::Resolvers::EpicsResolver
     field :labels, Types::LabelType.connection_type, null: true,
           description: 'Labels assigned to the epic.'
@@ -130,7 +132,7 @@ module Types
           null: true,
           complexity: 5,
           description: 'A list of issues associated with the epic.',
-          max_page_size: 2000,
+          max_page_size: 1000,
           resolver: Resolvers::EpicIssuesResolver
 
     field :descendant_counts, Types::EpicDescendantCountType, null: true,
@@ -146,6 +148,12 @@ module Types
           Types::AwardEmojis::AwardEmojiType.connection_type,
           null: true,
           description: 'A list of award emojis associated with the epic.'
+
+    field :ancestors, Types::EpicType.connection_type,
+          null: true,
+          complexity: 5,
+          resolver: ::Resolvers::EpicAncestorsResolver,
+          description: 'Ancestors (parents) of the epic.'
 
     def has_children?
       Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT) do |node, _aggregate_object|
@@ -175,7 +183,7 @@ module Types
     end
 
     def health_status
-      Epics::DescendantCountService.new(object, context[:current_user])
+      ::Epics::DescendantCountService.new(object, context[:current_user])
     end
   end
 end

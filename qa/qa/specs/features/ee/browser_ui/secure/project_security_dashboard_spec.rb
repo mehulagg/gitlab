@@ -5,11 +5,12 @@ module QA
     describe 'Security Dashboard in a Project' do
       let(:vulnerability_name) { "CVE-2017-18269 in glibc" }
       let(:vulnerability_description) { "Short description to match in specs" }
+      let(:edited_vulnerability_issue_description) { "Test Vulnerability edited comment" }
 
       before(:all) do
         @executor = "qa-runner-#{Time.now.to_i}"
 
-        Flow::Login.sign_in
+        Flow::Login.sign_in_unless_signed_in
 
         @project = Resource::Project.fabricate_via_api! do |p|
           p.name = Runtime::Env.auto_devops_project_name || 'project-with-secure'
@@ -46,12 +47,22 @@ module QA
         @merge_request.visit!
         Page::MergeRequest::Show.perform do |merge_request|
           # Give time for the runner on Staging to complete pipeline
-          Support::Retrier.retry_until(max_attempts: 5, sleep_interval: 5, reload_page: merge_request) do
-            merge_request.has_pipeline_status?(/Pipeline #\d+ passed/)
+          Support::Retrier.retry_until(max_attempts: 5, sleep_interval: 5) do
+            merge_request.has_pipeline_status?('passed')
           end
           merge_request.merge!
         end
         Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
+
+        @label = Resource::ProjectLabel.fabricate_via_api! do |new_label|
+          new_label.project = @project
+          new_label.title = "test severity 3"
+        end
+      end
+
+      before do
+        Flow::Login.sign_in_unless_signed_in
+        @project.visit!
       end
 
       after(:all) do
@@ -59,8 +70,6 @@ module QA
       end
 
       it 'shows vulnerability details', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/949' do
-        Flow::Login.sign_in_unless_signed_in
-        @project.visit!
         Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::SecurityDashboard.perform do |security_dashboard|
@@ -69,11 +78,44 @@ module QA
         end
 
         EE::Page::Project::Secure::VulnerabilityDetails.perform do |vulnerability_details|
-          expect(vulnerability_details).to have_component(component_name: :vulnerability_header)
-          expect(vulnerability_details).to have_component(component_name: :vulnerability_details)
+          aggregate_failures "testing vulnerability details" do
+            expect(vulnerability_details).to have_component(component_name: :vulnerability_header)
+            expect(vulnerability_details).to have_component(component_name: :vulnerability_details)
+            expect(vulnerability_details).to have_vulnerability_title(title: vulnerability_name)
+            expect(vulnerability_details).to have_vulnerability_description(description: vulnerability_description)
+            expect(vulnerability_details).to have_component(component_name: :vulnerability_footer)
+          end
+        end
+      end
+
+      it(
+        'creates an issue from vulnerability details',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1228'
+      ) do
+        Page::Project::Menu.perform(&:click_on_vulnerability_report)
+
+        EE::Page::Project::Secure::SecurityDashboard.perform do |security_dashboard|
+          expect(security_dashboard).to have_vulnerability(description: vulnerability_name)
+          security_dashboard.click_vulnerability(description: vulnerability_name)
+        end
+
+        EE::Page::Project::Secure::VulnerabilityDetails.perform do |vulnerability_details|
           expect(vulnerability_details).to have_vulnerability_title(title: vulnerability_name)
-          expect(vulnerability_details).to have_vulnerability_description(description: vulnerability_description)
-          expect(vulnerability_details).to have_component(component_name: :vulnerability_footer)
+          vulnerability_details.click_create_issue_button
+        end
+
+        Page::Project::Issue::New.perform do |new_page|
+          new_page.fill_description(edited_vulnerability_issue_description)
+          new_page.select_label(@label)
+          new_page.create_new_issue
+        end
+
+        Page::Project::Issue::Show.perform do |issue|
+          aggregate_failures "testing edited vulnerability issue" do
+            expect(issue).to have_title("Investigate vulnerability: #{vulnerability_name}")
+            expect(issue).to have_text(edited_vulnerability_issue_description)
+            expect(issue).to have_label(@label.title)
+          end
         end
       end
     end

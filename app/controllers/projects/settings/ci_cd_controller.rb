@@ -7,11 +7,12 @@ module Projects
 
       NUMBER_OF_RUNNERS_PER_PAGE = 20
 
+      layout 'project_settings'
       before_action :authorize_admin_pipeline!
       before_action :define_variables
       before_action do
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
-        push_frontend_feature_flag(:vueify_shared_runners_toggle, @project)
+        push_frontend_feature_flag(:ci_scoped_job_token, @project, default_enabled: :yaml)
       end
 
       helper_method :highlight_badge
@@ -61,7 +62,7 @@ module Projects
       end
 
       def runner_setup_scripts
-        private_runner_setup_scripts(project: @project)
+        private_runner_setup_scripts
       end
 
       private
@@ -118,12 +119,13 @@ module Projects
           .assignable_for(project)
           .ordered
           .page(params[:specific_page]).per(NUMBER_OF_RUNNERS_PER_PAGE)
+          .with_tags
 
-        @shared_runners = ::Ci::Runner.instance_type.active
+        @shared_runners = ::Ci::Runner.instance_type.active.with_tags
 
         @shared_runners_count = @shared_runners.count(:all)
 
-        @group_runners = ::Ci::Runner.belonging_to_parent_group_of_project(@project.id)
+        @group_runners = ::Ci::Runner.belonging_to_parent_group_of_project(@project.id).with_tags
       end
 
       def define_ci_variables
@@ -142,7 +144,7 @@ module Projects
       end
 
       def define_badges_variables
-        @ref = params[:ref] || @project.default_branch || 'master'
+        @ref = params[:ref] || @project.default_branch_or_main
 
         @badges = [Gitlab::Ci::Badge::Pipeline::Status,
                    Gitlab::Ci::Badge::Coverage::Report]
@@ -159,4 +161,4 @@ module Projects
   end
 end
 
-Projects::Settings::CiCdController.prepend_if_ee('EE::Projects::Settings::CiCdController')
+Projects::Settings::CiCdController.prepend_mod_with('Projects::Settings::CiCdController')

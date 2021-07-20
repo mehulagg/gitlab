@@ -7,7 +7,6 @@ class TemplateFinder
     dockerfiles: ::Gitlab::Template::DockerfileTemplate,
     gitignores: ::Gitlab::Template::GitignoreTemplate,
     gitlab_ci_ymls: ::Gitlab::Template::GitlabCiYmlTemplate,
-    gitlab_ci_syntax_ymls: ::Gitlab::Template::GitlabCiSyntaxYmlTemplate,
     metrics_dashboard_ymls: ::Gitlab::Template::MetricsDashboardTemplate,
     issues: ::Gitlab::Template::IssueTemplate,
     merge_requests: ::Gitlab::Template::MergeRequestTemplate
@@ -26,12 +25,6 @@ class TemplateFinder
       return {} if !VENDORED_TEMPLATES.key?(type.to_s) && type.to_s != 'licenses'
 
       build(type, project).template_names
-    end
-
-    # This is issues and merge requests description templates only.
-    # This will be removed once we introduce group level inherited templates
-    def all_template_names_array(project, type)
-      all_template_names(project, type).values.flatten.uniq
     end
   end
 
@@ -61,4 +54,4 @@ class TemplateFinder
   end
 end
 
-TemplateFinder.prepend_if_ee('::EE::TemplateFinder')
+TemplateFinder.prepend_mod_with('TemplateFinder')

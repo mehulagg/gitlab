@@ -6,11 +6,13 @@
 class NetworkPolicyMetricsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   queue_namespace :cronjob
   feature_category :container_network_security
 
   def perform
-    services = PrometheusService
+    services = ::Integrations::Prometheus
                  .preload_project
                  .with_clusters_with_cilium
     service_metrics = count_adapter_metrics(services)

@@ -12,18 +12,13 @@ module BulkImports
         transformer Common::Transformers::ProhibitedAttributesTransformer
         transformer BulkImports::Groups::Transformers::MemberAttributesTransformer
 
-        loader BulkImports::Groups::Loaders::MembersLoader
+        def load(context, data)
+          return unless data
 
-        def after_run(extracted_data)
-          context.entity.update_tracker_for(
-            relation: :group_members,
-            has_next_page: extracted_data.has_next_page?,
-            next_page: extracted_data.next_page
-          )
+          # Current user is already a member
+          return if data['user_id'].to_i == context.current_user.id
 
-          if extracted_data.has_next_page?
-            run
-          end
+          context.group.members.create!(data)
         end
       end
     end

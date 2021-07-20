@@ -44,12 +44,12 @@ export default {
       const { targetBranch } = this;
 
       return this.fetchRules({ targetBranch, resetToDefault: true }).then(() => {
-        const toast = showToast(__('Approval rules reset to project defaults'), {
+        showToast(__('Approval rules reset to project defaults'), {
           action: {
             text: __('Undo'),
-            onClick: () => {
+            onClick: (_, toast) => {
               this.undoRulesChange();
-              toast.goAway(0);
+              toast.hide();
             },
           },
         });
@@ -66,26 +66,28 @@ export default {
       <div class="border-bottom">
         <slot name="rules"></slot>
       </div>
-      <div v-if="settings.canEdit && settings.allowMultiRule" class="border-bottom py-3 px-2">
+      <div v-if="settings.canEdit && settings.allowMultiRule" class="border-bottom py-3 px-3">
         <div class="gl-display-flex">
           <gl-button
-            v-if="targetBranch"
-            :disabled="isLoading"
-            data-testid="reset-to-defaults"
-            @click="resetToProjectDefaults"
-          >
-            {{ __('Reset to project defaults') }}
-          </gl-button>
-          <gl-button
-            :class="{ 'gl-ml-3': targetBranch, 'gl-ml-0': !targetBranch }"
+            :class="{ 'gl-mr-3': targetBranch, 'gl-mr-0': !targetBranch }"
             :disabled="isLoading"
             category="secondary"
             variant="info"
+            size="small"
             data-qa-selector="add_approvers_button"
             data-testid="add-approval-rule"
             @click="openCreateModal(null)"
           >
             {{ __('Add approval rule') }}
+          </gl-button>
+          <gl-button
+            v-if="targetBranch"
+            :disabled="isLoading"
+            size="small"
+            data-testid="reset-to-defaults"
+            @click="resetToProjectDefaults"
+          >
+            {{ __('Reset to project defaults') }}
           </gl-button>
         </div>
       </div>

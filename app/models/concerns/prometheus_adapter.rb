@@ -26,14 +26,19 @@ module PrometheusAdapter
       }
     end
 
+    # Overridden in app/models/clusters/applications/prometheus.rb
+    def managed_prometheus?
+      false
+    end
+
     # This is a light-weight check if a prometheus client is properly configured.
     def configured?
-      raise NotImplemented
+      raise NotImplementedError
     end
 
     # This is a heavy-weight check if a prometheus is properly configured and accessible from GitLab.
     # This actually sends a request to an external service and often it could take a long time,
-    # Please consider using `configured?` instead if the process is running on unicorn/puma threads.
+    # Please consider using `configured?` instead if the process is running on Puma threads.
     def can_query?
       prometheus_client.present?
     end

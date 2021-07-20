@@ -1,5 +1,6 @@
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import ProductivityAnalyticsFilteredSearchTokenKeys from './productivity_analytics_filtered_search_token_keys';
 import store from './store';
@@ -23,6 +24,7 @@ export default class FilteredSearchProductivityAnalytics extends FilteredSearchM
    * Updates filters in productivity analytics store
    */
   updateObject = (path) => {
+    // eslint-disable-next-line import/no-deprecated
     const filters = urlParamsToObject(path);
     store.dispatch('filters/setFilters', filters);
   };

@@ -23,83 +23,109 @@ RSpec.describe Groups::GroupMembersHelper do
     end
   end
 
-  describe '#group_group_links_data_json' do
+  describe '#group_members_app_data_json' do
     include_context 'group_group_link'
 
-    it 'matches json schema' do
-      json = helper.group_group_links_data_json(shared_group.shared_with_group_links)
+    let(:members) { create_list(:group_member, 2, group: shared_group, created_by: current_user) }
+    let(:invited) { create_list(:group_member, 2, :invited, group: shared_group, created_by: current_user) }
+    let!(:access_requests) { create_list(:group_member, 2, :access_request, group: shared_group, created_by: current_user) }
 
-      expect(json).to match_schema('group_link/group_group_links')
+    let(:members_collection) { members }
+
+    subject do
+      Gitlab::Json.parse(
+        helper.group_members_app_data_json(
+          shared_group,
+          members: present_members(members_collection),
+          invited: present_members(invited),
+          access_requests: present_members(access_requests)
+        )
+      )
     end
-  end
 
-  describe '#members_data_json' do
-    shared_examples 'members.json' do
-      it 'matches json schema' do
-        json = helper.members_data_json(group, present_members([group_member]))
+    shared_examples 'members.json' do |member_type|
+      it 'returns `members` property that matches json schema' do
+        expect(subject[member_type]['members'].to_json).to match_schema('members')
+      end
 
-        expect(json).to match_schema('members')
+      it 'sets `member_path` property' do
+        expect(subject[member_type]['member_path']).to eq('/groups/foo-bar/-/group_members/:id')
       end
     end
 
-    context 'for a group member' do
-      let(:group_member) { create(:group_member, group: group, created_by: current_user) }
+    before do
+      allow(helper).to receive(:group_group_member_path).with(shared_group, ':id').and_return('/groups/foo-bar/-/group_members/:id')
+      allow(helper).to receive(:group_group_link_path).with(shared_group, ':id').and_return('/groups/foo-bar/-/group_links/:id')
+      allow(helper).to receive(:can?).with(current_user, :admin_group_member, shared_group).and_return(true)
+    end
 
-      it_behaves_like 'members.json'
+    it 'returns expected json' do
+      expected = {
+        source_id: shared_group.id,
+        can_manage_members: true
+      }.as_json
+
+      expect(subject).to include(expected)
+    end
+
+    context 'group members' do
+      it_behaves_like 'members.json', 'user'
 
       context 'with user status set' do
         let(:user) { create(:user) }
         let!(:status) { create(:user_status, user: user) }
-        let(:group_member) { create(:group_member, group: group, user: user, created_by: current_user) }
+        let(:members) { [create(:group_member, group: shared_group, user: user, created_by: current_user)] }
 
-        it_behaves_like 'members.json'
+        it_behaves_like 'members.json', 'user'
       end
     end
 
-    context 'for an invited group member' do
-      let(:group_member) { create(:group_member, :invited, group: group, created_by: current_user) }
-
-      it_behaves_like 'members.json'
+    context 'invited group members' do
+      it_behaves_like 'members.json', 'invite'
     end
 
-    context 'for an access request' do
-      let(:group_member) { create(:group_member, :access_request, group: group, created_by: current_user) }
-
-      it_behaves_like 'members.json'
-    end
-  end
-
-  describe '#group_members_list_data_attributes' do
-    let(:group_member) { create(:group_member, group: group, created_by: current_user) }
-
-    before do
-      allow(helper).to receive(:group_group_member_path).with(group, ':id').and_return('/groups/foo-bar/-/group_members/:id')
-      allow(helper).to receive(:can?).with(current_user, :admin_group_member, group).and_return(true)
+    context 'access requests' do
+      it_behaves_like 'members.json', 'access_request'
     end
 
-    it 'returns expected hash' do
-      expect(helper.group_members_list_data_attributes(group, present_members([group_member]))).to include({
-        members: helper.members_data_json(group, present_members([group_member])),
-        member_path: '/groups/foo-bar/-/group_members/:id',
-        source_id: group.id,
-        can_manage_members: 'true'
-      })
-    end
-  end
+    context 'group links' do
+      it 'sets `group.members` property that matches json schema' do
+        expect(subject['group']['members'].to_json).to match_schema('group_link/group_group_links')
+      end
 
-  describe '#group_group_links_list_data_attributes' do
-    include_context 'group_group_link'
-
-    before do
-      allow(helper).to receive(:group_group_link_path).with(shared_group, ':id').and_return('/groups/foo-bar/-/group_links/:id')
+      it 'sets `member_path` property' do
+        expect(subject['group']['member_path']).to eq('/groups/foo-bar/-/group_links/:id')
+      end
     end
 
-    it 'returns expected hash' do
-      expect(helper.group_group_links_list_data_attributes(shared_group)).to include({
-        members: helper.group_group_links_data_json(shared_group.shared_with_group_links),
-        member_path: '/groups/foo-bar/-/group_links/:id',
-        source_id: shared_group.id
-      })
+    context 'when pagination is not available' do
+      it 'sets `pagination` attribute to expected json' do
+        expected = {
+          current_page: nil,
+          per_page: nil,
+          total_items: 2,
+          param_name: nil,
+          params: {}
+        }.as_json
+
+        expect(subject['access_request']['pagination']).to include(expected)
+      end
+    end
+
+    context 'when pagination is available' do
+      let(:members_collection) { Kaminari.paginate_array(members).page(1).per(1) }
+
+      it 'sets `pagination` attribute to expected json' do
+        expected = {
+          current_page: 1,
+          per_page: 1,
+          total_items: 2,
+          param_name: :page,
+          params: { invited_members_page: nil, search_invited: nil }
+        }.as_json
+
+        expect(subject['user']['pagination']).to include(expected)
+      end
     end
   end
 end

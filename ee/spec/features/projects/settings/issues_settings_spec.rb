@@ -72,4 +72,108 @@ RSpec.describe 'Project settings > Issues', :js do
       expect(page).to have_selector('#project_issues_template')
     end
   end
+
+  context 'when viewing CVE request settings with different :cve_id_request_button feature flag values' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:feature_flag_enabled, :should_show_toggle) do
+      true | true
+      false | false
+    end
+
+    with_them do
+      before do
+        stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+
+        # setup the project so that it *should* be visible IF the feature flag
+        # were enabled
+        allow(::Gitlab).to receive(:com?).and_return(true)
+
+        vis_val = Gitlab::VisibilityLevel.const_get(:PUBLIC, false)
+        project.visibility_level = vis_val
+        project.save!
+
+        project_setting = project.project_setting
+        project_setting.cve_id_request_enabled = true
+        project_setting.save!
+
+        visit edit_project_path(project)
+      end
+
+      it 'CVE ID Request toggle should only be visible if the feature is enabled' do
+        if should_show_toggle
+          expect(page).to have_selector('[data-testid="cve_id_request_toggle"')
+        else
+          expect(page).not_to have_selector('[data-testid="cve_id_request_toggle"')
+        end
+      end
+    end
+  end
+
+  context 'when viewing CVE request settings on GitLab.com' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:project_vis, :cve_enabled, :toggle_checked, :toggle_disabled) do
+      :public   | true  | true  | false
+      :public   | false | false | false
+
+      :internal | true  | false | true
+      :internal | false | false | true
+
+      :private  | true  | false | true
+      :private  | false | false | true
+    end
+
+    with_them do
+      let(:project) do
+        create(:project, project_vis, :with_cve_request, cve_request_enabled: cve_enabled)
+      end
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+        visit edit_project_path(project)
+      end
+
+      it "CVE ID Request toggle should be correctly visible" do
+        toggle_btn = find('[data-testid="cve_id_request_toggle"] button')
+
+        if toggle_disabled
+          expect(toggle_btn).to match_css('.is-disabled', wait: 0)
+        else
+          expect(toggle_btn).not_to match_css('.is-disabled', wait: 0)
+        end
+
+        if toggle_checked
+          expect(toggle_btn).to match_css('.is-checked', wait: 0)
+        else
+          expect(toggle_btn).not_to match_css('.is-checked', wait: 0)
+        end
+      end
+    end
+  end
+
+  context 'when viewing CVE request settings not on GitLab.com' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:project_vis, :cve_enabled) do
+      :public   | true
+      :internal | true
+      :private  | true
+    end
+
+    with_them do
+      let(:project) do
+        create(:project, project_vis, :with_cve_request, cve_request_enabled: cve_enabled)
+      end
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(false)
+        visit edit_project_path(project)
+      end
+
+      it "CVE ID Request toggle should never be visible" do
+        expect(page).not_to have_selector('[data-testid="cve_id_request_toggle"]')
+      end
+    end
+  end
 end

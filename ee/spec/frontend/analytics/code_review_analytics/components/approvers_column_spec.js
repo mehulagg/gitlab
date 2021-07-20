@@ -48,8 +48,8 @@ describe('ApproversColumn component', () => {
     if (wrapper) wrapper.destroy();
   });
 
-  const findAvatar = () => wrapper.find(GlAvatarLink);
-  const findInlineAvatars = () => wrapper.find(GlAvatarsInline);
+  const findAvatar = () => wrapper.findComponent(GlAvatarLink);
+  const findInlineAvatars = () => wrapper.findComponent(GlAvatarsInline);
 
   describe('when an empty list approvers is passed', () => {
     beforeEach(() => {

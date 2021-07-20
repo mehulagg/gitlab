@@ -19,7 +19,7 @@ that it believes to be relevant to the input files.
 
 `tff` is designed for Ruby on Rails projects, so the `Verify/FailFast` template is
 configured to run when changes to Ruby files are detected. By default, it runs in
-the [`.pre` stage](../../../ci/yaml/README.md#pre-and-post) of a GitLab CI/CD pipeline,
+the [`.pre` stage](../../../ci/yaml/index.md#pre-and-post) of a GitLab CI/CD pipeline,
 before all other stages.
 
 ## Example use case
@@ -42,14 +42,14 @@ This template requires:
 - A project built in Rails that uses RSpec for testing.
 - CI/CD configured to:
   - Use a Docker image with Ruby available.
-  - Use [Pipelines for Merge Requests](../../../ci/merge_request_pipelines/index.md#configuring-pipelines-for-merge-requests)
-- [Pipelines for Merged Results](../../../ci/merge_request_pipelines/pipelines_for_merged_results/index.md#enable-pipelines-for-merged-results)
+  - Use [Pipelines for merge requests](../../../ci/pipelines/merge_request_pipelines.md#configure-pipelines-for-merge-requests)
+- [Pipelines for Merged Results](../../../ci/pipelines/pipelines_for_merged_results.md#enable-pipelines-for-merged-results)
   enabled in the project settings.
 - A Docker image with Ruby available. The template uses `image: ruby:2.6` by default, but you [can override](../../../ci/yaml/includes.md#overriding-external-template-values) this.
 
 ## Configuring Fast RSpec Failure
 
-We'll use the following plain RSpec configuration as a starting point. It installs all the
+We use the following plain RSpec configuration as a starting point. It installs all the
 project gems and executes `rspec`, on merge request pipelines only.
 
 ```yaml
@@ -62,7 +62,7 @@ rspec-complete:
     - bundle exec rspec
 ```
 
-To run the most relevant specs first instead of the whole suite, [`include`](../../../ci/yaml/README.md#include)
+To run the most relevant specs first instead of the whole suite, [`include`](../../../ci/yaml/index.md#include)
 the template by adding the following to your CI/CD configuration:
 
 ```yaml
@@ -86,13 +86,13 @@ For illustrative purposes, let's say our Rails app spec suite consists of 100 sp
 
 If no Ruby files are changed:
 
-- `rspec-rails-modified-paths-specs` will not run any tests.
-- `rspec-complete` will run the full suite of 1000 tests.
+- `rspec-rails-modified-paths-specs` does not run any tests.
+- `rspec-complete` runs the full suite of 1000 tests.
 
 If one Ruby model is changed, for example `app/models/example.rb`, then `rspec-rails-modified-paths-specs`
-will run the 100 tests for `example.rb`:
+runs the 100 tests for `example.rb`:
 
 - If all of these 100 tests pass, then the full `rspec-complete` suite of 1000 tests is allowed to run.
-- If any of these 100 tests fail, they will fail quickly, and `rspec-complete` will not run any tests.
+- If any of these 100 tests fail, they fail quickly, and `rspec-complete` does not run any tests.
 
 The final case saves resources and time as the full 1000 test suite does not run.

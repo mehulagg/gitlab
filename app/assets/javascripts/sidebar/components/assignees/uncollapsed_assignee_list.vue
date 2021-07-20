@@ -1,12 +1,15 @@
 <script>
+import { IssuableType } from '~/issue_show/constants';
 import { __, sprintf } from '~/locale';
 import AssigneeAvatarLink from './assignee_avatar_link.vue';
+import UserNameWithStatus from './user_name_with_status.vue';
 
 const DEFAULT_RENDER_COUNT = 5;
 
 export default {
   components: {
     AssigneeAvatarLink,
+    UserNameWithStatus,
   },
   props: {
     users: {
@@ -55,6 +58,12 @@ export default {
     toggleShowLess() {
       this.showLess = !this.showLess;
     },
+    userAvailability(u) {
+      if (this.issuableType === IssuableType.MergeRequest) {
+        return u?.availability || '';
+      }
+      return u?.status?.availability || '';
+    },
   },
 };
 </script>
@@ -68,7 +77,7 @@ export default {
     :issuable-type="issuableType"
   >
     <div class="ml-2 gl-line-height-normal">
-      <div>{{ firstUser.name }}</div>
+      <user-name-with-status :name="firstUser.name" :availability="userAvailability(firstUser)" />
       <div>{{ username }}</div>
     </div>
   </assignee-avatar-link>
@@ -78,7 +87,7 @@ export default {
         <assignee-avatar-link :user="user" :issuable-type="issuableType" />
       </div>
     </div>
-    <div v-if="renderShowMoreSection" class="user-list-more">
+    <div v-if="renderShowMoreSection" class="user-list-more gl-hover-text-blue-800">
       <button
         type="button"
         class="btn-link"

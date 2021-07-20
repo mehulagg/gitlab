@@ -11,10 +11,6 @@ export default () =>
   new Vuex.Store({
     modules: {
       threatMonitoring: threatMonitoring(),
-      threatMonitoringWaf: threatMonitoringStatistics((payload) => {
-        const { totalTraffic, anomalousTraffic, history } = convertObjectPropsToCamelCase(payload);
-        return { total: totalTraffic, anomalous: anomalousTraffic, history };
-      }),
       threatMonitoringNetworkPolicy: threatMonitoringStatistics((payload) => {
         const {
           opsRate,

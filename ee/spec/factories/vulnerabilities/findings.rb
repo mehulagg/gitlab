@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  sequence :vulnerability_finding_uuid do |n|
-    SecureRandom.uuid
-  end
-
   factory :vulnerabilities_finding_with_remediation, parent: :vulnerabilities_finding do
     transient do
       summary { nil }
@@ -47,15 +43,34 @@ FactoryBot.define do
   factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding' do
     name { 'Cipher with no integrity' }
     project
-    sequence(:uuid) { generate(:vulnerability_finding_uuid) }
     project_fingerprint { generate(:project_fingerprint) }
     primary_identifier factory: :vulnerabilities_identifier
-    location_fingerprint { '4e5b6966dd100170b4b1ad599c7058cce91b57b4' }
+    location_fingerprint { SecureRandom.hex(20) }
     report_type { :sast }
+    uuid do
+      Security::VulnerabilityUUID.generate(
+        report_type: report_type,
+        primary_identifier_fingerprint: primary_identifier.fingerprint,
+        location_fingerprint: location_fingerprint,
+        project_id: project_id
+      )
+    end
     severity { :high }
     confidence { :medium }
+    detection_method { :gitlab_security_report }
     scanner factory: :vulnerabilities_scanner
     metadata_version { 'sast:1.0' }
+
+    details do
+      {
+        url: {
+          name: 'URL',
+          type: 'url',
+          href: 'http://site.com'
+        }
+      }
+    end
+
     raw_metadata do
       {
         description: 'The cipher does not provide data integrity update 1',
@@ -222,6 +237,286 @@ FactoryBot.define do
         pipeline = create(:ci_pipeline, project: finding.project)
 
         finding.pipelines = [pipeline]
+      end
+    end
+
+    trait :with_details do
+      details do
+        {
+          commit: {
+            name: 'The Commit',
+            description: 'Commit where the vulnerability was identified',
+            type: 'commit',
+            value: '41df7b7eb3be2b5be2c406c2f6d28cd6631eeb19'
+          },
+          marked_up: {
+            name: 'Marked Data',
+            description: 'GFM-flavored markdown',
+            type: 'markdown',
+            value: "Here is markdown `inline code` #1 [test](gitlab.com)\n\n![GitLab Logo](https://about.gitlab.com/images/press/logo/preview/gitlab-logo-white-preview.png)"
+          },
+          diff: {
+            name: 'Modified data',
+            description: 'How the data was modified',
+            type: 'diff',
+            before: "Hello there\nHello world\nhello again",
+            after: "Hello there\nHello Wooorld\nanew line\nhello again\nhello again"
+          },
+          table_data: {
+            name: 'Registers',
+            type: 'table',
+            header: [
+              {
+                type: 'text',
+                value: 'Register'
+              },
+              {
+                type: 'text',
+                value: 'Value'
+              },
+              {
+                type: 'text',
+                value: 'Note'
+              }
+            ],
+            rows: [
+              [
+                {
+                  type: 'text',
+                  value: 'eax'
+                },
+                {
+                  type: 'value',
+                  value: 1336
+                },
+                {
+                  type: 'text',
+                  value: 'A note for eax'
+                }
+              ],
+              [
+                {
+                  type: 'value',
+                  value: 'ebx'
+                },
+                {
+                  type: 'value',
+                  value: 1337
+                },
+                {
+                  type: 'value',
+                  value: true
+                }
+              ],
+              [
+                {
+                  type: 'text',
+                  value: 'ecx'
+                },
+                {
+                  type: 'value',
+                  value: 1338
+                },
+                {
+                  type: 'text',
+                  value: 'A note for ecx'
+                }
+              ],
+              [
+                {
+                  type: 'text',
+                  value: 'edx'
+                },
+                {
+                  type: 'value',
+                  value: 1339
+                },
+                {
+                  type: 'text',
+                  value: 'A note for edx'
+                }
+              ]
+            ]
+          },
+          urls: {
+            name: 'URLs',
+            description: 'The list of URLs in this report',
+            type: 'list',
+            items: [
+              {
+                type: 'url',
+                href: 'https://gitlab.com'
+              },
+              {
+                type: 'url',
+                href: 'https://gitlab.com'
+              },
+              {
+                type: 'url',
+                href: 'https://gitlab.com'
+              }
+            ]
+          },
+          description: {
+            name: 'Description',
+            description: 'The actual description of the description',
+            type: 'text',
+            value: 'Text value'
+          },
+          code_block: {
+            name: 'Code Block',
+            type: 'code',
+            value: "Here\nis\ncode"
+          },
+          named_list: {
+            name: 'A Named List',
+            type: 'named-list',
+            items: {
+              field1: {
+                name: 'Field 1',
+                description: 'The description for field 1',
+                type: 'text',
+                value: 'Text'
+              },
+              field2: {
+                name: 'Field 2',
+                description: 'The description for field 2',
+                type: 'text',
+                value: 'Text'
+              },
+              nested_ints: {
+                name: 'Nested Ints',
+                type: 'list',
+                items: [
+                  {
+                    type: 'value',
+                    value: 1337
+                  },
+                  {
+                    type: 'value',
+                    value: '0x1337'
+                  }
+                ]
+              }
+            }
+          },
+          stack_trace: {
+            name: 'Stack Trace',
+            type: 'list',
+            items: [
+              {
+                type: 'module-location',
+                module_name: 'compiled_binary',
+                offset: 100
+              },
+              {
+                type: 'module-location',
+                module_name: 'compiled_binary',
+                offset: 500
+              },
+              {
+                type: 'module-location',
+                module_name: 'compiled_binary',
+                offset: 700
+              },
+              {
+                type: 'module-location',
+                module_name: 'compiled_binary',
+                offset: 1000
+              }
+            ]
+          },
+          location1: {
+            name: 'Location 1',
+            description: 'The first location',
+            type: 'file-location',
+            file_name: 'new_file.c',
+            line_start: 5,
+            line_end: 6
+          },
+          module_location1: {
+            name: 'Module Location 1',
+            description: 'The first location',
+            type: 'module-location',
+            module_name: 'gitlab.h',
+            offset: 100
+          },
+          code: {
+            type: 'code',
+            name: 'Truthy Code',
+            value: 'function isTrue(value) { value ? true : false }',
+            lang: 'javascript'
+          },
+          url: {
+            type: 'url',
+            name: 'GitLab URL',
+            text: 'URL to GitLab.com',
+            href: 'https://gitlab.com'
+          },
+          text: {
+            type: 'text',
+            name: 'Text with more info',
+            value: 'More info about this vulnerability'
+          }
+        }
+      end
+    end
+
+    trait :with_dependency_scanning_metadata do
+      transient do
+        raw_severity { "High" }
+        id { "Gemnasium-06565b64-486d-4326-b906-890d9915804d" }
+        file { "rails/Gemfile.lock" }
+        package { "nokogiri" }
+        version { "1.8.0" }
+      end
+
+      after(:build) do |finding, evaluator|
+        finding.report_type = "dependency_scanning"
+        finding.name = "Vulnerabilities in libxml2"
+        finding.message = "Vulnerabilities in libxml2 in nokogiri"
+        finding.metadata_version = "2.1"
+        finding.raw_metadata = {
+          "category": "dependency_scanning",
+          "name": "Vulnerabilities in libxml2",
+          "message": "Vulnerabilities in libxml2 in nokogiri",
+          "description": "  The version of libxml2 packaged with Nokogiri contains several vulnerabilities.",
+          "cve": "rails/Gemfile.lock:nokogiri:gemnasium:06565b64-486d-4326-b906-890d9915804d",
+          "severity": evaluator.raw_severity,
+          "solution": "Upgrade to latest version.",
+          "scanner": {
+            "id": "gemnasium",
+            "name": "Gemnasium"
+          },
+          "location": {
+            "file": evaluator.file,
+            "dependency": {
+              "package": {
+                "name": evaluator.package
+              },
+              "version": evaluator.version
+            }
+          },
+          "identifiers": [
+            {
+              "type": "gemnasium",
+              "name": evaluator.id,
+              "value": "06565b64-486d-4326-b906-890d9915804d",
+              "url": "https://deps.sec.gitlab.com/packages/gem/nokogiri/versions/1.8.0/advisories"
+            },
+            {
+              "type": "usn",
+              "name": "USN-3424-1",
+              "value": "USN-3424-1",
+              "url": "https://usn.ubuntu.com/3424-1/"
+            }
+          ],
+          "links": [
+            {
+              "url": "https://github.com/sparklemotion/nokogiri/issues/1673"
+            }
+          ]
+        }.to_json
       end
     end
 

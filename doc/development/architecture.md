@@ -15,14 +15,14 @@ There are two software distributions of GitLab:
 
 GitLab is available under [different subscriptions](https://about.gitlab.com/pricing/).
 
-New versions of GitLab are released from stable branches, and the `master` branch is used for
+New versions of GitLab are released from stable branches, and the `main` branch is used for
 bleeding-edge development.
 
 For more information, visit the [GitLab Release Process](https://about.gitlab.com/handbook/engineering/releases/).
 
 Both distributions require additional components. These components are described in the
 [Component details](#components) section, and all have their own repositories.
-New versions of each dependent component are usually tags, but staying on the `master` branch of the
+New versions of each dependent component are usually tags, but staying on the `main` branch of the
 GitLab codebase gives you the latest stable version of those components. New versions are
 generally released around the same time as GitLab releases, with the exception of informal security
 updates deemed critical.
@@ -35,7 +35,7 @@ Kubernetes platform. The largest known GitLab instance is on GitLab.com, which i
 
 A typical installation uses NGINX or Apache as a web server to proxy through
 [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) and into the [Puma](https://puma.io)
-application server. GitLab serves web pages and the [GitLab API](../api/README.md) using the Puma
+application server. GitLab serves web pages and the [GitLab API](../api/index.md) using the Puma
 application server. It uses Sidekiq as a job queue which, in turn, uses Redis as a non-persistent
 database backend for job information, metadata, and incoming jobs.
 
@@ -46,14 +46,14 @@ and pre-compiled assets.
 
 The GitLab application uses PostgreSQL for persistent database information (for example, users,
 permissions, issues, or other metadata). GitLab stores the bare Git repositories in the location
-defined in [the configuration file, `repositories:` section](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example).
+defined in [the configuration file, `repositories:` section](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example).
 It also keeps default branch and hook information with the bare repository.
 
 When serving repositories over HTTP/HTTPS GitLab uses the GitLab API to resolve authorization and
 access and to serve Git objects.
 
 The add-on component GitLab Shell serves repositories over SSH. It manages the SSH keys within the
-location defined in [the configuration file, `GitLab Shell` section](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example).
+location defined in [the configuration file, `GitLab Shell` section](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example).
 The file in that location should never be manually edited. GitLab Shell accesses the bare
 repositories through Gitaly to serve Git objects, and communicates with Redis to submit jobs to
 Sidekiq for GitLab to process. GitLab Shell queries the GitLab API to determine authorization and access.
@@ -111,72 +111,187 @@ https://docs.google.com/drawings/d/1fBzAyklyveF-i-2q-OHUIqDkYfjjxC4mq5shwKSZHLs/
 ### Component diagram
 
 ```mermaid
-graph TB
+%%{init: {"flowchart": { "useMaxWidth": false } }}%%
+graph LR
+  %% Anchor items in the appropriate subgraph.
+  %% Link them where the destination* is.
 
-HTTP[HTTP/HTTPS] -- TCP 80, 443 --> NGINX[NGINX]
-SSH -- TCP 22 --> GitLabShell[GitLab Shell]
-SMTP[SMTP Gateway]
-Geo[GitLab Geo Node] -- TCP 22, 80, 443 --> NGINX
+  subgraph Clients
+    Browser((Browser))
+    Git((Git))
+  end
 
-GitLabShell --TCP 8080 -->Puma["Puma (GitLab Rails)"]
-GitLabShell --> Praefect
-Puma --> PgBouncer[PgBouncer]
-Puma --> Redis
-Puma --> Praefect
-Sidekiq --> Redis
-Sidekiq --> PgBouncer
-Sidekiq --> Praefect
-GitLabWorkhorse[GitLab Workhorse] --> Puma
-GitLabWorkhorse --> Redis
-GitLabWorkhorse --> Praefect
-Praefect --> Gitaly
-NGINX --> GitLabWorkhorse
-NGINX -- TCP 8090 --> GitLabPages[GitLab Pages]
-NGINX --> Grafana[Grafana]
-NGINX -- TCP 8150 --> GitLabKas[GitLab Kubernetes Agent Server]
-GitLabKas --> Praefect
-Grafana -- TCP 9090 --> Prometheus[Prometheus]
-Prometheus -- TCP 80, 443 --> Puma
-RedisExporter[Redis Exporter] --> Redis
-Prometheus -- TCP 9121 --> RedisExporter
-PostgreSQLExporter[PostgreSQL Exporter] --> PostgreSQL
-PgBouncerExporter[PgBouncer Exporter] --> PgBouncer
-Prometheus -- TCP 9187 --> PostgreSQLExporter
-Prometheus -- TCP 9100 --> NodeExporter[Node Exporter]
-Prometheus -- TCP 9168 --> GitLabExporter[GitLab Exporter]
-Prometheus -- TCP 9127 --> PgBouncerExporter
-GitLabExporter --> PostgreSQL
-GitLabExporter --> GitLabShell
-GitLabExporter --> Sidekiq
-PgBouncer --> Consul
-PostgreSQL --> Consul
-PgBouncer --> PostgreSQL
-NGINX --> Registry
-Puma --> Registry
-NGINX --> Mattermost
-Mattermost --- Puma
-Prometheus --> Alertmanager
-Migrations --> PostgreSQL
-Runner -- TCP 443 --> NGINX
-Puma -- TCP 9200 --> Elasticsearch
-Sidekiq -- TCP 9200 --> Elasticsearch
-Sidekiq -- TCP 80, 443 --> Sentry
-Puma -- TCP 80, 443 --> Sentry
-Sidekiq -- UDP 6831 --> Jaeger
-Puma -- UDP 6831 --> Jaeger
-Gitaly -- UDP 6831 --> Jaeger
-GitLabShell -- UDP 6831 --> Jaeger
-GitLabWorkhorse -- UDP 6831 --> Jaeger
-Alertmanager -- TCP 25 --> SMTP
-Sidekiq -- TCP 25 --> SMTP
-Puma -- TCP 25 --> SMTP
-Puma -- TCP 369 --> LDAP
-Sidekiq -- TCP 369 --> LDAP
-Puma -- TCP 443 --> ObjectStorage["Object Storage"]
-Sidekiq -- TCP 443 --> ObjectStorage
-GitLabWorkhorse -- TCP 443 --> ObjectStorage
-Registry -- TCP 443 --> ObjectStorage
-Geo -- TCP 5432 --> PostgreSQL
+  %% External Components / Applications
+  Geo{{GitLab Geo}} -- TCP 80, 443 --> HTTP
+  Geo -- TCP 22 --> SSH
+  Geo -- TCP 5432 --> PostgreSQL
+  Runner{{GitLab Runner}} -- TCP 443 --> HTTP
+  K8sAgent{{GitLab Kubernetes Agent}} -- TCP 443 --> HTTP
+
+  %% GitLab Application Suite
+  subgraph GitLab
+    subgraph Ingress
+        HTTP[[HTTP/HTTPS]]
+        SSH[[SSH]]
+        NGINX[NGINX]
+        GitLabShell[GitLab Shell]
+
+        %% inbound/internal
+        Browser -- TCP 80,443 --> HTTP
+        Git -- TCP 80,443 --> HTTP
+        Git -- TCP 22 --> SSH
+        HTTP -- TCP 80, 443 --> NGINX
+        SSH -- TCP 22 --> GitLabShell
+    end
+
+    subgraph GitLab Services
+        %% inbound from NGINX
+        NGINX --> GitLabWorkhorse
+        NGINX -- TCP 8090 --> GitLabPages
+        NGINX -- TCP 8150 --> GitLabKas
+        NGINX --> Registry
+        %% inbound from GitLabShell
+        GitLabShell --TCP 8080 -->Puma
+
+        %% services
+        Puma["Puma (GitLab Rails)"]
+        Puma <--> Registry
+        GitLabWorkhorse[GitLab Workhorse] <--> Puma
+        GitLabKas[GitLab Kubernetes Agent Server] --> GitLabWorkhorse
+        GitLabPages[GitLab Pages] --> GitLabWorkhorse
+        Mailroom
+        Sidekiq
+    end
+
+    subgraph Integrated Services
+        %% Mattermost
+        Mattermost
+        Mattermost ---> GitLabWorkhorse
+        NGINX --> Mattermost
+
+        %% Grafana
+        Grafana
+        NGINX --> Grafana
+    end
+
+    subgraph Metadata
+        %% PostgreSQL
+        PostgreSQL
+        PostgreSQL --> Consul
+
+        %% Consul and inbound
+        Consul
+        Puma ---> Consul
+        Sidekiq ---> Consul
+        Migrations --> PostgreSQL
+
+        %% PgBouncer and inbound
+        PgBouncer
+        PgBouncer --> Consul
+        PgBouncer --> PostgreSQL
+        Sidekiq --> PgBouncer
+        Puma --> PgBouncer
+    end
+
+    subgraph State
+        %% Redis and inbound
+        Redis
+        Puma --> Redis
+        Sidekiq --> Redis
+        GitLabWorkhorse --> Redis
+        Mailroom --> Redis
+        GitLabKas --> Redis
+
+        %% Sentinel and inbound
+        Sentinel <--> Redis
+        Puma --> Sentinel
+        Sidekiq --> Sentinel
+        GitLabWorkhorse --> Sentinel
+        Mailroom --> Sentinel
+        GitLabKas --> Sentinel
+    end
+
+    subgraph Git Repositories
+        %% Gitaly / Praefect
+        Praefect --> Gitaly
+        GitLabKas --> Praefect
+        GitLabShell --> Praefect
+        GitLabWorkhorse --> Praefect
+        Puma --> Praefect
+        Sidekiq --> Praefect
+        Praefect <--> PraefectPGSQL[PostgreSQL]
+        %% Gitaly makes API calls
+        %% Ordered here to ensure placement.
+        Gitaly --> GitLabWorkhorse
+    end
+
+    subgraph Storage
+        %% ObjectStorage and inbound traffic
+        ObjectStorage["Object Storage"]
+        Puma -- TCP 443 --> ObjectStorage
+        Sidekiq -- TCP 443 --> ObjectStorage
+        GitLabWorkhorse -- TCP 443 --> ObjectStorage
+        Registry -- TCP 443 --> ObjectStorage
+        GitLabPages -- TCP 443 --> ObjectStorage
+    end
+
+    subgraph Monitoring
+        %% Prometheus
+        Grafana -- TCP 9090 --> Prometheus[Prometheus]
+        Prometheus -- TCP 80, 443 --> Puma
+        RedisExporter[Redis Exporter] --> Redis
+        Prometheus -- TCP 9121 --> RedisExporter
+        PostgreSQLExporter[PostgreSQL Exporter] --> PostgreSQL
+        PgBouncerExporter[PgBouncer Exporter] --> PgBouncer
+        Prometheus -- TCP 9187 --> PostgreSQLExporter
+        Prometheus -- TCP 9100 --> NodeExporter[Node Exporter]
+        Prometheus -- TCP 9168 --> GitLabExporter[GitLab Exporter]
+        Prometheus -- TCP 9127 --> PgBouncerExporter
+        Prometheus --> Alertmanager
+        GitLabExporter --> PostgreSQL
+        GitLabExporter --> GitLabShell
+        GitLabExporter --> Sidekiq
+
+        %% Alertmanager
+        Alertmanager -- TCP 25 --> SMTP
+    end
+  %% end subgraph GitLab
+  end
+
+  subgraph External
+    subgraph External Services
+        SMTP[SMTP Gateway]
+        LDAP
+
+        %% Outbound SMTP
+        Sidekiq -- TCP 25 --> SMTP
+        Puma -- TCP 25 --> SMTP
+        Mailroom -- TCP 25 --> SMTP
+
+        %% Outbound LDAP
+        Puma -- TCP 369 --> LDAP
+        Sidekiq -- TCP 369 --> LDAP
+
+        %% Elasticsearch
+        Elasticsearch
+        Puma -- TCP 9200 --> Elasticsearch
+        Sidekiq -- TCP 9200 --> Elasticsearch
+    end
+    subgraph External Monitoring
+        %% Sentry
+        Sidekiq -- TCP 80, 443 --> Sentry
+        Puma -- TCP 80, 443 --> Sentry
+
+        %% Jaeger
+        Jaeger
+        Sidekiq -- UDP 6831 --> Jaeger
+        Puma -- UDP 6831 --> Jaeger
+        Gitaly -- UDP 6831 --> Jaeger
+        GitLabShell -- UDP 6831 --> Jaeger
+        GitLabWorkhorse -- UDP 6831 --> Jaeger
+    end
+  %% end subgraph External
+  end
 
 click Alertmanager "./architecture.html#alertmanager"
 click Praefect "./architecture.html#praefect"
@@ -215,7 +330,7 @@ click NodeExporter "./architecture.html#node-exporter"
 ### Component legend
 
 - ✅ - Installed by default
-- ⚙ - Requires additional configuration, or GitLab Managed Apps
+- ⚙ - Requires additional configuration
 - ⤓ - Manual installation required
 - ❌ - Not supported or no instructions available
 - N/A - Not applicable
@@ -224,17 +339,7 @@ Component statuses are linked to configuration documentation for each component.
 
 ### Component list
 
-Table description links:
-
-- [Omnibus GitLab](https://docs.gitlab.com/omnibus/)
-- [GitLab Environment Toolkit (GET)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit)
-- [GitLab chart](https://docs.gitlab.com/charts/)
-- [Minikube Minimal](https://docs.gitlab.com/charts/development/minikube/#deploying-gitlab-with-minimal-settings)
-- [GitLab.com](https://gitlab.com)
-- [Source](../install/installation.md)
-- [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit)
-
-| Component                                             | Description                                                          | Omnibus GitLab | GitLab Environment Toolkit (GET) | GitLab chart | Minikube Minimal | GitLab.com | Source | GDK |  CE/EE  |
+| Component                                             | Description                                                          | [Omnibus GitLab](https://docs.gitlab.com/omnibus/) | [GitLab Environment Toolkit (GET)](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit) | [GitLab chart](https://docs.gitlab.com/charts/) | [Minikube Minimal](https://docs.gitlab.com/charts/development/minikube/#deploying-gitlab-with-minimal-settings) | [GitLab.com](https://gitlab.com) | [Source](../install/installation.md) | [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit) |  [CE/EE](https://about.gitlab.com/install/ce-or-ee/)  |
 |-------------------------------------------------------|----------------------------------------------------------------------|:--------------:|:--------------:|:------------:|:----------------:|:----------:|:------:|:---:|:-------:|
 | [Certificate Management](#certificate-management)     | TLS Settings, Let's Encrypt                                          |       ✅       |       ✅        |      ✅       |        ⚙         |     ✅      |   ⚙    |  ⚙  | CE & EE |
 | [Consul](#consul)                                     | Database node discovery, failover                                    |       ⚙       |       ✅         |      ❌       |        ❌         |     ✅      |   ❌    |  ❌  | EE Only |
@@ -244,7 +349,6 @@ Table description links:
 | [GitLab Exporter](#gitlab-exporter)                   | Generates a variety of GitLab metrics                                |       ✅       |       ✅        |      ✅       |        ✅         |     ✅      |   ❌    |  ❌  | CE & EE |
 | [GitLab Geo Node](#gitlab-geo)                        | Geographically distributed GitLab nodes                              |       ⚙        |       ⚙      |        ❌      |        ❌         |     ✅      |   ❌    |  ⚙  | EE Only |
 | [GitLab Kubernetes Agent](#gitlab-kubernetes-agent)   | Integrate Kubernetes clusters in a cloud-native way                  |       ⚙       |       ⚙        |      ⚙       |        ❌         |     ❌      |   ⤓    |  ⚙   | EE Only |
-| [GitLab Managed Apps](#gitlab-managed-apps)           | Deploy Helm, Ingress, Cert-Manager, Prometheus, GitLab Runner, JupyterHub, or Knative to a cluster |  ⤓  |  ⤓  |  ⤓  |      ⤓       |     ⤓      |   ⤓    |  ⤓  | CE & EE |
 | [GitLab Pages](#gitlab-pages)                         | Hosts static websites                                                |       ⚙       |       ⚙        |      ❌       |        ❌         |     ✅      |   ⚙    |  ⚙  | CE & EE |
 | [GitLab Kubernetes Agent](#gitlab-kubernetes-agent)   | Integrate Kubernetes clusters in a cloud-native way                  |       ⚙       |       ⚙        |      ⚙       |        ❌         |     ❌      |   ⤓    |  ⚙   | EE Only |
 | [GitLab self-monitoring: Alertmanager](#alertmanager) | Deduplicates, groups, and routes alerts from Prometheus              |       ⚙       |       ⚙        |      ✅       |        ⚙         |     ✅      |   ❌    |  ❌  | CE & EE |
@@ -312,7 +416,7 @@ GitLab can be considered to have two layers from a process perspective:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/ssl.html)
   - [Charts](https://docs.gitlab.com/charts/installation/tls.html)
   - [Source](../install/installation.md#using-https)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/https.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/https.md)
 - Layer: Core Service (Processor)
 - GitLab.com: [Secrets Management](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#secrets-management)
 
@@ -332,7 +436,7 @@ Consul is a tool for service discovery and configuration. Consul is distributed,
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/database.html#disabling-automatic-database-migration)
   - [Charts](https://docs.gitlab.com/charts/charts/gitlab/migrations/)
-  - [Source](../update/upgrading_from_source.md#14-install-libraries-migrations-etc)
+  - [Source](../update/upgrading_from_source.md#10-install-libraries-migrations-etc)
 - Layer: Core Service (Data)
 
 #### Elasticsearch
@@ -342,7 +446,7 @@ Consul is a tool for service discovery and configuration. Consul is distributed,
   - [Omnibus](../integration/elasticsearch.md)
   - [Charts](../integration/elasticsearch.md)
   - [Source](../integration/elasticsearch.md)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/elasticsearch.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/elasticsearch.md)
 - Layer: Core Service (Data)
 - GitLab.com: [Get Advanced Search working on GitLab.com (Closed)](https://gitlab.com/groups/gitlab-org/-/epics/153) epic.
 
@@ -379,8 +483,10 @@ repository updates to secondary nodes.
 - Configuration:
   - [Omnibus](../administration/geo/setup/index.md)
   - [Charts](https://docs.gitlab.com/charts/advanced/geo/)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/geo.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/geo.md)
 - Layer: Core Service (Processor)
+
+Geo is a premium feature built to help speed up the development of distributed teams by providing one or more read-only mirrors of a primary GitLab instance. This mirror (a Geo secondary site) reduces the time to clone or fetch large repositories and projects, or can be part of a Disaster Recovery solution.
 
 #### GitLab Exporter
 
@@ -413,7 +519,7 @@ You can use it to sync deployments onto your Kubernetes cluster.
   - [Omnibus](../administration/pages/index.md)
   - [Charts](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/37)
   - [Source](../install/installation.md#install-gitlab-pages)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/pages.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/pages.md)
 - Layer: Core Service (Processor)
 - GitLab.com: [GitLab Pages](../user/gitlab_com/index.md#gitlab-pages)
 
@@ -428,7 +534,7 @@ You can use it either for personal or business websites, such as portfolios, doc
   - [Omnibus](https://docs.gitlab.com/runner/)
   - [Charts](https://docs.gitlab.com/runner/install/kubernetes.html)
   - [Source](https://docs.gitlab.com/runner/)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/runner.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/runner.md)
 - Layer: Core Service (Processor)
 - GitLab.com: [Runner](../user/gitlab_com/index.md#shared-runners)
 
@@ -443,7 +549,7 @@ GitLab CI/CD is the open-source continuous integration service included with Git
   - [Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template)
   - [Charts](https://docs.gitlab.com/charts/charts/gitlab/gitlab-shell/)
   - [Source](../install/installation.md#install-gitlab-shell)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
 - Layer: Core Service (Processor)
 - GitLab.com: [Service Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#service-architecture)
 
@@ -517,7 +623,7 @@ Mattermost is an open source, private cloud, Slack-alternative from <https://mat
 - Configuration:
   - [Omnibus](https://min.io/download)
   - [Charts](https://docs.gitlab.com/charts/charts/minio/)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/object_storage.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/object_storage.md)
 - Layer: Core Service (Data)
 - GitLab.com: [Storage Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#storage-architecture)
 
@@ -635,6 +741,8 @@ Redis is packaged to provide a place to store:
 - temporary cache information
 - background job queues
 
+See our [Redis guidelines](redis.md) for more information about how GitLab uses Redis.
+
 #### Redis Exporter
 
 - [Project page](https://github.com/oliver006/redis_exporter/blob/master/README.md)
@@ -651,10 +759,10 @@ Redis is packaged to provide a place to store:
 
 - [Project page](https://github.com/docker/distribution/blob/master/README.md)
 - Configuration:
-  - [Omnibus](../update/upgrading_from_source.md#14-install-libraries-migrations-etc)
+  - [Omnibus](../update/upgrading_from_source.md#10-install-libraries-migrations-etc)
   - [Charts](https://docs.gitlab.com/charts/charts/registry/)
   - [Source](../administration/packages/container_registry.md#enable-the-container-registry)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/registry.md)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/registry.md)
 - Layer: Core Service (Processor)
 - GitLab.com: [GitLab Container Registry](../user/packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd)
 
@@ -674,8 +782,8 @@ An external registry can also be configured to use GitLab as an auth endpoint.
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/configuration.html#error-reporting-and-logging-with-sentry)
   - [Charts](https://docs.gitlab.com/charts/charts/globals#sentry-settings)
-  - [Source](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+  - [Source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
 - Layer: Monitoring
 - GitLab.com: [Searching Sentry](https://about.gitlab.com/handbook/support/workflows/500_errors.html#searching-sentry)
 
@@ -691,8 +799,8 @@ For monitoring deployed apps, see the [Sentry integration docs](../operations/er
   - [Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template)
   - [Charts](https://docs.gitlab.com/charts/charts/gitlab/sidekiq/)
   - [Minikube Minimal](https://docs.gitlab.com/charts/charts/gitlab/sidekiq/index.html)
-  - [Source](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+  - [Source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
 - Layer: Core Service (Processor)
 - Process: `sidekiq`
 - GitLab.com: [Sidekiq](../user/gitlab_com/index.md#sidekiq)
@@ -701,45 +809,27 @@ Sidekiq is a Ruby background job processor that pulls jobs from the Redis queue 
 
 #### Puma
 
-Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
-disabled by default.
+Starting with GitLab 13.0, Puma is the default web server.
 
-- [Project page](https://gitlab.com/gitlab-org/gitlab/blob/master/README.md)
+- [Project page](https://gitlab.com/gitlab-org/gitlab/-/blob/master/README.md)
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/puma.html)
   - [Charts](https://docs.gitlab.com/charts/charts/gitlab/webservice/)
   - [Source](../install/installation.md#configure-it)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
 - Layer: Core Service (Processor)
 - Process: `puma`
 - GitLab.com: [Puma](../user/gitlab_com/index.md#puma)
 
 [Puma](https://puma.io/) is a Ruby application server that is used to run the core Rails Application that provides the user facing features in GitLab. Often this displays in process output as `bundle` or `config.ru` depending on the GitLab version.
 
-#### Unicorn
-
-Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
-disabled by default.
-
-- [Project page](https://gitlab.com/gitlab-org/gitlab/blob/master/README.md)
-- Configuration:
-  - [Omnibus](https://docs.gitlab.com/omnibus/settings/unicorn.html)
-  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/webservice/)
-  - [Source](../install/installation.md#configure-it)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-- Layer: Core Service (Processor)
-- Process: `unicorn`
-- GitLab.com: [Unicorn](../user/gitlab_com/index.md#unicorn)
-
-[Unicorn](https://yhbt.net/unicorn/) is a Ruby application server that is used to run the core Rails Application that provides the user facing features in GitLab. Often this displays in process output as `bundle` or `config.ru` depending on the GitLab version.
-
 #### LDAP Authentication
 
 - Configuration:
   - [Omnibus](../administration/auth/ldap/index.md)
   - [Charts](https://docs.gitlab.com/charts/charts/globals.html#ldap)
-  - [Source](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/ldap.md)
+  - [Source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/ldap.md)
 - Layer: Core Service (Processor)
 - GitLab.com: [Product Tiers](https://about.gitlab.com/pricing/#gitlab-com)
 
@@ -748,8 +838,8 @@ disabled by default.
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/smtp.html)
   - [Charts](https://docs.gitlab.com/charts/installation/command-line-options.html#outgoing-email-configuration)
-  - [Source](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+  - [Source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
 - Layer: Core Service (Processor)
 - GitLab.com: [Mail configuration](../user/gitlab_com/index.md#mail-configuration)
 
@@ -758,32 +848,10 @@ disabled by default.
 - Configuration:
   - [Omnibus](../administration/incoming_email.md)
   - [Charts](https://docs.gitlab.com/charts/installation/command-line-options.html#incoming-email-configuration)
-  - [Source](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+  - [Source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/gitlab.yml.example)
 - Layer: Core Service (Processor)
 - GitLab.com: [Mail configuration](../user/gitlab_com/index.md#mail-configuration)
-
-#### GitLab Managed Apps
-
-- Configuration:
-  - [Omnibus](../user/project/clusters/index.md#installing-applications)
-  - [Charts](../user/project/clusters/index.md#installing-applications)
-  - [Source](../user/project/clusters/index.md#installing-applications)
-  - [GDK](../user/project/clusters/index.md#installing-applications)
-- Layer: Core Service (Processor)
-
-GitLab provides [GitLab Managed Apps](../user/project/clusters/index.md#installing-applications),
-a one-click install for various applications which can be added directly to your configured cluster.
-These applications are needed for Review Apps and deployments when using Auto DevOps.
-You can install them after you create a cluster. This includes:
-
-- [Helm](https://helm.sh/docs/)
-- [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
-- [Cert-Manager](https://cert-manager.io/docs/)
-- [Prometheus](https://prometheus.io/docs/introduction/overview/)
-- [GitLab Runner](https://docs.gitlab.com/runner/)
-- [JupyterHub](https://jupyter.org)
-- [Knative](https://cloud.google.com/knative/)
 
 ## GitLab by request type
 
@@ -902,14 +970,14 @@ instead of `git upload-pack`.
 
 If fast SSH key lookups are not enabled, the SSH server reads from the
 `~git/.ssh/authorized_keys` file to determine what command to run for a given
-SSH session. This is kept up to date by an [`AuthorizedKeysWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/workers/authorized_keys_worker.rb)
+SSH session. This is kept up to date by an [`AuthorizedKeysWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/workers/authorized_keys_worker.rb)
 in Rails, scheduled to run whenever an SSH key is modified by a user.
 
 [SSH certificates](../administration/operations/ssh_certificates.md) may be used
 instead of keys. In this case, `AuthorizedKeysCommand` is replaced with an
 `AuthorizedPrincipalsCommand`. This extracts a username from the certificate
 without using the Rails internal API, which is used instead of `key_id` in the
-`/api/internal/allowed` call later.
+[`/api/internal/allowed`](internal_api.md) call later.
 
 GitLab Shell also has a few operations that do not involve Gitaly, such as
 resetting two-factor authentication codes. These are handled in the same way,
@@ -1041,7 +1109,7 @@ GitLab Shell has a configuration file at `/home/git/gitlab-shell/config.yml`.
 
 ### Maintenance tasks
 
-[GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master) provides Rake tasks with which you see version information and run a quick check on your configuration to ensure it is configured properly within the application. See [maintenance Rake tasks](../administration/raketasks/maintenance.md).
+[GitLab](https://gitlab.com/gitlab-org/gitlab/-/tree/master) provides Rake tasks with which you see version information and run a quick check on your configuration to ensure it is configured properly within the application. See [maintenance Rake tasks](../administration/raketasks/maintenance.md).
 In a nutshell, do the following:
 
 ```shell

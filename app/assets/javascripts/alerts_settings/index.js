@@ -1,14 +1,18 @@
 import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
+import IncidentsSettingsService from '~/incidents_settings/incidents_settings_service';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
 import apolloProvider from './graphql';
+import getCurrentIntegrationQuery from './graphql/queries/get_current_integration.query.graphql';
 
-apolloProvider.clients.defaultClient.cache.writeData({
+apolloProvider.clients.defaultClient.cache.writeQuery({
+  query: getCurrentIntegrationQuery,
   data: {
     currentIntegration: null,
   },
 });
+
 Vue.use(GlToast);
 
 export default (el) => {
@@ -17,45 +21,37 @@ export default (el) => {
   }
 
   const {
-    prometheusActivated,
-    prometheusUrl,
-    prometheusAuthorizationKey,
-    prometheusFormPath,
-    prometheusResetKeyPath,
-    prometheusApiUrl,
-    activated: activatedStr,
-    alertsSetupUrl,
     alertsUsageUrl,
-    formPath,
-    authorizationKey,
-    url,
     projectPath,
     multiIntegrations,
     alertFields,
+    templates,
+    createIssue,
+    issueTemplateKey,
+    sendEmail,
+    autoCloseIncident,
+    pagerdutyResetKeyPath,
+    operationsSettingsEndpoint,
   } = el.dataset;
 
+  const service = new IncidentsSettingsService(operationsSettingsEndpoint, pagerdutyResetKeyPath);
   return new Vue({
     el,
     components: {
       AlertSettingsWrapper,
     },
     provide: {
-      prometheus: {
-        active: parseBoolean(prometheusActivated),
-        url: prometheusUrl,
-        token: prometheusAuthorizationKey,
-        prometheusFormPath,
-        prometheusResetKeyPath,
-        prometheusApiUrl,
+      service,
+      alertSettings: {
+        templates: JSON.parse(templates),
+        createIssue: parseBoolean(createIssue),
+        issueTemplateKey,
+        sendEmail: parseBoolean(sendEmail),
+        autoCloseIncident: parseBoolean(autoCloseIncident),
+        pagerdutyResetKeyPath,
+        operationsSettingsEndpoint,
       },
-      generic: {
-        alertsSetupUrl,
-        alertsUsageUrl,
-        active: parseBoolean(activatedStr),
-        formPath,
-        token: authorizationKey,
-        url,
-      },
+      alertsUsageUrl,
       projectPath,
       multiIntegrations: parseBoolean(multiIntegrations),
     },
@@ -63,10 +59,7 @@ export default (el) => {
     render(createElement) {
       return createElement('alert-settings-wrapper', {
         props: {
-          alertFields:
-            gon.features?.multipleHttpIntegrationsCustomMapping && parseBoolean(multiIntegrations)
-              ? JSON.parse(alertFields)
-              : null,
+          alertFields: parseBoolean(multiIntegrations) ? JSON.parse(alertFields) : null,
         },
       });
     },

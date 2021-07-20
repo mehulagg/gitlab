@@ -76,7 +76,7 @@ export default {
 };
 </script>
 <template>
-  <gl-loading-icon v-if="showLoadingSpinner" />
+  <gl-loading-icon v-if="showLoadingSpinner" size="sm" />
   <div v-else class="license-management">
     <delete-confirmation-modal v-if="isAdmin" />
 
@@ -93,7 +93,7 @@ export default {
           <gl-button
             class="js-open-form"
             :disabled="formIsOpen"
-            variant="success"
+            variant="confirm"
             data-qa-selector="license_add_button"
             @click="openAddLicenseForm"
           >

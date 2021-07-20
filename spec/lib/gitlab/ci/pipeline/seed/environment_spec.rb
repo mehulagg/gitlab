@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Seed::Environment do
   let_it_be(:project) { create(:project) }
+
   let(:job) { build(:ci_build, project: project) }
   let(:seed) { described_class.new(job) }
   let(:attributes) { {} }
@@ -85,6 +86,55 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Environment do
         end
 
         it_behaves_like 'returning a correct environment'
+      end
+    end
+
+    context 'when job has deployment tier attribute' do
+      let(:attributes) do
+        {
+          environment: 'customer-portal',
+          options: {
+            environment: {
+              name: 'customer-portal',
+              deployment_tier: deployment_tier
+            }
+          }
+        }
+      end
+
+      let(:deployment_tier) { 'production' }
+
+      context 'when environment has not been created yet' do
+        it 'sets the specified deployment tier' do
+          is_expected.to be_production
+        end
+
+        context 'when deployment tier is staging' do
+          let(:deployment_tier) { 'staging' }
+
+          it 'sets the specified deployment tier' do
+            is_expected.to be_staging
+          end
+        end
+
+        context 'when deployment tier is unknown' do
+          let(:deployment_tier) { 'unknown' }
+
+          it 'raises an error' do
+            expect { subject }.to raise_error(ArgumentError, "'unknown' is not a valid tier")
+          end
+        end
+      end
+
+      context 'when environment has already been created' do
+        before do
+          create(:environment, project: project, name: 'customer-portal', tier: :staging)
+        end
+
+        it 'does not overwrite the specified deployment tier' do
+          # This is to be updated when a deployment succeeded i.e. Deployments::UpdateEnvironmentService.
+          is_expected.to be_staging
+        end
       end
     end
 

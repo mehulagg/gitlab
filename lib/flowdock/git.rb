@@ -17,7 +17,7 @@ module Flowdock
     end
 
     def initialize(ref, from, to, options = {})
-      raise TokenError.new("Flowdock API token not found") unless options[:token]
+      raise TokenError, "Flowdock API token not found" unless options[:token]
 
       @ref = ref
       @from = from
@@ -34,7 +34,7 @@ module Flowdock
     # Send git push notification to Flowdock
     def post
       messages.each do |message|
-        Flowdock::Client.new(flow_token: @token).post_to_thread(message)
+        ::Flowdock::Client.new(flow_token: @token).post_to_thread(message)
       end
     end
 

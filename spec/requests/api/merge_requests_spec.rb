@@ -52,7 +52,7 @@ RSpec.describe API::MergeRequests do
     end
 
     context 'when authenticated' do
-      it 'avoids N+1 queries' do
+      it 'avoids N+1 queries', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330335' do
         control = ActiveRecord::QueryRecorder.new do
           get api(endpoint_path, user)
         end
@@ -142,7 +142,7 @@ RSpec.describe API::MergeRequests do
             expect(json_response.last['labels'].first).to match_schema('/public_api/v4/label_basic')
           end
 
-          it 'avoids N+1 queries' do
+          it 'avoids N+1 queries', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330335' do
             path = endpoint_path + "?with_labels_details=true"
 
             control = ActiveRecord::QueryRecorder.new do
@@ -973,6 +973,14 @@ RSpec.describe API::MergeRequests do
 
     it_behaves_like 'merge requests list'
 
+    context 'when :api_caching_merge_requests is disabled' do
+      before do
+        stub_feature_flags(api_caching_merge_requests: false)
+      end
+
+      it_behaves_like 'merge requests list'
+    end
+
     it "returns 404 for non public projects" do
       project = create(:project, :private)
 
@@ -1049,7 +1057,7 @@ RSpec.describe API::MergeRequests do
 
       include_context 'with merge requests'
 
-      it 'avoids N+1 queries' do
+      it 'avoids N+1 queries', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330335' do
         control = ActiveRecord::QueryRecorder.new do
           get api("/projects/#{project.id}/merge_requests", user)
         end.count
@@ -1178,17 +1186,16 @@ RSpec.describe API::MergeRequests do
       expect(json_response['downvotes']).to eq(1)
       expect(json_response['source_project_id']).to eq(merge_request.source_project.id)
       expect(json_response['target_project_id']).to eq(merge_request.target_project.id)
-      expect(json_response['work_in_progress']).to be_falsy
-      expect(json_response['merge_when_pipeline_succeeds']).to be_falsy
+      expect(json_response['draft']).to be false
+      expect(json_response['work_in_progress']).to be false
+      expect(json_response['merge_when_pipeline_succeeds']).to be false
       expect(json_response['merge_status']).to eq('can_be_merged')
-      expect(json_response['should_close_merge_request']).to be_falsy
-      expect(json_response['force_close_merge_request']).to be_falsy
       expect(json_response['changes_count']).to eq(merge_request.merge_request_diff.real_size)
       expect(json_response['merge_error']).to eq(merge_request.merge_error)
       expect(json_response['user']['can_merge']).to be_truthy
       expect(json_response).not_to include('rebase_in_progress')
-      expect(json_response['first_contribution']).to be_falsy
-      expect(json_response['has_conflicts']).to be_falsy
+      expect(json_response['first_contribution']).to be false
+      expect(json_response['has_conflicts']).to be false
       expect(json_response['blocking_discussions_resolved']).to be_truthy
       expect(json_response['references']['short']).to eq("!#{merge_request.iid}")
       expect(json_response['references']['relative']).to eq("!#{merge_request.iid}")
@@ -1321,29 +1328,30 @@ RSpec.describe API::MergeRequests do
       expect(response).to have_gitlab_http_status(:not_found)
     end
 
-    context 'Work in Progress' do
-      let!(:merge_request_wip) do
+    context 'Draft' do
+      let!(:merge_request_draft) do
         create(:merge_request,
           author: user,
           assignees: [user],
           source_project: project,
           target_project: project,
-          title: "WIP: Test",
+          title: "Draft: Test",
           created_at: base_time + 1.second
         )
       end
 
       it "returns merge request" do
-        get api("/projects/#{project.id}/merge_requests/#{merge_request_wip.iid}", user)
+        get api("/projects/#{project.id}/merge_requests/#{merge_request_draft.iid}", user)
 
         expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['draft']).to eq(true)
         expect(json_response['work_in_progress']).to eq(true)
       end
     end
 
     context 'when a merge request has more than the changes limit' do
       it "returns a string indicating that more changes were made" do
-        allow(Commit).to receive(:diff_hard_limit_files).and_return(5)
+        allow(Commit).to receive(:diff_max_files).and_return(5)
 
         merge_request_overflow = create(:merge_request, :simple,
                                         author: user,
@@ -1386,7 +1394,7 @@ RSpec.describe API::MergeRequests do
 
       get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user2)
 
-      expect(json_response['user']['can_merge']).to be_falsy
+      expect(json_response['user']['can_merge']).to be false
     end
 
     it 'returns `checking` as its merge_status instead of `cannot_be_merged_rechecking`' do
@@ -1999,6 +2007,7 @@ RSpec.describe API::MergeRequests do
 
     context 'forked projects', :sidekiq_might_not_need_inline do
       let_it_be(:user2) { create(:user) }
+
       let(:project) { create(:project, :public, :repository) }
       let!(:forked_project) { fork_project(project, user2, repository: true) }
       let!(:unrelated_project) { create(:project, namespace: create(:user).namespace, creator_id: user2.id) }
@@ -2146,9 +2155,115 @@ RSpec.describe API::MergeRequests do
     end
   end
 
-  describe 'PUT /projects/:id/merge_reuests/:merge_request_iid' do
+  describe 'PUT /projects/:id/merge_requests/:merge_request_iid' do
     it_behaves_like 'issuable update endpoint' do
       let(:entity) { merge_request }
+    end
+
+    context 'when only assignee_ids are provided' do
+      let(:params) do
+        {
+          assignee_ids: [user2.id]
+        }
+      end
+
+      it 'sets the assignees' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['assignees']).to contain_exactly(
+          a_hash_including('name' => user2.name)
+        )
+      end
+
+      it 'creates appropriate system notes', :sidekiq_inline do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(merge_request.notes.system.last.note).to include("assigned to #{user2.to_reference}")
+      end
+    end
+
+    context 'when assignee_id=user2.id' do
+      let(:params) do
+        {
+          assignee_id: user2.id
+        }
+      end
+
+      it 'sets the assignees' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['assignees']).to contain_exactly(
+          a_hash_including('name' => user2.name)
+        )
+      end
+    end
+
+    context 'when assignee_id=0' do
+      let(:params) do
+        {
+          assignee_id: 0
+        }
+      end
+
+      it 'clears the assignees' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['assignees']).to be_empty
+      end
+
+      it 'creates appropriate system notes', :sidekiq_inline do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(merge_request.notes.system.last.note).to include("unassigned #{user.to_reference}")
+      end
+    end
+
+    context 'when only assignee_ids are provided, and the list is empty' do
+      let(:params) do
+        {
+          assignee_ids: []
+        }
+      end
+
+      it 'clears the assignees' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['assignees']).to be_empty
+      end
+    end
+
+    context 'when only assignee_ids are provided, and the list contains the sentinel value' do
+      let(:params) do
+        {
+          assignee_ids: [0]
+        }
+      end
+
+      it 'clears the assignees' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['assignees']).to be_empty
+      end
+    end
+
+    context 'when only assignee_id=0' do
+      let(:params) do
+        {
+          assignee_id: 0
+        }
+      end
+
+      it 'clears the assignees' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['assignees']).to be_empty
+      end
     end
 
     context 'accepts reviewer_ids' do
@@ -2408,8 +2523,8 @@ RSpec.describe API::MergeRequests do
       expect(json_response['message']).to eq('405 Method Not Allowed')
     end
 
-    it "returns 405 if merge_request is a work in progress" do
-      merge_request.update_attribute(:title, "WIP: #{merge_request.title}")
+    it "returns 405 if merge_request is a draft" do
+      merge_request.update_attribute(:title, "Draft: #{merge_request.title}")
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
       expect(response).to have_gitlab_http_status(:method_not_allowed)
       expect(json_response['message']).to eq('405 Method Not Allowed')
@@ -2533,11 +2648,11 @@ RSpec.describe API::MergeRequests do
       it "results in a default squash commit message when not set" do
         put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user), params: { squash: true }
 
-        expect(squash_commit.message).to eq(merge_request.default_squash_commit_message)
+        expect(squash_commit.message.chomp).to eq(merge_request.default_squash_commit_message.chomp)
       end
     end
 
-    describe "the should_remove_source_branch param" do
+    describe "the should_remove_source_branch param", :sidekiq_inline do
       let(:source_repository) { merge_request.source_project.repository }
       let(:source_branch) { merge_request.source_branch }
 
@@ -2548,11 +2663,11 @@ RSpec.describe API::MergeRequests do
         )
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(source_repository.branch_exists?(source_branch)).to be_falsy
+        expect(source_repository.branch_exists?(source_branch)).to be false
       end
     end
 
-    context "with a merge request that has force_remove_source_branch enabled" do
+    context "with a merge request that has force_remove_source_branch enabled", :sidekiq_inline do
       let(:source_repository) { merge_request.source_project.repository }
       let(:source_branch) { merge_request.source_branch }
 
@@ -2566,7 +2681,7 @@ RSpec.describe API::MergeRequests do
         )
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(source_repository.branch_exists?(source_branch)).to be_falsy
+        expect(source_repository.branch_exists?(source_branch)).to be false
       end
 
       it 'does not remove the source branch' do
@@ -2688,7 +2803,7 @@ RSpec.describe API::MergeRequests do
       it 'sets to true' do
         merge_request.update!(merge_params: { 'force_remove_source_branch' => false } )
 
-        expect(merge_request.force_remove_source_branch?).to be_falsey
+        expect(merge_request.force_remove_source_branch?).to be false
 
         put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: { state_event: "close", remove_source_branch: true }
 
@@ -2773,6 +2888,7 @@ RSpec.describe API::MergeRequests do
 
     context "forked projects" do
       let_it_be(:user2) { create(:user) }
+
       let(:project) { create(:project, :public, :repository) }
       let!(:forked_project) { fork_project(project, user2, repository: true) }
       let(:merge_request) do

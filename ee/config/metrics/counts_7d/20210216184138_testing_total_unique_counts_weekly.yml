@@ -1,0 +1,17 @@
+---
+data_category: Optional
+key_path: redis_hll_counters.testing.testing_total_unique_counts_weekly
+description: ''
+product_section: ''
+product_stage: ''
+product_group: ''
+product_category: ''
+value_type: number
+status: removed
+time_frame: 7d
+data_source: redis_hll
+distribution:
+- ee
+tier:
+- premium
+- ultimate

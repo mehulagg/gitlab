@@ -20,13 +20,13 @@ module IssuablesHelper
   end
 
   def assignees_label(issuable, include_value: true)
-    label = 'Assignee'.pluralize(issuable.assignees.count)
+    assignees = issuable.assignees
 
     if include_value
       sanitized_list = sanitize_name(issuable.assignee_list)
-      "#{label}: #{sanitized_list}"
+      ns_('NotificationEmail|Assignee: %{users}', 'NotificationEmail|Assignees: %{users}', assignees.count) % { users: sanitized_list }
     else
-      label
+      ns_('NotificationEmail|Assignee', 'NotificationEmail|Assignees', assignees.count)
     end
   end
 
@@ -151,7 +151,7 @@ module IssuablesHelper
 
   def issuable_meta(issuable, project)
     output = []
-    output << "Opened #{time_ago_with_tooltip(issuable.created_at)} by ".html_safe
+    output << "Created #{time_ago_with_tooltip(issuable.created_at)} by ".html_safe
 
     if issuable.is_a?(Issue) && issuable.service_desk_reply_to
       output << "#{html_escape(issuable.service_desk_reply_to)} via "
@@ -199,7 +199,7 @@ module IssuablesHelper
     count = issuables_count_for_state(issuable_type, state)
 
     if count != -1
-      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-muted badge-pill gl-badge gl-tab-counter-badge sm')
     end
 
     html.html_safe
@@ -218,6 +218,10 @@ module IssuablesHelper
 
   def issuable_reference(issuable)
     @show_full_reference ? issuable.to_reference(full: true) : issuable.to_reference(@group || @project)
+  end
+
+  def issuable_project_reference(issuable)
+    "#{issuable.project.full_name} #{issuable.to_reference}"
   end
 
   def issuable_initial_data(issuable)
@@ -332,6 +336,18 @@ module IssuablesHelper
     end
   end
 
+  def state_name_with_icon(issuable)
+    if issuable.is_a?(MergeRequest) && issuable.merged?
+      [_("Merged"), "git-merge"]
+    elsif issuable.is_a?(MergeRequest) && issuable.closed?
+      [_("Closed"), "close"]
+    elsif issuable.closed?
+      [_("Closed"), "mobile-issue-close"]
+    else
+      [_("Open"), "issue-open-m"]
+    end
+  end
+
   private
 
   def sidebar_gutter_collapsed?
@@ -386,9 +402,11 @@ module IssuablesHelper
       rootPath: root_path,
       fullPath: issuable[:project_full_path],
       iid: issuable[:iid],
+      id: issuable[:id],
       severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours,
-      createNoteEmail: issuable[:create_note_email]
+      createNoteEmail: issuable[:create_note_email],
+      issuableType: issuable[:type]
     }
   end
 
@@ -407,9 +425,18 @@ module IssuablesHelper
     }
   end
 
+  def sidebar_status_data(issuable_sidebar, project)
+    {
+      iid: issuable_sidebar[:iid],
+      issuable_type: issuable_sidebar[:type],
+      full_path: project.full_path,
+      can_edit: issuable_sidebar.dig(:current_user, :can_edit).to_s
+    }
+  end
+
   def parent
     @project || @group
   end
 end
 
-IssuablesHelper.prepend_if_ee('EE::IssuablesHelper')
+IssuablesHelper.prepend_mod_with('IssuablesHelper')

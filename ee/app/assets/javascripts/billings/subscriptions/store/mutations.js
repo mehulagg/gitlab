@@ -1,11 +1,5 @@
-import { parseInt } from 'lodash';
 import Vue from 'vue';
-import {
-  TABLE_TYPE_DEFAULT,
-  TABLE_TYPE_FREE,
-  TABLE_TYPE_TRIAL,
-  HEADER_TOTAL_ENTRIES,
-} from 'ee/billings/constants';
+import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import * as types from './mutation_types';
 
@@ -25,6 +19,7 @@ export default {
     let tableKey = TABLE_TYPE_DEFAULT;
 
     state.plan = plan;
+    state.billing = billing;
 
     if (state.plan.code === null) {
       tableKey = TABLE_TYPE_FREE;
@@ -48,23 +43,5 @@ export default {
   [types.RECEIVE_SUBSCRIPTION_ERROR](state) {
     state.isLoadingSubscription = false;
     state.hasErrorSubscription = true;
-  },
-
-  [types.REQUEST_HAS_BILLABLE_MEMBERS](state) {
-    state.isLoadingHasBillableMembers = true;
-    state.hasErrorHasBillableMembers = false;
-  },
-
-  [types.RECEIVE_HAS_BILLABLE_MEMBERS_SUCCESS](state, payload) {
-    const { headers } = payload;
-    const hasBillableGroupMembers = parseInt(headers[HEADER_TOTAL_ENTRIES], 10) > 0;
-
-    state.hasBillableGroupMembers = hasBillableGroupMembers;
-    state.isLoadingHasBillableMembers = false;
-  },
-
-  [types.RECEIVE_HAS_BILLABLE_MEMBERS_ERROR](state) {
-    state.isLoadinggHasBillableMembers = false;
-    state.hasErrorHasBillableMembers = true;
   },
 };

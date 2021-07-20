@@ -20,6 +20,13 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan', through: :builds
         has_many :security_findings, class_name: 'Security::Finding', through: :security_scans, source: :findings
 
+        has_one :dast_profiles_pipeline, class_name: 'Dast::ProfilesPipeline', foreign_key: :ci_pipeline_id, inverse_of: :ci_pipeline
+        has_one :dast_profile, class_name: 'Dast::Profile', through: :dast_profiles_pipeline
+
+        # Temporary location to be moved in the future. Please see gitlab-org/gitlab#330950 for more info.
+        has_one :dast_site_profiles_pipeline, class_name: 'Dast::SiteProfilesPipeline', foreign_key: :ci_pipeline_id, inverse_of: :ci_pipeline
+        has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_pipeline
+
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
         # Legacy way to fetch security reports based on job name. This has been replaced by the reports feature.
@@ -39,11 +46,11 @@ module EE
           secret_detection: %i[secret_detection],
           dependency_scanning: %i[dependency_scanning],
           container_scanning: %i[container_scanning],
+          cluster_image_scanning: %i[cluster_image_scanning],
           dast: %i[dast],
           performance: %i[merge_request_performance_metrics],
           browser_performance: %i[merge_request_performance_metrics],
           load_performance: %i[merge_request_performance_metrics],
-          license_management: %i[license_scanning],
           license_scanning: %i[license_scanning],
           metrics: %i[metrics_reports],
           requirements: %i[requirements],
@@ -56,9 +63,13 @@ module EE
             next unless pipeline.can_store_security_reports?
 
             pipeline.run_after_commit do
-              StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
               ::Security::StoreScansWorker.perform_async(pipeline.id)
-              SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
+            end
+          end
+
+          after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
+            pipeline.run_after_commit do
+              ::Ci::SyncReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
             end
           end
 
@@ -100,9 +111,9 @@ module EE
       end
 
       def license_scanning_report
-        ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
+        ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_scanning_report|
           latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
-            build.collect_license_scanning_reports!(license_management_report)
+            build.collect_license_scanning_reports!(license_scanning_report)
           end
         end
       end
@@ -129,8 +140,8 @@ module EE
       ##
       # Check if it's a merge request pipeline with the HEAD of source and target branches
       # TODO: Make `Ci::Pipeline#latest?` compatible with merge request pipelines and remove this method.
-      def latest_merge_request_pipeline?
-        merge_request_pipeline? &&
+      def latest_merged_result_pipeline?
+        merged_result_pipeline? &&
           source_sha == merge_request.diff_head_sha &&
           target_sha == merge_request.target_branch_sha
       end
@@ -146,7 +157,7 @@ module EE
 
       override :merge_train_pipeline?
       def merge_train_pipeline?
-        merge_request_pipeline? && merge_train_ref?
+        merged_result_pipeline? && merge_train_ref?
       end
 
       def latest_failed_security_builds
@@ -164,6 +175,10 @@ module EE
 
       def has_security_findings?
         security_findings.exists?
+      end
+
+      def triggered_for_ondemand_dast_scan?
+        ondemand_dast_scan? && parameter_source?
       end
 
       private

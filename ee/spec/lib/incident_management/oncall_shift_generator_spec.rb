@@ -3,11 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::OncallShiftGenerator do
+  let_it_be(:schedule) { create(:incident_management_oncall_schedule, timezone: 'Etc/UTC') }
   let_it_be(:rotation_start_time) { Time.parse('2020-12-08 00:00:00 UTC').utc }
-  let_it_be_with_reload(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time, length: 5, length_unit: :days) }
+  let_it_be_with_reload(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time, length: 5, length_unit: :days, schedule: schedule) }
 
   let(:current_time) { Time.parse('2020-12-08 15:00:00 UTC').utc }
-  let(:shift_length) { rotation.shift_duration }
+  let(:shift_length) { rotation.shift_cycle_duration }
 
   around do |example|
     travel_to(current_time) { example.run }
@@ -29,7 +30,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
   # Example) [[:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']]
   #          :participant2 would reference `let(:participant2)`
   shared_examples 'unsaved shifts' do |description, shift_params|
-    it "returns #{description}" do
+    it "returns #{description}", :aggregate_failures do
       expect(shifts).to all(be_a(IncidentManagement::OncallShift))
       expect(shifts.length).to eq(shift_params.length)
 
@@ -71,10 +72,125 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
        [[:participant, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
         [:participant, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
         [:participant, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
+
+      context 'when timestamp is at the end of a shift' do
+        let(:starts_at) { rotation_start_time + shift_length }
+
+        it_behaves_like 'unsaved shifts',
+          'the second and third shift',
+          [[:participant, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+           [:participant, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
+      end
     end
 
     context 'with many participants' do
       include_context 'with three participants'
+
+      it_behaves_like 'unsaved shifts',
+        'One shift of 5 days long for each participant',
+        [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
+         [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+         [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
+
+      context 'with shift active period times set' do
+        let(:active_period_start) { "08:00" }
+        let(:active_period_end) { "17:00" }
+
+        before do
+          rotation.update!(
+            active_period_start: active_period_start,
+            active_period_end: active_period_end
+          )
+        end
+
+        it 'splits the shifts daily by each active period' do
+          expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
+        end
+
+        it_behaves_like 'unsaved shifts',
+          '5 shifts for each participant split by each day',
+          [[:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC'],
+           [:participant1, '2020-12-09 08:00:00 UTC', '2020-12-09 17:00:00 UTC'],
+           [:participant1, '2020-12-10 08:00:00 UTC', '2020-12-10 17:00:00 UTC'],
+           [:participant1, '2020-12-11 08:00:00 UTC', '2020-12-11 17:00:00 UTC'],
+           [:participant1, '2020-12-12 08:00:00 UTC', '2020-12-12 17:00:00 UTC'],
+           [:participant2, '2020-12-13 08:00:00 UTC', '2020-12-13 17:00:00 UTC'],
+           [:participant2, '2020-12-14 08:00:00 UTC', '2020-12-14 17:00:00 UTC'],
+           [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
+           [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
+           [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC']]
+
+        context 'with week length unit' do
+          before do
+            rotation.update!(
+              length_unit: :weeks,
+              length: 1
+            )
+          end
+
+          it 'splits the shifts daily by each active period' do
+            expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
+          end
+
+          it_behaves_like 'unsaved shifts',
+            '7 shifts for each participant split by each day',
+            [[:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC'],
+             [:participant1, '2020-12-09 08:00:00 UTC', '2020-12-09 17:00:00 UTC'],
+             [:participant1, '2020-12-10 08:00:00 UTC', '2020-12-10 17:00:00 UTC'],
+             [:participant1, '2020-12-11 08:00:00 UTC', '2020-12-11 17:00:00 UTC'],
+             [:participant1, '2020-12-12 08:00:00 UTC', '2020-12-12 17:00:00 UTC'],
+             [:participant1, '2020-12-13 08:00:00 UTC', '2020-12-13 17:00:00 UTC'],
+             [:participant1, '2020-12-14 08:00:00 UTC', '2020-12-14 17:00:00 UTC'],
+             [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
+             [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
+             [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC'],
+             [:participant2, '2020-12-18 08:00:00 UTC', '2020-12-18 17:00:00 UTC'],
+             [:participant2, '2020-12-19 08:00:00 UTC', '2020-12-19 17:00:00 UTC'],
+             [:participant2, '2020-12-20 08:00:00 UTC', '2020-12-20 17:00:00 UTC'],
+             [:participant2, '2020-12-21 08:00:00 UTC', '2020-12-21 17:00:00 UTC']]
+        end
+
+        context 'rotation start time is in middle of active period' do
+          before do
+            rotation.update!(starts_at: rotation_start_time.change(hour: 10))
+          end
+
+          it_behaves_like 'unsaved shifts',
+            '5 shifts for each participant split by each day',
+            [[:participant1, '2020-12-08 10:00:00 UTC', '2020-12-08 17:00:00 UTC'],
+             [:participant1, '2020-12-09 08:00:00 UTC', '2020-12-09 17:00:00 UTC'],
+             [:participant1, '2020-12-10 08:00:00 UTC', '2020-12-10 17:00:00 UTC'],
+             [:participant1, '2020-12-11 08:00:00 UTC', '2020-12-11 17:00:00 UTC'],
+             [:participant1, '2020-12-12 08:00:00 UTC', '2020-12-12 17:00:00 UTC'],
+             [:participant2, '2020-12-13 08:00:00 UTC', '2020-12-13 17:00:00 UTC'],
+             [:participant2, '2020-12-14 08:00:00 UTC', '2020-12-14 17:00:00 UTC'],
+             [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
+             [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
+             [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC']]
+        end
+
+        context 'active period is overnight' do
+          let(:active_period_start) { "17:00" }
+          let(:active_period_end) { "08:00" }
+
+          it 'splits the shifts daily by each active period' do
+            expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
+          end
+
+          it_behaves_like 'unsaved shifts',
+          '5 shifts for each participant with overnight shifts',
+          [[:participant1, '2020-12-08 17:00:00 UTC', '2020-12-09 08:00:00 UTC'],
+           [:participant1, '2020-12-09 17:00:00 UTC', '2020-12-10 08:00:00 UTC'],
+           [:participant1, '2020-12-10 17:00:00 UTC', '2020-12-11 08:00:00 UTC'],
+           [:participant1, '2020-12-11 17:00:00 UTC', '2020-12-12 08:00:00 UTC'],
+           [:participant1, '2020-12-12 17:00:00 UTC', '2020-12-13 08:00:00 UTC'],
+           [:participant2, '2020-12-13 17:00:00 UTC', '2020-12-14 08:00:00 UTC'],
+           [:participant2, '2020-12-14 17:00:00 UTC', '2020-12-15 08:00:00 UTC'],
+           [:participant2, '2020-12-15 17:00:00 UTC', '2020-12-16 08:00:00 UTC'],
+           [:participant2, '2020-12-16 17:00:00 UTC', '2020-12-17 08:00:00 UTC'],
+           [:participant2, '2020-12-17 17:00:00 UTC', '2020-12-18 08:00:00 UTC']]
+        end
+      end
 
       context 'when end time is earlier than start time' do
         let(:ends_at) { starts_at - 1.hour }
@@ -141,6 +257,49 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
            [:participant2, '2020-12-28 00:00:00 UTC', '2021-01-02 00:00:00 UTC'],
            [:participant3, '2021-01-02 00:00:00 UTC', '2021-01-07 00:00:00 UTC'],
            [:participant1, '2021-01-07 00:00:00 UTC', '2021-01-12 00:00:00 UTC']]
+      end
+
+      context 'with rotation end time' do
+        let(:equal_to) { rotation_end_time }
+        let(:less_than) { 10.minutes.before(rotation_end_time) }
+        let(:greater_than) { 10.minutes.after(rotation_end_time) }
+        let(:well_past) { shift_length.after(rotation_end_time) }
+
+        before do
+          rotation.update!(ends_at: rotation_end_time)
+        end
+
+        context 'when the rotation end time coincides with a shift end' do
+          let(:rotation_end_time) { rotation_start_time + (shift_length * 3) }
+
+          [:equal_to, :less_than, :greater_than, :well_past].each do |scenario|
+            context "when end time is #{scenario} the rotation end time" do
+              let(:ends_at) { send(scenario) }
+
+              it_behaves_like 'unsaved shifts',
+                '3 shifts of 5 days which ends at the rotation end time',
+                [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
+                 [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+                 [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
+            end
+          end
+        end
+
+        context 'when the rotation end time is partway through a shift' do
+          let(:rotation_end_time) { rotation_start_time + (shift_length * 2.5) }
+
+          [:equal_to, :less_than, :greater_than, :well_past].each do |scenario|
+            context "when end time is #{scenario} the rotation end time" do
+              let(:ends_at) { send(scenario) }
+
+              it_behaves_like 'unsaved shifts',
+                '2 shifts of 5 days and one partial shift which ends at the rotation end time',
+                [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
+                 [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+                 [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-20 12:00:00 UTC']]
+            end
+          end
+        end
       end
     end
 
@@ -696,6 +855,77 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
         it_behaves_like 'unsaved shift',
           'the shift during which the timestamp occurs',
           [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
+      end
+
+      context 'when timestamp is at the end of a shift' do
+        let(:timestamp) { rotation_start_time + shift_length }
+
+        it_behaves_like 'unsaved shift',
+          'the second shift',
+          [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
+      end
+
+      context 'with rotation end time' do
+        let(:rotation_end_time) { rotation_start_time + (shift_length * 2.5) }
+
+        before do
+          rotation.update!(ends_at: rotation_end_time)
+        end
+
+        context 'when timestamp matches rotation end time' do
+          let(:timestamp) { rotation_end_time }
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'when timestamp is before rotation end time' do
+          let(:timestamp) { 10.minutes.before(rotation_end_time) }
+
+          it_behaves_like 'unsaved shift',
+            'the shift during which the timestamp occurs',
+            [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-20 12:00:00 UTC']
+        end
+
+        context 'when timestamp is at rotation end time' do
+          let(:timestamp) { 10.minutes.after(rotation_end_time) }
+
+          it { is_expected.to be_nil }
+        end
+      end
+
+      context 'with shift active period times set' do
+        before do
+          rotation.update!(
+            active_period_start: "08:00",
+            active_period_end: "17:00"
+          )
+        end
+
+        context 'when timestamp is the start of rotation, but before active period' do
+          let(:timestamp) { rotation_start_time }
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'when timestamp is the same time as active period start' do
+          let(:timestamp) { rotation_start_time.change(hour: 8) }
+
+          it_behaves_like 'unsaved shift',
+            'the first shift of the shift cycle (split by the active period)',
+            [:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC']
+        end
+
+        context 'when timestamp is the same time as active period end' do
+          let(:timestamp) { rotation_start_time.change(hour: 17) }
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'when timestamp is the after the active period ends' do
+          let(:timestamp) { rotation_start_time.change(hour: 17, min: 1) }
+
+          it { is_expected.to be_nil }
+        end
       end
     end
   end

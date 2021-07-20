@@ -9,21 +9,11 @@ module Boards
         IssuesFinder.valid_params
       end
 
-      # rubocop: disable CodeReuse/ActiveRecord
-      def metadata
-        issues = Issue.arel_table
-        keys = metadata_fields.keys
-        # TODO: eliminate need for SQL literal fragment
-        columns = Arel.sql(metadata_fields.values_at(*keys).join(', '))
-        results = Issue.where(id: items.select(issues[:id])).pluck(columns)
-
-        Hash[keys.zip(results.flatten)]
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
       private
 
-      def ordered_items
+      def order(items)
+        return items.order_closed_date_desc if list&.closed?
+
         items.order_by_position_and_priority(with_cte: params[:search].present?)
       end
 
@@ -33,10 +23,6 @@ module Boards
 
       def board
         @board ||= parent.boards.find(params[:board_id])
-      end
-
-      def metadata_fields
-        { size: 'COUNT(*)' }
       end
 
       def filter_params
@@ -66,4 +52,4 @@ module Boards
   end
 end
 
-Boards::Issues::ListService.prepend_if_ee('EE::Boards::Issues::ListService')
+Boards::Issues::ListService.prepend_mod_with('Boards::Issues::ListService')

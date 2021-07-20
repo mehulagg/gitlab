@@ -137,7 +137,7 @@ export default {
         <span :title="icon.tooltip" :aria-label="icon.tooltip">
           <gl-icon
             :name="icon.name"
-            :size="18"
+            :size="16"
             :class="icon.classes"
             data-qa-selector="design_status_icon"
             :data-qa-status="icon.name"

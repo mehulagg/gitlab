@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DastSiteProfileSummary renders properly profile 0 1`] = `
+<div>
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      class=""
+      label="Target URL"
+      value="https://foo.com"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Site type"
+      value="Website"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Authentication URL"
+      value="https://foo.com/login"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Username"
+      value="admin"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Password"
+      value="••••••••"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Username form field"
+      value="username"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Password form field"
+      value="password"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Excluded URLs"
+      value="https://foo.com/logout,https://foo.com/send_mail"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Request headers"
+      value="[Redacted]"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Validation status"
+      value="Not Validated"
+    />
+  </div>
+</div>
+`;
+
+exports[`DastSiteProfileSummary renders properly profile 1 1`] = `
+<div>
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      class=""
+      label="Target URL"
+      value="https://bar.com"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Site type"
+      value="Rest API"
+    />
+  </div>
+   
+  <!---->
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Excluded URLs"
+      value="https://bar.com/logout"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Request headers"
+      value="[Redacted]"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Validation status"
+      value="Validated"
+    />
+  </div>
+</div>
+`;

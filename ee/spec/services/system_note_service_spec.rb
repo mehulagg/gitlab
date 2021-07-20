@@ -29,7 +29,7 @@ RSpec.describe SystemNoteService do
     let(:date) { double }
 
     it 'calls EpicsService' do
-      expect_next_instance_of(EE::SystemNotes::EpicsService) do |service|
+      expect_next_instance_of(SystemNotes::EpicsService) do |service|
         expect(service).to receive(:change_epic_date_note).with(date_type, date)
       end
 
@@ -41,7 +41,7 @@ RSpec.describe SystemNoteService do
     let(:type) { double }
 
     it 'calls EpicsService' do
-      expect_next_instance_of(EE::SystemNotes::EpicsService) do |service|
+      expect_next_instance_of(SystemNotes::EpicsService) do |service|
         expect(service).to receive(:epic_issue).with(noteable, type)
       end
 
@@ -53,7 +53,7 @@ RSpec.describe SystemNoteService do
     let(:type) { double }
 
     it 'calls EpicsService' do
-      expect_next_instance_of(EE::SystemNotes::EpicsService) do |service|
+      expect_next_instance_of(SystemNotes::EpicsService) do |service|
         expect(service).to receive(:issue_on_epic).with(noteable, type)
       end
 
@@ -66,7 +66,7 @@ RSpec.describe SystemNoteService do
     let(:type) { double }
 
     it 'calls EpicsService' do
-      expect_next_instance_of(EE::SystemNotes::EpicsService) do |service|
+      expect_next_instance_of(SystemNotes::EpicsService) do |service|
         expect(service).to receive(:change_epics_relation).with(child_epic, type)
       end
 
@@ -78,7 +78,7 @@ RSpec.describe SystemNoteService do
     let(:merge_train) { double }
 
     it 'calls MergeTrainService' do
-      expect_next_instance_of(EE::SystemNotes::MergeTrainService) do |service|
+      expect_next_instance_of(SystemNotes::MergeTrainService) do |service|
         expect(service).to receive(:enqueue).with(merge_train)
       end
 
@@ -88,7 +88,7 @@ RSpec.describe SystemNoteService do
 
   describe '.cancel_merge_train' do
     it 'calls MergeTrainService' do
-      expect_next_instance_of(EE::SystemNotes::MergeTrainService) do |service|
+      expect_next_instance_of(SystemNotes::MergeTrainService) do |service|
         expect(service).to receive(:cancel)
       end
 
@@ -100,7 +100,7 @@ RSpec.describe SystemNoteService do
     let(:message) { double }
 
     it 'calls MergeTrainService' do
-      expect_next_instance_of(EE::SystemNotes::MergeTrainService) do |service|
+      expect_next_instance_of(SystemNotes::MergeTrainService) do |service|
         expect(service).to receive(:abort).with(message)
       end
 
@@ -112,7 +112,7 @@ RSpec.describe SystemNoteService do
     let(:sha) { double }
 
     it 'calls MergeTrainService' do
-      expect_next_instance_of(EE::SystemNotes::MergeTrainService) do |service|
+      expect_next_instance_of(SystemNotes::MergeTrainService) do |service|
         expect(service).to receive(:add_when_pipeline_succeeds).with(sha)
       end
 
@@ -122,7 +122,7 @@ RSpec.describe SystemNoteService do
 
   describe '.cancel_add_to_merge_train_when_pipeline_succeeds' do
     it 'calls MergeTrainService' do
-      expect_next_instance_of(EE::SystemNotes::MergeTrainService) do |service|
+      expect_next_instance_of(SystemNotes::MergeTrainService) do |service|
         expect(service).to receive(:cancel_add_when_pipeline_succeeds)
       end
 
@@ -134,7 +134,7 @@ RSpec.describe SystemNoteService do
     let(:message) { double }
 
     it 'calls MergeTrainService' do
-      expect_next_instance_of(EE::SystemNotes::MergeTrainService) do |service|
+      expect_next_instance_of(SystemNotes::MergeTrainService) do |service|
         expect(service).to receive(:abort_add_when_pipeline_succeeds).with(message)
       end
 
@@ -144,7 +144,7 @@ RSpec.describe SystemNoteService do
 
   describe '.change_vulnerability_state' do
     it 'calls VulnerabilitiesService' do
-      expect_next_instance_of(EE::SystemNotes::VulnerabilitiesService) do |service|
+      expect_next_instance_of(SystemNotes::VulnerabilitiesService) do |service|
         expect(service).to receive(:change_vulnerability_state)
       end
 

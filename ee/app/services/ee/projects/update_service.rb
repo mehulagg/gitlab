@@ -4,7 +4,6 @@ module EE
   module Projects
     module UpdateService
       extend ::Gitlab::Utils::Override
-      include CleanupApprovers
 
       PULL_MIRROR_ATTRIBUTES = %i[
         mirror
@@ -19,12 +18,13 @@ module EE
 
       override :execute
       def execute
-        should_remove_old_approvers = params.delete(:remove_old_approvers)
         limit = params.delete(:repository_size_limit)
         wiki_was_enabled = project.wiki_enabled?
 
+        shared_runners_setting
         mirror_user_setting
         compliance_framework_setting
+
         return update_failed! if project.errors.any?
 
         result = super do
@@ -33,7 +33,6 @@ module EE
         end
 
         if result[:status] == :success
-          cleanup_approvers(project) if should_remove_old_approvers
           refresh_merge_trains(project)
 
           log_audit_events
@@ -56,6 +55,17 @@ module EE
           action: :custom,
           custom_message: "Default branch changed from #{previous_default_branch} to #{project.default_branch}"
         ).for_project.security_event
+      end
+
+      # A user who enables shared runners must meet the credit card requirement if
+      # there is one.
+      def shared_runners_setting
+        return unless params[:shared_runners_enabled]
+        return if project.shared_runners_enabled
+
+        unless current_user.has_required_credit_card_to_enable_shared_runners?(project)
+          project.errors.add(:shared_runners_enabled, _('cannot be enabled until a valid credit card is on file'))
+        end
       end
 
       # A user who changes any aspect of pull mirroring settings must be made
@@ -81,10 +91,8 @@ module EE
           framework_identifier = settings.delete(:framework)
           if framework_identifier.blank?
             settings.merge!(_destroy: true)
-          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks)
-            settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
           else
-            settings[:compliance_management_framework] = ComplianceManagement::Framework.find_or_create_legacy_default_framework(project, framework_identifier)
+            settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
           end
         else
           params.delete(:compliance_framework_setting_attributes)

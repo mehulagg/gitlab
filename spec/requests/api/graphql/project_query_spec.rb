@@ -8,6 +8,7 @@ RSpec.describe 'getting project information' do
   let_it_be(:group) { create(:group) }
   let_it_be(:project, reload: true) { create(:project, :repository, group: group) }
   let_it_be(:current_user) { create(:user) }
+
   let(:project_fields) { all_graphql_fields_for('project'.to_s.classify, max_depth: 1) }
 
   let(:query) do
@@ -57,6 +58,22 @@ RSpec.describe 'getting project information' do
       end
     end
 
+    context 'topics' do
+      it 'includes empty topics array if no topics set' do
+        post_graphql(query, current_user: current_user)
+
+        expect(graphql_data_at(:project, :topics)).to match([])
+      end
+
+      it 'includes topics array' do
+        project.update!(topic_list: 'topic1, topic2, topic3')
+
+        post_graphql(query, current_user: current_user)
+
+        expect(graphql_data_at(:project, :topics)).to match(%w[topic1 topic2 topic3])
+      end
+    end
+
     it 'includes inherited members in project_members' do
       group_member = create(:group_member, group: group)
       project_member = create(:project_member, project: project)
@@ -100,6 +117,29 @@ RSpec.describe 'getting project information' do
           'project' => { 'id' => project.to_global_id.to_s }
         )
       )
+    end
+  end
+
+  context 'when the user has reporter access to the project' do
+    let(:statistics_query) do
+      <<~GRAPHQL
+        {
+          project(fullPath: "#{project.full_path}") {
+            statistics { wikiSize }
+          }
+        }
+      GRAPHQL
+    end
+
+    before do
+      project.add_reporter(current_user)
+      create(:project_statistics, project: project, wiki_size: 100)
+    end
+
+    it 'allows fetching project statistics' do
+      post_graphql(statistics_query, current_user: current_user)
+
+      expect(graphql_data.dig('project', 'statistics')).to include('wikiSize' => 100.0)
     end
   end
 

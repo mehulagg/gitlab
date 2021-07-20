@@ -1,13 +1,15 @@
 <script>
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import Api from 'ee/api';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __, s__ } from '~/locale';
 
 export default {
   name: 'GroupActivityCard',
   components: {
-    MetricCard,
+    GlSkeletonLoading,
+    GlSingleStat,
   },
   inject: ['groupFullPath', 'groupName'],
   data() {
@@ -54,7 +56,9 @@ export default {
           this.isLoading = false;
         })
         .catch(() => {
-          createFlash(__('Failed to load group activity metrics. Please try again.'));
+          createFlash({
+            message: __('Failed to load group activity metrics. Please try again.'),
+          });
           this.isLoading = false;
         });
     },
@@ -63,9 +67,25 @@ export default {
 </script>
 
 <template>
-  <metric-card
-    :title="s__('GroupActivityMetrics|Recent activity (last 90 days)')"
-    :metrics="metricsArray"
-    :is-loading="isLoading"
-  />
+  <div
+    class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-mt-6 gl-mb-4 gl-align-items-flex-start"
+  >
+    <div class="gl-display-flex gl-flex-direction-column gl-pr-9 gl-flex-shrink-0">
+      <span class="gl-font-weight-bold">{{ s__('GroupActivityMetrics|Recent activity') }}</span>
+      <span>{{ s__('GroupActivityMetrics|Last 90 days') }}</span>
+    </div>
+    <div
+      v-for="metric in metricsArray"
+      :key="metric.key"
+      class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
+    >
+      <gl-skeleton-loading v-if="isLoading" />
+      <gl-single-stat
+        v-else
+        :value="`${metric.value}`"
+        :title="metric.label"
+        :should-animate="true"
+      />
+    </div>
+  </div>
 </template>

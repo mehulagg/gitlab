@@ -6,7 +6,7 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        %i[epics group_timelogs].each do |feature|
+        %i[epics].each do |feature|
           field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true,
                 description: "Indicates if #{feature.to_s.humanize} are enabled for namespace"
 
@@ -39,11 +39,9 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
-        field :timelogs, ::Types::TimelogType.connection_type, null: false,
-              description: 'Time logged in issues by group members.',
-              extras: [:lookahead],
-              complexity: 5,
-              resolver: ::Resolvers::TimelogResolver
+        field :iteration_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
+              description: 'Find iteration cadences.',
+              resolver: ::Resolvers::Iterations::CadencesResolver
 
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
@@ -67,13 +65,6 @@ module EE
               description: 'Number of vulnerabilities per day for the projects in the group and its subgroups.',
               resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
 
-        field :vulnerabilities_count_by_day_and_severity,
-              ::Types::VulnerabilitiesCountByDayAndSeverityType.connection_type,
-              null: true,
-              description: 'Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups.',
-              resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
-              deprecated: { reason: 'Use `vulnerabilitiesCountByDay`', milestone: '13.3' }
-
         field :vulnerability_grades,
               [::Types::VulnerableProjectsByGradeType],
               null: false,
@@ -91,6 +82,16 @@ module EE
               null: true,
               description: 'Group statistics.',
               method: :itself
+
+        field :billable_members_count, ::GraphQL::INT_TYPE,
+              null: true,
+              description: 'The number of billable users in the group.'
+
+        field :dora,
+              ::Types::DoraType,
+              null: true,
+              method: :itself,
+              description: "The group's DORA metrics."
       end
     end
   end

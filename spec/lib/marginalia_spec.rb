@@ -3,10 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe 'Marginalia spec' do
-  class MarginaliaTestController < ActionController::Base
+  class MarginaliaTestController < ApplicationController
+    skip_before_action :authenticate_user!, :check_two_factor_requirement
+
     def first_user
       User.first
       render body: nil
+    end
+
+    private
+
+    [:auth_user, :current_user, :set_experimentation_subject_id_cookie, :signed_in?].each do |method|
+      define_method(method) { }
     end
   end
 
@@ -14,7 +22,9 @@ RSpec.describe 'Marginalia spec' do
     include Sidekiq::Worker
 
     def perform
-      User.first
+      Gitlab::ApplicationContext.with_context(caller_id: self.class.name) do
+        User.first
+      end
     end
   end
 
@@ -30,33 +40,15 @@ RSpec.describe 'Marginalia spec' do
 
     let(:component_map) do
       {
-        "application"       => "test",
-        "controller"        => "marginalia_test",
-        "action"            => "first_user",
-        "correlation_id"    => correlation_id
+        "application"    => "test",
+        "endpoint_id"    => "MarginaliaTestController#first_user",
+        "correlation_id" => correlation_id
       }
     end
 
-    context 'when the feature is enabled' do
-      before do
-        stub_feature(true)
-      end
-
-      it 'generates a query that includes the component and value' do
-        component_map.each do |component, value|
-          expect(recorded.log.last).to include("#{component}:#{value}")
-        end
-      end
-    end
-
-    context 'when the feature is disabled' do
-      before do
-        stub_feature(false)
-      end
-
-      it 'excludes annotations in generated queries' do
-        expect(recorded.log.last).not_to include("/*")
-        expect(recorded.log.last).not_to include("*/")
+    it 'generates a query that includes the component and value' do
+      component_map.each do |component, value|
+        expect(recorded.log.last).to include("#{component}:#{value}")
       end
     end
   end
@@ -64,6 +56,7 @@ RSpec.describe 'Marginalia spec' do
   describe 'for Sidekiq worker jobs' do
     around do |example|
       with_sidekiq_server_middleware do |chain|
+        chain.add Labkit::Middleware::Sidekiq::Context::Server
         chain.add Marginalia::SidekiqInstrumentation::Middleware
         Marginalia.application_name = "sidekiq"
         example.run
@@ -83,16 +76,34 @@ RSpec.describe 'Marginalia spec' do
 
     let(:component_map) do
       {
-        "application"       => "sidekiq",
-        "job_class"         => "MarginaliaTestJob",
-        "correlation_id"    => sidekiq_job['correlation_id'],
-        "jid"               => sidekiq_job['jid']
+        "application"    => "sidekiq",
+        "endpoint_id"    => "MarginaliaTestJob",
+        "correlation_id" => sidekiq_job['correlation_id'],
+        "jid"            => sidekiq_job['jid']
       }
     end
 
-    context 'when the feature is enabled' do
-      before do
-        stub_feature(true)
+    it 'generates a query that includes the component and value' do
+      component_map.each do |component, value|
+        expect(recorded.log.last).to include("#{component}:#{value}")
+      end
+    end
+
+    describe 'for ActionMailer delivery jobs', :sidekiq_mailers do
+      let(:delivery_job) { MarginaliaTestMailer.first_user.deliver_later }
+
+      let(:recorded) do
+        ActiveRecord::QueryRecorder.new do
+          Sidekiq::Worker.drain_all
+        end
+      end
+
+      let(:component_map) do
+        {
+          "application" => "sidekiq",
+          "endpoint_id" => "ActionMailer::MailDeliveryJob",
+          "jid"         => delivery_job.job_id
+        }
       end
 
       it 'generates a query that includes the component and value' do
@@ -100,47 +111,7 @@ RSpec.describe 'Marginalia spec' do
           expect(recorded.log.last).to include("#{component}:#{value}")
         end
       end
-
-      describe 'for ActionMailer delivery jobs' do
-        let(:delivery_job) { MarginaliaTestMailer.first_user.deliver_later }
-
-        let(:recorded) do
-          ActiveRecord::QueryRecorder.new do
-            delivery_job.perform_now
-          end
-        end
-
-        let(:component_map) do
-          {
-            "application"  => "sidekiq",
-            "jid"          => delivery_job.job_id,
-            "job_class"    => delivery_job.arguments.first
-          }
-        end
-
-        it 'generates a query that includes the component and value' do
-          component_map.each do |component, value|
-            expect(recorded.log.last).to include("#{component}:#{value}")
-          end
-        end
-      end
     end
-
-    context 'when the feature is disabled' do
-      before do
-        stub_feature(false)
-      end
-
-      it 'excludes annotations in generated queries' do
-        expect(recorded.log.last).not_to include("/*")
-        expect(recorded.log.last).not_to include("*/")
-      end
-    end
-  end
-
-  def stub_feature(value)
-    stub_feature_flags(marginalia: value)
-    Gitlab::Marginalia.set_enabled_from_feature_flag
   end
 
   def make_request(correlation_id)

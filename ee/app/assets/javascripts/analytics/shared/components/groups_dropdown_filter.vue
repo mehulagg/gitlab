@@ -10,10 +10,10 @@ import {
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { filterBySearchTerm } from '~/analytics/shared/utils';
 import Api from '~/api';
 import { s__, __ } from '~/locale';
 import { DATA_REFETCH_DELAY } from '../constants';
-import { filterBySearchTerm } from '../utils';
 
 export default {
   name: 'GroupsDropdownFilter',
@@ -118,7 +118,7 @@ export default {
 <template>
   <gl-dropdown ref="groupsDropdown" class="dropdown dropdown-groups" toggle-class="gl-shadow-none">
     <template #button-content>
-      <div class="gl-display-flex gl-flex-fill-1">
+      <div class="gl-display-flex gl-flex-grow-1">
         <gl-avatar
           v-if="selectedGroup.name"
           :src="selectedGroup.avatar_url"

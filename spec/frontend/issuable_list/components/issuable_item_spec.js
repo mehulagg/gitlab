@@ -202,7 +202,7 @@ describe('IssuableItem', () => {
     describe('labelTarget', () => {
       it('returns target string for a provided label param when `enableLabelPermalinks` is true', () => {
         expect(wrapper.vm.labelTarget(mockRegularLabel)).toBe(
-          '?label_name%5B%5D=Documentation%20Update',
+          '?label_name[]=Documentation%20Update',
         );
       });
 
@@ -294,7 +294,17 @@ describe('IssuableItem', () => {
 
       expect(confidentialEl.exists()).toBe(true);
       expect(confidentialEl.props('name')).toBe('eye-slash');
-      expect(confidentialEl.attributes('title')).toBe('Confidential');
+      expect(confidentialEl.attributes()).toMatchObject({
+        title: 'Confidential',
+        arialabel: 'Confidential',
+      });
+    });
+
+    it('renders task status', () => {
+      const taskStatus = wrapper.find('[data-testid="task-status"]');
+      const expected = `${mockIssuable.taskCompletionStatus.completedCount} of ${mockIssuable.taskCompletionStatus.count} tasks completed`;
+
+      expect(taskStatus.text()).toBe(expected);
     });
 
     it('renders issuable reference', () => {
@@ -326,7 +336,7 @@ describe('IssuableItem', () => {
       const createdAtEl = wrapper.find('[data-testid="issuable-created-at"]');
 
       expect(createdAtEl.exists()).toBe(true);
-      expect(createdAtEl.attributes('title')).toBe('Jun 29, 2020 1:52pm GMT+0000');
+      expect(createdAtEl.attributes('title')).toBe('Jun 29, 2020 1:52pm UTC');
       expect(createdAtEl.text()).toBe(wrapper.vm.createdAt);
     });
 
@@ -440,8 +450,34 @@ describe('IssuableItem', () => {
       const updatedAtEl = wrapper.find('[data-testid="issuable-updated-at"]');
 
       expect(updatedAtEl.exists()).toBe(true);
-      expect(updatedAtEl.find('span').attributes('title')).toBe('Sep 10, 2020 11:41am GMT+0000');
+      expect(updatedAtEl.find('span').attributes('title')).toBe('Sep 10, 2020 11:41am UTC');
       expect(updatedAtEl.text()).toBe(wrapper.vm.updatedAt);
+    });
+
+    describe('when issuable is closed', () => {
+      it('renders issuable card with a closed style', () => {
+        wrapper = createComponent({ issuable: { ...mockIssuable, closedAt: '2020-12-10' } });
+
+        expect(wrapper.classes()).toContain('closed');
+      });
+    });
+
+    describe('when issuable was created within the past 24 hours', () => {
+      it('renders issuable card with a recently-created style', () => {
+        wrapper = createComponent({
+          issuable: { ...mockIssuable, createdAt: '2020-12-10T12:34:56' },
+        });
+
+        expect(wrapper.classes()).toContain('today');
+      });
+    });
+
+    describe('when issuable was created earlier than the past 24 hours', () => {
+      it('renders issuable card without a recently-created style', () => {
+        wrapper = createComponent({ issuable: { ...mockIssuable, createdAt: '2020-12-09' } });
+
+        expect(wrapper.classes()).not.toContain('today');
+      });
     });
   });
 });

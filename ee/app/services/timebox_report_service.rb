@@ -62,7 +62,7 @@ class TimeboxReportService
       handle_remove_timebox_event(event)
     end
 
-    issue_state[:timebox] = event['value']
+    issue_state[:timebox] = event['action'] == ResourceTimeboxEvent.actions[:add] ? event['value'] : nil
   end
 
   def handle_add_timebox_event(event)

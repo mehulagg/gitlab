@@ -12,7 +12,7 @@ module Resolvers
       argument :statuses, [Types::AlertManagement::StatusEnum],
                 as: :status,
                 required: false,
-                description: 'Alerts with the specified statues. For example, [TRIGGERED].'
+                description: 'Alerts with the specified statues. For example, `[TRIGGERED]`.'
 
       argument :sort, Types::AlertManagement::AlertSortEnum,
                 description: 'Sort alerts by this criteria.',
@@ -43,7 +43,8 @@ module Resolvers
       def preloads
         {
           assignees: [:assignees],
-          notes: [:ordered_notes, { ordered_notes: [:system_note_metadata, :project, :noteable] }]
+          notes: [:ordered_notes, { ordered_notes: [:system_note_metadata, :project, :noteable] }],
+          issue: [:issue]
         }
       end
     end

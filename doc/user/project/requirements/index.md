@@ -23,6 +23,10 @@ When a feature is no longer necessary, you can [archive the related requirement]
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [GitLab 12.10 Introduces Requirements Management](https://www.youtube.com/watch?v=uSS7oUNSEoU).
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a more in-depth walkthrough using a [demonstration project](https://gitlab.com/gitlab-org/requiremeents-mgmt),
+see [GitLab Requirements Traceability Walkthrough](https://youtu.be/VIiuTQYFVa0) (Feb 2021).
+
 ![requirements list view](img/requirements_list_v13_5.png)
 
 ## Create a requirement
@@ -92,18 +96,20 @@ As soon as a requirement is reopened, it no longer appears in the **Archived** t
 
 ## Search for a requirement
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212543) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212543) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - Searching by status [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/224614) in GitLab 13.10.
 
 You can search for a requirement from the requirements list page based on the following criteria:
 
-- Requirement title
+- Title
 - Author's username
+- Status (satisfied, failed, or missing)
 
 To search for a requirement:
 
 1. In a project, go to  **Requirements > List**.
 1. Select the **Search or filter results** field. A dropdown menu appears.
-1. Select the requirement author from the dropdown or enter plain text to search by requirement title.
+1. Select the requirement author or status from the dropdown or enter plain text to search by requirement title.
 1. Press <kbd>Enter</kbd> on your keyboard to filter the list.
 
 You can also sort the requirements list by:
@@ -116,8 +122,7 @@ You can also sort the requirements list by:
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2859) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
 > - [Added](https://gitlab.com/gitlab-org/gitlab/-/issues/215514) ability to specify individual requirements and their statuses in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.2.
 
-GitLab supports [requirements test
-reports](../../../ci/pipelines/job_artifacts.md#artifactsreportsrequirements) now.
+GitLab supports [requirements test reports](../../../ci/yaml/index.md#artifactsreportsrequirements) now.
 You can add a job to your CI pipeline that, when triggered, marks all existing
 requirements as Satisfied (you may manually satisfy a requirement in the edit form [edit a requirement](#edit-a-requirement)).
 
@@ -179,7 +184,7 @@ requirements_confirmation:
 ### Add the manual job to CI conditionally
 
 To configure your CI to include the manual job only when there are some open
-requirements, add a rule which checks `CI_HAS_OPEN_REQUIREMENTS` CI variable.
+requirements, add a rule which checks `CI_HAS_OPEN_REQUIREMENTS` CI/CD variable.
 
 ```yaml
 requirements_confirmation:
@@ -262,6 +267,7 @@ For GitLab.com, it is set to 10 MB.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290813) in GitLab 13.8.
 > - Revised CSV column headers [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299247) in GitLab 13.9.
+> - Ability to select which fields to export [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290823) in GitLab 13.9.
 
 You can export GitLab requirements to a
 [CSV file](https://en.wikipedia.org/wiki/Comma-separated_values) sent to your default notification
@@ -276,7 +282,14 @@ Users with Reporter or higher [permissions](../../permissions.md) can export req
 To export requirements:
 
 1. In a project, go to **Requirements**.
-1. Select the **Export as CSV** icon (**{export}**) in the top right. A confirmation modal appears.
+1. In the top right, select the **Export as CSV** icon (**{export}**).
+
+   A confirmation modal appears.
+
+1. Under **Advanced export options**, select which fields to export.
+
+   All fields are selected by default. To exclude a field from being exported, clear the checkbox next to it.
+
 1. Select **Export requirements**. The exported CSV file is sent to the email address associated with your user.
 
 ### Exported CSV file format

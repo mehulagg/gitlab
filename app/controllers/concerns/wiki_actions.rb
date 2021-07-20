@@ -14,8 +14,7 @@ module WikiActions
     before_action { respond_to :html }
 
     before_action :authorize_read_wiki!
-    before_action :authorize_create_wiki!, only: [:edit, :create]
-    before_action :authorize_admin_wiki!, only: :destroy
+    before_action :authorize_create_wiki!, only: [:edit, :create, :destroy]
 
     before_action :wiki
     before_action :page, only: [:show, :edit, :update, :history, :destroy, :diff]
@@ -112,11 +111,9 @@ module WikiActions
         wiki_page_path(wiki, page)
       )
     else
+      @error = response.message
       render 'shared/wikis/edit'
     end
-  rescue WikiPage::PageChangedError, WikiPage::PageRenameError => e
-    @error = e
-    render 'shared/wikis/edit'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -140,8 +137,8 @@ module WikiActions
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def history
     if page
-      @page_versions = Kaminari.paginate_array(page.versions(page: params[:page].to_i),
-                                               total_count: page.count_versions)
+      @commits = Kaminari.paginate_array(page.versions(page: params[:page].to_i),
+                                         total_count: page.count_versions)
         .page(params[:page])
 
       render 'shared/wikis/history'
@@ -179,7 +176,7 @@ module WikiActions
       redirect_to wiki_path(wiki),
       status: :found
     else
-      @error = response
+      @error = response.message
       render 'shared/wikis/edit'
     end
   end

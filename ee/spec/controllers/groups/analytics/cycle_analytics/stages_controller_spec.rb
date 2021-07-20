@@ -15,6 +15,7 @@ RSpec.describe Groups::Analytics::CycleAnalytics::StagesController do
 
   context 'when params have group_id and value_stream_id' do
     let_it_be(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
+
     let(:params) { { group_id: group, value_stream_id: value_stream.id } }
     let(:parent) { group }
 

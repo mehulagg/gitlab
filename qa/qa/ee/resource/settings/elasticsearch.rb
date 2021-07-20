@@ -19,6 +19,10 @@ module QA
             QA::Page::Main::Menu.perform(&:go_to_admin_area)
             QA::Page::Admin::Menu.perform(&:go_to_advanced_search)
             QA::EE::Page::Admin::Settings::Component::Elasticsearch.perform do |es|
+              if es.has_no_indexing_checkbox_element?
+                es.click_expand_advanced_search
+              end
+
               es.check_indexing if @es_indexing
               es.check_search if @es_enabled
               es.enter_link(@es_url)

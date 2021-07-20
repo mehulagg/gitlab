@@ -1,7 +1,6 @@
-import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlDropdown, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import IterationForm from 'ee/iterations/components/iteration_form.vue';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
@@ -12,6 +11,13 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '../mock_data';
 
 const localVue = createLocalVue();
+const $router = {
+  currentRoute: {
+    params: {
+      iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
+    },
+  },
+};
 
 describe('Iterations report', () => {
   let wrapper;
@@ -19,21 +25,21 @@ describe('Iterations report', () => {
 
   const defaultProps = {
     fullPath: 'gitlab-org',
-    labelsFetchPath: '/gitlab-org/gitlab-test/-/labels.json?include_ancestor_groups=true',
+    namespaceType: Namespace.Group,
   };
+  const labelsFetchPath = '/labels.json';
 
   const findTopbar = () => wrapper.find({ ref: 'topbar' });
   const findTitle = () => wrapper.find({ ref: 'title' });
   const findDescription = () => wrapper.find({ ref: 'description' });
   const findActionsDropdown = () => wrapper.find('[data-testid="actions-dropdown"]');
-  const clickEditButton = () => {
-    findActionsDropdown().vm.$emit('click');
-    wrapper.find(GlDropdownItem).vm.$emit('click');
-  };
 
-  const mountComponentWithApollo = ({
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+
+  const mountComponent = ({
     props = defaultProps,
-    iterationQueryHandler = jest.fn(),
+    iterationQueryHandler = jest.fn().mockResolvedValue(mockGroupIterations),
   } = {}) => {
     localVue.use(VueApollo);
     mockApollo = createMockApollo([[query, iterationQueryHandler]]);
@@ -42,6 +48,22 @@ describe('Iterations report', () => {
       localVue,
       apolloProvider: mockApollo,
       propsData: props,
+      provide: {
+        fullPath: props.fullPath,
+        groupPath: props.fullPath,
+        cadencesListPath: '/groups/some-group/-/cadences',
+        canCreateCadence: true,
+        canEditCadence: true,
+        namespaceType: props.namespaceType,
+        canEditIteration: props.canEditIteration,
+        hasScopedLabelsFeature: true,
+        labelsFetchPath,
+        previewMarkdownPath: '/markdown',
+        noIssuesSvgPath: '/some.svg',
+      },
+      mocks: {
+        $router,
+      },
       stubs: {
         GlLoadingIcon,
         GlTab,
@@ -57,6 +79,7 @@ describe('Iterations report', () => {
         {
           fullPath: 'group-name',
           iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
+          namespaceType: Namespace.Group,
         },
         mockGroupIterations,
         {
@@ -82,7 +105,7 @@ describe('Iterations report', () => {
     ])('when viewing an iteration in a %s', (_, props, mockIteration, expectedParams) => {
       it('calls a query with correct parameters', () => {
         const iterationQueryHandler = jest.fn();
-        mountComponentWithApollo({
+        mountComponent({
           props,
           iterationQueryHandler,
         });
@@ -91,7 +114,7 @@ describe('Iterations report', () => {
       });
 
       it('renders an iteration title', async () => {
-        mountComponentWithApollo({
+        mountComponent({
           props,
           iterationQueryHandler: jest.fn().mockResolvedValue(mockIteration),
         });
@@ -103,43 +126,28 @@ describe('Iterations report', () => {
     });
   });
 
-  const mountComponent = ({ props = defaultProps, loading = false } = {}) => {
-    wrapper = shallowMount(IterationReport, {
-      propsData: props,
-      mocks: {
-        $apollo: {
-          queries: { iteration: { loading } },
-        },
-      },
-      stubs: {
-        GlLoadingIcon,
-        GlTab,
-        GlTabs,
-      },
-    });
-  };
-
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
   });
 
-  it('shows spinner while loading', () => {
-    mountComponent({
-      loading: true,
-    });
-
-    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
-  });
-
   describe('empty state', () => {
-    it('shows empty state if no item loaded', () => {
+    it('shows empty state if no item loaded', async () => {
       mountComponent({
-        loading: false,
+        iterationQueryHandler: jest.fn().mockResolvedValue({
+          data: {
+            group: {
+              iterations: {
+                nodes: [],
+              },
+            },
+          },
+        }),
       });
 
-      expect(wrapper.find(GlEmptyState).exists()).toBe(true);
-      expect(wrapper.find(GlEmptyState).props('title')).toEqual('Could not find iteration');
+      await waitForPromises();
+
+      expect(findEmptyState().props('title')).toBe('Could not find iteration');
       expect(findTitle().exists()).toBe(false);
       expect(findDescription().exists()).toBe(false);
       expect(findActionsDropdown().exists()).toBe(false);
@@ -147,40 +155,34 @@ describe('Iterations report', () => {
   });
 
   describe('item loaded', () => {
-    const iteration = {
-      title: 'June week 1',
-      id: 'gid://gitlab/Iteration/2',
-      descriptionHtml: 'The first week of June',
-      startDate: '2020-06-02',
-      dueDate: '2020-06-08',
-      state: 'opened',
-    };
-
     describe('user without edit permission', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         mountComponent({
-          loading: false,
+          iterationQueryHandler: jest.fn().mockResolvedValue(mockGroupIterations),
         });
 
-        wrapper.setData({
-          iteration,
-        });
+        await waitForPromises();
       });
 
       it('shows status and date in header', () => {
-        expect(findTopbar().text()).toContain('Open');
-        expect(findTopbar().text()).toContain('Jun 2, 2020');
-        expect(findTopbar().text()).toContain('Jun 8, 2020');
+        const startDate = IterationReport.methods.formatDate(mockIterationNode.startDate);
+        const dueDate = IterationReport.methods.formatDate(mockIterationNode.startDate);
+        expect(findTopbar().text().toLowerCase()).toContain(mockIterationNode.state);
+        expect(findTopbar().text()).toContain(startDate);
+        expect(findTopbar().text()).toContain(dueDate);
       });
 
       it('hides empty region and loading spinner', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-        expect(wrapper.find(GlEmptyState).exists()).toBe(false);
+        expect(findLoadingIcon().exists()).toBe(false);
+        expect(findEmptyState().exists()).toBe(false);
       });
 
-      it('shows title and description', () => {
-        expect(findTitle().text()).toContain(iteration.title);
-        expect(findDescription().text()).toContain(iteration.descriptionHtml);
+      it('shows title', () => {
+        expect(findTitle().text()).toContain(mockIterationNode.title);
+      });
+
+      it('shows description', () => {
+        expect(findDescription().text()).toContain(mockIterationNode.description);
       });
 
       it('hides actions dropdown', () => {
@@ -188,99 +190,24 @@ describe('Iterations report', () => {
       });
 
       it('shows IterationReportTabs component', () => {
-        const iterationReportTabs = wrapper.find(IterationReportTabs);
+        const iterationReportTabs = wrapper.findComponent(IterationReportTabs);
 
-        expect(iterationReportTabs.props()).toEqual({
+        expect(iterationReportTabs.props()).toMatchObject({
           fullPath: defaultProps.fullPath,
-          iterationId: iteration.id,
-          labelsFetchPath: defaultProps.labelsFetchPath,
+          iterationId: mockIterationNode.id,
+          labelsFetchPath,
           namespaceType: Namespace.Group,
-        });
-      });
-    });
-
-    describe('user with edit permission', () => {
-      describe('loading report view', () => {
-        beforeEach(() => {
-          mountComponent({
-            props: {
-              ...defaultProps,
-              canEdit: true,
-            },
-            loading: false,
-          });
-
-          wrapper.setData({
-            iteration,
-          });
-        });
-
-        it('updates URL when loading form', async () => {
-          jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
-
-          clickEditButton();
-
-          await wrapper.vm.$nextTick();
-
-          expect(window.history.pushState).toHaveBeenCalledWith(
-            { prev: 'viewIteration' },
-            null,
-            '/edit',
-          );
-        });
-      });
-
-      describe('loading edit form directly', () => {
-        beforeEach(() => {
-          mountComponent({
-            props: {
-              ...defaultProps,
-              canEdit: true,
-              initiallyEditing: true,
-            },
-            loading: false,
-          });
-
-          wrapper.setData({
-            iteration,
-          });
-        });
-
-        it('updates URL when cancelling form submit', async () => {
-          jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
-          wrapper.find(IterationForm).vm.$emit('cancel');
-
-          await wrapper.vm.$nextTick();
-
-          expect(window.history.pushState).toHaveBeenCalledWith(
-            { prev: 'editIteration' },
-            null,
-            '/',
-          );
-        });
-
-        it('updates URL after form submitted', async () => {
-          jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
-          wrapper.find(IterationForm).vm.$emit('updated');
-
-          await wrapper.vm.$nextTick();
-
-          expect(window.history.pushState).toHaveBeenCalledWith(
-            { prev: 'editIteration' },
-            null,
-            '/',
-          );
         });
       });
     });
 
     describe('actions dropdown to edit iteration', () => {
       describe.each`
-        description                    | canEdit  | namespaceType        | canEditIteration
-        ${'has permissions'}           | ${true}  | ${Namespace.Group}   | ${true}
-        ${'has permissions'}           | ${true}  | ${Namespace.Project} | ${false}
-        ${'does not have permissions'} | ${false} | ${Namespace.Group}   | ${false}
-        ${'does not have permissions'} | ${false} | ${Namespace.Project} | ${false}
+        description                    | canEditIteration | namespaceType        | canEdit
+        ${'has permissions'}           | ${true}          | ${Namespace.Group}   | ${true}
+        ${'has permissions'}           | ${true}          | ${Namespace.Project} | ${false}
+        ${'does not have permissions'} | ${false}         | ${Namespace.Group}   | ${false}
+        ${'does not have permissions'} | ${false}         | ${Namespace.Project} | ${false}
       `(
         'when user $description and they are viewing an iteration within a $namespaceType',
         ({ canEdit, namespaceType, canEditIteration }) => {
@@ -288,18 +215,14 @@ describe('Iterations report', () => {
             mountComponent({
               props: {
                 ...defaultProps,
-                canEdit,
+                canEditIteration,
                 namespaceType,
               },
-            });
-
-            wrapper.setData({
-              iteration,
             });
           });
 
           it(`${canEditIteration ? 'is shown' : 'is hidden'}`, () => {
-            expect(wrapper.find(GlDropdown).exists()).toBe(canEditIteration);
+            expect(wrapper.findComponent(GlDropdown).exists()).toBe(canEdit);
           });
         },
       );

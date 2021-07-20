@@ -30,7 +30,7 @@ module QA
         let(:default_membership_role) { 'Developer' }
 
         it 'adds the new member with access level as set in SAML SSO configuration', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/968' do
-          managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service, default_membership_role)
+          managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service, default_membership_role: default_membership_role)
           Page::Main::Menu.perform(&:sign_out_if_signed_in)
 
           Flow::Login.while_signed_in(as: user) do

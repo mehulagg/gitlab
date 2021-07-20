@@ -32,6 +32,14 @@ module Ci
       end.to_i
     end
 
+    def runner_variables
+      if Feature.enabled?(:variable_inside_variable, project)
+        variables.sort_and_expand_all(project, keep_undefined: true).to_runner_variables
+      else
+        variables.to_runner_variables
+      end
+    end
+
     def refspecs
       specs = []
       specs << refspec_for_persistent_ref if persistent_ref_exist?
@@ -46,6 +54,18 @@ module Ci
 
       specs
     end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def all_dependencies
+      dependencies = super
+
+      if Feature.enabled?(:preload_associations_jobs_request_api_endpoint, project, default_enabled: :yaml)
+        ActiveRecord::Associations::Preloader.new.preload(dependencies, :job_artifacts_archive)
+      end
+
+      dependencies
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     private
 
@@ -62,7 +82,7 @@ module Ci
         expire_in: artifacts[:expire_in]
       }
 
-      if artifacts.dig(:exclude).present? && ::Gitlab::Ci::Features.artifacts_exclude_enabled?
+      if artifacts.dig(:exclude).present?
         archive.merge(exclude: artifacts[:exclude])
       else
         archive
@@ -118,4 +138,4 @@ module Ci
   end
 end
 
-Ci::BuildRunnerPresenter.prepend_if_ee('EE::Ci::BuildRunnerPresenter')
+Ci::BuildRunnerPresenter.prepend_mod_with('Ci::BuildRunnerPresenter')

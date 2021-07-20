@@ -83,7 +83,7 @@ module Gitlab
           },
           'fenced code with inline script' => {
             input: '```mypre"><script>alert(3)</script>',
-            output: "<div>\n<div>\n<pre class=\"code highlight js-syntax-highlight plaintext\" lang=\"plaintext\" v-pre=\"true\"><code><span id=\"LC1\" class=\"line\" lang=\"plaintext\">\"&gt;</span></code></pre>\n</div>\n</div>"
+            output: "<div>\n<div>\n<pre class=\"code highlight js-syntax-highlight language-plaintext\" lang=\"plaintext\" v-pre=\"true\"><code><span id=\"LC1\" class=\"line\" lang=\"plaintext\">\"&gt;</span></code></pre>\n</div>\n</div>"
           }
         }
 
@@ -91,6 +91,15 @@ module Gitlab
           it "does not convert dangerous #{name} into HTML" do
             expect(render(data[:input], context)).to include(data[:output])
           end
+        end
+
+        it 'does not allow locked attributes to be overridden' do
+          input = <<~ADOC
+            {counter:max-include-depth:1234}
+            <|-- {max-include-depth}
+          ADOC
+
+          expect(render(input, {})).not_to include('1234')
         end
       end
 
@@ -344,7 +353,7 @@ module Gitlab
           output = <<~HTML
             <div>
             <div>
-            <pre class="code highlight js-syntax-highlight javascript" lang="javascript" v-pre="true"><code><span id="LC1" class="line" lang="javascript"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">hello world</span><span class="dl">'</span><span class="p">)</span></span></code></pre>
+            <pre class="code highlight js-syntax-highlight language-javascript" lang="javascript" v-pre="true"><code><span id="LC1" class="line" lang="javascript"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">hello world</span><span class="dl">'</span><span class="p">)</span></span></code></pre>
             </div>
             </div>
           HTML
@@ -371,7 +380,7 @@ module Gitlab
             <div>
             <div>class.cpp</div>
             <div>
-            <pre class="code highlight js-syntax-highlight cpp" lang="cpp" v-pre="true"><code><span id="LC1" class="line" lang="cpp"><span class="cp">#include &lt;stdio.h&gt;</span></span>
+            <pre class="code highlight js-syntax-highlight language-cpp" lang="cpp" v-pre="true"><code><span id="LC1" class="line" lang="cpp"><span class="cp">#include &lt;stdio.h&gt;</span></span>
             <span id="LC2" class="line" lang="cpp"></span>
             <span id="LC3" class="line" lang="cpp"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span></span>
             <span id="LC4" class="line" lang="cpp">  <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">"*"</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></span>
@@ -504,6 +513,107 @@ module Gitlab
             <div>
             <div>
             <a class="no-attachment-icon" href="https://kroki.io/graphviz/svg/eNpLyUwvSizIUHBXqOZSUPBIzcnJ17ULzy_KSeGqBQCEzQka" target="_blank" rel="noopener noreferrer"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Diagram" class="lazy" data-src="https://kroki.io/graphviz/svg/eNpLyUwvSizIUHBXqOZSUPBIzcnJ17ULzy_KSeGqBQCEzQka"></a>
+            </div>
+            </div>
+          HTML
+
+          expect(render(input, context)).to include(output.strip)
+        end
+
+        it 'does not convert a blockdiag diagram to image' do
+          input = <<~ADOC
+            [blockdiag]
+            ....
+            blockdiag {
+              Kroki -> generates -> "Block diagrams";
+              Kroki -> is -> "very easy!";
+
+              Kroki [color = "greenyellow"];
+              "Block diagrams" [color = "pink"];
+              "very easy!" [color = "orange"];
+            }
+            ....
+          ADOC
+
+          output = <<~HTML
+            <div>
+            <div>
+            <pre>blockdiag {
+              Kroki -&gt; generates -&gt; "Block diagrams";
+              Kroki -&gt; is -&gt; "very easy!";
+
+              Kroki [color = "greenyellow"];
+              "Block diagrams" [color = "pink"];
+              "very easy!" [color = "orange"];
+            }</pre>
+            </div>
+            </div>
+          HTML
+
+          expect(render(input, context)).to include(output.strip)
+        end
+
+        it 'does not allow kroki-plantuml-include to be overridden' do
+          input = <<~ADOC
+            [plantuml, test="{counter:kroki-plantuml-include:/etc/passwd}", format="png"]
+            ....
+            class BlockProcessor
+
+            BlockProcessor <|-- {counter:kroki-plantuml-include}
+            ....
+          ADOC
+
+          output = <<~HTML
+            <div>
+            <div>
+            <a class=\"no-attachment-icon\" href=\"https://kroki.io/plantuml/png/eNpLzkksLlZwyslPzg4oyk9OLS7OL-LiQuUr2NTo6ipUJ-eX5pWkFlllF-VnZ-oW5CTmlZTm5uhm5iXnlKak1gIABQEb8A==\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==\" alt=\"Diagram\" class=\"lazy\" data-src=\"https://kroki.io/plantuml/png/eNpLzkksLlZwyslPzg4oyk9OLS7OL-LiQuUr2NTo6ipUJ-eX5pWkFlllF-VnZ-oW5CTmlZTm5uhm5iXnlKak1gIABQEb8A==\"></a>
+            </div>
+            </div>
+          HTML
+
+          expect(render(input, {})).to include(output.strip)
+        end
+
+        it 'does not allow kroki-server-url to be overridden' do
+          input = <<~ADOC
+            [plantuml, test="{counter:kroki-server-url:evilsite}", format="png"]
+            ....
+            class BlockProcessor
+
+            BlockProcessor
+            ....
+          ADOC
+
+          expect(render(input, {})).not_to include('evilsite')
+        end
+      end
+
+      context 'with Kroki and BlockDiag (additional format) enabled' do
+        before do
+          allow_any_instance_of(ApplicationSetting).to receive(:kroki_enabled).and_return(true)
+          allow_any_instance_of(ApplicationSetting).to receive(:kroki_url).and_return('https://kroki.io')
+          allow_any_instance_of(ApplicationSetting).to receive(:kroki_formats_blockdiag).and_return(true)
+        end
+
+        it 'converts a blockdiag diagram to image' do
+          input = <<~ADOC
+            [blockdiag]
+            ....
+            blockdiag {
+              Kroki -> generates -> "Block diagrams";
+              Kroki -> is -> "very easy!";
+
+              Kroki [color = "greenyellow"];
+              "Block diagrams" [color = "pink"];
+              "very easy!" [color = "orange"];
+            }
+            ....
+          ADOC
+
+          output = <<~HTML
+            <div>
+            <div>
+            <a class="no-attachment-icon" href="https://kroki.io/blockdiag/svg/eNpdzDEKQjEQhOHeU4zpPYFoYesRxGJ9bwghMSsbUYJ4d10UCZbDfPynolOek0Q8FsDeNCestoisNLmy-Qg7R3Blcm5hPcr0ITdaB6X15fv-_YdJixo2CNHI2lmK3sPRA__RwV5SzV80ZAegJjXSyfMFptc71w==" target="_blank" rel="noopener noreferrer"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Diagram" class="lazy" data-src="https://kroki.io/blockdiag/svg/eNpdzDEKQjEQhOHeU4zpPYFoYesRxGJ9bwghMSsbUYJ4d10UCZbDfPynolOek0Q8FsDeNCestoisNLmy-Qg7R3Blcm5hPcr0ITdaB6X15fv-_YdJixo2CNHI2lmK3sPRA__RwV5SzV80ZAegJjXSyfMFptc71w=="></a>
             </div>
             </div>
           HTML

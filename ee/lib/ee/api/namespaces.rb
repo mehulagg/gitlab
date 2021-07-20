@@ -29,6 +29,10 @@ module EE
               ::Ci::Runner.instance_type.each(&:tick_runner_queue)
             end
 
+            if params[:extra_shared_runners_minutes_limit].present? || params[:shared_runners_minutes_limit].present?
+              ::Gitlab::Ci::Minutes::CachedQuota.new(namespace).expire!
+            end
+
             namespace.update(update_attrs)
           end
         end
@@ -45,6 +49,7 @@ module EE
               optional :trial, type: Grape::API::Boolean, desc: 'Whether the subscription is a trial'
               optional :trial_ends_on, type: Date, desc: 'End date of trial'
               optional :trial_starts_on, type: Date, desc: 'Start date of trial'
+              optional :trial_extension_type, type: Integer, desc: 'Whether subscription is an extended or reactivated trial'
             end
           end
 
@@ -123,6 +128,7 @@ module EE
 
             subscription_params = declared_params(include_missing: false)
             subscription_params[:trial_starts_on] ||= subscription_params[:start_date] if subscription_params[:trial]
+            subscription_params[:updated_at] = Time.current
 
             if subscription.update(subscription_params)
               present subscription, with: ::EE::API::Entities::GitlabSubscription

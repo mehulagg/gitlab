@@ -1,10 +1,12 @@
 <script>
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
     UserAvatarLink,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
     pipeline: {
       type: Object,
@@ -19,7 +21,7 @@ export default {
 };
 </script>
 <template>
-  <div class="table-section section-10 d-none d-md-block pipeline-triggerer">
+  <div class="pipeline-triggerer" data-testid="pipeline-triggerer">
     <user-avatar-link
       v-if="user"
       :link-href="user.path"

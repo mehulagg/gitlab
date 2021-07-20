@@ -6,6 +6,10 @@ class InstanceSecurityDashboardPolicy < BasePolicy
     License.feature_available?(:security_dashboard)
   end
 
-  rule { ~anonymous }.enable :read_instance_security_dashboard
+  rule { ~anonymous }.policy do
+    enable :read_instance_security_dashboard
+    enable :read_security_resource
+  end
+
   rule { security_dashboard_enabled & can?(:read_instance_security_dashboard) }.enable :create_vulnerability_export
 end

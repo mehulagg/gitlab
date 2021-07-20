@@ -13,6 +13,7 @@ RSpec.describe Gitlab::ImportExport::Base::RelationFactory do
   subject do
     described_class.create(relation_sym: relation_sym,
                            relation_hash: relation_hash,
+                           relation_index: 1,
                            object_builder: Gitlab::ImportExport::Project::ObjectBuilder,
                            members_mapper: members_mapper,
                            user: user,
@@ -39,6 +40,15 @@ RSpec.describe Gitlab::ImportExport::Base::RelationFactory do
 
       it 'returns without creating a new relation' do
         expect(subject).to be_nil
+      end
+    end
+
+    context 'when author relation' do
+      let(:relation_sym) { :author }
+      let(:relation_hash) { { 'name' => 'User', 'project_id' => project.id } }
+
+      it 'returns author hash unchanged' do
+        expect(subject).to eq(relation_hash)
       end
     end
 

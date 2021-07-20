@@ -98,6 +98,10 @@ module Gitlab
 
           if Rails.env.test?
             socket_filename = options[:gitaly_socket] || "gitaly.socket"
+            prometheus_listen_addr = options[:prometheus_listen_addr]
+
+            git_bin_path = File.expand_path('../gitaly/_build/deps/git/install/bin/git')
+            git_bin_path = nil unless File.exist?(git_bin_path)
 
             config = {
               # Override the set gitaly_address since Praefect is in the loop
@@ -106,8 +110,12 @@ module Gitlab
               # Compared to production, tests run in constrained environments. This
               # number is meant to grow with the number of concurrent rails requests /
               # sidekiq jobs, and concurrency will be low anyway in test.
-              git: { catfile_cache_size: 5 }
-            }
+              git: {
+                catfile_cache_size: 5,
+                bin_path: git_bin_path
+              }.compact,
+              prometheus_listen_addr: prometheus_listen_addr
+            }.compact
 
             storage_path = Rails.root.join('tmp', 'tests', 'second_storage').to_s
             storages << { name: 'test_second_storage', path: storage_path }
@@ -115,13 +123,13 @@ module Gitlab
 
           config[:storage] = storages
 
-          internal_socket_dir = File.join(gitaly_dir, 'internal_sockets')
+          internal_socket_dir = options[:internal_socket_dir] || File.join(gitaly_dir, 'internal_sockets')
           FileUtils.mkdir(internal_socket_dir) unless File.exist?(internal_socket_dir)
           config[:internal_socket_dir] = internal_socket_dir
 
           config[:'gitaly-ruby'] = { dir: File.join(gitaly_dir, 'ruby') } if gitaly_ruby
           config[:'gitlab-shell'] = { dir: Gitlab.config.gitlab_shell.path }
-          config[:bin_dir] = Gitlab.config.gitaly.client_path
+          config[:bin_dir] = File.join(gitaly_dir, '_build', 'bin') # binaries by default are in `_build/bin`
           config[:gitlab] = { url: Gitlab.config.gitlab.url }
           config[:logging] = { dir: Rails.root.join('log').to_s }
 
@@ -145,8 +153,14 @@ module Gitlab
           second_storage_nodes = [{ storage: 'test_second_storage', address: "unix:#{gitaly_dir}/gitaly2.socket", primary: true, token: 'secret' }]
 
           storages = [{ name: 'default', node: nodes }, { name: 'test_second_storage', node: second_storage_nodes }]
-          failover = { enabled: false }
-          config = { socket_path: "#{gitaly_dir}/praefect.socket", memory_queue_enabled: true, virtual_storage: storages, failover: failover }
+          failover = { enabled: false, election_strategy: 'local' }
+          config = {
+            i_understand_my_election_strategy_is_unsupported_and_will_be_removed_without_warning: true,
+            socket_path: "#{gitaly_dir}/praefect.socket",
+            memory_queue_enabled: true,
+            virtual_storage: storages,
+            failover: failover
+          }
           config[:token] = 'secret' if Rails.env.test?
 
           TomlRB.dump(config)

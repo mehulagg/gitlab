@@ -1,35 +1,42 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
-# External Pipeline Validation
+# External pipeline validation **(FREE SELF)**
 
-You can use an external service for validating a pipeline before it's created.
+You can use an external service to validate a pipeline before it's created.
 
 WARNING:
 This is an experimental feature and subject to change without notice.
 
-## Usage
-
 GitLab sends a POST request to the external service URL with the pipeline
-data as payload. GitLab then invalidates the pipeline based on the response
-code. If there's an error or the request times out, the pipeline is not
-invalidated.
+data as payload. The response code from the external service determines if GitLab
+should accept or reject the pipeline. If the response is:
 
-Response Code Legend:
+- `200`, the pipeline is accepted.
+- `406`, the pipeline is rejected.
+- Other codes, the pipeline is accepted and logged.
 
-- `200` - Accepted
-- `4xx` - Not Accepted
-- Other Codes - Accepted and Logged
+If there's an error or the request times out, the pipeline is accepted.
 
-## Configuration
+Pipelines rejected by the external validation service aren't created, and don't
+appear in pipeline lists in the GitLab UI or API. If you create a pipeline in the
+UI that is rejected, `Pipeline cannot be run. External validation failed` is displayed.
 
-Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
+## Configure external pipeline validation
 
-## Payload Schema
+To configure external pipeline validation, add the
+[`EXTERNAL_VALIDATION_SERVICE_URL` environment variable](environment_variables.md)
+and set it to the external service URL.
+
+By default, requests to the external service time out after five seconds. To override
+the default, set the `EXTERNAL_VALIDATION_SERVICE_TIMEOUT` environment variable to the
+required number of seconds.
+
+## Payload schema
 
 ```json
 {
@@ -38,18 +45,21 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
     "project",
     "user",
     "pipeline",
-    "builds"
+    "builds",
+    "namespace"
   ],
   "properties" : {
     "project": {
       "type": "object",
       "required": [
         "id",
-        "path"
+        "path",
+        "created_at"
       ],
       "properties": {
         "id": { "type": "integer" },
-        "path": { "type": "string" }
+        "path": { "type": "string" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" }
       }
     },
     "user": {
@@ -57,12 +67,16 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
       "required": [
         "id",
         "username",
-        "email"
+        "email",
+        "created_at"
       ],
       "properties": {
         "id": { "type": "integer" },
         "username": { "type": "string" },
-        "email": { "type": "string" }
+        "email": { "type": "string" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" },
+        "current_sign_in_ip": { "type": ["string", "null"] },
+        "last_sign_in_ip": { "type": ["string", "null"] }
       }
     },
     "pipeline": {
@@ -103,8 +117,32 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
           }
         }
       }
+    },
+    "namespace": {
+      "type": "object",
+      "required": [
+        "plan",
+        "trial"
+      ],
+      "properties": {
+        "plan": { "type": "string" },
+        "trial": { "type": "boolean" }
+      }
+    },
+    "provisioning_group": {
+      "type": "object",
+      "required": [
+        "plan",
+        "trial"
+      ],
+      "properties": {
+        "plan": { "type": "string" },
+        "trial": { "type": "boolean" }
+      }
     }
-  },
-  "additionalProperties": false
+  }
 }
 ```
+
+The `namespace` field is only available in [GitLab Premium](https://about.gitlab.com/pricing/)
+and higher.

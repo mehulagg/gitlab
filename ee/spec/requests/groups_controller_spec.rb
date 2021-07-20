@@ -32,8 +32,8 @@ RSpec.describe GroupsController, type: :request do
             shared_examples 'creates ip restrictions' do
               it 'creates ip restrictions' do
                 expect { subject }
-                  .to(change { group.reload.ip_restrictions.map(&:range) }
-                    .from([]).to(range.split(',')))
+                  .to change { group.reload.ip_restrictions.map(&:range) }
+                    .from([]).to(contain_exactly(*range.split(',')))
                 expect(response).to have_gitlab_http_status(:found)
               end
             end
@@ -72,8 +72,8 @@ RSpec.describe GroupsController, type: :request do
               shared_examples 'updates ip restrictions' do
                 it 'updates ip restrictions' do
                   expect { subject }
-                    .to(change { group.reload.ip_restrictions.map(&:range) }
-                      .from(['10.0.0.0/8']).to(range.split(',')))
+                    .to change { group.reload.ip_restrictions.map(&:range) }
+                      .from(['10.0.0.0/8']).to(contain_exactly(*range.split(',')))
                   expect(response).to have_gitlab_http_status(:found)
                 end
               end
@@ -331,6 +331,64 @@ RSpec.describe GroupsController, type: :request do
             .not_to change { group.reload.allowed_email_domains.count }.from(0)
           expect(response).to have_gitlab_http_status(:found)
         end
+      end
+    end
+  end
+
+  describe 'PUT #transfer' do
+    let(:new_parent_group) { create(:group) }
+
+    before do
+      group.add_owner(user)
+      new_parent_group.add_owner(user)
+      create(:gitlab_subscription, :ultimate, namespace: group)
+      login_as(user)
+    end
+
+    it 'does not transfer a group with a gitlab saas subscription' do
+      put transfer_group_path(group),
+        params: { new_parent_group_id: new_parent_group.id }
+
+      expect(response).to redirect_to(edit_group_path(group))
+      expect(flash[:alert]).to include('Transfer failed')
+      expect(group.reload.parent_id).to be_nil
+    end
+
+    it 'transfers a subgroup with a parent group with a gitlab saas subscription' do
+      subgroup = create(:group, parent: group)
+
+      put transfer_group_path(subgroup),
+        params: { new_parent_group_id: new_parent_group.id }
+
+      subgroup.reload
+      expect(response).to redirect_to(group_path(subgroup))
+      expect(flash[:alert]).to be_nil
+      expect(subgroup.parent_id).to eq(new_parent_group.id)
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    before do
+      group.add_owner(user)
+      login_as(user)
+    end
+
+    it 'does not delete a group with a gitlab.com subscription' do
+      create(:gitlab_subscription, :ultimate, namespace: group)
+
+      Sidekiq::Testing.fake! do
+        expect { delete(group_path(group)) }.not_to change(GroupDestroyWorker.jobs, :size)
+        expect(response).to redirect_to(edit_group_path(group))
+      end
+    end
+
+    it 'deletes a subgroup with a parent group with a gitlab.com subscription' do
+      create(:gitlab_subscription, :ultimate, namespace: group)
+      subgroup = create(:group, parent: group)
+
+      Sidekiq::Testing.fake! do
+        expect { delete(group_path(subgroup)) }.to change(GroupDestroyWorker.jobs, :size).by(1)
+        expect(response).to redirect_to(root_path)
       end
     end
   end

@@ -5,4 +5,4 @@
   %h3.mb-2
     = _('Code Review')
   %span.text-secondary= _('Review time is defined as the time it takes from first comment until merged.')
-#js-code-review-analytics{ data: { project_id: @project.id, project_path: project_path(@project), new_merge_request_url: namespace_project_new_merge_request_path(@project.namespace), empty_state_svg_path: image_path('illustrations/merge_requests.svg'), milestone_path: project_milestones_path(@project), labels_path: project_labels_path(@project) } }
+#js-code-review-analytics{ data: code_review_app_data(@project) }

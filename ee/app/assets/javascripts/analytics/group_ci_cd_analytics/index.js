@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import CiCdAnalyticsApp from './components/app.vue';
 
 Vue.use(VueApollo);
@@ -16,11 +17,14 @@ export default () => {
 
   const { fullPath } = el.dataset;
 
+  const shouldRenderDoraCharts = parseBoolean(el.dataset.shouldRenderDoraCharts);
+
   return new Vue({
     el,
     apolloProvider,
     provide: {
-      fullPath,
+      groupPath: fullPath,
+      shouldRenderDoraCharts,
     },
     render: (createElement) => createElement(CiCdAnalyticsApp),
   });

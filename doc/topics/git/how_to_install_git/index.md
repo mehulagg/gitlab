@@ -9,9 +9,9 @@ type: howto
 # Installing Git **(FREE)**
 
 To begin contributing to GitLab projects,
-you will need to install the Git client on your computer.
+you must install the Git client on your computer.
 
-This article will show you how to install Git on macOS, Ubuntu Linux and Windows.
+This article shows you how to install Git on macOS, Ubuntu Linux and Windows.
 
 Information on [installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 is also available at the official Git website.
@@ -62,7 +62,7 @@ To verify that Git works on your system, run:
 git --version
 ```
 
-Next, read our article on [adding an SSH key to GitLab](../../../ssh/README.md).
+Next, read our article on [adding an SSH key to GitLab](../../../ssh/index.md).
 
 ## Install Git on Ubuntu Linux
 
@@ -86,13 +86,13 @@ To verify that Git works on your system, run:
 git --version
 ```
 
-Next, read our article on [adding an SSH key to GitLab](../../../ssh/README.md).
+Next, read our article on [adding an SSH key to GitLab](../../../ssh/index.md).
 
 ## Installing Git on Windows from the Git website
 
 Open the [Git website](https://git-scm.com/) and download and install Git for Windows.
 
-Next, read our article on [adding an SSH key to GitLab](../../../ssh/README.md).
+Next, read our article on [adding an SSH key to GitLab](../../../ssh/index.md).
 
 <!-- ## Troubleshooting
 

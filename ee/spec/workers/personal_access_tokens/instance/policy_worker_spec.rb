@@ -9,6 +9,7 @@ RSpec.describe PersonalAccessTokens::Instance::PolicyWorker, type: :worker do
 
     before do
       stub_application_setting(max_personal_access_token_lifetime: instance_limit)
+      stub_licensed_features(personal_access_token_expiration_policy: true)
     end
 
     context 'when a token is valid' do

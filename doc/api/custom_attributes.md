@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Create
+group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -90,7 +90,8 @@ PUT /projects/:id/custom_attributes/:key
 | `value` | string | yes | The value of the custom attribute |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "value=Greenland" "https://gitlab.example.com/api/v4/users/42/custom_attributes/location"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" \
+     --data "value=Greenland" "https://gitlab.example.com/api/v4/users/42/custom_attributes/location"
 ```
 
 Example response:

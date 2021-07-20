@@ -40,42 +40,56 @@ RSpec.describe Ci::Runner do
     context 'runner_type validations' do
       let_it_be(:group) { create(:group) }
       let_it_be(:project) { create(:project) }
-      let(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-      let(:project_runner) { create(:ci_runner, :project, projects: [project]) }
-      let(:instance_runner) { create(:ci_runner, :instance) }
 
       it 'disallows assigning group to project_type runner' do
-        project_runner.groups << build(:group)
+        project_runner = build(:ci_runner, :project, groups: [group])
 
         expect(project_runner).not_to be_valid
         expect(project_runner.errors.full_messages).to include('Runner cannot have groups assigned')
       end
 
       it 'disallows assigning group to instance_type runner' do
-        instance_runner.groups << build(:group)
+        instance_runner = build(:ci_runner, :instance, groups: [group])
 
         expect(instance_runner).not_to be_valid
         expect(instance_runner.errors.full_messages).to include('Runner cannot have groups assigned')
       end
 
       it 'disallows assigning project to group_type runner' do
-        group_runner.projects << build(:project)
+        group_runner = build(:ci_runner, :instance, projects: [project])
 
         expect(group_runner).not_to be_valid
         expect(group_runner.errors.full_messages).to include('Runner cannot have projects assigned')
       end
 
       it 'disallows assigning project to instance_type runner' do
-        instance_runner.projects << build(:project)
+        instance_runner = build(:ci_runner, :instance, projects: [project])
 
         expect(instance_runner).not_to be_valid
         expect(instance_runner.errors.full_messages).to include('Runner cannot have projects assigned')
       end
 
       it 'fails to save a group assigned to a project runner even if the runner is already saved' do
-        group.runners << project_runner
-        expect { group.save! }
+        project_runner = create(:ci_runner, :project, projects: [project])
+
+        expect { create(:group, runners: [project_runner]) }
           .to raise_error(ActiveRecord::RecordInvalid)
+      end
+
+      context 'when runner has config' do
+        it 'is valid' do
+          runner = build(:ci_runner, config: { gpus: "all" })
+
+          expect(runner).to be_valid
+        end
+      end
+
+      context 'when runner has an invalid config' do
+        it 'is invalid' do
+          runner = build(:ci_runner, config: { test: 1 })
+
+          expect(runner).not_to be_valid
+        end
       end
     end
 
@@ -259,6 +273,20 @@ RSpec.describe Ci::Runner do
     end
   end
 
+  describe '.recent' do
+    subject { described_class.recent }
+
+    before do
+      @runner1 = create(:ci_runner, :instance, contacted_at: nil, created_at: 2.months.ago)
+      @runner2 = create(:ci_runner, :instance, contacted_at: nil, created_at: 3.months.ago)
+      @runner3 = create(:ci_runner, :instance, contacted_at: 1.month.ago, created_at: 2.months.ago)
+      @runner4 = create(:ci_runner, :instance, contacted_at: 1.month.ago, created_at: 3.months.ago)
+      @runner5 = create(:ci_runner, :instance, contacted_at: 3.months.ago, created_at: 5.months.ago)
+    end
+
+    it { is_expected.to eq([@runner1, @runner3, @runner4])}
+  end
+
   describe '.online' do
     subject { described_class.online }
 
@@ -351,8 +379,27 @@ RSpec.describe Ci::Runner do
     it { is_expected.to eq([@runner1])}
   end
 
+  describe '#tick_runner_queue' do
+    it 'sticks the runner to the primary and calls the original method' do
+      runner = create(:ci_runner)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+        .and_return(true)
+
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
+        .with(:runner, runner.id)
+
+      expect(Gitlab::Workhorse).to receive(:set_key_and_notify)
+
+      runner.tick_runner_queue
+    end
+  end
+
   describe '#can_pick?' do
+    using RSpec::Parameterized::TableSyntax
+
     let_it_be(:pipeline) { create(:ci_pipeline) }
+
     let(:build) { create(:ci_build, pipeline: pipeline) }
     let(:runner_project) { build.project }
     let(:runner) { create(:ci_runner, :project, projects: [runner_project], tag_list: tag_list, run_untagged: run_untagged) }
@@ -364,6 +411,11 @@ RSpec.describe Ci::Runner do
     context 'a different runner' do
       let(:other_project) { create(:project) }
       let(:other_runner) { create(:ci_runner, :project, projects: [other_project], tag_list: tag_list, run_untagged: run_untagged) }
+
+      before do
+        # `can_pick?` is not used outside the runners available for the project
+        stub_feature_flags(ci_runners_short_circuit_assignable_for: false)
+      end
 
       it 'cannot handle builds' do
         expect(other_runner.can_pick?(build)).to be_falsey
@@ -432,9 +484,32 @@ RSpec.describe Ci::Runner do
           expect(runner.can_pick?(build)).to be_truthy
         end
       end
+
+      it 'does not query for owned or instance runners' do
+        expect(described_class).not_to receive(:owned_or_instance_wide)
+
+        runner.can_pick?(build)
+      end
+
+      context 'when feature flag ci_runners_short_circuit_assignable_for is disabled' do
+        before do
+          stub_feature_flags(ci_runners_short_circuit_assignable_for: false)
+        end
+
+        it 'does not query for owned or instance runners' do
+          expect(described_class).to receive(:owned_or_instance_wide).and_call_original
+
+          runner.can_pick?(build)
+        end
+      end
     end
 
     context 'when runner is not shared' do
+      before do
+        # `can_pick?` is not used outside the runners available for the project
+        stub_feature_flags(ci_runners_short_circuit_assignable_for: false)
+      end
+
       context 'when runner is assigned to a project' do
         it 'can handle builds' do
           expect(runner.can_pick?(build)).to be_truthy
@@ -500,6 +575,29 @@ RSpec.describe Ci::Runner do
         end
 
         it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'matches tags' do
+      where(:run_untagged, :runner_tags, :build_tags, :result) do
+        true  | []      | []      | true
+        true  | []      | ['a']   | false
+        true  | %w[a b] | ['a']   | true
+        true  | ['a']   | %w[a b] | false
+        true  | ['a']   | ['a']   | true
+        false | ['a']   | ['a']   | true
+        false | ['b']   | ['a']   | false
+        false | %w[a b] | ['a']   | true
+      end
+
+      with_them do
+        let(:tag_list) { runner_tags }
+
+        before do
+          build.tag_list = build_tags
+        end
+
+        it { is_expected.to eq(result) }
       end
     end
   end
@@ -601,7 +699,7 @@ RSpec.describe Ci::Runner do
   describe '#heartbeat' do
     let(:runner) { create(:ci_runner, :project) }
 
-    subject { runner.heartbeat(architecture: '18-bit') }
+    subject { runner.heartbeat(architecture: '18-bit', config: { gpus: "all" }) }
 
     context 'when database was updated recently' do
       before do
@@ -649,6 +747,7 @@ RSpec.describe Ci::Runner do
     def does_db_update
       expect { subject }.to change { runner.reload.read_attribute(:contacted_at) }
         .and change { runner.reload.read_attribute(:architecture) }
+        .and change { runner.reload.read_attribute(:config) }
     end
   end
 
@@ -774,12 +873,12 @@ RSpec.describe Ci::Runner do
       expect(described_class.search(runner.token)).to eq([runner])
     end
 
-    it 'returns runners with a partially matching token' do
-      expect(described_class.search(runner.token[0..2])).to eq([runner])
+    it 'does not return runners with a partially matching token' do
+      expect(described_class.search(runner.token[0..2])).to be_empty
     end
 
-    it 'returns runners with a matching token regardless of the casing' do
-      expect(described_class.search(runner.token.upcase)).to eq([runner])
+    it 'does not return runners with a matching token with different casing' do
+      expect(described_class.search(runner.token.upcase)).to be_empty
     end
 
     it 'returns runners with a matching description' do
@@ -844,27 +943,34 @@ RSpec.describe Ci::Runner do
   end
 
   describe '#pick_build!' do
+    let(:build) { create(:ci_build) }
+    let(:runner) { create(:ci_runner) }
+
     context 'runner can pick the build' do
       it 'calls #tick_runner_queue' do
-        ci_build = build(:ci_build)
-        runner = build(:ci_runner)
-        allow(runner).to receive(:can_pick?).with(ci_build).and_return(true)
-
         expect(runner).to receive(:tick_runner_queue)
 
-        runner.pick_build!(ci_build)
+        runner.pick_build!(build)
       end
     end
 
     context 'runner cannot pick the build' do
-      it 'does not call #tick_runner_queue' do
-        ci_build = build(:ci_build)
-        runner = build(:ci_runner)
-        allow(runner).to receive(:can_pick?).with(ci_build).and_return(false)
+      before do
+        build.tag_list = [:docker]
+      end
 
+      it 'does not call #tick_runner_queue' do
         expect(runner).not_to receive(:tick_runner_queue)
 
-        runner.pick_build!(ci_build)
+        runner.pick_build!(build)
+      end
+    end
+
+    context 'build picking improvement' do
+      it 'does not check if the build is assignable to a runner' do
+        expect(runner).not_to receive(:can_pick?)
+
+        runner.pick_build!(build)
       end
     end
   end
@@ -898,6 +1004,122 @@ RSpec.describe Ci::Runner do
 
       expect(runners).to eq([runner2, runner1])
     end
+  end
+
+  describe '.runner_matchers' do
+    subject(:matchers) { described_class.all.runner_matchers }
+
+    context 'deduplicates on runner_type' do
+      before do
+        create_list(:ci_runner, 2, :instance)
+        create_list(:ci_runner, 2, :project)
+      end
+
+      it 'creates two matchers' do
+        expect(matchers.size).to eq(2)
+
+        expect(matchers.map(&:runner_type)).to match_array(%w[instance_type project_type])
+      end
+    end
+
+    context 'deduplicates on public_projects_minutes_cost_factor' do
+      before do
+        create_list(:ci_runner, 2, public_projects_minutes_cost_factor: 5)
+        create_list(:ci_runner, 2, public_projects_minutes_cost_factor: 10)
+      end
+
+      it 'creates two matchers' do
+        expect(matchers.size).to eq(2)
+
+        expect(matchers.map(&:public_projects_minutes_cost_factor)).to match_array([5, 10])
+      end
+    end
+
+    context 'deduplicates on private_projects_minutes_cost_factor' do
+      before do
+        create_list(:ci_runner, 2, private_projects_minutes_cost_factor: 5)
+        create_list(:ci_runner, 2, private_projects_minutes_cost_factor: 10)
+      end
+
+      it 'creates two matchers' do
+        expect(matchers.size).to eq(2)
+
+        expect(matchers.map(&:private_projects_minutes_cost_factor)).to match_array([5, 10])
+      end
+    end
+
+    context 'deduplicates on run_untagged' do
+      before do
+        create_list(:ci_runner, 2, run_untagged: true, tag_list: ['a'])
+        create_list(:ci_runner, 2, run_untagged: false, tag_list: ['a'])
+      end
+
+      it 'creates two matchers' do
+        expect(matchers.size).to eq(2)
+
+        expect(matchers.map(&:run_untagged)).to match_array([true, false])
+      end
+    end
+
+    context 'deduplicates on access_level' do
+      before do
+        create_list(:ci_runner, 2, access_level: :ref_protected)
+        create_list(:ci_runner, 2, access_level: :not_protected)
+      end
+
+      it 'creates two matchers' do
+        expect(matchers.size).to eq(2)
+
+        expect(matchers.map(&:access_level)).to match_array(%w[ref_protected not_protected])
+      end
+    end
+
+    context 'deduplicates on tag_list' do
+      before do
+        create_list(:ci_runner, 2, tag_list: %w[tag1 tag2])
+        create_list(:ci_runner, 2, tag_list: %w[tag3 tag4])
+      end
+
+      it 'creates two matchers' do
+        expect(matchers.size).to eq(2)
+
+        expect(matchers.map(&:tag_list)).to match_array([%w[tag1 tag2], %w[tag3 tag4]])
+      end
+    end
+
+    context 'with runner_ids' do
+      before do
+        create_list(:ci_runner, 2)
+      end
+
+      it 'includes runner_ids' do
+        expect(matchers.size).to eq(1)
+
+        expect(matchers.first.runner_ids).to match_array(described_class.all.pluck(:id))
+      end
+    end
+  end
+
+  describe '#runner_matcher' do
+    let(:runner) do
+      build_stubbed(:ci_runner, :instance_type, tag_list: %w[tag1 tag2])
+    end
+
+    subject(:matcher) { runner.runner_matcher }
+
+    it { expect(matcher.runner_ids).to eq([runner.id]) }
+
+    it { expect(matcher.runner_type).to eq(runner.runner_type) }
+
+    it { expect(matcher.public_projects_minutes_cost_factor).to eq(runner.public_projects_minutes_cost_factor) }
+
+    it { expect(matcher.private_projects_minutes_cost_factor).to eq(runner.private_projects_minutes_cost_factor) }
+
+    it { expect(matcher.run_untagged).to eq(runner.run_untagged) }
+
+    it { expect(matcher.access_level).to eq(runner.access_level) }
+
+    it { expect(matcher.tag_list).to match_array(runner.tag_list) }
   end
 
   describe '#uncached_contacted_at' do

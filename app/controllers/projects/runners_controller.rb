@@ -6,7 +6,7 @@ class Projects::RunnersController < Projects::ApplicationController
 
   layout 'project_settings'
 
-  feature_category :continuous_integration
+  feature_category :runner
 
   def index
     redirect_to project_settings_ci_cd_path(@project, anchor: 'js-runners-settings')
@@ -48,27 +48,16 @@ class Projects::RunnersController < Projects::ApplicationController
   end
 
   def show
-    render 'shared/runners/show'
   end
 
   def toggle_shared_runners
-    if !project.shared_runners_enabled && project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
+    update_params = { shared_runners_enabled: !project.shared_runners_enabled }
+    result = Projects::UpdateService.new(project, current_user, update_params).execute
 
-      if Feature.enabled?(:vueify_shared_runners_toggle, @project)
-        render json: { error: _('Cannot enable shared runners because parent group does not allow it') }, status: :unauthorized
-      else
-        redirect_to project_runners_path(@project), alert: _('Cannot enable shared runners because parent group does not allow it')
-      end
-
-      return
-    end
-
-    project.toggle!(:shared_runners_enabled)
-
-    if Feature.enabled?(:vueify_shared_runners_toggle, @project)
+    if result[:status] == :success
       render json: {}, status: :ok
     else
-      redirect_to project_settings_ci_cd_path(@project, anchor: 'js-runners-settings')
+      render json: { error: result[:message] }, status: :unauthorized
     end
   end
 

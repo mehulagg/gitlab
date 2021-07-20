@@ -133,7 +133,7 @@ export default {
   methods: {
     stopEditing() {
       this.editing = false;
-      this.$emit('toggleDateType', true, true);
+      this.$emit('toggleDateType', { dateTypeIsFixed: true, typeChangeOnEdit: true });
     },
     startEditing(e) {
       this.editing = true;
@@ -144,7 +144,7 @@ export default {
       this.$emit('saveDate', date);
     },
     toggleDateType(dateTypeFixed) {
-      this.$emit('toggleDateType', dateTypeFixed);
+      this.$emit('toggleDateType', { dateTypeIsFixed: dateTypeFixed });
     },
     toggleSidebar() {
       this.$emit('toggleCollapse');
@@ -158,7 +158,7 @@ export default {
     <collapsed-calendar-icon :text="collapsedText" class="sidebar-collapsed-icon" />
     <div class="title">
       {{ label }}
-      <gl-loading-icon v-if="dateSaveInProgress" :inline="true" />
+      <gl-loading-icon v-if="dateSaveInProgress" size="sm" :inline="true" />
       <div class="float-right d-flex">
         <gl-icon
           ref="epicDatePopover"

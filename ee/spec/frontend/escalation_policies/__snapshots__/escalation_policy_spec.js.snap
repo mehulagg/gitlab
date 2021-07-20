@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EscalationPolicy renders a policy with rules 1`] = `
+<div>
+  <gl-card-stub
+    bodyclass="[object Object]"
+    class="gl-mt-5"
+    footerclass=""
+    headerclass="[object Object]"
+  >
+     
+    <gl-collapse-stub
+      visible="true"
+    >
+      <p
+        class="gl-text-gray-500 gl-mb-5"
+      >
+        
+        Description 1 lives here
+      
+      </p>
+       
+      <div
+        class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5"
+      >
+        <div
+          class="gl-mb-5"
+        >
+          <gl-icon-stub
+            class="gl-mr-3"
+            name="clock"
+            size="16"
+          />
+           IF alert is not 
+                acknowledged
+               in 
+          <span
+            class="gl-font-weight-bold"
+          >
+            
+                  1 mins
+                
+          </span>
+           
+          <span
+            class="right-arrow"
+          >
+            <i
+              class="right-arrow-head"
+            />
+          </span>
+           
+          <gl-icon-stub
+            class="gl-mr-3"
+            name="notifications"
+            size="16"
+          />
+           THEN 
+                email on-call user in schedule
+               
+          <span
+            class="gl-font-weight-bold"
+          >
+            
+                  Schedule to fill in
+                
+          </span>
+        </div>
+        <div
+          class=""
+        >
+          <gl-icon-stub
+            class="gl-mr-3"
+            name="clock"
+            size="16"
+          />
+           IF alert is not 
+                resolved
+               in 
+          <span
+            class="gl-font-weight-bold"
+          >
+            
+                  2 mins
+                
+          </span>
+           
+          <span
+            class="right-arrow"
+          >
+            <i
+              class="right-arrow-head"
+            />
+          </span>
+           
+          <gl-icon-stub
+            class="gl-mr-3"
+            name="notifications"
+            size="16"
+          />
+           THEN 
+                email on-call user in schedule
+               
+          <span
+            class="gl-font-weight-bold"
+          >
+            
+                  Monitor schedule
+                
+          </span>
+        </div>
+      </div>
+    </gl-collapse-stub>
+  </gl-card-stub>
+   
+  <delete-escalation-policy-modal-stub
+    escalationpolicy="[object Object]"
+    modalid="deleteEscalationPolicyModal-37"
+  />
+   
+  <edit-escalation-policy-modal-stub
+    escalationpolicy="[object Object]"
+    iseditmode="true"
+    modalid="editEscalationPolicyModal-37"
+  />
+</div>
+`;

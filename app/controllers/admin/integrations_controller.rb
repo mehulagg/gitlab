@@ -2,7 +2,7 @@
 
 class Admin::IntegrationsController < Admin::ApplicationController
   include IntegrationsActions
-  include ServicesHelper
+  include IntegrationsHelper
 
   before_action :not_found, unless: -> { instance_level_integrations? }
 
@@ -11,7 +11,7 @@ class Admin::IntegrationsController < Admin::ApplicationController
   private
 
   def find_or_initialize_non_project_specific_integration(name)
-    Service.find_or_initialize_non_project_specific_integration(name, instance: true)
+    Integration.find_or_initialize_non_project_specific_integration(name, instance: true)
   end
 
   def scoped_edit_integration_path(integration)

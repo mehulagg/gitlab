@@ -19,36 +19,33 @@ module AlertManagement
     # Updates or creates alert from payload for project
     # including system notes
     def process_alert
-      if alert.persisted?
-        process_existing_alert
-      else
-        process_new_alert
-      end
+      alert.persisted? ? process_existing_alert : process_new_alert
     end
 
     # Creates or closes issue for alert and notifies stakeholders
     def complete_post_processing_tasks
       process_incident_issues if process_issues?
-      send_alert_email if send_email?
+      send_alert_email if send_email? && notifying_alert?
     end
 
     def process_existing_alert
-      if resolving_alert?
-        process_resolved_alert
-      else
-        process_firing_alert
-      end
+      resolving_alert? ? process_resolved_alert : process_firing_alert
     end
 
     def process_resolved_alert
-      return unless auto_close_incident?
-      return close_issue(alert.issue) if alert.resolve(incoming_payload.ends_at)
+      SystemNoteService.log_resolving_alert(alert, alert_source)
 
-      logger.warn(
-        message: 'Unable to update AlertManagement::Alert status to resolved',
-        project_id: project.id,
-        alert_id: alert.id
-      )
+      if alert.resolve(incoming_payload.ends_at)
+        SystemNoteService.change_alert_status(alert, User.alert_bot)
+
+        close_issue(alert.issue) if auto_close_incident?
+      else
+        logger.warn(
+          message: 'Unable to update AlertManagement::Alert status to resolved',
+          project_id: project.id,
+          alert_id: alert.id
+        )
+      end
     end
 
     def process_firing_alert
@@ -59,7 +56,7 @@ module AlertManagement
       return if issue.blank? || issue.closed?
 
       ::Issues::CloseService
-        .new(project, User.alert_bot)
+        .new(project: project, current_user: User.alert_bot)
         .execute(issue, system_note: false)
 
       SystemNoteService.auto_resolve_prometheus_alert(issue, project, User.alert_bot) if issue.reset.closed?
@@ -67,8 +64,10 @@ module AlertManagement
 
     def process_new_alert
       if alert.save
-        alert.execute_services
+        alert.execute_integrations
         SystemNoteService.create_new_alert(alert, alert_source)
+
+        process_resolved_alert if resolving_alert?
       else
         logger.warn(
           message: "Unable to create AlertManagement::Alert from #{alert_source}",
@@ -81,7 +80,7 @@ module AlertManagement
     def process_incident_issues
       return if alert.issue || alert.resolved?
 
-      ::IncidentManagement::ProcessAlertWorker.perform_async(nil, nil, alert.id)
+      ::IncidentManagement::ProcessAlertWorkerV2.perform_async(alert.id)
     end
 
     def send_alert_email
@@ -116,8 +115,12 @@ module AlertManagement
       incoming_payload.ends_at.present?
     end
 
+    def notifying_alert?
+      alert.triggered? || alert.resolved?
+    end
+
     def alert_source
-      alert.monitoring_tool
+      incoming_payload.monitoring_tool
     end
 
     def logger
@@ -126,4 +129,4 @@ module AlertManagement
   end
 end
 
-AlertManagement::AlertProcessing.prepend_ee_mod
+AlertManagement::AlertProcessing.prepend_mod

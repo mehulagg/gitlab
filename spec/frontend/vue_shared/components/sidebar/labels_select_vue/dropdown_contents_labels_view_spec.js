@@ -54,7 +54,6 @@ describe('DropdownContentsLabelsView', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findDropdownContent = () => wrapper.find('[data-testid="dropdown-content"]');
@@ -117,6 +116,8 @@ describe('DropdownContentsLabelsView', () => {
   });
 
   describe('methods', () => {
+    const fakePreventDefault = jest.fn();
+
     describe('isLabelSelected', () => {
       it('returns true when provided `label` param is one of the selected labels', () => {
         expect(wrapper.vm.isLabelSelected(mockRegularLabel)).toBe(true);
@@ -192,9 +193,11 @@ describe('DropdownContentsLabelsView', () => {
 
         wrapper.vm.handleKeyDown({
           keyCode: ENTER_KEY_CODE,
+          preventDefault: fakePreventDefault,
         });
 
         expect(wrapper.vm.searchKey).toBe('');
+        expect(fakePreventDefault).toHaveBeenCalled();
       });
 
       it('calls action `updateSelectedLabels` with currently highlighted label when Enter key is pressed', () => {
@@ -205,6 +208,7 @@ describe('DropdownContentsLabelsView', () => {
 
         wrapper.vm.handleKeyDown({
           keyCode: ENTER_KEY_CODE,
+          preventDefault: fakePreventDefault,
         });
 
         expect(wrapper.vm.updateSelectedLabels).toHaveBeenCalledWith([
@@ -378,6 +382,15 @@ describe('DropdownContentsLabelsView', () => {
 
     it('does not render footer list items when `state.variant` is "standalone"', () => {
       createComponent({ ...mockConfig, variant: 'standalone' });
+      expect(findDropdownFooter().exists()).toBe(false);
+    });
+
+    it('does not render footer list items when `allowLabelCreate` is false and `labelsManagePath` is null', () => {
+      createComponent({
+        ...mockConfig,
+        allowLabelCreate: false,
+        labelsManagePath: null,
+      });
       expect(findDropdownFooter().exists()).toBe(false);
     });
 

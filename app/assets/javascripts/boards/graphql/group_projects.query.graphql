@@ -2,12 +2,13 @@
 
 query getGroupProjects($fullPath: ID!, $search: String, $after: String) {
   group(fullPath: $fullPath) {
-    projects(search: $search, after: $after, first: 100) {
+    projects(search: $search, after: $after, first: 100, includeSubgroups: true) {
       nodes {
         id
         name
         fullPath
         nameWithNamespace
+        archived
       }
       pageInfo {
         ...PageInfo

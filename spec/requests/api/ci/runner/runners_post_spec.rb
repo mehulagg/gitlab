@@ -11,8 +11,10 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
   before do
     stub_feature_flags(ci_enable_live_trace: true)
+    stub_feature_flags(runner_registration_control: false)
     stub_gitlab_calls
     stub_application_setting(runners_registration_token: registration_token)
+    stub_application_setting(valid_runner_registrars: ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
     allow_any_instance_of(::Ci::Runner).to receive(:cache_attributes)
   end
 
@@ -35,25 +37,44 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
       end
 
       context 'when valid token is provided' do
-        it 'creates runner with default values' do
-          post api('/runners'), params: { token: registration_token }
+        def request
+          post api('/runners'), params: { token: token }
+        end
 
-          runner = ::Ci::Runner.first
+        context 'with a registration token' do
+          let(:token) { registration_token }
 
-          expect(response).to have_gitlab_http_status(:created)
-          expect(json_response['id']).to eq(runner.id)
-          expect(json_response['token']).to eq(runner.token)
-          expect(runner.run_untagged).to be true
-          expect(runner.active).to be true
-          expect(runner.token).not_to eq(registration_token)
-          expect(runner).to be_instance_type
+          it 'creates runner with default values' do
+            request
+
+            runner = ::Ci::Runner.first
+
+            expect(response).to have_gitlab_http_status(:created)
+            expect(json_response['id']).to eq(runner.id)
+            expect(json_response['token']).to eq(runner.token)
+            expect(runner.run_untagged).to be true
+            expect(runner.active).to be true
+            expect(runner.token).not_to eq(registration_token)
+            expect(runner).to be_instance_type
+          end
+
+          it_behaves_like 'storing arguments in the application context' do
+            subject { request }
+
+            let(:expected_params) { { client_id: "runner/#{::Ci::Runner.first.id}" } }
+          end
+
+          it_behaves_like 'not executing any extra queries for the application context' do
+            let(:subject_proc) { proc { request } }
+          end
         end
 
         context 'when project token is used' do
           let(:project) { create(:project) }
+          let(:token) { project.runners_token }
 
           it 'creates project runner' do
-            post api('/runners'), params: { token: project.runners_token }
+            request
 
             expect(response).to have_gitlab_http_status(:created)
             expect(project.runners.size).to eq(1)
@@ -62,13 +83,82 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             expect(runner.token).not_to eq(project.runners_token)
             expect(runner).to be_project_type
           end
+
+          it_behaves_like 'storing arguments in the application context' do
+            subject { request }
+
+            let(:expected_params) { { project: project.full_path, client_id: "runner/#{::Ci::Runner.first.id}" } }
+          end
+
+          it_behaves_like 'not executing any extra queries for the application context' do
+            let(:subject_proc) { proc { request } }
+          end
+
+          context 'when it exceeds the application limits' do
+            before do
+              create(:ci_runner, runner_type: :project_type, projects: [project], contacted_at: 1.second.ago)
+              create(:plan_limits, :default_plan, ci_registered_project_runners: 1)
+            end
+
+            it 'does not create runner' do
+              request
+
+              expect(response).to have_gitlab_http_status(:bad_request)
+              expect(json_response['message']).to include('runner_projects.base' => ['Maximum number of ci registered project runners (1) exceeded'])
+              expect(project.runners.reload.size).to eq(1)
+            end
+          end
+
+          context 'when abandoned runners cause application limits to not be exceeded' do
+            before do
+              create(:ci_runner, runner_type: :project_type, projects: [project], created_at: 14.months.ago, contacted_at: 13.months.ago)
+              create(:plan_limits, :default_plan, ci_registered_project_runners: 1)
+            end
+
+            it 'creates runner' do
+              request
+
+              expect(response).to have_gitlab_http_status(:created)
+              expect(json_response['message']).to be_nil
+              expect(project.runners.reload.size).to eq(2)
+              expect(project.runners.recent.size).to eq(1)
+            end
+          end
+
+          context 'when valid runner registrars do not include project' do
+            before do
+              stub_application_setting(valid_runner_registrars: ['group'])
+            end
+
+            context 'when feature flag is enabled' do
+              before do
+                stub_feature_flags(runner_registration_control: true)
+              end
+
+              it 'returns 403 error' do
+                request
+
+                expect(response).to have_gitlab_http_status(:forbidden)
+              end
+            end
+
+            context 'when feature flag is disabled' do
+              it 'registers the runner' do
+                request
+
+                expect(response).to have_gitlab_http_status(:created)
+                expect(::Ci::Runner.first.active).to be true
+              end
+            end
+          end
         end
 
         context 'when group token is used' do
           let(:group) { create(:group) }
+          let(:token) { group.runners_token }
 
           it 'creates a group runner' do
-            post api('/runners'), params: { token: group.runners_token }
+            request
 
             expect(response).to have_gitlab_http_status(:created)
             expect(group.runners.reload.size).to eq(1)
@@ -76,6 +166,75 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             expect(runner.token).not_to eq(registration_token)
             expect(runner.token).not_to eq(group.runners_token)
             expect(runner).to be_group_type
+          end
+
+          it_behaves_like 'storing arguments in the application context' do
+            subject { request }
+
+            let(:expected_params) { { root_namespace: group.full_path_components.first, client_id: "runner/#{::Ci::Runner.first.id}" } }
+          end
+
+          it_behaves_like 'not executing any extra queries for the application context' do
+            let(:subject_proc) { proc { request } }
+          end
+
+          context 'when it exceeds the application limits' do
+            before do
+              create(:ci_runner, runner_type: :group_type, groups: [group], contacted_at: nil, created_at: 1.month.ago)
+              create(:plan_limits, :default_plan, ci_registered_group_runners: 1)
+            end
+
+            it 'does not create runner' do
+              request
+
+              expect(response).to have_gitlab_http_status(:bad_request)
+              expect(json_response['message']).to include('runner_namespaces.base' => ['Maximum number of ci registered group runners (1) exceeded'])
+              expect(group.runners.reload.size).to eq(1)
+            end
+          end
+
+          context 'when abandoned runners cause application limits to not be exceeded' do
+            before do
+              create(:ci_runner, runner_type: :group_type, groups: [group], created_at: 4.months.ago, contacted_at: 3.months.ago)
+              create(:ci_runner, runner_type: :group_type, groups: [group], contacted_at: nil, created_at: 4.months.ago)
+              create(:plan_limits, :default_plan, ci_registered_group_runners: 1)
+            end
+
+            it 'creates runner' do
+              request
+
+              expect(response).to have_gitlab_http_status(:created)
+              expect(json_response['message']).to be_nil
+              expect(group.runners.reload.size).to eq(3)
+              expect(group.runners.recent.size).to eq(1)
+            end
+          end
+
+          context 'when valid runner registrars do not include group' do
+            before do
+              stub_application_setting(valid_runner_registrars: ['project'])
+            end
+
+            context 'when feature flag is enabled' do
+              before do
+                stub_feature_flags(runner_registration_control: true)
+              end
+
+              it 'returns 403 error' do
+                request
+
+                expect(response).to have_gitlab_http_status(:forbidden)
+              end
+            end
+
+            context 'when feature flag is disabled' do
+              it 'registers the runner' do
+                request
+
+                expect(response).to have_gitlab_http_status(:created)
+                expect(::Ci::Runner.first.active).to be true
+              end
+            end
           end
         end
       end

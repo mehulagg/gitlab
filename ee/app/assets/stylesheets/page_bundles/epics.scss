@@ -84,10 +84,6 @@
   }
 }
 
-.tooltip .tooltip-inner .milestone-date-range {
-  color: var(--gray-400, $gray-400);
-}
-
 .new-epic-form .md-area.gfm-form {
   @include gl-rounded-base;
   @include gl-border-none;
@@ -108,5 +104,11 @@
 
   .labels-select-dropdown-contents {
     min-height: 335px;
+  }
+}
+
+.add-item-form-container {
+  .select-project-dropdown .gl-new-dropdown-item-text-primary {
+    display: flex;
   }
 }

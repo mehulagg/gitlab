@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-require 'spec_helper'
-
 RSpec.describe Gitlab::Auth::GroupSaml::User do
   let(:uid) { 1234 }
   let(:saml_provider) { create(:saml_provider) }
@@ -59,6 +57,18 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
       it 'does not mark the user as provisioned' do
         expect(find_and_update.provisioned_by_group).to be_nil
       end
+
+      context 'when the user has multiple group saml identities' do
+        let(:saml_provider2) { create(:saml_provider) }
+
+        before do
+          create(:group_saml_identity, extern_uid: uid, saml_provider: saml_provider2, user: identity.user)
+        end
+
+        it 'returns the user' do
+          expect(find_and_update).to eq identity.user
+        end
+      end
     end
 
     context 'with no matching user identity' do
@@ -107,9 +117,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
       end
 
       context 'when a conflicting user already exists' do
-        before do
-          create(:user, email: info_hash[:email])
-        end
+        let!(:user) { create(:user, email: info_hash[:email]) }
 
         it 'does not update membership' do
           expect { find_and_update }.not_to change { group.members.count }
@@ -117,6 +125,60 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
 
         it 'does not return a user' do
           expect(find_and_update).to eq nil
+        end
+
+        context 'when user was provisioned by this group' do
+          before do
+            user.update!(provisioned_by_group: group)
+          end
+
+          it 'updates membership' do
+            expect { find_and_update }.to change { group.members.count }.by(1)
+          end
+
+          it 'returns a user' do
+            expect(find_and_update).to eq user
+          end
+
+          it 'updates idenitity' do
+            expect { find_and_update }.to change { user.group_saml_identities.count }.by(1)
+          end
+
+          context 'without feature flag turned on' do
+            before do
+              stub_feature_flags(block_password_auth_for_saml_users: false)
+            end
+
+            it 'does not update membership' do
+              expect { find_and_update }.not_to change { group.members.count }
+            end
+
+            it 'does not return a user' do
+              expect(find_and_update).to eq nil
+            end
+
+            it 'does not update identity' do
+              expect { find_and_update }.not_to change { user.group_saml_identities.count }
+            end
+          end
+        end
+
+        context 'when user was provisioned by different group' do
+          before do
+            user.update!(provisioned_by_group: create(:group))
+          end
+
+          it 'does not update membership' do
+            expect { find_and_update }.not_to change { group.members.count }
+          end
+
+          it 'does not return a user' do
+            expect(find_and_update).to eq nil
+          end
+
+          it 'does not update identity' do
+            expect { find_and_update }.not_to change { user.group_saml_identities.count }
+          end
         end
       end
     end

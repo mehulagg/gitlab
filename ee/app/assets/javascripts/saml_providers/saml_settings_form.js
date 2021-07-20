@@ -1,24 +1,30 @@
 import $ from 'jquery';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import dirtySubmitFactory from '~/dirty_submit/dirty_submit_factory';
 import { __ } from '~/locale';
-import setupToggleButtons from '~/toggle_buttons';
 import { fixTitle } from '~/tooltips';
-import DirtyFormChecker from './dirty_form_checker';
 
 const CALLOUT_SELECTOR = '.js-callout';
 const HELPER_SELECTOR = '.js-helper-text';
-const TOGGLE_SELECTOR = '.js-project-feature-toggle';
+const WARNING_SELECTOR = '.js-warning';
 
 function getHelperText(el) {
-  return el.parentNode.querySelector(HELPER_SELECTOR);
+  return el?.parentNode?.querySelector(HELPER_SELECTOR) || null;
+}
+
+function getWarning(el) {
+  return el?.parentNode?.querySelector(WARNING_SELECTOR) || null;
 }
 
 function getCallout(el) {
-  return el.parentNode.querySelector(CALLOUT_SELECTOR);
+  return el?.closest('.form-group')?.querySelector(CALLOUT_SELECTOR) || null;
 }
 
-function getToggle(el) {
-  return el.querySelector(TOGGLE_SELECTOR);
+function toggleElementVisibility(el, show) {
+  if (show) {
+    el.classList.remove('gl-display-none');
+  } else {
+    el.classList.add('gl-display-none');
+  }
 }
 
 export default class SamlSettingsForm {
@@ -27,40 +33,49 @@ export default class SamlSettingsForm {
     this.settings = [
       {
         name: 'group-saml',
-        el: this.form.querySelector('.js-group-saml-enabled-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enabled-input'),
       },
       {
         name: 'enforced-sso',
-        el: this.form.querySelector('.js-group-saml-enforced-sso-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enforced-sso-input'),
         dependsOn: 'group-saml',
       },
       {
         name: 'enforced-group-managed-accounts',
-        el: this.form.querySelector('.js-group-saml-enforced-group-managed-accounts-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enforced-group-managed-accounts-input'),
+        dependsOn: 'enforced-sso',
+      },
+      {
+        name: 'enforced-git-activity-check',
+        el: this.form.querySelector('.js-group-saml-enforced-git-check-input'),
         dependsOn: 'enforced-sso',
       },
       {
         name: 'prohibited-outer-forks',
-        el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-input'),
         dependsOn: 'enforced-group-managed-accounts',
       },
     ]
       .filter((s) => s.el)
       .map((setting) => ({
         ...setting,
-        toggle: getToggle(setting.el),
         helperText: getHelperText(setting.el),
+        warning: getWarning(setting.el),
         callout: getCallout(setting.el),
-        input: setting.el.querySelector('input'),
       }));
 
     this.testButtonTooltipWrapper = this.form.querySelector('#js-saml-test-button');
     this.testButton = this.testButtonTooltipWrapper.querySelector('a');
-    this.dirtyFormChecker = new DirtyFormChecker(formSelector, () => this.updateView());
+    this.dirtyFormChecker = dirtySubmitFactory(this.form);
+    this.form.addEventListener('change', this.handleChangeEvent);
   }
 
   findSetting(name) {
     return this.settings.find((s) => s.name === name);
+  }
+
+  settingIsDefined(el) {
+    return this.settings.some((setting) => setting.el.isSameNode(el));
   }
 
   getValueWithDeps(name) {
@@ -80,21 +95,25 @@ export default class SamlSettingsForm {
 
   init() {
     this.dirtyFormChecker.init();
-    setupToggleButtons(this.form);
-    $(this.form).on('trigger-change', () => this.onEnableToggle());
     this.updateSAMLSettings();
     this.updateView();
   }
 
-  onEnableToggle() {
-    this.updateSAMLSettings();
-    this.updateView();
+  handleChangeEvent = (event) => {
+    if (this.settingIsDefined(event.target)) {
+      this.updateSAMLSettings();
+      this.updateView();
+    }
+  };
+
+  isFormDirty() {
+    return this.dirtyFormChecker.dirtyInputs.length;
   }
 
   updateSAMLSettings() {
     this.settings = this.settings.map((setting) => ({
       ...setting,
-      value: parseBoolean(setting.el.querySelector('input').value),
+      value: setting.el.checked,
     }));
   }
 
@@ -103,40 +122,44 @@ export default class SamlSettingsForm {
       return __('Group SAML must be enabled to test');
     }
 
-    if (this.dirtyFormChecker.isDirty) {
+    if (this.isFormDirty()) {
       return __('Save changes before testing');
     }
 
     return __('Redirect to SAML provider to test configuration');
   }
 
-  updateToggles() {
+  updateCheckboxes() {
     this.settings
       .filter((setting) => setting.dependsOn)
       .forEach((setting) => {
-        const { helperText, callout, toggle } = setting;
+        const { helperText, warning, callout, el } = setting;
         const isRelatedToggleOn = this.getValueWithDeps(setting.dependsOn);
+
         if (helperText) {
-          helperText.style.display = isRelatedToggleOn ? 'none' : 'block';
+          toggleElementVisibility(helperText, !isRelatedToggleOn);
         }
 
-        toggle.classList.toggle('is-disabled', !isRelatedToggleOn);
-        toggle.disabled = !isRelatedToggleOn;
+        el.disabled = !isRelatedToggleOn;
+
+        if (warning) {
+          toggleElementVisibility(warning, !setting.value);
+        }
 
         if (callout) {
-          callout.style.display = setting.value && isRelatedToggleOn ? 'block' : 'none';
+          toggleElementVisibility(callout, setting.value && isRelatedToggleOn);
         }
       });
   }
 
   updateView() {
-    if (this.getValueWithDeps('group-saml') && !this.dirtyFormChecker.isDirty) {
+    if (this.getValueWithDeps('group-saml') && !this.isFormDirty()) {
       this.testButton.removeAttribute('disabled');
     } else {
       this.testButton.setAttribute('disabled', true);
     }
 
-    this.updateToggles();
+    this.updateCheckboxes();
 
     // Update tooltip using wrapper so it works when input disabled
     this.testButtonTooltipWrapper.setAttribute('title', this.testButtonTooltip());

@@ -8,6 +8,7 @@ import {
   GlDropdownItem,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import { mapState, mapActions } from 'vuex';
 
 import { __ } from '~/locale';
@@ -51,13 +52,20 @@ export default {
       return this.isSubmitting ? __('Creating epic') : __('Create epic');
     },
     dropdownPlaceholderText() {
-      return this.selectedGroup?.name || __('Search a group');
+      return this.selectedGroup?.name || this.parentItem?.groupName || __('Search a group');
     },
     canRenderNoResults() {
       return !this.descendantGroupsFetchInProgress && !this.descendantGroups?.length;
     },
     canRenderSearchResults() {
       return !this.descendantGroupsFetchInProgress;
+    },
+    canShowParentGroup() {
+      if (!this.searchTerm) {
+        return true;
+      }
+
+      return fuzzaldrinPlus.filter([this.parentItem.groupName], this.searchTerm).length === 1;
     },
   },
   watch: {
@@ -142,6 +150,19 @@ export default {
           />
 
           <template v-if="canRenderSearchResults">
+            <gl-dropdown-item v-if="canShowParentGroup" class="w-100" @click="selectedGroup = null">
+              <gl-avatar
+                :entity-name="parentItem.groupName"
+                shape="rect"
+                :size="32"
+                class="d-inline-flex"
+              />
+              <div class="d-inline-flex flex-column">
+                {{ parentItem.groupName }}
+                <div class="text-secondary">{{ parentItem.fullPath }}</div>
+              </div>
+            </gl-dropdown-item>
+
             <gl-dropdown-item
               v-for="group in descendantGroups"
               :key="group.id"
@@ -162,7 +183,7 @@ export default {
             </gl-dropdown-item>
           </template>
 
-          <gl-dropdown-item v-if="canRenderNoResults">{{
+          <gl-dropdown-item v-if="canRenderNoResults && !canShowParentGroup">{{
             __('No matching results')
           }}</gl-dropdown-item>
         </gl-dropdown>

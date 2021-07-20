@@ -9,6 +9,8 @@ import {
   median,
   changeInPercent,
   formattedChangeInPercent,
+  isNumeric,
+  isPositiveInteger,
 } from '~/lib/utils/number_utils';
 
 describe('Number Utils', () => {
@@ -78,18 +80,22 @@ describe('Number Utils', () => {
   describe('numberToHumanSize', () => {
     it('should return bytes', () => {
       expect(numberToHumanSize(654)).toEqual('654 bytes');
+      expect(numberToHumanSize(-654)).toEqual('-654 bytes');
     });
 
     it('should return KiB', () => {
       expect(numberToHumanSize(1079)).toEqual('1.05 KiB');
+      expect(numberToHumanSize(-1079)).toEqual('-1.05 KiB');
     });
 
     it('should return MiB', () => {
       expect(numberToHumanSize(10485764)).toEqual('10.00 MiB');
+      expect(numberToHumanSize(-10485764)).toEqual('-10.00 MiB');
     });
 
     it('should return GiB', () => {
       expect(numberToHumanSize(10737418240)).toEqual('10.00 GiB');
+      expect(numberToHumanSize(-10737418240)).toEqual('-10.00 GiB');
     });
   });
 
@@ -160,6 +166,52 @@ describe('Number Utils', () => {
 
     it('shows the given fallback if the change can not be expressed in an integer', () => {
       expect(formattedChangeInPercent(0, 1, { nonFiniteResult: '*' })).toBe('*');
+    });
+  });
+
+  describe('isNumeric', () => {
+    it.each`
+      value        | outcome
+      ${0}         | ${true}
+      ${12345}     | ${true}
+      ${'0'}       | ${true}
+      ${'12345'}   | ${true}
+      ${1.0}       | ${true}
+      ${'1.0'}     | ${true}
+      ${'abcd'}    | ${false}
+      ${'abcd100'} | ${false}
+      ${''}        | ${false}
+      ${false}     | ${false}
+      ${true}      | ${false}
+      ${undefined} | ${false}
+      ${null}      | ${false}
+    `('when called with $value it returns $outcome', ({ value, outcome }) => {
+      expect(isNumeric(value)).toBe(outcome);
+    });
+  });
+
+  describe.each`
+    value        | outcome
+    ${0}         | ${true}
+    ${'0'}       | ${true}
+    ${12345}     | ${true}
+    ${'12345'}   | ${true}
+    ${-1}        | ${false}
+    ${'-1'}      | ${false}
+    ${1.01}      | ${false}
+    ${'1.01'}    | ${false}
+    ${'abcd'}    | ${false}
+    ${'100abcd'} | ${false}
+    ${'abcd100'} | ${false}
+    ${''}        | ${false}
+    ${false}     | ${false}
+    ${true}      | ${false}
+    ${undefined} | ${false}
+    ${null}      | ${false}
+    ${Infinity}  | ${false}
+  `('isPositiveInteger', ({ value, outcome }) => {
+    it(`when called with ${typeof value} ${value} it returns ${outcome}`, () => {
+      expect(isPositiveInteger(value)).toBe(outcome);
     });
   });
 });

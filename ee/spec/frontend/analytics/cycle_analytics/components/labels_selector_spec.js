@@ -7,7 +7,10 @@ import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selec
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import waitForPromises from 'helpers/wait_for_promises';
+import createFlash from '~/flash';
 import { groupLabels } from '../mock_data';
+
+jest.mock('~/flash');
 
 const selectedLabel = groupLabels[groupLabels.length - 1];
 const findActiveItem = (wrapper) =>
@@ -15,8 +18,6 @@ const findActiveItem = (wrapper) =>
     .findAll('gl-dropdown-item-stub')
     .filter((d) => d.attributes('active'))
     .at(0);
-
-const findFlashError = () => document.querySelector('.flash-container .flash-text');
 
 const mockGroupLabelsRequest = (status = 200) =>
   new MockAdapter(axios).onGet().reply(status, groupLabels);
@@ -71,7 +72,7 @@ describe('Value Stream Analytics LabelsSelector', () => {
     });
 
     it('will render with the default option selected', () => {
-      const sectionHeader = wrapper.find(GlDropdownSectionHeader);
+      const sectionHeader = wrapper.findComponent(GlDropdownSectionHeader);
 
       expect(sectionHeader.exists()).toBe(true);
       expect(sectionHeader.text()).toEqual('Select a label');
@@ -79,7 +80,6 @@ describe('Value Stream Analytics LabelsSelector', () => {
 
     describe('with a failed request', () => {
       beforeEach(() => {
-        setFixtures('<div class="flash-container"></div>');
         mock = mockGroupLabelsRequest(404);
         wrapper = createComponent({});
 
@@ -87,9 +87,9 @@ describe('Value Stream Analytics LabelsSelector', () => {
       });
 
       it('should flash an error message', () => {
-        expect(findFlashError().innerText.trim()).toEqual(
-          'There was an error fetching label data for the selected group',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error fetching label data for the selected group',
+        });
       });
     });
 
@@ -100,7 +100,7 @@ describe('Value Stream Analytics LabelsSelector', () => {
         return waitForPromises();
       });
 
-      it('will emit the "selectLabel" event', () => {
+      it('will emit the "select-label" event', () => {
         expect(wrapper.emitted('select-label')).toBeUndefined();
 
         const elem = wrapper.findAll('.dropdown-item').at(1);

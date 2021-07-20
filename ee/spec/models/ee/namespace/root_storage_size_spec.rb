@@ -7,9 +7,10 @@ RSpec.describe EE::Namespace::RootStorageSize do
   let(:current_size) { 50.megabytes }
   let(:model) { described_class.new(namespace) }
   let(:create_statistics) { create(:namespace_root_storage_statistics, namespace: namespace, storage_size: current_size)}
-  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
-  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: gold_plan, storage_size_limit: 100) }
-  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+  let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
+  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: ultimate_plan, storage_size_limit: 100) }
+
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
   before do
     create_statistics

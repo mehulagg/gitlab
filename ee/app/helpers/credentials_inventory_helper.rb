@@ -21,7 +21,7 @@ module CredentialsInventoryHelper
     License.feature_available?(:credentials_inventory)
   end
 
-  def revoke_button_available?
+  def gpg_keys_available?
     false
   end
 

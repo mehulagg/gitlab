@@ -157,7 +157,7 @@ module EventsHelper
         project_commit_url(event.project,
                                      id: event.commit_to)
       end
-    else
+    elsif event.ref_name
       project_commits_url(event.project,
                                     event.ref_name)
     end
@@ -228,7 +228,7 @@ module EventsHelper
   def event_commit_title(message)
     message ||= ''
     (message.split("\n").first || "").truncate(70)
-  rescue
+  rescue StandardError
     "--broken encoding"
   end
 
@@ -240,8 +240,7 @@ module EventsHelper
   DESIGN_ICONS = {
     'created' => 'upload',
     'updated' => 'pencil',
-    'destroyed' => ICON_NAMES_BY_EVENT_TYPE['destroyed'],
-    'archived' => 'archive'
+    'destroyed' => ICON_NAMES_BY_EVENT_TYPE['destroyed']
   }.freeze
 
   def design_event_icon(action, size: 24)
@@ -273,7 +272,7 @@ module EventsHelper
 
   def event_user_info(event)
     content_tag(:div, class: "event-user-info") do
-      concat content_tag(:span, link_to_author(event), class: "author_name")
+      concat content_tag(:span, link_to_author(event), class: "author-name")
       concat "&nbsp;".html_safe
       concat content_tag(:span, event.author.to_reference, class: "username")
     end
@@ -290,4 +289,4 @@ module EventsHelper
   end
 end
 
-EventsHelper.prepend_if_ee('EE::EventsHelper')
+EventsHelper.prepend_mod_with('EventsHelper')

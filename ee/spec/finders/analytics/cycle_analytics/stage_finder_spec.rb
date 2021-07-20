@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Analytics::CycleAnalytics::StageFinder do
   let_it_be(:group) { create(:group) }
+
   let(:stage_id) { { id: Gitlab::Analytics::CycleAnalytics::DefaultStages.names.first } }
 
   subject { described_class.new(parent: group, stage_id: stage_id[:id]).execute }

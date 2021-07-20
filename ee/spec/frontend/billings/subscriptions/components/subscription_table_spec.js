@@ -8,9 +8,12 @@ import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
-const namespaceName = 'GitLab.com';
-const customerPortalUrl = 'https://customers.gitlab.com/subscriptions';
-const planName = 'Gold';
+const defaultInjectedProps = {
+  namespaceName: 'GitLab.com',
+  customerPortalUrl: 'https://customers.gitlab.com/subscriptions',
+  planName: 'Gold',
+  freePersonalNamespace: false,
+};
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -19,19 +22,12 @@ describe('SubscriptionTable component', () => {
   let store;
   let wrapper;
 
-  const defaultFlags = { saasAddSeatsButton: false };
-
   const findAddSeatsButton = () => wrapper.findByTestId('add-seats-button');
   const findManageButton = () => wrapper.findByTestId('manage-button');
   const findRenewButton = () => wrapper.findByTestId('renew-button');
   const findUpgradeButton = () => wrapper.findByTestId('upgrade-button');
 
-  const createComponentWithStore = ({
-    props = {},
-    featureFlags = {},
-    provide = {},
-    state = {},
-  } = {}) => {
+  const createComponentWithStore = ({ props = {}, provide = {}, state = {} } = {}) => {
     store = new Vuex.Store(initialStore());
     jest.spyOn(store, 'dispatch').mockImplementation();
 
@@ -40,14 +36,8 @@ describe('SubscriptionTable component', () => {
         store,
         localVue,
         provide: {
-          customerPortalUrl,
-          namespaceName,
-          planName,
+          ...defaultInjectedProps,
           ...provide,
-          glFeatures: {
-            defaultFlags,
-            ...featureFlags,
-          },
         },
         propsData: props,
       }),
@@ -86,7 +76,7 @@ describe('SubscriptionTable component', () => {
     beforeEach(() => {
       createComponentWithStore();
       store.state.isLoadingSubscription = false;
-      store.commit(`${types.RECEIVE_SUBSCRIPTION_SUCCESS}`, mockDataSubscription.gold);
+      store.commit(types.RECEIVE_SUBSCRIPTION_SUCCESS, mockDataSubscription.gold);
       return wrapper.vm.$nextTick();
     });
 
@@ -120,7 +110,7 @@ describe('SubscriptionTable component', () => {
       ${null}     | ${false} | ${'does not render the button'}
       ${'free'}   | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
+      'given a plan with state: planCode = $planCode',
       ({ planCode, upgradable, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
@@ -143,19 +133,24 @@ describe('SubscriptionTable component', () => {
 
   describe('Renew button', () => {
     describe.each`
-      planCode    | expected | testDescription
-      ${'silver'} | ${true}  | ${'renders the button'}
-      ${null}     | ${false} | ${'does not render the button'}
-      ${'free'}   | ${false} | ${'does not render the button'}
+      planCode    | trial    | expected | testDescription
+      ${'silver'} | ${false} | ${true}  | ${'renders the button'}
+      ${'silver'} | ${true}  | ${false} | ${'does not render the button'}
+      ${null}     | ${false} | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode',
-      ({ planCode, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode, trial = $trial',
+      ({ planCode, trial, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
             state: {
               isLoadingSubscription: false,
               plan: {
                 code: planCode,
+                trial,
+              },
+              billing: {
+                subscriptionEndDate: new Date(),
               },
             },
           });
@@ -166,23 +161,43 @@ describe('SubscriptionTable component', () => {
         });
       },
     );
+
+    describe('when subscriptionEndDate is more than 15 days', () => {
+      beforeEach(() => {
+        const today = new Date();
+        const subscriptionEndDate = today.setDate(today.getDate() + 16);
+
+        createComponentWithStore({
+          state: {
+            isLoadingSubscription: false,
+            plan: {
+              code: mockDataSubscription.planCode,
+              trial: false,
+            },
+            billing: {
+              subscriptionEndDate,
+            },
+          },
+        });
+      });
+
+      it('does not display the renew button', () => {
+        expect(findRenewButton().exists()).toBe(false);
+      });
+    });
   });
 
   describe('Add seats button', () => {
     describe.each`
-      planCode    | featureFlag | expected | testDescription
-      ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
-      ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
-      ${null}     | ${true}     | ${false} | ${'does not render the button'}
-      ${null}     | ${false}    | ${false} | ${'does not render the button'}
-      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
-      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
+      planCode    | expected | testDescription
+      ${'silver'} | ${true}  | ${'renders the button'}
+      ${null}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
-      ({ planCode, featureFlag, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode',
+      ({ planCode, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
-            featureFlags: { saasAddSeatsButton: featureFlag },
             state: {
               isLoadingSubscription: false,
               plan: {
@@ -202,20 +217,27 @@ describe('SubscriptionTable component', () => {
 
   describe('Upgrade button', () => {
     describe.each`
-      planCode    | upgradable | expected | testDescription
-      ${'bronze'} | ${true}    | ${true}  | ${'renders the button'}
-      ${'bronze'} | ${false}   | ${false} | ${'does not render the button'}
-      ${null}     | ${true}    | ${true}  | ${'renders the button'}
-      ${null}     | ${false}   | ${true}  | ${'renders the button'}
-      ${'free'}   | ${true}    | ${true}  | ${'renders the button'}
-      ${'free'}   | ${false}   | ${true}  | ${'renders the button'}
+      planCode    | upgradable | freePersonalNamespace | expected
+      ${null}     | ${false}   | ${false}              | ${true}
+      ${null}     | ${true}    | ${false}              | ${true}
+      ${null}     | ${false}   | ${true}               | ${false}
+      ${null}     | ${true}    | ${true}               | ${false}
+      ${'free'}   | ${false}   | ${false}              | ${true}
+      ${'free'}   | ${true}    | ${false}              | ${true}
+      ${'free'}   | ${false}   | ${true}               | ${false}
+      ${'free'}   | ${true}    | ${true}               | ${false}
+      ${'bronze'} | ${false}   | ${false}              | ${false}
+      ${'bronze'} | ${true}    | ${false}              | ${true}
+      ${'bronze'} | ${false}   | ${true}               | ${false}
+      ${'bronze'} | ${true}    | ${true}               | ${false}
     `(
-      'given a plan with state: planCode = $planCode, upgradable = $upgradable',
-      ({ planCode, upgradable, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode, upgradable = $upgradable, freePersonalNamespace = $freePersonalNamespace',
+      ({ planCode, upgradable, freePersonalNamespace, expected }) => {
         beforeEach(() => {
           createComponentWithStore({
             provide: {
               planUpgradeHref: '',
+              freePersonalNamespace,
             },
             state: {
               isLoadingSubscription: false,
@@ -226,6 +248,9 @@ describe('SubscriptionTable component', () => {
             },
           });
         });
+
+        const testDescription =
+          expected === true ? 'renders the button' : 'does not render the button';
 
         it(testDescription, () => {
           expect(findUpgradeButton().exists()).toBe(expected);

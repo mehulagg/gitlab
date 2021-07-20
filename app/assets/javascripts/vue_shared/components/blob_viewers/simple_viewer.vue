@@ -1,14 +1,18 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import { GlIcon } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { HIGHLIGHT_CLASS_NAME } from './constants';
 import ViewerMixin from './mixins';
 
 export default {
+  name: 'SimpleViewer',
   components: {
     GlIcon,
+    SourceEditor: () =>
+      import(/* webpackChunkName: 'SourceEditor' */ '~/vue_shared/components/source_editor.vue'),
   },
-  mixins: [ViewerMixin],
+  mixins: [ViewerMixin, glFeatureFlagsMixin()],
   inject: ['blobHash'],
   data() {
     return {
@@ -18,6 +22,9 @@ export default {
   computed: {
     lineNumbers() {
       return this.content.split('\n').length;
+    },
+    refactorBlobViewerEnabled() {
+      return this.glFeatures.refactorBlobViewer;
     },
   },
   mounted() {
@@ -45,27 +52,31 @@ export default {
 };
 </script>
 <template>
-  <div
-    class="file-content code js-syntax-highlight"
-    data-qa-selector="file_content"
-    :class="$options.userColorScheme"
-  >
-    <div class="line-numbers">
-      <a
-        v-for="line in lineNumbers"
-        :id="`L${line}`"
-        :key="line"
-        class="diff-line-num js-line-number"
-        :href="`#LC${line}`"
-        :data-line-number="line"
-        @click="scrollToLine(`#LC${line}`)"
-      >
-        <gl-icon :size="12" name="link" />
-        {{ line }}
-      </a>
-    </div>
-    <div class="blob-content">
-      <pre class="code highlight"><code :data-blob-hash="blobHash" v-html="content"></code></pre>
+  <div>
+    <source-editor
+      v-if="isRawContent && refactorBlobViewerEnabled"
+      :value="content"
+      :file-name="fileName"
+      :editor-options="{ readOnly: true }"
+    />
+    <div v-else class="file-content code js-syntax-highlight" :class="$options.userColorScheme">
+      <div class="line-numbers">
+        <a
+          v-for="line in lineNumbers"
+          :id="`L${line}`"
+          :key="line"
+          class="diff-line-num js-line-number"
+          :href="`#LC${line}`"
+          :data-line-number="line"
+          @click="scrollToLine(`#LC${line}`)"
+        >
+          <gl-icon :size="12" name="link" />
+          {{ line }}
+        </a>
+      </div>
+      <div class="blob-content">
+        <pre class="code highlight"><code :data-blob-hash="blobHash" v-html="content"></code></pre>
+      </div>
     </div>
   </div>
 </template>

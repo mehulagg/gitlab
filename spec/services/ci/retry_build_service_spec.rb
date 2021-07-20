@@ -18,6 +18,7 @@ RSpec.describe Ci::RetryBuildService do
   end
 
   let_it_be_with_refind(:build) { create(:ci_build, pipeline: pipeline, stage_id: stage.id) }
+
   let(:user) { developer }
 
   let(:service) do
@@ -29,7 +30,7 @@ RSpec.describe Ci::RetryBuildService do
     project.add_reporter(reporter)
   end
 
-  clone_accessors = described_class.clone_accessors
+  clone_accessors = described_class.clone_accessors.without(described_class.extra_accessors)
 
   reject_accessors =
     %i[id status user token token_encrypted coverage trace runner
@@ -38,8 +39,8 @@ RSpec.describe Ci::RetryBuildService do
        erased_at auto_canceled_by job_artifacts job_artifacts_archive
        job_artifacts_metadata job_artifacts_trace job_artifacts_junit
        job_artifacts_sast job_artifacts_secret_detection job_artifacts_dependency_scanning
-       job_artifacts_container_scanning job_artifacts_dast
-       job_artifacts_license_management job_artifacts_license_scanning
+       job_artifacts_container_scanning job_artifacts_cluster_image_scanning job_artifacts_dast
+       job_artifacts_license_scanning
        job_artifacts_performance job_artifacts_browser_performance job_artifacts_load_performance
        job_artifacts_lsif job_artifacts_terraform job_artifacts_cluster_applications
        job_artifacts_codequality job_artifacts_metrics scheduled_at
@@ -58,13 +59,14 @@ RSpec.describe Ci::RetryBuildService do
        metadata runner_session trace_chunks upstream_pipeline_id
        artifacts_file artifacts_metadata artifacts_size commands
        resource resource_group_id processed security_scans author
-       pipeline_id report_results pending_state pages_deployments].freeze
+       pipeline_id report_results pending_state pages_deployments
+       queuing_entry runtime_metadata].freeze
 
   shared_examples 'build duplication' do
     let_it_be(:another_pipeline) { create(:ci_empty_pipeline, project: project) }
 
     let_it_be(:build) do
-      create(:ci_build, :failed, :expired, :erased, :queued, :coverage, :tags,
+      create(:ci_build, :failed, :picked, :expired, :erased, :queued, :coverage, :tags,
              :allowed_to_fail, :on_tag, :triggered, :teardown_environment, :resource_group,
              description: 'my-job', stage: 'test', stage_id: stage.id,
              pipeline: pipeline, auto_canceled_by: another_pipeline,
@@ -72,9 +74,6 @@ RSpec.describe Ci::RetryBuildService do
     end
 
     before_all do
-      # Test correctly behaviour of deprecated artifact because it can be still in use
-      stub_feature_flags(drop_license_management_artifact: false)
-
       # Make sure that build has both `stage_id` and `stage` because FactoryBot
       # can reset one of the fields when assigning another. We plan to deprecate
       # and remove legacy `stage` column in the future.
@@ -99,7 +98,7 @@ RSpec.describe Ci::RetryBuildService do
       end
 
       clone_accessors.each do |attribute|
-        it "clones #{attribute} build attribute" do
+        it "clones #{attribute} build attribute", :aggregate_failures do
           expect(attribute).not_to be_in(forbidden_associations), "association #{attribute} must be `belongs_to`"
           expect(build.send(attribute)).not_to be_nil
           expect(new_build.send(attribute)).not_to be_nil
@@ -135,7 +134,7 @@ RSpec.describe Ci::RetryBuildService do
       end
     end
 
-    it 'has correct number of known attributes' do
+    it 'has correct number of known attributes', :aggregate_failures do
       processed_accessors = clone_accessors + reject_accessors
       known_accessors = processed_accessors + ignore_accessors
 
@@ -147,9 +146,10 @@ RSpec.describe Ci::RetryBuildService do
         Ci::Build.attribute_names.map(&:to_sym) +
         Ci::Build.attribute_aliases.keys.map(&:to_sym) +
         Ci::Build.reflect_on_all_associations.map(&:name) +
-        [:tag_list, :needs_attributes]
-
-      current_accessors << :secrets if Gitlab.ee?
+        [:tag_list, :needs_attributes] -
+        # ee-specific accessors should be tested in ee/spec/services/ci/retry_build_service_spec.rb instead
+        described_class.extra_accessors -
+        [:dast_site_profiles_build, :dast_scanner_profiles_build] # join tables
 
       current_accessors.uniq!
 
@@ -181,7 +181,7 @@ RSpec.describe Ci::RetryBuildService do
       end
 
       it 'resolves todos for old build that failed' do
-        expect(MergeRequests::AddTodoWhenBuildFailsService)
+        expect(::MergeRequests::AddTodoWhenBuildFailsService)
           .to receive_message_chain(:new, :close)
 
         service.execute(build)

@@ -1,12 +1,12 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 type: index, howto
 ---
 
-# Migrating from CircleCI
+# Migrating from CircleCI **(FREE)**
 
 If you are currently using CircleCI, you can migrate your CI/CD pipelines to [GitLab CI/CD](../introduction/index.md),
 and start making use of all its powerful features. Check out our
@@ -41,7 +41,7 @@ jobs:
 
 Example of the same job definition in GitLab CI/CD:
 
-``` yaml
+```yaml
 job1:
   script: "execute-script-for-job1"
 ```
@@ -68,7 +68,7 @@ job1:
 
 ### Workflows
 
-CircleCI determines the run order for jobs with `workflows`. This is also used to determine concurrent, sequential, scheduled, or manual runs. The equivalent function in GitLab CI/CD is called [stages](../yaml/README.md#stages). Jobs on the same stage run in parallel, and only run after previous stages complete. Execution of the next stage is skipped when a job fails by default, but this can be allowed to continue even [after a failed job](../yaml/README.md#allow_failure).
+CircleCI determines the run order for jobs with `workflows`. This is also used to determine concurrent, sequential, scheduled, or manual runs. The equivalent function in GitLab CI/CD is called [stages](../yaml/index.md#stages). Jobs on the same stage run in parallel, and only run after previous stages complete. Execution of the next stage is skipped when a job fails by default, but this can be allowed to continue even [after a failed job](../yaml/index.md#allow_failure).
 
 See [the Pipeline Architecture Overview](../pipelines/pipeline_architectures.md) for guidance on different types of pipelines that you can use. Pipelines can be tailored to meet your needs, such as for a large complex project or a monorepo with independent defined components.
 
@@ -140,7 +140,7 @@ job4:
 
 #### Scheduled run
 
-GitLab CI/CD has an easy to use UI to [schedule pipelines](../pipelines/schedules.md). Also, [rules](../yaml/README.md#rules) can be used to determine if jobs should be included or excluded from a scheduled pipeline.
+GitLab CI/CD has an easy to use UI to [schedule pipelines](../pipelines/schedules.md). Also, [rules](../yaml/index.md#rules) can be used to determine if jobs should be included or excluded from a scheduled pipeline.
 
 CircleCI example of a scheduled workflow:
 
@@ -159,7 +159,7 @@ scheduled-workflow:
     - build
 ```
 
-Example of the same scheduled pipeline using [`rules`](../yaml/README.md#rules) in GitLab CI/CD:
+Example of the same scheduled pipeline using [`rules`](../yaml/index.md#rules) in GitLab CI/CD:
 
 ```yaml
 job1:
@@ -188,7 +188,7 @@ release-branch-workflow:
           - testing
 ```
 
-Example of the same workflow using [`when: manual`](../yaml/README.md#whenmanual) in GitLab CI/CD:
+Example of the same workflow using [`when: manual`](../yaml/index.md#whenmanual) in GitLab CI/CD:
 
 ```yaml
 deploy_prod:
@@ -200,7 +200,7 @@ deploy_prod:
 
 ### Filter job by branch
 
-[Rules](../yaml/README.md#rules) are a mechanism to determine if the job runs for a specific branch.
+[Rules](../yaml/index.md#rules) are a mechanism to determine if the job runs for a specific branch.
 
 CircleCI example of a job filtered by branch:
 
@@ -209,7 +209,7 @@ jobs:
   deploy:
     branches:
       only:
-        - master
+        - main
         - /rc-.*/
 ```
 
@@ -221,12 +221,12 @@ deploy_prod:
   script:
     - echo "Deploy to production server"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
 ```
 
 ### Caching
 
-GitLab provides a caching mechanism to speed up build times for your jobs by reusing previously downloaded dependencies. It's important to know the different between [cache and artifacts](../caching/index.md#cache-vs-artifacts) to make the best use of these features.
+GitLab provides a caching mechanism to speed up build times for your jobs by reusing previously downloaded dependencies. It's important to know the different between [cache and artifacts](../caching/index.md#how-cache-is-different-from-artifacts) to make the best use of these features.
 
 CircleCI example of a job using a cache:
 
@@ -265,7 +265,7 @@ test_async:
 
 ## Contexts and variables
 
-CircleCI provides [Contexts](https://circleci.com/docs/2.0/contexts/) to securely pass environment variables across project pipelines. In GitLab, a [Group](../../user/group/index.md) can be created to assemble related projects together. At the group level, [variables](../variables/README.md#group-level-cicd-variables) can be stored outside the individual projects, and securely passed into pipelines across multiple projects.
+CircleCI provides [Contexts](https://circleci.com/docs/2.0/contexts/) to securely pass environment variables across project pipelines. In GitLab, a [Group](../../user/group/index.md) can be created to assemble related projects together. At the group level, [CI/CD variables](../variables/index.md#add-a-cicd-variable-to-a-group) can be stored outside the individual projects, and securely passed into pipelines across multiple projects.
 
 ## Orbs
 
@@ -294,7 +294,7 @@ GitLab.com shared runners:
 
 ### Machine and specific build environments
 
-[Tags](../yaml/README.md#tags) can be used to run jobs on different platforms, by telling GitLab which runners should run the jobs.
+[Tags](../yaml/index.md#tags) can be used to run jobs on different platforms, by telling GitLab which runners should run the jobs.
 
 CircleCI example of a job running on a specific environment:
 

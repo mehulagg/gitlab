@@ -69,7 +69,7 @@ module API
           parsed_hash = parser.update_params
 
           if parser.deprovision_user?
-            deprovision(identity)
+            patch_deprovision(identity)
           elsif reprovisionable?(identity) && parser.reprovision_user?
             reprovision(identity)
           elsif parsed_hash[:extern_uid]
@@ -103,21 +103,35 @@ module API
           group.scim_identities.with_extern_uid(extern_uid).first
         end
 
-        def deprovision(identity)
-          ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
+        # delete_deprovision handles the response and returns either no_content! or a detailed error message.
+        def delete_deprovision(identity)
+          service = ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
-          true
-        rescue => e
-          logger.error(identity: identity, error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
+          if service.success?
+            no_content!
+          else
+            logger.error(identity: identity, error: service.class.name, message: service.message, source: "#{__FILE__}:#{__LINE__}")
+            scim_error!(message: service.message)
+          end
+        end
 
-          false
+        # The method that calls patch_deprovision, update_scim_user, expects a truthy/falsey value, and then continues to handle the request.
+        def patch_deprovision(identity)
+          service = ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
+
+          if service.success?
+            true
+          else
+            logger.error(identity: identity, error: service.class.name, message: service.message, source: "#{__FILE__}:#{__LINE__}")
+            false
+          end
         end
 
         def reprovision(identity)
           ::EE::Gitlab::Scim::ReprovisionService.new(identity).execute
 
           true
-        rescue => e
+        rescue StandardError => e
           logger.error(identity: identity, error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
 
           false
@@ -212,11 +226,7 @@ module API
 
           scim_not_found!(message: "Resource #{params[:id]} not found") unless identity
 
-          destroyed = deprovision(identity)
-
-          scim_not_found!(message: "Resource #{params[:id]} not found") unless destroyed
-
-          no_content!
+          delete_deprovision(identity)
         end
       end
     end

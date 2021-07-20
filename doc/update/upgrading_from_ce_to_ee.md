@@ -5,13 +5,13 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 comments: false
 ---
 
-# Upgrading from Community Edition to Enterprise Edition from source
+# Upgrading from Community Edition to Enterprise Edition from source **(FREE SELF)**
 
 NOTE:
 In the past we used separate documents for upgrading from
 Community Edition to Enterprise Edition. These documents can be found in the
 [`doc/update` directory of Enterprise Edition's source
-code](https://gitlab.com/gitlab-org/gitlab/tree/11-8-stable-ee/doc/update).
+code](https://gitlab.com/gitlab-org/gitlab/-/tree/11-8-stable-ee/doc/update).
 
 If you want to upgrade the version only, for example 11.8 to 11.9, *without* changing the
 GitLab edition you are using (Community or Enterprise), see the
@@ -63,7 +63,12 @@ sudo -u git -H git checkout EE_BRANCH
 ```shell
 cd /home/git/gitlab
 
-sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
+# If you haven't done so during installation or a previous upgrade already
+sudo -u git -H bundle config set --local deployment 'true'
+sudo -u git -H bundle config set --local without 'development test mysql aws kerberos'
+
+# Update gems
+sudo -u git -H bundle install
 
 # Optional: clean up old gems
 sudo -u git -H bundle clean

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:group) { create(:group, name: 'my-organization') }
+
   let(:upstream_project) { create(:project, :repository, name: 'upstream', group: group) }
   let(:downstram_project) { create(:project, :repository, name: 'downstream', group: group) }
   let(:user) { create(:user) }
@@ -40,6 +41,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
 
     it 'creates bridge job with resource group' do
       pipeline = create_pipeline!
+      Ci::InitialPipelineProcessWorker.new.perform(pipeline.id)
 
       test = pipeline.statuses.find_by(name: 'instrumentation_test')
       expect(pipeline).to be_created_successfully
@@ -77,7 +79,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   end
 
   def create_pipeline!
-    service.execute(:push)
+    service.execute(:push).payload
   end
 
   def create_gitlab_ci_yml(project, content)

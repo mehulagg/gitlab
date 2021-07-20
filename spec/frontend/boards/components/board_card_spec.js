@@ -1,43 +1,54 @@
-/* global List */
-/* global ListAssignee */
-/* global ListLabel */
+import { GlLabel } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
+import Vue from 'vue';
+import Vuex from 'vuex';
 
-import { mount } from '@vue/test-utils';
-
-import MockAdapter from 'axios-mock-adapter';
-import waitForPromises from 'helpers/wait_for_promises';
 import BoardCard from '~/boards/components/board_card.vue';
-import issueCardInner from '~/boards/components/issue_card_inner.vue';
-import eventHub from '~/boards/eventhub';
-import store from '~/boards/stores';
-import boardsStore from '~/boards/stores/boards_store';
-import axios from '~/lib/utils/axios_utils';
+import BoardCardInner from '~/boards/components/board_card_inner.vue';
+import { inactiveId } from '~/boards/constants';
+import { mockLabelList, mockIssue } from '../mock_data';
 
-import sidebarEventHub from '~/sidebar/event_hub';
-import '~/boards/models/label';
-import '~/boards/models/assignee';
-import '~/boards/models/list';
-import userAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import { listObj, boardsMockInterceptor, setMockEndpoints } from '../mock_data';
-
-describe('BoardCard', () => {
+describe('Board card', () => {
   let wrapper;
-  let mock;
-  let list;
+  let store;
+  let mockActions;
 
-  const findIssueCardInner = () => wrapper.find(issueCardInner);
-  const findUserAvatarLink = () => wrapper.find(userAvatarLink);
+  Vue.use(Vuex);
+
+  const createStore = ({ initialState = {} } = {}) => {
+    mockActions = {
+      toggleBoardItem: jest.fn(),
+      toggleBoardItemMultiSelection: jest.fn(),
+      performSearch: jest.fn(),
+    };
+
+    store = new Vuex.Store({
+      state: {
+        activeId: inactiveId,
+        selectedBoardItems: [],
+        ...initialState,
+      },
+      actions: mockActions,
+      getters: {
+        isEpicBoard: () => false,
+      },
+    });
+  };
 
   // this particular mount component needs to be used after the root beforeEach because it depends on list being initialized
-  const mountComponent = (propsData) => {
-    wrapper = mount(BoardCard, {
-      stubs: {
-        issueCardInner,
-      },
+  const mountComponent = ({
+    propsData = {},
+    provide = {},
+    mountFn = shallowMount,
+    stubs = { BoardCardInner },
+    item = mockIssue,
+  } = {}) => {
+    wrapper = mountFn(BoardCard, {
+      stubs,
       store,
       propsData: {
-        list,
-        issue: list.issues[0],
+        list: mockLabelList,
+        item,
         disabled: false,
         index: 0,
         ...propsData,
@@ -46,174 +57,126 @@ describe('BoardCard', () => {
         groupId: null,
         rootPath: '/',
         scopedLabelsAvailable: false,
+        ...provide,
       },
     });
   };
 
-  const setupData = async () => {
-    list = new List(listObj);
-    boardsStore.create();
-    boardsStore.detail.issue = {};
-    const label1 = new ListLabel({
-      id: 3,
-      title: 'testing 123',
-      color: '#000cff',
-      text_color: 'white',
-      description: 'test',
-    });
-    await waitForPromises();
+  const selectCard = async () => {
+    wrapper.trigger('mouseup');
+    await wrapper.vm.$nextTick();
+  };
 
-    list.issues[0].labels.push(label1);
+  const multiSelectCard = async () => {
+    wrapper.trigger('mouseup', { ctrlKey: true });
+    await wrapper.vm.$nextTick();
   };
 
   beforeEach(() => {
-    mock = new MockAdapter(axios);
-    mock.onAny().reply(boardsMockInterceptor);
-    setMockEndpoints();
-    return setupData();
+    window.gon = { features: {} };
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
-    list = null;
-    mock.restore();
+    store = null;
   });
 
-  it('when details issue is empty does not show the element', () => {
-    mountComponent();
-    expect(wrapper.find('[data-testid="board_card"').classes()).not.toContain('is-active');
+  describe('when GlLabel is clicked in BoardCardInner', () => {
+    it('doesnt call toggleBoardItem', () => {
+      createStore({ initialState: { isShowingLabels: true } });
+      mountComponent({ mountFn: mount, stubs: {} });
+
+      wrapper.find(GlLabel).trigger('mouseup');
+
+      expect(mockActions.toggleBoardItem).toHaveBeenCalledTimes(0);
+    });
   });
 
-  it('when detailIssue is equal to card issue shows the element', () => {
-    [boardsStore.detail.issue] = list.issues;
+  it('should not highlight the card by default', async () => {
+    createStore();
     mountComponent();
 
-    expect(wrapper.classes()).toContain('is-active');
-  });
-
-  it('when multiSelect does not contain issue removes multi select class', () => {
-    mountComponent();
+    expect(wrapper.classes()).not.toContain('is-active');
     expect(wrapper.classes()).not.toContain('multi-select');
   });
 
-  it('when multiSelect contain issue add multi select class', () => {
-    boardsStore.multiSelect.list = [list.issues[0]];
+  it('should highlight the card with a correct style when selected', async () => {
+    createStore({
+      initialState: {
+        activeId: mockIssue.id,
+      },
+    });
+    mountComponent();
+
+    expect(wrapper.classes()).toContain('is-active');
+    expect(wrapper.classes()).not.toContain('multi-select');
+  });
+
+  it('should highlight the card with a correct style when multi-selected', async () => {
+    createStore({
+      initialState: {
+        activeId: inactiveId,
+        selectedBoardItems: [mockIssue],
+      },
+    });
     mountComponent();
 
     expect(wrapper.classes()).toContain('multi-select');
+    expect(wrapper.classes()).not.toContain('is-active');
   });
 
-  it('adds user-can-drag class if not disabled', () => {
-    mountComponent();
-    expect(wrapper.classes()).toContain('user-can-drag');
-  });
-
-  it('does not add user-can-drag class disabled', () => {
-    mountComponent({ disabled: true });
-
-    expect(wrapper.classes()).not.toContain('user-can-drag');
-  });
-
-  it('does not add disabled class', () => {
-    mountComponent();
-    expect(wrapper.classes()).not.toContain('is-disabled');
-  });
-
-  it('adds disabled class is disabled is true', () => {
-    mountComponent({ disabled: true });
-
-    expect(wrapper.classes()).toContain('is-disabled');
-  });
-
-  describe('mouse events', () => {
-    it('does not set detail issue if showDetail is false', () => {
+  describe('when mouseup event is called on the card', () => {
+    beforeEach(() => {
+      createStore();
       mountComponent();
-      expect(boardsStore.detail.issue).toEqual({});
     });
 
-    it('does not set detail issue if link is clicked', () => {
-      mountComponent();
-      findIssueCardInner().find('a').trigger('mouseup');
+    describe('when not using multi-select', () => {
+      it('should call vuex action "toggleBoardItem" with correct parameters', async () => {
+        await selectCard();
 
-      expect(boardsStore.detail.issue).toEqual({});
+        expect(mockActions.toggleBoardItem).toHaveBeenCalledTimes(1);
+        expect(mockActions.toggleBoardItem).toHaveBeenCalledWith(expect.any(Object), {
+          boardItem: mockIssue,
+        });
+      });
     });
 
-    it('does not set detail issue if img is clicked', () => {
-      mountComponent({
-        issue: {
-          ...list.issues[0],
-          assignees: [
-            new ListAssignee({
-              id: 1,
-              name: 'testing 123',
-              username: 'test',
-              avatar: 'test_image',
-            }),
-          ],
-        },
+    describe('when using multi-select', () => {
+      beforeEach(() => {
+        window.gon = { features: { boardMultiSelect: true } };
       });
 
-      findUserAvatarLink().trigger('mouseup');
+      it('should call vuex action "multiSelectBoardItem" with correct parameters', async () => {
+        await multiSelectCard();
 
-      expect(boardsStore.detail.issue).toEqual({});
-    });
-
-    it('does not set detail issue if showDetail is false after mouseup', () => {
-      mountComponent();
-      wrapper.trigger('mouseup');
-
-      expect(boardsStore.detail.issue).toEqual({});
-    });
-
-    it('sets detail issue to card issue on mouse up', () => {
-      jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
-
-      mountComponent();
-
-      wrapper.trigger('mousedown');
-      wrapper.trigger('mouseup');
-
-      expect(eventHub.$emit).toHaveBeenCalledWith('newDetailIssue', wrapper.vm.issue, false);
-      expect(boardsStore.detail.list).toEqual(wrapper.vm.list);
-    });
-
-    it('resets detail issue to empty if already set', () => {
-      jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
-      const [issue] = list.issues;
-      boardsStore.detail.issue = issue;
-      mountComponent();
-
-      wrapper.trigger('mousedown');
-      wrapper.trigger('mouseup');
-
-      expect(eventHub.$emit).toHaveBeenCalledWith('clearDetailIssue', false);
+        expect(mockActions.toggleBoardItemMultiSelection).toHaveBeenCalledTimes(1);
+        expect(mockActions.toggleBoardItemMultiSelection).toHaveBeenCalledWith(
+          expect.any(Object),
+          mockIssue,
+        );
+      });
     });
   });
 
-  describe('sidebarHub events', () => {
-    it('closes all sidebars before showing an issue if no issues are opened', () => {
-      jest.spyOn(sidebarEventHub, '$emit').mockImplementation(() => {});
-      boardsStore.detail.issue = {};
-      mountComponent();
+  describe('when card is loading', () => {
+    it('card is disabled and user cannot drag', () => {
+      createStore();
+      mountComponent({ item: { ...mockIssue, isLoading: true } });
 
-      // sets conditional so that event is emitted.
-      wrapper.trigger('mousedown');
-
-      wrapper.trigger('mouseup');
-
-      expect(sidebarEventHub.$emit).toHaveBeenCalledWith('sidebar.closeAll');
+      expect(wrapper.classes()).toContain('is-disabled');
+      expect(wrapper.classes()).not.toContain('user-can-drag');
     });
+  });
 
-    it('it does not closes all sidebars before showing an issue if an issue is opened', () => {
-      jest.spyOn(sidebarEventHub, '$emit').mockImplementation(() => {});
-      const [issue] = list.issues;
-      boardsStore.detail.issue = issue;
+  describe('when card is not loading', () => {
+    it('user can drag', () => {
+      createStore();
       mountComponent();
 
-      wrapper.trigger('mousedown');
-
-      expect(sidebarEventHub.$emit).not.toHaveBeenCalledWith('sidebar.closeAll');
+      expect(wrapper.classes()).not.toContain('is-disabled');
+      expect(wrapper.classes()).toContain('user-can-drag');
     });
   });
 });

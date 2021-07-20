@@ -8,11 +8,11 @@
   .form-group.project-name.col-sm-12
     = f.label :name, class: 'label-bold' do
       %span= _("Project name")
-    = f.text_field :name, placeholder: "My awesome project", class: "form-control input-lg", autofocus: true, data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "project_name", track_value: "" }
+    = f.text_field :name, placeholder: "My awesome project", class: "form-control gl-form-input input-lg", autofocus: true, data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "project_name", track_value: "" }, required: true, aria: { required: true }
   .form-group.project-path.col-sm-6
     = f.label :namespace_id, class: 'label-bold' do
       %span= s_("Project URL")
-    .input-group.flex-nowrap
+    .input-group.gl-flex-nowrap
       - if current_user.can_select_namespace?
         .input-group-prepend.flex-shrink-0.has-tooltip{ title: root_url }
           .input-group-text
@@ -23,7 +23,7 @@
                                                                       display_path: true,
                                                                       extra_group: namespace_id),
                    {},
-                   { class: 'select2 js-select-namespace qa-project-namespace-select block-truncated', data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "project_path", track_value: "" }})
+                   { class: 'select2 js-select-namespace qa-project-namespace-select block-truncated', data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "project_path", track_value: "", qa_selector: "select_namespace_dropdown" }})
 
       - else
         .input-group-prepend.static-namespace.flex-shrink-0.has-tooltip{ title: user_url(current_user.username) + '/' }
@@ -33,7 +33,7 @@
   .form-group.project-path.col-sm-6
     = f.label :path, class: 'label-bold' do
       %span= _("Project slug")
-    = f.text_field :path, placeholder: "my-awesome-project", class: "form-control", required: true
+    = f.text_field :path, placeholder: "my-awesome-project", class: "form-control gl-form-input", required: true, aria: { required: true }
 - if current_user.can_create_group?
   .form-text.text-muted
     - link_start_group_path = '<a href="%{path}">' % { path: new_group_path }
@@ -43,7 +43,7 @@
 .form-group
   = f.label :description, class: 'label-bold' do
     = s_('ProjectsNew|Project description %{tag_start}(optional)%{tag_end}').html_safe % { tag_start: '<span>'.html_safe, tag_end: '</span>'.html_safe }
-  = f.text_area :description, placeholder: s_('ProjectsNew|Description format'), class: "form-control", rows: 3, maxlength: 250, data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "project_description", track_value: "" }
+  = f.text_area :description, placeholder: s_('ProjectsNew|Description format'), class: "form-control gl-form-input", rows: 3, maxlength: 250, data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "project_description", track_value: "" }
 
 = f.label :visibility_level, class: 'label-bold' do
   = s_('ProjectsNew|Visibility Level')
@@ -55,12 +55,12 @@
     %div{ :class => "col-sm-12" }
       .form-check
         - experiment(:new_project_readme, actor: current_user) do |e|
-          = check_box_tag 'project[initialize_with_readme]', '1', e.run, class: 'form-check-input qa-initialize-with-readme-checkbox', data: { track_label: "#{track_label}", track_event: "activate_form_input", track_property: "init_with_readme", track_value: "" }
+          = check_box_tag 'project[initialize_with_readme]', '1', e.run, class: 'form-check-input', data: { qa_selector: "initialize_with_readme_checkbox", track_label: "#{track_label}", track_event: "activate_form_input", track_property: "init_with_readme", track_value: "" }
         = label_tag 'project[initialize_with_readme]', class: 'form-check-label' do
           .option-title
             %strong= s_('ProjectsNew|Initialize repository with a README')
           .option-description
             = s_('ProjectsNew|Allows you to immediately clone this project’s repository. Skip this if you plan to push up an existing repository.')
 
-= f.submit _('Create project'), class: "btn gl-button btn-success", data: { track_label: "#{track_label}", track_event: "click_button", track_property: "create_project", track_value: "" }
+= f.submit _('Create project'), class: "btn gl-button btn-confirm", data: { track_label: "#{track_label}", track_event: "click_button", track_property: "create_project", track_value: "" }
 = link_to _('Cancel'), dashboard_projects_path, class: 'btn gl-button btn-default btn-cancel', data: { track_label: "#{track_label}", track_event: "click_button", track_property: "cancel", track_value: "" }

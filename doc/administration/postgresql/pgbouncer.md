@@ -23,7 +23,7 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 
 1. Generate PGBOUNCER_USER_PASSWORD_HASH with the command `gitlab-ctl pg-password-md5 pgbouncer`
 
-1. Generate SQL_USER_PASSWORD_HASH with the command `gitlab-ctl pg-password-md5 gitlab`. We'll also need to enter the plaintext SQL_USER_PASSWORD later
+1. Generate SQL_USER_PASSWORD_HASH with the command `gitlab-ctl pg-password-md5 gitlab`. Enter the plaintext SQL_USER_PASSWORD later.
 
 1. On your database node, ensure the following is set in your `/etc/gitlab/gitlab.rb`
 
@@ -37,7 +37,7 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 1. Run `gitlab-ctl reconfigure`
 
    NOTE:
-   If the database was already running, it will need to be restarted after reconfigure by running `gitlab-ctl restart postgresql`.
+   If the database was already running, it needs to be restarted after reconfigure by running `gitlab-ctl restart postgresql`.
 
 1. On the node you are running PgBouncer on, make sure the following is set in `/etc/gitlab/gitlab.rb`
 
@@ -51,6 +51,20 @@ This content has been moved to a [new location](replication_and_failover.md#conf
      }
    }
    ```
+
+   You can pass additional configuration parameters per database, for example:
+
+   ```ruby
+   pgbouncer['databases'] = {
+     gitlabhq_production: {
+        ...
+        pool_mode: 'transaction'
+     }
+   }
+   ```
+
+   Use these parameters with caution. For the complete list of parameters refer to the
+   [PgBouncer documentation](https://www.pgbouncer.org/config.html#section-databases).
 
 1. Run `gitlab-ctl reconfigure`
 
@@ -68,7 +82,7 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 
 ## Backups
 
-Do not backup or restore GitLab through a PgBouncer connection: this will cause a GitLab outage.
+Do not backup or restore GitLab through a PgBouncer connection: it causes a GitLab outage.
 
 [Read more about this and how to reconfigure backups](../../raketasks/backup_restore.md#backup-and-restore-for-installations-using-pgbouncer).
 
@@ -164,7 +178,7 @@ and [GitLab upgrades](https://docs.gitlab.com/omnibus/update/README.html#use-pos
 1. To find the primary node, run the following on a database node:
 
    ```shell
-   sudo gitlab-ctl repmgr cluster show
+   sudo gitlab-ctl patroni members
    ```
 
 1. Edit `/etc/gitlab/gitlab.rb` on the application node you're performing the task on, and update

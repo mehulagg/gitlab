@@ -20,7 +20,7 @@ class UsersController < ApplicationController
 
   skip_before_action :authenticate_user!
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
-  before_action :user, except: [:exists, :suggests, :ssh_keys]
+  before_action :user, except: [:exists, :ssh_keys]
   before_action :authorize_read_user_profile!,
                 only: [:calendar, :calendar_activities, :groups, :projects, :contributed, :starred, :snippets, :followers, :following]
 
@@ -153,14 +153,6 @@ class UsersController < ApplicationController
     render json: { exists: !!Namespace.find_by_path_or_name(params[:username]) }
   end
 
-  def suggests
-    namespace_path = params[:username]
-    exists = !!Namespace.find_by_path_or_name(namespace_path)
-    suggestions = exists ? [Namespace.clean_path(namespace_path)] : []
-
-    render json: { exists: exists, suggests: suggestions }
-  end
-
   def follow
     current_user.follow(user)
 
@@ -260,4 +252,4 @@ class UsersController < ApplicationController
   end
 end
 
-UsersController.prepend_if_ee('EE::UsersController')
+UsersController.prepend_mod_with('UsersController')

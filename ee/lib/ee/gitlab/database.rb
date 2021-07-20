@@ -17,14 +17,6 @@ module EE
           !Postgresql::ReplicationSlot.lag_too_great?
         end
 
-        # Disables prepared statements for the current database connection.
-        def disable_prepared_statements
-          config = ActiveRecord::Base.configurations[Rails.env]
-          config['prepared_statements'] = false
-
-          ActiveRecord::Base.establish_connection(config)
-        end
-
         def geo_uncached_queries(&block)
           raise 'No block given' unless block_given?
 

@@ -9,7 +9,6 @@ module Gitlab
     ForbiddenError = Class.new(StandardError)
     NotFoundError = Class.new(StandardError)
     TimeoutError = Class.new(StandardError)
-    ProjectMovedError = Class.new(NotFoundError)
 
     # Use the magic string '_any' to indicate we do not know what the
     # changes are. This is also what gitlab-shell does.
@@ -22,7 +21,7 @@ module Gitlab
       auth_download: 'You are not allowed to download code.',
       deploy_key_upload: 'This deploy key does not have write access to this project.',
       no_repo: 'A repository for this project does not exist yet.',
-      project_not_found: 'The project you were looking for could not be found.',
+      project_not_found: "The project you were looking for could not be found or you don't have permission to view it.",
       command_not_allowed: "The command you're trying to execute is not allowed.",
       upload_pack_disabled_over_http: 'Pulling over HTTP is not allowed.',
       receive_pack_disabled_over_http: 'Pushing over HTTP is not allowed.',
@@ -91,6 +90,7 @@ module Gitlab
       when *PUSH_COMMANDS
         check_push_access!
       end
+      check_additional_conditions!
 
       success_result
     end
@@ -147,11 +147,11 @@ module Gitlab
       raise NotFoundError, not_found_message if container.nil?
 
       check_project! if project?
+      add_container_moved_message!
     end
 
     def check_project!
       check_project_accessibility!
-      add_project_moved_message!
     end
 
     def check_custom_action
@@ -220,12 +220,12 @@ module Gitlab
       error_message(:project_not_found)
     end
 
-    def add_project_moved_message!
+    def add_container_moved_message!
       return if redirected_path.nil?
 
-      project_moved = Checks::ProjectMoved.new(repository, user, protocol, redirected_path)
+      container_moved = Checks::ContainerMoved.new(repository, user, protocol, redirected_path)
 
-      project_moved.add_message
+      container_moved.add_message
     end
 
     def check_command_disabled!
@@ -319,10 +319,8 @@ module Gitlab
     end
 
     def check_change_access!
-      return if deploy_key? && !deploy_keys_on_protected_branches_enabled?
-
       if changes == ANY
-        can_push = (deploy_key? && deploy_keys_on_protected_branches_enabled?) ||
+        can_push = deploy_key? ||
                    user_can_push? ||
           project&.any_branch_allows_collaboration?(user_access.user)
 
@@ -335,23 +333,15 @@ module Gitlab
         # clear stale lock files.
         project.repository.clean_stale_repository_files if project.present?
 
-        # Iterate over all changes to find if user allowed all of them to be applied
-        changes_list.each.with_index do |change, index|
-          first_change = index == 0
-
-          # If user does not have access to make at least one change, cancel all
-          # push by allowing the exception to bubble up
-          check_single_change_access(change, skip_lfs_integrity_check: !first_change)
-        end
+        check_access!
       end
     end
 
-    def check_single_change_access(change, skip_lfs_integrity_check: false)
-      Checks::ChangeAccess.new(
-        change,
+    def check_access!
+      Checks::ChangesAccess.new(
+        changes_list.changes,
         user_access: user_access,
         project: project,
-        skip_lfs_integrity_check: skip_lfs_integrity_check,
         protocol: protocol,
         logger: logger
       ).validate!
@@ -453,7 +443,7 @@ module Gitlab
                          CiAccess.new
                        elsif user && request_from_ci_build?
                          BuildAccess.new(user, container: container)
-                       elsif deploy_key? && deploy_keys_on_protected_branches_enabled?
+                       elsif deploy_key?
                          DeployKeyAccess.new(deploy_key, container: container)
                        else
                          UserAccess.new(user, container: container)
@@ -508,13 +498,23 @@ module Gitlab
     end
 
     def check_changes_size
-      changes_size = 0
+      changes_size =
+        if Feature.enabled?(:git_access_batched_changes_size, project, default_enabled: :yaml)
+          revs = ['--not', '--all', '--not']
+          revs += changes_list.map { |change| change[:newrev] }
 
-      changes_list.each do |change|
-        changes_size += repository.new_blobs(change[:newrev]).sum(&:size)
+          repository.blobs(revs).sum(&:size)
+        else
+          changes_size = 0
 
-        check_size_against_limit(changes_size)
-      end
+          changes_list.each do |change|
+            changes_size += repository.new_blobs(change[:newrev]).sum(&:size)
+          end
+
+          changes_size
+        end
+
+      check_size_against_limit(changes_size)
     end
 
     def check_size_against_limit(size)
@@ -533,10 +533,10 @@ module Gitlab
       container.repository_size_checker
     end
 
-    def deploy_keys_on_protected_branches_enabled?
-      Feature.enabled?(:deploy_keys_on_protected_branches, project)
+    # overriden in EE
+    def check_additional_conditions!
     end
   end
 end
 
-Gitlab::GitAccess.prepend_if_ee('EE::Gitlab::GitAccess')
+Gitlab::GitAccess.prepend_mod_with('Gitlab::GitAccess')

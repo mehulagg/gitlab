@@ -4,29 +4,33 @@ query groupEpics(
   $fullPath: ID!
   $state: EpicState
   $sort: EpicSort
-  $startDate: Time
-  $dueDate: Time
+  $iid: ID
+  $timeframe: Timeframe
   $labelName: [String!] = []
   $authorUsername: String = ""
   $milestoneTitle: String = ""
+  $myReactionEmoji: String
   $confidential: Boolean
   $search: String = ""
   $first: Int = 1001
+  $not: NegatedEpicFilterInput
 ) {
   group(fullPath: $fullPath) {
     id
     name
     epics(
+      iid: $iid
       state: $state
       sort: $sort
-      startDate: $startDate
-      endDate: $dueDate
       labelName: $labelName
       authorUsername: $authorUsername
       milestoneTitle: $milestoneTitle
+      myReactionEmoji: $myReactionEmoji
       confidential: $confidential
       search: $search
       first: $first
+      timeframe: $timeframe
+      not: $not
     ) {
       edges {
         node {

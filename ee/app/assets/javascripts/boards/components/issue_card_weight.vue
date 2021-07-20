@@ -28,8 +28,8 @@ export default {
     class="board-card-info card-number board-card-weight"
     v-on="$listeners"
   >
-    <gl-icon name="weight" class="board-card-info-icon" />
-    <span class="board-card-info-text"> {{ weight }} </span>
+    <gl-icon name="weight" class="board-card-info-icon gl-mr-2" />
+    <span data-testid="board-card-weight" class="board-card-info-text"> {{ weight }} </span>
     <gl-tooltip
       :target="() => $refs.itemWeight"
       placement="bottom"

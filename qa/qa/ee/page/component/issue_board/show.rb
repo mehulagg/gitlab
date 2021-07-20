@@ -14,19 +14,11 @@ module QA
                 view 'ee/app/assets/javascripts/boards/components/board_scope.vue' do
                   element :board_scope_modal
                 end
-
-                view 'ee/app/assets/javascripts/boards/components/config_toggle.vue' do
-                  element :boards_config_button
-                end
               end
             end
 
             def board_scope_modal
               find_element(:board_scope_modal)
-            end
-
-            def click_boards_config_button
-              click_element(:boards_config_button)
             end
           end
         end

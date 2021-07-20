@@ -1,7 +1,6 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import createFlash from '~/flash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, n__, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
@@ -72,7 +71,7 @@ export default {
     },
     epicTimeAgoString() {
       return this.isOpen
-        ? sprintf(__(`Opened %{epicTimeagoDate}`), {
+        ? sprintf(__(`Created %{epicTimeagoDate}`), {
             epicTimeagoDate: this.timeFormatted(this.epic.createdAt),
           })
         : sprintf(__(`Closed %{epicTimeagoDate}`), {
@@ -88,11 +87,14 @@ export default {
     shouldDisplay() {
       return this.issuesCount > 0 || this.isLoading;
     },
+    showUnassignedLane() {
+      return !this.isCollapsed && this.issuesCount > 0;
+    },
   },
   watch: {
-    filterParams: {
-      handler() {
-        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
+    'filterParams.epicId': {
+      handler(epicId) {
+        if (!epicId || epicId === this.epic.id) {
           this.fetchIssuesForEpic(this.epic.id);
         }
       },
@@ -100,10 +102,12 @@ export default {
     },
   },
   mounted() {
-    this.fetchIssuesForEpic(this.epic.id);
+    if (this.issuesCount === 0) {
+      this.fetchIssuesForEpic(this.epic.id);
+    }
   },
   methods: {
-    ...mapActions(['fetchIssuesForEpic', 'updateBoardEpicUserPreferences']),
+    ...mapActions(['updateBoardEpicUserPreferences', 'setError', 'fetchIssuesForEpic']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
 
@@ -111,7 +115,7 @@ export default {
         collapsed: this.isCollapsed,
         epicId: this.epic.id,
       }).catch(() => {
-        createFlash({ message: __('Unable to save your preference'), captureError: true });
+        this.setError({ message: __('Unable to save your preference'), captureError: true });
       });
     },
   },
@@ -119,7 +123,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="shouldDisplay">
+  <div v-if="shouldDisplay" class="board-epic-lane-container">
     <div
       class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block"
       data-testid="board-epic-lane"
@@ -133,7 +137,6 @@ export default {
           class="gl-mr-2 gl-cursor-pointer"
           category="tertiary"
           size="small"
-          data-testid="epic-lane-chevron"
           @click="toggleCollapsed"
         />
         <h4
@@ -142,7 +145,7 @@ export default {
         >
           {{ epic.title }}
         </h4>
-        <gl-popover :target="() => $refs.epicTitle" triggers="hover" placement="top">
+        <gl-popover :target="() => $refs.epicTitle" placement="top">
           <template #title>{{ epic.title }} &middot; {{ epic.reference }}</template>
           <div>{{ epicTimeAgoString }}</div>
           <div class="gl-mb-2">{{ epicDateString }}</div>
@@ -160,10 +163,14 @@ export default {
           <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
-        <gl-loading-icon v-if="isLoading" class="gl-p-2" />
+        <gl-loading-icon v-else class="gl-p-2" />
       </div>
     </div>
-    <div v-if="!isCollapsed" class="gl-display-flex gl-pb-5" data-testid="board-epic-lane-issues">
+    <div
+      v-if="showUnassignedLane"
+      class="gl-display-flex gl-pb-5 board-epic-lane-issues"
+      data-testid="board-epic-lane-issues"
+    >
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

@@ -1,18 +1,18 @@
-- service = chat_name.service
-- project = service.project
+- integration = chat_name.integration
+- project = integration.project
 %tr
   %td
     %strong
       - if can?(current_user, :read_project, project)
         = link_to project.full_name, project_path(project)
       - else
-        .light N/A
+        .light= _('N/A')
   %td
     %strong
       - if can?(current_user, :admin_project, project)
-        = link_to service.title, edit_project_service_path(project, service)
+        = link_to integration.title, edit_project_service_path(project, integration)
       - else
-        = service.title
+        = integration.title
   %td
     = chat_name.team_domain
   %td

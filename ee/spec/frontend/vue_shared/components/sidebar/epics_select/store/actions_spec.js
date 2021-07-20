@@ -1,15 +1,17 @@
 import Api from 'ee/api';
-
 import * as actions from 'ee/vue_shared/components/sidebar/epics_select/store/actions';
 import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
 import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 import { noneEpic } from 'ee/vue_shared/constants';
 import testAction from 'helpers/vuex_action_helper';
 import boardsStore from '~/boards/stores/boards_store';
+import createFlash from '~/flash';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockEpic1, mockIssue, mockEpics, mockAssignRemoveRes } from '../../mock_data';
+
+jest.mock('~/flash');
 
 describe('EpicsSelect', () => {
   describe('store', () => {
@@ -123,18 +125,14 @@ describe('EpicsSelect', () => {
       });
 
       describe('receiveEpicsFailure', () => {
-        beforeEach(() => {
-          setFixtures('<div class="flash-container"></div>');
-        });
-
         it('should show flash error message', () => {
           actions.receiveEpicsFailure({
             commit: () => {},
           });
 
-          expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-            'Something went wrong while fetching group epics.',
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'Something went wrong while fetching group epics.',
+          });
         });
 
         it('should set `state.epicsFetchInProgress` to false', (done) => {
@@ -331,10 +329,6 @@ describe('EpicsSelect', () => {
       });
 
       describe('receiveIssueUpdateFailure', () => {
-        beforeEach(() => {
-          setFixtures('<div class="flash-container"></div>');
-        });
-
         it('should show flash error message', () => {
           const message = 'Something went wrong.';
           actions.receiveIssueUpdateFailure(
@@ -344,9 +338,7 @@ describe('EpicsSelect', () => {
             message,
           );
 
-          expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(
-            message,
-          );
+          expect(createFlash).toHaveBeenCalledWith({ message });
         });
 
         it('should set `state.epicSelectInProgress` to false', (done) => {

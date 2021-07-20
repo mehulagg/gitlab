@@ -6,6 +6,9 @@ module Gitlab
       # Matches for instance "-1", "+1" or "-1+2".
       SUGGESTION_CONTEXT = /^(\-(?<above>\d+))?(\+(?<below>\d+))?$/.freeze
 
+      CSS   = 'pre.language-suggestion'
+      XPATH = Gitlab::Utils::Nokogiri.css_to_xpath(CSS).freeze
+
       class << self
         # Returns an array of Gitlab::Diff::Suggestion which represents each
         # suggestion in the given text.
@@ -17,7 +20,7 @@ module Gitlab
                                      no_original_data: true,
                                      suggestions_filter_enabled: supports_suggestion)
           doc = Nokogiri::HTML(html)
-          suggestion_nodes = doc.search('pre.suggestion')
+          suggestion_nodes = doc.xpath(XPATH)
 
           return [] if suggestion_nodes.empty?
 
@@ -29,9 +32,8 @@ module Gitlab
             lines_above, lines_below = nil
 
             if lang_param && suggestion_params = fetch_suggestion_params(lang_param)
-              lines_above, lines_below =
-                suggestion_params[:above],
-                suggestion_params[:below]
+              lines_above = suggestion_params[:above]
+              lines_below = suggestion_params[:below]
             end
 
             Gitlab::Diff::Suggestion.new(node.text,

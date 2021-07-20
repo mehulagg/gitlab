@@ -14,7 +14,7 @@ RSpec.describe 'projects/settings/operations/show' do
     create(:project_tracing_setting, project: project)
   end
 
-  let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
+  let_it_be(:prometheus_integration) { create(:prometheus_integration, project: project) }
 
   before_all do
     project.add_maintainer(user)
@@ -27,8 +27,8 @@ RSpec.describe 'projects/settings/operations/show' do
       .and_return(error_tracking_setting)
     allow(view).to receive(:tracing_setting)
       .and_return(tracing_setting)
-    allow(view).to receive(:prometheus_service)
-      .and_return(prometheus_service)
+    allow(view).to receive(:prometheus_integration)
+      .and_return(prometheus_integration)
     allow(view).to receive(:current_user).and_return(user)
   end
 
@@ -37,7 +37,7 @@ RSpec.describe 'projects/settings/operations/show' do
       render
 
       expect(rendered).to have_content _('Alerts')
-      expect(rendered).to have_content _('Display alerts from all your monitoring tools directly within GitLab.')
+      expect(rendered).to have_content _('Display alerts from all configured monitoring tools.')
     end
   end
 
@@ -47,7 +47,7 @@ RSpec.describe 'projects/settings/operations/show' do
         render
 
         expect(rendered).to have_content _('Error tracking')
-        expect(rendered).to have_content _('To link Sentry to GitLab, enter your Sentry URL and Auth Token')
+        expect(rendered).to have_content _('Link Sentry to GitLab to discover and view the errors your application generates.')
       end
     end
   end
@@ -59,7 +59,7 @@ RSpec.describe 'projects/settings/operations/show' do
 
         expect(rendered).to have_content _('Prometheus')
         expect(rendered).to have_content _('Link Prometheus monitoring to GitLab.')
-        expect(rendered).to have_content _('To enable the installation of Prometheus on your clusters, deactivate the manual configuration below')
+        expect(rendered).to have_content _('To use a Prometheus installed on a cluster, deactivate the manual configuration.')
       end
     end
 
@@ -71,47 +71,17 @@ RSpec.describe 'projects/settings/operations/show' do
       it 'renders the Operations Settings page' do
         render
 
-        expect(rendered).not_to have_content _('Select the Active checkbox to override the Auto Configuration with custom settings. If unchecked, Auto Configuration settings are used.')
+        expect(rendered).not_to have_content _('Auto configuration settings are used unless you override their values here.')
       end
     end
   end
 
   describe 'Operations > Tracing' do
-    context 'with project.tracing_external_url' do
-      it 'links to project.tracing_external_url' do
+    context 'Settings page ' do
+      it 'renders the Tracing Settings page' do
         render
 
-        expect(rendered).to have_link('Tracing', href: tracing_setting.external_url)
-      end
-
-      context 'with malicious external_url' do
-        let(:malicious_tracing_url) { "https://replaceme.com/'><script>alert(document.cookie)</script>" }
-        let(:cleaned_url) { "https://replaceme.com/'>" }
-
-        before do
-          tracing_setting.update_column(:external_url, malicious_tracing_url)
-        end
-
-        it 'sanitizes external_url' do
-          render
-
-          expect(tracing_setting.external_url).to eq(malicious_tracing_url)
-          expect(rendered).to have_link('Tracing', href: cleaned_url)
-        end
-      end
-    end
-
-    context 'without project.tracing_external_url' do
-      let(:tracing_setting) { build(:project_tracing_setting, project: project) }
-
-      before do
-        tracing_setting.external_url = nil
-      end
-
-      it 'links to Tracing page' do
-        render
-
-        expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
+        expect(rendered).to have_content _('Embed an image of your existing Jaeger server in GitLab.')
       end
     end
   end

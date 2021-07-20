@@ -1,0 +1,19 @@
+---
+data_category: Optional
+key_path: gitlab_shared_runners_enabled
+description: Whether shared runners is enabled
+product_section: ops
+product_stage: verify
+product_group: group::runner
+product_category: runner
+value_type: boolean
+status: data_available
+time_frame: none
+data_source: system
+distribution:
+- ce
+- ee
+tier:
+- free
+- premium
+- ultimate

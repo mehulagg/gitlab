@@ -35,7 +35,7 @@ performance.getEntriesByName('my-component-start')
 - The start of navigation and a mark
 - The start of navigation and the moment the measurement is taken
 
-It takes several arguments of which the measurement’s name is the only one required. Examples:
+It takes several arguments of which the measurement's name is the only one required. Examples:
 
 - Duration between the start and end marks:
 
@@ -185,16 +185,16 @@ To access stored measurements, you can use either:
 ### Naming convention
 
 All the marks and measures should be instantiated with the constants from
-`app/assets/javascripts/performance/constants.js`. When you’re ready to add a new mark’s or
-measurement’s label, you can follow the pattern.
+`app/assets/javascripts/performance/constants.js`. When you're ready to add a new mark's or
+measurement's label, you can follow the pattern.
 
 NOTE:
 This pattern is a recommendation and not a hard rule.
 
 ```javascript
-app-*-start // for a start ‘mark’
-app-*-end   // for an end ‘mark’
-app-*       // for ‘measure’
+app-*-start // for a start 'mark'
+app-*-end   // for an end 'mark'
+app-*       // for 'measure'
 ```
 
 For example, `'webide-init-editor-start`, `mr-diffs-mark-file-tree-end`, and so on. We do it to
@@ -245,6 +245,55 @@ Layout to be recalculated, which is much more expensive. For details on this, se
 
 If you _do_ need to change layout (for example, a sidebar that pushes main content over), prefer [FLIP](https://aerotwist.com/blog/flip-your-animations/). FLIP allows you to change expensive
 properties once, and handle the actual animation with transforms.
+
+### Prefetching assets
+
+In addition to prefetching data from the [API](graphql.md#making-initial-queries-early-with-graphql-startup-calls)
+we allow prefetching the named JavaScript "chunks" as
+[defined in the Webpack configuration](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/webpack.config.js#L298-359).
+We support two types of prefetching for the chunks:
+
+- The [`prefetch` link type](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types/prefetch)
+  is used to prefetch a chunk for the future navigation
+- The [`preload` link type](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types/preload)
+  is used to prefetch a chunk that is crucial for the current navigation but is not
+  discovered until later in the rendering process
+
+Both `prefetch` and `preload` links bring the loading performance benefit to the pages. Both are
+fetched asynchronously, but contrary to [deferring the loading](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#attr-defer)
+of the assets which is used for other JavaScript resources in the product by default, `prefetch` and
+`preload` neither parse nor execute the fetched script unless explicitly imported in any JavaScript
+module. This allows to cache the fetched resources without blocking the execution of the
+remaining page resources.
+
+To prefetch a JavaScript chunk in a HAML view, `:prefetch_asset_tags` with the combination of
+the `webpack_preload_asset_tag` helper is provided:
+
+```javascript
+- content_for :prefetch_asset_tags do
+  - webpack_preload_asset_tag('monaco')
+```
+
+This snippet will add a new `<link rel="preload">` element into the resulting HTML page:
+
+```HTML
+<link rel="preload" href="/assets/webpack/monaco.chunk.js" as="script" type="text/javascript">
+```
+
+By default, `webpack_preload_asset_tag` will `preload` the chunk. You don't need to worry about
+`as` and `type` attributes for preloading the JavaScript chunks. However, when a chunk is not
+critical, for the current navigation, one has to explicitly request `prefetch`:
+
+```javascript
+- content_for :prefetch_asset_tags do
+  - webpack_preload_asset_tag('monaco', prefetch: true)
+```
+
+This snippet will add a new `<link rel="prefetch">` element into the resulting HTML page:
+
+```HTML
+<link rel="prefetch" href="/assets/webpack/monaco.chunk.js">
+```
 
 ## Reducing Asset Footprint
 
@@ -381,7 +430,7 @@ Use `webpackChunkName` when generating dynamic imports as
 it provides a deterministic filename for the chunk which can then be cached
 in the browser across GitLab versions.
 
-More information is available in [webpack's code splitting documentation](https://webpack.js.org/guides/code-splitting/#dynamic-imports).
+More information is available in [webpack's code splitting documentation](https://webpack.js.org/guides/code-splitting/#dynamic-imports) and [vue's dynamic component documentation](https://vuejs.org/v2/guide/components-dynamic-async.html).
 
 ### Minimizing page size
 
@@ -405,5 +454,5 @@ General tips:
 
 - [WebPage Test](https://www.webpagetest.org) for testing site loading time and size.
 - [Google PageSpeed Insights](https://developers.google.com/speed/pagespeed/insights/) grades web pages and provides feedback to improve the page.
-- [Profiling with Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/)
+- [Profiling with Chrome DevTools](https://developer.chrome.com/docs/devtools/)
 - [Browser Diet](https://browserdiet.com/) is a community-built guide that catalogues practical tips for improving web page performance.

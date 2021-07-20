@@ -1,0 +1,13 @@
+mutation createIteration($input: iterationCreateInput!) {
+  iterationCreate(input: $input) {
+    iteration {
+      id
+      title
+      description
+      descriptionHtml
+      startDate
+      dueDate
+    }
+    errors
+  }
+}

@@ -11,6 +11,8 @@ module Projects
     end
 
     def execute
+      return success unless ::Settings.pages.local_store.enabled
+
       # If the pages were never deployed, we can't write out the config, as the
       # directory would not exist.
       # https://gitlab.com/gitlab-org/gitlab/-/issues/235139
@@ -100,7 +102,7 @@ module Projects
       File.open(file, 'r') do |f|
         f.read
       end
-    rescue
+    rescue StandardError
       nil
     end
   end

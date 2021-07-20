@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`TimeMetricsCard Recent activity renders the Recent activity metric 1`] = `"<div><span>4 </span><span>- </span><span>- per day</span></div>"`;
-
-exports[`TimeMetricsCard Time summary renders the Time summary metric 1`] = `"<div><span>4.5 days</span><span>3.0 days</span></div>"`;

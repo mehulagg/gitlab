@@ -1,15 +1,16 @@
 <script>
-import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlSprintf } from '@gitlab/ui';
+import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlIcon, GlSprintf } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { __ } from '~/locale';
 import { getUsers } from '~/rest_api';
-import { USER_SEARCH_DELAY } from '../constants';
+import { SEARCH_DELAY } from '../constants';
 
 export default {
   components: {
     GlTokenSelector,
     GlAvatar,
     GlAvatarLabeled,
+    GlIcon,
     GlSprintf,
   },
   props: {
@@ -21,6 +22,11 @@ export default {
     ariaLabelledby: {
       type: String,
       required: true,
+    },
+    validationState: {
+      type: Boolean,
+      required: false,
+      default: null,
     },
   },
   data() {
@@ -67,7 +73,7 @@ export default {
         .catch(() => {
           this.loading = false;
         });
-    }, USER_SEARCH_DELAY),
+    }, SEARCH_DELAY),
     handleInput() {
       this.$emit('input', this.selectedTokens);
     },
@@ -84,6 +90,13 @@ export default {
 
       this.hasBeenFocused = true;
     },
+    handleTokenRemove() {
+      if (this.selectedTokens.length) {
+        return;
+      }
+
+      this.$emit('clear');
+    },
   },
   queryOptions: { exclude_internal: true, active: true },
   i18n: {
@@ -95,19 +108,26 @@ export default {
 <template>
   <gl-token-selector
     v-model="selectedTokens"
+    :state="validationState"
     :dropdown-items="users"
     :loading="loading"
     :allow-user-defined-tokens="emailIsValid"
     :hide-dropdown-with-no-items="hideDropdownWithNoItems"
     :placeholder="placeholderText"
     :aria-labelledby="ariaLabelledby"
+    :text-input-attrs="{
+      'data-testid': 'members-token-select-input',
+      'data-qa-selector': 'members_token_select_input',
+    }"
     @blur="handleBlur"
     @text-input="handleTextInput"
     @input="handleInput"
     @focus="handleFocus"
+    @token-remove="handleTokenRemove"
   >
     <template #token-content="{ token }">
-      <gl-avatar v-if="token.avatar_url" :src="token.avatar_url" :size="16" />
+      <gl-icon v-if="validationState === false" name="error" :size="16" class="gl-mr-2" />
+      <gl-avatar v-else-if="token.avatar_url" :src="token.avatar_url" :size="16" />
       {{ token.name }}
     </template>
 

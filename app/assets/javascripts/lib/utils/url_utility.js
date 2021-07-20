@@ -16,6 +16,50 @@ function decodeUrlParameter(val) {
   return decodeURIComponent(val.replace(/\+/g, '%20'));
 }
 
+/**
+ * Safely encodes a string to be used as a path
+ *
+ * Note: This function DOES encode typical URL parts like ?, =, &, #, and +
+ * If you need to use search parameters or URL fragments, they should be
+ *     added AFTER calling this function, not before.
+ *
+ * Usecase: An image filename is stored verbatim, and you need to load it in
+ *     the browser.
+ *
+ * Example: /some_path/file #1.jpg      ==> /some_path/file%20%231.jpg
+ * Example: /some-path/file! Final!.jpg ==> /some-path/file%21%20Final%21.jpg
+ *
+ * Essentially, if a character *could* present a problem in a URL, it's escaped
+ *     to the hexadecimal representation instead. This means it's a bit more
+ *     aggressive than encodeURIComponent: that built-in function doesn't
+ *     encode some characters that *could* be problematic, so this function
+ *     adds them (#, !, ~, *, ', (, and )).
+ *     Additionally, encodeURIComponent *does* encode `/`, but we want safer
+ *     URLs, not non-functional URLs, so this function DEcodes slashes ('%2F').
+ *
+ * @param {String} potentiallyUnsafePath
+ * @returns {String}
+ */
+export function encodeSaferUrl(potentiallyUnsafePath) {
+  const unencode = ['%2F'];
+  const encode = ['#', '!', '~', '\\*', "'", '\\(', '\\)'];
+  let saferPath = encodeURIComponent(potentiallyUnsafePath);
+
+  unencode.forEach((code) => {
+    saferPath = saferPath.replace(new RegExp(code, 'g'), decodeURIComponent(code));
+  });
+  encode.forEach((code) => {
+    const encodedValue = code
+      .codePointAt(code.length - 1)
+      .toString(16)
+      .toUpperCase();
+
+    saferPath = saferPath.replace(new RegExp(code, 'g'), `%${encodedValue}`);
+  });
+
+  return saferPath;
+}
+
 export function cleanLeadingSeparator(path) {
   return path.replace(PATH_SEPARATOR_LEADING_REGEX, '');
 }
@@ -165,11 +209,7 @@ export function removeParams(params, url = window.location.href, skipEncoding = 
   return `${root}${writableQuery}${writableFragment}`;
 }
 
-export function getLocationHash(url = window.location.href) {
-  const hashIndex = url.indexOf('#');
-
-  return hashIndex === -1 ? null : url.substring(hashIndex + 1);
-}
+export const getLocationHash = (hash = window.location.hash) => hash.split('#')[1];
 
 /**
  * Returns a boolean indicating whether the URL hash contains the given string value
@@ -279,7 +319,7 @@ export function isAbsolute(url) {
  * @param {String} url
  */
 export function isRootRelative(url) {
-  return /^\//.test(url);
+  return /^\/(?!\/)/.test(url);
 }
 
 /**
@@ -365,34 +405,89 @@ export function getWebSocketUrl(path) {
   return `${getWebSocketProtocol()}//${joinPaths(window.location.host, path)}`;
 }
 
+const splitPath = (path = '') => path.replace(/^\?/, '').split('&');
+
+export const urlParamsToArray = (path = '') =>
+  splitPath(path)
+    .filter((param) => param.length > 0)
+    .map((param) => {
+      const split = param.split('=');
+      return [decodeURI(split[0]), split[1]].join('=');
+    });
+
+export const getUrlParamsArray = () => urlParamsToArray(window.location.search);
+
+/**
+ * Accepts encoding string which includes query params being
+ * sent to URL.
+ *
+ * @param {string} path Query param string
+ *
+ * @returns {object} Query params object containing key-value pairs
+ *                   with both key and values decoded into plain string.
+ *
+ * @deprecated Please use `queryToObject(query, { gatherArrays: true });` instead. See https://gitlab.com/gitlab-org/gitlab/-/issues/328845
+ */
+export const urlParamsToObject = (path = '') =>
+  splitPath(path).reduce((dataParam, filterParam) => {
+    if (filterParam === '') {
+      return dataParam;
+    }
+
+    const data = dataParam;
+    let [key, value] = filterParam.split('=');
+    key = /%\w+/g.test(key) ? decodeURIComponent(key) : key;
+    const isArray = key.includes('[]');
+    key = key.replace('[]', '');
+    value = decodeURIComponent(value.replace(/\+/g, ' '));
+
+    if (isArray) {
+      if (!data[key]) {
+        data[key] = [];
+      }
+
+      data[key].push(value);
+    } else {
+      data[key] = value;
+    }
+
+    return data;
+  }, {});
+
 /**
  * Convert search query into an object
  *
  * @param {String} query from "document.location.search"
  * @param {Object} options
- * @param {Boolean} options.gatherArrays - gather array values into an Array
+ * @param {Boolean?} options.gatherArrays - gather array values into an Array
+ * @param {Boolean?} options.legacySpacesDecode - (deprecated) plus symbols (+) are not replaced with spaces, false by default
  * @returns {Object}
  *
  * ex: "?one=1&two=2" into {one: 1, two: 2}
  */
-export function queryToObject(query, options = {}) {
-  const { gatherArrays = false } = options;
+export function queryToObject(query, { gatherArrays = false, legacySpacesDecode = false } = {}) {
   const removeQuestionMarkFromQuery = String(query).startsWith('?') ? query.slice(1) : query;
   return removeQuestionMarkFromQuery.split('&').reduce((accumulator, curr) => {
     const [key, value] = curr.split('=');
     if (value === undefined) {
       return accumulator;
     }
-    const decodedValue = decodeURIComponent(value);
+
+    const decodedValue = legacySpacesDecode ? decodeURIComponent(value) : decodeUrlParameter(value);
 
     if (gatherArrays && key.endsWith('[]')) {
-      const decodedKey = decodeURIComponent(key.slice(0, -2));
+      const decodedKey = legacySpacesDecode
+        ? decodeURIComponent(key.slice(0, -2))
+        : decodeUrlParameter(key.slice(0, -2));
+
       if (!Array.isArray(accumulator[decodedKey])) {
         accumulator[decodedKey] = [];
       }
       accumulator[decodedKey].push(decodedValue);
     } else {
-      accumulator[decodeURIComponent(key)] = decodedValue;
+      const decodedKey = legacySpacesDecode ? decodeURIComponent(key) : decodeUrlParameter(key);
+
+      accumulator[decodedKey] = decodedValue;
     }
 
     return accumulator;
@@ -400,17 +495,30 @@ export function queryToObject(query, options = {}) {
 }
 
 /**
+ * This function accepts the `name` of the param to parse in the url
+ * if the name does not exist this function will return `null`
+ * otherwise it will return the value of the param key provided
+ *
+ * @param {String} name
+ * @param {String?} urlToParse
+ * @returns value of the parameter as string
+ */
+export const getParameterByName = (name, query = window.location.search) => {
+  return queryToObject(query)[name] || null;
+};
+
+/**
  * Convert search query object back into a search query
  *
- * @param {Object} obj that needs to be converted
+ * @param {Object?} params that needs to be converted
  * @returns {String}
  *
  * ex: {one: 1, two: 2} into "one=1&two=2"
  *
  */
-export function objectToQuery(obj) {
-  return Object.keys(obj)
-    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+export function objectToQuery(params = {}) {
+  return Object.keys(params)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
 }
 
@@ -429,6 +537,7 @@ export const setUrlParams = (
   url = window.location.href,
   clearParams = false,
   railsArraySyntax = false,
+  decodeParams = false,
 ) => {
   const urlObj = new URL(url);
   const queryString = urlObj.search;
@@ -439,19 +548,25 @@ export const setUrlParams = (
       searchParams.delete(key);
     } else if (Array.isArray(params[key])) {
       const keyName = railsArraySyntax ? `${key}[]` : key;
-      params[key].forEach((val, idx) => {
-        if (idx === 0) {
-          searchParams.set(keyName, val);
-        } else {
-          searchParams.append(keyName, val);
-        }
-      });
+      if (params[key].length === 0) {
+        searchParams.delete(keyName);
+      } else {
+        params[key].forEach((val, idx) => {
+          if (idx === 0) {
+            searchParams.set(keyName, val);
+          } else {
+            searchParams.append(keyName, val);
+          }
+        });
+      }
     } else {
       searchParams.set(key, params[key]);
     }
   });
 
-  urlObj.search = searchParams.toString();
+  urlObj.search = decodeParams
+    ? decodeURIComponent(searchParams.toString())
+    : searchParams.toString();
 
   return urlObj.toString();
 };
@@ -486,5 +601,29 @@ export function getURLOrigin(url) {
     return new URL(url).origin;
   } catch (e) {
     return null;
+  }
+}
+
+/**
+ * Returns `true` if the given `url` resolves to the same origin the page is served
+ * from; otherwise, returns `false`.
+ *
+ * The `url` may be absolute or relative.
+ *
+ * @param {string} url The URL to check.
+ * @returns {boolean}
+ */
+export function isSameOriginUrl(url) {
+  if (typeof url !== 'string') {
+    return false;
+  }
+
+  const { origin } = window.location;
+
+  try {
+    return new URL(url, origin).origin === origin;
+  } catch {
+    // Invalid URLs cannot have the same origin
+    return false;
   }
 }

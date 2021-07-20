@@ -14,7 +14,7 @@ projects using the [Go language](https://golang.org).
 GitLab is built on top of [Ruby on Rails](https://rubyonrails.org/), but we're
 also using Go for projects where it makes sense. Go is a very powerful
 language, with many advantages, and is best suited for projects with a lot of
-IO (disk/network access), HTTP requests, parallel processing, etc. Since we
+IO (disk/network access), HTTP requests, parallel processing, and so on. Since we
 have both Ruby on Rails and Go at GitLab, we should evaluate carefully which of
 the two is best for the job.
 
@@ -91,7 +91,7 @@ projects:
 - Avoid global variables, even in packages. By doing so you introduce side
   effects if the package is included multiple times.
 - Use `goimports` before committing.
-  [`goimports`](https://godoc.org/golang.org/x/tools/cmd/goimports)
+  [`goimports`](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
   is a tool that automatically formats Go source code using
   [`Gofmt`](https://golang.org/cmd/gofmt/), in addition to formatting import lines,
   adding missing ones and removing unreferenced ones.
@@ -159,7 +159,7 @@ In some cases, such as building a Go project for it to act as a dependency of a
 CI run for another project, removing the `vendor/` directory means the code must
 be downloaded repeatedly, which can lead to intermittent problems due to rate
 limiting or network failures. In these circumstances, you should [cache the
-downloaded code between](../../ci/caching/index.md#caching-go-dependencies).
+downloaded code between](../../ci/caching/index.md#cache-go-dependencies).
 
 There was a
 [bug on modules checksums](https://github.com/golang/go/issues/29278) in Go versions earlier than v1.11.4, so make
@@ -202,9 +202,9 @@ code readability and test output.
 ### Better output in tests
 
 When comparing expected and actual values in tests, use
-[`testify/require.Equal`](https://godoc.org/github.com/stretchr/testify/require#Equal),
-[`testify/require.EqualError`](https://godoc.org/github.com/stretchr/testify/require#EqualError),
-[`testify/require.EqualValues`](https://godoc.org/github.com/stretchr/testify/require#EqualValues),
+[`testify/require.Equal`](https://pkg.go.dev/github.com/stretchr/testify/require#Equal),
+[`testify/require.EqualError`](https://pkg.go.dev/github.com/stretchr/testify/require#EqualError),
+[`testify/require.EqualValues`](https://pkg.go.dev/github.com/stretchr/testify/require#EqualValues),
 and others to improve readability when comparing structs, errors,
 large portions of text, or JSON documents:
 
@@ -322,7 +322,7 @@ A few things to keep in mind when adding context:
 - [Go 1.13 errors](https://blog.golang.org/go1.13-errors).
 - [Programing with
   errors](https://peter.bourgon.org/blog/2019/09/11/programming-with-errors.html).
-- [Don’t just check errors, handle them
+- [Don't just check errors, handle them
   gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully).
 
 ## CLIs
@@ -363,12 +363,12 @@ There are a few guidelines one should follow when using the
 [Logrus](https://github.com/sirupsen/logrus) package:
 
 - When printing an error use
-  [WithError](https://godoc.org/github.com/sirupsen/logrus#WithError). For
+  [WithError](https://pkg.go.dev/github.com/sirupsen/logrus#WithError). For
   example, `logrus.WithError(err).Error("Failed to do something")`.
 - Since we use [structured logging](#structured-json-logging) we can log
   fields in the context of that code path, such as the URI of the request using
-  [`WithField`](https://godoc.org/github.com/sirupsen/logrus#WithField) or
-  [`WithFields`](https://godoc.org/github.com/sirupsen/logrus#WithFields). For
+  [`WithField`](https://pkg.go.dev/github.com/sirupsen/logrus#WithField) or
+  [`WithFields`](https://pkg.go.dev/github.com/sirupsen/logrus#WithFields). For
   example, `logrus.WithField("file", "/app/go").Info("Opening dir")`. If you
   have to log multiple keys, always use `WithFields` instead of calling
   `WithField` more than once.
@@ -390,7 +390,7 @@ consistent across Workhorse, Gitaly, and, in future, other Go servers. For
 example, in the case of `gitlab.com/gitlab-org/labkit/tracing` we can switch
 from using `Opentracing` directly to using `Zipkin` or Gokit's own tracing wrapper
 without changes to the application code, while still keeping the same
-consistent configuration mechanism (i.e. the `GITLAB_TRACING` environment
+consistent configuration mechanism (that is, the `GITLAB_TRACING` environment
 variable).
 
 ### Context
@@ -436,8 +436,8 @@ and the version being used for [CNG](https://gitlab.com/gitlab-org/build/cng/blo
 
 ### Updating Go version
 
-We should always use a [supported version](https://golang.org/doc/devel/release.html#policy)
-of Go, i.e., one of the three most recent minor releases, and should always use
+We should always use a [supported version](https://golang.org/doc/devel/release#policy)
+of Go, that is, one of the three most recent minor releases, and should always use
 the most recent patch-level for that version, as it may contain security fixes.
 
 Changing the version affects every project being compiled, so it's important to
@@ -449,12 +449,12 @@ Once you've picked a new Go version to use, the steps to update Omnibus and CNG
 are:
 
 - [Create a merge request in the CNG project](https://gitlab.com/gitlab-org/build/CNG/-/edit/master/ci_files/variables.yml?branch_name=update-go-version),
-  updating the `GO_VERSION` in `ci_files/variables.yml`.
+  update the `GO_VERSION` in `ci_files/variables.yml`.
 - [Create a merge request in the `gitlab-omnibus-builder` project](https://gitlab.com/gitlab-org/gitlab-omnibus-builder/-/edit/master/docker/VERSIONS?branch_name=update-go-version),
-  updating the `GO_VERSION` in `docker/VERSIONS`.
+  update the `GO_VERSION` in `docker/VERSIONS`.
 - Tag a new release of `gitlab-omnibus-builder` containing the change.
 - [Create a merge request in the `omnibus-gitlab` project](https://gitlab.com/gitlab-org/omnibus-gitlab/edit/master/.gitlab-ci.yml?branch_name=update-gitlab-omnibus-builder-version),
-  updating the `BUILDER_IMAGE_REVISION` to match the newly-created tag.
+  update the `BUILDER_IMAGE_REVISION` to match the newly-created tag.
 
 To reduce unnecessary differences between two distribution methods, Omnibus and
 CNG **should always use the same Go version**.
@@ -488,7 +488,7 @@ The following are some style guidelines that are specific to the Secure Team.
 ### Code style and format
 
 Use `goimports -local gitlab.com/gitlab-org` before committing.
-[`goimports`](https://godoc.org/golang.org/x/tools/cmd/goimports)
+[`goimports`](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
 is a tool that automatically formats Go source code using
 [`Gofmt`](https://golang.org/cmd/gofmt/), in addition to formatting import lines,
 adding missing ones and removing unreferenced ones.
@@ -499,6 +499,12 @@ of the Code Review Comments page on the Go wiki for more details.
 Most editors/IDEs allow you to run commands before/after saving a file, you can set it
 up to run `goimports -local gitlab.com/gitlab-org` so that it's applied to every file when saving.
 
+### Analyzer Tests
+
+The conventional Secure [analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/) has a [`convert` function](https://gitlab.com/gitlab-org/security-products/analyzers/command/-/blob/main/convert.go#L15-17) that converts SAST/DAST scanner reports into [GitLab Security Reports](https://gitlab.com/gitlab-org/security-products/security-report-schemas). When writing tests for the `convert` function, we should make use of [test fixtures](https://dave.cheney.net/2016/05/10/test-fixtures-in-go) using a `testdata` directory at the root of the analyzer's repository. The `testdata` directory should contain two subdirectories: `expect` and `reports`. The `reports` directory should contain sample SAST/DAST scanner reports which are passed into the `convert` function during the test setup. The `expect` directory should contain the expected GitLab Security Report that the `convert` returns. See Secret Detection for an [example](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/160424589ef1eed7b91b59484e019095bc7233bd/convert_test.go#L13-66).
+
+If the scanner report is small, less than 35 lines, then feel free to [inline the report](https://gitlab.com/gitlab-org/security-products/analyzers/sobelow/-/blob/8bd2428a/convert/convert_test.go#L13-77) rather than use a `testdata` directory.
+
 ---
 
-[Return to Development documentation](../README.md).
+[Return to Development documentation](../index.md).

@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Activate GitLab EE with a license **(STARTER ONLY)**
+# Activate GitLab EE with a license **(PREMIUM SELF)**
 
 To activate all GitLab Enterprise Edition (EE) functionality, you need to upload
 a license. It's only possible to activate GitLab Enterprise Edition, so first verify which edition
@@ -34,28 +34,28 @@ is locked.
 
 The first time you visit your GitLab EE installation signed in as an administrator,
 you should see a note urging you to upload a license with a link that takes you
-to **Admin Area > License**.
+to the **License** area.
 
-Otherwise, you can:
+Otherwise, to manually go to the **License** area:
 
-1. Navigate manually to the **Admin Area** by clicking the wrench (**{admin}**) icon in the menu bar.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 
-1. Navigate to the **License** tab, and click **Upload New License**.
+1. On the left sidebar, select **License**, and select **Upload New License**.
 
    - *If you've received a `.gitlab-license` file:*
      1. Download the license file to your local machine.
      1. Select **Upload `.gitlab-license` file**.
-     1. Select **Choose File** and select the license file.
+     1. Select **Choose file** and select the license file.
         In this example the license file is named `GitLab.gitlab-license`.
-     1. Check the **Subscription Agreement** checkbox.
+     1. Select the **Terms of Service** checkbox.
      1. Select **Upload License**.
 
-     ![Upload license](img/license_upload_v13_8.png)
+     ![Upload license](img/license_upload_v13_12.png)
 
    - *If you've received your license as plain text:*
      1. Select **Enter license key**.
      1. Copy the license and paste it into the **License key** field.
-     1. Check the **Subscription Agreement** checkbox.
+     1. Select the **Terms of Service** checkbox.
      1. Select **Upload License**.
 
 ## Add your license at install time
@@ -89,10 +89,7 @@ is active until the end of the license period. When that period ends, the
 instance will [fall back](#what-happens-when-your-license-expires) to Free-only
 functionality.
 
-You can review the license details at any time in the **License** section of the
-**Admin Area**.
-
-![License details](img/license_details_v13_8.png)
+You can review the license details at any time by going to **Admin Area > License**.
 
 ## Notification before the license expires
 
@@ -102,20 +99,25 @@ license, otherwise you miss all the paid features if your license expires.
 
 ## What happens when your license expires
 
-In case your license expires, GitLab locks down some features like Git pushes,
-and issue creation, and displays a message to all administrators to inform of the expired license.
+When your license expires, GitLab locks down features, like Git pushes
+and issue creation. Then, your instance becomes read-only and
+an expiration message is displayed to all administrators.
 
-To get back all the previous functionality, you must upload a new license.
-To fall back to having only the Free features active, you must delete the
-expired license(s).
+For GitLab self-managed instances, you have a 14-day grace period
+before this occurs.
+
+- To resume functionality, upload a new license.
+- To fall back to Free features, delete all expired licenses.
 
 ### Remove a license
 
 To remove a license from a self-managed instance:
 
-1. In the top navigation bar, click the **{admin}** wrench icon to navigate to the [Admin Area](index.md).
-1. Click **License** in the left sidebar.
-1. Click **Remove License**.
+1. On the top bar, select **Menu >** **{admin}** **Admin** to go to the [Admin Area](index.md).
+1. On the left sidebar, select **License**.
+1. Select **Remove license**.
+
+These steps may need to be repeated to completely remove all licenses, including those applied in the past.
 
 ## License history
 

@@ -51,7 +51,12 @@ class ProjectPolicy < BasePolicy
 
   desc "Container registry is disabled"
   condition(:container_registry_disabled, scope: :subject) do
-    !project.container_registry_enabled
+    !access_allowed_to?(:container_registry)
+  end
+
+  desc "Container registry is enabled for everyone with access to the project"
+  condition(:container_registry_enabled_for_everyone_with_access, scope: :subject) do
+    project.container_registry_access_level == ProjectFeature::ENABLED
   end
 
   desc "Project has an external wiki"
@@ -65,6 +70,16 @@ class ProjectPolicy < BasePolicy
     project.merge_requests_allowing_push_to_user(user).any?
   end
 
+  desc "Deploy key with read access"
+  condition(:download_code_deploy_key) do
+    user.is_a?(DeployKey) && user.has_access_to?(project)
+  end
+
+  desc "Deploy key with write access"
+  condition(:push_code_deploy_key) do
+    user.is_a?(DeployKey) && user.can_push_to?(project)
+  end
+
   desc "Deploy token with read_package_registry scope"
   condition(:read_package_registry_deploy_token) do
     user.is_a?(DeployToken) && user.has_access_to?(project) && user.read_package_registry
@@ -73,6 +88,11 @@ class ProjectPolicy < BasePolicy
   desc "Deploy token with write_package_registry scope"
   condition(:write_package_registry_deploy_token) do
     user.is_a?(DeployToken) && user.has_access_to?(project) && user.write_package_registry
+  end
+
+  desc "If user is authenticated via CI job token then the target project should be in scope"
+  condition(:project_allowed_for_job_token) do
+    !@user&.from_ci_job_token? || @user.ci_job_token_scope.includes?(project)
   end
 
   with_scope :subject
@@ -108,7 +128,8 @@ class ProjectPolicy < BasePolicy
   condition(:service_desk_enabled) { @subject.service_desk_enabled? }
 
   with_scope :subject
-  condition(:resource_access_token_available) { resource_access_token_available? }
+  condition(:resource_access_token_feature_available) { resource_access_token_feature_available? }
+  condition(:resource_access_token_creation_allowed) { resource_access_token_creation_allowed? }
 
   # We aren't checking `:read_issue` or `:read_merge_request` in this case
   # because it could be possible for a user to see an issuable-iid
@@ -138,6 +159,10 @@ class ProjectPolicy < BasePolicy
     ::Feature.enabled?(:build_service_proxy, @subject)
   end
 
+  condition(:respect_protected_tag_for_release_permissions) do
+    ::Feature.enabled?(:evalute_protected_tag_for_release_permissions, @subject, default_enabled: :yaml)
+  end
+
   condition(:user_defined_variables_allowed) do
     !@subject.restrict_user_defined_variables?
   end
@@ -156,6 +181,7 @@ class ProjectPolicy < BasePolicy
     metrics_dashboard
     analytics
     operations
+    security_and_compliance
   ]
 
   features.each do |f|
@@ -169,6 +195,7 @@ class ProjectPolicy < BasePolicy
   rule { guest | admin }.enable :read_project_for_iids
 
   rule { admin }.enable :update_max_artifacts_size
+  rule { admin }.enable :read_storage_disk_path
   rule { can?(:read_all_resources) }.enable :read_confidential_issues
 
   rule { guest }.enable :guest_access
@@ -203,8 +230,8 @@ class ProjectPolicy < BasePolicy
   rule { can?(:guest_access) }.policy do
     enable :read_project
     enable :create_merge_request_in
-    enable :read_board
-    enable :read_list
+    enable :read_issue_board
+    enable :read_issue_board_list
     enable :read_wiki
     enable :read_issue
     enable :read_label
@@ -224,22 +251,25 @@ class ProjectPolicy < BasePolicy
     enable :read_insights
   end
 
+  rule { can?(:guest_access) & can?(:create_issue) }.enable :create_incident
+
   # These abilities are not allowed to admins that are not members of the project,
   # that's why they are defined separately.
   rule { guest & can?(:download_code) }.enable :build_download_code
   rule { guest & can?(:read_container_image) }.enable :build_read_container_image
 
   rule { can?(:reporter_access) }.policy do
-    enable :admin_board
+    enable :admin_issue_board
     enable :download_code
     enable :read_statistics
+    enable :daily_statistics
     enable :download_wiki_code
     enable :create_snippet
     enable :update_issue
     enable :reopen_issue
     enable :admin_issue
     enable :admin_label
-    enable :admin_list
+    enable :admin_issue_board_list
     enable :admin_issue_link
     enable :read_commit_status
     enable :read_build
@@ -272,8 +302,11 @@ class ProjectPolicy < BasePolicy
     enable :guest_access
 
     enable :build_download_code
-    enable :build_read_container_image
     enable :request_access
+  end
+
+  rule { container_registry_enabled_for_everyone_with_access & can?(:public_user_access) }.policy do
+    enable :build_read_container_image
   end
 
   rule { (can?(:public_user_access) | can?(:reporter_access)) & forking_allowed }.policy do
@@ -318,7 +351,7 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:developer_access) }.policy do
     enable :create_package
-    enable :admin_board
+    enable :admin_issue_board
     enable :admin_merge_request
     enable :admin_milestone
     enable :update_merge_request
@@ -341,7 +374,6 @@ class ProjectPolicy < BasePolicy
     enable :update_deployment
     enable :create_release
     enable :update_release
-    enable :daily_statistics
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation
@@ -368,7 +400,7 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:maintainer_access) }.policy do
     enable :destroy_package
-    enable :admin_board
+    enable :admin_issue_board
     enable :push_to_delete_protected_branch
     enable :update_snippet
     enable :admin_snippet
@@ -405,6 +437,7 @@ class ProjectPolicy < BasePolicy
     enable :update_freeze_period
     enable :destroy_freeze_period
     enable :admin_feature_flags_client
+    enable :update_runners_registration_token
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do
@@ -428,8 +461,8 @@ class ProjectPolicy < BasePolicy
 
   rule { issues_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:issue))
-    prevent(*create_read_update_admin_destroy(:board))
-    prevent(*create_read_update_admin_destroy(:list))
+    prevent(*create_read_update_admin_destroy(:issue_board))
+    prevent(*create_read_update_admin_destroy(:issue_board_list))
   end
 
   rule { merge_requests_disabled | repository_disabled }.policy do
@@ -503,11 +536,13 @@ class ProjectPolicy < BasePolicy
     enable :read_project_for_iids
   end
 
+  rule { ~project_allowed_for_job_token }.prevent_all
+
   rule { can?(:public_access) }.policy do
     enable :read_package
     enable :read_project
-    enable :read_board
-    enable :read_list
+    enable :read_issue_board
+    enable :read_issue_board_list
     enable :read_wiki
     enable :read_label
     enable :read_milestone
@@ -599,6 +634,14 @@ class ProjectPolicy < BasePolicy
     prevent :move_design
   end
 
+  rule { download_code_deploy_key }.policy do
+    enable :download_code
+  end
+
+  rule { push_code_deploy_key }.policy do
+    enable :push_code
+  end
+
   rule { read_package_registry_deploy_token }.policy do
     enable :read_package
     enable :read_project
@@ -613,6 +656,10 @@ class ProjectPolicy < BasePolicy
   rule { can?(:create_pipeline) & can?(:maintainer_access) }.enable :create_web_ide_terminal
 
   rule { build_service_proxy_enabled }.enable :build_service_proxy_enabled
+
+  rule { respect_protected_tag_for_release_permissions & can?(:developer_access) }.policy do
+    enable :destroy_release
+  end
 
   rule { can?(:download_code) }.policy do
     enable :read_repository_graphs
@@ -630,14 +677,25 @@ class ProjectPolicy < BasePolicy
 
   rule { project_bot }.enable :project_bot_access
 
-  rule { resource_access_token_available & can?(:admin_project) }.policy do
-    enable :admin_resource_access_tokens
+  rule { can?(:admin_project) & resource_access_token_feature_available }.policy do
+    enable :read_resource_access_tokens
+    enable :destroy_resource_access_tokens
   end
 
-  rule { can?(:project_bot_access) }.prevent :admin_resource_access_tokens
+  rule { can?(:read_resource_access_tokens) & resource_access_token_creation_allowed }.policy do
+    enable :create_resource_access_tokens
+  end
+
+  rule { can?(:project_bot_access) }.policy do
+    prevent :create_resource_access_tokens
+  end
 
   rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
     enable :set_pipeline_variables
+  end
+
+  rule { ~security_and_compliance_disabled & can?(:developer_access) }.policy do
+    enable :access_security_and_compliance
   end
 
   private
@@ -714,8 +772,16 @@ class ProjectPolicy < BasePolicy
     end
   end
 
-  def resource_access_token_available?
+  def resource_access_token_feature_available?
     true
+  end
+
+  def resource_access_token_creation_allowed?
+    group = project.group
+
+    return true unless group # always enable for projects in personal namespaces
+
+    resource_access_token_feature_available? && group.root_ancestor.namespace_settings.resource_access_token_creation_allowed?
   end
 
   def project
@@ -723,4 +789,4 @@ class ProjectPolicy < BasePolicy
   end
 end
 
-ProjectPolicy.prepend_if_ee('EE::ProjectPolicy')
+ProjectPolicy.prepend_mod_with('ProjectPolicy')

@@ -1,8 +1,6 @@
 import loadAwardsHandler from '~/awards_handler';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
 import initIssuableSidebar from '~/init_issuable_sidebar';
-import initInviteMemberModal from '~/invite_member/init_invite_member_modal';
-import initInviteMemberTrigger from '~/invite_member/init_invite_member_trigger';
 import { IssuableType } from '~/issuable_show/constants';
 import Issue from '~/issue';
 import '~/notes/index';
@@ -42,11 +40,17 @@ export default function initShowIssue() {
   new ZenMode(); // eslint-disable-line no-new
 
   if (issueType !== IssuableType.TestCase) {
+    const awardEmojiEl = document.getElementById('js-vue-awards-block');
+
     new Issue(); // eslint-disable-line no-new
     new ShortcutsIssuable(); // eslint-disable-line no-new
     initIssuableSidebar();
-    loadAwardsHandler();
-    initInviteMemberModal();
-    initInviteMemberTrigger();
+    if (awardEmojiEl) {
+      import('~/emoji/awards_app')
+        .then((m) => m.default(awardEmojiEl))
+        .catch(() => {});
+    } else {
+      loadAwardsHandler();
+    }
   }
 }

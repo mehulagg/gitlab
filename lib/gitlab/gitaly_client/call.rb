@@ -30,7 +30,7 @@ module Gitlab
           store_timings
           response
         end
-      rescue => err
+      rescue StandardError => err
         store_timings
         raise err
       end
@@ -50,11 +50,11 @@ module Gitlab
       end
 
       def recording_request
-        start = Gitlab::Metrics::System.monotonic_time
+        @start = Gitlab::Metrics::System.monotonic_time
 
         yield
       ensure
-        @duration += Gitlab::Metrics::System.monotonic_time - start
+        @duration += Gitlab::Metrics::System.monotonic_time - @start
       end
 
       def store_timings
@@ -64,8 +64,14 @@ module Gitlab
 
         request_hash = @request.is_a?(Google::Protobuf::MessageExts) ? @request.to_h : {}
 
-        GitalyClient.add_call_details(feature: "#{@service}##{@rpc}", duration: @duration, request: request_hash, rpc: @rpc,
-                                      backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller))
+        GitalyClient.add_call_details(
+          start: @start,
+          feature: "#{@service}##{@rpc}",
+          duration: @duration,
+          request: request_hash,
+          rpc: @rpc,
+          backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller)
+        )
       end
     end
   end

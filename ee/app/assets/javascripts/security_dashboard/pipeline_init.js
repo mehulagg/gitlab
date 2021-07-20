@@ -1,5 +1,6 @@
 import Vue from 'vue';
-import PipelineSecurityDashboard from './components/pipeline_security_dashboard.vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import PipelineSecurityDashboard from './components/pipeline/pipeline_security_dashboard.vue';
 import apolloProvider from './graphql/provider';
 import createDashboardStore from './store';
 import { DASHBOARD_TYPES } from './store/constants';
@@ -22,8 +23,11 @@ export default () => {
     vulnerabilitiesEndpoint,
     emptyStateUnauthorizedSvgPath,
     emptyStateForbiddenSvgPath,
+    commitPathTemplate,
     projectFullPath,
     pipelineJobsPath,
+    canAdminVulnerability,
+    securityReportHelpPageLink,
   } = el.dataset;
 
   const loadingErrorIllustrations = {
@@ -37,21 +41,26 @@ export default () => {
     store: createDashboardStore({
       dashboardType: DASHBOARD_TYPES.PIPELINE,
     }),
+    provide: {
+      dashboardType: DASHBOARD_TYPES.PIPELINE,
+      projectId: parseInt(projectId, 10),
+      commitPathTemplate,
+      projectFullPath,
+      dashboardDocumentation,
+      emptyStateSvgPath,
+      canAdminVulnerability: parseBoolean(canAdminVulnerability),
+      pipeline: {
+        id: parseInt(pipelineId, 10),
+        iid: parseInt(pipelineIid, 10),
+        jobsPath: pipelineJobsPath,
+        sourceBranch,
+      },
+      securityReportHelpPageLink,
+      vulnerabilitiesEndpoint,
+      loadingErrorIllustrations,
+    },
     render(createElement) {
-      return createElement(PipelineSecurityDashboard, {
-        props: {
-          projectId: parseInt(projectId, 10),
-          pipelineId: parseInt(pipelineId, 10),
-          pipelineIid: parseInt(pipelineIid, 10),
-          vulnerabilitiesEndpoint,
-          sourceBranch,
-          dashboardDocumentation,
-          emptyStateSvgPath,
-          loadingErrorIllustrations,
-          projectFullPath,
-          pipelineJobsPath,
-        },
-      });
+      return createElement(PipelineSecurityDashboard);
     },
   });
 };

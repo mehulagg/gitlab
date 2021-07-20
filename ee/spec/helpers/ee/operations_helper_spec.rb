@@ -85,28 +85,14 @@ RSpec.describe OperationsHelper, :routing do
 
         it { is_expected.to include('multi_integrations' => 'true') }
 
-        context 'with multiple_http_integrations_custom_mapping feature flag enabled' do
-          before do
-            stub_feature_flags(multiple_http_integrations_custom_mapping: true)
-          end
+        it 'has the correct list of fields', :aggregate_failures do
+          fields = Gitlab::Json.parse(alerts_settings_data['alert_fields'])
 
-          it 'has the correct list of fields', :aggregate_failures do
-            fields = Gitlab::Json.parse(alerts_settings_data['alert_fields'])
-
-            expect(fields.count).to eq(10)
-            expect(fields.first.keys).to eq(%w[name label types])
-            expect(fields.map { |f| f['name'] }).to match_array(
-              %w[title description start_time end_time service monitoring_tool hosts severity fingerprint gitlab_environment_name]
-            )
-          end
-        end
-
-        context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
-          before do
-            stub_feature_flags(multiple_http_integrations_custom_mapping: false)
-          end
-
-          it { is_expected.not_to have_key('alert_fields') }
+          expect(fields.count).to eq(10)
+          expect(fields.first.keys).to eq(%w[name label types])
+          expect(fields.map { |f| f['name'] }).to match_array(
+            %w[title description start_time end_time service monitoring_tool hosts severity fingerprint gitlab_environment_name]
+          )
         end
       end
 
@@ -124,9 +110,7 @@ RSpec.describe OperationsHelper, :routing do
       create(
         :project_incident_management_setting,
         project: project,
-        issue_template_key: 'template-key',
-        pagerduty_active: true,
-        auto_close_incident: false
+        pagerduty_active: true
       )
     end
 
@@ -135,11 +119,6 @@ RSpec.describe OperationsHelper, :routing do
     it 'returns the correct set of data' do
       is_expected.to eq(
         operations_settings_endpoint: project_settings_operations_path(project),
-        templates: '[]',
-        create_issue: 'false',
-        issue_template_key: 'template-key',
-        send_email: 'false',
-        auto_close_incident: 'false',
         pagerduty_active: 'true',
         pagerduty_token: operations_settings.pagerduty_token,
         pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),

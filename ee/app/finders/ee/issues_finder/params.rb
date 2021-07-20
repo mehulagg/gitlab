@@ -19,7 +19,7 @@ module EE
       end
 
       def weights?
-        params[:weight].present? && params[:weight] != ::Issue::WEIGHT_ALL
+        params[:weight].present? && params[:weight].to_s.casecmp(::Issue::WEIGHT_ALL) != 0
       end
 
       def filter_by_no_weight?
@@ -30,22 +30,9 @@ module EE
         params[:weight].to_s.downcase == ::IssuableFinder::Params::FILTER_ANY
       end
 
-      override :assignees
-      # rubocop: disable CodeReuse/ActiveRecord
-      def assignees
-        strong_memoize(:assignees) do
-          if assignee_ids?
-            ::User.where(id: params[:assignee_ids])
-          else
-            super
-          end
-        end
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
       def epics
         if params[:include_subepics]
-          ::Gitlab::ObjectHierarchy.new(::Epic.for_ids(params[:epic_id])).base_and_descendants.select(:id)
+          ::Gitlab::ObjectHierarchy.new(::Epic.id_in(params[:epic_id])).base_and_descendants.select(:id)
         else
           params[:epic_id]
         end

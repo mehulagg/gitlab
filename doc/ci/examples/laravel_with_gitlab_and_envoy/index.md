@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/articles/laravel_with_gitlab_and_envoy/index.html'
 author: Mehran Rasulian
@@ -11,7 +11,7 @@ date: 2017-08-31
 
 <!-- vale off -->
 
-# Test and deploy Laravel applications with GitLab CI/CD and Envoy
+# Test and deploy Laravel applications with GitLab CI/CD and Envoy **(FREE)**
 
 ## Introduction
 
@@ -78,7 +78,7 @@ git init
 git remote add origin git@gitlab.example.com:<USERNAME>/laravel-sample.git
 git add .
 git commit -m 'Initial Commit'
-git push -u origin master
+git push -u origin main
 ```
 
 ## Configure the production server
@@ -106,7 +106,7 @@ sudo apt install acl
 
 ### Add SSH key
 
-Let's suppose we want to deploy our app to the production server from a private repository on GitLab. First, we need to [generate a new SSH key pair **with no passphrase**](../../../ssh/README.md) for the deployer user.
+Let's suppose we want to deploy our app to the production server from a private repository on GitLab. First, we need to [generate a new SSH key pair **with no passphrase**](../../../ssh/index.md) for the deployer user.
 
 After that, we need to copy the private key, which will be used to connect to our server as the deployer user with SSH, to be able to automate our deployment process:
 
@@ -119,8 +119,8 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 cat ~/.ssh/id_rsa
 ```
 
-Now, let's add it to your GitLab project as a [CI/CD variable](../../variables/README.md).
-Variables are user-defined variables and are stored out of `.gitlab-ci.yml`, for security purposes.
+Now, let's add it to your GitLab project as a [CI/CD variable](../../variables/index.md).
+Project CI/CD variables are user-defined variables and are stored out of `.gitlab-ci.yml`, for security purposes.
 They can be added per project by navigating to the project's **Settings** > **CI/CD**.
 
 To the field **KEY**, add the name `SSH_PRIVATE_KEY`, and to the **VALUE** field, paste the private key you've copied earlier.
@@ -128,7 +128,7 @@ We'll use this variable in the `.gitlab-ci.yml` later, to easily connect to our 
 
 ![variables page](img/variables_page.png)
 
-We also need to add the public key to **Project** > **Settings** > **Repository** as a [Deploy Key](../../../ssh/README.md#deploy-keys), which gives us the ability to access our repository from the server through [SSH protocol](../../../gitlab-basics/command-line-commands.md#start-working-on-your-project).
+We also need to add the public key to **Project** > **Settings** > **Repository** as a [Deploy Key](../../../user/project/deploy_keys/index.md), which gives us the ability to access our repository from the server through [SSH protocol](../../../gitlab-basics/command-line-commands.md#start-working-on-your-project).
 
 ```shell
 # As the deployer user on the server
@@ -260,7 +260,7 @@ Let's create these three tasks one by one.
 
 #### Clone the repository
 
-The first task will create the `releases` directory (if it doesn't exist), and then clone the `master` branch of the repository (by default) into the new release directory, given by the `$new_release_dir` variable.
+The first task will create the `releases` directory (if it doesn't exist), and then clone the `main` branch of the repository (by default) into the new release directory, given by the `$new_release_dir` variable.
 The `releases` directory will hold all our deployments:
 
 ```php
@@ -378,14 +378,14 @@ These are persistent data and will be shared to every new release.
 
 Now, we would need to deploy our app by running `envoy run deploy`, but it won't be necessary since GitLab can handle that for us with CI's [environments](../../environments/index.md), which will be described [later](#setting-up-gitlab-cicd) in this tutorial.
 
-Now it's time to commit [Envoy.blade.php](https://gitlab.com/mehranrasulian/laravel-sample/blob/master/Envoy.blade.php) and push it to the `master` branch.
-To keep things simple, we commit directly to `master`, without using [feature-branches](../../../topics/gitlab_flow.md#github-flow-as-a-simpler-alternative) since collaboration is beyond the scope of this tutorial.
+Now it's time to commit [Envoy.blade.php](https://gitlab.com/mehranrasulian/laravel-sample/blob/master/Envoy.blade.php) and push it to the `main` branch.
+To keep things simple, we commit directly to `main`, without using [feature-branches](../../../topics/gitlab_flow.md#github-flow-as-a-simpler-alternative) since collaboration is beyond the scope of this tutorial.
 In a real world project, teams may use [Issue Tracker](../../../user/project/issues/index.md) and [Merge Requests](../../../user/project/merge_requests/index.md) to move their code across branches:
 
 ```shell
 git add Envoy.blade.php
 git commit -m 'Add Envoy'
-git push origin master
+git push origin main
 ```
 
 ## Continuous Integration with GitLab
@@ -474,7 +474,7 @@ Let's commit the `Dockerfile` file.
 ```shell
 git add Dockerfile
 git commit -m 'Add Dockerfile'
-git push origin master
+git push origin main
 ```
 
 ### Setting up GitLab CI/CD
@@ -523,16 +523,16 @@ deploy_production:
     url: http://192.168.1.1
   when: manual
   only:
-    - master
+    - main
 ```
 
 That's a lot to take in, isn't it? Let's run through it step by step.
 
 #### Image and Services
 
-[Runners](../../runners/README.md) run the script defined by `.gitlab-ci.yml`.
+[Runners](../../runners/index.md) run the script defined by `.gitlab-ci.yml`.
 The `image` keyword tells the runners which image to use.
-The `services` keyword defines additional images [that are linked to the main image](../../docker/using_docker_images.md#what-is-a-service).
+The `services` keyword defines additional images [that are linked to the main image](../../services/index.md).
 Here we use the container image we created before as our main image and also use MySQL 5.7 as a service.
 
 ```yaml
@@ -546,16 +546,16 @@ services:
 
 If you wish to test your app with different PHP versions and [database management systems](../../services/index.md), you can define different `image` and `services` keywords for each test job.
 
-#### Variables
+#### CI/CD variables
 
-GitLab CI/CD allows us to use [environment variables](../../yaml/README.md#variables) in our jobs.
+GitLab CI/CD allows us to use [CI/CD variables](../../yaml/index.md#variables) in our jobs.
 We defined MySQL as our database management system, which comes with a superuser root created by default.
 
 So we should adjust the configuration of MySQL instance by defining `MYSQL_DATABASE` variable as our database name and `MYSQL_ROOT_PASSWORD` variable as the password of `root`.
 Find out more about MySQL variables at the [official MySQL Docker Image](https://hub.docker.com/_/mysql).
 
 Also set the variables `DB_HOST` to `mysql` and `DB_USERNAME` to `root`, which are Laravel specific variables.
-We define `DB_HOST` as `mysql` instead of `127.0.0.1`, as we use MySQL Docker image as a service which [is linked to the main Docker image](../../docker/using_docker_images.md#how-services-are-linked-to-the-job).
+We define `DB_HOST` as `mysql` instead of `127.0.0.1`, as we use MySQL Docker image as a service which [is linked to the main Docker image](../../services/index.md#how-services-are-linked-to-the-job).
 
 ```yaml
 variables:
@@ -567,7 +567,7 @@ variables:
 
 #### Unit Test as the first job
 
-We defined the required shell scripts as an array of the [script](../../yaml/README.md#script) variable to be executed when running `unit_test` job.
+We defined the required shell scripts as an array of the [script](../../yaml/index.md#script) keyword to be executed when running `unit_test` job.
 
 These scripts are some Artisan commands to prepare the Laravel, and, at the end of the script, we'll run the tests by `PHPUnit`.
 
@@ -593,9 +593,9 @@ To deploy our app with Envoy, we had to set up the `$SSH_PRIVATE_KEY` variable a
 If the SSH keys have added successfully, we can run Envoy.
 
 As mentioned before, GitLab supports [Continuous Delivery](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#continuous-delivery) methods as well.
-The [environment](../../yaml/README.md#environment) keyword tells GitLab that this job deploys to the `production` environment.
+The [environment](../../yaml/index.md#environment) keyword tells GitLab that this job deploys to the `production` environment.
 The `url` keyword is used to generate a link to our application on the GitLab Environments page.
-The `only` keyword tells GitLab CI/CD that the job should be executed only when the pipeline is building the `master` branch.
+The `only` keyword tells GitLab CI/CD that the job should be executed only when the pipeline is building the `main` branch.
 Lastly, `when: manual` is used to turn the job from running automatically to a manual action.
 
 ```yaml
@@ -616,15 +616,15 @@ deploy_production:
     url: http://192.168.1.1
   when: manual
   only:
-    - master
+    - main
 ```
 
-You may also want to add another job for [staging environment](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/), to final test your application before deploying to production.
+You may also want to add another job for [staging environment](https://about.gitlab.com/blog/2021/02/05/ci-deployment-and-environments/), to final test your application before deploying to production.
 
 ### Turn on GitLab CI/CD
 
 We have prepared everything we need to test and deploy our app with GitLab CI/CD.
-To do that, commit and push `.gitlab-ci.yml` to the `master` branch. It will trigger a pipeline, which you can watch live under your project's **Pipelines**.
+To do that, commit and push `.gitlab-ci.yml` to the `main` branch. It will trigger a pipeline, which you can watch live under your project's **Pipelines**.
 
 ![pipelines page](img/pipelines_page.png)
 

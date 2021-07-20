@@ -19,7 +19,7 @@ describe('EE gitlab license banner dismiss', () => {
     setFixtures(`
     <div class="js-gitlab-ee-license-banner">
       <button class="js-close"></button>
-      <a href="#" class="btn gl-button btn-primary"></a>
+      <a href="#" class="btn gl-button btn-confirm"></a>
     </div>
     `);
 

@@ -16,6 +16,7 @@ RSpec.describe 'User searches for milestones', :js do
   end
 
   include_examples 'top right search form'
+  include_examples 'search timeouts', 'milestones'
 
   it 'finds a milestone' do
     fill_in('dashboard_search', with: milestone1.title)
@@ -35,7 +36,7 @@ RSpec.describe 'User searches for milestones', :js do
       wait_for_requests
 
       page.within('[data-testid="project-filter"]') do
-        click_on(project.full_name)
+        click_on(project.name)
       end
 
       fill_in('dashboard_search', with: milestone1.title)

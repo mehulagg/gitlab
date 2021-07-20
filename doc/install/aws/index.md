@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Installing GitLab on Amazon Web Services (AWS)
+# Installing GitLab on Amazon Web Services (AWS) **(FREE SELF)**
 
 This page offers a walkthrough of a common configuration
 for GitLab on AWS using the official GitLab Linux package. You should customize it to accommodate your needs.
@@ -348,10 +348,6 @@ Now that the database is created, let's move on to setting up Redis with ElastiC
 ElastiCache is an in-memory hosted caching solution. Redis maintains its own
 persistence and is used to store session data, temporary cache information, and background job queues for the GitLab application.
 
-WARNING:
-GitLab recommends you use ElastiCache Redis version 5.0.x, because version 6.x contains
-a bug that [prevents Sidekiq from processing jobs](https://gitlab.com/gitlab-org/gitlab/-/issues/281683).
-
 ### Create a Redis Security Group
 
 1. Navigate to the EC2 dashboard.
@@ -413,7 +409,7 @@ If you do not want to maintain bastion hosts, you can set up [AWS Systems Manage
    1. Leave everything else as default and click **Add Storage**.
 1. For storage, we'll leave everything as default and only add an 8GB root volume. We won't store anything on this instance.
 1. Click **Add Tags** and on the next screen click **Add Tag**.
-   1. We’ll only set `Key: Name` and `Value: Bastion Host A`.
+   1. We'll only set `Key: Name` and `Value: Bastion Host A`.
 1. Click **Configure Security Group**.
    1. Select **Create a new security group**, enter a **Security group name** (we'll use `bastion-sec-group`), and add a description.
    1. We'll enable SSH access from anywhere (`0.0.0.0/0`). If you want stricter security, specify a single IP address or an IP address range in CIDR notation.
@@ -432,7 +428,7 @@ Confirm that you can SSH into the instance:
 
 1. Create an EC2 instance following the same steps as above with the following changes:
    1. For the **Subnet**, select the second public subnet we created earlier (`gitlab-public-10.0.2.0`).
-   1. Under the **Add Tags** section, we’ll set `Key: Name` and `Value: Bastion Host B` so that we can easily identify our two instances.
+   1. Under the **Add Tags** section, we'll set `Key: Name` and `Value: Bastion Host B` so that we can easily identify our two instances.
    1. For the security group, select the existing `bastion-sec-group` we created above.
 
 ### Use SSH Agent Forwarding
@@ -449,18 +445,17 @@ We will need a preconfigured, custom GitLab AMI to use in our launch configurati
 
 From the EC2 dashboard:
 
-1. Click **Launch Instance** and select **Community AMIs** from the left menu.
-1. In the search bar, search for `GitLab EE <version>` where `<version>` is the latest version as seen on the [releases page](https://about.gitlab.com/releases/). Select the latest patch release, for example `GitLab EE 12.9.2`.
-1. Select an instance type based on your workload. Consult the [hardware requirements](../../install/requirements.md#hardware-requirements) to choose one that fits your needs (at least `c5.xlarge`, which is sufficient to accommodate 100 users).
+1. Use the section below titled "[Find official GitLab-created AMI IDs on AWS](#find-official-gitlab-created-ami-ids-on-aws)" to find the correct AMI to launch.
+1. After clicking **Launch** on the desired AMI, select an instance type based on your workload. Consult the [hardware requirements](../../install/requirements.md#hardware-requirements) to choose one that fits your needs (at least `c5.xlarge`, which is sufficient to accommodate 100 users).
 1. Click **Configure Instance Details**:
    1. In the **Network** dropdown, select `gitlab-vpc`, the VPC we created earlier.
    1. In the **Subnet** dropdown, select `gitlab-private-10.0.1.0` from the list of subnets we created earlier.
    1. Double check that **Auto-assign Public IP** is set to `Use subnet setting (Disable)`.
    1. Click **Add Storage**.
-   1. The root volume is 8GiB by default and should be enough given that we won’t store any data there.
+   1. The root volume is 8GiB by default and should be enough given that we won't store any data there.
 1. Click **Add Tags** and add any tags you may need. In our case, we'll only set `Key: Name` and `Value: GitLab`.
 1. Click **Configure Security Group**. Check **Select an existing security group** and select the `gitlab-loadbalancer-sec-group` we created earlier.
-1. Click **Review and launch** followed by **Launch** if you’re happy with your settings.
+1. Click **Review and launch** followed by **Launch** if you're happy with your settings.
 1. Finally, acknowledge that you have access to the selected private key file or create a new one. Click **Launch Instances**.
 
 ### Add custom configuration
@@ -585,9 +580,9 @@ Let's create an EC2 instance where we'll install Gitaly:
 1. Finally, acknowledge that you have access to the selected private key file or create a new one. Click **Launch Instances**.
 
 NOTE:
-Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact the performance of GitLab. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
+Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact the performance of GitLab. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-cloud-based-file-systems) for more details.
 
-Now that we have our EC2 instance ready, follow the [documentation to install GitLab and set up Gitaly on its own server](../../administration/gitaly/index.md#run-gitaly-on-its-own-server). Perform the client setup steps from that document on the [GitLab instance we created](#install-gitlab) above.
+Now that we have our EC2 instance ready, follow the [documentation to install GitLab and set up Gitaly on its own server](../../administration/gitaly/configure_gitaly.md#run-gitaly-on-its-own-server). Perform the client setup steps from that document on the [GitLab instance we created](#install-gitlab) above.
 
 #### Add Support for Proxied SSL
 
@@ -655,8 +650,9 @@ That concludes the configuration changes for our GitLab instance. Next, we'll cr
 
 ### Log in for the first time
 
-Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser. You will be asked to set up a password
-for the `root` user which has admin privileges on the GitLab instance. This password will be stored in the database.
+Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser.
+If you didn't change the password by any other means, the default password will be the same as the instance ID. To change the default password, login as the `root` user
+with the default password and [change it in the user profile](../../user/profile#change-your-password).
 
 When our [auto scaling group](#create-an-auto-scaling-group) spins up new instances, we'll be able to log in with username `root` and the newly created password.
 
@@ -684,7 +680,7 @@ From the EC2 dashboard:
 1. **Do not** check **Request Spot Instance**.
 1. From the **IAM Role** dropdown, pick the `GitLabAdmin` instance role we [created earlier](#create-an-iam-ec2-instance-role-and-profile).
 1. Leave the rest as defaults and click **Add Storage**.
-1. The root volume is 8GiB by default and should be enough given that we won’t store any data there. Click **Configure Security Group**.
+1. The root volume is 8GiB by default and should be enough given that we won't store any data there. Click **Configure Security Group**.
 1. Check **Select and existing security group** and select the `gitlab-loadbalancer-sec-group` we created earlier.
 1. Click **Review**, review your changes, and click **Create launch configuration**.
 1. Acknowledge that you have access to the private key or create a new one. Click **Create launch configuration**.
@@ -726,7 +722,7 @@ that you can ping and get reports.
 
 ## GitLab Runner
 
-If you want to take advantage of [GitLab CI/CD](../../ci/README.md), you have to
+If you want to take advantage of [GitLab CI/CD](../../ci/index.md), you have to
 set up at least one [runner](https://docs.gitlab.com/runner/).
 
 Read more on configuring an
@@ -789,6 +785,24 @@ For GitLab 12.1 and earlier, use `gitlab-rake gitlab:backup:create`.
 
 After a few minutes, the new version should be up and running.
 
+## Find official GitLab-created AMI IDs on AWS
+
+To find the AMIs generated by GitLab:
+
+1. Login to AWS Web Console, so that clicking the links below will take you directly to the AMI list.
+1. Pick the edition you want:
+
+    - [GitLab Enterprise Edition](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=782774275127;search=GitLab%20EE;sort=desc:name): If you want to unlock the enterprise features, a license is needed. Recommended for this guide.
+    - [GitLab Community Edition](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=782774275127;search=GitLab%20CE;sort=desc:name): The open source version of GitLab.
+    - [GitLab Premium or Ultimate Marketplace (Prelicensed)](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;source=Marketplace;search=GitLab%20EE;sort=desc:name): 5 user license built into per-minute billing.
+1. AMI IDs are unique per region, so once you've loaded one of the above, select the desired target region in the upper right of the console to see the appropriate AMIs.
+1. Once the console is loaded, you can add additional search criteria to narrow further. For instance, `13.` to find only 13.x versions.
+1. To launch an EC2 Machine with one of the listed AMIs, check the box at the start of the relevant row, and select the "Launch" button near the top of left of the page.
+
+NOTE:
+If you are trying to restore from an older version of GitLab while moving to AWS, find the
+[Enterprise and Community Editions Before 11.10.3](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=855262394183;sort=desc:name).
+
 ## Conclusion
 
 In this guide, we went mostly through scaling and some redundancy options,
@@ -824,3 +838,9 @@ You may have to set a password on the `root` user to prevent automatic redirects
 ### "The change you requested was rejected (422)"
 
 If you see this page when trying to set a password via the web interface, make sure `external_url` in `gitlab.rb` matches the domain you are making a request from, and run `sudo gitlab-ctl reconfigure` after making any changes to it.
+
+### Some job logs are not uploaded to object storage
+
+When the GitLab deployment is scaled up to more than one node, some job logs may not be uploaded to [object storage](../../administration/object_storage.md) properly. [Incremental logging is required](../../administration/object_storage.md#other-alternatives-to-file-system-storage) for CI to use object storage.
+
+Enable [incremental logging](../../administration/job_logs.md#enable-or-disable-incremental-logging) if it has not already been enabled.

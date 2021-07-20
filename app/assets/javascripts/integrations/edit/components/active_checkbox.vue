@@ -37,8 +37,7 @@ export default {
     <input name="service[active]" type="hidden" :value="activated || false" />
     <gl-form-checkbox
       v-model="activated"
-      name="service[active]"
-      class="gl-display-block gl-line-height-0"
+      class="gl-display-block"
       :disabled="isInheriting"
       @change="onChange"
     >

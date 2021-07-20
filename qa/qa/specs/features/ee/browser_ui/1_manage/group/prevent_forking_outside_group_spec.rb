@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage', quarantine: { only: :production, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/290717', type: :bug } do
+  # This test is disabled on staging due to `top_level_group_creation_enabled` set to false.
+  # See: https://gitlab.com/gitlab-org/gitlab/-/issues/324808#note_531060031
+  # The bug issue link in the rspec metadata below is for production only.
+  # When unquarantining on staging, it should continue to remain in quarantine in production until the bug is resolved.
+  RSpec.describe 'Manage', quarantine: { only: [:staging, :production], issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/324808', type: :bug } do
     describe 'prevent forking outside group' do
       let!(:group_for_fork) do
         Resource::Sandbox.fabricate_via_api! do |sandbox_group|
@@ -21,11 +25,14 @@ module QA
           set_prevent_forking_outside_group('disabled')
         end
 
-        it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1681' do
-          visit_project_and_search_group_for_fork
+        it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1774' do
+          project.visit!
 
-          expect(page).to have_text(group_for_fork.path)
-          expect(page).to have_text('Select a namespace to fork the project')
+          Page::Project::Show.perform(&:fork_project)
+
+          all_namespaces_for_fork = Page::Project::Fork::New.perform(&:fork_namespace_dropdown_values)
+
+          expect(all_namespaces_for_fork).to include(group_for_fork.path)
         end
       end
 
@@ -34,11 +41,14 @@ module QA
           set_prevent_forking_outside_group('enabled')
         end
 
-        it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1682' do
-          visit_project_and_search_group_for_fork
+        it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1775' do
+          project.visit!
 
-          expect(page).not_to have_text(group_for_fork.path)
-          expect(page).not_to have_text('Select a namespace to fork the project')
+          Page::Project::Show.perform(&:fork_project)
+
+          all_namespaces_for_fork = Page::Project::Fork::New.perform(&:fork_namespace_dropdown_values)
+
+          expect(all_namespaces_for_fork).not_to include(group_for_fork.path)
         end
       end
 
@@ -54,15 +64,6 @@ module QA
         Page::Group::Menu.perform(&:click_group_general_settings_item)
         Page::Group::Settings::General.perform do |general_setting|
           general_setting.send("set_prevent_forking_outside_group_#{enabled_or_disabled}")
-        end
-      end
-
-      def visit_project_and_search_group_for_fork
-        project.visit!
-        Page::Project::Show.perform(&:fork_project)
-
-        Page::Project::Fork::New.perform do |fork_new|
-          fork_new.search_for_group(group_for_fork.path)
         end
       end
     end

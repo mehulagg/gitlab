@@ -1,16 +1,15 @@
-/* eslint-disable no-useless-return, func-names, no-underscore-dangle, no-new, consistent-return, no-shadow, no-param-reassign, no-lonely-if, dot-notation, no-empty */
+/* eslint-disable func-names, no-underscore-dangle, no-new, consistent-return, no-shadow, no-param-reassign, no-lonely-if, no-empty */
 /* global Issuable */
 /* global ListLabel */
 
 import $ from 'jquery';
 import { difference, isEqual, escape, sortBy, template, union } from 'lodash';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import IssuableBulkUpdateActions from '~/issuable_bulk_update_sidebar/issuable_bulk_update_actions';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import boardsStore from './boards/stores/boards_store';
-import ModalStore from './boards/stores/modal_store';
 import CreateLabelDropdown from './create_label';
-import { deprecatedCreateFlash as flash } from './flash';
-import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
+import createFlash from './flash';
 import axios from './lib/utils/axios_utils';
 import { sprintf, __ } from './locale';
 
@@ -149,7 +148,11 @@ export default class LabelsSelect {
               container: 'body',
             });
           })
-          .catch(() => flash(__('Error saving label update.')));
+          .catch(() =>
+            createFlash({
+              message: __('Error saving label update.'),
+            }),
+          );
       };
       initDeprecatedJQueryDropdown($dropdown, {
         showMenuAbove,
@@ -184,7 +187,11 @@ export default class LabelsSelect {
                 $dropdown.data('deprecatedJQueryDropdown').positionMenuAbove();
               }
             })
-            .catch(() => flash(__('Error fetching labels.')));
+            .catch(() =>
+              createFlash({
+                message: __('Error fetching labels.'),
+              }),
+            );
         },
         renderRow(label) {
           let colorEl;
@@ -313,7 +320,11 @@ export default class LabelsSelect {
             return;
           }
 
-          if ($('html').hasClass('issue-boards-page')) {
+          if (
+            $('html')
+              .attr('class')
+              .match(/issue-boards-page|epic-boards-page/)
+          ) {
             return;
           }
           if ($dropdown.hasClass('js-multiselect')) {
@@ -357,21 +368,7 @@ export default class LabelsSelect {
             return;
           }
 
-          let boardsModel;
-          if ($dropdown.closest('.add-issues-modal').length) {
-            boardsModel = ModalStore.store.filter;
-          }
-
-          if (boardsModel) {
-            if (label.isAny) {
-              boardsModel['label_name'] = [];
-            } else if ($el.hasClass('is-active')) {
-              boardsModel['label_name'].push(label.title);
-            }
-
-            e.preventDefault();
-            return;
-          } else if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
+          if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
             if (!$dropdown.hasClass('js-multiselect')) {
               selectedLabel = label.title;
               return Issuable.filterResults($dropdown.closest('form'));
@@ -522,11 +519,15 @@ export default class LabelsSelect {
   }
 
   bindEvents() {
-    return $('body').on('change', '.selected-issuable', this.onSelectCheckboxIssue);
+    return $('body').on(
+      'change',
+      '.issuable-list input[type="checkbox"]',
+      this.onSelectCheckboxIssue,
+    );
   }
   // eslint-disable-next-line class-methods-use-this
   onSelectCheckboxIssue() {
-    if ($('.selected-issuable:checked').length) {
+    if ($('.issuable-list input[type="checkbox"]:checked').length) {
       return;
     }
     return $('.issues-bulk-update .labels-filter .dropdown-toggle-text').text(__('Label'));

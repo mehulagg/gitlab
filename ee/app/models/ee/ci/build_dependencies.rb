@@ -9,14 +9,14 @@ module EE
 
       CROSS_PROJECT_LIMIT = ::Gitlab::Ci::Config::Entry::Needs::NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT
 
+      private
+
       override :cross_project
       def cross_project
         strong_memoize(:cross_project) do
           fetch_cross_project
         end
       end
-
-      private
 
       override :valid_cross_project?
       def valid_cross_project?

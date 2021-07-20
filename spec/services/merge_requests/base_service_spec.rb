@@ -6,6 +6,7 @@ RSpec.describe MergeRequests::BaseService do
   include ProjectForksHelper
 
   let_it_be(:project) { create(:project, :repository) }
+
   let(:title) { 'Awesome merge_request' }
   let(:params) do
     {
@@ -16,7 +17,7 @@ RSpec.describe MergeRequests::BaseService do
     }
   end
 
-  subject { MergeRequests::CreateService.new(project, project.owner, params) }
+  subject { MergeRequests::CreateService.new(project: project, current_user: project.owner, params: params) }
 
   describe '#execute_hooks' do
     shared_examples 'enqueues Jira sync worker' do

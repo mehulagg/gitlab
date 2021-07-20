@@ -6,7 +6,7 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        value 'EPIC', value: 'Epic', description: 'An Epic'
+        value 'EPIC', value: 'Epic', description: 'An Epic.'
       end
     end
   end

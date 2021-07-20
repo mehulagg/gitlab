@@ -32,15 +32,10 @@ module EE
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,
               null: true,
-              description: "Number of vulnerabilities per day for the projects on the current user's instance security dashboard.",
-              resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
-
-        field :vulnerabilities_count_by_day_and_severity,
-              ::Types::VulnerabilitiesCountByDayAndSeverityType.connection_type,
-              null: true,
-              description: "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard.",
-              resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
-              deprecated: { reason: 'Use `vulnerabilitiesCountByDay`', milestone: '13.3' }
+              resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver,
+              description: <<~DESC
+                Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
+              DESC
 
         field :geo_node, ::Types::Geo::GeoNodeType,
               null: true,
@@ -52,10 +47,20 @@ module EE
               resolver: ::Resolvers::InstanceSecurityDashboardResolver,
               description: 'Fields related to Instance Security Dashboard.'
 
-        field :devops_adoption_segments, ::Types::Admin::Analytics::DevopsAdoption::SegmentType.connection_type,
+        field :devops_adoption_enabled_namespaces, ::Types::Analytics::DevopsAdoption::EnabledNamespaceType.connection_type,
               null: true,
-              description: 'Get configured DevOps adoption segments on the instance.',
-              resolver: ::Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
+              description: 'Get configured DevOps adoption namespaces. **BETA** This endpoint is subject to change without notice.',
+              resolver: ::Resolvers::Analytics::DevopsAdoption::EnabledNamespacesResolver
+
+        field :current_license, ::Types::Admin::CloudLicenses::CurrentLicenseType,
+              null: true,
+              resolver: ::Resolvers::Admin::CloudLicenses::CurrentLicenseResolver,
+              description: 'Fields related to the current license.'
+
+        field :license_history_entries, ::Types::Admin::CloudLicenses::LicenseHistoryEntryType.connection_type,
+              null: true,
+              resolver: ::Resolvers::Admin::CloudLicenses::LicenseHistoryEntriesResolver,
+              description: 'Fields related to entries in the license history.'
       end
 
       def vulnerability(id:)

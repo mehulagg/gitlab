@@ -10,10 +10,13 @@ module Enums
           unknown_failure: 0,
           config_error: 1,
           external_validation_failure: 2,
+          user_not_verified: 3,
           activity_limit_exceeded: 20,
           size_limit_exceeded: 21,
           job_activity_limit_exceeded: 22,
-          deployments_limit_exceeded: 23
+          deployments_limit_exceeded: 23,
+          user_blocked: 24,
+          project_deleted: 25
         }
       end
 

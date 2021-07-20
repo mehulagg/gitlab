@@ -42,10 +42,6 @@ class ApplicationRecord < ActiveRecord::Base
     false
   end
 
-  def self.at_most(count)
-    limit(count)
-  end
-
   def self.safe_find_or_create_by!(*args, &block)
     safe_find_or_create_by(*args, &block).tap do |record|
       raise ActiveRecord::RecordNotFound unless record.present?
@@ -56,11 +52,13 @@ class ApplicationRecord < ActiveRecord::Base
 
   # Start a new transaction with a shorter-than-usual statement timeout. This is
   # currently one third of the default 15-second timeout
-  def self.with_fast_statement_timeout
-    transaction(requires_new: true) do
-      connection.exec_query("SET LOCAL statement_timeout = 5000")
+  def self.with_fast_read_statement_timeout(timeout_ms = 5000)
+    ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
+      transaction(requires_new: true) do
+        connection.exec_query("SET LOCAL statement_timeout = #{timeout_ms}")
 
-      yield
+        yield
+      end
     end
   end
 
@@ -68,6 +66,12 @@ class ApplicationRecord < ActiveRecord::Base
     safe_ensure_unique(retries: 1) do
       find_or_create_by(*args, &block)
     end
+  end
+
+  def create_or_load_association(association_name)
+    association(association_name).create unless association(association_name).loaded?
+  rescue ActiveRecord::RecordNotUnique, PG::UniqueViolation
+    association(association_name).reader
   end
 
   def self.underscore

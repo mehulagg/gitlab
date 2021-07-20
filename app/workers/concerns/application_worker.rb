@@ -13,12 +13,14 @@ module ApplicationWorker
   include Gitlab::SidekiqVersioning::Worker
 
   LOGGING_EXTRA_KEY = 'extra'
+  DEFAULT_DELAY_INTERVAL = 1
 
   included do
     set_queue
+    after_set_class_attribute { set_queue }
 
     def structured_payload(payload = {})
-      context = Labkit::Context.current.to_h.merge(
+      context = Gitlab::ApplicationContext.current.merge(
         'class' => self.class.name,
         'job_status' => 'running',
         'queue' => self.class.queue,
@@ -45,22 +47,53 @@ module ApplicationWorker
   end
 
   class_methods do
+    extend ::Gitlab::Utils::Override
+
     def inherited(subclass)
       subclass.set_queue
+      subclass.after_set_class_attribute { subclass.set_queue }
+    end
+
+    def generated_queue_name
+      Gitlab::SidekiqConfig::WorkerRouter.queue_name_from_worker_name(self)
+    end
+
+    override :validate_worker_attributes!
+    def validate_worker_attributes!
+      super
+
+      # Since the delayed data_consistency will use sidekiq built in retry mechanism, it is required that this mechanism
+      # is not disabled.
+      if retry_disabled? && get_data_consistency == :delayed
+        raise ArgumentError, "Retry support cannot be disabled if data_consistency is set to :delayed"
+      end
+    end
+
+    # Checks if sidekiq retry support is disabled
+    def retry_disabled?
+      get_sidekiq_options['retry'] == 0 || get_sidekiq_options['retry'] == false
+    end
+
+    override :sidekiq_options
+    def sidekiq_options(opts = {})
+      super.tap do
+        validate_worker_attributes!
+      end
+    end
+
+    def perform_async(*args)
+      # Worker execution for workers with data_consistency set to :delayed or :sticky
+      # will be delayed to give replication enough time to complete
+      if utilizes_load_balancing_capabilities?
+        perform_in(delay_interval, *args)
+      else
+        super
+      end
     end
 
     def set_queue
-      queue_name = [queue_namespace, base_queue_name].compact.join(':')
-
+      queue_name = ::Gitlab::SidekiqConfig::WorkerRouter.global.route(self)
       sidekiq_options queue: queue_name # rubocop:disable Cop/SidekiqOptionsQueue
-    end
-
-    def base_queue_name
-      name
-        .sub(/\AGitlab::/, '')
-        .sub(/Worker\z/, '')
-        .underscore
-        .tr('/', '_')
     end
 
     def queue_namespace(new_namespace = nil)
@@ -117,6 +150,12 @@ module ApplicationWorker
       else
         Sidekiq::Client.push_bulk('class' => self, 'args' => args_list, 'at' => schedule)
       end
+    end
+
+    protected
+
+    def delay_interval
+      DEFAULT_DELAY_INTERVAL.seconds
     end
   end
 end

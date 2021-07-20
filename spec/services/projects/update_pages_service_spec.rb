@@ -5,6 +5,7 @@ require "spec_helper"
 RSpec.describe Projects::UpdatePagesService do
   let_it_be(:project, refind: true) { create(:project, :repository) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit('HEAD').sha) }
+
   let(:build) { create(:ci_build, pipeline: pipeline, ref: 'HEAD') }
   let(:invalid_file) { fixture_file_upload('spec/fixtures/dk.png') }
 
@@ -16,6 +17,7 @@ RSpec.describe Projects::UpdatePagesService do
   subject { described_class.new(project, build) }
 
   before do
+    stub_feature_flags(skip_pages_deploy_to_legacy_storage: false)
     project.legacy_remove_pages
   end
 
@@ -55,8 +57,24 @@ RSpec.describe Projects::UpdatePagesService do
         end
       end
 
+      it 'creates a temporary directory with the project and build ID' do
+        expect(Dir).to receive(:mktmpdir).with("project-#{project.id}-build-#{build.id}-", anything).and_call_original
+
+        subject.execute
+      end
+
       it "doesn't deploy to legacy storage if it's disabled" do
-        stub_feature_flags(pages_update_legacy_storage: false)
+        allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+
+        expect(execute).to eq(:success)
+        expect(project.pages_deployed?).to be_truthy
+
+        expect(File.exist?(File.join(project.pages_path, 'public', 'index.html'))).to eq(false)
+      end
+
+      it "doesn't deploy to legacy storage if skip_pages_deploy_to_legacy_storage is enabled" do
+        allow(Settings.pages.local_store).to receive(:enabled).and_return(true)
+        stub_feature_flags(skip_pages_deploy_to_legacy_storage: true)
 
         expect(execute).to eq(:success)
         expect(project.pages_deployed?).to be_truthy
@@ -334,6 +352,41 @@ RSpec.describe Projects::UpdatePagesService do
       expect(deploy_status).to be_script_failure
     end
   end
+
+  context 'when retrying the job' do
+    let!(:older_deploy_job) do
+      create(:generic_commit_status, :failed, pipeline: pipeline,
+                                              ref: build.ref,
+                                              stage: 'deploy',
+                                              name: 'pages:deploy')
+    end
+
+    before do
+      create(:ci_job_artifact, :correct_checksum, file: file, job: build)
+      create(:ci_job_artifact, file_type: :metadata, file_format: :gzip, file: metadata, job: build)
+      build.reload
+    end
+
+    it 'marks older pages:deploy jobs retried' do
+      expect(execute).to eq(:success)
+
+      expect(older_deploy_job.reload).to be_retried
+    end
+
+    context 'when FF ci_fix_commit_status_retried is disabled' do
+      before do
+        stub_feature_flags(ci_fix_commit_status_retried: false)
+      end
+
+      it 'does not mark older pages:deploy jobs retried' do
+        expect(execute).to eq(:success)
+
+        expect(older_deploy_job.reload).not_to be_retried
+      end
+    end
+  end
+
+  private
 
   def deploy_status
     GenericCommitStatus.find_by(name: 'pages:deploy')

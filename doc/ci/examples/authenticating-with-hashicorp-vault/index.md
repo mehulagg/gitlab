@@ -30,30 +30,59 @@ You must replace the `vault.example.com` URL below with the URL of your Vault se
 
 ## How it works
 
-Each job has JSON Web Token (JWT) provided as environment variable named `CI_JOB_JWT`. This JWT can be used to authenticate with Vault using the [JWT Auth](https://www.vaultproject.io/docs/auth/jwt#jwt-authentication) method.
+Each job has JSON Web Token (JWT) provided as CI/CD variable named `CI_JOB_JWT`. This JWT can be used to authenticate with Vault using the [JWT Auth](https://www.vaultproject.io/docs/auth/jwt#jwt-authentication) method.
 
-The JWT's payload looks like this:
+The following fields are included in the JWT:
+
+| Field                   | When   | Description |
+| ----------------------- | ------ | ----------- |
+| `jti`                   | Always | Unique identifier for this token |
+| `iss`                   | Always | Issuer, the domain of your GitLab instance |
+| `iat`                   | Always | Issued at |
+| `nbf`                   | Always | Not valid before |
+| `exp`                   | Always | Expires at |
+| `sub`                   | Always | Subject (job ID) |
+| `namespace_id`          | Always | Use this to scope to group or user level namespace by ID |
+| `namespace_path`        | Always | Use this to scope to group or user level namespace by path |
+| `project_id`            | Always | Use this to scope to project by ID |
+| `project_path`          | Always | Use this to scope to project by path |
+| `user_id`               | Always | ID of the user executing the job |
+| `user_login`            | Always | Username of the user executing the job |
+| `user_email`            | Always | Email of the user executing the job |
+| `pipeline_id`           | Always | ID of this pipeline |
+| `pipeline_source`       | Always | [Pipeline source](../../jobs/job_control.md#common-if-clauses-for-rules) |
+| `job_id`                | Always | ID of this job |
+| `ref`                   | Always | Git ref for this job |
+| `ref_type`              | Always | Git ref type, either `branch` or `tag` |
+| `ref_protected`         | Always | `true` if this Git ref is protected, `false` otherwise |
+| `environment`           | Job is creating a deployment | Environment this job deploys to ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294440) in GitLab 13.9) |
+| `environment_protected` | Job is creating a deployment |`true` if deployed environment is protected, `false` otherwise ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294440) in GitLab 13.9) |
+
+Example JWT payload:
 
 ```json
 {
-  "jti": "c82eeb0c-5c6f-4a33-abf5-4c474b92b558", # Unique identifier for this token
-  "iss": "gitlab.example.com",                   # Issuer, the domain of your GitLab instance
-  "iat": 1585710286,                             # Issued at
-  "nbf": 1585798372,                             # Not valid before
-  "exp": 1585713886,                             # Expire at
-  "sub": "job_1212",                             # Subject (job id)
-  "namespace_id": "1",                           # Use this to scope to group or user level namespace by id
-  "namespace_path": "mygroup",                   # Use this to scope to group or user level namespace by path
-  "project_id": "22",                            #
-  "project_path": "mygroup/myproject",           #
-  "user_id": "42",                               # Id of the user executing the job
-  "user_login": "myuser"                         # GitLab @username
-  "user_email": "myuser@example.com",            # Email of the user executing the job
-  "pipeline_id": "1212",                         #
-  "job_id": "1212",                              #
-  "ref": "auto-deploy-2020-04-01",               # Git ref for this job
-  "ref_type": "branch",                          # Git ref type, branch or tag
-  "ref_protected": "true"                        # true if this git ref is protected, false otherwise
+  "jti": "c82eeb0c-5c6f-4a33-abf5-4c474b92b558",
+  "iss": "gitlab.example.com",
+  "iat": 1585710286,
+  "nbf": 1585798372,
+  "exp": 1585713886,
+  "sub": "job_1212",
+  "namespace_id": "1",
+  "namespace_path": "mygroup",
+  "project_id": "22",
+  "project_path": "mygroup/myproject",
+  "user_id": "42",
+  "user_login": "myuser",
+  "user_email": "myuser@example.com",
+  "pipeline_id": "1212",
+  "pipeline_source": "web",
+  "job_id": "1212",
+  "ref": "auto-deploy-2020-04-01",
+  "ref_type": "branch",
+  "ref_protected": "true",
+  "environment": "production",
+  "environment_protected": "true"
 }
 ```
 
@@ -178,7 +207,7 @@ $ vault write auth/jwt/config \
 
 For the full list of available configuration options, see Vault's [API documentation](https://www.vaultproject.io/api/auth/jwt#configure).
 
-The following job, when run for the `master` branch, is able to read secrets under `secret/myproject/staging/`, but not the secrets under `secret/myproject/production/`:
+The following job, when run for the default branch, is able to read secrets under `secret/myproject/staging/`, but not the secrets under `secret/myproject/production/`:
 
 ```yaml
 read_secrets:
@@ -187,7 +216,7 @@ read_secrets:
     - echo $CI_COMMIT_REF_NAME
     # and is this ref protected
     - echo $CI_COMMIT_REF_PROTECTED
-    # Vault's address can be provided here or as CI variable
+    # Vault's address can be provided here or as CI/CD variable
     - export VAULT_ADDR=http://vault.example.com:8200
     # Authenticate and get token. Token expiry time and other properties can be configured
     # when configuring JWT Auth - https://www.vaultproject.io/api/auth/jwt#parameters-1
@@ -200,6 +229,10 @@ read_secrets:
     - export PASSWORD="$(vault kv get -field=password secret/myproject/production/db)"
 ```
 
+NOTE:
+If you're using a Vault instance provided by HashiCorp Cloud Platform,
+you need to export the `VAULT_NAMESPACE` variable. Its default value is `admin`.
+
 ![read_secrets staging](img/vault-read-secrets-staging.png)
 
 The following job is able to authenticate using the `myproject-production` role and read secrets under `/secret/myproject/production/`:
@@ -211,7 +244,7 @@ read_secrets:
     - echo $CI_COMMIT_REF_NAME
     # and is this ref protected
     - echo $CI_COMMIT_REF_PROTECTED
-    # Vault's address can be provided here or as CI variable
+    # Vault's address can be provided here or as CI/CD variable
     - export VAULT_ADDR=http://vault.example.com:8200
     # Authenticate and get token. Token expiry time and other properties can be configured
     # when configuring JWT Auth - https://www.vaultproject.io/api/auth/jwt#parameters-1

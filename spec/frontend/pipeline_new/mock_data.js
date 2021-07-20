@@ -1,16 +1,14 @@
-export const mockBranches = [
-  { shortName: 'master', fullName: 'refs/heads/master' },
-  { shortName: 'branch-1', fullName: 'refs/heads/branch-1' },
-  { shortName: 'branch-2', fullName: 'refs/heads/branch-2' },
-];
+export const mockRefs = {
+  Branches: ['main', 'branch-1', 'branch-2'],
+  Tags: ['1.0.0', '1.1.0', '1.2.0'],
+};
 
-export const mockTags = [
-  { shortName: '1.0.0', fullName: 'refs/tags/1.0.0' },
-  { shortName: '1.1.0', fullName: 'refs/tags/1.1.0' },
-  { shortName: '1.2.0', fullName: 'refs/tags/1.2.0' },
-];
+export const mockFilteredRefs = {
+  Branches: ['branch-1'],
+  Tags: ['1.0.0', '1.1.0'],
+};
 
-export const mockParams = {
+export const mockQueryParams = {
   refParam: 'tag-1',
   variableParams: {
     test_var: 'test_var_val',
@@ -42,6 +40,28 @@ export const mockError = {
   total_warnings: 7,
 };
 
-export const mockBranchRefs = ['master', 'dev', 'release'];
+export const mockCreditCardValidationRequiredError = {
+  errors: ['Credit card required to be on file in order to create a pipeline'],
+  warnings: [],
+  total_warnings: 0,
+};
+
+export const mockBranchRefs = ['main', 'dev', 'release'];
 
 export const mockTagRefs = ['1.0.0', '1.1.0', '1.2.0'];
+
+export const mockVariables = [
+  {
+    uniqueId: 'var-refs/heads/main2',
+    variable_type: 'env_var',
+    key: 'var_without_value',
+    value: '',
+  },
+  {
+    uniqueId: 'var-refs/heads/main3',
+    variable_type: 'env_var',
+    key: 'var_with_value',
+    value: 'test_value',
+  },
+  { uniqueId: 'var-refs/heads/main4', variable_type: 'env_var', key: '', value: '' },
+];

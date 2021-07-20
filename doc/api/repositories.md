@@ -22,11 +22,11 @@ Supported attributes:
 
 | Attribute   | Type           | Required | Description |
 | :---------- | :------------- | :------- | :---------- |
-| `id`        | integer/string | no       | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`        | integer/string | no       | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `path`      | string         | yes      | The path inside repository. Used to get content of subdirectories. |
 | `ref`       | string         | yes      | The name of a repository branch or tag or if not given the default branch. |
 | `recursive` | boolean        | yes      | Boolean value used to get a recursive tree (false by default). |
-| `per_page`  | integer        | yes      | Number of results to show per page. If not specified, defaults to `20`. [Learn more on pagination](README.md#pagination). |
+| `per_page`  | integer        | yes      | Number of results to show per page. If not specified, defaults to `20`. [Learn more on pagination](index.md#pagination). |
 
 ```json
 [
@@ -96,7 +96,7 @@ Supported attributes:
 
 | Attribute | Type           | Required | Description |
 | :-------- | :------------- | :------- | :---------- |
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `sha`     | string         | yes      | The blob SHA. |
 
 ## Raw blob content
@@ -112,7 +112,7 @@ Supported attributes:
 
 | Attribute | Type     | Required | Description |
 | :-------- | :------- | :------- | :---------- |
-| `id`      | datatype | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`      | datatype | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `sha`     | datatype | yes      | The blob SHA. |
 
 ## Get file archive
@@ -137,7 +137,7 @@ Supported attributes:
 
 | Attribute   | Type           | Required | Description           |
 |:------------|:---------------|:---------|:----------------------|
-| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `sha`       | string         | no       | The commit SHA to download. A tag, branch reference, or SHA can be used. This defaults to the tip of the default branch if not specified. |
 
 Example request:
@@ -157,12 +157,13 @@ GET /projects/:id/repository/compare
 
 Supported attributes:
 
-| Attribute  | Type           | Required | Description |
-| :--------- | :------------- | :------- | :---------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
-| `from`     | string         | yes      | The commit SHA or branch name. |
-| `to`       | string         | yes      | The commit SHA or branch name. |
-| `straight` | boolean        | no       | Comparison method, `true` for direct comparison between `from` and `to` (`from`..`to`), `false` to compare using merge base (`from`...`to`)'. Default is `false`. |
+| Attribute         | Type           | Required | Description |
+| :---------        | :------------- | :------- | :---------- |
+| `id`              | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
+| `from`            | string         | yes      | The commit SHA or branch name. |
+| `to`              | string         | yes      | The commit SHA or branch name. |
+| `from_project_id` | integer        | no       | The ID to compare from |
+| `straight`        | boolean        | no       | Comparison method, `true` for direct comparison between `from` and `to` (`from`..`to`), `false` to compare using merge base (`from`...`to`)'. Default is `false`. |
 
 ```plaintext
 GET /projects/:id/repository/compare?from=master&to=feature
@@ -219,7 +220,7 @@ Supported attributes:
 
 | Attribute  | Type           | Required | Description |
 | :--------- | :------------- | :------- | :---------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `order_by` | string         | no       | Return contributors ordered by `name`, `email`, or `commits` (orders by commit date) fields. Default is `commits`. |
 | `sort`     | string         | no       | Return contributors sorted in `asc` or `desc` order. Default is `asc`. |
 
@@ -251,7 +252,7 @@ GET /projects/:id/repository/merge_base
 
 | Attribute | Type           | Required | Description |
 | --------- | -------------- | -------- | ------------------------------------------------------------------------------- |
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `refs`    | array          | yes      | The refs to find the common ancestor of, multiple refs can be passed            |
 
 Example request:
@@ -281,19 +282,12 @@ Example response:
 
 ## Generate changelog data
 
-> - [Introduced](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/351) in GitLab 13.9.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not yet recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-generating-changelog-data).
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> [Introduced](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/351) in GitLab 13.9.
 
 Generate changelog data based on commits in a repository.
 
-Given a version (using semantic versioning) and a range of commits,
-GitLab generates a changelog for all commits that use a particular
+Given a version (using [semantic versioning](https://semver.org/)) and a range
+of commits, GitLab generates a changelog for all commits that use a particular
 [Git trailer](https://git-scm.com/docs/git-interpret-trailers).
 
 The output of this process is a new section in a changelog file in the Git
@@ -310,35 +304,85 @@ Supported attributes:
 | :-------- | :------- | :--------- | :---------- |
 | `version` | string   | yes | The version to generate the changelog for. The format must follow [semantic versioning](https://semver.org/). |
 | `from`    | string   | no | The start of the range of commits (as a SHA) to use for generating the changelog. This commit itself isn't included in the list. |
-| `to`      | string   | yes | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. |
+| `to`      | string   | no | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. Defaults to the branch specified in the `branch` attribute. |
 | `date`    | datetime | no | The date and time of the release, defaults to the current time. |
 | `branch`  | string   | no | The branch to commit the changelog changes to, defaults to the project's default branch. |
 | `trailer` | string   | no | The Git trailer to use for including commits, defaults to `Changelog`. |
 | `file`    | string   | no | The file to commit the changes to, defaults to `CHANGELOG.md`. |
 | `message` | string   | no | The commit message to produce when committing the changes, defaults to `Add changelog for version X` where X is the value of the `version` argument. |
 
+WARNING:
+GitLab treats trailers case-sensitively. If you set the `trailer` field to
+`Example`, GitLab _won't_ include commits that use the trailer `example`,
+`eXaMpLE`, or anything else that isn't _exactly_ `Example`.
+
 If the `from` attribute is unspecified, GitLab uses the Git tag of the last
-version that came before the version specified in the `version` attribute. For
-this to work, your project must create Git tags for versions using the
-following format:
+stable version that came before the version specified in the `version`
+attribute. This requires that Git tag names follow a specific format, allowing
+GitLab to extract a version from the tag names. By default, GitLab considers
+tags using these formats:
 
-```plaintext
-vX.Y.Z
-```
+- `vX.Y.Z`
+- `X.Y.Z`
 
-Where `X.Y.Z` is a version that follows semantic versioning. For example,
-consider a project with the following tags:
+Where `X.Y.Z` is a version that follows [semantic
+versioning](https://semver.org/). For example, consider a project with the
+following tags:
 
+- v1.0.0-pre1
 - v1.0.0
 - v1.1.0
 - v2.0.0
 
 If the `version` attribute is `2.1.0`, GitLab uses tag v2.0.0. And when the
-version is `1.1.1`, or `1.2.0`, GitLab uses tag v1.1.0.
+version is `1.1.1`, or `1.2.0`, GitLab uses tag v1.1.0. The tag `v1.0.0-pre1` is
+never used, because pre-release tags are ignored.
 
 If `from` is unspecified and no tag to use is found, the API produces an error.
 To solve such an error, you must explicitly specify a value for the `from`
 attribute.
+
+### Examples
+
+These examples use [cURL](https://curl.se/) to perform HTTP requests.
+The example commands use these values:
+
+- **Project ID**: 42
+- **Location**: hosted on GitLab.com
+- **Example API token**: `token`
+
+This command generates a changelog for version `1.0.0`.
+
+The commit range:
+
+- Starts with the tag of the last release.
+- Ends with the last commit on the target branch. The default target branch is the project's default branch.
+
+If the last tag is `v0.9.0` and the default branch is `main`, the range of commits
+included in this example is `v0.9.0..main`:
+
+```shell
+curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0" "https://gitlab.com/api/v4/projects/42/repository/changelog"
+```
+
+To generate the data on a different branch, specify the `branch` parameter. This
+command generates data from the `foo` branch:
+
+```shell
+curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0&branch=foo" "https://gitlab.com/api/v4/projects/42/repository/changelog"
+```
+
+To use a different trailer, use the `trailer` parameter:
+
+```shell
+curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0&trailer=Type" "https://gitlab.com/api/v4/projects/42/repository/changelog"
+```
+
+To store the results in a different file, use the `file` parameter:
+
+```shell
+curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0&file=NEWS" "https://gitlab.com/api/v4/projects/42/repository/changelog"
+```
 
 ### How it works
 
@@ -357,6 +401,38 @@ Changelogs are generated by taking the title of the commits to include and using
 these as the changelog entries. You can enrich entries with additional data,
 such as a link to the merge request or details about the commit author. You can
 [customize the format of a changelog](#customize-the-changelog-output) section with a template.
+
+Trailers can be manually added while editing a commit message. To include a commit
+using the default trailer of `Changelog` and categorize it as a feature, the
+trailer could be added to a commit message like so:
+
+```plaintext
+<Commit message subject>
+
+<Commit message description>
+
+Changelog: feature
+```
+
+### Reverted commits
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55537) in GitLab 13.10.
+
+When generating a changelog for a range, GitLab ignores commits both added and
+reverted in that range. Revert commits themselves _are_ included if they use the
+Git trailer used for generating changelogs.
+
+Imagine the following scenario: you have three commits: A, B, and C. To generate
+changelogs, you use the default trailer `Changelog`. Both A and B use this
+trailer. Commit C is a commit that reverts commit B. When generating a changelog
+for this range, GitLab only includes commit A.
+
+Revert commits are detected by looking for commits where the message contains
+the pattern `This reverts commit SHA`, where `SHA` is the SHA of the commit that
+is reverted.
+
+If a revert commit includes the trailer used for generating changelogs
+(`Changelog` in the above example), the revert commit itself _is_ included.
 
 ### Customize the changelog output
 
@@ -562,25 +638,54 @@ In an entry, the following variables are available (here `foo.bar` means that
 - `merge_request.reference`: a reference to the merge request that first
   introduced the change (for example, `gitlab-org/gitlab!50063`).
 
-The `author` and `merge_request` objects might not be present if the data couldn't
-be determined (for example, when a commit was created without a corresponding merge
-request).
+The `author` and `merge_request` objects might not be present if the data
+couldn't be determined. For example, when a commit is created without a
+corresponding merge request, no merge request is displayed.
 
-### Enable or disable generating changelog data **(CORE ONLY)**
+### Customize the tag format when extracting versions
 
-This feature is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56889) in GitLab 13.11.
 
-To enable it for a project:
+GitLab uses a regular expression (using the
+[re2](https://github.com/google/re2/) engine and syntax) to extract a semantic
+version from tag names. The default regular expression is:
 
-```ruby
-Feature.enable(:changelog_api, Project.find(id_of_the_project))
+```plaintext
+^v?(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<pre>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<meta>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
 ```
 
-To disable it for a project:
+This regular expression is based on the official
+[semantic versioning](https://semver.org/) regular expression, and also includes
+support for tag names that start with the letter `v`.
 
-```ruby
-Feature.disable(:changelog_api, Project.find(id_of_the_project))
+If your project uses a different format for tags, you can specify a different
+regular expression. The regular expression used _must_ produce the following
+capture groups. If any of these capture groups are missing, the tag is ignored:
+
+- `major`
+- `minor`
+- `patch`
+
+The following capture groups are optional:
+
+- `pre`: If set, the tag is ignored. Ignoring `pre` tags ensures release candidate
+  tags and other pre-release tags are not considered when determining the range of
+  commits to generate a changelog for.
+- `meta`: (Optional) Specifies build metadata.
+
+Using this information, GitLab builds a map of Git tags and their release
+versions. It then determines what the latest tag is, based on the version
+extracted from each tag.
+
+To specify a custom regular expression, use the `tag_regex` setting in your
+changelog configuration YAML file. For example, this pattern matches tag names
+such as `version-1.2.3` but not `version-1.2`.
+
+```yaml
+---
+tag_regex: '^version-(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$'
 ```
+
+To test if your regular expression is working, you can use websites such as
+[regex101](https://regex101.com/). If the regular expression syntax is invalid,
+an error is produced when generating a changelog.

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::ApplicationController
-  include Analytics::UniqueVisitsHelper
   include CycleAnalyticsParams
+  include RedisTracking
   extend ::Gitlab::Utils::Override
 
   increment_usage_counter Gitlab::UsageDataCounters::CycleAnalyticsCounter, :views, only: :show
@@ -13,15 +13,12 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
   before_action :request_params, only: :show
 
   before_action do
-    push_frontend_feature_flag(:cycle_analytics_scatterplot_enabled, default_enabled: true)
-    push_frontend_feature_flag(:value_stream_analytics_path_navigation, @group)
-    push_frontend_feature_flag(:value_stream_analytics_extended_form, @group)
     render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
   end
 
   layout 'group'
 
-  track_unique_visits :show, target_id: 'g_analytics_valuestream'
+  track_redis_hll_event :show, name: 'g_analytics_valuestream'
 
   private
 
@@ -33,6 +30,12 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
   def load_value_stream
     return unless @group && params[:value_stream_id]
 
-    @value_stream = @group.value_streams.find(params[:value_stream_id])
+    default_name = Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
+
+    @value_stream = if params[:value_stream_id] == default_name
+                      @group.value_streams.new(name: default_name)
+                    else
+                      @group.value_streams.find(params[:value_stream_id])
+                    end
   end
 end

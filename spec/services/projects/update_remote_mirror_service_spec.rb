@@ -12,20 +12,37 @@ RSpec.describe Projects::UpdateRemoteMirrorService do
   subject(:service) { described_class.new(project, project.creator) }
 
   describe '#execute' do
-    subject(:execute!) { service.execute(remote_mirror, 0) }
+    let(:retries) { 0 }
+    let(:inmemory) { true }
+
+    subject(:execute!) { service.execute(remote_mirror, retries) }
 
     before do
+      stub_feature_flags(update_remote_mirror_inmemory: inmemory)
       project.repository.add_branch(project.owner, 'existing-branch', 'master')
 
       allow(remote_mirror)
         .to receive(:update_repository)
+        .with(inmemory_remote: inmemory)
         .and_return(double(divergent_refs: []))
     end
 
-    it 'ensures the remote exists' do
-      expect(remote_mirror).to receive(:ensure_remote!)
+    context 'with in-memory remote disabled' do
+      let(:inmemory) { false }
 
-      execute!
+      it 'ensures the remote exists' do
+        expect(remote_mirror).to receive(:ensure_remote!)
+
+        execute!
+      end
+    end
+
+    context 'with in-memory remote enabled' do
+      it 'does not ensure the remote exists' do
+        expect(remote_mirror).not_to receive(:ensure_remote!)
+
+        execute!
+      end
     end
 
     it 'does not fetch the remote repository' do
@@ -62,8 +79,18 @@ RSpec.describe Projects::UpdateRemoteMirrorService do
         allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(true)
       end
 
-      it 'fails and returns error status' do
+      it 'hard retries and returns error status' do
         expect(execute!).to eq(status: :error, message: 'The remote mirror URL is invalid.')
+        expect(remote_mirror).to be_to_retry
+      end
+
+      context 'when retries are exceeded' do
+        let(:retries) { 4 }
+
+        it 'hard fails and returns error status' do
+          expect(execute!).to eq(status: :error, message: 'The remote mirror URL is invalid.')
+          expect(remote_mirror).to be_failed
+        end
       end
     end
 

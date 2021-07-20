@@ -1,14 +1,17 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
+import { GlPagination, GlAlert } from '@gitlab/ui';
 import Api from '~/api';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+// eslint-disable-next-line import/no-deprecated
+import { updateHistory, setUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
-import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  DEFAULT_LABEL_ANY,
+  OPERATOR_IS_ONLY,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
@@ -16,6 +19,7 @@ import {
   FilterState,
   AvailableSortOptions,
   TestReportStatus,
+  TestReportStatusToValue,
   DEFAULT_PAGE_SIZE,
 } from '../constants';
 import createRequirement from '../queries/createRequirement.mutation.graphql';
@@ -31,11 +35,14 @@ import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementsLoading from './requirements_loading.vue';
 import RequirementsTabs from './requirements_tabs.vue';
 
+import StatusToken from './tokens/status_token.vue';
+
 export default {
   DEFAULT_PAGE_SIZE,
   AvailableSortOptions,
   components: {
     GlPagination,
+    GlAlert,
     FilteredSearchBar,
     RequirementsTabs,
     RequirementsLoading,
@@ -70,6 +77,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    initialStatus: {
+      type: String,
+      required: false,
+      default: '',
     },
     initialRequirementsCount: {
       type: Object,
@@ -145,6 +157,10 @@ export default {
           queryVariables.authorUsernames = this.authorUsernames;
         }
 
+        if (this.status) {
+          queryVariables.status = TestReportStatusToValue[this.status];
+        }
+
         if (this.sortBy) {
           queryVariables.sortBy = this.sortBy;
         }
@@ -202,6 +218,7 @@ export default {
       filterBy: this.initialFilterBy,
       textSearch: this.initialTextSearch,
       authorUsernames: this.initialAuthorUsernames,
+      status: this.initialStatus,
       sortBy: this.initialSortBy,
       showRequirementCreateDrawer: false,
       showRequirementViewDrawer: false,
@@ -221,6 +238,7 @@ export default {
         ARCHIVED: this.initialRequirementsCount[FilterState.archived],
         ALL: this.initialRequirementsCount[FilterState.all],
       },
+      alert: null,
     };
   },
   computed: {
@@ -233,11 +251,7 @@ export default {
       return this.$apollo.queries.requirements.loading;
     },
     requirementsListEmpty() {
-      return (
-        !this.$apollo.queries.requirements.loading &&
-        !this.requirements.list.length &&
-        this.requirementsCount[this.filterBy] === 0
-      );
+      return !this.$apollo.queries.requirements.loading && !this.requirementsList.length;
     },
     totalRequirementsForCurrentTab() {
       return this.requirementsCount[this.filterBy];
@@ -275,9 +289,17 @@ export default {
           unique: false,
           symbol: '@',
           token: AuthorToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchPath: this.projectPath,
           fetchAuthors: Api.projectUsers.bind(Api),
+        },
+        {
+          type: 'status',
+          icon: 'status',
+          title: __('Status'),
+          unique: true,
+          token: StatusToken,
+          operators: OPERATOR_IS_ONLY,
         },
       ];
     },
@@ -287,8 +309,18 @@ export default {
         value: { data: author },
       }));
 
+      if (this.status) {
+        value.push({
+          type: 'status',
+          value: { data: this.status },
+        });
+      }
+
       if (this.textSearch) {
-        value.push(this.textSearch);
+        value.push({
+          type: 'filtered-search-term',
+          value: { data: this.textSearch },
+        });
       }
 
       return value;
@@ -299,6 +331,7 @@ export default {
      */
     updateUrl() {
       const { href, search } = window.location;
+      // eslint-disable-next-line import/no-deprecated
       const queryParams = urlParamsToObject(search);
       const {
         filterBy,
@@ -307,6 +340,7 @@ export default {
         nextPageCursor,
         textSearch,
         authorUsernames,
+        status,
         sortBy,
       } = this;
 
@@ -345,6 +379,12 @@ export default {
       delete queryParams.author_username;
       if (authorUsernames.length) {
         queryParams['author_username[]'] = authorUsernames;
+      }
+
+      if (status) {
+        queryParams.status = status;
+      } else {
+        delete queryParams.status;
       }
 
       // We want to replace the history state so that back button
@@ -408,7 +448,7 @@ export default {
           createFlash({ message });
         });
     },
-    exportCsv() {
+    exportCsv(selectedFields) {
       return this.$apollo
         .mutate({
           mutation: exportRequirement,
@@ -418,7 +458,17 @@ export default {
             authorUsername: this.authorUsernames,
             search: this.textSearch,
             sortBy: this.sortBy,
+            selectedFields,
           },
+        })
+        .then(() => {
+          this.alert = {
+            variant: 'info',
+            message: sprintf(
+              __('Your CSV export has started. It will be emailed to %{email} when complete.'),
+              { email: this.currentUserEmail },
+            ),
+          };
         })
         .catch((e) => {
           createFlash({
@@ -569,23 +619,35 @@ export default {
     },
     handleFilterRequirements(filters = []) {
       const authors = [];
-      let textSearch = '';
+      let status = '';
+      const textSearch = [];
 
       filters.forEach((filter) => {
-        if (typeof filter === 'string') {
-          textSearch = filter;
-        } else if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
-          authors.push(filter.value.data);
+        switch (filter.type) {
+          case 'author_username':
+            if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
+              authors.push(filter.value.data);
+            }
+            break;
+          case 'status':
+            status = filter.value.data;
+            break;
+          case 'filtered-search-term':
+            if (filter.value.data) textSearch.push(filter.value.data);
+            break;
+          default:
+            break;
         }
       });
 
       this.authorUsernames = [...authors];
-      this.textSearch = textSearch;
+      this.status = status;
+      this.textSearch = textSearch.join(' ');
       this.currentPage = 1;
       this.prevPageCursor = '';
       this.nextPageCursor = '';
 
-      if (textSearch || authors.length) {
+      if (textSearch.length || authors.length || status) {
         this.track('filter', {
           property: JSON.stringify(filters),
         });
@@ -628,6 +690,16 @@ export default {
 
 <template>
   <div class="requirements-list-container">
+    <gl-alert
+      v-if="alert"
+      :variant="alert.variant"
+      :dismissible="true"
+      class="gl-mt-3 gl-mb-4"
+      @dismiss="alert = null"
+    >
+      {{ alert.message }}
+    </gl-alert>
+
     <requirements-tabs
       :filter-by="filterBy"
       :requirements-count="requirementsCount"
@@ -657,6 +729,7 @@ export default {
       @drawer-close="handleNewRequirementCancel"
     />
     <requirement-edit-form
+      data-testid="edit-form"
       :drawer-open="showRequirementViewDrawer"
       :requirement="editedRequirement"
       :enable-requirement-edit="enableRequirementEdit"

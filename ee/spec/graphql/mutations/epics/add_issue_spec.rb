@@ -6,6 +6,7 @@ RSpec.describe Mutations::Epics::AddIssue do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:epic) { create(:epic, group: group) }
+
   let(:user) { issue.author }
   let(:issue) { create(:issue, project: project) }
 
@@ -45,7 +46,7 @@ RSpec.describe Mutations::Epics::AddIssue do
       it 'returns error if issue is not found' do
         issue.update!(project: create(:project))
 
-        expect(subject[:errors]).to eq('No Issue found for given params')
+        expect(subject[:errors]).to eq('No matching issue found. Make sure that you are adding a valid issue URL.')
       end
     end
   end

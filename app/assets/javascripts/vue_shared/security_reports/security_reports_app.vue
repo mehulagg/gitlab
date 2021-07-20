@@ -13,10 +13,10 @@ import {
   REPORT_TYPE_SECRET_DETECTION,
   reportTypeToSecurityReportTypeEnum,
 } from './constants';
-import securityReportDownloadPathsQuery from './queries/security_report_download_paths.query.graphql';
+import securityReportMergeRequestDownloadPathsQuery from './queries/security_report_merge_request_download_paths.query.graphql';
 import store from './store';
 import { MODULE_SAST, MODULE_SECRET_DETECTION } from './store/constants';
-import { extractSecurityReportArtifacts } from './utils';
+import { extractSecurityReportArtifactsFromMergeRequest } from './utils';
 
 export default {
   store,
@@ -86,7 +86,7 @@ export default {
   },
   apollo: {
     reportArtifacts: {
-      query: securityReportDownloadPathsQuery,
+      query: securityReportMergeRequestDownloadPathsQuery,
       variables() {
         return {
           projectPath: this.targetProjectFullPath,
@@ -97,7 +97,7 @@ export default {
         };
       },
       update(data) {
-        return extractSecurityReportArtifacts(this.$options.reportTypes, data);
+        return extractSecurityReportArtifactsFromMergeRequest(this.$options.reportTypes, data);
       },
       error(error) {
         this.showError(error);
@@ -184,12 +184,14 @@ export default {
     :has-issues="false"
     class="mr-widget-border-top mr-report"
     data-testid="security-mr-widget"
+    track-action="users_expanding_secure_security_report"
   >
     <template v-for="slot in $options.summarySlots" #[slot]>
       <span :key="slot">
         <security-summary :message="groupedSummaryText" />
 
         <help-icon
+          class="gl-ml-3"
           :help-path="securityReportsDocsPath"
           :discover-project-security-path="discoverProjectSecurityPath"
         />
@@ -198,6 +200,7 @@ export default {
 
     <template #action-buttons>
       <security-report-download-dropdown
+        :text="s__('SecurityReports|Download results')"
         :artifacts="reportArtifacts"
         :loading="isLoadingReportArtifacts"
       />
@@ -212,11 +215,13 @@ export default {
     :has-issues="false"
     class="mr-widget-border-top mr-report"
     data-testid="security-mr-widget"
+    track-action="users_expanding_secure_security_report"
   >
     <template #error>
       {{ $options.i18n.scansHaveRun }}
 
       <help-icon
+        class="gl-ml-3"
         :help-path="securityReportsDocsPath"
         :discover-project-security-path="discoverProjectSecurityPath"
       />
@@ -224,6 +229,7 @@ export default {
 
     <template #action-buttons>
       <security-report-download-dropdown
+        :text="s__('SecurityReports|Download results')"
         :artifacts="reportArtifacts"
         :loading="isLoadingReportArtifacts"
       />

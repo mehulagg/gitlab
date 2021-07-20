@@ -4,11 +4,9 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Confidential issues
+# Confidential issues **(FREE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3282) in GitLab 8.6.
-
-Confidential issues are issues visible only to members of a project with
+Confidential issues are [issues](index.md) visible only to members of a project with
 [sufficient permissions](#permissions-and-access-to-confidential-issues).
 Confidential issues can be used by open source projects and companies alike to
 keep security vulnerabilities private or prevent surprises from leaking out.
@@ -19,7 +17,7 @@ You can make an issue confidential during issue creation or by editing
 an existing one.
 
 When you create a new issue, a checkbox right below the text area is available
-to mark the issue as confidential. Check that box and hit the **Submit issue**
+to mark the issue as confidential. Check that box and hit the **Create issue**
 button to create the issue. For existing issues, edit them, check the
 confidential checkbox and hit **Save changes**.
 
@@ -77,11 +75,11 @@ least [Reporter access](../../permissions.md#project-members-permissions). Howev
 confidential issues, but can only view the ones that they created themselves.
 
 Confidential issues are also hidden in search results for unprivileged users.
-For example, here's what a user with Maintainer and Guest access sees in the
-project's search results respectively.
+For example, here's what a user with the [Maintainer role](../../permissions.md) and Guest access
+sees in the project's search results respectively.
 
-| Maintainer access | Guest access |
-| :-----------: | :----------: |
+| Maintainer role                                                                        | Guest access                                                                     |
+|:---------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------|
 | ![Confidential issues search by maintainer](img/confidential_issues_search_master.png) | ![Confidential issues search by guest](img/confidential_issues_search_guest.png) |
 
 ## Merge Requests for Confidential Issues
@@ -99,9 +97,9 @@ confidential information prematurely. To make a confidential commit public,
 open a merge request from the private fork to the public upstream project.
 
 Permissions are inherited from parent groups. Developers have the same permissions
-for private forks created in the same group or in a sub-group of the original
+for private forks created in the same group or in a subgroup of the original
 Permissions are inherited from parent groups. When private forks are created
-in the same group or sub-group as the original upstream repository, users
+in the same group or subgroup as the original upstream repository, users
 receive the same permissions in both projects. This inheritance ensures
 Developer users have the needed permissions to both view confidential issues and
 resolve them.

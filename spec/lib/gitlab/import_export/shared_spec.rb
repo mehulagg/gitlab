@@ -26,13 +26,35 @@ RSpec.describe Gitlab::ImportExport::Shared do
 
     describe '#export_path' do
       it 'uses a random hash relative to project path' do
-        expect(subject.export_path).to match(/#{base_path}\h{32}\/\h{32}/)
+        expect(subject.export_path).to match(%r{#{base_path}\h{32}/\h{32}})
       end
 
       it 'memoizes the path' do
         path = subject.export_path
 
         2.times { expect(subject.export_path).to eq(path) }
+      end
+    end
+  end
+
+  context 'with a group on disk' do
+    describe '#base_path' do
+      it 'uses hashed storage path' do
+        group = create(:group)
+        subject = described_class.new(group)
+        base_path = %(/tmp/gitlab_exports/@groups/)
+
+        expect(subject.base_path).to match(%r{#{base_path}\h{2}/\h{2}/\h{64}})
+      end
+    end
+  end
+
+  context 'when exportable type is unsupported' do
+    describe '#base_path' do
+      it 'raises' do
+        subject = described_class.new('test')
+
+        expect { subject.base_path }.to raise_error(Gitlab::ImportExport::Error, 'Unsupported Exportable Type String')
       end
     end
   end

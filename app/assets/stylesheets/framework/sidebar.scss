@@ -58,19 +58,6 @@
       height: $gl-padding;
     }
   }
-
-  .copy-email-button { // TODO: replace with utility
-    @include gl-w-full;
-    @include gl-h-full;
-  }
-
-  .copy-email-address {
-    height: 60px;
-
-    &:hover {
-      background: $gray-100;
-    }
-  }
 }
 
 .right-sidebar-expanded {
@@ -244,4 +231,9 @@
       padding: 0;
     }
   }
+}
+
+.toggle-right-sidebar-button {
+  @include side-panel-toggle;
+  border-bottom: 1px solid $border-color;
 }

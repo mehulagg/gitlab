@@ -7,7 +7,8 @@ RSpec.describe Integrations::Test::ProjectService do
 
   describe '#execute' do
     let_it_be(:project) { create(:project) }
-    let(:integration) { create(:slack_service, project: project) }
+
+    let(:integration) { create(:integrations_slack, project: project) }
     let(:user) { project.owner }
     let(:event) { nil }
     let(:sample_data) { { data: 'sample' } }
@@ -23,8 +24,8 @@ RSpec.describe Integrations::Test::ProjectService do
         expect(subject).to eq(success_result)
       end
 
-      context 'PipelinesEmailService' do
-        let(:integration) { create(:pipelines_email_service, project: project) }
+      context 'with Integrations::PipelinesEmail' do
+        let(:integration) { create(:pipelines_email_integration, project: project) }
 
         it_behaves_like 'tests for integration with pipeline data'
       end
@@ -32,7 +33,7 @@ RSpec.describe Integrations::Test::ProjectService do
 
     context 'with event specified' do
       context 'event not supported by integration' do
-        let(:integration) { create(:jira_service, project: project) }
+        let(:integration) { create(:jira_integration, project: project) }
         let(:event) { 'push' }
 
         it 'returns error message' do
@@ -131,6 +132,7 @@ RSpec.describe Integrations::Test::ProjectService do
 
       context 'deployment' do
         let_it_be(:project) { create(:project, :test_repo) }
+
         let(:deployment) { build(:deployment) }
         let(:event) { 'deployment' }
 
@@ -145,21 +147,6 @@ RSpec.describe Integrations::Test::ProjectService do
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
-        end
-
-        context 'when the reorder feature flag is disabled' do
-          before do
-            stub_feature_flags(integrations_test_webhook_reorder: false)
-          end
-
-          it 'executes the old query' do
-            allow(Gitlab::DataBuilder::Deployment).to receive(:build).and_return(sample_data)
-
-            expect(DeploymentsFinder).not_to receive(:new)
-            expect(project).to receive(:deployments).and_return([deployment])
-            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
-            expect(subject).to eq(success_result)
-          end
         end
       end
 
@@ -179,25 +166,11 @@ RSpec.describe Integrations::Test::ProjectService do
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
         end
-
-        context 'when the reorder feature flag is disabled' do
-          before do
-            stub_feature_flags(integrations_test_webhook_reorder: false)
-          end
-
-          it 'executes the old query' do
-            create(:ci_empty_pipeline, project: project)
-            allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
-
-            expect(Ci::PipelinesFinder).not_to receive(:new)
-            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
-            expect(subject).to eq(success_result)
-          end
-        end
       end
 
       context 'wiki_page' do
         let_it_be(:project) { create(:project, :wiki_repo) }
+
         let(:event) { 'wiki_page' }
 
         it 'returns error message if wiki disabled' do

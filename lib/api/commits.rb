@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require 'mime/types'
 
 module API
@@ -41,6 +40,7 @@ module API
         optional :with_stats, type: Boolean, desc: 'Stats about each commit will be added to the response'
         optional :first_parent, type: Boolean, desc: 'Only include the first parent of merges'
         optional :order, type: String, desc: 'List commits in order', default: 'default', values: %w[default topo]
+        optional :trailers, type: Boolean, desc: 'Parse and include Git trailers for every commit', default: false
         use :pagination
       end
       get ':id/repository/commits' do
@@ -62,7 +62,8 @@ module API
                                                   after: after,
                                                   all: all,
                                                   first_parent: first_parent,
-                                                  order: order)
+                                                  order: order,
+                                                  trailers: params[:trailers])
 
         serializer = with_stats ? Entities::CommitWithStats : Entities::Commit
 
@@ -186,16 +187,14 @@ module API
         use :pagination
         requires :sha, type: String, desc: 'A commit sha, or the name of a branch or tag'
       end
-      # rubocop: disable CodeReuse/ActiveRecord
       get ':id/repository/commits/:sha/comments', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         commit = user_project.commit(params[:sha])
 
         not_found! 'Commit' unless commit
-        notes = commit.notes.order(:created_at)
+        notes = commit.notes.with_api_entity_associations.fresh
 
         present paginate(notes), with: Entities::CommitNote
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Cherry pick commit into a branch' do
         detail 'This feature was introduced in GitLab 8.15'
@@ -205,6 +204,7 @@ module API
         requires :sha, type: String, desc: 'A commit sha, or the name of a branch or tag to be cherry picked'
         requires :branch, type: String, desc: 'The name of the branch', allow_blank: false
         optional :dry_run, type: Boolean, default: false, desc: "Does not commit any changes"
+        optional :message, type: String, desc: 'A custom commit message to use for the picked commit'
       end
       post ':id/repository/commits/:sha/cherry_pick', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         authorize_push_to_branch!(params[:branch])
@@ -218,7 +218,8 @@ module API
           commit: commit,
           start_branch: params[:branch],
           branch_name: params[:branch],
-          dry_run: params[:dry_run]
+          dry_run: params[:dry_run],
+          message: params[:message]
         }
 
         result = ::Commits::CherryPickService
@@ -372,7 +373,7 @@ module API
           current_user,
           project_id: user_project.id,
           commit_sha: commit.sha
-        ).execute
+        ).execute.with_api_entity_associations
 
         present paginate(commit_merge_requests), with: Entities::MergeRequestBasic
       end

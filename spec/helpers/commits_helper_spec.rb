@@ -3,57 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe CommitsHelper do
-  describe '#revert_commit_link' do
-    context 'when current_user exists' do
-      before do
-        allow(helper).to receive(:current_user).and_return(double('User'))
-      end
-
-      it 'renders a div for Vue' do
-        result = helper.revert_commit_link
-
-        expect(result).to include('js-revert-commit-trigger')
-      end
-    end
-
-    context 'when current_user does not exist' do
-      before do
-        allow(helper).to receive(:current_user).and_return(nil)
-      end
-
-      it 'does not render anything' do
-        result = helper.revert_commit_link
-
-        expect(result).to be_nil
-      end
-    end
-  end
-
-  describe '#cherry_pick_commit_link' do
-    context 'when current_user exists' do
-      before do
-        allow(helper).to receive(:current_user).and_return(double('User'))
-      end
-
-      it 'renders a div for Vue' do
-        result = helper.cherry_pick_commit_link
-
-        expect(result).to include('js-cherry-pick-commit-trigger')
-      end
-    end
-
-    context 'when current_user does not exist' do
-      before do
-        allow(helper).to receive(:current_user).and_return(nil)
-      end
-
-      it 'does not render anything' do
-        result = helper.cherry_pick_commit_link
-
-        expect(result).to be_nil
-      end
-    end
-  end
+  include ProjectForksHelper
 
   describe 'commit_author_link' do
     it 'escapes the author email' do
@@ -194,7 +144,7 @@ RSpec.describe CommitsHelper do
       }
     end
 
-    subject { helper.conditionally_paginate_diff_files(diffs_collection, paginate: paginate) }
+    subject { helper.conditionally_paginate_diff_files(diffs_collection, paginate: paginate, per: Projects::CommitController::COMMIT_DIFFS_PER_PAGE) }
 
     before do
       allow(helper).to receive(:params).and_return(params)
@@ -218,15 +168,15 @@ RSpec.describe CommitsHelper do
         let(:page) { 1 }
 
         it "has 20 diffs" do
-          expect(subject.size).to eq(75)
+          expect(subject.size).to eq(20)
         end
       end
 
-      context "page 2" do
-        let(:page) { 2 }
+      context "page 5" do
+        let(:page) { 5 }
 
-        it "has the remaining 10 diffs" do
-          expect(subject.size).to eq(10)
+        it "has the remaining 5 out of 85 diffs" do
+          expect(subject.size).to eq(5)
         end
       end
     end
@@ -238,15 +188,146 @@ RSpec.describe CommitsHelper do
         expect(subject).to be_a(Gitlab::Git::DiffCollection)
       end
     end
+  end
 
-    context "feature flag is disabled" do
-      let(:paginate) { true }
+  describe '#cherry_pick_projects_data' do
+    let(:project) { create(:project, :repository) }
+    let(:user) { create(:user, maintainer_projects: [project]) }
+    let!(:forked_project) { fork_project(project, user, { namespace: user.namespace, repository: true }) }
 
-      it "returns a standard DiffCollection" do
-        stub_feature_flags(paginate_commit_view: false)
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
 
-        expect(subject).to be_a(Gitlab::Git::DiffCollection)
+    it 'returns data for cherry picking into a project' do
+      expect(helper.cherry_pick_projects_data(forked_project)).to match_array([
+        { id: project.id.to_s, name: project.full_path, refsUrl: refs_project_path(project) },
+        { id: forked_project.id.to_s, name: forked_project.full_path, refsUrl: refs_project_path(forked_project) }
+      ])
+    end
+  end
+
+  describe "#commit_options_dropdown_data" do
+    let(:project) { build(:project, :repository) }
+    let(:commit) { build(:commit) }
+    let(:user) { build(:user) }
+
+    subject { helper.commit_options_dropdown_data(project, commit) }
+
+    context "when user is logged in" do
+      before do
+        allow(helper).to receive(:can?).with(user, :push_code, project).and_return(true)
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      it "returns data as expected" do
+        is_expected.to eq standard_expected_data
+      end
+
+      context "when can not collaborate on project" do
+        before do
+          allow(helper).to receive(:can_collaborate_with_project?).with(project).and_return(false)
+        end
+
+        it "returns data as expected" do
+          no_collaboration_values = {
+            can_revert: 'false',
+            can_cherry_pick: 'false'
+          }
+
+          is_expected.to eq standard_expected_data.merge(no_collaboration_values)
+        end
+      end
+
+      context "when commit has already been reverted" do
+        before do
+          allow(commit).to receive(:has_been_reverted?).with(user).and_return(true)
+        end
+
+        it "returns data as expected" do
+          is_expected.to eq standard_expected_data.merge({ can_revert: 'false' })
+        end
       end
     end
+
+    context "when user is not logged in" do
+      before do
+        allow(helper).to receive(:can?).with(nil, :push_code, project).and_return(false)
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it "returns data as expected" do
+        logged_out_values = {
+          can_revert: '',
+          can_cherry_pick: '',
+          can_tag: 'false'
+        }
+
+        is_expected.to eq standard_expected_data.merge(logged_out_values)
+      end
+    end
+
+    def standard_expected_data
+      {
+        new_project_tag_path: new_project_tag_path(project, ref: commit),
+        email_patches_path: project_commit_path(project, commit, format: :patch),
+        plain_diff_path: project_commit_path(project, commit, format: :diff),
+        can_revert: 'true',
+        can_cherry_pick: 'true',
+        can_tag: 'true',
+        can_email_patches: 'true'
+      }
+    end
+  end
+
+  describe "#commit_partial_cache_key" do
+    subject(:cache_key) { helper.commit_partial_cache_key(commit, ref: ref, merge_request: merge_request, request: request) }
+
+    let(:commit) { create(:commit).present(current_user: user) }
+    let(:commit_status) { Gitlab::Ci::Status::Running.new(pipeline, user) }
+    let(:pipeline) { create(:ci_pipeline, :running) }
+    let(:user) { create(:user) }
+    let(:ref) { "master" }
+    let(:merge_request) { create(:merge_request) }
+    let(:request) { double(xhr?: true) }
+    let(:current_path) { "test" }
+
+    before do
+      expect(commit).to receive(:status_for).with(ref).and_return(commit_status)
+      assign(:path, current_path)
+    end
+
+    it { is_expected.to be_an(Array) }
+    it { is_expected.to include(commit) }
+    it { is_expected.to include(commit.author) }
+    it { is_expected.to include(ref) }
+
+    it do
+      is_expected.to include(
+        {
+          merge_request: merge_request.cache_key,
+          pipeline_status: pipeline.cache_key,
+          xhr: true,
+          controller: "commits",
+          path: current_path
+        }
+      )
+    end
+
+    describe "final cache key output" do
+      subject { ActiveSupport::Cache.expand_cache_key(cache_key) }
+
+      it { is_expected.to include(commit.cache_key) }
+      it { is_expected.to include(pipeline.cache_key) }
+    end
+  end
+
+  describe "#commit_path_template" do
+    let(:project) { build(:project) }
+    let(:expected_path) { "/#{project.full_path}/-/commit/$COMMIT_SHA" }
+
+    subject { helper.commit_path_template(project) }
+
+    it { is_expected.to eq(expected_path) }
   end
 end

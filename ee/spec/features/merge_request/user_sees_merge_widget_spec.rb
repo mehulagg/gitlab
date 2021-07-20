@@ -73,12 +73,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       it 'shows a warning that fork project merge request does not create merge request pipelines by default', :sidekiq_might_not_need_inline do
         visit project_merge_request_path(project, merge_request)
 
-        within('.warning_message') do
-          expect(page)
-            .to have_content('Fork project merge requests do not create merge' \
-                             ' request pipelines that validate a post merge result' \
-                             ' unless invoked by a project member.')
-        end
+        expect(page).to have_content('If the last pipeline ran in the fork project, it may be inaccurate.')
       end
     end
   end

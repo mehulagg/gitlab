@@ -23,8 +23,8 @@ RSpec.describe ApplicationSettings::UpdateService do
     context 'when the passed terms are blank' do
       let(:params) { { terms: '' } }
 
-      it 'does not create terms' do
-        expect { subject.execute }.not_to change { ApplicationSetting::Term.count }
+      it 'does create terms' do
+        expect { subject.execute }.to change { ApplicationSetting::Term.count }.by(1)
       end
     end
 
@@ -123,6 +123,7 @@ RSpec.describe ApplicationSettings::UpdateService do
     it_behaves_like 'invalidates markdown cache', { asset_proxy_url: 'http://test.com' }
     it_behaves_like 'invalidates markdown cache', { asset_proxy_secret_key: 'another secret' }
     it_behaves_like 'invalidates markdown cache', { asset_proxy_allowlist: ['domain.com'] }
+    it_behaves_like 'invalidates markdown cache', { asset_proxy_whitelist: ['domain.com'] }
 
     context 'when also setting the local_markdown_version' do
       let(:params) { { asset_proxy_enabled: true, local_markdown_version: 12 } }
@@ -332,6 +333,32 @@ RSpec.describe ApplicationSettings::UpdateService do
       expect(application_settings.throttle_protected_paths_period_in_seconds).to eq(600)
       expect(application_settings.throttle_protected_paths_requests_per_period).to eq(100)
       expect(application_settings.protected_paths).to eq(['/users/password', '/users/sign_in'])
+    end
+  end
+
+  context 'when package registry rate limits are passed' do
+    let(:params) do
+      {
+        throttle_unauthenticated_packages_api_enabled: 1,
+        throttle_unauthenticated_packages_api_period_in_seconds: 500,
+        throttle_unauthenticated_packages_api_requests_per_period: 20,
+        throttle_authenticated_packages_api_enabled: 1,
+        throttle_authenticated_packages_api_period_in_seconds: 600,
+        throttle_authenticated_packages_api_requests_per_period: 10
+      }
+    end
+
+    it 'updates package registry throttle settings' do
+      subject.execute
+
+      application_settings.reload
+
+      expect(application_settings.throttle_unauthenticated_packages_api_enabled).to be_truthy
+      expect(application_settings.throttle_unauthenticated_packages_api_period_in_seconds).to eq(500)
+      expect(application_settings.throttle_unauthenticated_packages_api_requests_per_period).to eq(20)
+      expect(application_settings.throttle_authenticated_packages_api_enabled).to be_truthy
+      expect(application_settings.throttle_authenticated_packages_api_period_in_seconds).to eq(600)
+      expect(application_settings.throttle_authenticated_packages_api_requests_per_period).to eq(10)
     end
   end
 

@@ -12,8 +12,10 @@
 
   .billing-plans
     - plans.each do |plan|
+      - next if plan.hide_card
       - is_default_plan = current_plan.nil? && plan.default?
       - is_current = plan.code == current_plan&.code || is_default_plan
+
       = render 'shared/billings/billing_plan', namespace: namespace, plan: plan, is_current: is_current,
                                                plan_offer_type: upgrade_offer_type(namespace, plan)
 

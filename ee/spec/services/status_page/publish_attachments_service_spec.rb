@@ -14,6 +14,7 @@ RSpec.describe StatusPage::PublishAttachmentsService do
 
   describe '#execute' do
     let_it_be(:project, refind: true) { create(:project) }
+
     let(:markdown_field) { 'Hello World' }
     let(:user_notes) { [] }
     let(:incident_id) { 1 }

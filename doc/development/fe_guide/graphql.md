@@ -43,12 +43,8 @@ can help you learn how to integrate Vue Apollo.
 
 For other use cases, check out the [Usage outside of Vue](#usage-outside-of-vue) section.
 
-<!-- vale gitlab.Spelling = NO -->
-
-We use [Immer](https://immerjs.github.io/immer/docs/introduction) for immutable cache updates;
+We use [Immer](https://immerjs.github.io/immer/) for immutable cache updates;
 see [Immutability and cache updates](#immutability-and-cache-updates) for more information.
-
-<!-- vale gitlab.Spelling = YES -->
 
 ### Tooling
 
@@ -63,6 +59,7 @@ see [Immutability and cache updates](#immutability-and-cache-updates) for more i
 If you use VS Code, the Apollo GraphQL extension supports autocompletion in `.graphql` files. To set up
 the GraphQL extension, follow these steps:
 
+1. Generate the schema: `bundle exec rake gitlab:graphql:schema:dump`
 1. Add an `apollo.config.js` file to the root of your `gitlab` local directory.
 1. Populate the file with the following content:
 
@@ -72,7 +69,7 @@ the GraphQL extension, follow these steps:
         includes: ['./app/assets/javascripts/**/*.graphql', './ee/app/assets/javascripts/**/*.graphql'],
         service: {
           name: 'GitLab',
-          localSchemaFile: './doc/api/graphql/reference/gitlab_schema.graphql',
+          localSchemaFile: './tmp/tests/graphql/gitlab_schema.graphql',
         },
       },
     };
@@ -97,7 +94,7 @@ their execution by clicking **Execute query** button on the top left:
 ## Apollo Client
 
 To save duplicated clients getting created in different apps, we have a
-[default client](https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/lib/graphql.js) that should be used. This sets up the
+[default client](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/lib/graphql.js) that should be used. This sets up the
 Apollo client with the correct URL and also sets the CSRF headers.
 
 Default client accepts two parameters: `resolvers` and `config`.
@@ -108,6 +105,12 @@ Default client accepts two parameters: `resolvers` and `config`.
   - `baseUrl` allows us to pass a URL for GraphQL endpoint different from our main endpoint (for example, `${gon.relative_url_root}/api/graphql`)
   - `assumeImmutableResults` (set to `false` by default) - this setting, when set to `true`, assumes that every single operation on updating Apollo Cache is immutable. It also sets `freezeResults` to `true`, so any attempt on mutating Apollo Cache throws a console warning in development environment. Please ensure you're following the immutability pattern on cache update operations before setting this option to `true`.
   - `fetchPolicy` determines how you want your component to interact with the Apollo cache. Defaults to "cache-first".
+
+### Multiple client queries for the same object
+
+If you are make multiple queries to the same Apollo client object you might encounter the following error: "Store error: the application attempted to write an object with no provided ID but the store already contains an ID of SomeEntity". [This error only should occur when you have made a query with an ID field for a portion, then made another that returns what would be the same object, but is missing the ID field.](https://github.com/apollographql/apollo-client/issues/2510#issue-271829009)
+
+Please note this is being tracked in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326101) and the documentation will be updated when this issue is resolved.
 
 ## GraphQL Queries
 
@@ -120,6 +123,8 @@ To distinguish queries from mutations and fragments, the following naming conven
 - `all_users.query.graphql` for queries;
 - `add_user.mutation.graphql` for mutations;
 - `basic_user.fragment.graphql` for fragments.
+
+If you are using queries for the [CustomersDot GraphQL endpoint](https://gitlab.com/gitlab-org/gitlab/-/blob/be78ccd832fd40315c5e63bb48ee1596ae146f56/app/controllers/customers_dot/proxy_controller.rb), end the filename with `.customer.query.graphql`, `.customer.mutation.graphql`, or `.customer.fragment.graphql`.
 
 ### Fragments
 
@@ -172,13 +177,9 @@ const primaryKeyId = getIdFromGraphQLId(data.id);
 From Apollo version 3.0.0 all the cache updates need to be immutable. It needs to be replaced entirely
 with a **new and updated** object.
 
-<!-- vale gitlab.Spelling = NO -->
-
 To facilitate the process of updating the cache and returning the new object we
-use the library [Immer](https://immerjs.github.io/immer/docs/introduction).
+use the library [Immer](https://immerjs.github.io/immer/).
 When possible, follow these conventions:
-
-<!-- vale gitlab.Spelling = YES -->
 
 - The updated cache is named `data`.
 - The original cache data is named `sourceData`.
@@ -237,17 +238,33 @@ Read more about [Vue Apollo](https://github.com/vuejs/vue-apollo) in the [Vue Ap
 
 It is possible to manage an application state with Apollo by passing
 in a resolvers object when creating the default client. The default state can be set by writing
-to the cache after setting up the default client.
+to the cache after setting up the default client. In the example below, we are using query with `@client` Apollo directive to write the initial data to Apollo cache and then get this state in the Vue component:
 
 ```javascript
+// user.query.graphql
+
+query User {
+  user @client {
+    name
+    surname
+    age
+  }
+}
+```
+
+```javascript
+// index.js
+
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import userQuery from '~/user/user.query.graphql'
 Vue.use(VueApollo);
 
 const defaultClient = createDefaultClient();
 
-defaultClient.cache.writeData({
+defaultClient.cache.writeQuery({
+  query: userQuery,
   data: {
     user: {
       name: 'John',
@@ -262,16 +279,15 @@ const apolloProvider = new VueApollo({
 });
 ```
 
-We can query local data with `@client` Apollo directive:
-
 ```javascript
-// user.query.graphql
+// App.vue
+import userQuery from '~/user/user.query.graphql'
 
-query User {
-  user @client {
-    name
-    surname
-    age
+export default {
+  apollo: {
+    user: {
+      query: userQuery
+    }
   }
 }
 ```
@@ -422,7 +438,7 @@ query getAuthorData($authorNameEnabled: Boolean = false) {
 ```
 
 Then in the Vue (or JavaScript) call to the query we can pass in our feature flag. This feature
-flag needs to be already set up correctly. See the [feature flag documentation](../feature_flags/development.md)
+flag needs to be already set up correctly. See the [feature flag documentation](../feature_flags/index.md)
 for the correct way to do this.
 
 ```javascript
@@ -766,7 +782,177 @@ export default {
 };
 ```
 
+#### Polling and Performance
+
+While the Apollo client has support for simple polling, for performance reasons, our [Etag-based caching](../polling.md) is preferred to hitting the database each time.
+
+Once the backend is set up, there are a few changes to make on the frontend.
+
+First, get your resource ETag path from the backend. In the example of the pipelines graph, this is called the `graphql_resource_etag`. This will be used to create new headers to add to the Apollo context:
+
+```javascript
+/* pipelines/components/graph/utils.js */
+
+/* eslint-disable @gitlab/require-i18n-strings */
+const getQueryHeaders = (etagResource) => {
+  return {
+    fetchOptions: {
+      method: 'GET',
+    },
+    headers: {
+      /* This will depend on your feature */
+      'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
+      'X-GITLAB-GRAPHQL-RESOURCE-ETAG': etagResource,
+      'X-REQUESTED-WITH': 'XMLHttpRequest',
+    },
+  };
+};
+/* eslint-enable @gitlab/require-i18n-strings */
+
+/* component.vue */
+
+apollo: {
+  pipeline: {
+    context() {
+      return getQueryHeaders(this.graphqlResourceEtag);
+    },
+    query: getPipelineDetails,
+    pollInterval: 10000,
+    ..
+  },
+},
+```
+
+Then, because ETags depend on the request being a `GET` instead of GraphQL's usual `POST`, but our default link library does not support `GET` we need to let our default Apollo client know to use a different library.
+
+```javascript
+/* componentMountIndex.js */
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(
+    {},
+    {
+      useGet: true,
+    },
+  ),
+});
+```
+
+Keep in mind, this means your app will not batch queries.
+
+Once subscriptions are mature, this process can be replaced by using them and we can remove the separate link library and return to batching queries.
+
+#### Subscriptions
+
+We use [subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/) to receive real-time updates from GraphQL API via websockets. Currently, the number of existing subscriptions is limited, you can check a list of available ones in [GraphqiQL explorer](https://gitlab.com/-/graphql-explorer)
+
+**NOTE:**
+We cannot test subscriptions using GraphiQL, because they require an ActionCable client, which GraphiQL does not support at the moment.
+
+Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extension:
+
+```graphql
+// ~/sidebar/queries/issuable_assignees.subscription.graphql
+
+subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
+  issuableAssigneesUpdated(issuableId: $issuableId) {
+    ... on Issue {
+      assignees {
+        nodes {
+          ...User
+          status {
+            availability
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+When using GraphQL subscriptions in Vue application, we recommend updating existing Apollo query results with [subscribeToMore](https://apollo.vuejs.org/guide/apollo/subscriptions.html#subscribe-to-more) option:
+
+```javascript
+import issuableAssigneesSubscription from '~/sidebar/queries/issuable_assignees.subscription.graphql'
+
+apollo: {
+  issuable: {
+    query() {
+      return assigneesQueries[this.issuableType].query;
+    },
+    subscribeToMore: {
+      // Specify the subscription that will update the query
+      document() {
+        return issuableAssigneesSubscription;
+      },
+      variables() {
+        return {
+          issuableId: convertToGraphQLId(this.issuableClass, this.issuableId),
+        };
+      },
+      // Describe how subscription should update the query
+      updateQuery(prev, { subscriptionData }) {
+        if (prev && subscriptionData?.data?.issuableAssigneesUpdated) {
+          const data = produce(prev, (draftData) => {
+            draftData.workspace.issuable.assignees.nodes =
+              subscriptionData.data.issuableAssigneesUpdated.assignees.nodes;
+          });
+          return data;
+        }
+        return prev;
+      },
+    },
+  },
+},
+```
+
+### Best Practices
+
+#### When to use (and not use) `update` hook in mutations
+
+Apollo Client's [`.mutate()`](https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClient.mutate)
+method exposes an `update` hook that is invoked twice during the mutation lifecycle:
+
+- Once at the beginning. That is, before the mutation has completed.
+- Once after the mutation has completed.
+
+You should use this hook only if you're adding or removing an item from the store
+(that is, ApolloCache). If you're _updating_ an existing item, it is usually represented by
+a global `id`.
+
+In that case, presence of this `id` in your mutation query definition makes the store update
+automatically. Here's an example of a typical mutation query with `id` present in it:
+
+```graphql
+mutation issueSetWeight($input: IssueSetWeightInput!) {
+  issuableSetWeight: issueSetWeight(input: $input) {
+    issuable: issue {
+      id
+      weight
+    }
+    errors
+  }
+}
+```
+
 ### Testing
+
+#### Generating the GraphQL schema
+
+Some of our tests load the schema JSON files. To generate these files, run:
+
+```shell
+bundle exec rake gitlab:graphql:schema:dump
+```
+
+You should run this task after pulling from upstream, or when rebasing your
+branch. This is run automatically as part of `gdk update`.
+
+NOTE:
+If you use the RubyMine IDE, and have marked the `tmp` directory as
+"Excluded", you should "Mark Directory As -> Not Excluded" for
+`gitlab/tmp/tests/graphql`. This will allow the **JS GraphQL** plugin to
+automatically find and index the schema.
 
 #### Mocking response as component data
 
@@ -1004,7 +1190,7 @@ it('renders a loading state', () => {
   const mockApollo = createMockApolloProvider();
   const wrapper = createComponent({ mockApollo });
 
-  expect(wrapper.find(LoadingSpinner).exists()).toBe(true)
+  expect(wrapper.findComponent(LoadingSpinner).exists()).toBe(true)
 });
 
 it('renders designs list', async () => {
@@ -1090,6 +1276,45 @@ it('calls a mutation with correct parameters and reorders designs', async () => 
       .at(0)
       .props('id'),
   ).toBe('2');
+});
+```
+
+To mock multiple query response states, success and failure, Apollo Client's native retry behavior can combine with Jest's mock functions to create a series of responses. These do not need to be advanced manually, but they do need to be awaited in specific fashion.
+
+```javascript
+describe('when query times out', () => {
+  const advanceApolloTimers = async () => {
+    jest.runOnlyPendingTimers();
+    await wrapper.vm.$nextTick();
+    await wrapper.vm.$nextTick();
+  };
+
+  beforeEach(async () => {
+    const failSucceedFail = jest
+      .fn()
+      .mockResolvedValueOnce({ errors: [{ message: 'timeout' }] })
+      .mockResolvedValueOnce(mockPipelineResponse)
+      .mockResolvedValueOnce({ errors: [{ message: 'timeout' }] });
+
+    createComponentWithApollo(failSucceedFail);
+    await wrapper.vm.$nextTick();
+  });
+
+  it('shows correct errors and does not overwrite populated data when data is empty', async () => {
+    /* fails at first, shows error, no data yet */
+    expect(getAlert().exists()).toBe(true);
+    expect(getGraph().exists()).toBe(false);
+
+    /* succeeds, clears error, shows graph */
+    await advanceApolloTimers();
+    expect(getAlert().exists()).toBe(false);
+    expect(getGraph().exists()).toBe(true);
+
+    /* fails again, alert retuns but data persists */
+    await advanceApolloTimers();
+    expect(getAlert().exists()).toBe(true);
+    expect(getGraph().exists()).toBe(true);
+  });
 });
 ```
 
@@ -1267,7 +1492,6 @@ describe('My Index test with `createMockApollo`', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     fetchLocalUserSpy = null;
   });
 
@@ -1318,6 +1542,34 @@ describe('My Index test with `createMockApollo`', () => {
     });
   });
 });
+```
+
+When you need to configure the mocked apollo client's caching behavior,
+provide additional cache options when creating a mocked client instance and the provided options will merge with the default cache option:
+
+```javascript
+const defaultCacheOptions = {
+  fragmentMatcher: { match: () => true },
+  addTypename: false,
+};
+```
+
+```javascript
+function createMockApolloProvider({ props = {}, requestHandlers } = {}) {
+  Vue.use(VueApollo);
+
+  const mockApollo = createMockApollo(
+    requestHandlers,
+    {},
+    {
+      dataIdFromObject: (object) =>
+        // eslint-disable-next-line no-underscore-dangle
+        object.__typename === 'Requirement' ? object.iid : defaultDataIdFromObject(object),
+    },
+  );
+
+  return mockApollo;
+}
 ```
 
 ## Handling errors

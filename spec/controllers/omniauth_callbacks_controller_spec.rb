@@ -60,7 +60,7 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
       let(:extern_uid) { 'my-uid' }
 
       before do
-        user.update(failed_attempts: User.maximum_attempts.pred)
+        user.update!(failed_attempts: User.maximum_attempts.pred)
         subject.response = ActionDispatch::Response.new
       end
 
@@ -233,7 +233,7 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
           before do
             stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
             settings = Gitlab::CurrentSettings.current_application_settings
-            settings.update(disabled_oauth_sign_in_sources: [provider.to_s])
+            settings.update!(disabled_oauth_sign_in_sources: [provider.to_s])
           end
 
           it 'prevents login via POST' do
@@ -293,13 +293,25 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
 
             expect(request.env['warden']).to be_authenticated
           end
+
+          it 'sets the username and caller_id in the context' do
+            expect(controller).to receive(:atlassian_oauth2).and_wrap_original do |m, *args|
+              m.call(*args)
+
+              expect(Gitlab::ApplicationContext.current)
+                .to include('meta.user' => user.username,
+                            'meta.caller_id' => 'OmniauthCallbacksController#atlassian_oauth2')
+            end
+
+            post :atlassian_oauth2
+          end
         end
 
         context 'for a new user' do
           before do
             stub_omniauth_setting(enabled: true, auto_link_user: true, allow_single_sign_on: ['atlassian_oauth2'])
 
-            user.destroy
+            user.destroy!
           end
 
           it 'denies sign-in if sign-up is enabled, but block_auto_created_users is set' do
@@ -381,7 +393,7 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
 
     context 'sign up' do
       before do
-        user.destroy
+        user.destroy!
       end
 
       it 'denies login if sign up is enabled, but block_auto_created_users is set' do
@@ -453,6 +465,18 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
 
       it 'doesn\'t link a new identity to the user' do
         expect { post :saml, params: { SAMLResponse: mock_saml_response } }.not_to change { user.identities.count }
+      end
+
+      it 'sets the username and caller_id in the context' do
+        expect(controller).to receive(:saml).and_wrap_original do |m, *args|
+          m.call(*args)
+
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.user' => user.username,
+                        'meta.caller_id' => 'OmniauthCallbacksController#saml')
+        end
+
+        post :saml, params: { SAMLResponse: mock_saml_response }
       end
     end
   end

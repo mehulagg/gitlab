@@ -5,7 +5,7 @@ module Gitlab
     module Ldap
       class Adapter
         SEARCH_RETRY_FACTOR = [1, 1, 2, 3].freeze
-        MAX_SEARCH_RETRIES = Rails.env.test? ? 1 : SEARCH_RETRY_FACTOR.size.freeze
+        MAX_SEARCH_RETRIES = Rails.env.test? ? 1 : SEARCH_RETRY_FACTOR.size
 
         attr_reader :provider, :ldap
 
@@ -53,11 +53,7 @@ module Gitlab
 
             if results.nil?
               response = ldap.get_operation_result
-
-              unless response.code == 0
-                Gitlab::AppLogger.warn("LDAP search error: #{response.message}")
-              end
-
+              check_empty_response_code(response)
               []
             else
               results
@@ -136,9 +132,19 @@ module Gitlab
         def renew_connection_adapter
           @ldap = Net::LDAP.new(config.adapter_options)
         end
+
+        def check_empty_response_code(response)
+          if config.retry_empty_result_with_codes.include?(response.code)
+            raise Net::LDAP::Error, "Got empty results with response code: #{response.code}, message: #{response.message}"
+          end
+
+          unless response.code == 0
+            Gitlab::AppLogger.warn("LDAP search error: #{response.message}")
+          end
+        end
       end
     end
   end
 end
 
-Gitlab::Auth::Ldap::Adapter.prepend_if_ee('::EE::Gitlab::Auth::Ldap::Adapter')
+Gitlab::Auth::Ldap::Adapter.prepend_mod_with('Gitlab::Auth::Ldap::Adapter')

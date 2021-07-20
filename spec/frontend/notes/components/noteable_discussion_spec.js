@@ -24,8 +24,6 @@ describe('noteable_discussion component', () => {
   let wrapper;
   let originalGon;
 
-  preloadFixtures(discussionWithTwoUnresolvedNotes);
-
   beforeEach(() => {
     window.mrTabs = {};
     store = createStore();
@@ -58,6 +56,18 @@ describe('noteable_discussion component', () => {
     expect(wrapper.find('.discussion-header').exists()).toBe(true);
   });
 
+  it('should hide actions when diff refs do not exists', async () => {
+    const discussion = { ...discussionMock };
+    discussion.diff_file = { ...mockDiffFile, diff_refs: null };
+    discussion.diff_discussion = true;
+    discussion.expanded = false;
+
+    wrapper.setProps({ discussion });
+    await nextTick();
+
+    expect(wrapper.vm.canShowReplyActions).toBe(false);
+  });
+
   describe('actions', () => {
     it('should toggle reply form', async () => {
       await nextTick();
@@ -65,7 +75,7 @@ describe('noteable_discussion component', () => {
       expect(wrapper.vm.isReplying).toEqual(false);
 
       const replyPlaceholder = wrapper.find(ReplyPlaceholder);
-      replyPlaceholder.vm.$emit('onClick');
+      replyPlaceholder.vm.$emit('focus');
       await nextTick();
 
       expect(wrapper.vm.isReplying).toEqual(true);
@@ -126,14 +136,7 @@ describe('noteable_discussion component', () => {
         ...getJSONFixture(discussionWithTwoUnresolvedNotes)[0],
         expanded: true,
       };
-      discussion.notes = discussion.notes.map((note) => ({
-        ...note,
-        resolved: false,
-        current_user: {
-          ...note.current_user,
-          can_resolve: true,
-        },
-      }));
+      discussion.resolved = false;
 
       wrapper.setProps({ discussion });
 

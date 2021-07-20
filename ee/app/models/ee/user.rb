@@ -11,8 +11,8 @@ module EE
 
     include AuditorUserHelper
 
-    DEFAULT_ROADMAP_LAYOUT = 'months'.freeze
-    DEFAULT_GROUP_VIEW = 'details'.freeze
+    DEFAULT_ROADMAP_LAYOUT = 'months'
+    DEFAULT_GROUP_VIEW = 'details'
     MAX_USERNAME_SUGGESTION_ATTEMPTS = 15
 
     prepended do
@@ -45,11 +45,12 @@ module EE
       has_many :vulnerability_feedback, foreign_key: :author_id, class_name: 'Vulnerabilities::Feedback'
       has_many :commented_vulnerability_feedback, foreign_key: :comment_author_id, class_name: 'Vulnerabilities::Feedback'
       has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :user
+      has_many :epic_board_recent_visits, class_name: 'Boards::EpicBoardRecentVisit', inverse_of: :user
 
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
 
-      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, class_name: 'GroupMember'
       has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
       has_many :users_ops_dashboard_projects
@@ -57,7 +58,7 @@ module EE
       has_many :users_security_dashboard_projects
       has_many :security_dashboard_projects, through: :users_security_dashboard_projects, source: :project
 
-      has_many :group_saml_identities, -> { where.not(saml_provider_id: nil) }, source: :identities, class_name: "::Identity"
+      has_many :group_saml_identities, -> { where.not(saml_provider_id: nil) }, class_name: "::Identity"
 
       # Protected Branch Access
       has_many :protected_branch_merge_access_levels, dependent: :destroy, class_name: "::ProtectedBranch::MergeAccessLevel" # rubocop:disable Cop/ActiveRecordDependent
@@ -72,6 +73,10 @@ module EE
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
       has_many :user_permission_export_uploads
+
+      has_many :oncall_participants, class_name: 'IncidentManagement::OncallParticipant', inverse_of: :user
+      has_many :oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :oncall_participants, source: :rotation
+      has_many :oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', through: :oncall_rotations, source: :schedule
 
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
@@ -157,10 +162,7 @@ module EE
 
       def billable
         scope = active.without_bots
-
-        License.with_valid_license do |license|
-          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
-        end
+        scope = scope.excluding_guests if License.current&.exclude_guests_from_active_count?
 
         scope
       end
@@ -228,12 +230,12 @@ module EE
       super || DEFAULT_GROUP_VIEW
     end
 
-    # Returns true if the user is a Reporter or higher on any namespace
+    # Returns true if the user owns a group
     # that has never had a trial (now or in the past)
-    def any_namespace_without_trial?
-      ::Namespace
-        .from("(#{namespace_union_for_reporter_developer_maintainer_owned}) #{::Namespace.table_name}")
+    def owns_group_without_trial?
+      owned_groups
         .include_gitlab_subscription
+        .where(parent_id: nil)
         .where(gitlab_subscriptions: { trial_ends_on: nil })
         .any?
     end
@@ -258,10 +260,6 @@ module EE
         .any?
     end
 
-    def manageable_groups_eligible_for_subscription
-      manageable_groups.eligible_for_subscription.order(:name)
-    end
-
     def manageable_groups_eligible_for_trial
       manageable_groups.eligible_for_trial.order(:name)
     end
@@ -284,7 +282,7 @@ module EE
       namespace.present? &&
       active? &&
       !namespace.root_ancestor.free_plan? &&
-      namespace.root_ancestor.billed_user_ids.include?(self.id)
+      namespace.root_ancestor.billed_user_ids[:user_ids].include?(self.id)
     end
 
     def group_sso?(group)
@@ -310,13 +308,10 @@ module EE
       ::Gitlab.config.ldap['sync_time']
     end
 
-    def admin_unsubscribe!
-      update_column :admin_email_unsubscribed_at, Time.current
-    end
-
     override :allow_password_authentication_for_web?
     def allow_password_authentication_for_web?(*)
       return false if group_managed_account?
+      return false if user_authorized_by_provisioning_group?
 
       super
     end
@@ -324,13 +319,27 @@ module EE
     override :allow_password_authentication_for_git?
     def allow_password_authentication_for_git?(*)
       return false if group_managed_account?
+      return false if user_authorized_by_provisioning_group?
 
       super
     end
 
+    override :password_based_login_forbidden?
+    def password_based_login_forbidden?
+      user_authorized_by_provisioning_group? || super
+    end
+
+    def user_authorized_by_provisioning_group?
+      user_detail.provisioned_by_group? && ::Feature.enabled?(:block_password_auth_for_saml_users, user_detail.provisioned_by_group, type: :ops)
+    end
+
+    def authorized_by_provisioning_group?(group)
+      user_authorized_by_provisioning_group? && provisioned_by_group == group
+    end
+
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
-        ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
+        ::Gitlab.com? && gitlab_team_member?
       end
     end
 
@@ -357,16 +366,18 @@ module EE
     end
 
     def owns_upgradeable_namespace?
-      !owns_paid_namespace?(plans: [::Plan::GOLD]) &&
-        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
+      !owns_paid_namespace?(plans: [::Plan::GOLD, ::Plan::ULTIMATE]) &&
+        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER, ::Plan::PREMIUM])
     end
 
     # Returns the groups a user has access to, either through a membership or a project authorization
     override :authorized_groups
-    def authorized_groups
+    def authorized_groups(with_minimal_access: true)
+      return super() unless with_minimal_access
+
       ::Group.unscoped do
         ::Group.from_union([
-          super,
+          super(),
           available_minimal_access_groups
         ])
       end
@@ -387,6 +398,16 @@ module EE
       !password_automatically_set?
     end
 
+    def has_required_credit_card_to_run_pipelines?(project)
+      has_valid_credit_card? || !requires_credit_card_to_run_pipelines?(project)
+    end
+
+    # This is like has_required_credit_card_to_run_pipelines? except that
+    # former checks whether shared runners are enabled, and this method does not.
+    def has_required_credit_card_to_enable_shared_runners?(project)
+      has_valid_credit_card? || !requires_credit_card_to_enable_shared_runners?(project)
+    end
+
     protected
 
     override :password_required?
@@ -397,6 +418,39 @@ module EE
     end
 
     private
+
+    def created_after_credit_card_release_day?(project)
+      created_at >= ::Users::CreditCardValidation::RELEASE_DAY ||
+        ::Feature.enabled?(:ci_require_credit_card_for_old_users, project, default_enabled: :yaml)
+    end
+
+    def has_valid_credit_card?
+      credit_card_validated_at.present?
+    end
+
+    def requires_credit_card_to_run_pipelines?(project)
+      return false unless project.shared_runners_enabled
+
+      requires_credit_card?(project)
+    end
+
+    def requires_credit_card_to_enable_shared_runners?(project)
+      requires_credit_card?(project)
+    end
+
+    def requires_credit_card?(project)
+      return false unless ::Gitlab.com?
+      return false unless created_after_credit_card_release_day?(project)
+
+      root_namespace = project.root_namespace
+      if root_namespace.free_plan?
+        ::Feature.enabled?(:ci_require_credit_card_on_free_plan, project, default_enabled: :yaml)
+      elsif root_namespace.trial?
+        ::Feature.enabled?(:ci_require_credit_card_on_trial_plan, project, default_enabled: :yaml)
+      else
+        false
+      end
+    end
 
     def namespace_union_for_owned(select = :id)
       ::Gitlab::SQL::Union.new([

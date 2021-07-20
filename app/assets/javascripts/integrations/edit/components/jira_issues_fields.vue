@@ -1,15 +1,8 @@
 <script>
-import {
-  GlFormGroup,
-  GlFormCheckbox,
-  GlFormInput,
-  GlSprintf,
-  GlLink,
-  GlButton,
-  GlCard,
-} from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { GlFormGroup, GlFormCheckbox, GlFormInput, GlSprintf, GlLink } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 import eventHub from '../event_hub';
+import JiraUpgradeCta from './jira_upgrade_cta.vue';
 
 export default {
   name: 'JiraIssuesFields',
@@ -19,12 +12,10 @@ export default {
     GlFormInput,
     GlSprintf,
     GlLink,
-    GlButton,
-    GlCard,
+    JiraUpgradeCta,
     JiraIssueCreationVulnerabilities: () =>
       import('ee_component/integrations/edit/components/jira_issue_creation_vulnerabilities.vue'),
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     showJiraIssuesIntegration: {
       type: Boolean,
@@ -80,15 +71,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isInheriting']),
     validProjectKey() {
       return !this.enableJiraIssues || Boolean(this.projectKey) || !this.validated;
-    },
-    showJiraVulnerabilitiesOptions() {
-      return (
-        this.enableJiraIssues &&
-        this.showJiraVulnerabilitiesIntegration &&
-        this.glFeatures.jiraForVulnerabilities
-      );
     },
   },
   created() {
@@ -124,38 +109,41 @@ export default {
         </p>
         <template v-if="showJiraIssuesIntegration">
           <input name="service[issues_enabled]" type="hidden" :value="enableJiraIssues || false" />
-          <gl-form-checkbox v-model="enableJiraIssues">
+          <gl-form-checkbox v-model="enableJiraIssues" :disabled="isInheriting">
             {{ s__('JiraService|Enable Jira issues') }}
             <template #help>
               {{
                 s__(
-                  'JiraService|Warning: All GitLab users that have access to this GitLab project will be able to view all issues from the Jira project specified below.',
+                  'JiraService|Warning: All GitLab users that have access to this GitLab project are able to view all issues from the Jira project specified below.',
                 )
               }}
             </template>
           </gl-form-checkbox>
-          <jira-issue-creation-vulnerabilities
-            v-if="showJiraVulnerabilitiesOptions"
-            :project-key="projectKey"
-            :initial-is-enabled="initialEnableJiraVulnerabilities"
-            :initial-issue-type-id="initialVulnerabilitiesIssuetype"
-            data-testid="jira-for-vulnerabilities"
-            @request-get-issue-types="getJiraIssueTypes"
-          />
+          <template v-if="enableJiraIssues">
+            <jira-issue-creation-vulnerabilities
+              :project-key="projectKey"
+              :initial-is-enabled="initialEnableJiraVulnerabilities"
+              :initial-issue-type-id="initialVulnerabilitiesIssuetype"
+              :show-full-feature="showJiraVulnerabilitiesIntegration"
+              data-testid="jira-for-vulnerabilities"
+              @request-get-issue-types="getJiraIssueTypes"
+            />
+            <jira-upgrade-cta
+              v-if="!showJiraVulnerabilitiesIntegration"
+              class="gl-mt-2 gl-ml-6"
+              data-testid="ultimate-upgrade-cta"
+              show-ultimate-message
+              :upgrade-plan-path="upgradePlanPath"
+            />
+          </template>
         </template>
-        <gl-card v-else class="gl-mt-7">
-          <strong>{{ __('This is a Premium feature') }}</strong>
-          <p>{{ __('Upgrade your plan to enable this feature of the Jira Integration.') }}</p>
-          <gl-button
-            v-if="upgradePlanPath"
-            category="primary"
-            variant="info"
-            :href="upgradePlanPath"
-            target="_blank"
-          >
-            {{ __('Upgrade your plan') }}
-          </gl-button>
-        </gl-card>
+        <jira-upgrade-cta
+          v-else
+          class="gl-mt-2"
+          data-testid="premium-upgrade-cta"
+          show-premium-message
+          :upgrade-plan-path="upgradePlanPath"
+        />
       </div>
     </gl-form-group>
     <template v-if="showJiraIssuesIntegration">
@@ -169,10 +157,11 @@ export default {
           id="service_project_key"
           v-model="projectKey"
           name="service[project_key]"
-          :placeholder="s__('JiraService|e.g. AB')"
+          :placeholder="s__('JiraService|For example, AB')"
           :required="enableJiraIssues"
           :state="validProjectKey"
           :disabled="!enableJiraIssues"
+          :readonly="isInheriting"
         />
       </gl-form-group>
       <p v-if="gitlabIssuesEnabled">

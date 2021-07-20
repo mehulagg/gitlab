@@ -8,8 +8,16 @@ import '~/notes/index';
 initEpicApp();
 
 requestIdleCallback(() => {
+  const awardEmojiEl = document.getElementById('js-vue-awards-block');
+
   new EpicTabs(); // eslint-disable-line no-new
   new ShortcutsEpic(); // eslint-disable-line no-new
-  loadAwardsHandler();
+  if (awardEmojiEl) {
+    import('~/emoji/awards_app')
+      .then((m) => m.default(awardEmojiEl))
+      .catch(() => {});
+  } else {
+    loadAwardsHandler();
+  }
   new ZenMode(); // eslint-disable-line no-new
 });

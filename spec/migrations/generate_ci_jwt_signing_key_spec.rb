@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-require Rails.root.join('db', 'migrate', '20201008013434_generate_ci_jwt_signing_key.rb')
+require_migration!
 
 RSpec.describe GenerateCiJwtSigningKey do
   let(:application_settings) do
@@ -11,7 +11,7 @@ RSpec.describe GenerateCiJwtSigningKey do
 
       attr_encrypted :ci_jwt_signing_key, {
         mode: :per_attribute_iv,
-        key: Rails.application.secrets.db_key_base[0..31],
+        key: Gitlab::Utils.ensure_utf8_size(Rails.application.secrets.db_key_base, bytes: 32.bytes),
         algorithm: 'aes-256-gcm',
         encode: true
       }

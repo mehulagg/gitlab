@@ -19,10 +19,30 @@ module Types
             null: true,
             description: 'Timestamp the token was created.'
 
+      field :created_by_user,
+            Types::UserType,
+            null: true,
+            description: 'The user who created the token.'
+
+      field :description,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Description of the token.'
+
+      field :last_used_at,
+            Types::TimeType,
+            null: true,
+            description: 'Timestamp the token was last used.'
+
       field :id,
             ::Types::GlobalIDType[::Clusters::AgentToken],
             null: false,
             description: 'Global ID of the token.'
+
+      field :name,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Name given to the token.'
 
       def cluster_agent
         Gitlab::Graphql::Loaders::BatchModelLoader.new(::Clusters::Agent, object.agent_id).find

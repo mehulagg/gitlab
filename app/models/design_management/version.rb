@@ -14,7 +14,9 @@ module DesignManagement
       attr_reader :sha, :issue_id, :actions
 
       def initialize(sha, issue_id, actions)
-        @sha, @issue_id, @actions = sha, issue_id, actions
+        @sha = sha
+        @issue_id = issue_id
+        @actions = actions
       end
 
       def message
@@ -56,6 +58,7 @@ module DesignManagement
     scope :ordered, -> { order(id: :desc) }
     scope :for_issue, -> (issue) { where(issue: issue) }
     scope :by_sha, -> (sha) { where(sha: sha) }
+    scope :with_author, -> { includes(:author) }
 
     # This is the one true way to create a Version.
     #
@@ -92,7 +95,7 @@ module DesignManagement
 
         version
       end
-    rescue
+    rescue StandardError
       raise CouldNotCreateVersion.new(sha, issue_id, design_actions)
     end
 

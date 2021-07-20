@@ -17,9 +17,13 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       include CacheMarkdownField
 
       def initialize(args = {})
-        @title, @description, @cached_markdown_version = args[:title], args[:description], args[:cached_markdown_version]
-        @title_html, @description_html = args[:title_html], args[:description_html]
-        @author, @project = args[:author], args[:project]
+        @title = args[:title]
+        @description = args[:description]
+        @cached_markdown_version = args[:cached_markdown_version]
+        @title_html = args[:title_html]
+        @description_html = args[:description_html]
+        @author = args[:author]
+        @project = args[:project]
         @parent_user = args[:parent_user]
       end
 
@@ -71,7 +75,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       end
 
       it 'returns false when the local version was bumped' do
-        allow(Gitlab::CurrentSettings.current_application_settings).to receive(:local_markdown_version).and_return(2)
+        stub_application_setting(local_markdown_version: 2)
         thing.cached_markdown_version = cache_version
 
         is_expected.to be_falsy
@@ -84,7 +88,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       end
 
       it 'returns true when the cached version is just right' do
-        allow(Gitlab::CurrentSettings.current_application_settings).to receive(:local_markdown_version).and_return(2)
+        stub_application_setting(local_markdown_version: 2)
         thing.cached_markdown_version = cache_version + 2
 
         is_expected.to be_truthy

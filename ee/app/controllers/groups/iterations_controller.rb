@@ -18,7 +18,7 @@ class Groups::IterationsController < Groups::ApplicationController
   private
 
   def check_iterations_available!
-    render_404 unless group.feature_available?(:iterations)
+    render_404 unless group.licensed_feature_available?(:iterations)
   end
 
   def authorize_create_iteration!

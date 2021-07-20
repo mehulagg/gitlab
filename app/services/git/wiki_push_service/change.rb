@@ -9,7 +9,9 @@ module Git
       # @param [Hash] change - must have keys `:oldrev` and `:newrev`
       # @param [Gitlab::Git::RawDiffChange] raw_change
       def initialize(wiki, change, raw_change)
-        @wiki, @raw_change, @change = wiki, raw_change, change
+        @wiki = wiki
+        @raw_change = raw_change
+        @change = change
       end
 
       def page
@@ -64,7 +66,8 @@ module Git
       def strip_extension(filename)
         return unless filename
 
-        File.basename(filename, File.extname(filename))
+        encoded_filename = Gitlab::EncodingHelper.encode_utf8(filename.dup)
+        File.basename(encoded_filename, File.extname(encoded_filename))
       end
     end
   end

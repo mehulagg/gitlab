@@ -9,7 +9,7 @@ RSpec.describe Ci::CreatePipelineService do
     let(:ref) { 'refs/heads/master' }
     let(:source) { :push }
     let(:service) { described_class.new(project, user, { ref: ref }) }
-    let(:pipeline) { service.execute(source) }
+    let(:pipeline) { service.execute(source).payload }
 
     before do
       stub_ci_pipeline_yaml_file(config)
@@ -39,8 +39,8 @@ RSpec.describe Ci::CreatePipelineService do
       it 'creates a pipeline' do
         expect(pipeline).to be_persisted
         expect(pipeline.builds.first.options).to match(a_hash_including({
-          'before_script' => ['ls'],
-          'script' => [
+          before_script: ['ls'],
+          script: [
             'echo doing my first step',
             'echo doing step 1 of job 1',
             'echo doing my last step'

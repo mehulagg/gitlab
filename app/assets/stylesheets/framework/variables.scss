@@ -9,7 +9,7 @@ $sidebar-transition-duration: 0.3s;
 $sidebar-breakpoint: 1024px;
 $default-transition-duration: 0.15s;
 $contextual-sidebar-width: 220px;
-$contextual-sidebar-collapsed-width: 50px;
+$contextual-sidebar-collapsed-width: 48px;
 $toggle-sidebar-height: 48px;
 
 /**
@@ -82,7 +82,7 @@ $darken-border-dashed-factor: 25% !default;
 $white: #fff !default;
 $white-normal: #f0f0f0 !default;
 $white-dark: #eaeaea !default;
-$white-transparent: rgba(255, 255, 255, 0.8) !default;
+$white-transparent: rgba($white, 0.8) !default;
 
 $gray-lightest: #fdfdfd !default;
 $gray-light: #fafafa !default;
@@ -283,6 +283,8 @@ $indigo-700: #4b4ba3;
 $indigo-800: #393982;
 $indigo-900: #292961;
 $indigo-950: #1a1a40;
+// To do this variant right for darkmode, we need to create a variable for it.
+$indigo-900-alpha-008: rgba($indigo-900, 0.08);
 
 $theme-blue-50: #f4f8fc;
 $theme-blue-100: #e6edf5;
@@ -352,8 +354,8 @@ $border-gray-normal-dashed: darken($gray-normal, $darken-border-dashed-factor);
  */
 $border-color: $gray-100;
 $shadow-color: $t-gray-a-08;
-$well-expand-item: #e8f2f7;
-$well-inner-border: #eef0f2;
+$well-expand-item: #e8f2f7 !default;
+$well-inner-border: #eef0f2 !default;
 $well-light-border: #f1f1f1;
 $well-light-text-color: #5b6169;
 
@@ -443,7 +445,7 @@ $gl-avatar-size: 40px;
 $border-radius-default: 4px;
 $border-radius-small: 2px;
 $border-radius-large: 8px;
-$default-icon-size: 18px;
+$default-icon-size: 16px;
 $layout-link-gray: #7e7c7c;
 $btn-side-margin: 10px;
 $btn-sm-side-margin: 7px;
@@ -571,6 +573,9 @@ $inactive-badge-background: rgba($black, 0.08);
 $sidebar-toggle-height: 60px;
 $sidebar-toggle-width: 40px;
 $sidebar-milestone-toggle-bottom-margin: 10px;
+$sidebar-avatar-size: 32px;
+$sidebar-top-item-lr-margin: 4px;
+$sidebar-top-item-tb-margin: 1px;
 
 /*
 * Buttons
@@ -590,7 +595,7 @@ $gl-btn-xs-line-height: 13px;
 /*
 * Badges
 */
-$badge-bg: rgba(0, 0, 0, 0.07);
+$badge-bg: rgba($black, 0.07);
 
 /*
 * Pagination
@@ -627,18 +632,6 @@ $search-input-xl-width: 320px;
 $note-disabled-comment-color: #b2b2b2;
 $note-targe3-outside: #fffff0;
 $note-targe3-inside: #ffffd3;
-
-/*
-* Identicon
-*/
-$identicon-text-color: #525252 !default;
-$identicon-red: #ffebee !default;
-$identicon-purple: #f3e5f5 !default;
-$identicon-indigo: #e8eaf6 !default;
-$identicon-blue: #e3f2fd !default;
-$identicon-teal: #e0f2f1 !default;
-$identicon-orange: #fbe9e7 !default;
-$identicon-gray: #eee !default;
 
 /*
 * Calendar
@@ -710,6 +703,18 @@ $job-log-line-padding: 55px;
 $job-line-number-width: 50px;
 $job-line-number-margin: 43px;
 $job-arrow-margin: 55px;
+
+/*
+ * Calendar
+ */
+// See https://gitlab.com/gitlab-org/gitlab/-/issues/332150 to align with Pajamas Design System
+$calendar-activity-colors: (
+  #ededed,
+  #acd5f2,
+  #7fa8c9,
+  #527ba0,
+  #254e77,
+);
 
 /*
 * Commit Page
@@ -830,8 +835,8 @@ $ci-variable-remove-button-width: calc(1em + #{2 * $gl-padding});
 /*
 GitLab Plans
 */
-$gl-gold-plan: #d4af37;
-$gl-silver-plan: #91a1ab;
+$gl-ultimate-plan: #d4af37;
+$gl-premium-plan: #91a1ab;
 $gl-bronze-plan: #cd7f32;
 
 /*
@@ -842,10 +847,10 @@ $linked-project-column-margin: 60px;
 /*
 Performance Bar
 */
-$perf-bar-production: #222;
-$perf-bar-staging: #291430;
-$perf-bar-development: #4c1210;
-$perf-bar-bucket-bg: #111;
+$perf-bar-production: $gray-950;
+$perf-bar-staging: $indigo-950;
+$perf-bar-development: $red-950;
+$perf-bar-bucket-bg: $black;
 $perf-bar-bucket-box-shadow-from: rgba($white, 0.2);
 $perf-bar-bucket-box-shadow-to: rgba($black, 0.25);
 $perf-bar-canary-text: $orange-400;
@@ -924,11 +929,12 @@ Issue Analytics
 $issues-analytics-popover-boarder-color: rgba(0, 0, 0, 0.15);
 
 /*
-Merge Requests
+Merge requests
 */
 $mr-tabs-height: 48px;
 $mr-version-controls-height: 56px;
 $mr-widget-margin-left: 40px;
+$mr-review-bar-height: calc(2rem + 13px);
 
 /*
 Compare Branches

@@ -62,9 +62,10 @@ export default {
       <gl-sprintf :message="emptyStateDescription" />
     </template>
     <template v-if="!hasIssues" #actions>
-      <gl-button :href="issueCreateUrl" target="_blank" category="primary" variant="success"
-        >{{ s__('Integrations|Create new issue in Jira') }}<gl-icon name="external-link"
-      /></gl-button>
+      <gl-button :href="issueCreateUrl" target="_blank" variant="confirm">
+        {{ s__('Integrations|Create new issue in Jira') }}
+        <gl-icon name="external-link" />
+      </gl-button>
     </template>
   </gl-empty-state>
 </template>

@@ -3,14 +3,14 @@
 class Admin::CredentialsController < Admin::ApplicationController
   extend ::Gitlab::Utils::Override
   include CredentialsInventoryActions
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
-  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?, :ssh_key_delete_path
+  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path,
+                :ssh_key_delete_path, :gpg_keys_available?
 
   before_action :check_license_credentials_inventory_available!, only: [:index, :revoke, :destroy]
-  before_action :check_gpg_keys_list_enabled!, only: [:index]
 
-  track_unique_visits :index, target_id: 'i_compliance_credential_inventory'
+  track_redis_hll_event :index, name: 'i_compliance_credential_inventory'
 
   feature_category :compliance_management
 
@@ -18,10 +18,6 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   def check_license_credentials_inventory_available!
     render_404 unless credentials_inventory_feature_available?
-  end
-
-  def check_gpg_keys_list_enabled!
-    render_404 if show_gpg_keys? && Feature.disabled?(:credential_inventory_gpg_keys)
   end
 
   override :credentials_inventory_path
@@ -49,8 +45,8 @@ class Admin::CredentialsController < Admin::ApplicationController
     revoke_admin_credential_path(token)
   end
 
-  override :revoke_button_available?
-  def revoke_button_available?
+  override :gpg_keys_available?
+  def gpg_keys_available?
     true
   end
 

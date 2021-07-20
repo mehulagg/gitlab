@@ -6,6 +6,7 @@ RSpec.describe 'Delete a compliance framework' do
   include GraphqlHelpers
 
   let_it_be(:framework) { create(:compliance_framework) }
+
   let(:mutation) { graphql_mutation(:destroy_compliance_framework, { id: global_id_of(framework) }) }
 
   subject { post_graphql_mutation(mutation, current_user: current_user) }
@@ -19,7 +20,6 @@ RSpec.describe 'Delete a compliance framework' do
 
     before do
       stub_licensed_features(custom_compliance_frameworks: false)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     it 'does not destroy a compliance framework' do
@@ -30,10 +30,9 @@ RSpec.describe 'Delete a compliance framework' do
                     errors: ["The resource that you are attempting to access does not exist or you don't have permission to perform this action"]
   end
 
-  context 'when licensed and enabled' do
+  context 'when licensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     context 'current_user is namespace owner' do

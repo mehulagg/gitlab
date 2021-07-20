@@ -1,17 +1,17 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Jobs
+# Jobs **(FREE)**
 
 Pipeline configuration begins with jobs. Jobs are the most fundamental element of a `.gitlab-ci.yml` file.
 
 Jobs are:
 
 - Defined with constraints stating under what conditions they should be executed.
-- Top-level elements with an arbitrary name and must contain at least the [`script`](../yaml/README.md#script) clause.
+- Top-level elements with an arbitrary name and must contain at least the [`script`](../yaml/index.md#script) clause.
 - Not limited in how many can be defined.
 
 For example:
@@ -29,7 +29,7 @@ jobs, where each of the jobs executes a different command.
 Of course a command can execute code directly (`./configure;make;make install`)
 or run a script (`test.sh`) in the repository.
 
-Jobs are picked up by [runners](../runners/README.md) and executed within the
+Jobs are picked up by [runners](../runners/index.md) and executed in the
 environment of the runner. What is important is that each job is run
 independently from each other.
 
@@ -65,7 +65,7 @@ you can also see the reason it failed on the Job detail page.
 
 The order of jobs in a pipeline depends on the type of pipeline graph.
 
-- For [regular pipeline graphs](../pipelines/index.md#regular-pipeline-graphs), jobs are sorted by name.
+- For [full pipeline graphs](../pipelines/index.md#view-full-pipeline-graph), jobs are sorted by name.
 - For [pipeline mini graphs](../pipelines/index.md#pipeline-mini-graphs), jobs are sorted by severity and then by name.
 
 The order of severity is:
@@ -101,7 +101,7 @@ jobs. Click to expand them.
 
 ![Grouped pipelines](img/pipelines_grouped.png)
 
-To create a group of jobs, in the [CI/CD pipeline configuration file](../yaml/README.md),
+To create a group of jobs, in the [CI/CD pipeline configuration file](../yaml/index.md),
 separate each job name with a number and one of the following:
 
 - A slash (`/`), for example, `test 1/3`, `test 2/3`, `test 3/3`.
@@ -136,8 +136,15 @@ In the pipeline, the result is a group named `build ruby` with three jobs:
 The jobs are ordered by comparing the numbers from left to right. You
 usually want the first number to be the index and the second number to be the total.
 
-[This regular expression](https://gitlab.com/gitlab-org/gitlab/blob/2f3dc314f42dbd79813e6251792853bc231e69dd/app/models/commit_status.rb#L99)
-evaluates the job names: `\d+[\s:\/\\]+\d+\s*`.
+[This regular expression](https://gitlab.com/gitlab-org/gitlab/-/blob/2f3dc314f42dbd79813e6251792853bc231e69dd/app/models/commit_status.rb#L99)
+evaluates the job names: `([\b\s:]+((\[.*\])|(\d+[\s:\/\\]+\d+)))+\s*\z`.
+One or more `: [...]`, `X Y`, `X/Y`, or `X\Y` sequences are removed from the **end**
+of job names only. Matching substrings found at the beginning or in the middle of
+job names are not removed.
+
+In [GitLab 13.8 and earlier](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52644),
+the regular expression is `\d+[\s:\/\\]+\d+\s*`. [Feature flag](../../user/feature_flags.md)
+removed in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/322080).
 
 ## Specifying variables when running manual jobs
 
@@ -150,18 +157,18 @@ additional variables. To access this page, click on the **name** of the manual j
 the pipeline view, *not* the play (**{play}**) button.
 
 This is useful when you want to alter the execution of a job that uses
-[custom environment variables](../variables/README.md#custom-cicd-variables).
+[custom CI/CD variables](../variables/index.md#custom-cicd-variables).
 Add a variable name (key) and value here to override the value defined in
-[the UI or `.gitlab-ci.yml`](../variables/README.md#custom-cicd-variables),
+[the UI or `.gitlab-ci.yml`](../variables/index.md#custom-cicd-variables),
 for a single run of the manual job.
 
-![Manual job variables](img/manual_job_variables.png)
+![Manual job variables](img/manual_job_variables_v13_10.png)
 
 ## Delay a job
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21767) in GitLab 11.4.
 
-When you do not want to run a job immediately, you can use the [`when:delayed`](../yaml/README.md#whendelayed) keyword to
+When you do not want to run a job immediately, you can use the [`when:delayed`](../yaml/index.md#whendelayed) keyword to
 delay a job's execution for a certain period.
 
 This is especially useful for timed incremental rollout where new code is rolled out gradually.
@@ -170,7 +177,7 @@ For example, if you start rolling out new code and:
 
 - Users do not experience trouble, GitLab can automatically complete the deployment from 0% to 100%.
 - Users experience trouble with the new code, you can stop the timed incremental rollout by canceling the pipeline
-  and [rolling](../environments/index.md#retrying-and-rolling-back) back to the last stable version.
+  and [rolling](../environments/index.md#retry-or-roll-back-a-deployment) back to the last stable version.
 
 ![Pipelines example](img/pipeline_incremental_rollout.png)
 
@@ -183,10 +190,10 @@ the duration.
 
 In the following example:
 
-- Two sections are collapsed and can be expanded.
+- Three sections are collapsed and can be expanded.
 - Three sections are expanded and can be collapsed.
 
-![Collapsible sections](img/collapsible_log_v12_6.png)
+![Collapsible sections](img/collapsible_log_v13_10.png)
 
 ### Custom collapsible sections
 
@@ -209,6 +216,9 @@ job1:
     - echo 'this line should be hidden when collapsed'
     - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
 ```
+
+Depending on the shell that your runner uses, for example if it is using ZSH, you may need to
+escape the special characters like so: `\\e` and `\\r`.
 
 In the example above:
 

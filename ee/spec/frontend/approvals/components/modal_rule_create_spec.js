@@ -1,15 +1,16 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
 import RuleForm from 'ee/approvals/components/rule_form.vue';
+import { stubComponent } from 'helpers/stub_component';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 const TEST_MODAL_ID = 'test-modal-create-id';
 const TEST_RULE = { id: 7 };
 const MODAL_MODULE = 'createModal';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('Approvals ModalRuleCreate', () => {
   let createModalState;
@@ -17,8 +18,8 @@ describe('Approvals ModalRuleCreate', () => {
   let modal;
   let form;
 
-  const findModal = () => wrapper.find(GlModalVuex);
-  const findForm = () => wrapper.find(RuleForm);
+  const findModal = () => wrapper.findComponent(GlModalVuex);
+  const findForm = () => wrapper.findComponent(RuleForm);
 
   const factory = (options = {}) => {
     const store = new Vuex.Store({
@@ -35,11 +36,15 @@ describe('Approvals ModalRuleCreate', () => {
       ...options.propsData,
     };
 
-    wrapper = shallowMount(localVue.extend(ModalRuleCreate), {
+    wrapper = shallowMount(ModalRuleCreate, {
       ...options,
-      localVue,
       store,
       propsData,
+      stubs: {
+        GlModalVuex: stubComponent(GlModalVuex, {
+          props: ['modalModule', 'modalId', 'actionPrimary', 'actionCancel'],
+        }),
+      },
     });
   };
 
@@ -63,8 +68,12 @@ describe('Approvals ModalRuleCreate', () => {
       expect(modal.exists()).toBe(true);
       expect(modal.props('modalModule')).toEqual(MODAL_MODULE);
       expect(modal.props('modalId')).toEqual(TEST_MODAL_ID);
+      expect(modal.props('actionPrimary')).toStrictEqual({
+        text: 'Add approval rule',
+        attributes: [{ variant: 'confirm' }],
+      });
+      expect(modal.props('actionCancel')).toStrictEqual({ text: 'Cancel' });
       expect(modal.attributes('title')).toEqual('Add approval rule');
-      expect(modal.attributes('ok-title')).toEqual('Add approval rule');
     });
 
     it('renders form', () => {
@@ -91,7 +100,11 @@ describe('Approvals ModalRuleCreate', () => {
     it('renders modal', () => {
       expect(modal.exists()).toBe(true);
       expect(modal.attributes('title')).toEqual('Update approval rule');
-      expect(modal.attributes('ok-title')).toEqual('Update approval rule');
+      expect(modal.props('actionPrimary')).toStrictEqual({
+        text: 'Update approval rule',
+        attributes: [{ variant: 'confirm' }],
+      });
+      expect(modal.props('actionCancel')).toStrictEqual({ text: 'Cancel' });
     });
 
     it('renders form', () => {
@@ -100,15 +113,11 @@ describe('Approvals ModalRuleCreate', () => {
     });
   });
 
-  describe('with approvalSuggestions feature flag', () => {
+  describe('with approval suggestions', () => {
     beforeEach(() => {
       createModalState.data = { ...TEST_RULE, defaultRuleName: 'Vulnerability-Check' };
 
-      factory({
-        provide: {
-          glFeatures: { approvalSuggestions: true },
-        },
-      });
+      factory();
       modal = findModal();
       form = findForm();
     });
@@ -116,7 +125,11 @@ describe('Approvals ModalRuleCreate', () => {
     it('renders add rule modal', () => {
       expect(modal.exists()).toBe(true);
       expect(modal.attributes('title')).toEqual('Add approval rule');
-      expect(modal.attributes('ok-title')).toEqual('Add approval rule');
+      expect(modal.props('actionPrimary')).toStrictEqual({
+        text: 'Add approval rule',
+        attributes: [{ variant: 'confirm' }],
+      });
+      expect(modal.props('actionCancel')).toStrictEqual({ text: 'Cancel' });
     });
 
     it('renders form with defaultRuleName', () => {

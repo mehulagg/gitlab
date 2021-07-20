@@ -39,6 +39,41 @@ RSpec.describe SystemCheck::Geo::HttpConnectionCheck do
       end
     end
 
+    context 'redirects' do
+      def stub_many_requests(num_redirects)
+        url = primary_node.internal_uri
+        location = "https://example.com"
+
+        num_redirects.times do |index|
+          next_url = "#{location}/#{index}"
+          stub_request(http_method, url).to_return(status: 301, headers: { 'Location' => next_url })
+          url = next_url
+        end
+
+        stub_request(http_method, url).to_return(status: 200, body: "", headers: {})
+      end
+
+      context 'connection succeeds after 9 redirects' do
+        it 'puts yes' do
+          stub_many_requests(9)
+
+          expect do
+            subject.multi_check
+          end.to output("\n* Can connect to the primary node ... yes\n").to_stdout
+        end
+      end
+
+      context 'connection would succeed after 10 redirects' do
+        it 'puts no' do
+          stub_many_requests(10)
+
+          expect do
+            subject.multi_check
+          end.to output("\n* Can connect to the primary node ... no\n  Reason:\n  Gitlab::HTTP::RedirectionTooDeep\n").to_stdout
+        end
+      end
+    end
+
     context 'connection errored' do
       it 'puts no if check errored' do
         stub_request(http_method, primary_node.internal_uri).to_return(status: 400, body: "", headers: {})

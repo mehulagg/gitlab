@@ -22,4 +22,8 @@ RSpec.describe PipelineHooksWorker do
       end
     end
   end
+
+  it_behaves_like 'worker with data consistency',
+                  described_class,
+                  data_consistency: :delayed
 end

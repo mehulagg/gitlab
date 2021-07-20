@@ -10,7 +10,7 @@ RSpec.describe Ci::CreatePipelineService do
     let(:ref)      { 'refs/heads/master' }
     let(:source)   { :push }
     let(:service)  { described_class.new(project, user, { ref: ref }) }
-    let(:pipeline) { service.execute(source) }
+    let(:pipeline) { service.execute(source).payload }
 
     before do
       stub_ci_pipeline_yaml_file(config)
@@ -104,7 +104,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       it 'saves dependencies' do
         expect(test_a_build.options)
-          .to match(a_hash_including('dependencies' => ['build_a']))
+          .to match(a_hash_including(dependencies: ['build_a']))
       end
 
       it 'artifacts default to true' do
@@ -202,7 +202,7 @@ RSpec.describe Ci::CreatePipelineService do
         YAML
       end
 
-      it 'creates a pipeline with build_a and test_b pending; deploy_b manual' do
+      it 'creates a pipeline with build_a and test_b pending; deploy_b manual', :sidekiq_inline do
         processables = pipeline.processables
 
         build_a = processables.find { |processable| processable.name == 'build_a' }
@@ -211,7 +211,7 @@ RSpec.describe Ci::CreatePipelineService do
         deploy_a = processables.find { |processable| processable.name == 'deploy_a' }
         deploy_b = processables.find { |processable| processable.name == 'deploy_b' }
 
-        expect(pipeline).to be_persisted
+        expect(pipeline).to be_created_successfully
         expect(build_a.status).to eq('pending')
         expect(test_a.status).to eq('created')
         expect(test_b.status).to eq('pending')
@@ -236,6 +236,52 @@ RSpec.describe Ci::CreatePipelineService do
       it 'raises error' do
         expect(pipeline.yaml_errors)
           .to eq('jobs:invalid_dag_job:needs config can not be an empty hash')
+      end
+    end
+
+    context 'when the needed job has rules' do
+      let(:config) do
+        <<~YAML
+          build:
+            stage: build
+            script: exit 0
+            rules:
+              - if: $CI_COMMIT_REF_NAME == "invalid"
+
+          test:
+            stage: test
+            script: exit 0
+            needs: [build]
+        YAML
+      end
+
+      it 'returns error' do
+        expect(pipeline.yaml_errors)
+          .to eq("'test' job needs 'build' job, but 'build' is not in any previous stage")
+      end
+
+      context 'when need is optional' do
+        let(:config) do
+          <<~YAML
+            build:
+              stage: build
+              script: exit 0
+              rules:
+                - if: $CI_COMMIT_REF_NAME == "invalid"
+
+            test:
+              stage: test
+              script: exit 0
+              needs:
+                - job: build
+                  optional: true
+          YAML
+        end
+
+        it 'creates the pipeline without an error' do
+          expect(pipeline).to be_persisted
+          expect(pipeline.builds.pluck(:name)).to contain_exactly('test')
+        end
       end
     end
   end

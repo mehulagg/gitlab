@@ -8,6 +8,17 @@ RSpec.describe Resolvers::IterationsResolver do
   describe '#resolve' do
     let_it_be(:current_user) { create(:user) }
 
+    let(:params_list) do
+      {
+        id: nil,
+        iid: nil,
+        iteration_cadence_ids: nil,
+        parent: nil,
+        state: nil,
+        search_title: nil
+      }
+    end
+
     context 'for group iterations' do
       let_it_be(:now) { Time.now }
       let_it_be(:group) { create(:group, :private) }
@@ -30,7 +41,7 @@ RSpec.describe Resolvers::IterationsResolver do
 
       context 'without parameters' do
         it 'calls IterationsFinder to retrieve all iterations' do
-          params = { id: nil, iid: nil, group_ids: Group.where(id: group.id).select(:id), state: 'all', start_date: nil, end_date: nil, search_title: nil }
+          params = params_list.merge(parent: group, include_ancestors: true, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -39,23 +50,40 @@ RSpec.describe Resolvers::IterationsResolver do
       end
 
       context 'with parameters' do
-        it 'calls IterationsFinder with correct parameters' do
+        it 'calls IterationsFinder with correct parameters, using timeframe' do
           start_date = now
           end_date = start_date + 1.hour
           search = 'wow'
           id = '1'
           iid = 2
-          params = { id: id, iid: iid, group_ids: group.id, state: 'closed', start_date: start_date, end_date: end_date, search_title: search }
+          iteration_cadence_ids = ['5']
+
+          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, parent: group, include_ancestors: nil, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
-          resolve_group_iterations(start_date: start_date, end_date: end_date, state: 'closed', title: search, id: 'gid://gitlab/Iteration/1', iid: iid)
+          resolve_group_iterations(timeframe: { start: start_date, end: end_date }, state: 'closed', title: search, id: 'gid://gitlab/Iteration/1', iteration_cadence_ids: ['gid://gitlab/Iterations::Cadence/5'], iid: iid)
+        end
+
+        it 'calls IterationsFinder with correct parameters, using start and end date' do
+          start_date = now
+          end_date = start_date + 1.hour
+          search = 'wow'
+          id = '1'
+          iid = 2
+          iteration_cadence_ids = ['5']
+
+          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, parent: group, include_ancestors: nil, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
+
+          expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
+
+          resolve_group_iterations(start_date: start_date, end_date: end_date, state: 'closed', title: search, id: 'gid://gitlab/Iteration/1', iteration_cadence_ids: ['gid://gitlab/Iterations::Cadence/5'], iid: iid)
         end
 
         it 'accepts a raw model id for backward compatibility' do
           id = 1
           iid = 2
-          params = { id: id, iid: iid, group_ids: group.id, state: 'all', start_date: nil, end_date: nil, search_title: nil }
+          params = params_list.merge(id: id, iid: iid, parent: group, include_ancestors: nil, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -67,7 +95,7 @@ RSpec.describe Resolvers::IterationsResolver do
         let_it_be(:subgroup) { create(:group, :private, parent: group) }
 
         it 'defaults to include_ancestors' do
-          params = { id: nil, iid: nil, group_ids: subgroup.self_and_ancestors.select(:id), state: 'all', start_date: nil, end_date: nil, search_title: nil }
+          params = params_list.merge(parent: subgroup, include_ancestors: true, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -75,7 +103,7 @@ RSpec.describe Resolvers::IterationsResolver do
         end
 
         it 'does not default to include_ancestors if IID is supplied' do
-          params = { id: nil, iid: 1, group_ids: subgroup.id, state: 'all', start_date: nil, end_date: nil, search_title: nil }
+          params = params_list.merge(iid: 1, parent: subgroup, include_ancestors: false, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -83,7 +111,7 @@ RSpec.describe Resolvers::IterationsResolver do
         end
 
         it 'accepts include_ancestors false' do
-          params = { id: nil, iid: nil, group_ids: subgroup.id, state: 'all', start_date: nil, end_date: nil, search_title: nil }
+          params = params_list.merge(parent: subgroup, include_ancestors: false, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -92,6 +120,18 @@ RSpec.describe Resolvers::IterationsResolver do
       end
 
       context 'by timeframe' do
+        context 'when start_date and end_date are present' do
+          context 'when start date is after end_date' do
+            it 'raises error' do
+              expect do
+                resolve_group_iterations(timeframe: { start: now, end: now - 2.days })
+              end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "start must be before end")
+            end
+          end
+        end
+      end
+
+      context 'by dates' do
         context 'when start_date and end_date are present' do
           context 'when start date is after end_date' do
             it 'raises error' do

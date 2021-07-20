@@ -12,9 +12,4 @@ export default {
       return response ? [response] : [];
     },
   },
-  methods: {
-    hasDownstream(i) {
-      return i === this.pipeline.details.stages.length - 1 && this.triggered.length;
-    },
-  },
 };

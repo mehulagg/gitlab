@@ -24,9 +24,9 @@ module Gitlab
 
       PRIVATE_TOKEN_HEADER = 'HTTP_PRIVATE_TOKEN'
       PRIVATE_TOKEN_PARAM = :private_token
-      JOB_TOKEN_HEADER = 'HTTP_JOB_TOKEN'.freeze
+      JOB_TOKEN_HEADER = 'HTTP_JOB_TOKEN'
       JOB_TOKEN_PARAM = :job_token
-      DEPLOY_TOKEN_HEADER = 'HTTP_DEPLOY_TOKEN'.freeze
+      DEPLOY_TOKEN_HEADER = 'HTTP_DEPLOY_TOKEN'
       RUNNER_TOKEN_PARAM = :token
       RUNNER_JOB_TOKEN_PARAM = :token
 
@@ -89,9 +89,37 @@ module Gitlab
         job.user
       end
 
-      # We only allow Private Access Tokens with `api` scope to be used by web
+      def find_user_from_basic_auth_password
+        return unless has_basic_credentials?(current_request)
+
+        login, password = user_name_and_password(current_request)
+        return if ::Gitlab::Auth::CI_JOB_USER == login
+
+        Gitlab::Auth.find_with_user_password(login, password)
+      end
+
+      def find_user_from_lfs_token
+        return unless has_basic_credentials?(current_request)
+
+        login, token = user_name_and_password(current_request)
+        user = User.by_login(login)
+
+        user if user && Gitlab::LfsToken.new(user).token_valid?(token)
+      end
+
+      def find_user_from_personal_access_token
+        return unless access_token
+
+        validate_access_token!
+
+        access_token&.user || raise(UnauthorizedError)
+      end
+
+      # We allow Private Access Tokens with `api` scope to be used by web
       # requests on RSS feeds or ICS files for backwards compatibility.
       # It is also used by GraphQL/API requests.
+      # And to allow accessing /archive programatically as it was a big pain point
+      # for users https://gitlab.com/gitlab-org/gitlab/-/issues/28978.
       def find_user_from_web_access_token(request_format, scopes: [:api])
         return unless access_token && valid_web_access_format?(request_format)
 
@@ -160,7 +188,7 @@ module Gitlab
 
         case AccessTokenValidationService.new(access_token, request: request).validate(scopes: scopes)
         when AccessTokenValidationService::INSUFFICIENT_SCOPE
-          raise InsufficientScopeError.new(scopes)
+          raise InsufficientScopeError, scopes
         when AccessTokenValidationService::EXPIRED
           raise ExpiredError
         when AccessTokenValidationService::REVOKED
@@ -269,6 +297,8 @@ module Gitlab
           ics_request?
         when :api
           api_request?
+        when :archive
+          archive_request? if Feature.enabled?(:allow_archive_as_web_access_format, default_enabled: :yaml)
         end
       end
 
@@ -304,6 +334,10 @@ module Gitlab
         current_request.path.starts_with?(Gitlab::Utils.append_path(Gitlab.config.gitlab.relative_url_root, '/api/'))
       end
 
+      def git_request?
+        Gitlab::PathRegex.repository_git_route_regex.match?(current_request.path)
+      end
+
       def archive_request?
         current_request.path.include?('/-/archive/')
       end
@@ -321,4 +355,4 @@ module Gitlab
   end
 end
 
-Gitlab::Auth::AuthFinders.prepend_if_ee('::EE::Gitlab::Auth::AuthFinders')
+Gitlab::Auth::AuthFinders.prepend_mod_with('Gitlab::Auth::AuthFinders')

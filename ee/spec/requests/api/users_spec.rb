@@ -130,6 +130,9 @@ RSpec.describe API::Users do
   end
 
   context 'with group SAML' do
+    before do
+      stub_licensed_features(group_saml: true)
+    end
     let(:saml_provider) { create(:saml_provider) }
 
     it 'creates user with new identity' do
@@ -170,19 +173,26 @@ RSpec.describe API::Users do
       expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['message']).to eq({ "identities.provider" => ["can't be blank"] })
     end
+
+    it 'contains provisioned_by_group_id parameter' do
+      user.update!(provisioned_by_group: saml_provider.group)
+      get api("/users/#{user.id}", admin)
+
+      expect(json_response).to have_key('provisioned_by_group_id')
+    end
   end
 
   describe 'GET /user/:id' do
     context 'when authenticated' do
       context 'as an admin' do
         context 'and user has a plan' do
-          let!(:subscription) { create(:gitlab_subscription, :gold, namespace: user.namespace) }
+          let!(:subscription) { create(:gitlab_subscription, :ultimate, namespace: user.namespace) }
 
           context 'and user is not a trial user' do
             it 'contains plan and trial' do
               get api("/users/#{user.id}", admin)
 
-              expect(json_response).to include('plan' => 'gold', 'trial' => false)
+              expect(json_response).to include('plan' => 'ultimate', 'trial' => false)
             end
           end
 
@@ -194,8 +204,14 @@ RSpec.describe API::Users do
             it 'contains plan and trial' do
               get api("/users/#{user.id}", admin)
 
-              expect(json_response).to include('plan' => 'gold', 'trial' => true)
+              expect(json_response).to include('plan' => 'ultimate', 'trial' => true)
             end
+          end
+
+          it 'contains is_auditor parameter' do
+            get api("/users/#{user.id}", admin)
+
+            expect(json_response).to have_key('is_auditor')
           end
         end
 
@@ -214,6 +230,18 @@ RSpec.describe API::Users do
 
           expect(json_response).not_to have_key('plan')
           expect(json_response).not_to have_key('trial')
+        end
+
+        it 'does not contain is_auditor parameter' do
+          get api("/users/#{user.id}", user)
+
+          expect(json_response).not_to have_key('is_auditor')
+        end
+
+        it 'does not contain provisioned_by_group_id parameter' do
+          get api("/users/#{user.id}", user)
+
+          expect(json_response).not_to have_key('provisioned_by_group_id')
         end
       end
     end

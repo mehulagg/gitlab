@@ -3,7 +3,6 @@ import $ from 'jquery';
 import initMrPage from 'helpers/init_vue_mr_page_helper';
 import axios from '~/lib/utils/axios_utils';
 import MergeRequestTabs from '~/merge_request_tabs';
-import '~/commit/pipelines/pipelines_bundle';
 import '~/lib/utils/common_utils';
 
 jest.mock('~/lib/utils/webpack', () => ({
@@ -21,11 +20,6 @@ describe('MergeRequestTabs', () => {
     };
     $.extend(stubLocation, defaults, stubs || {});
   };
-
-  preloadFixtures(
-    'merge_requests/merge_request_with_task_list.html',
-    'merge_requests/diff_comment.html',
-  );
 
   beforeEach(() => {
     initMrPage();

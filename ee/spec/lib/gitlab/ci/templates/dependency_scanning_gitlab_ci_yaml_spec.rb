@@ -10,13 +10,15 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
     let(:files) { { 'README.txt' => '' } }
     let(:project) { create(:project, :custom_repo, files: files) }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
-    let(:pipeline) { service.execute!(:push) }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master') }
+    let(:pipeline) { service.execute!(:push).payload }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
       stub_ci_pipeline_yaml_file(template.content)
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -27,7 +29,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
     end
 
     context 'when project has Ultimate license' do
-      let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+      let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
       before do
         allow(License).to receive(:current).and_return(license)
@@ -40,6 +42,46 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
 
         it 'includes no jobs' do
           expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
+      end
+
+      context 'when DS_EXCLUDED_ANALYZERS set to' do
+        let(:files) { { 'conan.lock' => '', 'Gemfile.lock' => '', 'package.json' => '', 'pom.xml' => '', 'Pipfile' => '' } }
+
+        describe 'exclude' do
+          using RSpec::Parameterized::TableSyntax
+
+          where(:case_name, :excluded_analyzers, :included_build_names) do
+            'nothing'          | []                                                    | %w(gemnasium-dependency_scanning gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning)
+            'gemnasium'        | %w(gemnasium)                                         | %w(gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning)
+            'gemnasium-maven'  | %w(gemnasium-maven)                                   | %w(gemnasium-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning)
+            'gemnasium-python' | %w(gemnasium-python)                                  | %w(gemnasium-dependency_scanning gemnasium-maven-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning)
+            'bundler-audit'    | %w(bundler-audit)                                     | %w(gemnasium-dependency_scanning gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning retire-js-dependency_scanning)
+            'retire.js'        | %w(retire.js)                                         | %w(gemnasium-dependency_scanning gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning)
+            'two'              | %w(gemnasium bundler-audit)                           | %w(gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning retire-js-dependency_scanning)
+            'three'            | %w(gemnasium-maven retire.js gemnasium)               | %w(gemnasium-python-dependency_scanning bundler-audit-dependency_scanning)
+            'four'             | %w(gemnasium-maven retire.js gemnasium bundler-audit) | %w(gemnasium-python-dependency_scanning)
+          end
+
+          with_them do
+            before do
+              create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: excluded_analyzers.join(','))
+            end
+
+            it "creates pipeline with excluded analyzers skipped" do
+              expect(build_names).to include(*included_build_names)
+            end
+          end
+
+          context 'all analyzers excluded' do
+            before do
+              create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'gemnasium-maven, retire.js, gemnasium-python, gemnasium, bundler-audit')
+            end
+
+            it 'creates a pipeline excluding jobs from specified analyzers' do
+              expect { build_names }.to raise_error(Ci::CreatePipelineService::CreateError, %r(No stages / jobs for this pipeline.))
+            end
+          end
         end
       end
 

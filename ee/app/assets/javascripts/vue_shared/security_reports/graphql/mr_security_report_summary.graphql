@@ -4,13 +4,16 @@ query($fullPath: ID!, $pipelineIid: ID!) {
       securityReportSummary {
         dast {
           scannedResourcesCsvPath
-          scannedResourcesCount
-          scannedResources {
-            nodes {
-              requestMethod
-              url
-            }
-          }
+          # The commented out fields will be added back by
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/321586
+          #
+          # scannedResourcesCount
+          # scannedResources {
+          #   nodes {
+          #     requestMethod
+          #     url
+          #   }
+          # }
         }
       }
     }

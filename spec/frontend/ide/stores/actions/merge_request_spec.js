@@ -1,18 +1,32 @@
 import MockAdapter from 'axios-mock-adapter';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { leftSidebarViews, PERMISSION_READ_MR } from '~/ide/constants';
+import { range } from 'lodash';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
+import { leftSidebarViews, PERMISSION_READ_MR, MAX_MR_FILES_AUTO_OPEN } from '~/ide/constants';
 import service from '~/ide/services';
 import { createStore } from '~/ide/stores';
 import {
   getMergeRequestData,
   getMergeRequestChanges,
   getMergeRequestVersions,
+  openMergeRequestChanges,
   openMergeRequest,
 } from '~/ide/stores/actions/merge_request';
+import * as types from '~/ide/stores/mutation_types';
 import axios from '~/lib/utils/axios_utils';
 
 const TEST_PROJECT = 'abcproject';
 const TEST_PROJECT_ID = 17;
+
+const createMergeRequestChange = (path) => ({
+  new_path: path,
+  path,
+});
+const createMergeRequestChangesCount = (n) =>
+  range(n).map((i) => createMergeRequestChange(`loremispum_${i}.md`));
+
+const testGetUrlForPath = (path) => `${TEST_HOST}/test/${path}`;
 
 jest.mock('~/flash');
 
@@ -131,7 +145,9 @@ describe('IDE store merge request actions', () => {
           .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
           .catch(() => {
             expect(createFlash).toHaveBeenCalled();
-            expect(createFlash.mock.calls[0][0]).toBe('Error fetching merge requests for bar');
+            expect(createFlash.mock.calls[0][0].message).toBe(
+              'Error fetching merge requests for bar',
+            );
           })
           .then(done)
           .catch(done.fail);
@@ -353,6 +369,72 @@ describe('IDE store merge request actions', () => {
     });
   });
 
+  describe('openMergeRequestChanges', () => {
+    it.each`
+      desc                                   | changes                     | entries
+      ${'with empty changes'}                | ${[]}                       | ${{}}
+      ${'with changes not matching entries'} | ${[{ new_path: '123.md' }]} | ${{ '456.md': {} }}
+    `('$desc, does nothing', ({ changes, entries }) => {
+      const state = { entries };
+
+      return testAction({
+        action: openMergeRequestChanges,
+        state,
+        payload: changes,
+        expectedActions: [],
+        expectedMutations: [],
+      });
+    });
+
+    it('updates views and opens mr changes', () => {
+      // This is the payload sent to the action
+      const changesPayload = createMergeRequestChangesCount(15);
+
+      // Remove some items from the payload to use for entries
+      const changes = changesPayload.slice(1, 14);
+
+      const entries = changes.reduce(
+        (acc, { path }) => Object.assign(acc, { [path]: path, type: 'blob' }),
+        {},
+      );
+      const pathsToOpen = changes.slice(0, MAX_MR_FILES_AUTO_OPEN).map((x) => x.new_path);
+
+      return testAction({
+        action: openMergeRequestChanges,
+        state: { entries, getUrlForPath: testGetUrlForPath },
+        payload: changesPayload,
+        expectedActions: [
+          { type: 'updateActivityBarView', payload: leftSidebarViews.review.name },
+          // Only activates first file
+          { type: 'router/push', payload: testGetUrlForPath(pathsToOpen[0]) },
+          { type: 'setFileActive', payload: pathsToOpen[0] },
+          // Fetches data for other files
+          ...pathsToOpen.slice(1).map((path) => ({
+            type: 'getFileData',
+            payload: { path, makeFileActive: false },
+          })),
+          ...pathsToOpen.slice(1).map((path) => ({
+            type: 'getRawFileData',
+            payload: { path },
+          })),
+        ],
+        expectedMutations: [
+          ...changes.map((change) => ({
+            type: types.SET_FILE_MERGE_REQUEST_CHANGE,
+            payload: {
+              file: entries[change.new_path],
+              mrChange: change,
+            },
+          })),
+          ...pathsToOpen.map((path) => ({
+            type: types.TOGGLE_FILE_OPEN,
+            payload: path,
+          })),
+        ],
+      });
+    });
+  });
+
   describe('openMergeRequest', () => {
     const mr = {
       projectId: TEST_PROJECT,
@@ -381,11 +463,11 @@ describe('IDE store merge request actions', () => {
       };
 
       store.state.currentProjectId = 'test/test';
-      store.state.currentBranchId = 'master';
+      store.state.currentBranchId = 'main';
 
       store.state.projects['test/test'] = {
         branches: {
-          master: {
+          main: {
             commit: {
               id: '7297abc',
             },
@@ -409,7 +491,6 @@ describe('IDE store merge request actions', () => {
           case 'getFiles':
           case 'getMergeRequestVersions':
           case 'getBranchData':
-          case 'setFileMrChange':
             return Promise.resolve();
           default:
             return originalDispatch(type, payload);
@@ -445,6 +526,7 @@ describe('IDE store merge request actions', () => {
             ],
             ['getMergeRequestVersions', mr],
             ['getMergeRequestChanges', mr],
+            ['openMergeRequestChanges', testMergeRequestChanges.changes],
           ]);
         })
         .then(done)
@@ -454,9 +536,11 @@ describe('IDE store merge request actions', () => {
     it('updates activity bar view and gets file data, if changes are found', (done) => {
       store.state.entries.foo = {
         type: 'blob',
+        path: 'foo',
       };
       store.state.entries.bar = {
         type: 'blob',
+        path: 'bar',
       };
 
       testMergeRequestChanges.changes = [
@@ -467,24 +551,9 @@ describe('IDE store merge request actions', () => {
       openMergeRequest({ state: store.state, dispatch: store.dispatch, getters: mockGetters }, mr)
         .then(() => {
           expect(store.dispatch).toHaveBeenCalledWith(
-            'updateActivityBarView',
-            leftSidebarViews.review.name,
+            'openMergeRequestChanges',
+            testMergeRequestChanges.changes,
           );
-
-          testMergeRequestChanges.changes.forEach((change, i) => {
-            expect(store.dispatch).toHaveBeenCalledWith('setFileMrChange', {
-              file: store.state.entries[change.new_path],
-              mrChange: change,
-            });
-
-            expect(store.dispatch).toHaveBeenCalledWith('getFileData', {
-              path: change.new_path,
-              makeFileActive: i === 0,
-              openFile: true,
-            });
-          });
-
-          expect(store.state.openFiles.length).toBe(testMergeRequestChanges.changes.length);
         })
         .then(done)
         .catch(done.fail);
@@ -495,7 +564,9 @@ describe('IDE store merge request actions', () => {
 
       openMergeRequest(store, mr)
         .catch(() => {
-          expect(createFlash).toHaveBeenCalledWith(expect.any(String));
+          expect(createFlash).toHaveBeenCalledWith({
+            message: expect.any(String),
+          });
         })
         .then(done)
         .catch(done.fail);

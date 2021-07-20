@@ -25,10 +25,12 @@ RSpec.describe Resolvers::Boards::BoardListEpicsResolver do
     expect(described_class).to have_nullable_graphql_type(Types::EpicType.connection_type)
   end
 
-  describe '#resolve' do
-    let(:args) { {} }
+  def resolve_board_list_epics(args: {})
+    resolve(described_class, ctx: { current_user: user }, obj: list1, args: args)
+  end
 
-    subject(:result) { resolve(described_class, ctx: { current_user: user }, obj: list1, args: args) }
+  describe '#resolve' do
+    subject(:result) { resolve_board_list_epics }
 
     before do
       stub_licensed_features(epics: true)
@@ -37,6 +39,59 @@ RSpec.describe Resolvers::Boards::BoardListEpicsResolver do
 
     it 'returns epics on the board list ordered by position on the board' do
       expect(result.to_a).to eq([list1_epic2, list1_epic1])
+    end
+
+    context 'when filtering' do
+      let_it_be(:production_label) { create(:group_label, group: group, name: 'production') }
+      let_it_be(:list1_epic3) { create(:labeled_epic, group: group, labels: [development, production_label], title: 'filter_this 1') }
+      let_it_be(:list1_epic4) { create(:labeled_epic, group: group, labels: [development], description: 'filter_this 2') }
+      let_it_be(:awarded_emoji) { create(:award_emoji, name: 'thumbsup', awardable: list1_epic1, user: user) }
+
+      subject(:results) { resolve(described_class, ctx: { current_user: user }, obj: list1, args: args) }
+
+      context 'by label' do
+        let(:args) { { filters: { label_name: [production_label.title] } } }
+
+        it { is_expected.to contain_exactly(list1_epic3) }
+      end
+
+      context 'by author' do
+        let(:args) { { filters: { author_username: list1_epic4.author.username } } }
+
+        it { is_expected.to contain_exactly(list1_epic4) }
+      end
+
+      context 'by reaction emoji' do
+        let(:args) { { filters: { my_reaction_emoji: awarded_emoji.name } } }
+
+        it { is_expected.to contain_exactly(list1_epic1) }
+      end
+
+      context 'by title and description' do
+        let(:args) { { filters: { search: 'filter_this' } } }
+
+        it { is_expected.to contain_exactly(list1_epic3, list1_epic4) }
+      end
+
+      context 'with negated filters' do
+        context 'by label' do
+          let(:args) { { filters: { not: { label_name: [production_label.title] } } } }
+
+          it { is_expected.to contain_exactly(list1_epic1, list1_epic2, list1_epic4) }
+        end
+
+        context 'by author' do
+          let(:args) { { filters: { not: { author_username: list1_epic2.author.username } } } }
+
+          it { is_expected.to contain_exactly(list1_epic1, list1_epic3, list1_epic4) }
+        end
+
+        context 'by emoji' do
+          let(:args) { { filters: { not: { my_reaction_emoji: awarded_emoji.name } } } }
+
+          it { is_expected.to contain_exactly(list1_epic2, list1_epic3, list1_epic4) }
+        end
+      end
     end
   end
 end

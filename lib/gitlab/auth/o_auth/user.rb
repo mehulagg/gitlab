@@ -115,6 +115,8 @@ module Gitlab
             log.info "Correct LDAP account has been found. identity to user: #{gl_user.username}."
             gl_user.identities.build(provider: ldap_person.provider, extern_uid: ldap_person.dn)
           end
+
+          identity
         end
 
         def find_or_build_ldap_user
@@ -206,7 +208,7 @@ module Gitlab
 
         def build_new_user(skip_confirmation: true)
           user_params = user_attributes.merge(skip_confirmation: skip_confirmation)
-          Users::BuildService.new(nil, user_params).execute(skip_authorization: true)
+          Users::AuthorizedBuildService.new(nil, user_params).execute
         end
 
         def user_attributes
@@ -239,8 +241,9 @@ module Gitlab
         end
 
         def update_profile
-          clear_user_synced_attributes_metadata
+          return unless gl_user
 
+          clear_user_synced_attributes_metadata
           return unless sync_profile_from_provider? || creating_linked_ldap_user?
 
           metadata = gl_user.build_user_synced_attributes_metadata
@@ -291,4 +294,4 @@ module Gitlab
   end
 end
 
-Gitlab::Auth::OAuth::User.prepend_if_ee('::EE::Gitlab::Auth::OAuth::User')
+Gitlab::Auth::OAuth::User.prepend_mod_with('Gitlab::Auth::OAuth::User')

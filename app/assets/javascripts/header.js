@@ -45,7 +45,7 @@ function initStatusTriggers() {
                 defaultEmoji,
                 currentMessage,
                 currentAvailability,
-                canSetUserAvailability,
+                currentClearStatusAfter,
               } = setStatusModalWrapperEl.dataset;
 
               return {
@@ -53,7 +53,7 @@ function initStatusTriggers() {
                 defaultEmoji,
                 currentMessage,
                 currentAvailability,
-                canSetUserAvailability,
+                currentClearStatusAfter,
               };
             },
             render(createElement) {
@@ -62,7 +62,7 @@ function initStatusTriggers() {
                 defaultEmoji,
                 currentMessage,
                 currentAvailability,
-                canSetUserAvailability,
+                currentClearStatusAfter,
               } = this;
 
               return createElement(SetStatusModalWrapper, {
@@ -71,7 +71,7 @@ function initStatusTriggers() {
                   defaultEmoji,
                   currentMessage,
                   currentAvailability,
-                  canSetUserAvailability,
+                  currentClearStatusAfter,
                 },
               });
             },

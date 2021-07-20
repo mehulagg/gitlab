@@ -11,7 +11,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
 
     before do
       users.each { |user| project.add_developer(user) }
-      groups.each { |group| project.project_group_links.create(group: group, group_access: Gitlab::Access::DEVELOPER) }
+      groups.each { |group| project.project_group_links.create(group: group, group_access: Gitlab::Access::DEVELOPER) } # rubocop:disable Rails/SaveBang
     end
 
     def last_access_levels(git_operation)

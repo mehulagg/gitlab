@@ -35,6 +35,24 @@ describe('Codequality report mutations', () => {
       expect(state.allCodequalityIssues).toBe(parsedIssues);
       expect(state.pageInfo.total).toBe(parsedIssues.length);
     });
+
+    it('should sort issues by severity', () => {
+      mutations[types.RECEIVE_REPORT_SUCCESS](state, [
+        { severity: 'critical' },
+        { severity: 'blocker' },
+        { severity: 'info' },
+        { severity: 'minor' },
+        { severity: 'unknown' },
+        { severity: 'major' },
+      ]);
+
+      expect(state.allCodequalityIssues[0].severity).toBe('unknown');
+      expect(state.allCodequalityIssues[1].severity).toBe('blocker');
+      expect(state.allCodequalityIssues[2].severity).toBe('critical');
+      expect(state.allCodequalityIssues[3].severity).toBe('major');
+      expect(state.allCodequalityIssues[4].severity).toBe('minor');
+      expect(state.allCodequalityIssues[5].severity).toBe('info');
+    });
   });
 
   describe('receive report error', () => {

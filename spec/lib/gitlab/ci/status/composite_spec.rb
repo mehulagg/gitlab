@@ -6,13 +6,13 @@ RSpec.describe Gitlab::Ci::Status::Composite do
   let_it_be(:pipeline) { create(:ci_pipeline) }
 
   before_all do
-    @statuses = Ci::HasStatus::STATUSES_ENUM.map do |status, idx|
+    @statuses = Ci::HasStatus::STATUSES_ENUM.to_h do |status, idx|
       [status, create(:ci_build, pipeline: pipeline, status: status, importing: true)]
-    end.to_h
+    end
 
-    @statuses_with_allow_failure = Ci::HasStatus::STATUSES_ENUM.map do |status, idx|
+    @statuses_with_allow_failure = Ci::HasStatus::STATUSES_ENUM.to_h do |status, idx|
       [status, create(:ci_build, pipeline: pipeline, status: status, allow_failure: true, importing: true)]
-    end.to_h
+    end
   end
 
   describe '#status' do
@@ -69,6 +69,8 @@ RSpec.describe Gitlab::Ci::Status::Composite do
         %i(manual)           | false | 'skipped'   | false
         %i(skipped failed)   | false | 'success'   | true
         %i(skipped failed)   | true  | 'skipped'   | true
+        %i(success manual)   | true  | 'skipped'   | false
+        %i(success manual)   | false | 'success'   | false
         %i(created failed)   | false | 'created'   | true
         %i(preparing manual) | false | 'preparing' | false
       end

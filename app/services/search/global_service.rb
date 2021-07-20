@@ -9,7 +9,8 @@ module Search
     attr_accessor :current_user, :params
 
     def initialize(user, params)
-      @current_user, @params = user, params.dup
+      @current_user = user
+      @params = params.dup
     end
 
     def execute
@@ -37,4 +38,4 @@ module Search
   end
 end
 
-Search::GlobalService.prepend_if_ee('EE::Search::GlobalService')
+Search::GlobalService.prepend_mod_with('Search::GlobalService')

@@ -4,13 +4,6 @@ class Admin::Geo::NodesController < Admin::Geo::ApplicationController
   before_action :check_license!, except: :index
   before_action :load_node, only: [:edit, :update]
 
-  # rubocop: disable CodeReuse/ActiveRecord
-  def index
-    @nodes = GeoNode.all.order(:id)
-    @node = GeoNode.new
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
-
   def create
     @node = ::Geo::NodeCreateService.new(geo_node_params).execute
 

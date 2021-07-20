@@ -20,6 +20,7 @@ RSpec.describe CountriesController do
       resultant_countries = json_response.map {|row| row[0]}
 
       expect(resultant_countries).not_to include(World::DENYLIST)
+      expect(resultant_countries).not_to include(World::JH_MARKET)
     end
   end
 end

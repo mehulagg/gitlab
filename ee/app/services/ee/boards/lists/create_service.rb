@@ -10,7 +10,7 @@ module EE
 
         override :execute
         def execute(board)
-          return ServiceResponse.error(message: 'iteration_board_lists feature flag is disabled') if type == :iteration && ::Feature.disabled?(:iteration_board_lists, board.resource_parent)
+          return ServiceResponse.error(message: 'iteration_board_lists feature flag is disabled') if type == :iteration && ::Feature.disabled?(:iteration_board_lists, board.resource_parent, default_enabled: :yaml)
           return license_validation_error unless valid_license?(board.resource_parent)
 
           super
@@ -83,14 +83,14 @@ module EE
         end
 
         def find_iteration(board)
-          parent_params = ::IterationsFinder.params_for_parent(board.resource_parent, include_ancestors: true)
+          parent_params = { parent: board.resource_parent, include_ancestors: true }
           ::IterationsFinder.new(current_user, parent_params).find_by(id: params['iteration_id']) # rubocop: disable CodeReuse/ActiveRecord
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
         def find_user(board)
-          user_ids = user_finder(board).execute.select(:user_id)
-          ::User.where(id: user_ids).find_by(id: params['assignee_id'])
+          user_ids = user_finder(board).execute.reselect(:user_id)
+          ::User.id_in(user_ids).find_by(id: params['assignee_id'])
         end
         # rubocop: enable CodeReuse/ActiveRecord
 

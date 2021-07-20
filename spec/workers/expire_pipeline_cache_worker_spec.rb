@@ -18,6 +18,23 @@ RSpec.describe ExpirePipelineCacheWorker do
       subject.perform(pipeline.id)
     end
 
+    it 'does not perform extra queries', :aggregate_failures do
+      recorder = ActiveRecord::QueryRecorder.new { subject.perform(pipeline.id) }
+
+      project_queries = recorder.data.values.flat_map {|v| v[:occurrences]}.select {|s| s.include?('FROM "projects"')}
+      namespace_queries = recorder.data.values.flat_map {|v| v[:occurrences]}.select {|s| s.include?('FROM "namespaces"')}
+      route_queries = recorder.data.values.flat_map {|v| v[:occurrences]}.select {|s| s.include?('FROM "routes"')}
+
+      # This worker is run 1 million times an hour, so we need to save as much
+      # queries as possible.
+      expect(recorder.count).to be <= 6
+
+      # These arises from #update_etag_cache
+      expect(project_queries.size).to eq(1)
+      expect(namespace_queries.size).to eq(1)
+      expect(route_queries.size).to eq(1)
+    end
+
     it "doesn't do anything if the pipeline not exist" do
       expect_any_instance_of(Ci::ExpirePipelineCacheService).not_to receive(:execute)
       expect_any_instance_of(Gitlab::EtagCaching::Store).not_to receive(:touch)
@@ -25,17 +42,14 @@ RSpec.describe ExpirePipelineCacheWorker do
       subject.perform(617748)
     end
 
-    it "doesn't do anything if the pipeline cannot be cached" do
-      allow_any_instance_of(Ci::Pipeline).to receive(:cacheable?).and_return(false)
-
-      expect_any_instance_of(Ci::ExpirePipelineCacheService).not_to receive(:execute)
-      expect_any_instance_of(Gitlab::EtagCaching::Store).not_to receive(:touch)
-
-      subject.perform(pipeline.id)
+    skip "with https://gitlab.com/gitlab-org/gitlab/-/issues/325291 resolved" do
+      it_behaves_like 'an idempotent worker' do
+        let(:job_args) { [pipeline.id] }
+      end
     end
 
-    it_behaves_like 'an idempotent worker' do
-      let(:job_args) { [pipeline.id] }
-    end
+    it_behaves_like 'worker with data consistency',
+                  described_class,
+                  data_consistency: :delayed
   end
 end

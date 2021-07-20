@@ -6,6 +6,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::UpdateService do
   let_it_be(:group, refind: true) { create(:group) }
   let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user, refind: true) { create(:user) }
+
   let(:default_stages) { Gitlab::Analytics::CycleAnalytics::DefaultStages.all }
   let(:params) { { value_stream: value_stream } }
   let(:persisted_stages) { group.reload.cycle_analytics_stages.ordered }
@@ -98,6 +99,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::UpdateService do
 
   context 'when updating a custom stage' do
     let_it_be(:stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream) }
+
     let(:params) { { id: stage.id, name: 'my new stage name', value_stream: value_stream } }
 
     it { expect(subject).to be_success }

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::AlertManagement::Payload::Generic do
   let_it_be(:project) { create(:project) }
+
   let(:raw_payload) { {} }
   let(:parsed_payload) { described_class.new(project: project, payload: raw_payload) }
 
@@ -106,175 +107,161 @@ RSpec.describe Gitlab::AlertManagement::Payload::Generic do
         stub_licensed_features(multiple_alert_http_integrations: project)
       end
 
-      context 'with multiple_http_integrations_custom_mapping feature flag enabled' do
-        let_it_be(:attribute_mapping) do
-          {
-            title: { path: %w(alert name), type: 'string' },
-            description: { path: %w(alert desc), type: 'string' },
-            start_time: { path: %w(alert start_time), type: 'datetime' },
-            end_time: { path: %w(alert end_time), type: 'datetime' },
-            service: { path: %w(alert service), type: 'string' },
-            monitoring_tool: { path: %w(alert monitoring_tool), type: 'string' },
-            hosts: { path: %w(alert hosts), type: 'string' },
-            severity: { path: %w(alert severity), type: 'string' },
-            gitlab_environment_name: { path: %w(alert env_name), type: 'string' },
-            fingerprint: { path: %w(alert fingerprint), type: 'string' }
-          }
+      let_it_be(:attribute_mapping) do
+        {
+          title: { path: %w(alert name), type: 'string' },
+          description: { path: %w(alert desc), type: 'string' },
+          start_time: { path: %w(alert start_time), type: 'datetime' },
+          end_time: { path: %w(alert end_time), type: 'datetime' },
+          service: { path: %w(alert service), type: 'string' },
+          monitoring_tool: { path: %w(alert monitoring_tool), type: 'string' },
+          hosts: { path: %w(alert hosts), type: 'string' },
+          severity: { path: %w(alert severity), type: 'string' },
+          gitlab_environment_name: { path: %w(alert env_name), type: 'string' },
+          fingerprint: { path: %w(alert fingerprint), type: 'string' }
+        }
+      end
+
+      let(:parsed_payload) { described_class.new(project: project, payload: raw_payload, integration: integration) }
+
+      context 'with defined custom mapping' do
+        let_it_be(:integration) do
+          create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
         end
 
-        let(:parsed_payload) { described_class.new(project: project, payload: raw_payload, integration: integration) }
+        describe '#title' do
+          subject { parsed_payload.title }
 
-        before do
-          stub_feature_flags(multiple_http_integrations_custom_mapping: project)
+          it { is_expected.to eq('mapped title') }
         end
 
-        context 'with defined custom mapping' do
-          let_it_be(:integration) do
-            create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
-          end
+        describe '#description' do
+          subject { parsed_payload.description }
 
-          describe '#title' do
-            subject { parsed_payload.title }
-
-            it { is_expected.to eq('mapped title') }
-          end
-
-          describe '#description' do
-            subject { parsed_payload.description }
-
-            it { is_expected.to eq('mapped description') }
-          end
-
-          describe '#starts_at' do
-            subject { parsed_payload.starts_at }
-
-            it { is_expected.to eq(mapped_start_time) }
-          end
-
-          describe '#ends_at' do
-            subject { parsed_payload.ends_at }
-
-            it { is_expected.to eq(mapped_end_time) }
-          end
-
-          describe '#service' do
-            subject { parsed_payload.service }
-
-            it { is_expected.to eq('mapped service') }
-          end
-
-          describe '#monitoring_tool' do
-            subject { parsed_payload.monitoring_tool }
-
-            it { is_expected.to eq('mapped monitoring tool') }
-          end
-
-          describe '#host' do
-            subject { parsed_payload.hosts }
-
-            it { is_expected.to eq(['mapped-host']) }
-          end
-
-          describe '#severity' do
-            subject { parsed_payload.severity }
-
-            it { is_expected.to eq(:high) }
-          end
-
-          describe '#environment_name' do
-            subject { parsed_payload.environment_name }
-
-            it { is_expected.to eq('mapped gitlab environment')}
-          end
-
-          describe '#gitlab_fingerprint' do
-            subject { parsed_payload.gitlab_fingerprint }
-
-            it { is_expected.to eq(Gitlab::AlertManagement::Fingerprint.generate('mapped fingerprint')) }
-          end
+          it { is_expected.to eq('mapped description') }
         end
 
-        context 'with only some attributes defined in custom mapping' do
-          let_it_be(:attribute_mapping) do
-            {
-              title: { path: %w(alert name), type: 'string' }
-            }
-          end
+        describe '#starts_at' do
+          subject { parsed_payload.starts_at }
 
-          let_it_be(:integration) do
-            create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
-          end
-
-          describe '#title' do
-            subject { parsed_payload.title }
-
-            it 'uses the value defined by the custom mapping' do
-              is_expected.to eq('mapped title')
-            end
-          end
-
-          describe '#description' do
-            subject { parsed_payload.description }
-
-            it 'falls back to the default value' do
-              is_expected.to eq('default description')
-            end
-          end
+          it { is_expected.to eq(mapped_start_time) }
         end
 
-        context 'when the payload has no default generic attributes' do
-          let_it_be(:raw_payload) do
-            {
-              'alert' => {
-                'name' => 'mapped title',
-                'desc' => 'mapped description'
-              }
-            }
-          end
+        describe '#ends_at' do
+          subject { parsed_payload.ends_at }
 
-          let_it_be(:attribute_mapping) do
-            {
-              title: { path: %w(alert name), type: 'string' },
-              description: { path: %w(alert desc), type: 'string' }
-            }
-          end
-
-          let_it_be(:integration) do
-            create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
-          end
-
-          describe '#title' do
-            subject { parsed_payload.title }
-
-            it { is_expected.to eq('mapped title') }
-          end
-
-          describe '#description' do
-            subject { parsed_payload.description }
-
-            it { is_expected.to eq('mapped description') }
-          end
+          it { is_expected.to eq(mapped_end_time) }
         end
 
-        context 'with inactive HTTP integration' do
-          let_it_be(:integration) do
-            create(:alert_management_http_integration, :inactive, project: project, payload_attribute_mapping: attribute_mapping)
-          end
+        describe '#service' do
+          subject { parsed_payload.service }
 
-          it_behaves_like 'parsing alert payload fields with default paths'
+          it { is_expected.to eq('mapped service') }
         end
 
-        context 'with blank custom mapping' do
-          let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+        describe '#monitoring_tool' do
+          subject { parsed_payload.monitoring_tool }
 
-          it_behaves_like 'parsing alert payload fields with default paths'
+          it { is_expected.to eq('mapped monitoring tool') }
+        end
+
+        describe '#host' do
+          subject { parsed_payload.hosts }
+
+          it { is_expected.to eq(['mapped-host']) }
+        end
+
+        describe '#severity' do
+          subject { parsed_payload.severity }
+
+          it { is_expected.to eq(:high) }
+        end
+
+        describe '#environment_name' do
+          subject { parsed_payload.environment_name }
+
+          it { is_expected.to eq('mapped gitlab environment')}
+        end
+
+        describe '#gitlab_fingerprint' do
+          subject { parsed_payload.gitlab_fingerprint }
+
+          it { is_expected.to eq(Gitlab::AlertManagement::Fingerprint.generate('mapped fingerprint')) }
         end
       end
 
-      context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
-        before do
-          stub_feature_flags(multiple_http_integrations_custom_mapping: false)
+      context 'with only some attributes defined in custom mapping' do
+        let_it_be(:attribute_mapping) do
+          {
+            title: { path: %w(alert name), type: 'string' }
+          }
         end
+
+        let_it_be(:integration) do
+          create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
+        end
+
+        describe '#title' do
+          subject { parsed_payload.title }
+
+          it 'uses the value defined by the custom mapping' do
+            is_expected.to eq('mapped title')
+          end
+        end
+
+        describe '#description' do
+          subject { parsed_payload.description }
+
+          it 'falls back to the default value' do
+            is_expected.to eq('default description')
+          end
+        end
+      end
+
+      context 'when the payload has no default generic attributes' do
+        let_it_be(:raw_payload) do
+          {
+            'alert' => {
+              'name' => 'mapped title',
+              'desc' => 'mapped description'
+            }
+          }
+        end
+
+        let_it_be(:attribute_mapping) do
+          {
+            title: { path: %w(alert name), type: 'string' },
+            description: { path: %w(alert desc), type: 'string' }
+          }
+        end
+
+        let_it_be(:integration) do
+          create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
+        end
+
+        describe '#title' do
+          subject { parsed_payload.title }
+
+          it { is_expected.to eq('mapped title') }
+        end
+
+        describe '#description' do
+          subject { parsed_payload.description }
+
+          it { is_expected.to eq('mapped description') }
+        end
+      end
+
+      context 'with inactive HTTP integration' do
+        let_it_be(:integration) do
+          create(:alert_management_http_integration, :inactive, project: project, payload_attribute_mapping: attribute_mapping)
+        end
+
+        it_behaves_like 'parsing alert payload fields with default paths'
+      end
+
+      context 'with blank custom mapping' do
+        let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
 
         it_behaves_like 'parsing alert payload fields with default paths'
       end

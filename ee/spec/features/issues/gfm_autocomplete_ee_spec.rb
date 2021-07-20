@@ -6,43 +6,33 @@ RSpec.describe 'GFM autocomplete EE', :js do
   let_it_be(:user) { create(:user, name: '💃speciąl someone💃', username: 'someone.special') }
   let_it_be(:another_user) { create(:user, name: 'another user', username: 'another.user') }
   let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, group: group) }
-  let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:epic) { create(:epic, group: group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:issue) { create(:issue, project: project, assignees: [user]) }
 
   before do
     project.add_maintainer(user)
   end
 
   context 'assignees' do
-    let(:issue_assignee) { create(:issue, project: project) }
-
     describe 'when tribute_autocomplete feature flag is off' do
       before do
         stub_feature_flags(tribute_autocomplete: false)
 
-        issue_assignee.update!(assignees: [user])
-
         sign_in(user)
-        visit project_issue_path(project, issue_assignee)
 
-        wait_for_requests
+        visit project_issue_path(project, issue)
       end
 
       it 'only lists users who are currently assigned to the issue when using /unassign' do
-        note = find('#note-body')
-        page.within '.timeline-content-form' do
-          note.native.send_keys('/una')
-        end
+        fill_in 'Comment', with: '/una'
 
-        find('.atwho-view li', text: '/unassign')
-        note.native.send_keys(:tab)
+        find_highlighted_autocomplete_item.click
 
         wait_for_requests
 
-        users = find('#at-view-users .atwho-view-ul')
-        expect(users).to have_content(user.username)
-        expect(users).not_to have_content(another_user.username)
+        expect(find_autocomplete_menu).to have_text(user.username)
+        expect(find_autocomplete_menu).not_to have_text(another_user.username)
       end
     end
 
@@ -51,40 +41,45 @@ RSpec.describe 'GFM autocomplete EE', :js do
         stub_licensed_features(epics: true)
         stub_feature_flags(tribute_autocomplete: true)
 
-        issue_assignee.update!(assignees: [user])
-
         sign_in(user)
-        visit project_issue_path(project, issue_assignee)
 
-        wait_for_requests
+        visit project_issue_path(project, issue)
       end
 
       it 'only lists users who are currently assigned to the issue when using /unassign' do
-        note = find('#note-body')
-        page.within '.timeline-content-form' do
-          note.native.send_keys('/unassign ')
-          # The `/unassign` ajax response might replace the one by `@` below causing a failed test
-          # so we need to wait for the `/assign` ajax request to finish first
-          wait_for_requests
-          note.native.send_keys('@')
-          wait_for_requests
-        end
+        note = find_field('Comment')
+        note.native.send_keys('/unassign ')
+        # The `/unassign` ajax response might replace the one by `@` below causing a failed test
+        # so we need to wait for the `/assign` ajax request to finish first
+        wait_for_requests
+        note.native.send_keys('@')
+        wait_for_requests
 
-        users = find('.tribute-container ul', visible: true)
-        expect(users).to have_content(user.username)
-        expect(users).not_to have_content(another_user.username)
+        expect(find_tribute_autocomplete_menu).to have_text(user.username)
+        expect(find_tribute_autocomplete_menu).not_to have_text(another_user.username)
       end
 
       it 'shows epics' do
-        note = find('#note-body')
-        page.within('.timeline-content-form') do
-          note.native.send_keys('&')
-        end
+        fill_in 'Comment', with: '&'
 
         wait_for_requests
 
-        expect(find('.tribute-container ul', visible: true).text).to have_content(epic.title)
+        expect(find_tribute_autocomplete_menu).to have_text(epic.title)
       end
     end
+  end
+
+  private
+
+  def find_autocomplete_menu
+    find('.atwho-view ul', visible: true)
+  end
+
+  def find_highlighted_autocomplete_item
+    find('.atwho-view li.cur', visible: true)
+  end
+
+  def find_tribute_autocomplete_menu
+    find('.tribute-container ul', visible: true)
   end
 end

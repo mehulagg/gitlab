@@ -1,13 +1,14 @@
 #import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
 #import "../fragments/vulnerability.fragment.graphql"
 
-query project(
+query projectVulnerabilities(
   $fullPath: ID!
   $after: String
   $first: Int
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
+  $scannerId: [VulnerabilitiesScannerID!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
   $hasIssues: Boolean
@@ -21,6 +22,7 @@ query project(
       severity: $severity
       reportType: $reportType
       scanner: $scanner
+      scannerId: $scannerId
       state: $state
       sort: $sort
       hasIssues: $hasIssues

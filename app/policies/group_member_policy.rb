@@ -4,7 +4,7 @@ class GroupMemberPolicy < BasePolicy
   delegate :group
 
   with_scope :subject
-  condition(:last_owner) { @subject.group.last_owner?(@subject.user) }
+  condition(:last_owner) { @subject.group.member_last_owner?(@subject) || @subject.group.member_last_blocked_owner?(@subject) }
 
   desc "Membership is users' own"
   with_score 0
@@ -30,4 +30,4 @@ class GroupMemberPolicy < BasePolicy
   end
 end
 
-GroupMemberPolicy.prepend_if_ee('EE::GroupMemberPolicy')
+GroupMemberPolicy.prepend_mod_with('GroupMemberPolicy')

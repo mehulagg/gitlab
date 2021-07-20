@@ -1,0 +1,20 @@
+---
+data_category: Operational
+key_path: ingress_modsecurity_enabled
+description: Whether or not ModSecurity is enabled within Ingress
+product_section: sec
+product_stage: protect
+product_group: group::container security
+product_category: web_firewall
+value_type: boolean
+status: removed
+milestone_removed: 14.0
+time_frame: none
+data_source: system
+distribution:
+- ce
+- ee
+tier:
+- free
+- premium
+- ultimate

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_dependency 'declarative_policy'
-
 module API
   class Projects < ::API::Base
     include PaginationParams
@@ -12,6 +10,8 @@ module API
     before { authenticate_non_get! }
 
     feature_category :projects, ['/projects/:id/custom_attributes', '/projects/:id/custom_attributes/:key']
+
+    PROJECT_ATTACHMENT_SIZE_EXEMPT = 1.gigabyte
 
     helpers do
       # EE::API::Projects would override this method
@@ -51,6 +51,29 @@ module API
         end
 
         accepted!
+      end
+
+      def exempt_from_global_attachment_size?(user_project)
+        list = ::Gitlab::RackAttack::UserAllowlist.new(ENV['GITLAB_UPLOAD_API_ALLOWLIST'])
+        list.include?(user_project.id)
+      end
+
+      # Temporarily introduced for upload API: https://gitlab.com/gitlab-org/gitlab/-/issues/325788
+      def project_attachment_size(user_project)
+        return PROJECT_ATTACHMENT_SIZE_EXEMPT if exempt_from_global_attachment_size?(user_project)
+        return user_project.max_attachment_size if Feature.enabled?(:enforce_max_attachment_size_upload_api, user_project, default_enabled: :yaml)
+
+        PROJECT_ATTACHMENT_SIZE_EXEMPT
+      end
+
+      # This is to help determine which projects to use in https://gitlab.com/gitlab-org/gitlab/-/issues/325788
+      def log_if_upload_exceed_max_size(user_project, file)
+        return if file.size <= user_project.max_attachment_size
+
+        if file.size > user_project.max_attachment_size
+          allowed = exempt_from_global_attachment_size?(user_project)
+          Gitlab::AppLogger.info({ message: "File exceeds maximum size", file_bytes: file.size, project_id: user_project.id, project_path: user_project.full_path, upload_allowed: allowed })
+        end
       end
     end
 
@@ -94,6 +117,7 @@ module API
         optional :last_activity_after, type: DateTime, desc: 'Limit results to projects with last_activity after specified time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ'
         optional :last_activity_before, type: DateTime, desc: 'Limit results to projects with last_activity before specified time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ'
         optional :repository_storage, type: String, desc: 'Which storage shard the repository is on. Available only to admins'
+        optional :topic, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of topics. Limit results to projects having all topics'
 
         use :optional_filter_params_ee
       end
@@ -133,7 +157,20 @@ module API
           [options[:with].prepare_relation(projects, options), options]
         end
 
+        Preloaders::UserMaxAccessLevelInProjectsPreloader.new(records, current_user).execute if current_user
+
         present records, options
+      end
+
+      def present_groups(groups)
+        options = {
+          with: Entities::PublicGroupDetails,
+          current_user: current_user
+        }
+
+        groups, options = with_custom_attributes(groups, options)
+
+        present paginate(groups), options
       end
 
       def translate_params_for_compatibility(params)
@@ -199,12 +236,13 @@ module API
       params do
         optional :name, type: String, desc: 'The name of the project'
         optional :path, type: String, desc: 'The path of the repository'
+        optional :default_branch, type: String, desc: 'The default branch of the project'
         at_least_one_of :name, :path
         use :optional_create_project_params
         use :create_params
       end
       post do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/21139')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/21139')
         attrs = declared_params(include_missing: false)
         attrs = translate_params_for_compatibility(attrs)
         filter_attributes_using_license!(attrs)
@@ -237,7 +275,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       post "user/:user_id", feature_category: :projects do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/21139')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/21139')
         authenticated_as_admin!
         user = User.find_by(id: params.delete(:user_id))
         not_found!('User') unless user
@@ -299,7 +337,7 @@ module API
         optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The visibility of the fork'
       end
       post ':id/fork', feature_category: :source_code_management do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42284')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20759')
 
         not_found! unless can?(current_user, :fork_project, user_project)
 
@@ -449,7 +487,7 @@ module API
       get ':id/languages', feature_category: :source_code_management do
         ::Projects::RepositoryLanguagesService
           .new(user_project, current_user)
-          .execute.map { |lang| [lang.name, lang.share] }.to_h
+          .execute.to_h { |lang| [lang.name, lang.share] }
       end
 
       desc 'Delete a project'
@@ -534,13 +572,27 @@ module API
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
+      desc 'Workhorse authorize the file upload' do
+        detail 'This feature was introduced in GitLab 13.11'
+      end
+      post ':id/uploads/authorize', feature_category: :not_owned do
+        require_gitlab_workhorse!
+
+        status 200
+        content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
+        FileUploader.workhorse_authorize(has_length: false, maximum_size: project_attachment_size(user_project))
+      end
+
       desc 'Upload a file'
       params do
-        # TODO: remove rubocop disable - https://gitlab.com/gitlab-org/gitlab/issues/14960
-        requires :file, type: File, desc: 'The file to be uploaded' # rubocop:disable Scalability/FileUploads
+        requires :file, types: [Rack::Multipart::UploadedFile, ::API::Validations::Types::WorkhorseFile], desc: 'The attachment file to be uploaded'
       end
       post ":id/uploads", feature_category: :not_owned do
-        upload = UploadService.new(user_project, params[:file]).execute
+        log_if_upload_exceed_max_size(user_project, params[:file])
+
+        service = UploadService.new(user_project, params[:file])
+        service.override_max_attachment_size = project_attachment_size(user_project)
+        upload = service.execute
 
         present upload, with: Entities::ProjectUpload
       end
@@ -558,7 +610,32 @@ module API
         users = users.search(params[:search]) if params[:search].present?
         users = users.where_not_in(params[:skip_users]) if params[:skip_users].present?
 
+        if Feature.enabled?(:sort_by_project_users_by_project_authorizations_user_id, user_project, default_enabled: :yaml)
+          users = users.order('project_authorizations.user_id' => :asc) # rubocop: disable CodeReuse/ActiveRecord
+        end
+
         present paginate(users), with: Entities::UserBasic
+      end
+
+      desc 'Get ancestor and shared groups for a project' do
+        success Entities::PublicGroupDetails
+      end
+      params do
+        optional :search, type: String, desc: 'Return list of groups matching the search criteria'
+        optional :skip_groups, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of group ids to exclude from list'
+        optional :with_shared, type: Boolean, default: false,
+                 desc: 'Include shared groups'
+        optional :shared_visible_only, type: Boolean, default: false,
+                 desc: 'Limit to shared groups user has access to'
+        optional :shared_min_access_level, type: Integer, values: Gitlab::Access.all_values,
+                 desc: 'Limit returned shared groups by minimum access level to the project'
+        use :pagination
+      end
+      get ':id/groups', feature_category: :source_code_management do
+        groups = ::Projects::GroupsFinder.new(project: user_project, current_user: current_user, params: declared_params(include_missing: false)).execute
+        groups = groups.search(params[:search]) if params[:search].present?
+
+        present_groups groups
       end
 
       desc 'Start the housekeeping task for a project' do
@@ -590,8 +667,20 @@ module API
           render_api_error!("Failed to transfer project #{user_project.errors.messages}", 400)
         end
       end
+
+      desc 'Show the storage information' do
+        success Entities::ProjectRepositoryStorage
+      end
+      params do
+        requires :id, type: String, desc: 'ID of a project'
+      end
+      get ':id/storage', feature_category: :projects do
+        authenticated_as_admin!
+
+        present user_project, with: Entities::ProjectRepositoryStorage, current_user: current_user
+      end
     end
   end
 end
 
-API::Projects.prepend_if_ee('EE::API::Projects')
+API::Projects.prepend_mod_with('API::Projects')

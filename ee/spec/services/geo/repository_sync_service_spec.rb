@@ -36,7 +36,7 @@ RSpec.describe Geo::RepositorySyncService, :geo do
 
       allow_any_instance_of(Repository)
         .to receive(:find_remote_root_ref)
-        .with('geo')
+        .with('geo', url_to_repo, anything)
         .and_return('master')
 
       allow_any_instance_of(Geo::ProjectHousekeepingService).to receive(:execute)
@@ -48,7 +48,6 @@ RSpec.describe Geo::RepositorySyncService, :geo do
     it 'fetches project repository with JWT credentials' do
       expect(repository).to receive(:with_config)
         .with("http.#{url_to_repo}.extraHeader" => anything)
-        .twice
         .and_call_original
 
       expect(repository).to receive(:fetch_as_mirror)
@@ -234,11 +233,11 @@ RSpec.describe Geo::RepositorySyncService, :geo do
         context 'with non empty repositories' do
           let(:project) { create(:project, :repository) }
 
-          context 'when when HEAD change' do
+          context 'when HEAD change' do
             before do
               allow(project.repository)
                 .to receive(:find_remote_root_ref)
-                .with('geo')
+                .with('geo', url_to_repo, anything)
                 .and_return('feature')
             end
 
@@ -248,39 +247,32 @@ RSpec.describe Geo::RepositorySyncService, :geo do
               subject.execute
             end
 
-            it 'updates the default branch with JWT credentials' do
+            it 'updates the default branch' do
               expect(repository).to receive(:with_config)
                 .with("http.#{url_to_repo}.extraHeader" => anything)
-                .twice
                 .and_call_original
+                .once
 
-              expect(project).to receive(:change_head).with('feature').once
+              expect(repository).to receive(:change_head).with('feature').once
 
               subject.execute
             end
           end
 
           context 'when HEAD does not change' do
-            before do
-              allow(project.repository)
-                .to receive(:find_remote_root_ref)
-                .with('geo')
-                .and_return(project.default_branch)
-            end
-
             it 'syncs gitattributes to info/attributes' do
               expect(repository).to receive(:copy_gitattributes)
 
               subject.execute
             end
 
-            it 'updates the default branch with JWT credentials' do
+            it 'updates the default branch' do
               expect(repository).to receive(:with_config)
                 .with("http.#{url_to_repo}.extraHeader" => anything)
-                .twice
                 .and_call_original
+                .once
 
-              expect(project).to receive(:change_head).with('master').once
+              expect(repository).to receive(:change_head).with('master').once
 
               subject.execute
             end

@@ -5,7 +5,11 @@ module Gitlab
     attr_reader :title, :name, :description, :preview, :logo
 
     def initialize(name, title, description, preview, logo = 'illustrations/gitlab_logo.svg')
-      @name, @title, @description, @preview, @logo = name, title, description, preview, logo
+      @name = name
+      @title = title
+      @description = description
+      @preview = preview
+      @logo = logo
     end
 
     def file
@@ -83,4 +87,4 @@ module Gitlab
   end
 end
 
-Gitlab::ProjectTemplate.prepend_if_ee('EE::Gitlab::ProjectTemplate')
+Gitlab::ProjectTemplate.prepend_mod_with('Gitlab::ProjectTemplate')

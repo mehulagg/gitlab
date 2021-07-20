@@ -60,6 +60,7 @@ export default {
       'isChildEpics',
       'hasFiltersApplied',
       'milestonesFetchFailure',
+      'filterParams',
     ]),
     showFilteredSearchbar() {
       if (this.glFeatures.asyncFiltering) {
@@ -176,6 +177,7 @@ export default {
         :has-filters-applied="hasFiltersApplied"
         :empty-state-illustration-path="emptyStateIllustrationPath"
         :is-child-epics="isChildEpics"
+        :filter-params="filterParams"
       />
       <roadmap-shell
         v-else-if="!epicsFetchFailure"

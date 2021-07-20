@@ -37,10 +37,19 @@ RSpec.describe IssuesFinder do
             expect(issues).to contain_exactly(issue_with_weight_42)
           end
         end
+
+        context 'filer issues by negated weight' do
+          let(:params) { { not: { weight: 1 } } }
+
+          it 'filters out issues with the specified weight' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, issue_with_weight_42)
+          end
+        end
       end
 
       context 'filtering by assignee IDs' do
         let_it_be(:user3) { create(:user) }
+
         let(:params) { { assignee_ids: [user2.id, user3.id] } }
 
         before do
@@ -56,6 +65,7 @@ RSpec.describe IssuesFinder do
 
       context 'filter by username' do
         let_it_be(:user3) { create(:user) }
+
         let(:issuables) { issues }
 
         before do
@@ -164,7 +174,7 @@ RSpec.describe IssuesFinder do
           end
 
           context 'when current iteration exists' do
-            let(:current_iteration) { create(:iteration, :started, group: group, start_date: Date.today, due_date: 1.day.from_now) }
+            let(:current_iteration) { create(:iteration, :current, group: group, start_date: Date.yesterday, due_date: 1.day.from_now) }
 
             it 'returns filtered issues' do
               expect(issues).to contain_exactly(current_iteration_issue)

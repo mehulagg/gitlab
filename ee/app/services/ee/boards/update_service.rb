@@ -5,25 +5,25 @@ module EE
     module UpdateService
       extend ::Gitlab::Utils::Override
 
-      override :execute
-      def execute(board)
-        unless parent.feature_available?(:scoped_issue_board)
-          params.delete(:milestone_id)
-          params.delete(:iteration_id)
-          params.delete(:assignee_id)
-          params.delete(:label_ids)
-          params.delete(:labels)
-          params.delete(:weight)
-          params.delete(:hide_backlog_list)
-          params.delete(:hide_closed_list)
-        end
+      override :filter_params
+      def filter_params
+        super
 
         filter_assignee
         filter_labels
         filter_milestone
         filter_iteration
+      end
 
-        super
+      override :permitted_params
+      def permitted_params
+        permitted = super
+
+        if parent.feature_available?(:scoped_issue_board)
+          permitted += %i(milestone_id iteration_id assignee_id weight labels label_ids)
+        end
+
+        permitted
       end
     end
   end

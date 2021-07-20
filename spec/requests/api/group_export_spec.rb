@@ -64,6 +64,23 @@ RSpec.describe API::GroupExport do
             expect(response).to have_gitlab_http_status(:not_found)
           end
         end
+
+        context 'when object is not present' do
+          let(:other_group) { create(:group, :with_export) }
+          let(:other_download_path) { "/groups/#{other_group.id}/export/download" }
+
+          before do
+            other_group.add_owner(user)
+            other_group.export_file.file.delete
+          end
+
+          it 'returns 404' do
+            get api(other_download_path, user)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+            expect(json_response['message']).to eq('The group export file is not available yet')
+          end
+        end
       end
 
       context 'when export file does not exist' do
@@ -175,6 +192,76 @@ RSpec.describe API::GroupExport do
         expect(json_response["message"])
           .to include('error' => 'This endpoint has been requested too many times. Try again later.')
         expect(response).to have_gitlab_http_status :too_many_requests
+      end
+    end
+  end
+
+  describe 'relations export' do
+    let(:path) { "/groups/#{group.id}/export_relations" }
+    let(:download_path) { "/groups/#{group.id}/export_relations/download?relation=labels" }
+    let(:status_path) { "/groups/#{group.id}/export_relations/status" }
+
+    before do
+      stub_feature_flags(group_import_export: true)
+      group.add_owner(user)
+    end
+
+    describe 'POST /groups/:id/export_relations' do
+      it 'accepts the request' do
+        post api(path, user)
+
+        expect(response).to have_gitlab_http_status(:accepted)
+      end
+
+      context 'when response is not success' do
+        it 'returns api error' do
+          allow_next_instance_of(BulkImports::ExportService) do |service|
+            allow(service).to receive(:execute).and_return(ServiceResponse.error(message: 'error', http_status: :error))
+          end
+
+          post api(path, user)
+
+          expect(response).to have_gitlab_http_status(:error)
+        end
+      end
+    end
+
+    describe 'GET /groups/:id/export_relations/download' do
+      let(:export) { create(:bulk_import_export, group: group, relation: 'labels') }
+      let(:upload) { create(:bulk_import_export_upload, export: export) }
+
+      context 'when export file exists' do
+        it 'downloads exported group archive' do
+          upload.update!(export_file: fixture_file_upload('spec/fixtures/bulk_imports/gz/labels.ndjson.gz'))
+
+          get api(download_path, user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      context 'when export_file.file does not exist' do
+        it 'returns 404' do
+          allow(upload).to receive(:export_file).and_return(nil)
+
+          get api(download_path, user)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    describe 'GET /groups/:id/export_relations/status' do
+      it 'returns a list of relation export statuses' do
+        create(:bulk_import_export, :started, group: group, relation: 'labels')
+        create(:bulk_import_export, :finished, group: group, relation: 'milestones')
+        create(:bulk_import_export, :failed, group: group, relation: 'badges')
+
+        get api(status_path, user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.pluck('relation')).to contain_exactly('labels', 'milestones', 'badges')
+        expect(json_response.pluck('status')).to contain_exactly(-1, 0, 1)
       end
     end
   end

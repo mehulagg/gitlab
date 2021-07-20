@@ -23,7 +23,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
@@ -58,7 +58,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
@@ -74,7 +74,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: false)
+          expect(need.value).to eq(name: 'job_name', artifacts: false, optional: false)
         end
       end
 
@@ -90,7 +90,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
@@ -106,11 +106,67 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
       it_behaves_like 'job type'
+    end
+
+    context 'with job name and optional true' do
+      let(:config) { { job: 'job_name', optional: true } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: true)
+        end
+      end
+    end
+
+    context 'with job name and optional false' do
+      let(:config) { { job: 'job_name', optional: false } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+      end
+    end
+
+    context 'with job name and optional nil' do
+      let(:config) { { job: 'job_name', optional: nil } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+      end
+    end
+
+    context 'without optional key' do
+      let(:config) { { job: 'job_name' } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+      end
     end
 
     context 'when job name is empty' do

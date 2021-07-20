@@ -5,83 +5,8 @@ require 'spec_helper'
 RSpec.describe Projects::BlobController do
   include ProjectForksHelper
 
-  let(:project) { create(:project, :public, :repository) }
-
-  describe "GET new" do
-    context 'with no jobs' do
-      let_it_be(:user) { create(:user) }
-      let_it_be(:file_name) { '.gitlab-ci.yml' }
-
-      def request
-        get(:new, params: { namespace_id: project.namespace, project_id: project, id: 'master', file_name: file_name } )
-      end
-
-      before do
-        project.add_maintainer(user)
-        sign_in(user)
-
-        stub_experiment(ci_syntax_templates: experiment_active)
-        stub_experiment_for_subject(ci_syntax_templates: in_experiment_group)
-      end
-
-      context 'when the experiment is not active' do
-        let(:experiment_active) { false }
-        let(:in_experiment_group) { false }
-
-        it 'does not record the experiment user' do
-          expect(Experiment).not_to receive(:add_user)
-
-          request
-        end
-      end
-
-      context 'when the experiment is active and the user is in the control group' do
-        let(:experiment_active) { true }
-        let(:in_experiment_group) { false }
-
-        it 'records the experiment user in the control group' do
-          expect(Experiment).to receive(:add_user)
-            .with(:ci_syntax_templates, :control, user, namespace_id: project.namespace_id)
-
-          request
-        end
-      end
-
-      context 'when the experiment is active and the user is in the experimental group' do
-        let(:experiment_active) { true }
-        let(:in_experiment_group) { true }
-
-        it 'records the experiment user in the experimental group' do
-          expect(Experiment).to receive(:add_user)
-            .with(:ci_syntax_templates, :experimental, user, namespace_id: project.namespace_id)
-
-          request
-        end
-
-        context 'when requesting a non default config file type' do
-          let(:file_name) { '.non_default_ci_config' }
-          let(:project) { create(:project, :public, :repository, ci_config_path: file_name) }
-
-          it 'records the experiment user in the experimental group' do
-            expect(Experiment).to receive(:add_user)
-            .with(:ci_syntax_templates, :experimental, user, namespace_id: project.namespace_id)
-
-            request
-          end
-        end
-
-        context 'when requesting a different file type' do
-          let(:file_name) { '.gitignore' }
-
-          it 'does not record the experiment user' do
-            expect(Experiment).not_to receive(:add_user)
-
-            request
-          end
-        end
-      end
-    end
-  end
+  let(:project) { create(:project, :public, :repository, previous_default_branch: previous_default_branch) }
+  let(:previous_default_branch) { nil }
 
   describe "GET show" do
     def request
@@ -116,6 +41,20 @@ RSpec.describe Projects::BlobController do
         let(:id) { 'invalid-branch/README.md' }
 
         it { is_expected.to respond_with(:not_found) }
+      end
+
+      context "renamed default branch, valid file" do
+        let(:id) { 'old-default-branch/README.md' }
+        let(:previous_default_branch) { 'old-default-branch' }
+
+        it { is_expected.to redirect_to("/#{project.full_path}/-/blob/#{project.default_branch}/README.md") }
+      end
+
+      context "renamed default branch, invalid file" do
+        let(:id) { 'old-default-branch/invalid-path.rb' }
+        let(:previous_default_branch) { 'old-default-branch' }
+
+        it { is_expected.to redirect_to("/#{project.full_path}/-/blob/#{project.default_branch}/invalid-path.rb") }
       end
 
       context "binary file" do
@@ -520,6 +459,40 @@ RSpec.describe Projects::BlobController do
     end
   end
 
+  describe 'POST preview' do
+    subject(:request) { post :preview, params: default_params }
+
+    let(:user) { create(:user) }
+    let(:filename) { 'preview.md' }
+    let(:default_params) do
+      {
+        namespace_id: project.namespace,
+        project_id: project,
+        id: "#{project.default_branch}/#{filename}",
+        content: "Bar\n"
+      }
+    end
+
+    before do
+      project.add_developer(user)
+      sign_in(user)
+
+      project.repository.create_file(
+        project.creator,
+        filename,
+        "Foo\n",
+        message: 'Test',
+        branch_name: project.default_branch
+      )
+    end
+
+    it 'is successful' do
+      request
+
+      expect(response).to be_successful
+    end
+  end
+
   describe 'POST create' do
     let(:user) { create(:user) }
     let(:default_params) do
@@ -540,11 +513,36 @@ RSpec.describe Projects::BlobController do
       sign_in(user)
     end
 
-    it_behaves_like 'tracking unique hll events' do
-      subject(:request) { post :create, params: default_params }
+    subject(:request) { post :create, params: default_params }
 
+    it_behaves_like 'tracking unique hll events' do
       let(:target_id) { 'g_edit_by_sfe' }
       let(:expected_type) { instance_of(Integer) }
+    end
+
+    it 'redirects to blob' do
+      request
+
+      expect(response).to redirect_to(project_blob_path(project, 'master/docs/EXAMPLE_FILE'))
+    end
+
+    context 'when code_quality_walkthrough param is present' do
+      let(:default_params) { super().merge(code_quality_walkthrough: true) }
+
+      it 'redirects to the pipelines page' do
+        request
+
+        expect(response).to redirect_to(project_pipelines_path(project, code_quality_walkthrough: true))
+      end
+
+      it 'creates an "commit_created" experiment tracking event' do
+        experiment = double(track: true)
+        expect(controller).to receive(:experiment).with(:code_quality_walkthrough, namespace: project.root_ancestor).and_return(experiment)
+
+        request
+
+        expect(experiment).to have_received(:track).with(:commit_created)
+      end
     end
   end
 end

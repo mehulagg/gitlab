@@ -8,6 +8,7 @@ RSpec.describe DesignManagement::DeleteDesignsService do
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:design_repository) { ::Gitlab::GlRepository::DESIGN.repository_resolver.call(project)}
+
   let!(:design) { create(:design, :with_lfs_file, issue: issue) }
 
   subject { described_class.new(project, user, issue: issue, designs: [design]) }

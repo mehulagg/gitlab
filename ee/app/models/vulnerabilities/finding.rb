@@ -5,6 +5,7 @@ module Vulnerabilities
     include ShaAttribute
     include ::Gitlab::Utils::StrongMemoize
     include Presentable
+    include ::VulnerabilityFindingHelpers
 
     # https://gitlab.com/groups/gitlab-org/-/epics/3148
     # https://gitlab.com/gitlab-org/gitlab/-/issues/214563#note_370782508 is why the table names are not renamed
@@ -34,7 +35,13 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
-    serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
+    has_many :signatures, class_name: 'Vulnerabilities::FindingSignature', inverse_of: :finding
+
+    has_many :vulnerability_flags, class_name: 'Vulnerabilities::Flag', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
+    has_one :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
+    serialize :config_options, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
     attr_accessor :scan
@@ -42,6 +49,7 @@ module Vulnerabilities
     enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
     enum report_type: ::Enums::Vulnerability.report_types
     enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
+    enum detection_method: ::Enums::Vulnerability.detection_methods
 
     validates :scanner, presence: true
     validates :project, presence: true
@@ -57,6 +65,7 @@ module Vulnerabilities
     validates :report_type, presence: true
     validates :severity, presence: true
     validates :confidence, presence: true
+    validates :detection_method, presence: true
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
@@ -74,6 +83,7 @@ module Vulnerabilities
 
     scope :by_report_types, -> (values) { where(report_type: values) }
     scope :by_projects, -> (values) { where(project_id: values) }
+    scope :by_scanners, -> (values) { where(scanner_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
     scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }
@@ -83,6 +93,7 @@ module Vulnerabilities
     end
 
     scope :scoped_project, -> { where('vulnerability_occurrences.project_id = projects.id') }
+    scope :eager_load_vulnerability_flags, -> { includes(:vulnerability_flags) }
 
     def self.for_pipelines_with_sha(pipelines)
       joins(:pipelines)
@@ -101,18 +112,6 @@ module Vulnerabilities
       end
     end
 
-    def self.with_vulnerabilities_for_state(project:, report_type:, project_fingerprints:)
-      Vulnerabilities::Finding
-        .joins(:vulnerability)
-        .where(
-          project: project,
-          report_type: report_type,
-          project_fingerprint: project_fingerprints
-        )
-        .select('vulnerability_occurrences.report_type, vulnerability_id, project_fingerprint, raw_metadata, '\
-                'vulnerabilities.id, vulnerabilities.state') # fetching only required attributes
-    end
-
     # sha can be sourced from a joined pipeline or set from the report
     def sha
       self[:sha] || @sha
@@ -121,7 +120,7 @@ module Vulnerabilities
     def state
       return 'dismissed' if dismissal_feedback.present?
 
-      if vulnerability.nil?
+      if vulnerability.nil? || vulnerability.detected?
         'detected'
       elsif vulnerability.resolved?
         'resolved'
@@ -202,7 +201,8 @@ module Vulnerabilities
     end
 
     def issue_feedback
-      Vulnerabilities::Feedback.find_by(issue: vulnerability&.related_issues) if vulnerability
+      related_issues = vulnerability&.related_issues
+      related_issues.blank? ? feedback(feedback_type: 'issue') : Vulnerabilities::Feedback.find_by(issue: related_issues)
     end
 
     def merge_request_feedback
@@ -339,12 +339,17 @@ module Vulnerabilities
       end
     end
 
-    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
+    alias_method :==, :eql?
 
     def eql?(other)
-      other.report_type == report_type &&
-        other.location_fingerprint == location_fingerprint &&
-        other.first_fingerprint == first_fingerprint
+      return false unless other.is_a?(self.class)
+      return false unless other.report_type == report_type && other.primary_identifier_fingerprint == primary_identifier_fingerprint
+
+      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        matches_signatures(other.signatures, other.uuid)
+      else
+        other.location_fingerprint == location_fingerprint
+      end
     end
 
     # Array.difference (-) method uses hash and eql? methods to do comparison
@@ -355,7 +360,7 @@ module Vulnerabilities
       # when Finding is persisted and identifiers are not preloaded.
       return super if persisted? && !identifiers.loaded?
 
-      report_type.hash ^ location_fingerprint.hash ^ first_fingerprint.hash
+      report_type.hash ^ location_fingerprint.hash ^ primary_identifier_fingerprint.hash
     end
 
     def severity_value
@@ -369,16 +374,29 @@ module Vulnerabilities
     # We will eventually have only UUIDv5 values for the `uuid`
     # attribute of the finding records.
     def uuid_v5
-      Gitlab::UUID.v5?(uuid) ? uuid : Gitlab::UUID.v5(uuid_v5_name)
+      if Gitlab::UUID.v5?(uuid)
+        uuid
+      else
+        ::Security::VulnerabilityUUID.generate(
+          report_type: report_type,
+          primary_identifier_fingerprint: primary_identifier.fingerprint,
+          location_fingerprint: location_fingerprint,
+          project_id: project_id
+        )
+      end
     end
 
     def pipeline_branch
       pipelines&.last&.sha || project.default_branch
     end
 
+    def false_positive?
+      vulnerability_flags.false_positive.any?
+    end
+
     protected
 
-    def first_fingerprint
+    def primary_identifier_fingerprint
       identifiers.first&.fingerprint
     end
 
@@ -390,15 +408,6 @@ module Vulnerabilities
         category: report_type,
         project_fingerprint: project_fingerprint
       }
-    end
-
-    def uuid_v5_name
-      [
-        report_type,
-        primary_identifier.fingerprint,
-        location_fingerprint,
-        project_id
-      ].join('-')
     end
   end
 end

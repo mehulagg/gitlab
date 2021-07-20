@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -26,6 +26,21 @@ hosts or use IP ranges:
    ```
 
 1. Save the file and [reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
+
+---
+
+**For installations using cloud native Helm charts**
+
+You can set the required IPs under the `gitlab.webservice.monitoring.ipWhitelist` key. For example:
+
+```yaml
+gitlab:
+   webservice:
+      monitoring:
+         # Monitoring IP whitelist
+         ipWhitelist:
+         - 0.0.0.0/0 # Default
+```
 
 ---
 

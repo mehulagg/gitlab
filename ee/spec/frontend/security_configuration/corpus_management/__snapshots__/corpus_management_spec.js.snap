@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EE - CorpusManagement corpus management when loaded renders the correct header 1`] = `
+<header>
+  <h4
+    class="gl-my-5"
+  >
+    
+      Fuzz testing corpus management
+    
+  </h4>
+   
+  <h5
+    class="gl-font-base gl-font-weight-100"
+  >
+    
+      Corpus are used in fuzz testing as mutation source to Improve future testing.
+      
+    <gl-link-stub
+      href="/docs/corpus-management"
+    >
+      Learn More
+    </gl-link-stub>
+  </h5>
+</header>
+`;

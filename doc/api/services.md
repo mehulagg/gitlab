@@ -4,10 +4,10 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Services API
+# Services API **(FREE)**
 
 NOTE:
-This API requires an access token with Maintainer or Owner permissions
+This API requires an access token with the [Maintainer or Owner role](../user/permissions.md).
 
 ## List all active services
 
@@ -42,7 +42,7 @@ Example response:
     "wiki_page_events": true,
     "job_events": true,
     "comment_on_event_enabled": true
-  }
+  },
   {
     "id": 76,
     "title": "Alerts endpoint",
@@ -68,13 +68,13 @@ Example response:
 
 ## Asana
 
-Asana - Teamwork without email
+Add commit messages as comments to Asana tasks.
+
+See also the [Asana service documentation](../user/project/integrations/asana.md).
 
 ### Create/Edit Asana service
 
 Set Asana service for a project.
-
-> This service adds commit messages as comments to Asana tasks. Once enabled, commit messages are checked for Asana task URLs (for example, `https://app.asana.com/0/123456/987654`) or task IDs starting with # (for example, `#987654`). Every task ID found gets the commit comment added to it. You can also close a task with a message containing: `fix #123456`. You can find your API Keys here: <https://developers.asana.com/docs/#authentication-basics>.
 
 ```plaintext
 PUT /projects/:id/services/asana
@@ -84,8 +84,8 @@ Parameters:
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `api_key` | string | true | User API token. User must have access to task, all comments are attributed to this user. |
-| `restrict_to_branch` | string | false | Comma-separated list of branches which are automatically inspected. Leave blank to include all branches. |
+| `api_key` | string | true | User API token. User must have access to task. All comments are attributed to this user. |
+| `restrict_to_branch` | string | false | Comma-separated list of branches to be are automatically inspected. Leave blank to include all branches. |
 | `push_events` | boolean | false | Enable notifications for push events |
 
 ### Delete Asana service
@@ -258,7 +258,8 @@ GET /projects/:id/services/buildkite
 
 ## Campfire
 
-Simple web-based real-time group chat
+Send notifications about push events to Campfire chat rooms.
+Note that [new users can no longer sign up for Campfire](https://basecamp.com/retired/campfire).
 
 ### Create/Edit Campfire service
 
@@ -270,12 +271,12 @@ PUT /projects/:id/services/campfire
 
 Parameters:
 
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `token` | string | true | Campfire token |
-| `subdomain` | string | false | Campfire subdomain |
-| `room`  | string | false | Campfire room |
-| `push_events` | boolean | false | Enable notifications for push events |
+| Parameter     | Type    | Required | Description                                                                                 |
+|---------------|---------|----------|---------------------------------------------------------------------------------------------|
+| `token`       | string  | true     | Campfire API token. To find it, log into Campfire and select **My info**.                   |
+| `subdomain`   | string  | false    | Campfire subdomain. Text between `https://` and `.campfirenow.com` when you're logged in. |
+| `room`        | string  | false    | Campfire room. The last part of the URL when you're in a room.                              |
+| `push_events` | boolean | false    | Enable notifications for push events.                                                       |
 
 ### Delete Campfire service
 
@@ -536,13 +537,13 @@ Get Confluence service settings for a project.
 GET /projects/:id/services/confluence
 ```
 
-## External Wiki
+## External wiki
 
 Replaces the link to the internal wiki with a link to an external wiki.
 
-### Create/Edit External Wiki service
+### Create/Edit External wiki service
 
-Set External Wiki service for a project.
+Set External wiki service for a project.
 
 ```plaintext
 PUT /projects/:id/services/external-wiki
@@ -552,19 +553,19 @@ Parameters:
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `external_wiki_url` | string | true | The URL of the external Wiki |
+| `external_wiki_url` | string | true | The URL of the external wiki |
 
-### Delete External Wiki service
+### Delete External wiki service
 
-Delete External Wiki service for a project.
+Delete External wiki service for a project.
 
 ```plaintext
 DELETE /projects/:id/services/external-wiki
 ```
 
-### Get External Wiki service settings
+### Get External wiki service settings
 
-Get External Wiki service settings for a project.
+Get External wiki service settings for a project.
 
 ```plaintext
 GET /projects/:id/services/external-wiki
@@ -572,7 +573,9 @@ GET /projects/:id/services/external-wiki
 
 ## Flowdock
 
-Flowdock is a collaboration web app for technical teams.
+Flowdock is a ChatOps application for collaboration in software engineering
+companies. You can send notifications from GitLab events to Flowdock flows.
+For integration instructions, see the [Flowdock documentation](https://www.flowdock.com/help/gitlab).
 
 ### Create/Edit Flowdock service
 
@@ -692,53 +695,6 @@ Get Hangouts Chat service settings for a project.
 GET /projects/:id/services/hangouts-chat
 ```
 
-## HipChat
-
-Private group chat and IM
-
-### Create/Edit HipChat service
-
-Set HipChat service for a project.
-
-```plaintext
-PUT /projects/:id/services/hipchat
-```
-
-Parameters:
-
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `token` | string | true | Room token |
-| `color` | string | false | The room color |
-| `notify` | boolean | false | Enable notifications |
-| `room` | string | false |Room name or ID |
-| `api_version` | string | false | Leave blank for default (v2) |
-| `server` | string | false | Leave blank for default. For example, `https://hipchat.example.com`. |
-| `push_events` | boolean | false | Enable notifications for push events |
-| `issues_events` | boolean | false | Enable notifications for issue events |
-| `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
-| `merge_requests_events` | boolean | false | Enable notifications for merge request events |
-| `tag_push_events` | boolean | false | Enable notifications for tag push events |
-| `note_events` | boolean | false | Enable notifications for note events |
-| `confidential_note_events` | boolean | false | Enable notifications for confidential note events |
-| `pipeline_events` | boolean | false | Enable notifications for pipeline events |
-
-### Delete HipChat service
-
-Delete HipChat service for a project.
-
-```plaintext
-DELETE /projects/:id/services/hipchat
-```
-
-### Get HipChat service settings
-
-Get HipChat service settings for a project.
-
-```plaintext
-GET /projects/:id/services/hipchat
-```
-
 ## Irker (IRC gateway)
 
 Send IRC messages, on update, to a list of recipients through an Irker gateway.
@@ -799,7 +755,7 @@ Set Jira service for a project.
 
 > Starting with GitLab 8.14, `api_url`, `issues_url`, `new_issue_url` and
 > `project_url` are replaced by `url`. If you are using an
-> older version, [follow this documentation](https://gitlab.com/gitlab-org/gitlab/blob/8-13-stable-ee/doc/api/services.md#jira).
+> older version, [follow this documentation](https://gitlab.com/gitlab-org/gitlab/-/blob/8-13-stable-ee/doc/api/services.md#jira).
 
 ```plaintext
 PUT /projects/:id/services/jira
@@ -814,7 +770,8 @@ Parameters:
 | `username`      | string | yes  | The username of the user created to be used with GitLab/Jira. |
 | `password`      | string | yes  | The password of the user created to be used with GitLab/Jira. |
 | `active`        | boolean | no  | Activates or deactivates the service. Defaults to false (deactivated). |
-| `jira_issue_transition_id` | string | no | The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the transitions ID column. By default, this ID is set to `2`. |
+| `jira_issue_transition_automatic` | boolean | no | Enable [automatic issue transitions](../integration/jira/issues.md#automatic-issue-transitions). Takes precedence over `jira_issue_transition_id` if enabled. Defaults to `false` |
+| `jira_issue_transition_id` | string | no | The ID of one or more transitions for [custom issue transitions](../integration/jira/issues.md#custom-issue-transitions). Ignored if `jira_issue_transition_automatic` is enabled. Defaults to a blank string, which disables custom transitions. |
 | `commit_events` | boolean | false | Enable notifications for commit events |
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events |
 | `comment_on_event_enabled` | boolean | false | Enable comments inside Jira issues on each GitLab event (commit / merge request) |
@@ -999,13 +956,15 @@ Get Pipeline-Emails service settings for a project.
 GET /projects/:id/services/pipelines-email
 ```
 
-## PivotalTracker
+## Pivotal Tracker
 
-Project Management Software (Source Commits Endpoint)
+Add commit messages as comments to Pivotal Tracker stories.
 
-### Create/Edit PivotalTracker service
+See also the [Pivotal Tracker service documentation](../user/project/integrations/pivotal_tracker.md).
 
-Set PivotalTracker service for a project.
+### Create/Edit Pivotal Tracker service
+
+Set Pivotal Tracker service for a project.
 
 ```plaintext
 PUT /projects/:id/services/pivotaltracker
@@ -1015,21 +974,21 @@ Parameters:
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `token` | string | true | The PivotalTracker token |
+| `token` | string | true | The Pivotal Tracker token |
 | `restrict_to_branch` | boolean | false | Comma-separated list of branches to automatically inspect. Leave blank to include all branches. |
 | `push_events` | boolean | false | Enable notifications for push events |
 
-### Delete PivotalTracker service
+### Delete Pivotal Tracker service
 
-Delete PivotalTracker service for a project.
+Delete Pivotal Tracker service for a project.
 
 ```plaintext
 DELETE /projects/:id/services/pivotaltracker
 ```
 
-### Get PivotalTracker service settings
+### Get Pivotal Tracker service settings
 
-Get PivotalTracker service settings for a project.
+Get Pivotal Tracker service settings for a project.
 
 ```plaintext
 GET /projects/:id/services/pivotaltracker
@@ -1297,7 +1256,7 @@ Parameters:
 | `confidential_issue_channel` | string | false | The name of the channel to receive confidential issues events notifications |
 | `merge_request_channel` | string | false | The name of the channel to receive merge request events notifications |
 | `note_channel` | string | false | The name of the channel to receive note events notifications |
-| `confidential_note_channel` | boolean | The name of the channel to receive confidential note events notifications |
+| `confidential_note_channel` | string | false | The name of the channel to receive confidential note events notifications |
 | `tag_push_channel` | string | false | The name of the channel to receive tag push events notifications |
 | `pipeline_channel` | string | false | The name of the channel to receive pipeline events notifications |
 | `wiki_page_channel` | string | false | The name of the channel to receive wiki page events notifications |
@@ -1372,10 +1331,15 @@ PUT /projects/:id/services/jenkins
 
 Parameters:
 
-- `jenkins_url` (**required**) - Jenkins URL like `http://jenkins.example.com`
-- `project_name` (**required**) - The URL-friendly project name. Example: my_project_name
-- `username` (optional) - A user with access to the Jenkins server, if applicable
-- `password` (optional) - The password of the user
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `jenkins_url` | string | true | Jenkins URL like `http://jenkins.example.com`. |
+| `project_name` | string | true | The URL-friendly project name. Example: `my_project_name`. |
+| `username` | string | false | Username for authentication with the Jenkins server, if authentication is required by the server. |
+| `password` | string | false | Password for authentication with the Jenkins server, if authentication is required by the server. |
+| `push_events` | boolean | false | Enable notifications for push events. |
+| `merge_requests_events` | boolean | false | Enable notifications for merge request events. |
+| `tag_push_events` | boolean | false | Enable notifications for tag push events. |
 
 ### Delete Jenkins CI service
 

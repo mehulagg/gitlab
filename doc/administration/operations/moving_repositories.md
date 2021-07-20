@@ -20,7 +20,7 @@ The GitLab API is the recommended way to move Git repositories:
 
 For more information, see:
 
-- [Configuring additional storage for Gitaly](../gitaly/index.md#network-architecture). This
+- [Configuring additional storage for Gitaly](../gitaly/configure_gitaly.md#network-architecture). This
   example configures additional storage called `storage1` and `storage2`.
 - [The API documentation](../../api/project_repository_storage_moves.md) details the endpoints for
   querying and scheduling project repository moves.
@@ -28,7 +28,7 @@ For more information, see:
   querying and scheduling snippet repository moves.
 - [The API documentation](../../api/group_repository_storage_moves.md) details the endpoints for
   querying and scheduling group repository moves **(PREMIUM SELF)**.
-- [Migrate existing repositories to Gitaly Cluster](../gitaly/praefect.md#migrate-existing-repositories-to-gitaly-cluster).
+- [Migrate to Gitaly Cluster](../gitaly/praefect.md#migrate-to-gitaly-cluster).
 
 ## Migrating to another GitLab instance
 

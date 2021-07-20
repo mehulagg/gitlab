@@ -33,7 +33,7 @@ RSpec.describe 'Test Cases', :js do
       end
 
       it 'shows action buttons' do
-        page.within('.test-case-container .detail-page-header-actions') do
+        page.within('.test-case-container .detail-page-header') do
           expect(page).to have_selector('.dropdown', visible: false)
           expect(page).to have_button('Archive test case')
           expect(page).to have_link('New test case', href: new_project_quality_test_case_path(project))
@@ -69,6 +69,15 @@ RSpec.describe 'Test Cases', :js do
           expect(page.find('textarea#issuable-description').value).to eq(test_case.description)
           expect(page).to have_button('Save changes')
           expect(page).to have_button('Cancel')
+        end
+      end
+
+      it 'enters into zen mode when clicking on zen mode button' do
+        page.within('.test-case-container .issuable-details') do
+          page.find('.js-issuable-edit').click
+          page.find('.js-vue-markdown-field button.js-zen-enter').click
+
+          expect(page).to have_selector('.zen-backdrop.fullscreen')
         end
       end
 

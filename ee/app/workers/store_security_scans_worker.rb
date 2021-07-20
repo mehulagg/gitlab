@@ -2,9 +2,9 @@
 
 class StoreSecurityScansWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
-  include SecurityScansQueue
 
-  tags :requires_disk_io
+  sidekiq_options retry: 3
+  include SecurityScansQueue
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(*)

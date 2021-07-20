@@ -5,7 +5,7 @@ module Mutations
     class AddProject < BaseMutation
       graphql_name 'AddProjectToSecurityDashboard'
 
-      authorize :developer_access
+      authorize :add_project_to_instance_security_dashboard
 
       field :project, Types::ProjectType,
             null: true,
@@ -37,7 +37,7 @@ module Mutations
 
       def add_project(project)
         Dashboard::Projects::CreateService
-          .new(current_user, current_user.security_dashboard_projects, ability: :read_vulnerability)
+          .new(current_user, current_user.security_dashboard_projects, ability: :read_security_resource)
           .execute([project.id])
       end
 
@@ -47,7 +47,7 @@ module Mutations
         if result.duplicate_project_ids.include?(project.id)
           _('The project has already been added to your dashboard.')
         elsif result.not_licensed_project_ids.include?(project.id)
-          _('Only projects created under a Gold license are available in Security Dashboards.')
+          _('Only projects created under a Ultimate license are available in Security Dashboards.')
         else
           _('Project was not found or you do not have permission to add this project to Security Dashboards.')
         end

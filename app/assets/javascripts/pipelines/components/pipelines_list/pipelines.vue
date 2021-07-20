@@ -1,8 +1,8 @@
 <script>
-import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import { GlEmptyState, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { isEqual } from 'lodash';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { getParameterByName } from '~/lib/utils/common_utils';
+import createFlash from '~/flash';
+import { getParameterByName } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import NavigationTabs from '~/vue_shared/components/navigation_tabs.vue';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
@@ -10,7 +10,6 @@ import { ANY_TRIGGER_AUTHOR, RAW_TEXT_WARNING, FILTER_TAG_IDENTIFIER } from '../
 import PipelinesMixin from '../../mixins/pipelines_mixin';
 import PipelinesService from '../../services/pipelines_service';
 import { validateParams } from '../../utils';
-import SvgBlankState from './blank_state.vue';
 import EmptyState from './empty_state.vue';
 import NavigationControls from './nav_controls.vue';
 import PipelinesFilteredSearch from './pipelines_filtered_search.vue';
@@ -19,13 +18,13 @@ import PipelinesTableComponent from './pipelines_table.vue';
 export default {
   components: {
     EmptyState,
+    GlEmptyState,
     GlIcon,
     GlLoadingIcon,
     NavigationTabs,
     NavigationControls,
     PipelinesFilteredSearch,
     PipelinesTableComponent,
-    SvgBlankState,
     TablePagination,
   },
   mixins: [PipelinesMixin],
@@ -52,10 +51,6 @@ export default {
       required: false,
       default: '',
     },
-    helpPagePath: {
-      type: String,
-      required: true,
-    },
     emptyStateSvgPath: {
       type: String,
       required: true,
@@ -65,10 +60,6 @@ export default {
       required: true,
     },
     noPipelinesSvgPath: {
-      type: String,
-      required: true,
-    },
-    autoDevopsHelpPath: {
       type: String,
       required: true,
     },
@@ -102,6 +93,16 @@ export default {
     params: {
       type: Object,
       required: true,
+    },
+    codeQualityPagePath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    ciRunnerSettingsPath: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   data() {
@@ -253,11 +254,16 @@ export default {
         .postAction(endpoint)
         .then(() => {
           this.isResetCacheButtonLoading = false;
-          createFlash(s__('Pipelines|Project cache successfully reset.'), 'notice');
+          createFlash({
+            message: s__('Pipelines|Project cache successfully reset.'),
+            type: 'notice',
+          });
         })
         .catch(() => {
           this.isResetCacheButtonLoading = false;
-          createFlash(s__('Pipelines|Something went wrong while cleaning runners cache.'));
+          createFlash({
+            message: s__('Pipelines|Something went wrong while cleaning runners cache.'),
+          });
         });
     },
     resetRequestData() {
@@ -282,7 +288,10 @@ export default {
         }
 
         if (!filter.type) {
-          createFlash(RAW_TEXT_WARNING, 'warning');
+          createFlash({
+            message: RAW_TEXT_WARNING,
+            type: 'warning',
+          });
         }
       });
 
@@ -322,6 +331,7 @@ export default {
     </div>
 
     <pipelines-filtered-search
+      v-if="stateToRender !== $options.stateMap.emptyState"
       :project-id="projectId"
       :params="validatedParams"
       @filterPipelines="filterPipelines"
@@ -337,24 +347,25 @@ export default {
 
       <empty-state
         v-else-if="stateToRender === $options.stateMap.emptyState"
-        :help-page-path="helpPagePath"
         :empty-state-svg-path="emptyStateSvgPath"
         :can-set-ci="canCreatePipeline"
+        :code-quality-page-path="codeQualityPagePath"
+        :ci-runner-settings-path="ciRunnerSettingsPath"
       />
 
-      <svg-blank-state
+      <gl-empty-state
         v-else-if="stateToRender === $options.stateMap.error"
         :svg-path="errorStateSvgPath"
-        :message="
+        :title="
           s__(`Pipelines|There was an error fetching the pipelines.
         Try again in a few moments or contact your support team.`)
         "
       />
 
-      <svg-blank-state
+      <gl-empty-state
         v-else-if="stateToRender === $options.stateMap.emptyTab"
         :svg-path="noPipelinesSvgPath"
-        :message="emptyTabMessage"
+        :title="emptyTabMessage"
       />
 
       <div v-else-if="stateToRender === $options.stateMap.tableList">
@@ -362,7 +373,6 @@ export default {
           :pipelines="state.pipelines"
           :pipeline-schedule-url="pipelineScheduleUrl"
           :update-graph-dropdown="updateGraphDropdown"
-          :auto-devops-help-path="autoDevopsHelpPath"
           :view-type="viewType"
         />
       </div>

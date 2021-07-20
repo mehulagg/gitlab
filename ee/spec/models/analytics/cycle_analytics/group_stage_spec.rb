@@ -15,6 +15,7 @@ RSpec.describe Analytics::CycleAnalytics::GroupStage do
   end
 
   it_behaves_like 'value stream analytics stage' do
+    let(:factory) { :cycle_analytics_group_stage }
     let(:parent) { create(:group) }
     let(:parent_name) { :group }
   end
@@ -31,40 +32,6 @@ RSpec.describe Analytics::CycleAnalytics::GroupStage do
       let(:parent) { create(:group) }
       let(:factory) { :cycle_analytics_group_stage }
       let(:default_params) { { group: parent } }
-    end
-  end
-
-  context 'when the event identifier is using the old, recently deduplicated identifier' do
-    let(:group) { create(:group) }
-    let(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
-    let(:invalid_identifier) { 6 }
-
-    let(:stage_params) do
-      {
-        name: 'My Stage',
-        parent: group,
-        start_event_identifier: :merge_request_created,
-        end_event_identifier: :merge_request_merged,
-        value_stream: value_stream
-      }
-    end
-
-    let(:stage) { described_class.create!(stage_params) }
-
-    before do
-      # update the columns directly so validations are skipped
-      stage.update_column(:start_event_identifier, invalid_identifier)
-      stage.update_column(:end_event_identifier, invalid_identifier)
-    end
-
-    subject { described_class.find(stage.id) }
-
-    it 'loads the correct start event' do
-      expect(subject.start_event).to be_a_kind_of(Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit)
-    end
-
-    it 'loads the correct end event' do
-      expect(subject.end_event).to be_a_kind_of(Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit)
     end
   end
 end

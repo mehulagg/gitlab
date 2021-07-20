@@ -33,6 +33,52 @@ RSpec.describe Gitlab::Kas do
     end
   end
 
+  describe '.enabled?' do
+    before do
+      allow(Gitlab).to receive(:config).and_return(gitlab_config)
+    end
+
+    subject { described_class.enabled? }
+
+    context 'gitlab_config is not enabled' do
+      let(:gitlab_config) { { 'gitlab_kas' => { 'enabled' => false } } }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'gitlab_config is enabled' do
+      let(:gitlab_config) { { 'gitlab_kas' => { 'enabled' => true } } }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'enabled is unset' do
+      let(:gitlab_config) { { 'gitlab_kas' => {} } }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '.external_url' do
+    it 'returns gitlab_kas external_url config' do
+      expect(described_class.external_url).to eq(Gitlab.config.gitlab_kas.external_url)
+    end
+  end
+
+  describe '.internal_url' do
+    it 'returns gitlab_kas internal_url config' do
+      expect(described_class.internal_url).to eq(Gitlab.config.gitlab_kas.internal_url)
+    end
+  end
+
+  describe '.version' do
+    it 'returns gitlab_kas version config' do
+      version_file = Rails.root.join(described_class::VERSION_FILE)
+
+      expect(described_class.version).to eq(version_file.read.chomp)
+    end
+  end
+
   describe '.ensure_secret!' do
     context 'secret file exists' do
       before do
@@ -55,50 +101,6 @@ RSpec.describe Gitlab::Kas do
         expect(described_class).to receive(:write_secret)
 
         described_class.ensure_secret!
-      end
-    end
-  end
-
-  describe '.included_in_gitlab_com_rollout?' do
-    let_it_be(:project) { create(:project) }
-
-    context 'not GitLab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(false)
-      end
-
-      it 'returns true' do
-        expect(described_class.included_in_gitlab_com_rollout?(project)).to be_truthy
-      end
-    end
-
-    context 'GitLab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-      end
-
-      context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
-        before do
-          stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
-        end
-
-        it 'returns false' do
-          expect(described_class.included_in_gitlab_com_rollout?(project)).to be_falsey
-        end
-      end
-
-      context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
-        before do
-          stub_feature_flags(kubernetes_agent_on_gitlab_com: project)
-        end
-
-        it 'returns true' do
-          expect(described_class.included_in_gitlab_com_rollout?(project)).to be_truthy
-        end
-
-        it 'returns false for another project' do
-          expect(described_class.included_in_gitlab_com_rollout?(create(:project))).to be_falsey
-        end
       end
     end
   end

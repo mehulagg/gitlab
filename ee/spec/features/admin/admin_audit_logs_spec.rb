@@ -44,7 +44,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
       let(:release) { create(:release, project: project, tag: 'v0.1', author: user) }
 
       before do
-        EE::AuditEvents::ReleaseCreatedAuditEventService.new(user, project, '127.0.0.1', release).security_event
+        AuditEvents::ReleaseCreatedAuditEventService.new(user, project, '127.0.0.1', release).security_event
       end
 
       it 'shows the related audit event' do
@@ -190,7 +190,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
         click_link 'Impersonate'
 
         visit(new_project_path)
-        find('[data-qa-selector="blank_project_link"]').click
+        find('[data-qa-panel-name="blank_project"]').click
 
         fill_in(:project_name, with: 'Gotham City')
 
@@ -219,7 +219,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
       click_link type
       click_link name
 
-      find('button[type="button"]:not([name="clear"])').click
+      find('button[type="button"]:not([name="clear"]):not([aria-label="Close"]').click
     end
 
     wait_for_requests

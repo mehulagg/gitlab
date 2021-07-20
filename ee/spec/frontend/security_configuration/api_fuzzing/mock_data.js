@@ -42,9 +42,15 @@ export const apiFuzzingConfigurationQueryResponse = {
 
 export const createApiFuzzingConfigurationMutationResponse = {
   data: {
-    createApiFuzzingCiConfiguration: {
-      configurationYaml: 'yaml snippet',
-      gitlabCiYamlEditUrl: '/ci/editor',
+    apiFuzzingCiConfigurationCreate: {
+      configurationYaml: `---
+stages:
+- fuzz
+include:
+- template: template.gitlab-ci.yml
+variables:
+- FOO: bar`,
+      gitlabCiYamlEditPath: '/ci/editor',
       errors: [],
       __typename: 'ApiFuzzingCiConfiguration',
     },

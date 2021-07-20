@@ -3,13 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe ComplianceManagement::Frameworks::CreateService do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be_with_refind(:namespace) { create(:namespace) }
+
   let(:params) do
     {
       name: 'GDPR',
       description: 'The EUs data protection directive',
-      color: '#abc123',
-      pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
+      color: '#abc123'
     }
   end
 
@@ -35,17 +35,23 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
     end
 
     context 'namespace has a parent' do
-      let_it_be(:namespace) { create(:namespace, :with_hierarchy) }
-      let(:descendant) { namespace.descendants.first }
+      let_it_be(:user) { create(:user) }
+      let_it_be_with_reload(:group) { create(:group, :with_hierarchy) }
 
-      subject { described_class.new(namespace: descendant, params: params, current_user: namespace.owner) }
+      let(:descendant) { group.descendants.first }
+
+      before do
+        group.add_owner(user)
+      end
+
+      subject { described_class.new(namespace: descendant, params: params, current_user: user) }
 
       it 'responds with a successful service response' do
         expect(subject.execute.success?).to be true
       end
 
       it 'creates the new framework in the root namespace' do
-        expect(subject.execute.payload[:framework].namespace).to eq(namespace)
+        expect(subject.execute.payload[:framework].namespace).to eq(group)
       end
     end
 
@@ -72,6 +78,22 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
       end
     end
 
+    context 'when pipeline_configuration_full_path parameter is used and feature is not available' do
+      subject { described_class.new(namespace: namespace, params: params, current_user: namespace.owner) }
+
+      before do
+        params[:pipeline_configuration_full_path] = '.compliance-gitlab-ci.yml@compliance/hipaa'
+        stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: false)
+      end
+
+      let(:response) { subject.execute }
+
+      it 'returns an error', :aggregate_failures do
+        expect(response.success?).to be false
+        expect(response.message).to eq 'Pipeline configuration full path feature is not available'
+      end
+    end
+
     context 'when using parameters for a valid compliance framework' do
       subject { described_class.new(namespace: namespace, params: params, current_user: namespace.owner) }
 
@@ -89,7 +111,19 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
         expect(framework.name).to eq('GDPR')
         expect(framework.description).to eq('The EUs data protection directive')
         expect(framework.color).to eq('#abc123')
-        expect(framework.pipeline_configuration_full_path).to eq('compliance/.gitlab-ci.yml')
+      end
+
+      context 'when compliance pipeline configuration is available' do
+        before do
+          params[:pipeline_configuration_full_path] = '.compliance-gitlab-ci.yml@compliance/hipaa'
+          stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
+        end
+
+        it 'sets the pipeline configuration path attribute' do
+          framework = subject.execute.payload[:framework]
+
+          expect(framework.pipeline_configuration_full_path).to eq('.compliance-gitlab-ci.yml@compliance/hipaa')
+        end
       end
     end
   end

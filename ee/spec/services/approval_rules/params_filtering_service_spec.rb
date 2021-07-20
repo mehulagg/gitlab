@@ -80,6 +80,22 @@ RSpec.describe ApprovalRules::ParamsFilteringService do
         let(:expected_groups) { [accessible_group] }
       end
 
+      # When a project approval rule is genuinely empty, it should not be converted
+      # an any_approver rule
+      context 'empty project approval rule' do
+        let(:approval_rules_attributes) { [{ name: 'Foo', user_ids: [], group_ids: [] }] }
+
+        it 'adds empty rule', :aggregate_failures do
+          rules = service.execute[:approval_rules_attributes]
+
+          expect(rules.size).to eq(1)
+          expect(rules[0]['name']).to eq('Foo')
+          expect(rules[0]['user_ids']).to be_empty
+          expect(rules[0]['group_ids']).to be_empty
+          expect(rules[0].key?('rule_type')).to be_falsy
+        end
+      end
+
       context 'inapplicable user defined rules' do
         let!(:source_rule) { create(:approval_project_rule, project: project) }
         let!(:another_source_rule) { create(:approval_project_rule, project: project) }
@@ -148,7 +164,7 @@ RSpec.describe ApprovalRules::ParamsFilteringService do
         let(:can_update_approvers?) { true }
         let(:approval_rules_attributes) do
           [
-            { user_ids: [], group_ids: [] }
+            { user_ids: [], group_ids: [], name: '' }
           ]
         end
 

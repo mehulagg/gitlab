@@ -7,7 +7,8 @@ module Projects
     attr_reader :template_name
 
     def initialize(user, params)
-      @current_user, @params = user, params.to_h.dup
+      @current_user = user
+      @params = params.to_h.dup
       @template_name = @params.delete(:template_name).presence
     end
 
@@ -57,4 +58,4 @@ module Projects
   end
 end
 
-Projects::CreateFromTemplateService.prepend_if_ee('EE::Projects::CreateFromTemplateService')
+Projects::CreateFromTemplateService.prepend_mod_with('Projects::CreateFromTemplateService')

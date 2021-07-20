@@ -17,11 +17,11 @@ from development to staging, and then to production (or
 through any series of custom environment flows you can set up).
 With an at-a-glance view of multiple projects, you can instantly
 see which pipelines are green and which are red allowing you to
-diagnose if there is a block at a particular point, or if there’s
+diagnose if there is a block at a particular point, or if there's
 a more systemic problem you need to investigate.
 
-You can access the dashboard from the top bar by clicking
-**More > Environments**.
+You can access the dashboard on the top bar by selecting
+**Menu > Environments**.
 
 ![Environments Dashboard with projects](img/environments_dashboard_v12_5.png)
 
@@ -29,7 +29,7 @@ The Environments dashboard displays a paginated list of projects that includes
 up to three environments per project.
 
 The listed environments for each project are unique, such as
-"production", "staging", etc. Review apps and other grouped
+"production", "staging", and so on. Review apps and other grouped
 environments are not displayed.
 
 ## Adding a project to the dashboard

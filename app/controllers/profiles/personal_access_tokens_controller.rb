@@ -3,9 +3,17 @@
 class Profiles::PersonalAccessTokensController < Profiles::ApplicationController
   feature_category :authentication_and_authorization
 
+  before_action do
+    push_frontend_feature_flag(:personal_access_tokens_scoped_to_projects, current_user)
+  end
+
   def index
     set_index_vars
-    @personal_access_token = finder.build
+    scopes = params[:scopes].split(',').map(&:squish).select(&:present?).map(&:to_sym) unless params[:scopes].nil?
+    @personal_access_token = finder.build(
+      name: params[:name],
+      scopes: scopes
+    )
   end
 
   def create
@@ -56,4 +64,4 @@ class Profiles::PersonalAccessTokensController < Profiles::ApplicationController
   end
 end
 
-Profiles::PersonalAccessTokensController.prepend_if_ee('EE::Profiles::PersonalAccessTokensController')
+Profiles::PersonalAccessTokensController.prepend_mod_with('Profiles::PersonalAccessTokensController')

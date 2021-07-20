@@ -9,31 +9,31 @@ namespace :gitlab do
       task generate: :environment do
         Rake::Task["gitlab:packages:events:generate_counts"].invoke
         Rake::Task["gitlab:packages:events:generate_unique"].invoke
-      rescue => e
+      rescue StandardError => e
         logger.error("Error building events list: #{e}")
       end
 
       task generate_counts: :environment do
-        logger = Logger.new(STDOUT)
+        logger = Logger.new($stdout)
         logger.info('Building list of package events...')
 
         path = Gitlab::UsageDataCounters::PackageEventCounter::KNOWN_EVENTS_PATH
         File.open(path, "w") { |file| file << counter_events_list.to_yaml }
 
         logger.info("Events file `#{path}` generated successfully")
-      rescue => e
+      rescue StandardError => e
         logger.error("Error building events list: #{e}")
       end
 
       task generate_unique: :environment do
-        logger = Logger.new(STDOUT)
+        logger = Logger.new($stdout)
         logger.info('Building list of package events...')
 
         path = File.join(File.dirname(Gitlab::UsageDataCounters::HLLRedisCounter::KNOWN_EVENTS_PATH), 'package_events.yml')
         File.open(path, "w") { |file| file << generate_unique_events_list.to_yaml }
 
         logger.info("Events file `#{path}` generated successfully")
-      rescue => e
+      rescue StandardError => e
         logger.error("Error building events list: #{e}")
       end
 
@@ -51,8 +51,7 @@ namespace :gitlab do
                 "name" => event_name,
                 "category" => "#{originator_type}_packages",
                 "aggregation" => "weekly",
-                "redis_slot" => "package",
-                "feature_flag" => "collect_package_events_redis"
+                "redis_slot" => "package"
               }
             end
 

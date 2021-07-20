@@ -5,6 +5,7 @@ import Autosave from './autosave';
 import AutoWidthDropdownSelect from './issuable/auto_width_dropdown_select';
 import { loadCSSFile } from './lib/utils/css_utils';
 import { parsePikadayDate, pikadayToString } from './lib/utils/datetime_utility';
+import { select2AxiosTransport } from './lib/utils/select2_utils';
 import { queryToObject, objectToQuery } from './lib/utils/url_utility';
 import UsersSelect from './users_select';
 import ZenMode from './zen_mode';
@@ -30,7 +31,7 @@ function organizeQuery(obj, isFallbackKey = false) {
 }
 
 function format(searchTerm, isFallbackKey = false) {
-  const queryObject = queryToObject(searchTerm);
+  const queryObject = queryToObject(searchTerm, { legacySpacesDecode: true });
   const organizeQueryObject = organizeQuery(queryObject, isFallbackKey);
   const formattedQuery = objectToQuery(organizeQueryObject);
 
@@ -53,9 +54,9 @@ export default class IssuableForm {
     this.wipRegex = new RegExp(
       '^\\s*(' + // Line start, then any amount of leading whitespace
         'draft\\s-\\s' + // Draft_-_ where "_" are *exactly* one whitespace
-        '|\\[(draft|wip)\\]\\s*' + // [Draft] or [WIP] and any following whitespace
-        '|(draft|wip):\\s*' + // Draft: or WIP: and any following whitespace
-        '|(draft|wip)\\s+' + // Draft_ or WIP_ where "_" is at least one whitespace
+        '|\\[draft\\]\\s*' + // [Draft] or [WIP] and any following whitespace
+        '|draft:\\s*' + // Draft: or WIP: and any following whitespace
+        '|draft\\s+' + // Draft_ or WIP_ where "_" is at least one whitespace
         '|\\(draft\\)\\s*' + // (Draft) and any following whitespace
         ')+' + // At least one repeated match of the preceding parenthetical
         '\\s*', // Any amount of trailing whitespace
@@ -145,18 +146,12 @@ export default class IssuableForm {
   workInProgress() {
     return this.wipRegex.test(this.titleField.val());
   }
-  titlePrefixContainsDraft() {
-    const prefix = this.titleField.val().match(this.wipRegex);
-
-    return prefix && prefix[0].match(/draft/i);
-  }
 
   renderWipExplanation() {
     if (this.workInProgress()) {
       // These strings are not "translatable" (the code is hard-coded to look for them)
-      this.$wipExplanation.find('code')[0].textContent = this.titlePrefixContainsDraft()
-        ? 'Draft' /* eslint-disable-line @gitlab/require-i18n-strings */
-        : 'WIP';
+      this.$wipExplanation.find('code')[0].textContent =
+        'Draft'; /* eslint-disable-line @gitlab/require-i18n-strings */
       this.$wipExplanation.show();
       return this.$noWipExplanation.hide();
     }
@@ -199,15 +194,16 @@ export default class IssuableForm {
                     search,
                   };
                 },
-                results(data) {
+                results({ results }) {
                   return {
                     // `data` keys are translated so we can't just access them with a string based key
-                    results: data[Object.keys(data)[0]].map((name) => ({
+                    results: results[Object.keys(results)[0]].map((name) => ({
                       id: name,
                       text: name,
                     })),
                   };
                 },
+                transport: select2AxiosTransport,
               },
               initSelection(el, callback) {
                 const val = el.val();

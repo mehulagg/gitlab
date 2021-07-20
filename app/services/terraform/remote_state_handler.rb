@@ -60,7 +60,7 @@ module Terraform
     private
 
     def retrieve_with_lock(find_only: false)
-      create_or_find!(find_only: find_only).tap { |state| retry_optimistic_lock(state) { |state| yield state } }
+      create_or_find!(find_only: find_only).tap { |state| retry_optimistic_lock(state, name: 'terraform_remote_state_handler_retrieve') { |state| yield state } }
     end
 
     def create_or_find!(find_only:)
@@ -94,7 +94,7 @@ module Terraform
     end
 
     def find_state!(find_params)
-      find_state(find_params) || raise(ActiveRecord::RecordNotFound.new("Couldn't find state"))
+      find_state(find_params) || raise(ActiveRecord::RecordNotFound, "Couldn't find state")
     end
   end
 end

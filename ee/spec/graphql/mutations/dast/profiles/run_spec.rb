@@ -6,7 +6,7 @@ RSpec.describe Mutations::Dast::Profiles::Run do
   let_it_be_with_refind(:project) { create(:project, :repository) }
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+  let_it_be(:dast_profile) { create(:dast_profile, project: project, branch_name: project.default_branch) }
 
   let(:full_path) { project.full_path }
   let(:dast_profile_id) { dast_profile.to_global_id }
@@ -23,20 +23,9 @@ RSpec.describe Mutations::Dast::Profiles::Run do
       )
     end
 
-    context 'when the feature flag dast_saved_scans is disabled' do
-      it 'raises an exception' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: false)
-
-        expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'raises an exception' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: true)
-
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
     end
@@ -44,7 +33,6 @@ RSpec.describe Mutations::Dast::Profiles::Run do
     context 'when the feature is enabled' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: true)
       end
 
       context 'when the project does not exist' do
@@ -60,15 +48,27 @@ RSpec.describe Mutations::Dast::Profiles::Run do
           project.add_developer(user)
         end
 
-        it 'returns a pipeline_url containing the correct path' do
-          actual_url = subject[:pipeline_url]
-          pipeline = Ci::Pipeline.last
-          expected_url = Gitlab::Routing.url_helpers.project_pipeline_url(
-            project,
-            pipeline
-          )
+        it_behaves_like 'it creates a DAST on-demand scan pipeline' do
+          context 'when there is a dast_site_profile_secret_variable associated with the dast_profile' do
+            let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, dast_site_profile: dast_profile.dast_site_profile, raw_value: 'hello, world') }
 
-          expect(actual_url).to eq(expected_url)
+            it 'makes the variable available to the dast build' do
+              subject
+
+              dast_build = pipeline.builds.find_by!(name: 'dast')
+              variable = dast_build.variables.find { |var| var[:key] == dast_site_profile_secret_variable.key }
+
+              expect(Base64.strict_decode64(variable.value)).to include('hello, world')
+            end
+          end
+        end
+
+        it_behaves_like 'it checks branch permissions before creating a DAST on-demand scan pipeline' do
+          let(:branch_name) { dast_profile.branch_name }
+        end
+
+        it_behaves_like 'it delegates scan creation to another service' do
+          let(:delegated_params) { hash_including(dast_profile: dast_profile) }
         end
 
         context 'when the dast_profile does not exist' do

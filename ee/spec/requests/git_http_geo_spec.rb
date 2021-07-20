@@ -141,6 +141,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
           context 'but has not successfully synced' do
             let_it_be(:project_with_repo_but_not_synced) { create(:project, :repository, :private) }
             let_it_be(:project) { project_with_repo_but_not_synced }
+
             let(:redirect_url) { "#{primary_url}/#{project_with_repo_but_not_synced.full_path}.git/info/refs?service=git-upload-pack" }
 
             before do
@@ -177,6 +178,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
         context 'when the repository does not exist' do
           let_it_be(:project) { project_no_repo }
+
           let(:redirect_url) { "#{primary_url}/#{project.full_path}.git/info/refs?service=git-upload-pack" }
 
           it_behaves_like 'a Geo 302 redirect to Primary'
@@ -222,6 +224,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
         end
 
         let_it_be(:project) { project_with_repo }
+
         let(:endpoint_path) { "/#{project.full_path}.git/info/refs" }
         let(:redirect_url) { "#{redirected_primary_url}?service=git-receive-pack" }
 
@@ -257,6 +260,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
       context 'when the repository does not exist' do
         let_it_be(:project) { project_no_repo }
+
         let(:redirect_url) { "#{primary_url}/#{project.full_path}.git/git-upload-pack" }
 
         it_behaves_like 'a Geo 302 redirect to Primary'
@@ -280,6 +284,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
           let(:args) { {} }
           let_it_be(:project) { project_with_repo }
+
           let(:endpoint_path) { "/#{project.full_path}.git/info/lfs/objects/batch" }
 
           subject do
@@ -353,6 +358,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
             context 'when the repository does not exist' do
               let_it_be(:project) { project_no_repo }
+
               let(:redirect_url) { redirected_primary_url }
 
               it_behaves_like 'a Geo 302 redirect to Primary'
@@ -412,6 +418,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
           context 'when the repository does not exist' do
             let_it_be(:project) { project_no_repo }
+
             let(:redirect_url) { redirected_primary_url }
 
             it_behaves_like 'a Geo 302 redirect to Primary'
@@ -433,6 +440,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
             end
 
             let_it_be(:project) { project_with_repo }
+
             let(:endpoint_path) { "/#{project.full_path}.git/#{path}" }
             let(:redirect_url) { redirected_primary_url }
 
@@ -472,6 +480,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
         let(:identifier) { "user-#{user.id}" }
         let_it_be(:project) { project_with_repo }
+
         let(:gl_repository) { "project-#{project.id}" }
         let(:endpoint_path) { "#{::Gitlab::Geo::GitPushHttp::PATH_PREFIX}/#{secondary.id}/#{project.full_path}.git/git-receive-pack" }
 
@@ -505,6 +514,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
         end
 
         let_it_be(:project) { project_with_repo }
+
         let(:endpoint_path) { "/#{project.full_path}.git/git-receive-pack" }
 
         context 'when gl_id is provided in JWT token' do
@@ -534,7 +544,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
               it 'returns a 404' do
                 is_expected.to have_gitlab_http_status(:not_found)
-                expect(response.body).to eql('The project you were looking for could not be found.')
+                expect(response.body).to eql("The project you were looking for could not be found or you don't have permission to view it.")
               end
             end
 
@@ -638,6 +648,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       end
 
       let_it_be(:project) { project_with_repo }
+
       let(:repository_path) { project.full_path }
 
       it 'returns unauthorized error' do

@@ -32,6 +32,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
       it 'saves given value' do
         expect(subject[:key]).to eq variable_key
         expect(subject[:value]).to eq expected_value
+        expect(subject.value).to eq expected_value
       end
     end
 
@@ -69,6 +70,84 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
     end
   end
 
+  describe '.possible_var_reference?' do
+    context 'table tests' do
+      using RSpec::Parameterized::TableSyntax
+
+      where do
+        {
+          "empty value": {
+            value: '',
+            result: false
+          },
+          "normal value": {
+            value: 'some value',
+            result: false
+          },
+          "simple expansions": {
+            value: 'key$variable',
+            result: true
+          },
+          "complex expansions": {
+            value: 'key${variable}${variable2}',
+            result: true
+          },
+          "complex expansions for Windows": {
+            value: 'key%variable%%variable2%',
+            result: true
+          }
+        }
+      end
+
+      with_them do
+        subject { Gitlab::Ci::Variables::Collection::Item.possible_var_reference?(value) }
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
+
+  describe '#depends_on' do
+    let(:item) { Gitlab::Ci::Variables::Collection::Item.new(**variable) }
+
+    subject { item.depends_on }
+
+    context 'table tests' do
+      using RSpec::Parameterized::TableSyntax
+
+      where do
+        {
+          "no variable references": {
+            variable: { key: 'VAR', value: 'something' },
+            expected_depends_on: nil
+          },
+          "simple variable reference": {
+            variable: { key: 'VAR', value: 'something_$VAR2' },
+            expected_depends_on: %w(VAR2)
+          },
+          "complex expansion": {
+            variable: { key: 'VAR', value: 'something_${VAR2}_$VAR3' },
+            expected_depends_on: %w(VAR2 VAR3)
+          },
+          "complex expansion in raw variable": {
+            variable: { key: 'VAR', value: 'something_${VAR2}_$VAR3', raw: true },
+            expected_depends_on: nil
+          },
+          "complex expansions for Windows": {
+            variable: { key: 'variable3', value: 'key%variable%%variable2%' },
+            expected_depends_on: %w(variable variable2)
+          }
+        }
+      end
+
+      with_them do
+        it 'contains referenced variable names' do
+          is_expected.to eq(expected_depends_on)
+        end
+      end
+    end
+  end
+
   describe '.fabricate' do
     it 'supports using a hash' do
       resource = described_class.fabricate(variable)
@@ -86,7 +165,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
     end
 
     it 'supports using an active record resource' do
-      variable = create(:ci_variable, key: 'CI_VAR', value: '123')
+      variable = build(:ci_variable, key: 'CI_VAR', value: '123')
       resource = described_class.fabricate(variable)
 
       expect(resource).to be_a(described_class)
@@ -118,6 +197,26 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
     end
   end
 
+  describe '#raw' do
+    it 'returns false when :raw is not specified' do
+      item = described_class.new(**variable)
+
+      expect(item.raw).to eq false
+    end
+
+    context 'when :raw is specified as true' do
+      let(:variable) do
+        { key: variable_key, value: variable_value, public: true, masked: false, raw: true }
+      end
+
+      it 'returns true' do
+        item = described_class.new(**variable)
+
+        expect(item.raw).to eq true
+      end
+    end
+  end
+
   describe '#to_runner_variable' do
     context 'when variable is not a file-related' do
       it 'returns a runner-compatible hash representation' do
@@ -137,6 +236,48 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
 
         expect(runner_variable)
           .to eq(key: 'VAR', value: 'value', public: true, file: true, masked: false)
+      end
+    end
+
+    context 'when variable is raw' do
+      it 'does not export raw value when it is false' do
+        runner_variable = described_class
+                            .new(key: 'VAR', value: 'value', raw: false)
+                            .to_runner_variable
+
+        expect(runner_variable)
+          .to eq(key: 'VAR', value: 'value', public: true, masked: false)
+      end
+
+      it 'exports raw value when it is true' do
+        runner_variable = described_class
+                            .new(key: 'VAR', value: 'value', raw: true)
+                            .to_runner_variable
+
+        expect(runner_variable)
+          .to eq(key: 'VAR', value: 'value', public: true, raw: true, masked: false)
+      end
+    end
+
+    context 'when referencing a variable' do
+      it '#depends_on contains names of dependencies' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '${CI_VAR_2}-123-$CI_VAR_3')
+
+        expect(runner_variable.depends_on).to eq(%w(CI_VAR_2 CI_VAR_3))
+      end
+    end
+
+    context 'when assigned the raw attribute' do
+      it 'retains a true raw attribute' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '123', raw: true)
+
+        expect(runner_variable).to eq(key: 'CI_VAR', value: '123', public: true, masked: false, raw: true)
+      end
+
+      it 'does not retain a false raw attribute' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '123', raw: false)
+
+        expect(runner_variable).to eq(key: 'CI_VAR', value: '123', public: true, masked: false)
       end
     end
   end

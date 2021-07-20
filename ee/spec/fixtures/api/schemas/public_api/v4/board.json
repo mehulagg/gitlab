@@ -42,7 +42,18 @@
           ],
           "properties": {
             "id": { "type": "integer" },
-            "title": { "type": "string" }
+            "title": { "type": "string" },
+            "state": { "type": "string" },
+            "created_at": { "type": ["string", "null"] },
+            "updated_at": { "type": ["string", "null"] },
+            "due_date": { "type": ["string", "null"] },
+            "start_date": { "type": ["string", "null"] },
+            "expired": { "type": ["string", "null"] },
+            "web_url": { "type": "string" },
+            "description": { "type": [ "string", "null"] },
+            "iid": { "type": "integer" },
+            "group_id": { "type": "integer" },
+            "project_id": { "type": "integer" }
           },
           "additionalProperties": false
         },

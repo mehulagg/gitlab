@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ::PodLogs::ElasticsearchService do
   let_it_be(:cluster) { create(:cluster, :provided_by_gcp, environment_scope: '*') }
+
   let(:namespace) { 'autodevops-deploy-9-production' }
 
   let(:pod_name) { 'pod-1' }
@@ -34,11 +35,11 @@ RSpec.describe ::PodLogs::ElasticsearchService do
 
   describe '#get_raw_pods' do
     before do
-      create(:clusters_applications_elastic_stack, :installed, cluster: cluster)
+      create(:clusters_integrations_elastic_stack, cluster: cluster)
     end
 
     it 'returns success with elasticsearch response' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(Elasticsearch::Transport::Client.new)
       allow_any_instance_of(::Gitlab::Elasticsearch::Logs::Pods)
@@ -53,7 +54,7 @@ RSpec.describe ::PodLogs::ElasticsearchService do
     end
 
     it 'returns an error when ES is unreachable' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(nil)
 
@@ -64,7 +65,7 @@ RSpec.describe ::PodLogs::ElasticsearchService do
     end
 
     it 'handles server errors from elasticsearch' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(Elasticsearch::Transport::Client.new)
       allow_any_instance_of(::Gitlab::Elasticsearch::Logs::Pods)
@@ -247,11 +248,11 @@ RSpec.describe ::PodLogs::ElasticsearchService do
     let(:expected_cursor) { '9999934,1572449784442' }
 
     before do
-      create(:clusters_applications_elastic_stack, :installed, cluster: cluster)
+      create(:clusters_integrations_elastic_stack, cluster: cluster)
     end
 
     it 'returns the logs' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(Elasticsearch::Transport::Client.new)
       allow_any_instance_of(::Gitlab::Elasticsearch::Logs::Lines)
@@ -267,7 +268,7 @@ RSpec.describe ::PodLogs::ElasticsearchService do
     end
 
     it 'returns an error when ES is unreachable' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(nil)
 
@@ -278,7 +279,7 @@ RSpec.describe ::PodLogs::ElasticsearchService do
     end
 
     it 'handles server errors from elasticsearch' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(Elasticsearch::Transport::Client.new)
       allow_any_instance_of(::Gitlab::Elasticsearch::Logs::Lines)
@@ -292,7 +293,7 @@ RSpec.describe ::PodLogs::ElasticsearchService do
     end
 
     it 'handles cursor errors from elasticsearch' do
-      allow_any_instance_of(::Clusters::Applications::ElasticStack)
+      allow_any_instance_of(::Clusters::Integrations::ElasticStack)
         .to receive(:elasticsearch_client)
         .and_return(Elasticsearch::Transport::Client.new)
       allow_any_instance_of(::Gitlab::Elasticsearch::Logs::Lines)

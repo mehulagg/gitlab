@@ -25,6 +25,19 @@ module Elastic
         migrations.find { |m| m.version == version }
       end
 
+      def find_by_name(name)
+        migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+      end
+
+      def find_by_name!(name)
+        migration = find_by_name(name)
+
+        raise ArgumentError, "Couldn't find Elastic::Migration with name='#{name}'" unless migration
+        raise ArgumentError, "Elastic::Migration with name='#{name}' is marked as obsolete" if migration.obsolete?
+
+        migration
+      end
+
       def drop_migration_has_finished_cache!(migration)
         Rails.cache.delete cache_key(:migration_has_finished, migration.name_for_key)
       end
@@ -36,7 +49,7 @@ module Elastic
       end
 
       def migration_has_finished_uncached?(name)
-        migration = migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+        migration = find_by_name(name)
 
         !!migration&.load_from_index&.dig('_source', 'completed')
       end
@@ -57,6 +70,12 @@ module Elastic
 
       def pending_migrations?
         migrations.reverse.any? do |migration|
+          !migration_has_finished?(migration.name_for_key)
+        end
+      end
+
+      def pending_migrations
+        migrations.select do |migration|
           !migration_has_finished?(migration.name_for_key)
         end
       end

@@ -8,6 +8,7 @@ RSpec.describe IncidentManagement::OncallSchedulesFinder do
   let_it_be(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
   let_it_be(:another_oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
   let_it_be(:oncall_schedule_from_another_project) { create(:incident_management_oncall_schedule) }
+
   let(:params) { {} }
 
   describe '#execute' do
@@ -33,14 +34,6 @@ RSpec.describe IncidentManagement::OncallSchedulesFinder do
           it 'returns an on-call schedule for iid' do
             is_expected.to contain_exactly(oncall_schedule)
           end
-        end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to eq(IncidentManagement::OncallSchedule.none) }
         end
       end
 

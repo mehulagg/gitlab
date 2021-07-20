@@ -8,26 +8,17 @@ module QA
           module LicenseCompliance
             extend QA::Page::PageConcern
 
-            def self.prepended(base)
-              base.class_eval do
-                view 'ee/app/views/layouts/nav/sidebar/_project_security_link.html.haml' do
-                  element :licenses_list_link
-                  element :security_dashboard_link
-                end
-              end
-            end
-
             def click_on_license_compliance
               hover_security_compliance do
                 within_submenu do
-                  click_element(:licenses_list_link)
+                  click_element(:sidebar_menu_item_link, menu_item: 'License Compliance')
                 end
               end
             end
 
             def hover_security_compliance
               within_sidebar do
-                find_element(:security_dashboard_link).hover
+                find_element(:sidebar_menu_link, menu_item: 'Security & Compliance').hover
 
                 yield
               end

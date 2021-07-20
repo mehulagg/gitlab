@@ -130,10 +130,6 @@ ul.related-merge-requests > li {
     &:not(:only-child) {
       margin-right: $gl-padding-8;
     }
-
-    @include media-breakpoint-down(md) {
-      margin-top: $gl-padding-8;
-    }
   }
 }
 
@@ -154,10 +150,6 @@ ul.related-merge-requests > li {
 
   .btn-group:not(.hidden) {
     display: flex;
-
-    @include media-breakpoint-down(md) {
-      margin-top: $gl-padding-8;
-    }
   }
 
   .js-create-merge-request {
@@ -173,11 +165,10 @@ ul.related-merge-requests > li {
     margin-top: 4px;
 
     // override dropdown item styles
-    .btn.btn-success {
+    .btn.btn-confirm {
       @include btn-default;
-      @include btn-green;
+      @include btn-blue;
 
-      border-style: solid;
       border-width: 1px;
       line-height: $line-height-base;
       width: auto;

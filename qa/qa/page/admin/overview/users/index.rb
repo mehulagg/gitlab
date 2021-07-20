@@ -11,7 +11,7 @@ module QA
               element :pending_approval_tab
             end
 
-            view 'app/views/admin/users/_user.html.haml' do
+            view 'app/assets/javascripts/admin/users/components/users_table.vue' do
               element :user_row_content
             end
 
@@ -29,7 +29,7 @@ module QA
 
             def click_user(username)
               within_element(:user_row_content, text: username) do
-                click_element(:username_link)
+                click_link(username)
               end
             end
           end

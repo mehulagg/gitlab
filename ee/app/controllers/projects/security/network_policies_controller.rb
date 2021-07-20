@@ -76,7 +76,7 @@ module Projects
 
       def parse_time(params, fallback)
         Time.zone.parse(params) || fallback
-      rescue
+      rescue StandardError
         fallback
       end
 

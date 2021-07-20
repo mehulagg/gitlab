@@ -1,3 +1,0 @@
-query shiftTimeUnitWidth {
-  shiftTimeUnitWidth @client
-}

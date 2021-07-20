@@ -6,6 +6,7 @@ RSpec.describe Projects::IncidentsHelper do
   include Gitlab::Routing.url_helpers
 
   let_it_be_with_refind(:project) { create(:project) }
+
   let(:project_path) { project.full_path }
   let(:new_issue_path) { new_project_issue_path(project) }
   let(:issue_path) { project_issues_path(project) }

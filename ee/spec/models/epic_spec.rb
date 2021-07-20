@@ -47,18 +47,61 @@ RSpec.describe Epic do
       end
     end
 
-    describe '.order_relative_position_on_board' do
+    describe 'relative position scopes' do
       let_it_be(:board) { create(:epic_board) }
+      let_it_be(:other_board) { create(:epic_board) }
       let_it_be(:epic1) { create(:epic) }
       let_it_be(:epic2) { create(:epic) }
       let_it_be(:epic3) { create(:epic) }
 
-      it 'returns epics ordered by position on the board, null last' do
-        create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10)
-        create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20)
-        create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20)
+      let_it_be(:position1) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
+      let_it_be(:position2) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10) }
+      let_it_be(:position3) { create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20) }
+      # this position should be ignored because it's for other board:
+      let_it_be(:position5) { create(:epic_board_position, epic: confidential_epic, epic_board: other_board, relative_position: 5) }
 
-        expect(described_class.order_relative_position_on_board(board.id)).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
+      describe '.order_relative_position_on_board' do
+        it 'returns epics ordered by position on the board, null last' do
+          epics = described_class.join_board_position(board.id).order_relative_position_on_board(board.id)
+
+          expect(epics).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
+        end
+      end
+
+      describe 'without_board_position' do
+        it 'returns only epics which do not have position set for the board' do
+          epics = described_class.join_board_position(board.id).without_board_position(board.id)
+
+          expect(epics).to match_array([confidential_epic, public_epic])
+        end
+      end
+
+      describe '.join_board_position' do
+        it 'returns epics with joined position for the board' do
+          positions = described_class.join_board_position(board.id)
+            .select('boards_epic_board_positions.relative_position as pos').map(&:pos)
+
+          # confidential_epic and public_epic should have both nil position for the board
+          expect(positions).to match_array([20, 10, 20, nil, nil])
+        end
+      end
+    end
+
+    describe 'title sort scopes' do
+      let_it_be(:epic1) { create(:epic, title: 'foo') }
+      let_it_be(:epic2) { create(:epic, title: 'bar') }
+      let_it_be(:epic3) { create(:epic, title: 'baz') }
+
+      describe '.order_title_asc' do
+        it 'returns epics ordered by title, ascending' do
+          expect(described_class.order_title_asc).to eq([epic2, epic3, epic1, confidential_epic, public_epic])
+        end
+
+        describe '.order_title_desc' do
+          it 'returns epics ordered by title, decending' do
+            expect(described_class.order_title_desc).to eq([public_epic, confidential_epic, epic1, epic3, epic2])
+          end
+        end
       end
     end
 
@@ -74,6 +117,17 @@ RSpec.describe Epic do
         create(:epic_issue, issue: other_issue)
 
         expect(described_class.in_milestone(milestone.id)).to match_array([epic1, epic2])
+      end
+    end
+
+    describe 'from_id' do
+      let_it_be(:max_id) { Epic.maximum(:id) }
+      let_it_be(:epic1) { create(:epic, id: max_id + 1) }
+      let_it_be(:epic2) { create(:epic, id: max_id + 2) }
+      let_it_be(:epic3) { create(:epic, id: max_id + 3) }
+
+      it 'returns records with id bigger or equal to the provided param' do
+        expect(described_class.from_id(epic2.id)).to match_array([epic2, epic3])
       end
     end
   end
@@ -146,10 +200,10 @@ RSpec.describe Epic do
   end
 
   describe 'ordering' do
-    let!(:epic1) { create(:epic, start_date: 7.days.ago, end_date: 3.days.ago, updated_at: 3.days.ago, created_at: 7.days.ago, relative_position: 3) }
-    let!(:epic2) { create(:epic, start_date: 3.days.ago, updated_at: 10.days.ago, created_at: 12.days.ago, relative_position: 1) }
-    let!(:epic3) { create(:epic, end_date: 5.days.ago, updated_at: 5.days.ago, created_at: 6.days.ago, relative_position: 2) }
-    let!(:epic4) { create(:epic, relative_position: 4) }
+    let!(:epic1) { create(:epic, start_date: 7.days.ago, end_date: 3.days.ago, updated_at: 3.days.ago, created_at: 7.days.ago, relative_position: 3, title: 'foo') }
+    let!(:epic2) { create(:epic, start_date: 3.days.ago, updated_at: 10.days.ago, created_at: 12.days.ago, relative_position: 1, title: 'bar') }
+    let!(:epic3) { create(:epic, end_date: 5.days.ago, updated_at: 5.days.ago, created_at: 6.days.ago, relative_position: 2, title: 'baz') }
+    let!(:epic4) { create(:epic, relative_position: 4, title: 'world') }
 
     def epics(order_by)
       described_class.order_by(order_by)
@@ -194,6 +248,14 @@ RSpec.describe Epic do
     it 'orders by relative_position ASC' do
       expect(epics(:relative_position)).to eq([epic2, epic3, epic1, epic4])
     end
+
+    it 'orders by title ASC' do
+      expect(epics(:title_asc)).to eq([epic2, epic3, epic1, epic4])
+    end
+
+    it 'orders by title DESC' do
+      expect(epics(:title_desc)).to eq([epic4, epic1, epic3, epic2])
+    end
   end
 
   describe '#valid_parent?' do
@@ -228,6 +290,7 @@ RSpec.describe Epic do
 
     context 'when adding an Epic that has existing children' do
       let_it_be(:parent_epic) { create(:epic, group: group) }
+
       let(:epic) { build(:epic, group: group) }
 
       it 'returns true when total depth after adding will not exceed limit' do
@@ -250,6 +313,7 @@ RSpec.describe Epic do
     context 'when parent has ancestors and epic has children' do
       let_it_be(:root_epic) { create(:epic, group: group) }
       let_it_be(:parent_epic) { create(:epic, group: group, parent: root_epic) }
+
       let(:epic) { build(:epic, group: group) }
       let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
@@ -566,6 +630,14 @@ RSpec.describe Epic do
         expect(epic.to_reference(group_project, full: true)).to eq('group-a&1')
       end
     end
+
+    it 'avoids additional SQL queries' do
+      epic # pre-create the epic
+
+      recorder = ActiveRecord::QueryRecorder.new { epic.to_reference(project) }
+
+      expect(recorder.count).to be_zero
+    end
   end
 
   describe '#has_children?' do
@@ -669,21 +741,68 @@ RSpec.describe Epic do
     end
   end
 
-  describe '.related_issues' do
-    it 'returns epic issues ordered by relative position' do
-      epic1 = create(:epic, group: group)
-      epic2 = create(:epic, group: group)
-      issue1 = create(:issue, project: project)
-      issue2 = create(:issue, project: project)
-      create(:issue, project: project)
-      create(:epic_issue, epic: epic1, issue: issue1, relative_position: 5)
-      create(:epic_issue, epic: epic2, issue: issue2, relative_position: 2)
+  context 'with existing epics and related issues' do
+    let_it_be(:epic1) { create(:epic, group: group) }
+    let_it_be(:epic2) { create(:epic, group: group, parent: epic1) }
+    let_it_be(:epic3) { create(:epic, group: group, parent: epic2, state: :closed) }
+    let_it_be(:epic4) { create(:epic, group: group) }
+    let_it_be(:issue1) { create(:issue, weight: 2) }
+    let_it_be(:issue2) { create(:issue, weight: 3) }
+    let_it_be(:issue3) { create(:issue, state: :closed) }
+    let_it_be(:epic_issue1) { create(:epic_issue, epic: epic2, issue: issue1, relative_position: 5) }
+    let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, issue: issue2, relative_position: 2) }
+    let_it_be(:epic_issue3) { create(:epic_issue, epic: epic3, issue: issue3) }
 
-      result = described_class.related_issues(ids: [epic1.id, epic2.id])
+    describe '.related_issues' do
+      it 'returns epic issues ordered by relative position' do
+        result = described_class.related_issues(ids: [epic1.id, epic2.id])
 
-      expect(result.pluck(:id)).to eq [issue2.id, issue1.id]
+        expect(result.pluck(:id)).to eq [issue2.id, issue1.id]
+      end
+    end
+
+    describe '.ids_for_base_and_decendants' do
+      it 'returns epic ids only for selected epics or its descendant epics' do
+        create(:epic, group: group)
+
+        expect(described_class.ids_for_base_and_decendants([epic1.id, epic4.id]))
+          .to match_array([epic1.id, epic2.id, epic3.id, epic4.id])
+      end
+    end
+
+    describe '.issue_metadata_for_epics' do
+      it 'returns hash containing epic issues count and weight and epic status' do
+        result = described_class.issue_metadata_for_epics(epic_ids: [epic2.id, epic3.id], limit: 100)
+
+        expected = [{
+          "epic_state_id" => 1,
+          "id" => epic2.id,
+          "iid" => epic2.iid,
+          "issues_count" => 2,
+          "issues_state_id" => 1,
+          "issues_weight_sum" => 5,
+          "parent_id" => epic1.id
+        }, {
+          "epic_state_id" => 2,
+          "id" => epic3.id,
+          "iid" => epic3.iid,
+          "issues_count" => 1,
+          "issues_state_id" => 2,
+          "issues_weight_sum" => 0,
+          "parent_id" => epic2.id
+        }]
+        expect(result).to match_array(expected)
+      end
     end
   end
 
   it_behaves_like 'versioned description'
+
+  describe '#usage_ping_record_epic_creation' do
+    it 'records epic creation after saving' do
+      expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_created_action)
+
+      create(:epic)
+    end
+  end
 end

@@ -9,11 +9,13 @@ RSpec.describe Users::BuildService do
     end
 
     context 'with an admin user' do
-      let!(:admin_user) { create(:admin) }
+      let_it_be(:admin_user) { create(:admin) }
+
       let(:service) { described_class.new(admin_user, ActionController::Parameters.new(params).permit!) }
 
       context 'allowed params' do
-        let(:provider) { create(:saml_provider) }
+        let_it_be(:provider) { create(:saml_provider) }
+
         let(:identity_params) { { extern_uid: 'uid', provider: 'group_saml', saml_provider_id: provider.id } }
 
         before do

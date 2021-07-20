@@ -15,7 +15,7 @@ module QA
       let(:third_design) do
         Resource::Design.fabricate! do |design|
           design.issue = second_design.issue
-          design.filename = 'tanuki.jpg'
+          design.filename = 'testfile.png'
         end
       end
 
@@ -23,7 +23,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'user archives a design', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/274' do
+      it 'user archives a design', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1761' do
         third_design.issue.visit!
 
         Page::Project::Issue::Show.perform do |issue|

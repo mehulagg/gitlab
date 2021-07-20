@@ -18,7 +18,11 @@ module Gitlab
     def all_template_names
       template_names = {}
       namespace_template_projects_hash.flat_map do |namespace, project|
-        template_names[category_for(namespace)] = template_names_for(project).values.flatten
+        project_template_names = template_names_for(project).values.flatten
+
+        next if project_template_names.blank?
+
+        template_names[category_for(namespace)] = project_template_names
       end
 
       if instance_enabled?
@@ -88,8 +92,7 @@ module Gitlab
           .ancestors_upto(nil)
           .with_custom_file_templates
           .select { |namespace| namespace.checked_file_template_project }
-          .map { |namespace| [namespace, namespace.checked_file_template_project] }
-          .to_h
+          .to_h { |namespace| [namespace, namespace.checked_file_template_project] }
       end
     end
 
@@ -116,7 +119,7 @@ module Gitlab
     def translate(template, project, category:)
       return unless template
 
-      template.category = category
+      template.category = category if category
 
       # License templates require special handling as the "vendored" licenses
       # are actually in a gem, not on disk like the rest of the templates. So,

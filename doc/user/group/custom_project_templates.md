@@ -9,28 +9,41 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6861) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.6.
 
-Custom project templates are useful for organizations that need to create many similar types of [projects](../project/index.md) and want to start from the same jumping-off point.
+[Group owners](../permissions.md#group-members-permissions) can set a subgroup to
+be the source of project templates that are selectable when a new project is created
+in the group. These templates can be selected when you go to **New project > Create from template**
+in the group and select the **Group** tab.
 
-## Setting up Group-level Project Templates
+Every project in the subgroup, but not nested subgroups, can be selected by members
+of the group when a new project is created.
 
-To use a custom project template for a new project you need to:
+Repository and database information that is copied over to each new project is identical to the
+data exported with the [GitLab Project Import/Export](../project/settings/import_export.md).
 
-1. [Create a 'templates' subgroup](subgroups/index.md).
-1. [Add repositories (projects) to the that new subgroup](index.md#add-projects-to-a-group), as your templates.
-1. Edit your group's settings to look to your 'templates' subgroup for templates:
-   1. In the left-hand menu, click **{settings}** **Settings > General**.
+To set custom project templates at the instance level, see [Custom instance-level project templates](../admin_area/custom_project_templates.md).
 
-      NOTE:
-      If you don't have access to the group's settings, you may not have sufficient privileges (for example, you may need developer or higher permissions).
+## Set up group-level project templates
 
-   1. Scroll to **Custom project templates** and click **Expand**. If no **Custom project templates** section displays, make sure you've created a subgroup, and added a project (repository) to it.
-   1. Select the 'templates' subgroup.
+To set up custom project templates in a group, add the subgroup that contains the
+project templates to the group settings:
+
+1. In the group, create a [subgroup](subgroups/index.md).
+1. [Add projects to the new subgroup](index.md#add-projects-to-a-group) as your templates.
+1. In the left menu for the group, go to **Settings > General**.
+1. Expand **Custom project templates** and select the subgroup.
+
+If all enabled [project features](../project/settings/index.md#sharing-and-permissions)
+(except for GitLab Pages) are set to **Everyone With Access**, then every project
+template in the subgroup is available to every member of the group.
+
+Any projects added to the subgroup later can be selected the next time a group member
+creates a new project.
 
 ### Example structure
 
-Here is a sample group/project structure for a hypothetical "Acme Co" for project templates:
+Here's a sample group/project structure for project templates, for a hypothetical _Acme Co_:
 
-```txt
+```plaintext
 # GitLab instance and group
 gitlab.com/acmeco/
     # Subgroups
@@ -50,27 +63,6 @@ gitlab.com/acmeco/
         client-site-c
         ...
 ```
-
-### Adjust Settings
-
-Users can configure a GitLab group that serves as template
-source under a group's **Settings > General > Custom project templates**.
-
-NOTE:
-GitLab administrators can
-[set project templates for an entire GitLab instance](../admin_area/custom_project_templates.md).
-
-Within this section, you can configure the group where all the custom project
-templates are sourced. Every project _template_ directly under the group namespace is
-available to every signed-in user, if all enabled [project features](../project/settings/index.md#sharing-and-permissions) are set to **Everyone With Access**.
-
-However, private projects will be available only if the user is a member of the project.
-
-NOTE:
-Only direct subgroups can be set as the template source. Projects of nested subgroups of a selected template source cannot be used.
-
-Repository and database information that are copied over to each new project are
-identical to the data exported with the [GitLab Project Import/Export](../project/settings/import_export.md).
 
 <!-- ## Troubleshooting
 

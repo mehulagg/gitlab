@@ -4,12 +4,15 @@ module Vulnerabilities
   module HistoricalStatistics
     class DeletionWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       # rubocop:disable Scalability/CronWorkerContext
       # This worker does not perform work scoped to a context
       include CronjobQueue
       # rubocop:enable Scalability/CronWorkerContext
 
       feature_category :vulnerability_management
+      tags :exclude_from_kubernetes
 
       def perform
         DeletionService.execute

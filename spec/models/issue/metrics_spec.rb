@@ -38,7 +38,7 @@ RSpec.describe Issue::Metrics do
     context "milestones" do
       it "records the first time an issue is associated with a milestone" do
         time = Time.current
-        travel_to(time) { subject.update(milestone: create(:milestone, project: project)) }
+        travel_to(time) { subject.update!(milestone: create(:milestone, project: project)) }
         metrics = subject.metrics
 
         expect(metrics).to be_present
@@ -47,9 +47,9 @@ RSpec.describe Issue::Metrics do
 
       it "does not record the second time an issue is associated with a milestone" do
         time = Time.current
-        travel_to(time) { subject.update(milestone: create(:milestone, project: project)) }
-        travel_to(time + 2.hours) { subject.update(milestone: nil) }
-        travel_to(time + 6.hours) { subject.update(milestone: create(:milestone, project: project)) }
+        travel_to(time) { subject.update!(milestone: create(:milestone, project: project)) }
+        travel_to(time + 2.hours) { subject.update!(milestone: nil) }
+        travel_to(time + 6.hours) { subject.update!(milestone: create(:milestone, project: project)) }
         metrics = subject.metrics
 
         expect(metrics).to be_present
@@ -61,7 +61,7 @@ RSpec.describe Issue::Metrics do
       it "records the first time an issue is associated with a list label" do
         list_label = create(:list).label
         time = Time.current
-        travel_to(time) { subject.update(label_ids: [list_label.id]) }
+        travel_to(time) { subject.update!(label_ids: [list_label.id]) }
         metrics = subject.metrics
 
         expect(metrics).to be_present
@@ -71,13 +71,28 @@ RSpec.describe Issue::Metrics do
       it "does not record the second time an issue is associated with a list label" do
         time = Time.current
         first_list_label = create(:list).label
-        travel_to(time) { subject.update(label_ids: [first_list_label.id]) }
+        travel_to(time) { subject.update!(label_ids: [first_list_label.id]) }
         second_list_label = create(:list).label
-        travel_to(time + 5.hours) { subject.update(label_ids: [second_list_label.id]) }
+        travel_to(time + 5.hours) { subject.update!(label_ids: [second_list_label.id]) }
         metrics = subject.metrics
 
         expect(metrics).to be_present
         expect(metrics.first_added_to_board_at).to be_like_time(time)
+      end
+    end
+
+    describe "#record!" do
+      it "does not cause an N+1 query" do
+        label = create(:label)
+        subject.update!(label_ids: [label.id])
+
+        control_count = ActiveRecord::QueryRecorder.new { Issue::Metrics.find_by(issue: subject).record! }.count
+
+        additional_labels = create_list(:label, 4)
+
+        subject.update!(label_ids: additional_labels.map(&:id))
+
+        expect { Issue::Metrics.find_by(issue: subject).record! }.not_to exceed_query_limit(control_count)
       end
     end
   end

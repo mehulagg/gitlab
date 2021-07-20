@@ -1,4 +1,4 @@
-import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlSprintf, GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
 import TestCaseShowRoot from 'ee/test_case_show/components/test_case_show_root.vue';
@@ -54,6 +54,8 @@ const createComponent = ({ testCase, testCaseQueryLoading = false } = {}) =>
 
 describe('TestCaseShowRoot', () => {
   let wrapper;
+
+  const findTestCaseSidebar = () => wrapper.findComponent(TestCaseSidebar);
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -268,9 +270,26 @@ describe('TestCaseShowRoot', () => {
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
 
+    it('renders gl-alert when issuable-show component emits `task-list-update-failure` event', async () => {
+      await wrapper.find(IssuableShow).vm.$emit('task-list-update-failure');
+
+      const alertEl = wrapper.find(GlAlert);
+
+      expect(alertEl.exists()).toBe(true);
+      expect(alertEl.text()).toBe(
+        'Someone edited this test case at the same time you did. The description has been updated and you will need to make your changes again.',
+      );
+    });
+
     it('renders issuable-show when `testCaseLoading` prop is false', () => {
       const { statusBadgeClass, statusIcon, editTestCaseFormVisible } = wrapper.vm;
-      const { canEditTestCase, descriptionPreviewPath, descriptionHelpPath } = mockProvide;
+      const {
+        canEditTestCase,
+        descriptionPreviewPath,
+        descriptionHelpPath,
+        updatePath,
+        lockVersion,
+      } = mockProvide;
       const issuableShowEl = wrapper.find(IssuableShow);
 
       expect(issuableShowEl.exists()).toBe(true);
@@ -280,9 +299,13 @@ describe('TestCaseShowRoot', () => {
         descriptionPreviewPath,
         descriptionHelpPath,
         enableAutocomplete: true,
+        enableTaskList: true,
         issuable: mockTestCase,
         enableEdit: canEditTestCase,
         editFormVisible: editTestCaseFormVisible,
+        taskCompletionStatus: mockTestCase.taskCompletionStatus,
+        taskListUpdatePath: updatePath,
+        taskListLockVersion: lockVersion,
       });
     });
 
@@ -340,7 +363,17 @@ describe('TestCaseShowRoot', () => {
     });
 
     it('renders test-case-sidebar', async () => {
-      expect(wrapper.find(TestCaseSidebar).exists()).toBe(true);
+      expect(findTestCaseSidebar().exists()).toBe(true);
+    });
+
+    it('updates `sidebarExpanded` prop on `sidebar-toggle` event', async () => {
+      const testCaseSidebar = findTestCaseSidebar();
+      expect(testCaseSidebar.props('sidebarExpanded')).toBe(true);
+
+      testCaseSidebar.vm.$emit('sidebar-toggle');
+      await wrapper.vm.$nextTick();
+
+      expect(testCaseSidebar.props('sidebarExpanded')).toBe(false);
     });
   });
 });

@@ -41,30 +41,51 @@ RSpec.describe MergeRequestsFinder do
         expect(merge_requests).to contain_exactly(merge_request1)
       end
 
-      it 'filters by nonexistent author ID and MR term using CTE for search' do
-        params = {
-          author_id: 'does-not-exist',
-          search: 'git',
-          attempt_group_search_optimizations: true
-        }
+      context 'filtering by author' do
+        subject(:merge_requests) { described_class.new(user, params).execute }
 
-        merge_requests = described_class.new(user, params).execute
+        context 'using OR' do
+          let(:params) { { or: { author_username: [merge_request1.author.username, merge_request2.author.username] } } }
 
-        expect(merge_requests).to be_empty
-      end
+          before do
+            merge_request1.update!(author: create(:user))
+            merge_request2.update!(author: create(:user))
+          end
 
-      context 'filtering by not author ID' do
-        let(:params) { { not: { author_id: user2.id } } }
+          it 'returns merge requests created by any of the given users' do
+            expect(merge_requests).to contain_exactly(merge_request1, merge_request2)
+          end
 
-        before do
-          merge_request2.update!(author: user2)
-          merge_request3.update!(author: user2)
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(or_issuable_queries: false)
+            end
+
+            it 'does not add any filter' do
+              expect(merge_requests).to contain_exactly(merge_request1, merge_request2, merge_request3, merge_request4, merge_request5)
+            end
+          end
         end
 
-        it 'returns merge requests not created by that user' do
-          merge_requests = described_class.new(user, params).execute
+        context 'with nonexistent author ID and MR term using CTE for search' do
+          let(:params) { { author_id: 'does-not-exist', search: 'git', attempt_group_search_optimizations: true } }
 
-          expect(merge_requests).to contain_exactly(merge_request1, merge_request4, merge_request5)
+          it 'returns no results' do
+            expect(merge_requests).to be_empty
+          end
+        end
+
+        context 'filtering by not author ID' do
+          let(:params) { { not: { author_id: user2.id } } }
+
+          before do
+            merge_request2.update!(author: user2)
+            merge_request3.update!(author: user2)
+          end
+
+          it 'returns merge requests not created by that user' do
+            expect(merge_requests).to contain_exactly(merge_request1, merge_request4, merge_request5)
+          end
         end
       end
 
@@ -134,6 +155,18 @@ RSpec.describe MergeRequestsFinder do
           subject { described_class.new(user, merged_after: 15.days.ago, merged_before: 6.days.ago).execute }
 
           it { is_expected.to eq([merge_request2]) }
+        end
+
+        context 'when project_id is given' do
+          subject(:query) { described_class.new(user, merged_after: 15.days.ago, merged_before: 6.days.ago, project_id: merge_request2.project).execute }
+
+          it { is_expected.to eq([merge_request2]) }
+
+          it 'queries merge_request_metrics.target_project_id table' do
+            expect(query.to_sql).to include(%{"merge_request_metrics"."target_project_id" = #{merge_request2.target_project_id}})
+
+            expect(query.to_sql).not_to include(%{"merge_requests"."target_project_id"})
+          end
         end
       end
 
@@ -487,6 +520,44 @@ RSpec.describe MergeRequestsFinder do
         end
       end
 
+      context 'filtering by approved by' do
+        let(:params) { { approved_by_usernames: user2.username } }
+
+        before do
+          create(:approval, merge_request: merge_request3, user: user2)
+        end
+
+        it 'returns merge requests approved by that user' do
+          merge_requests = described_class.new(user, params).execute
+
+          expect(merge_requests).to contain_exactly(merge_request3)
+        end
+
+        context 'not filter' do
+          let(:params) { { not: { approved_by_usernames: user2.username } } }
+
+          it 'returns merge requests not approved by that user' do
+            merge_requests = described_class.new(user, params).execute
+
+            expect(merge_requests).to contain_exactly(merge_request1, merge_request2, merge_request4, merge_request5)
+          end
+        end
+
+        context 'when filtering by author and not approved by' do
+          let(:params) { { not: { approved_by_usernames: user2.username }, author_username: user.username } }
+
+          before do
+            merge_request4.update!(author: user2)
+          end
+
+          it 'returns merge requests authored by user and not approved by user2' do
+            merge_requests = described_class.new(user, params).execute
+
+            expect(merge_requests).to contain_exactly(merge_request1, merge_request2, merge_request5)
+          end
+        end
+      end
+
       context 'filtering by created_at/updated_at' do
         let(:new_project) { create(:project, forked_from_project: project1) }
 
@@ -830,6 +901,37 @@ RSpec.describe MergeRequestsFinder do
           it 'returns merge requests from the project' do
             expect(merge_requests).to eq([mr_internal_private_repo_access, mr_internal, mr_public])
           end
+        end
+      end
+    end
+
+    describe '#count_by_state' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:labels) { create_list(:label, 2, project: project) }
+      let_it_be(:merge_requests) { create_list(:merge_request, 4, :unique_branches, author: user, target_project: project, source_project: project, labels: labels) }
+
+      before do
+        project.add_developer(user)
+      end
+
+      context 'when filtering by multiple labels' do
+        it 'returns the correnct counts' do
+          counts = described_class.new(user, { label_name: labels.map(&:name) }).count_by_state
+
+          expect(counts[:all]).to eq(merge_requests.size)
+        end
+      end
+
+      context 'when filtering by approved_by_usernames' do
+        before do
+          merge_requests.each { |mr| mr.approved_by_users << user }
+        end
+
+        it 'returns the correnct counts' do
+          counts = described_class.new(user, { approved_by_usernames: [user.username] }).count_by_state
+
+          expect(counts[:all]).to eq(merge_requests.size)
         end
       end
     end

@@ -36,12 +36,12 @@ module Gitlab
         def add_complementary_review_note!(author_id)
           return if review.note.empty? && !review.approval?
 
-          note = "*Created by %{login}*\n\n%{note}" % {
-            note: review_note_content,
-            login: review.author.login
-          }
+          note_body = MarkdownText.format(
+            review_note_content,
+            review.author
+          )
 
-          add_note!(author_id, note)
+          add_note!(author_id, note_body)
         end
 
         def review_note_content
@@ -69,20 +69,30 @@ module Gitlab
             author_id: author_id,
             note: note,
             system: false,
-            created_at: review.submitted_at,
-            updated_at: review.submitted_at
+            created_at: submitted_at,
+            updated_at: submitted_at
           }.merge(extra)
         end
 
         def add_approval!(user_id)
           return unless review.review_type == 'APPROVED'
 
-          add_approval_system_note!(user_id)
-
-          merge_request.approvals.create!(
+          approval_attribues = {
+            merge_request_id: merge_request.id,
             user_id: user_id,
-            created_at: review.submitted_at
+            created_at: submitted_at,
+            updated_at: submitted_at
+          }
+
+          result = ::Approval.insert(
+            approval_attribues,
+            returning: [:id],
+            unique_by: [:user_id, :merge_request_id]
           )
+
+          if result.rows.present?
+            add_approval_system_note!(user_id)
+          end
         end
 
         def add_approval_system_note!(user_id)
@@ -94,6 +104,10 @@ module Gitlab
           )
 
           Note.create!(attributes)
+        end
+
+        def submitted_at
+          @submitted_at ||= (review.submitted_at || merge_request.updated_at)
         end
       end
     end

@@ -10,7 +10,7 @@ import {
 import { debounce } from 'lodash';
 import { mapGetters } from 'vuex';
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
 import { removeFlash } from '../utils';
@@ -104,7 +104,9 @@ export default {
           this.labels = data;
         })
         .catch(() => {
-          createFlash(__('There was an error fetching label data for the selected group'));
+          createFlash({
+            message: __('There was an error fetching label data for the selected group'),
+          });
         })
         .finally(() => {
           this.loading = false;
@@ -159,7 +161,7 @@ export default {
           'cursor-not-allowed': disabled,
         }"
         :active="isSelectedLabel(label.id)"
-        @click.prevent="$emit('select-label', label.id, selectedLabelIds)"
+        @click.prevent="$emit('select-label', label.id)"
       >
         <gl-icon
           v-if="multiselect && isSelectedLabel(label.id)"

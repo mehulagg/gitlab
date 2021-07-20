@@ -1,6 +1,7 @@
 import $ from 'jquery';
-import { once } from 'lodash';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import { once, countBy } from 'lodash';
+import createFlash from '~/flash';
+import { darkModeEnabled } from '~/lib/utils/color_utils';
 import { __, sprintf } from '~/locale';
 
 // Renders diagrams and flowcharts from text using Mermaid in any element with the
@@ -21,49 +22,80 @@ import { __, sprintf } from '~/locale';
 const MAX_CHAR_LIMIT = 2000;
 // Max # of mermaid blocks that can be rendered in a page.
 const MAX_MERMAID_BLOCK_LIMIT = 50;
+// Max # of `&` allowed in Chaining of links syntax
+const MAX_CHAINING_OF_LINKS_LIMIT = 30;
 // Keep a map of mermaid blocks we've already rendered.
 const elsProcessingMap = new WeakMap();
 let renderedMermaidBlocks = 0;
 
 let mermaidModule = {};
 
+// Whitelist pages where we won't impose any restrictions
+// on mermaid rendering
+const WHITELISTED_PAGES = [
+  // Group wiki
+  'groups:wikis:show',
+  'groups:wikis:edit',
+  'groups:wikis:create',
+
+  // Project wiki
+  'projects:wikis:show',
+  'projects:wikis:edit',
+  'projects:wikis:create',
+
+  // Project files
+  'projects:show',
+  'projects:blob:show',
+];
+
+export function initMermaid(mermaid) {
+  let theme = 'neutral';
+
+  if (darkModeEnabled()) {
+    theme = 'dark';
+  }
+
+  mermaid.initialize({
+    // mermaid core options
+    mermaid: {
+      startOnLoad: false,
+    },
+    // mermaidAPI options
+    theme,
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+    },
+    securityLevel: 'strict',
+  });
+
+  return mermaid;
+}
+
 function importMermaidModule() {
   return import(/* webpackChunkName: 'mermaid' */ 'mermaid')
     .then((mermaid) => {
-      let theme = 'neutral';
-      const ideDarkThemes = ['dark', 'solarized-dark', 'monokai'];
-
-      if (
-        ideDarkThemes.includes(window.gon?.user_color_scheme) &&
-        // if on the Web IDE page
-        document.querySelector('.ide')
-      ) {
-        theme = 'dark';
-      }
-
-      mermaid.initialize({
-        // mermaid core options
-        mermaid: {
-          startOnLoad: false,
-        },
-        // mermaidAPI options
-        theme,
-        flowchart: {
-          useMaxWidth: true,
-          htmlLabels: false,
-        },
-        securityLevel: 'strict',
-      });
-
-      mermaidModule = mermaid;
-
-      return mermaid;
+      mermaidModule = initMermaid(mermaid);
     })
     .catch((err) => {
-      flash(sprintf(__("Can't load mermaid module: %{err}"), { err }));
+      createFlash({
+        message: sprintf(__("Can't load mermaid module: %{err}"), { err }),
+      });
       // eslint-disable-next-line no-console
       console.error(err);
     });
+}
+
+function shouldLazyLoadMermaidBlock(source) {
+  /**
+   * If source contains `&`, which means that it might
+   * contain Chaining of links a new syntax in Mermaid.
+   */
+  if (countBy(source)['&'] > MAX_CHAINING_OF_LINKS_LIMIT) {
+    return true;
+  }
+
+  return false;
 }
 
 function fixElementSource(el) {
@@ -108,8 +140,10 @@ function renderMermaidEl(el) {
 function renderMermaids($els) {
   if (!$els.length) return;
 
+  const pageName = document.querySelector('body').dataset.page;
+
   // A diagram may have been truncated in search results which will cause errors, so abort the render.
-  if (document.querySelector('body').dataset.page === 'search:show') return;
+  if (pageName === 'search:show') return;
 
   importMermaidModule()
     .then(() => {
@@ -128,9 +162,11 @@ function renderMermaids($els) {
          * up the entire thread and causing a DoS.
          */
         if (
-          (source && source.length > MAX_CHAR_LIMIT) ||
-          renderedChars > MAX_CHAR_LIMIT ||
-          renderedMermaidBlocks >= MAX_MERMAID_BLOCK_LIMIT
+          !WHITELISTED_PAGES.includes(pageName) &&
+          ((source && source.length > MAX_CHAR_LIMIT) ||
+            renderedChars > MAX_CHAR_LIMIT ||
+            renderedMermaidBlocks >= MAX_MERMAID_BLOCK_LIMIT ||
+            shouldLazyLoadMermaidBlock(source))
         ) {
           const html = `
           <div class="alert gl-alert gl-alert-warning alert-dismissible lazy-render-mermaid-container js-lazy-render-mermaid-container fade show" role="alert">
@@ -171,7 +207,9 @@ function renderMermaids($els) {
       });
     })
     .catch((err) => {
-      flash(sprintf(__('Encountered an error while rendering: %{err}'), { err }));
+      createFlash({
+        message: sprintf(__('Encountered an error while rendering: %{err}'), { err }),
+      });
       // eslint-disable-next-line no-console
       console.error(err);
     });

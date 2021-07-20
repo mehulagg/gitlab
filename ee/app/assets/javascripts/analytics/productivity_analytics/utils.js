@@ -1,8 +1,8 @@
 import dateFormat from 'dateformat';
 import { flatten } from 'lodash';
+import { dateFormats } from '~/analytics/shared/constants';
 import { getDayDifference, getDateInPast } from '~/lib/utils/datetime_utility';
 import { median } from '~/lib/utils/number_utils';
-import { dateFormats } from '../shared/constants';
 
 /**
  * Gets the labels endpoint for a given group or project
@@ -97,7 +97,13 @@ export const transformScatterData = (data, startDate, endDate) => {
 
     if (dayDiff > -1) {
       const idx = totalItems - (dayDiff + 1);
-      result[idx].push(data[id]);
+      // When dealing with different time zones (merged_at is in UTC but endDate is in the browser's timezone)
+      // the computed idx might be out of bounds because the result array (and its length) is initialized
+      // via initDateArray (which takes only the browser's timezone into account)
+      // This would lead to result[idx] being undefined, thus we need a sanity check here
+      if (result[idx]) {
+        result[idx].push(data[id]);
+      }
     }
   });
 

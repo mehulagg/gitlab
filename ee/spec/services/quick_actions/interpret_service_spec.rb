@@ -12,6 +12,7 @@ RSpec.describe QuickActions::InterpretService do
   let_it_be_with_refind(:group) { create(:group) }
   let_it_be_with_refind(:project) { create(:project, :repository, :public, group: group) }
   let_it_be_with_reload(:issue) { create(:issue, project: project) }
+
   let(:service) { described_class.new(project, current_user) }
 
   before do
@@ -32,6 +33,57 @@ RSpec.describe QuickActions::InterpretService do
   shared_examples 'quick action is available' do |action|
     it 'does recognize action' do
       expect(service.available_commands(target).map { |command| command[:name] }).to include(action)
+    end
+  end
+
+  shared_examples 'adds quick action parameter' do |parameter_key, quick_action|
+    let(:content) { "/#{quick_action} #{referenced_epic&.to_reference(epic)}" }
+
+    it 'adds parameter to updates array' do
+      _, updates = service.execute(content, epic)
+
+      expect(updates[parameter_key]).to eq(referenced_epic)
+    end
+  end
+
+  shared_examples 'does not add quick action parameter' do |parameter_key, quick_action|
+    let(:content) { "/#{quick_action} #{referenced_epic&.to_reference(epic)}" }
+
+    it 'does not add parameter to updates array' do
+      _, updates = service.execute(content, epic)
+
+      expect(updates[parameter_key]).to eq(nil)
+    end
+  end
+
+  shared_examples 'returns execution messages' do |relation|
+    context 'when correct epic reference' do
+      let(:content) { "/#{relation}_epic #{epic2&.to_reference(epic)}" }
+      let(:explain_action) { relation == :child ? 'Adds' : 'Sets'}
+      let(:execute_action) { relation == :child ? 'Added' : 'Set'}
+      let(:article)        { relation == :child ? 'a' : 'the'}
+
+      it 'returns explain message with epic reference' do
+        _, explanations = service.explain(content, epic)
+        expect(explanations)
+          .to eq(["#{explain_action} #{epic2.group.name}&#{epic2.iid} as #{relation} epic."])
+      end
+
+      it 'returns successful execution message' do
+        _, _, message = service.execute(content, epic)
+
+        expect(message)
+          .to eq("#{execute_action} #{epic2.group.name}&#{epic2.iid} as #{article} #{relation} epic.")
+      end
+    end
+
+    context 'when epic reference is wrong' do |relation|
+      let(:content) { "/#{relation}_epic qwe" }
+
+      it 'returns empty explain message' do
+        _, explanations = service.explain(content, epic)
+        expect(explanations).to eq([])
+      end
     end
   end
 
@@ -339,11 +391,11 @@ RSpec.describe QuickActions::InterpretService do
               allow(current_user).to receive(:can?).with(:admin_issue, project).and_return(false)
             end
 
-            it 'returns empty message' do
+            it 'returns an error message' do
               _, updates, message = service.execute(content, issue)
 
               expect(updates).to be_empty
-              expect(message).to be_empty
+              expect(message).to eq('Could not apply iteration command.')
             end
           end
         end
@@ -407,11 +459,11 @@ RSpec.describe QuickActions::InterpretService do
             allow(current_user).to receive(:can?).with(:admin_issue, project).and_return(false)
           end
 
-          it 'returns empty message' do
+          it 'returns an error message' do
             _, updates, message = service.execute(content, issue)
 
             expect(updates).to be_empty
-            expect(message).to be_empty
+            expect(message).to eq('Could not apply remove_iteration command.')
           end
         end
       end
@@ -531,31 +583,33 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
+    context 'parent_epic command' do
+      let(:epic) { create(:epic, group: group) }
+      let(:epic2) { create(:epic, group: group) }
+      let(:referenced_epic) { create(:epic, group: epic.group) }
+
+      before do
+        group.add_developer(current_user)
+        stub_licensed_features(epics: true, subepics: true)
+      end
+
+      it_behaves_like 'adds quick action parameter', :quick_action_assign_to_parent_epic, :parent_epic
+
+      context 'when target epic is not persisted yet' do
+        let(:epic) { build(:epic, group: group) }
+        let(:referenced_epic) { epic2 }
+
+        it_behaves_like 'adds quick action parameter', :quick_action_assign_to_parent_epic, :parent_epic
+      end
+    end
+
     context 'child_epic command' do
       let(:subgroup) { create(:group, parent: group) }
       let(:another_group) { create(:group) }
       let(:merge_request) { create(:merge_request, source_project: project) }
       let(:epic) { create(:epic, group: group) }
       let(:child_epic) { create(:epic, group: group) }
-      let(:content) { "/child_epic #{child_epic&.to_reference(epic)}" }
-
-      shared_examples 'epic relation is not added' do
-        it 'does not add child epic to epic' do
-          service.execute(content, epic)
-          child_epic.reload
-
-          expect(child_epic.parent).to be_nil
-        end
-      end
-
-      shared_examples 'epic relation is added' do
-        it 'adds child epic relation to the epic' do
-          service.execute(content, epic)
-          child_epic.reload
-
-          expect(child_epic.parent).to eq(epic)
-        end
-      end
+      let(:referenced_epic) { child_epic }
 
       context 'when subepics are enabled' do
         before do
@@ -563,7 +617,7 @@ RSpec.describe QuickActions::InterpretService do
         end
 
         context 'when a user does not have permissions to add epic relations' do
-          it_behaves_like 'epic relation is not added'
+          it_behaves_like 'does not add quick action parameter', :quick_action_assign_child_epic, :child_epic
           it_behaves_like 'quick action is unavailable', :child_epic do
             let(:target) { epic }
           end
@@ -575,7 +629,7 @@ RSpec.describe QuickActions::InterpretService do
             another_group.add_developer(current_user)
           end
 
-          it_behaves_like 'epic relation is added'
+          it_behaves_like 'adds quick action parameter', :quick_action_assign_child_epic, :child_epic
 
           it_behaves_like 'quick action is available', :child_epic do
             let(:target) { epic }
@@ -590,63 +644,58 @@ RSpec.describe QuickActions::InterpretService do
           end
 
           context 'when target epic is not persisted yet' do
-            let(:target) { build(:epic, group: group) }
+            let(:epic) { build(:epic, group: group) }
 
-            it_behaves_like 'quick action is unavailable', :child_epic
+            it_behaves_like 'adds quick action parameter', :quick_action_assign_child_epic, :child_epic
           end
 
           context 'when passed child epic is nil' do
             let(:child_epic) { nil }
 
-            it 'does not add child epic to epic' do
-              expect { service.execute(content, epic) }.not_to change { epic.children.count }
-              expect { service.execute(content, epic) }.not_to raise_error
-            end
+            it_behaves_like 'does not add quick action parameter', :quick_action_assign_child_epic, :child_epic
 
             it 'does not raise error' do
+              content = "/child_epic "
+
               expect { service.execute(content, epic) }.not_to raise_error
             end
           end
 
           context 'when child_epic is already linked to an epic' do
-            let(:another_epic) { create(:epic, group: group) }
+            let(:referenced_epic) { create(:epic, group: group) }
 
             before do
-              child_epic.update!(parent: another_epic)
+              child_epic.update!(parent: referenced_epic)
             end
 
-            it_behaves_like 'epic relation is added'
             it_behaves_like 'quick action is available', :child_epic do
               let(:target) { epic }
             end
           end
 
           context 'when child epic is in a subgroup of parent epic' do
-            let(:child_epic) { create(:epic, group: subgroup) }
+            let(:referenced_epic) { create(:epic, group: subgroup) }
 
-            it_behaves_like 'epic relation is added'
             it_behaves_like 'quick action is available', :child_epic do
               let(:target) { epic }
             end
           end
 
           context 'when child epic is in a parent group of the parent epic' do
-            let(:child_epic) { create(:epic, group: group) }
+            let(:referenced_epic) { create(:epic, group: group) }
 
             before do
               epic.update!(group: subgroup)
             end
 
-            it_behaves_like 'epic relation is not added'
             it_behaves_like 'quick action is available', :child_epic do
               let(:target) { epic }
             end
           end
 
           context 'when child epic is in a different group than parent epic' do
-            let(:child_epic) { create(:epic, group: another_group) }
+            let(:referenced_epic) { create(:epic, group: another_group) }
 
-            it_behaves_like 'epic relation is not added'
             it_behaves_like 'quick action is available', :child_epic do
               let(:target) { epic }
             end
@@ -659,7 +708,7 @@ RSpec.describe QuickActions::InterpretService do
           group.add_developer(current_user)
         end
 
-        it_behaves_like 'epic relation is not added'
+        it_behaves_like 'does not add quick action parameter', :quick_action_assign_child_epic, :child_epic
         it_behaves_like 'quick action is unavailable', :child_epic do
           let(:target) { epic }
         end
@@ -1058,12 +1107,12 @@ RSpec.describe QuickActions::InterpretService do
 
     context 'confidential command' do
       context 'for test cases' do
-        it 'does not mark to update confidential attribute' do
+        it 'does mark to update confidential attribute' do
           issuable = create(:quality_test_case, project: project)
 
           _, updates, _ = service.execute('/confidential', issuable)
 
-          expect(updates[:confidential]).to eq(nil)
+          expect(updates[:confidential]).to eq(true)
         end
       end
     end
@@ -1112,47 +1161,6 @@ RSpec.describe QuickActions::InterpretService do
         group.add_developer(current_user)
       end
 
-      shared_examples 'quick action parameters' do |parameter, quick_action|
-        let(:content) { "/#{quick_action} #{epic2&.to_reference(epic)}" }
-
-        it 'adds parameter to updates array' do
-          _, updates = service.execute(content, epic)
-
-          expect(updates[:quick_action_assign_to_parent_epic]).to eq(epic2)
-        end
-      end
-
-      shared_examples 'returning execution messages' do |relation|
-        context 'when correct epic reference' do
-          let(:content) { "/#{relation}_epic #{epic2&.to_reference(epic)}" }
-          let(:explain_action) { relation == :child ? 'Adds' : 'Sets'}
-          let(:execute_action) { relation == :child ? 'Added' : 'Set'}
-          let(:article)        { relation == :child ? 'a' : 'the'}
-
-          it 'returns explain message with epic reference' do
-            _, explanations = service.explain(content, epic)
-            expect(explanations)
-              .to eq(["#{explain_action} #{epic2.group.name}&#{epic2.iid} as #{relation} epic."])
-          end
-
-          it 'returns successful execution message' do
-            _, _, message = service.execute(content, epic)
-
-            expect(message)
-              .to eq("#{execute_action} #{epic2.group.name}&#{epic2.iid} as #{article} #{relation} epic.")
-          end
-        end
-
-        context 'when epic reference is wrong' do |relation|
-          let(:content) { "/#{relation}_epic qwe" }
-
-          it 'returns empty explain message' do
-            _, explanations = service.explain(content, epic)
-            expect(explanations).to eq([])
-          end
-        end
-      end
-
       shared_examples 'target epic does not exist' do |relation|
         it 'returns unsuccessful execution message' do
           _, _, message = service.execute(content, epic)
@@ -1181,7 +1189,7 @@ RSpec.describe QuickActions::InterpretService do
       end
 
       context 'child_epic command' do
-        it_behaves_like 'returning execution messages', :child
+        it_behaves_like 'returns execution messages', :child
 
         context 'when epic is already a child epic' do
           let(:content) { "/child_epic #{epic2&.to_reference(epic)}" }
@@ -1270,8 +1278,9 @@ RSpec.describe QuickActions::InterpretService do
       end
 
       context 'parent_epic command' do
-        it_behaves_like 'quick action parameters', :quick_action_assign_to_parent_epic, :parent_epic
-        it_behaves_like 'returning execution messages', :parent
+        let(:referenced_epic) { epic2 }
+
+        it_behaves_like 'returns execution messages', :parent
 
         context 'when epic is already a parent epic' do
           let(:content) { "/parent_epic #{epic2&.to_reference(epic)}" }
@@ -1297,12 +1306,6 @@ RSpec.describe QuickActions::InterpretService do
           let(:content) { "/parent_epic none" }
 
           it_behaves_like 'target epic does not exist', :parent
-        end
-
-        context 'when target epic is not persisted yet' do
-          let(:epic) { build(:epic, group: group) }
-
-          it_behaves_like 'quick action parameters', :quick_action_assign_to_parent_epic, :parent_epic
         end
 
         context 'when user has no permission to read epic' do

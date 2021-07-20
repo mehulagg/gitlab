@@ -21,6 +21,14 @@ RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :cl
     end
   end
 
+  shared_examples_for 'not tracked merge request unique event' do
+    specify do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+      subject
+    end
+  end
+
   describe '.track_mr_diffs_action' do
     subject { described_class.track_mr_diffs_action(merge_request: merge_request) }
 
@@ -274,6 +282,116 @@ RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :cl
 
     it_behaves_like 'a tracked merge request unique event' do
       let(:action) { described_class::MR_APPROVAL_RULE_DELETED_USERS_ACTION }
+    end
+  end
+
+  describe '.track_mr_create_from_issue' do
+    subject { described_class.track_mr_create_from_issue(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_CREATE_FROM_ISSUE_ACTION }
+    end
+  end
+
+  describe '.track_discussion_locked_action' do
+    subject { described_class.track_discussion_locked_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_DISCUSSION_LOCKED_ACTION }
+    end
+  end
+
+  describe '.track_discussion_unlocked_action' do
+    subject { described_class.track_discussion_unlocked_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_DISCUSSION_UNLOCKED_ACTION }
+    end
+  end
+
+  describe '.track_time_estimate_changed_action' do
+    subject { described_class.track_time_estimate_changed_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_TIME_ESTIMATE_CHANGED_ACTION }
+    end
+  end
+
+  describe '.track_time_spent_changed_action' do
+    subject { described_class.track_time_spent_changed_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_TIME_SPENT_CHANGED_ACTION }
+    end
+  end
+
+  describe '.track_assignees_changed_action' do
+    subject { described_class.track_assignees_changed_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_ASSIGNEES_CHANGED_ACTION }
+    end
+  end
+
+  describe '.track_reviewers_changed_action' do
+    subject { described_class.track_reviewers_changed_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_REVIEWERS_CHANGED_ACTION }
+    end
+  end
+
+  describe '.track_mr_including_ci_config' do
+    subject { described_class.track_mr_including_ci_config(user: user, merge_request: merge_request) }
+
+    context 'when merge request includes a ci config change' do
+      before do
+        allow(merge_request).to receive(:diff_stats).and_return([double(path: 'abc.txt'), double(path: '.gitlab-ci.yml')])
+      end
+
+      it_behaves_like 'a tracked merge request unique event' do
+        let(:action) { described_class::MR_INCLUDING_CI_CONFIG_ACTION }
+      end
+    end
+
+    context 'when merge request does not include any ci config change' do
+      before do
+        allow(merge_request).to receive(:diff_stats).and_return([double(path: 'abc.txt'), double(path: 'abc.xyz')])
+      end
+
+      it_behaves_like 'not tracked merge request unique event'
+    end
+  end
+
+  describe '.track_milestone_changed_action' do
+    subject { described_class.track_milestone_changed_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_MILESTONE_CHANGED_ACTION }
+    end
+  end
+
+  describe '.track_labels_changed_action' do
+    subject { described_class.track_labels_changed_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_LABELS_CHANGED_ACTION }
+    end
+  end
+
+  describe '.track_loading_conflict_ui_action' do
+    subject { described_class.track_loading_conflict_ui_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_LOAD_CONFLICT_UI_ACTION }
+    end
+  end
+
+  describe '.track_resolve_conflict_action' do
+    subject { described_class.track_resolve_conflict_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_RESOLVE_CONFLICT_ACTION }
     end
   end
 end

@@ -8,9 +8,39 @@ RSpec.describe ProtectedEnvironment do
   end
 
   describe 'validation' do
-    it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_length_of(:deploy_access_levels) }
+
+    it 'can not belong to both group and project' do
+      group = build(:group)
+      project = build(:project)
+      protected_environment = build(:protected_environment, group: group, project: project)
+
+      expect { protected_environment.save! }.to raise_error(ActiveRecord::StatementInvalid, /PG::CheckViolation/)
+    end
+
+    it 'must belong to one of group or project' do
+      protected_environment = build(:protected_environment, group: nil, project: nil)
+
+      expect { protected_environment.save! }.to raise_error(ActiveRecord::StatementInvalid, /PG::CheckViolation/)
+    end
+
+    context 'group-level protected environment' do
+      let_it_be(:group) { create(:group) }
+
+      it 'passes the validation when the name is listed in the tiers' do
+        protection = build(:protected_environment, name: 'production', group: group)
+
+        expect(protection).to be_valid
+      end
+
+      it 'fails the validation when the name is not listed in the tiers' do
+        protection = build(:protected_environment, name: 'customer-portal', group: group)
+
+        expect(protection).not_to be_valid
+        expect(protection.errors[:name].first).to include('must be one of environment tiers')
+      end
+    end
   end
 
   describe '#accessible_to?' do
@@ -90,6 +120,58 @@ RSpec.describe ProtectedEnvironment do
     end
   end
 
+  describe '#container_access_level' do
+    subject { protected_environment.container_access_level(user) }
+
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:maintainer) { create(:user) }
+    let_it_be(:developer) { create(:user) }
+
+    before_all do
+      project.add_maintainer(maintainer)
+      project.add_developer(developer)
+      group.add_maintainer(maintainer)
+      group.add_developer(developer)
+    end
+
+    shared_examples_for 'correct access levels' do
+      context 'for project maintainer' do
+        let(:user) { maintainer }
+
+        it { is_expected.to eq(Gitlab::Access::MAINTAINER) }
+      end
+
+      context 'for project developer' do
+        let(:user) { developer }
+
+        it { is_expected.to eq(Gitlab::Access::DEVELOPER) }
+      end
+
+      context 'when user is nil' do
+        let(:user) { }
+
+        it { is_expected.to eq(Gitlab::Access::NO_ACCESS) }
+      end
+    end
+
+    context 'with project-level protected environment' do
+      let!(:protected_environment) do
+        create(:protected_environment, :project_level, project: project)
+      end
+
+      it_behaves_like 'correct access levels'
+    end
+
+    context 'with group-level protected environment' do
+      let!(:protected_environment) do
+        create(:protected_environment, :group_level, group: group)
+      end
+
+      it_behaves_like 'correct access levels'
+    end
+  end
+
   describe '.sorted_by_name' do
     subject(:protected_environments) { described_class.sorted_by_name }
 
@@ -128,6 +210,73 @@ RSpec.describe ProtectedEnvironment do
       deploy_access_level = create_deploy_access_level(group: group)
 
       expect(described_class.deploy_access_levels_by_group(group)).to contain_exactly(deploy_access_level)
+    end
+  end
+
+  describe '.for_environment' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project, reload: true) { create(:project, group: group) }
+
+    let!(:environment) { create(:environment, name: 'production', project: project) }
+    let!(:protected_environment) { create(:protected_environment, name: 'production', project: project) }
+
+    subject { described_class.for_environment(environment) }
+
+    it { is_expected.to eq([protected_environment]) }
+
+    it 'caches result', :request_store do
+      described_class.for_environment(environment).to_a
+
+      expect { described_class.for_environment(environment).to_a }
+        .not_to exceed_query_limit(0)
+    end
+
+    context 'when environment is a different name' do
+      let!(:environment) { create(:environment, name: 'staging', project: project) }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when environment exists in a different project' do
+      let!(:environment) { create(:environment, name: 'production', project: create(:project)) }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when environment does not exist' do
+      let!(:environment) { }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with group-level protected environment' do
+      let!(:group_protected_environment) { create(:protected_environment, :production, :group_level, group: group) }
+
+      context 'with project-level production environment' do
+        let!(:environment) { create(:environment, :production, project: project) }
+
+        it 'has multiple protections' do
+          is_expected.to contain_exactly(protected_environment, group_protected_environment)
+        end
+
+        context 'when project-level protection does not exist' do
+          let!(:protected_environment) { }
+
+          it 'has only group-level protection' do
+            is_expected.to eq([group_protected_environment])
+          end
+        end
+      end
+
+      context 'with staging environment' do
+        let(:environment) { create(:environment, :staging, project: project) }
+
+        it 'does not have any protections' do
+          is_expected.to be_empty
+        end
+      end
     end
   end
 

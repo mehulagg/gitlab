@@ -1,5 +1,12 @@
 <script>
-import { GlButtonGroup, GlDropdown, GlDropdownItem, GlLink, GlSearchBoxByType } from '@gitlab/ui';
+import {
+  GlButtonGroup,
+  GlDropdown,
+  GlDropdownItem,
+  GlIcon,
+  GlLink,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 import ReviewAppLink from '../review_app_link.vue';
 
@@ -9,6 +16,7 @@ export default {
     GlButtonGroup,
     GlDropdown,
     GlDropdownItem,
+    GlIcon,
     GlLink,
     GlSearchBoxByType,
     ReviewAppLink,
@@ -63,15 +71,22 @@ export default {
 };
 </script>
 <template>
-  <span>
+  <span class="gl-display-inline-flex">
     <gl-button-group v-if="shouldRenderDropdown" size="small">
       <review-app-link
         :display="appButtonText"
         :link="deploymentExternalUrl"
         size="small"
-        css-class="deploy-link js-deploy-url inline"
+        css-class="deploy-link js-deploy-url inline gl-ml-3"
       />
-      <gl-dropdown size="small" class="js-mr-wigdet-deployment-dropdown">
+      <gl-dropdown toggle-class="gl-px-2!" size="small" class="js-mr-wigdet-deployment-dropdown">
+        <template #button-content>
+          <gl-icon
+            class="dropdown-chevron gl-mx-0!"
+            name="chevron-down"
+            data-testid="mr-wigdet-deployment-dropdown-icon"
+          />
+        </template>
         <gl-search-box-by-type v-model.trim="searchTerm" v-autofocusonshow autofocus />
         <gl-dropdown-item
           v-for="change in filteredChanges"
@@ -97,7 +112,7 @@ export default {
       :display="appButtonText"
       :link="deploymentExternalUrl"
       size="small"
-      css-class="js-deploy-url deploy-link btn btn-default btn-sm inline"
+      css-class="js-deploy-url deploy-link btn btn-default btn-sm inline gl-ml-3"
     />
     <visual-review-app-link
       v-if="showVisualReviewApp"

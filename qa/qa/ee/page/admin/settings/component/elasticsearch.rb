@@ -12,14 +12,19 @@ module QA
                 element :search_checkbox
                 element :url_field
                 element :submit_button
+                element :expand_advanced_search_button
               end
 
               def check_indexing
-                check_element :indexing_checkbox
+                check_element(:indexing_checkbox)
+              end
+
+              def has_no_indexing_checkbox_element?
+                has_no_element?(:indexing_checkbox)
               end
 
               def check_search
-                check_element :search_checkbox
+                check_element(:search_checkbox)
               end
 
               def enter_link(link)
@@ -28,6 +33,10 @@ module QA
 
               def click_submit
                 click_element(:submit_button)
+              end
+
+              def click_expand_advanced_search
+                click_element(:expand_advanced_search_button)
               end
             end
           end

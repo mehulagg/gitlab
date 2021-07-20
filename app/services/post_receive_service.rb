@@ -32,11 +32,11 @@ class PostReceiveService
     response.add_alert_message(broadcast_message)
     response.add_merge_request_urls(merge_request_urls)
 
-    # Neither User nor Project are guaranteed to be returned; an orphaned write deploy
+    # Neither User nor Repository are guaranteed to be returned; an orphaned write deploy
     # key could be used
-    if user && project
-      redirect_message = Gitlab::Checks::ProjectMoved.fetch_message(user.id, project.id)
-      project_created_message = Gitlab::Checks::ProjectCreated.fetch_message(user.id, project.id)
+    if user && repository
+      redirect_message = Gitlab::Checks::ContainerMoved.fetch_message(user, repository)
+      project_created_message = Gitlab::Checks::ProjectCreated.fetch_message(user, repository)
 
       response.add_basic_message(redirect_message)
       response.add_basic_message(project_created_message)
@@ -48,7 +48,7 @@ class PostReceiveService
   end
 
   def process_mr_push_options(push_options, changes)
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/61359')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/28494')
     return unless repository
 
     unless repository.repo_type.project?
@@ -56,7 +56,7 @@ class PostReceiveService
     end
 
     service = ::MergeRequests::PushOptionsHandlerService.new(
-      project, user, changes, push_options
+      project: project, current_user: user, changes: changes, push_options: push_options
     ).execute
 
     if service.errors.present?
@@ -72,7 +72,7 @@ class PostReceiveService
   def merge_request_urls
     return [] unless repository&.repo_type&.project?
 
-    ::MergeRequests::GetUrlsService.new(project).execute(params[:changes])
+    ::MergeRequests::GetUrlsService.new(project: project).execute(params[:changes])
   end
 
   private
@@ -94,8 +94,10 @@ class PostReceiveService
   end
 
   def record_onboarding_progress
+    return unless project
+
     OnboardingProgressService.new(project.namespace).execute(action: :git_write)
   end
 end
 
-PostReceiveService.prepend_if_ee('EE::PostReceiveService')
+PostReceiveService.prepend_mod_with('PostReceiveService')

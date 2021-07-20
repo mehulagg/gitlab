@@ -2,29 +2,18 @@ import $ from 'jquery';
 import { escape } from 'lodash';
 import { __ } from '~/locale';
 import Api from './api';
-import axios from './lib/utils/axios_utils';
-import { normalizeHeaders } from './lib/utils/common_utils';
 import { loadCSSFile } from './lib/utils/css_utils';
+import { select2AxiosTransport } from './lib/utils/select2_utils';
 
-const fetchGroups = (params) => {
-  axios[params.type.toLowerCase()](params.url, {
-    params: params.data,
-  })
-    .then((res) => {
-      const results = res.data || [];
-      const headers = normalizeHeaders(res.headers);
-      const currentPage = parseInt(headers['X-PAGE'], 10) || 0;
-      const totalPages = parseInt(headers['X-TOTAL-PAGES'], 10) || 0;
-      const more = currentPage < totalPages;
-
-      params.success({
-        results,
-        pagination: {
-          more,
-        },
-      });
-    })
-    .catch(params.error);
+const groupsPath = (groupsFilter, parentGroupID) => {
+  switch (groupsFilter) {
+    case 'descendant_groups':
+      return Api.descendantGroupsPath.replace(':id', parentGroupID);
+    case 'subgroups':
+      return Api.subgroupsPath.replace(':id', parentGroupID);
+    default:
+      return Api.groupsPath;
+  }
 };
 
 const groupsSelect = () => {
@@ -38,9 +27,7 @@ const groupsSelect = () => {
         const allAvailable = $select.data('allAvailable');
         const skipGroups = $select.data('skipGroups') || [];
         const parentGroupID = $select.data('parentId');
-        const groupsPath = parentGroupID
-          ? Api.subgroupsPath.replace(':id', parentGroupID)
-          : Api.groupsPath;
+        const groupsFilter = $select.data('groupsFilter');
 
         $select.select2({
           placeholder: __('Search for a group'),
@@ -48,12 +35,10 @@ const groupsSelect = () => {
           multiple: $select.hasClass('multiselect'),
           minimumInputLength: 0,
           ajax: {
-            url: Api.buildUrl(groupsPath),
+            url: Api.buildUrl(groupsPath(groupsFilter, parentGroupID)),
             dataType: 'json',
             quietMillis: 250,
-            transport(params) {
-              fetchGroups(params);
-            },
+            transport: select2AxiosTransport,
             data(search, page) {
               return {
                 search,
@@ -63,8 +48,6 @@ const groupsSelect = () => {
               };
             },
             results(data, page) {
-              if (data.length) return { results: [] };
-
               const groups = data.length ? data : data.results || [];
               const more = data.pagination ? data.pagination.more : false;
               const results = groups.filter((group) => skipGroups.indexOf(group.id) === -1);

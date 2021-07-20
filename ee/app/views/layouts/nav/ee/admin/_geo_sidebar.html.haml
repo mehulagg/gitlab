@@ -1,14 +1,15 @@
-= nav_link(controller: %w(admin/geo/nodes admin/geo/nodes_beta admin/geo/projects admin/geo/uploads admin/geo/settings admin/geo/designs admin/geo/replicables)) do
-  = link_to admin_geo_nodes_path, class: "qa-link-geo-menu" do
+= nav_link(controller: %w(admin/geo/nodes admin/geo/projects admin/geo/uploads admin/geo/settings admin/geo/designs admin/geo/replicables)) do
+  = link_to admin_geo_nodes_path, class: "qa-link-geo-menu has-sub-items" do
     .nav-icon-container
       = sprite_icon('location-dot')
     %span.nav-item-name
       #{ _('Geo') }
   %ul.sidebar-sub-level-items
-    = nav_link(controller: '%w(admin/geo/nodes admin/geo/nodes_beta)', html_options: { class: "fly-out-top-item" } ) do
+    = nav_link(controller: '%w(admin/geo/nodes)', html_options: { class: "fly-out-top-item" } ) do
       = link_to admin_geo_nodes_path do
         %strong.fly-out-top-item-name
           #{ _('Geo') }
+      %li.divider.fly-out-top-item
       = nav_link(path: 'admin/geo/nodes#index') do
         = link_to admin_geo_nodes_path, title: _('Nodes') do
           %span

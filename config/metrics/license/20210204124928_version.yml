@@ -1,0 +1,17 @@
+---
+data_category: Operational
+key_path: gitaly.version
+description: Version of Gitaly
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: string
+status: data_available
+time_frame: none
+data_source: system
+distribution:
+- ce
+tier:
+- free
+skip_validation: true

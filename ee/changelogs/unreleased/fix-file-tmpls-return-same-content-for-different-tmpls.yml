@@ -1,6 +1,0 @@
----
-title: Fix file templates return same content for templates with same name but from
-  different projects
-merge_request: 52332
-author:
-type: fixed

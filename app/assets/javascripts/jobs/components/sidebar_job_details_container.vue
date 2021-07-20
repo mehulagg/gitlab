@@ -46,12 +46,14 @@ export default {
       return timeIntervalInWords(this.job.queued);
     },
     runnerHelpUrl() {
-      return helpPagePath('ci/runners/README.html', {
+      return helpPagePath('ci/runners/index.html', {
         anchor: 'set-maximum-job-timeout-for-a-runner',
       });
     },
     runnerId() {
-      return `${this.job.runner.description} (#${this.job.runner.id})`;
+      const { id, short_sha: token, description } = this.job?.runner;
+
+      return `#${id} (${token}) ${description}`;
     },
     shouldRenderBlock() {
       return Boolean(this.hasAnyDetail || this.hasTimeout || this.hasTags);
@@ -73,7 +75,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="shouldRenderBlock" class="block">
+  <div v-if="shouldRenderBlock">
     <detail-row v-if="job.duration" :value="duration" title="Duration" />
     <detail-row
       v-if="job.finished_at"

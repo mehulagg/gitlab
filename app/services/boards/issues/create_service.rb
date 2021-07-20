@@ -30,10 +30,12 @@ module Boards
       end
 
       def create_issue(params)
-        ::Issues::CreateService.new(project, current_user, params).execute
+        # NOTE: We are intentionally not doing a spam/CAPTCHA check for issues created via boards.
+        # See https://gitlab.com/gitlab-org/gitlab/-/issues/29400#note_598479184 for more context.
+        ::Issues::CreateService.new(project: project, current_user: current_user, params: params, spam_params: nil).execute
       end
     end
   end
 end
 
-Boards::Issues::CreateService.prepend_if_ee('EE::Boards::Issues::CreateService')
+Boards::Issues::CreateService.prepend_mod_with('Boards::Issues::CreateService')

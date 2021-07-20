@@ -63,7 +63,7 @@ To update GitLab documentation:
 1. Follow the [Merge Request Guidelines](../contributing/merge_request_workflow.md#merge-request-guidelines).
 
 NOTE:
-Work in a fork if you do not have Developer access to the GitLab project.
+Work in a fork if you do not have the Developer role in the GitLab project.
 
 ### Ask for help
 
@@ -85,8 +85,8 @@ If you are a member of the GitLab Slack workspace, you can request help in `#doc
 
 ### Reviewing and merging
 
-Anyone with Maintainer access to the relevant GitLab project can merge documentation changes.
-Maintainers must make a good-faith effort to ensure that the content:
+Anyone with the [Maintainer role](../../user/permissions.md) to the relevant GitLab project can
+merge documentation changes. Maintainers must make a good-faith effort to ensure that the content:
 
 - Is clear and sufficiently easy for the intended audience to navigate and understand.
 - Meets the [Documentation Guidelines](index.md) and [Style Guide](styleguide/index.md).
@@ -115,7 +115,7 @@ The process involves the following:
     and link it from the merge request.
 
 The process is reflected in the **Documentation**
-[merge request template](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/merge_request_templates/Documentation.md).
+[merge request template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/merge_request_templates/Documentation.md).
 
 ## Other ways to help
 

@@ -1,11 +1,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
+import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { deprecatedCreateFlash as Flash } from '../../flash';
+import draftNote from '../../batch_comments/components/draft_note.vue';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
 import placeholderNote from '../../vue_shared/components/notes/placeholder_note.vue';
 import placeholderSystemNote from '../../vue_shared/components/notes/placeholder_system_note.vue';
@@ -17,6 +19,7 @@ import commentForm from './comment_form.vue';
 import discussionFilterNote from './discussion_filter_note.vue';
 import noteableDiscussion from './noteable_discussion.vue';
 import noteableNote from './noteable_note.vue';
+import SidebarSubscription from './sidebar_subscription.vue';
 
 export default {
   name: 'NotesApp',
@@ -30,6 +33,9 @@ export default {
     skeletonLoadingContainer,
     discussionFilterNote,
     OrderedLayout,
+    SidebarSubscription,
+    draftNote,
+    TimelineEntryItem,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -60,6 +66,7 @@ export default {
   data() {
     return {
       currentFilter: null,
+      renderSkeleton: !this.shouldShow,
     };
   },
   computed: {
@@ -87,7 +94,7 @@ export default {
       return this.noteableData.noteableType;
     },
     allDiscussions() {
-      if (this.isLoading) {
+      if (this.renderSkeleton || this.isLoading) {
         const prerenderedNotesCount = parseInt(this.notesData.prerenderedNotesCount, 10) || 0;
 
         return new Array(prerenderedNotesCount).fill({
@@ -116,6 +123,10 @@ export default {
       if (!this.isNotesFetched) {
         this.fetchNotes();
       }
+
+      setTimeout(() => {
+        this.renderSkeleton = !this.shouldShow;
+      });
     },
     discussionTabCounterText(val) {
       if (this.discussionsCount) {
@@ -210,7 +221,9 @@ export default {
         .catch(() => {
           this.setLoadingState(false);
           this.setNotesFetchedState(true);
-          Flash(__('Something went wrong while fetching comments. Please try again.'));
+          createFlash({
+            message: __('Something went wrong while fetching comments. Please try again.'),
+          });
         });
     },
     initPolling() {
@@ -261,6 +274,7 @@ export default {
 
 <template>
   <div v-show="shouldShow" id="notes">
+    <sidebar-subscription :iid="noteableData.iid" :noteable-data="noteableData" />
     <ordered-layout :slot-keys="slotKeys">
       <template #form>
         <comment-form
@@ -273,6 +287,9 @@ export default {
         <ul id="notes-list" class="notes main-notes-list timeline">
           <template v-for="discussion in allDiscussions">
             <skeleton-loading-container v-if="discussion.isSkeletonNote" :key="discussion.id" />
+            <timeline-entry-item v-else-if="discussion.isDraft" :key="discussion.id">
+              <draft-note :draft="discussion" />
+            </timeline-entry-item>
             <template v-else-if="discussion.isPlaceholderNote">
               <placeholder-system-note
                 v-if="discussion.placeholderType === $options.systemNote"

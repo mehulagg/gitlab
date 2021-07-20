@@ -1,14 +1,21 @@
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
 import Api from 'ee/api';
-import Component from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
+import { STEPS } from 'ee/subscriptions/constants';
+import ConfirmOrder from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
 import createStore from 'ee/subscriptions/new/store';
-import * as types from 'ee/subscriptions/new/store/mutation_types';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
+import { createMockApolloProvider } from 'ee_jest/vue_shared/purchase_flow/spec_helper';
+import flash from '~/flash';
+
+jest.mock('~/flash');
 
 describe('Confirm Order', () => {
   const localVue = createLocalVue();
   localVue.use(Vuex);
+  localVue.use(VueApollo);
 
   let wrapper;
 
@@ -16,44 +23,45 @@ describe('Confirm Order', () => {
 
   const store = createStore();
 
-  const createComponent = (opts = {}) => {
-    wrapper = shallowMount(Component, {
+  function createComponent(options = {}) {
+    return shallowMount(ConfirmOrder, {
       localVue,
       store,
-      ...opts,
+      ...options,
     });
-  };
+  }
 
   const findConfirmButton = () => wrapper.find(GlButton);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-
-  beforeEach(() => {
-    createComponent();
-  });
 
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('Active', () => {
-    beforeEach(() => {
-      store.commit(types.UPDATE_CURRENT_STEP, 'confirmOrder');
-    });
+    describe('when receiving proper step data', () => {
+      beforeEach(async () => {
+        const mockApolloProvider = createMockApolloProvider(STEPS, 3);
+        wrapper = createComponent({ apolloProvider: mockApolloProvider });
+      });
 
-    it('button should be visible', () => {
-      expect(findConfirmButton().exists()).toBe(true);
-    });
+      it('button should be visible', () => {
+        expect(findConfirmButton().exists()).toBe(true);
+      });
 
-    it('shows the text "Confirm purchase"', () => {
-      expect(findConfirmButton().text()).toBe('Confirm purchase');
-    });
+      it('shows the text "Confirm purchase"', () => {
+        expect(findConfirmButton().text()).toBe('Confirm purchase');
+      });
 
-    it('the loading indicator should not be visible', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
+      it('the loading indicator should not be visible', () => {
+        expect(findLoadingIcon().exists()).toBe(false);
+      });
     });
 
     describe('Clicking the button', () => {
       beforeEach(() => {
+        const mockApolloProvider = createMockApolloProvider(STEPS, 3);
+        wrapper = createComponent({ apolloProvider: mockApolloProvider });
         Api.confirmOrder = jest.fn().mockReturnValue(new Promise(jest.fn()));
 
         findConfirmButton().vm.$emit('click');
@@ -71,11 +79,32 @@ describe('Confirm Order', () => {
         expect(findLoadingIcon().exists()).toBe(true);
       });
     });
+
+    describe('when failing to receive step data', () => {
+      beforeEach(async () => {
+        const mockApolloProvider = createMockApolloProvider([]);
+        mockApolloProvider.clients.defaultClient.clearStore();
+        wrapper = createComponent({ apolloProvider: mockApolloProvider });
+      });
+
+      afterEach(() => {
+        flash.mockClear();
+      });
+
+      it('displays an error', () => {
+        expect(flash.mock.calls[0][0]).toMatchObject({
+          message: GENERAL_ERROR_MESSAGE,
+          captureError: true,
+          error: expect.any(Error),
+        });
+      });
+    });
   });
 
   describe('Inactive', () => {
-    beforeEach(() => {
-      store.commit(types.UPDATE_CURRENT_STEP, 'otherStep');
+    beforeEach(async () => {
+      const mockApolloProvider = createMockApolloProvider(STEPS, 1);
+      wrapper = createComponent({ apolloProvider: mockApolloProvider });
     });
 
     it('button should not be visible', () => {

@@ -87,11 +87,11 @@ module Gitlab
           raise NotImplementedError
         end
 
-        def by_category(category, project = nil)
+        def by_category(category, project = nil, empty_category_title: nil)
           directory = category_directory(category)
           files = finder(project).list_files_for(directory)
 
-          files.map { |f| new(f, project, category: category) }.sort
+          files.map { |f| new(f, project, category: category.presence || empty_category_title) }.sort
         end
 
         def category_directory(category)
@@ -108,7 +108,7 @@ module Gitlab
         # Gitaly the actual template names within a given project's repository for all file templates
         # other than `issue` and `merge request` description templates, which would instead
         # overwrite the `template_names` method to return a redis cached version, by reading cached values
-        # from `repository.issue_template_names_by_category` and `repository.merge_request_template_names_by_category`
+        # from `repository.issue_template_names_hash` and `repository.merge_request_template_names_hash`
         # methods.
         def repository_template_names(project)
           template_names_by_category(self.all(project))
@@ -130,10 +130,10 @@ module Gitlab
           return [] if project && !project.repository.exists?
 
           if categories.any?
-            categories.keys.map do |category|
+            categories.keys.to_h do |category|
               files = self.by_category(category, project)
               [category, files.map { |t| { key: t.key, name: t.name, content: t.content } }]
-            end.to_h
+            end
           else
             files = self.all(project)
             files.map { |t| { key: t.key, name: t.name, content: t.content } }

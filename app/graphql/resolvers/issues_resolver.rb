@@ -15,6 +15,7 @@ module Resolvers
     type Types::IssueType.connection_type, null: true
 
     NON_STABLE_CURSOR_SORTS = %i[priority_asc priority_desc
+                                 popularity_asc popularity_desc
                                  label_priority_asc label_priority_desc
                                  milestone_due_asc milestone_due_desc].freeze
 
@@ -44,7 +45,8 @@ module Resolvers
       {
         alert_management_alert: [:alert_management_alert],
         labels: [:labels],
-        assignees: [:assignees]
+        assignees: [:assignees],
+        timelogs: [:timelogs]
       }
     end
 
@@ -54,4 +56,4 @@ module Resolvers
   end
 end
 
-Resolvers::IssuesResolver.prepend_if_ee('::EE::Resolvers::IssuesResolver')
+Resolvers::IssuesResolver.prepend_mod_with('Resolvers::IssuesResolver')

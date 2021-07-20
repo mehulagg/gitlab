@@ -11,7 +11,7 @@ module ReleaseHighlights
 
     validates :title, :body, :stage, presence: true
     validates :'self-managed', :'gitlab-com', inclusion: { in: [true, false], message: "must be a boolean" }
-    validates :url, :image_url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: 'must be a URL' }
+    validates :url, :image_url, public_url: { dns_rebind_protection: true }
     validates :release, numericality: true
     validate :validate_published_at
     validate :validate_packages
@@ -46,7 +46,10 @@ module ReleaseHighlights
 
     def add_line_numbers_to_errors!
       errors.messages.each do |attribute, messages|
-        messages.map! { |m| "#{m} (line #{line_number_for(attribute)})" }
+        extended_messages = messages.map { |m| "#{m} (line #{line_number_for(attribute)})" }
+
+        errors.delete(attribute)
+        extended_messages.each { |extended_message| errors.add(attribute, extended_message) }
       end
     end
 

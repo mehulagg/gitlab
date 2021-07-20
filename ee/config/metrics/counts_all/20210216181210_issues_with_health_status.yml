@@ -1,0 +1,16 @@
+---
+data_category: Optional
+key_path: counts.issues_with_health_status
+description: Count of issues with health status
+product_section: dev
+product_stage: plan
+product_group: group::product planning
+product_category: epics
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ee
+tier:
+- ultimate

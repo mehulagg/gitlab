@@ -33,13 +33,13 @@ RSpec.describe Mattermost::Session, type: :request do
 
     context 'without oauth uri' do
       it 'makes a request to the oauth uri' do
-        expect { subject.with_session }.to raise_error(Mattermost::NoSessionError)
+        expect { subject.with_session }.to raise_error(::Mattermost::NoSessionError)
       end
     end
 
     context 'with oauth_uri' do
       let!(:doorkeeper) do
-        Doorkeeper::Application.create(
+        Doorkeeper::Application.create!(
           name: 'GitLab Mattermost',
           redirect_uri: "#{mattermost_url}/signup/gitlab/complete\n#{mattermost_url}/login/gitlab/complete",
           scopes: '')
@@ -49,7 +49,7 @@ RSpec.describe Mattermost::Session, type: :request do
         it 'can not create a session' do
           expect do
             subject.with_session
-          end.to raise_error(Mattermost::NoSessionError)
+          end.to raise_error(::Mattermost::NoSessionError)
         end
       end
 
@@ -113,13 +113,13 @@ RSpec.describe Mattermost::Session, type: :request do
         expect_to_cancel_exclusive_lease(lease_key, 'uuid')
 
         # Cannot set up a session, but we should still cancel the lease
-        expect { subject.with_session }.to raise_error(Mattermost::NoSessionError)
+        expect { subject.with_session }.to raise_error(::Mattermost::NoSessionError)
       end
 
       it 'returns a NoSessionError error without lease' do
         stub_exclusive_lease_taken(lease_key)
 
-        expect { subject.with_session }.to raise_error(Mattermost::NoSessionError)
+        expect { subject.with_session }.to raise_error(::Mattermost::NoSessionError)
       end
     end
   end

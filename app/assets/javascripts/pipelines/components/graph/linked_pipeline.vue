@@ -3,9 +3,9 @@ import { GlTooltipDirective, GlButton, GlLink, GlLoadingIcon, GlBadge } from '@g
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { __, sprintf } from '~/locale';
 import CiStatus from '~/vue_shared/components/ci_icon.vue';
+import { reportToSentry } from '../../utils';
 import { accessValue } from './accessors';
 import { DOWNSTREAM, REST, UPSTREAM } from './constants';
-import { reportToSentry } from './utils';
 
 export default {
   directives: {
@@ -58,7 +58,7 @@ export default {
   },
   computed: {
     tooltipText() {
-      return `${this.downstreamTitle} #${this.pipeline.id} - ${this.pipelineStatus.label}
+      return `${this.downstreamTitle} #${this.pipeline.id} - ${this.pipelineStatus.label} -
       ${this.sourceJobInfo}`;
     },
     buttonId() {
@@ -71,7 +71,7 @@ export default {
       return this.pipeline.project.name;
     },
     downstreamTitle() {
-      return this.childPipeline ? __('child-pipeline') : this.pipeline.project.name;
+      return this.childPipeline ? this.sourceJobName : this.pipeline.project.name;
     },
     parentPipeline() {
       return this.isUpstream && this.isSameProject;
@@ -161,9 +161,9 @@ export default {
           :size="24"
           css-classes="gl-top-0 gl-pr-2"
         />
-        <div v-else class="gl-pr-2"><gl-loading-icon inline /></div>
+        <div v-else class="gl-pr-2"><gl-loading-icon size="sm" inline /></div>
         <div class="gl-display-flex gl-flex-direction-column gl-w-13">
-          <span class="gl-text-truncate">
+          <span class="gl-text-truncate" data-testid="downstream-title">
             {{ downstreamTitle }}
           </span>
           <div class="gl-text-truncate">
@@ -183,6 +183,7 @@ export default {
         class="gl-absolute gl-top-0 gl-bottom-0 gl-shadow-none! gl-rounded-0!"
         :class="`js-pipeline-expand-${pipeline.id} ${expandButtonPosition}`"
         :icon="expandedIcon"
+        :aria-label="__('Expand pipeline')"
         data-testid="expand-pipeline-button"
         data-qa-selector="expand_pipeline_button"
         @click="onClickLinkedPipeline"

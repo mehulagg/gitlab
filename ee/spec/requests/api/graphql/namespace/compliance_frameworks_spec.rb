@@ -8,6 +8,7 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:compliance_framework_1) { create(:compliance_framework, namespace: namespace, name: 'Test1') }
   let_it_be(:compliance_framework_2) { create(:compliance_framework, namespace: namespace, name: 'Test2') }
+
   let(:path) { %i[namespace compliance_frameworks nodes] }
 
   let!(:query) do
@@ -17,6 +18,10 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
   end
 
   context 'when authenticated as the namespace owner' do
+    before do
+      stub_licensed_features(custom_compliance_frameworks: true)
+    end
+
     let(:current_user) { namespace.owner }
 
     it 'returns the groups compliance frameworks' do
@@ -109,18 +114,6 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
         expect(graphql_data_at(:a, :complianceFrameworks, :nodes, :name)).to contain_exactly('Test1', 'Test2')
         expect(graphql_data_at(:b, :complianceFrameworks, :nodes, :name)).to contain_exactly('GDPR', 'SOX')
         expect(graphql_data_at(:c, :complianceFrameworks, :nodes, :name)).to contain_exactly('SOX')
-      end
-    end
-
-    context 'feature is disabled' do
-      before do
-        stub_feature_flags(ff_custom_compliance_frameworks: false)
-      end
-
-      it 'responds with error when querying a compliance framework' do
-        post_graphql(query, current_user: current_user)
-
-        expect(graphql_errors).to contain_exactly(include('message' => "Field 'complianceFrameworks' doesn't exist on type 'Namespace'"))
       end
     end
   end

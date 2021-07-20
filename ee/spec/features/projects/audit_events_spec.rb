@@ -60,10 +60,10 @@ RSpec.describe 'Projects > Audit Events', :js do
       expect(page).to have_link('Audit Events')
     end
 
-    it 'does not have Project Audit Events in the header' do
+    it 'does not have Project audit events in the header' do
       visit project_audit_events_path(project)
 
-      expect(page).not_to have_content('Project Audit Events')
+      expect(page).not_to have_content('Project audit events')
     end
   end
 
@@ -73,10 +73,10 @@ RSpec.describe 'Projects > Audit Events', :js do
     expect(page).to have_link('Audit Events')
   end
 
-  it 'has Project Audit Events in the header' do
+  it 'has Project audit events in the header' do
     visit project_audit_events_path(project)
 
-    expect(page).to have_content('Project Audit Events')
+    expect(page).to have_content('Project audit events')
   end
 
   describe 'adding an SSH key' do
@@ -96,9 +96,8 @@ RSpec.describe 'Projects > Audit Events', :js do
 
       visit project_deploy_keys_path(project)
 
-      accept_confirm do
-        find('[data-testid="remove-icon"]').click
-      end
+      click_button 'Remove'
+      click_button 'Remove deploy key'
 
       visit project_audit_events_path(project)
 
@@ -113,53 +112,23 @@ RSpec.describe 'Projects > Audit Events', :js do
       project.add_developer(pete)
     end
 
-    context 'when `vue_project_members_list` feature flag is enabled' do
-      it "appears in the project's audit events" do
-        visit project_project_members_path(project)
+    it "appears in the project's audit events" do
+      visit project_project_members_path(project)
 
-        page.within find_member_row(pete) do
-          click_button 'Developer'
-          click_button 'Maintainer'
-        end
-
-        page.within('.qa-project-sidebar') do
-          find(:link, text: 'Security & Compliance').click
-          click_link 'Audit Events'
-        end
-
-        page.within('.audit-log-table') do
-          expect(page).to have_content 'Changed access level from Developer to Maintainer'
-          expect(page).to have_content(project.owner.name)
-          expect(page).to have_content('Pete')
-        end
-      end
-    end
-
-    context 'when `vue_project_members_list` feature flag is disabled' do
-      before do
-        stub_feature_flags(vue_project_members_list: false)
+      page.within find_member_row(pete) do
+        click_button 'Developer'
+        click_button 'Maintainer'
       end
 
-      it "appears in the project's audit events" do
-        visit project_project_members_path(project)
+      page.within('.sidebar-top-level-items') do
+        find(:link, text: 'Security & Compliance').click
+        click_link 'Audit Events'
+      end
 
-        project_member = project.project_member(pete)
-
-        page.within "#project_member_#{project_member.id}" do
-          click_button 'Developer'
-          click_link 'Maintainer'
-        end
-
-        page.within('.qa-project-sidebar') do
-          find(:link, text: 'Security & Compliance').click
-          click_link 'Audit Events'
-        end
-
-        page.within('.audit-log-table') do
-          expect(page).to have_content 'Changed access level from Developer to Maintainer'
-          expect(page).to have_content(project.owner.name)
-          expect(page).to have_content('Pete')
-        end
+      page.within('.audit-log-table') do
+        expect(page).to have_content 'Changed access level from Developer to Maintainer'
+        expect(page).to have_content(project.owner.name)
+        expect(page).to have_content('Pete')
       end
     end
   end
@@ -178,12 +147,10 @@ RSpec.describe 'Projects > Audit Events', :js do
         click_button 'Save changes'
       end
 
-      wait_for('Save is completed') do
-        page.has_content?('was successfully updated', wait: 0)
-      end
+      wait_for_all_requests
 
-      page.within('.qa-project-sidebar') do
-        find(:link, text: 'Security & Compliance').click
+      page.within('.sidebar-top-level-items') do
+        click_link 'Security & Compliance'
         click_link 'Audit Events'
       end
 

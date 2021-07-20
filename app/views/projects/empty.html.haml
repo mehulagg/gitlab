@@ -1,15 +1,13 @@
 - @content_class = "limit-container-width" unless fluid_layout
-- default_branch_name = @project.default_branch || "master"
+- default_branch_name = @project.default_branch_or_main
 - @skip_current_level_breadcrumb = true
-
-= content_for :invite_members_sidebar do
-  = render partial: 'projects/invite_members_link'
 
 = render partial: 'flash_messages', locals: { project: @project }
 
 = render "home_panel"
+= render "archived_notice", project: @project
 
-= render "invite_members" if experiment_enabled?(:invite_members_empty_project_version_a) && can_import_members?
+= render 'invite_members_empty_project' if can_import_members?
 
 %h4.gl-mt-0.gl-mb-3
   = _('The repository for this project is empty')
@@ -46,6 +44,7 @@
           :preserve
             git clone #{ content_tag(:span, default_url_to_repo, class: 'js-clone')}
             cd #{h @project.path}
+            git switch -c #{default_branch_name}
             touch README.md
             git add README.md
             git commit -m "add README"
@@ -58,7 +57,7 @@
         %pre.bg-light
           :preserve
             cd existing_folder
-            git init
+            git init --initial-branch=#{default_branch_name}
             git remote add origin #{ content_tag(:span, default_url_to_repo, class: 'js-clone')}
             git add .
             git commit -m "Initial commit"
@@ -77,3 +76,6 @@
             %span><
               git push -u origin --all
               git push -u origin --tags
+
+- if @project.empty_repo_upload_experiment?
+  = render 'projects/blob/upload', title: _('Upload New File'), placeholder: _('Upload New File'), button_title: _('Upload file'), form_path: project_create_blob_path(@project, default_branch_name), ref: default_branch_name, method: :post

@@ -191,6 +191,26 @@ RSpec.describe ProjectImportState, type: :model do
     end
   end
 
+  describe 'mirror has an unrecoverable failure' do
+    let(:import_state) { create(:import_state, :mirror, :started, last_error: 'SSL certificate problem: certificate has expired') }
+
+    it 'sends a notification' do
+      expect_any_instance_of(EE::NotificationService).to receive(:mirror_was_hard_failed).with(import_state.project)
+
+      import_state.fail_op
+    end
+
+    it 'marks import state as hard_failed' do
+      import_state.fail_op
+
+      expect(import_state.hard_failed?).to be_truthy
+    end
+
+    it 'does not set next execution timestamp' do
+      expect { import_state.fail_op }.not_to change { import_state.next_execution_timestamp }
+    end
+  end
+
   describe '#mirror_waiting_duration' do
     it 'returns nil if not mirror' do
       import_state = create(:import_state, :scheduled)
@@ -567,6 +587,41 @@ RSpec.describe ProjectImportState, type: :model do
 
     it 'increments retry_count' do
       expect { import_state.increment_retry_count }.to change { import_state.retry_count }.from(0).to(1)
+    end
+  end
+
+  describe '#set_max_retry_count' do
+    let(:import_state) { create(:import_state, :mirror, :failed) }
+
+    it 'sets retry_count to max' do
+      expect { import_state.set_max_retry_count }.to change { import_state.retry_count }.from(0).to(Gitlab::Mirror::MAX_RETRY + 1)
+    end
+  end
+
+  describe '#unrecoverable_failure?' do
+    subject { import_state.unrecoverable_failure? }
+
+    let(:import_state) { create(:import_state, :mirror, :failed, last_error: last_error) }
+    let(:last_error) { 'fetch remote: "fatal: unable to access \'https://expired_cert.host\': SSL certificate problem: certificate has expired\n": exit status 128' }
+
+    it { is_expected.to be_truthy }
+
+    context 'when error is recoverable' do
+      let(:last_error) { 'fetch remote: "fatal: unable to access \'host\': Failed to connect to host port 80: Connection timed out\n": exit status 128' }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when error is missing' do
+      let(:last_error) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when import_state is not failed' do
+      let(:import_state) { create(:import_state, :mirror, :finished, last_error: last_error) }
+
+      it { is_expected.to be_falsey }
     end
   end
 end

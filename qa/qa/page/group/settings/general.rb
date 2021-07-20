@@ -6,9 +6,11 @@ module QA
       module Settings
         class General < QA::Page::Base
           include ::QA::Page::Settings::Common
+          include Page::Component::VisibilitySetting
 
           view 'app/views/groups/edit.html.haml' do
             element :permission_lfs_2fa_content
+            element :advanced_settings_content
           end
 
           view 'app/views/groups/settings/_permissions.html.haml' do
@@ -18,10 +20,6 @@ module QA
           view 'app/views/groups/settings/_general.html.haml' do
             element :group_name_field
             element :save_name_visibility_settings_button
-          end
-
-          view 'app/views/shared/_visibility_radios.html.haml' do
-            element :internal_radio, 'qa_selector: "#{visibility_level_label(level).downcase}_radio"' # rubocop:disable QA/ElementWithPattern, Lint/InterpolationCheck
           end
 
           view 'app/views/groups/settings/_lfs.html.haml' do
@@ -40,13 +38,19 @@ module QA
             element :project_creation_level_dropdown
           end
 
+          view 'app/views/groups/settings/_transfer.html.haml' do
+            element :select_group_dropdown
+            element :transfer_group_button
+          end
+
+          view 'app/helpers/dropdowns_helper.rb' do
+            element :dropdown_input_field
+            element :dropdown_list_content
+          end
+
           def set_group_name(name)
             find_element(:group_name_field).send_keys([:command, 'a'], :backspace)
             find_element(:group_name_field).set name
-          end
-
-          def set_group_visibility(visibility)
-            find_element("#{visibility.downcase}_radio").click
           end
 
           def click_save_name_visibility_settings_button
@@ -54,57 +58,70 @@ module QA
           end
 
           def set_lfs_enabled
-            expand_content :permission_lfs_2fa_content
-            check_element :lfs_checkbox
-            click_element :save_permissions_changes_button
+            expand_content(:permission_lfs_2fa_content)
+            check_element(:lfs_checkbox, true)
+            click_element(:save_permissions_changes_button)
           end
 
           def set_lfs_disabled
-            expand_content :permission_lfs_2fa_content
-            uncheck_element :lfs_checkbox
-            click_element :save_permissions_changes_button
+            expand_content(:permission_lfs_2fa_content)
+            uncheck_element(:lfs_checkbox, true)
+            click_element(:save_permissions_changes_button)
           end
 
           def set_request_access_enabled
-            expand_content :permission_lfs_2fa_content
-            check_element :request_access_checkbox
-            click_element :save_permissions_changes_button
+            expand_content(:permission_lfs_2fa_content)
+            check_element(:request_access_checkbox, true)
+            click_element(:save_permissions_changes_button)
           end
 
           def set_request_access_disabled
-            expand_content :permission_lfs_2fa_content
-            uncheck_element :request_access_checkbox
-            click_element :save_permissions_changes_button
+            expand_content(:permission_lfs_2fa_content)
+            uncheck_element(:request_access_checkbox, true)
+            click_element(:save_permissions_changes_button)
           end
 
           def set_require_2fa_enabled
-            expand_content :permission_lfs_2fa_content
-            check_element :require_2fa_checkbox
-            click_element :save_permissions_changes_button
+            expand_content(:permission_lfs_2fa_content)
+            check_element(:require_2fa_checkbox, true)
+            click_element(:save_permissions_changes_button)
           end
 
           def set_require_2fa_disabled
-            expand_content :permission_lfs_2fa_content
-            uncheck_element :require_2fa_checkbox
-            click_element :save_permissions_changes_button
+            expand_content(:permission_lfs_2fa_content)
+            uncheck_element(:require_2fa_checkbox, true)
+            click_element(:save_permissions_changes_button)
           end
 
           def set_project_creation_level(value)
-            expand_content :permission_lfs_2fa_content
+            expand_content(:permission_lfs_2fa_content)
             select_element(:project_creation_level_dropdown, value)
-            click_element :save_permissions_changes_button
+            click_element(:save_permissions_changes_button)
           end
 
           def toggle_request_access
-            expand_content :permission_lfs_2fa_content
+            expand_content(:permission_lfs_2fa_content)
 
-            if find_element(:request_access_checkbox).checked?
-              uncheck_element :request_access_checkbox
+            if find_element(:request_access_checkbox, visible: false).checked?
+              uncheck_element(:request_access_checkbox, true)
             else
-              check_element :request_access_checkbox
+              check_element(:request_access_checkbox, true)
             end
 
-            click_element :save_permissions_changes_button
+            click_element(:save_permissions_changes_button)
+          end
+
+          def transfer_group(target_group)
+            expand_content :advanced_settings_content
+
+            click_element :select_group_dropdown
+            fill_element(:dropdown_input_field, target_group)
+
+            within_element(:dropdown_list_content) do
+              click_on target_group
+            end
+
+            click_element :transfer_group_button
           end
         end
       end
@@ -112,4 +129,4 @@ module QA
   end
 end
 
-QA::Page::Group::Settings::General.prepend_if_ee('QA::EE::Page::Group::Settings::General')
+QA::Page::Group::Settings::General.prepend_mod_with('Page::Group::Settings::General', namespace: QA)

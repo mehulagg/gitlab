@@ -9,14 +9,11 @@ import {
   GlFormSelect,
   GlFormTextarea,
   GlLink,
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownSectionHeader,
-  GlSearchBoxByType,
   GlSprintf,
   GlLoadingIcon,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { uniqueId } from 'lodash';
 import Vue from 'vue';
 import axios from '~/lib/utils/axios_utils';
@@ -24,21 +21,34 @@ import { backOff } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, n__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
-import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
+import {
+  VARIABLE_TYPE,
+  FILE_TYPE,
+  CONFIG_VARIABLES_TIMEOUT,
+  CC_VALIDATION_REQUIRED_ERROR,
+} from '../constants';
+import filterVariables from '../utils/filter_variables';
+import RefsDropdown from './refs_dropdown.vue';
+
+const i18n = {
+  variablesDescription: s__(
+    'Pipeline|Specify variable values to be used in this run. The values specified in %{linkStart}CI/CD settings%{linkEnd} will be used by default.',
+  ),
+  defaultError: __('Something went wrong on our end. Please try again.'),
+  refsLoadingErrorTitle: s__('Pipeline|Branches or tags could not be loaded.'),
+  submitErrorTitle: s__('Pipeline|Pipeline cannot be run.'),
+  warningTitle: __('The form contains the following warning:'),
+  maxWarningsSummary: __('%{total} warnings found: showing first %{warningsDisplayed}'),
+  removeVariableLabel: s__('CiVariables|Remove variable'),
+};
 
 export default {
   typeOptions: [
     { value: VARIABLE_TYPE, text: __('Variable') },
     { value: FILE_TYPE, text: __('File') },
   ],
-  variablesDescription: s__(
-    'Pipeline|Specify variable values to be used in this run. The values specified in %{linkStart}CI/CD settings%{linkEnd} will be used by default.',
-  ),
+  i18n,
   formElementClasses: 'gl-mr-3 gl-mb-3 gl-flex-basis-quarter gl-flex-shrink-0 gl-flex-grow-0',
-  errorTitle: __('Pipeline cannot be run.'),
-  warningTitle: __('The form contains the following warning:'),
-  maxWarningsSummary: __('%{total} warnings found: showing first %{warningsDisplayed}'),
   // this height value is used inline on the textarea to match the input field height
   // it's used to prevent the overwrite if 'gl-h-7' or 'gl-h-7!' were used
   textAreaStyle: { height: '32px' },
@@ -52,12 +62,11 @@ export default {
     GlFormSelect,
     GlFormTextarea,
     GlLink,
-    GlDropdown,
-    GlDropdownItem,
-    GlDropdownSectionHeader,
-    GlSearchBoxByType,
     GlSprintf,
     GlLoadingIcon,
+    RefsDropdown,
+    CcValidationRequiredAlert: () =>
+      import('ee_component/billings/components/cc_validation_required_alert.vue'),
   },
   directives: { SafeHtml },
   props: {
@@ -75,14 +84,6 @@ export default {
     },
     projectId: {
       type: String,
-      required: true,
-    },
-    branches: {
-      type: Array,
-      required: true,
-    },
-    tags: {
-      type: Array,
       required: true,
     },
     settingsLink: {
@@ -111,11 +112,11 @@ export default {
   },
   data() {
     return {
-      searchTerm: '',
       refValue: {
         shortName: this.refParam,
       },
       form: {},
+      errorTitle: null,
       error: null,
       warnings: [],
       totalWarnings: 0,
@@ -125,22 +126,6 @@ export default {
     };
   },
   computed: {
-    lowerCasedSearchTerm() {
-      return this.searchTerm.toLowerCase();
-    },
-    filteredBranches() {
-      return this.branches.filter((branch) =>
-        branch.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
-      );
-    },
-    filteredTags() {
-      return this.tags.filter((tag) =>
-        tag.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
-      );
-    },
-    hasTags() {
-      return this.tags.length > 0;
-    },
     overMaxWarningsLimit() {
       return this.totalWarnings > this.maxWarnings;
     },
@@ -148,7 +133,7 @@ export default {
       return n__('%d warning found:', '%d warnings found:', this.warnings.length);
     },
     summaryMessage() {
-      return this.overMaxWarningsLimit ? this.$options.maxWarningsSummary : this.warningsSummary;
+      return this.overMaxWarningsLimit ? i18n.maxWarningsSummary : this.warningsSummary;
     },
     shouldShowWarning() {
       return this.warnings.length > 0 && !this.isWarningDismissed;
@@ -165,6 +150,14 @@ export default {
     descriptions() {
       return this.form[this.refFullName]?.descriptions ?? {};
     },
+    ccRequiredError() {
+      return this.error === CC_VALIDATION_REQUIRED_ERROR;
+    },
+  },
+  watch: {
+    refValue() {
+      this.loadConfigVariablesForm();
+    },
   },
   created() {
     // this is needed until we add support for ref type in url query strings
@@ -174,7 +167,7 @@ export default {
       this.refValue.fullName = `refs/heads/${this.refValue.shortName}`;
     }
 
-    this.setRefSelected(this.refValue);
+    this.loadConfigVariablesForm();
   },
   methods: {
     addEmptyVariable(refValue) {
@@ -213,48 +206,46 @@ export default {
         this.setVariable(refValue, type, key, value);
       });
     },
-    setRefSelected(refValue) {
-      this.refValue = refValue;
-
-      if (!this.form[this.refFullName]) {
-        this.fetchConfigVariables(this.refFullName || this.refShortName)
-          .then(({ descriptions, params }) => {
-            Vue.set(this.form, this.refFullName, {
-              variables: [],
-              descriptions,
-            });
-
-            // Add default variables from yml
-            this.setVariableParams(this.refFullName, VARIABLE_TYPE, params);
-          })
-          .catch(() => {
-            Vue.set(this.form, this.refFullName, {
-              variables: [],
-              descriptions: {},
-            });
-          })
-          .finally(() => {
-            // Add/update variables, e.g. from query string
-            if (this.variableParams) {
-              this.setVariableParams(this.refFullName, VARIABLE_TYPE, this.variableParams);
-            }
-            if (this.fileParams) {
-              this.setVariableParams(this.refFullName, FILE_TYPE, this.fileParams);
-            }
-
-            // Adds empty var at the end of the form
-            this.addEmptyVariable(this.refFullName);
-          });
-      }
-    },
-    isSelected(ref) {
-      return ref.fullName === this.refValue.fullName;
-    },
     removeVariable(index) {
       this.variables.splice(index, 1);
     },
     canRemove(index) {
       return index < this.variables.length - 1;
+    },
+    loadConfigVariablesForm() {
+      // Skip when variables already cached in `form`
+      if (this.form[this.refFullName]) {
+        return;
+      }
+
+      this.fetchConfigVariables(this.refFullName || this.refShortName)
+        .then(({ descriptions, params }) => {
+          Vue.set(this.form, this.refFullName, {
+            variables: [],
+            descriptions,
+          });
+
+          // Add default variables from yml
+          this.setVariableParams(this.refFullName, VARIABLE_TYPE, params);
+        })
+        .catch(() => {
+          Vue.set(this.form, this.refFullName, {
+            variables: [],
+            descriptions: {},
+          });
+        })
+        .finally(() => {
+          // Add/update variables, e.g. from query string
+          if (this.variableParams) {
+            this.setVariableParams(this.refFullName, VARIABLE_TYPE, this.variableParams);
+          }
+          if (this.fileParams) {
+            this.setVariableParams(this.refFullName, FILE_TYPE, this.fileParams);
+          }
+
+          // Adds empty var at the end of the form
+          this.addEmptyVariable(this.refFullName);
+        });
     },
     fetchConfigVariables(refValue) {
       this.isLoading = true;
@@ -301,20 +292,13 @@ export default {
     },
     createPipeline() {
       this.submitted = true;
-      const filteredVariables = this.variables
-        .filter(({ key, value }) => key !== '' && value !== '')
-        .map(({ variable_type, key, value }) => ({
-          variable_type,
-          key,
-          secret_value: value,
-        }));
 
       return axios
         .post(this.pipelinesPath, {
           // send shortName as fall back for query params
           // https://gitlab.com/gitlab-org/gitlab/-/issues/287815
           ref: this.refValue.fullName || this.refShortName,
-          variables_attributes: filteredVariables,
+          variables_attributes: filterVariables(this.variables),
         })
         .then(({ data }) => {
           redirectTo(`${this.pipelinesPath}/${data.id}`);
@@ -330,10 +314,24 @@ export default {
           } = err?.response?.data;
           const [error] = errors;
 
-          this.error = error;
-          this.warnings = warnings;
-          this.totalWarnings = totalWarnings;
+          this.reportError({
+            title: i18n.submitErrorTitle,
+            error,
+            warnings,
+            totalWarnings,
+          });
         });
+    },
+    onRefsLoadingError(error) {
+      this.reportError({ title: i18n.refsLoadingErrorTitle });
+
+      Sentry.captureException(error);
+    },
+    reportError({ title = null, error = i18n.defaultError, warnings = [], totalWarnings = 0 }) {
+      this.errorTitle = title;
+      this.error = error;
+      this.warnings = warnings;
+      this.totalWarnings = totalWarnings;
     },
   },
 };
@@ -341,9 +339,10 @@ export default {
 
 <template>
   <gl-form @submit.prevent="createPipeline">
+    <cc-validation-required-alert v-if="ccRequiredError" class="gl-pb-5" />
     <gl-alert
-      v-if="error"
-      :title="$options.errorTitle"
+      v-else-if="error"
+      :title="errorTitle"
       :dismissible="false"
       variant="danger"
       class="gl-mb-4"
@@ -353,7 +352,7 @@ export default {
     </gl-alert>
     <gl-alert
       v-if="shouldShowWarning"
-      :title="$options.warningTitle"
+      :title="$options.i18n.warningTitle"
       variant="warning"
       class="gl-mb-4"
       data-testid="run-pipeline-warning-alert"
@@ -380,31 +379,7 @@ export default {
       </details>
     </gl-alert>
     <gl-form-group :label="s__('Pipeline|Run for branch name or tag')">
-      <gl-dropdown :text="refShortName" block>
-        <gl-search-box-by-type v-model.trim="searchTerm" :placeholder="__('Search refs')" />
-        <gl-dropdown-section-header>{{ __('Branches') }}</gl-dropdown-section-header>
-        <gl-dropdown-item
-          v-for="branch in filteredBranches"
-          :key="branch.fullName"
-          class="gl-font-monospace"
-          is-check-item
-          :is-checked="isSelected(branch)"
-          @click="setRefSelected(branch)"
-        >
-          {{ branch.shortName }}
-        </gl-dropdown-item>
-        <gl-dropdown-section-header v-if="hasTags">{{ __('Tags') }}</gl-dropdown-section-header>
-        <gl-dropdown-item
-          v-for="tag in filteredTags"
-          :key="tag.fullName"
-          class="gl-font-monospace"
-          is-check-item
-          :is-checked="isSelected(tag)"
-          @click="setRefSelected(tag)"
-        >
-          {{ tag.shortName }}
-        </gl-dropdown-item>
-      </gl-dropdown>
+      <refs-dropdown v-model="refValue" @loadingError="onRefsLoadingError" />
     </gl-form-group>
 
     <gl-loading-icon v-if="isLoading" class="gl-mb-5" size="lg" />
@@ -423,6 +398,7 @@ export default {
             v-model="variable.variable_type"
             :class="$options.formElementClasses"
             :options="$options.typeOptions"
+            data-testid="pipeline-form-ci-variable-type"
           />
           <gl-form-input
             v-model="variable.key"
@@ -447,15 +423,17 @@ export default {
               data-testid="remove-ci-variable-row"
               variant="danger"
               category="secondary"
+              :aria-label="$options.i18n.removeVariableLabel"
               @click="removeVariable(index)"
             >
               <gl-icon class="gl-mr-0! gl-display-none gl-md-display-block" name="clear" />
-              <span class="gl-md-display-none">{{ s__('CiVariables|Remove variable') }}</span>
+              <span class="gl-md-display-none">{{ $options.i18n.removeVariableLabel }}</span>
             </gl-button>
             <gl-button
               v-else
               class="gl-md-ml-3 gl-mb-3 gl-display-none gl-md-display-block gl-visibility-hidden"
               icon="clear"
+              :aria-label="$options.i18n.removeVariableLabel"
             />
           </template>
         </div>
@@ -465,25 +443,23 @@ export default {
       </div>
 
       <template #description
-        ><gl-sprintf :message="$options.variablesDescription">
+        ><gl-sprintf :message="$options.i18n.variablesDescription">
           <template #link="{ content }">
             <gl-link :href="settingsLink">{{ content }}</gl-link>
           </template>
         </gl-sprintf></template
       >
     </gl-form-group>
-    <div
-      class="gl-border-t-solid gl-border-gray-100 gl-border-t-1 gl-p-5 gl-bg-gray-10 gl-display-flex gl-justify-content-space-between"
-    >
+    <div class="gl-pt-5 gl-display-flex">
       <gl-button
         type="submit"
         category="primary"
-        variant="success"
-        class="js-no-auto-disable"
+        variant="confirm"
+        class="js-no-auto-disable gl-mr-3"
         data-qa-selector="run_pipeline_button"
         data-testid="run_pipeline_button"
         :disabled="submitted"
-        >{{ s__('Pipeline|Run Pipeline') }}</gl-button
+        >{{ s__('Pipeline|Run pipeline') }}</gl-button
       >
       <gl-button :href="pipelinesPath">{{ __('Cancel') }}</gl-button>
     </div>

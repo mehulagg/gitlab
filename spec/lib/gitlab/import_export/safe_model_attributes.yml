@@ -84,6 +84,7 @@ Note:
 - discussion_id
 - original_discussion_id
 - confidential
+- last_edited_at
 LabelLink:
 - id
 - target_type
@@ -207,6 +208,7 @@ MergeRequest:
 - discussion_locked
 - allow_maintainer_to_push
 - merge_ref_sha
+- draft
 MergeRequestDiff:
 - id
 - state
@@ -233,6 +235,10 @@ MergeRequestDiffCommit:
 - committer_email
 - message
 - trailers
+MergeRequest::DiffCommitUser:
+- id
+- name
+- email
 MergeRequestDiffFile:
 - merge_request_diff_id
 - relative_order
@@ -500,6 +506,7 @@ ProtectedBranch:
 - name
 - created_at
 - updated_at
+- allow_force_push
 - code_owner_approval_required
 ProtectedTag:
 - id
@@ -584,6 +591,7 @@ ProjectFeature:
 - analytics_access_level
 - operations_access_level
 - security_and_compliance_access_level
+- container_registry_access_level
 - created_at
 - updated_at
 ProtectedBranch::MergeAccessLevel:
@@ -637,9 +645,11 @@ Timelog:
 - time_spent
 - merge_request_id
 - user_id
+- project_id
 - spent_at
 - created_at
 - updated_at
+- summary
 ProjectAutoDevops:
 - id
 - enabled
@@ -696,6 +706,7 @@ ProjectSetting:
 ProtectedEnvironment:
 - id
 - project_id
+- group_id
 - name
 - created_at
 - updated_at

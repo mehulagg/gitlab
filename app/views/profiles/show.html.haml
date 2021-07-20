@@ -11,7 +11,7 @@
   .row.js-search-settings-section
     .col-lg-4.profile-settings-sidebar
       %h4.gl-mt-0
-        = s_("Profiles|Public Avatar")
+        = s_("Profiles|Public avatar")
       %p
         - if @user.avatar?
           - if gravatar_enabled?
@@ -27,18 +27,17 @@
           .md
             = brand_profile_image_guidelines
     .col-lg-8
-      .clearfix.avatar-image.gl-mb-3
+      .avatar-image
         = link_to avatar_icon_for_user(@user, 400), target: '_blank', rel: 'noopener noreferrer' do
-          = image_tag avatar_icon_for_user(@user, 160), alt: '', class: 'avatar s160'
+          = image_tag avatar_icon_for_user(@user, 96), alt: '', class: 'avatar s96'
       %h5.gl-mt-0= s_("Profiles|Upload new avatar")
-      .gl-mt-2.gl-mb-3
-        %button.gl-button.btn.js-choose-user-avatar-button{ type: 'button' }= s_("Profiles|Choose file...")
-        %span.avatar-file-name.gl-ml-3.js-avatar-filename= s_("Profiles|No file chosen")
+      .gl-my-3
+        %button.gl-button.btn.btn-default.js-choose-user-avatar-button{ type: 'button' }= s_("Profiles|Choose file...")
+        %span.avatar-file-name.gl-ml-3.js-avatar-filename= s_("Profiles|No file chosen.")
         = f.file_field_without_bootstrap :avatar, class: 'js-user-avatar-input hidden', accept: 'image/*'
-      .form-text.text-muted= s_("Profiles|The maximum file size allowed is 200KB.")
+      .gl-text-gray-500= s_("Profiles|The maximum file size allowed is 200KB.")
       - if @user.avatar?
-        %hr
-        = link_to s_("Profiles|Remove avatar"), profile_avatar_path, data: { confirm: s_("Profiles|Avatar will be removed. Are you sure?") }, method: :delete, class: 'gl-button btn btn-danger btn-inverted'
+        = link_to s_("Profiles|Remove avatar"), profile_avatar_path, data: { confirm: s_("Profiles|Avatar will be removed. Are you sure?") }, method: :delete, class: 'gl-button btn btn-danger-secondary btn-sm gl-mt-5'
     .col-lg-12
       %hr
   .row.js-search-settings-section
@@ -48,17 +47,17 @@
     .col-lg-8
       = f.fields_for :status, @user.status do |status_form|
         - emoji_button = button_tag type: :button,
-          class: 'js-toggle-emoji-menu emoji-menu-toggle-button gl-button btn has-tooltip',
+          class: 'js-toggle-emoji-menu emoji-menu-toggle-button btn gl-button btn-default has-tooltip',
           title: s_("Profiles|Add status emoji") do
           - if custom_emoji
-            = emoji_icon @user.status.emoji
+            = emoji_icon(@user.status.emoji, class: 'gl-mr-0!')
           %span#js-no-emoji-placeholder.no-emoji-placeholder{ class: ('hidden' if custom_emoji) }
             = sprite_icon('slight-smile', css_class: 'award-control-icon-neutral')
             = sprite_icon('smiley', css_class: 'award-control-icon-positive')
             = sprite_icon('smile', css_class: 'award-control-icon-super-positive')
         - reset_message_button = button_tag type: :button,
           id: 'js-clear-user-status-button',
-          class: 'clear-user-status gl-button btn has-tooltip',
+          class: 'clear-user-status btn gl-button btn-default has-tooltip',
           title: s_("Profiles|Clear status") do
           = sprite_icon("close")
 
@@ -70,13 +69,11 @@
           prepend: emoji_button,
           append: reset_message_button,
           placeholder: s_("Profiles|What's your status?")
-        - if Feature.enabled?(:set_user_availability_status, @user, default_enabled: :yaml)
-          .checkbox-icon-inline-wrapper
-            = status_form.check_box :availability, { data: { testid: "user-availability-checkbox" }, label: s_("Profiles|Busy"), wrapper_class: 'gl-mr-0 gl-font-weight-bold' }, availability["busy"], availability["not_set"]
-            .gl-text-gray-600.gl-ml-5= s_('Profiles|"Busy" will be shown next to your name')
-    - if Feature.enabled?(:user_time_settings)
-      .col-lg-12
-        %hr
+        .checkbox-icon-inline-wrapper
+          = status_form.check_box :availability, { data: { testid: "user-availability-checkbox" }, label: s_("Profiles|Busy"), wrapper_class: 'gl-mr-0 gl-font-weight-bold' }, availability["busy"], availability["not_set"]
+          .gl-text-gray-600.gl-ml-5= s_('Profiles|"Busy" will be shown next to your name')
+    .col-lg-12
+      %hr
   .row.user-time-preferences.js-search-settings-section
     .col-lg-4.profile-settings-sidebar
       %h4.gl-mt-0= s_("Profiles|Time settings")
@@ -84,7 +81,7 @@
     .col-lg-8
       -# TODO: might need an entry in user/profile.md to describe some of these settings
       -# https://gitlab.com/gitlab-org/gitlab-foss/issues/60070
-      %h5= ("Time zone")
+      %h5= _("Time zone")
       = dropdown_tag(_("Select a timezone"), options: { toggle_class: 'gl-button btn js-timezone-dropdown input-lg', title: _("Select a timezone"), filter: true, placeholder: s_("OfSearchInADropdown|Filter"), data: { data: timezone_data } } )
       %input.hidden{ :type => 'hidden', :id => 'user_timezone', :name => 'user[timezone]', value: @user.timezone }
     .col-lg-12
@@ -102,6 +99,7 @@
         = render 'profiles/name', form: f, user: @user
         = f.text_field :id, class: 'gl-form-input', readonly: true, label: s_('Profiles|User ID'), wrapper: { class: 'col-md-3' }
 
+      = f.text_field :pronouns, class: 'input-md gl-form-input', help: s_("Profiles|Enter your pronouns to let people know how to refer to you")
       = render_if_exists 'profiles/email_settings', form: f
       = f.text_field :skype, class: 'input-md gl-form-input', placeholder: s_("Profiles|username")
       = f.text_field :linkedin, class: 'input-md gl-form-input', help: s_("Profiles|Your LinkedIn profile name from linkedin.com/in/profilename")
@@ -120,15 +118,15 @@
         - private_profile_label = capture do
           = s_("Profiles|Don't display activity-related personal information on your profiles")
         = f.check_box :private_profile, label: private_profile_label, inline: true, wrapper_class: 'mr-0'
-        = link_to sprite_icon('question-o'), help_page_path('user/profile/index.md', anchor: 'private-profile')
+        = link_to sprite_icon('question-o'), help_page_path('user/profile/index.md', anchor: 'make-your-user-profile-page-private')
       %h5= s_("Profiles|Private contributions")
       = f.check_box :include_private_contributions, label: s_('Profiles|Include private contributions on my profile'), wrapper_class: 'mb-2', inline: true
       .help-block
         = s_("Profiles|Choose to show contributions of private projects on your public profile without any project, repository or organization information")
-  .row.gl-mt-3.gl-mb-3.gl-justify-content-end
-    .col-lg-8
-      = f.submit s_("Profiles|Update profile settings"), class: 'gl-button btn btn-success'
-      = link_to _("Cancel"), user_path(current_user), class: 'gl-button btn btn-cancel'
+  .row.gl-justify-content-end.gl-mt-5
+    .col-lg-8.gl-display-flex
+      = f.submit s_("Profiles|Update profile settings"), class: 'gl-button btn btn-confirm gl-mr-3'
+      = link_to _("Cancel"), user_path(current_user), class: 'gl-button btn btn-default btn-cancel'
 
 .modal.modal-profile-crop{ data: { cropper_css_path: ActionController::Base.helpers.stylesheet_path('lazy_bundles/cropper.css') } }
   .modal-dialog
@@ -137,7 +135,7 @@
         %h4.modal-title
           = s_("Profiles|Position and size your new avatar")
         %button.close{ type: "button", "data-dismiss": "modal", "aria-label" => _("Close") }
-          %span{ "aria-hidden": true } &times;
+          %span{ "aria-hidden": "true" } &times;
       .modal-body
         .profile-crop-image-container
           %img.modal-profile-crop-image{ alt: s_("Profiles|Avatar cropper") }

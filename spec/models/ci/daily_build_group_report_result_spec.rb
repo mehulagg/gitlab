@@ -8,6 +8,7 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
   describe 'associations' do
     it { is_expected.to belong_to(:last_pipeline) }
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:group) }
   end
 
   describe 'validations' do
@@ -83,8 +84,10 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
   end
 
   describe 'scopes' do
-    let_it_be(:project) { create(:project) }
-    let(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+
+    let(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project, group: group) }
     let(:old_build_group_report_result) do
       create(:ci_daily_build_group_report_result, date: 1.week.ago, project: project)
     end
@@ -94,6 +97,14 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
 
       it 'returns records by projects' do
         expect(subject).to contain_exactly(recent_build_group_report_result, old_build_group_report_result)
+      end
+    end
+
+    describe '.by_group' do
+      subject { described_class.by_group(group) }
+
+      it 'returns records by group' do
+        expect(subject).to contain_exactly(recent_build_group_report_result)
       end
     end
 
@@ -149,40 +160,6 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
       context 'when coverage for the default branch does not exist' do
         it 'returns an empty collection' do
           expect(coverages).to be_empty
-        end
-      end
-    end
-
-    describe '.by_date' do
-      subject(:coverages) { described_class.by_date(start_date) }
-
-      let!(:coverage_1) { create(:ci_daily_build_group_report_result, date: 1.week.ago) }
-
-      context 'when project has several coverage' do
-        let!(:coverage_2) { create(:ci_daily_build_group_report_result, date: 2.weeks.ago) }
-        let(:start_date) { 1.week.ago.to_date.to_s }
-
-        it 'returns the coverage from the start_date' do
-          expect(coverages).to contain_exactly(coverage_1)
-        end
-      end
-
-      context 'when start_date is over 90 days' do
-        let!(:coverage_2) { create(:ci_daily_build_group_report_result, date: 90.days.ago) }
-        let!(:coverage_3) { create(:ci_daily_build_group_report_result, date: 91.days.ago) }
-        let(:start_date) { 1.year.ago.to_date.to_s }
-
-        it 'returns the coverage in the last 90 days' do
-          expect(coverages).to contain_exactly(coverage_1, coverage_2)
-        end
-      end
-
-      context 'when start_date is not a string' do
-        let!(:coverage_2) { create(:ci_daily_build_group_report_result, date: 90.days.ago) }
-        let(:start_date) { 1.week.ago }
-
-        it 'returns the coverage in the last 90 days' do
-          expect(coverages).to contain_exactly(coverage_1, coverage_2)
         end
       end
     end

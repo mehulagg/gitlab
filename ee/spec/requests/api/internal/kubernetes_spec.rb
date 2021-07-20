@@ -38,16 +38,16 @@ RSpec.describe API::Internal::Kubernetes do
   end
 
   shared_examples 'agent authentication' do
-    it 'returns 403 if Authorization header not sent' do
+    it 'returns 401 if Authorization header not sent' do
       send_request
 
-      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(response).to have_gitlab_http_status(:unauthorized)
     end
 
-    it 'returns 403 if Authorization is for non-existent agent' do
+    it 'returns 401 if Authorization is for non-existent agent' do
       send_request(headers: { 'Authorization' => 'Bearer NONEXISTENT' })
 
-      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(response).to have_gitlab_http_status(:unauthorized)
     end
   end
 
@@ -75,36 +75,6 @@ RSpec.describe API::Internal::Kubernetes do
         expect(AlertManagement::Alert.count).to eq(1)
         expect(AlertManagement::Alert.all.first.project).to eq(agent.project)
         expect(response).to have_gitlab_http_status(:success)
-      end
-
-      context 'on GitLab.com' do
-        before do
-          allow(::Gitlab).to receive(:com?).and_return(true)
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
-          end
-
-          it 'returns 403' do
-            send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
-
-            expect(response).to have_gitlab_http_status(:forbidden)
-          end
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: agent_token.agent.project)
-          end
-
-          it 'returns success' do
-            send_request(params: { alert: payload }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
-
-            expect(response).to have_gitlab_http_status(:success)
-          end
-        end
       end
 
       context 'when payload is invalid' do

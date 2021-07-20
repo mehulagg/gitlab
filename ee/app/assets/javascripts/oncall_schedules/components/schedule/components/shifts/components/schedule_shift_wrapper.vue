@@ -1,23 +1,13 @@
 <script>
-import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
-import getShiftTimeUnitWidthQuery from 'ee/oncall_schedules/graphql/queries/get_shift_time_unit_width.query.graphql';
-import DaysScheduleShift from './days_schedule_shift.vue';
-import WeeksScheduleShift from './weeks_schedule_shift.vue';
+import { SHIFT_WIDTH_CALCULATION_DELAY } from 'ee/oncall_schedules/constants';
+import getTimelineWidthQuery from 'ee/oncall_schedules/graphql/queries/get_timeline_width.query.graphql';
+import ShiftItem from './shift_item.vue';
 
 export default {
   components: {
-    DaysScheduleShift,
-    WeeksScheduleShift,
+    ShiftItem,
   },
   props: {
-    timeframeItem: {
-      type: [Date, Object],
-      required: true,
-    },
-    timeframe: {
-      type: Array,
-      required: true,
-    },
     presetType: {
       type: String,
       required: true,
@@ -26,19 +16,25 @@ export default {
       type: Object,
       required: true,
     },
+    timeframe: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
-      shiftTimeUnitWidth: 0,
-      componentByPreset: {
-        [PRESET_TYPES.DAYS]: DaysScheduleShift,
-        [PRESET_TYPES.WEEKS]: WeeksScheduleShift,
-      },
+      timelineWidth: 0,
     };
   },
   apollo: {
-    shiftTimeUnitWidth: {
-      query: getShiftTimeUnitWidthQuery,
+    timelineWidth: {
+      query: getTimelineWidthQuery,
+      debounce: SHIFT_WIDTH_CALCULATION_DELAY,
+    },
+  },
+  computed: {
+    shiftsToRender() {
+      return Object.freeze(this.rotation.shifts.nodes);
     },
   },
 };
@@ -46,16 +42,13 @@ export default {
 
 <template>
   <div>
-    <component
-      :is="componentByPreset[presetType]"
-      v-for="(shift, shiftIndex) in rotation.shifts.nodes"
+    <shift-item
+      v-for="shift in shiftsToRender"
       :key="shift.startAt"
       :shift="shift"
-      :shift-index="shiftIndex"
       :preset-type="presetType"
-      :timeframe-item="timeframeItem"
       :timeframe="timeframe"
-      :shift-time-unit-width="shiftTimeUnitWidth"
+      :timeline-width="timelineWidth"
     />
   </div>
 </template>

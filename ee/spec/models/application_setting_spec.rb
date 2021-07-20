@@ -29,18 +29,6 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(subject.mirror_max_capacity + 1).for(:mirror_capacity_threshold) }
     it { is_expected.to allow_value(nil).for(:custom_project_templates_group_id) }
 
-    it { is_expected.to allow_value(10).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(nil).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(0).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(-1).for(:elasticsearch_shards) }
-
-    it { is_expected.to allow_value(10).for(:elasticsearch_replicas) }
-    it { is_expected.to allow_value(0).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(nil).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(-1).for(:elasticsearch_replicas) }
-
     it { is_expected.to allow_value(10).for(:elasticsearch_indexed_file_size_limit_kb) }
     it { is_expected.not_to allow_value(0).for(:elasticsearch_indexed_file_size_limit_kb) }
     it { is_expected.not_to allow_value(nil).for(:elasticsearch_indexed_file_size_limit_kb) }
@@ -70,6 +58,10 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(nil).for(:elasticsearch_client_request_timeout) }
     it { is_expected.not_to allow_value(1.1).for(:elasticsearch_client_request_timeout) }
     it { is_expected.not_to allow_value(-1).for(:elasticsearch_client_request_timeout) }
+
+    it { is_expected.to allow_value('').for(:elasticsearch_username) }
+    it { is_expected.to allow_value('a' * 255).for(:elasticsearch_username) }
+    it { is_expected.not_to allow_value('a' * 256).for(:elasticsearch_username) }
 
     it { is_expected.to allow_value(nil).for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("").for(:required_instance_ci_template) }
@@ -168,24 +160,6 @@ RSpec.describe ApplicationSetting do
       with_them do
         specify do
           setting.elasticsearch_url = elasticsearch_url
-
-          expect(setting.valid?).to eq(is_valid)
-        end
-      end
-    end
-
-    context 'when validating compliance_frameworks' do
-      where(:compliance_frameworks, :is_valid) do
-        [1, 2, 3, 4, 5] | true
-        nil             | true
-        1               | true
-        [2, 3, 4, 6]    | false
-        6               | false
-      end
-
-      with_them do
-        specify do
-          setting.compliance_frameworks = compliance_frameworks
 
           expect(setting.valid?).to eq(is_valid)
         end
@@ -330,10 +304,56 @@ RSpec.describe ApplicationSetting do
     end
   end
 
+  describe '#elasticsearch_url_with_credentials' do
+    it 'embeds credentials in the result' do
+      setting.elasticsearch_url = 'http://example.com,https://example2.com:9200'
+      setting.elasticsearch_username = 'foo'
+      setting.elasticsearch_password = 'bar'
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://foo:bar@example.com https://foo:bar@example2.com:9200])
+    end
+
+    it 'embeds username only' do
+      setting.elasticsearch_url = 'http://example.com,https://example2.com:9200'
+      setting.elasticsearch_username = 'foo'
+      setting.elasticsearch_password = ''
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://foo:@example.com https://foo:@example2.com:9200])
+    end
+
+    it 'overrides existing embedded credentials' do
+      setting.elasticsearch_url = 'http://username:password@example.com,https://test:test@example2.com:9200'
+      setting.elasticsearch_username = 'foo'
+      setting.elasticsearch_password = 'bar'
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://foo:bar@example.com https://foo:bar@example2.com:9200])
+    end
+
+    it 'returns original url if credentials blank' do
+      setting.elasticsearch_url = 'http://username:password@example.com,https://test:test@example2.com:9200'
+      setting.elasticsearch_username = ''
+      setting.elasticsearch_password = ''
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://username:password@example.com https://test:test@example2.com:9200])
+    end
+  end
+
+  describe '#elasticsearch_password' do
+    it 'does not modify password if it is unchanged in the form' do
+      setting.elasticsearch_password = 'foo'
+
+      setting.elasticsearch_password = ApplicationSetting::MASK_PASSWORD
+
+      expect(setting.elasticsearch_password).to eq('foo')
+    end
+  end
+
   describe '#elasticsearch_config' do
     it 'places all elasticsearch configuration values into a hash' do
       setting.update!(
         elasticsearch_url: 'http://example.com:9200',
+        elasticsearch_username: 'foo',
+        elasticsearch_password: 'bar',
         elasticsearch_aws: false,
         elasticsearch_aws_region:     'test-region',
         elasticsearch_aws_access_key: 'test-access-key',
@@ -344,7 +364,7 @@ RSpec.describe ApplicationSetting do
       )
 
       expect(setting.elasticsearch_config).to eq(
-        url: ['http://example.com:9200'],
+        url: ['http://foo:bar@example.com:9200'],
         aws: false,
         aws_region:     'test-region',
         aws_access_key: 'test-access-key',
@@ -368,24 +388,31 @@ RSpec.describe ApplicationSetting do
       end
 
       context 'namespaces' do
-        let(:namespaces) { create_list(:namespace, 2) }
-        let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
+        context 'with personal namespaces' do
+          let(:namespaces) { create_list(:namespace, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
 
-        it 'tells you if a namespace is allowed to be indexed' do
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          it 'tells you if a namespace is allowed to be indexed' do
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          end
         end
 
-        it 'returns namespaces that are allowed to be indexed' do
-          child_namespace = create(:namespace, parent: namespaces.first)
-          create :elasticsearch_indexed_namespace, namespace: child_namespace
+        context 'with groups' do
+          let(:groups) { create_list(:group, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: groups.last }
 
-          child_namespace_indexed_through_parent = create(:namespace, parent: namespaces.last)
+          it 'returns groups that are allowed to be indexed' do
+            child_group = create(:group, parent: groups.first)
+            create :elasticsearch_indexed_namespace, namespace: child_group
 
-          expect(setting.elasticsearch_limited_namespaces).to match_array(
-            [namespaces.last, child_namespace, child_namespace_indexed_through_parent])
-          expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
-            [namespaces.last, child_namespace])
+            child_group_indexed_through_parent = create(:group, parent: groups.last)
+
+            expect(setting.elasticsearch_limited_namespaces).to match_array(
+              [groups.last, child_group, child_group_indexed_through_parent])
+            expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
+              [groups.last, child_group])
+          end
         end
 
         describe '#elasticsearch_indexes_project?' do
@@ -518,6 +545,24 @@ RSpec.describe ApplicationSetting do
         let(:scope) { excluded_project }
 
         it { is_expected.to eq(only_when_enabled_globally) }
+      end
+
+      context 'array of projects (all in scope)' do
+        let(:scope) { [included_project] }
+
+        it { is_expected.to eq(indexing && searching) }
+      end
+
+      context 'array of projects (all not in scope)' do
+        let(:scope) { [excluded_project] }
+
+        it { is_expected.to eq(only_when_enabled_globally) }
+      end
+
+      context 'array of projects (some in scope)' do
+        let(:scope) { [included_project, excluded_project] }
+
+        it { is_expected.to eq(indexing && searching) }
       end
     end
   end
@@ -678,71 +723,6 @@ RSpec.describe ApplicationSetting do
     end
   end
 
-  describe '#seat_link_available?' do
-    subject { setting.seat_link_available? }
-
-    before do
-      allow(License).to receive(:feature_available?).and_call_original
-      allow(License).to receive(:feature_available?).with(:seat_link).and_return(seat_link)
-    end
-
-    context 'when the seat_link feature is available' do
-      let(:seat_link) { true }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when the seat_link feature is not available' do
-      let(:seat_link) { false }
-
-      it { is_expected.to eq(false) }
-    end
-  end
-
-  describe '#seat_link_can_be_configured?' do
-    subject { setting.seat_link_can_be_configured? }
-
-    before do
-      allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(seat_link_enabled)
-    end
-
-    context 'when the seat_link_enabled configuration is enabled' do
-      let(:seat_link_enabled) { true }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when the seat_link_enabled configuration is disabled' do
-      let(:seat_link_enabled) { false }
-
-      it { is_expected.to eq(false) }
-    end
-  end
-
-  describe '#seat_link_enabled?' do
-    subject { setting.seat_link_enabled? }
-
-    using RSpec::Parameterized::TableSyntax
-
-    where(:seat_link_available, :seat_link_can_be_configured, :seat_link_enabled, :result) do
-      true  | true  | true  | true
-      false | true  | true  | false
-      true  | false | true  | false
-      true  | true  | false | false
-      false | false | false | false
-    end
-
-    with_them do
-      before do
-        allow(setting).to receive(:seat_link_available?).and_return(seat_link_available)
-        allow(setting).to receive(:seat_link_can_be_configured?).and_return(seat_link_can_be_configured)
-        setting.seat_link_enabled = seat_link_enabled
-      end
-
-      it { is_expected.to eq(result) }
-    end
-  end
-
   describe '#compliance_frameworks' do
     it 'sorts the list' do
       setting.compliance_frameworks = [5, 4, 1, 3, 2]
@@ -780,6 +760,12 @@ RSpec.describe ApplicationSetting do
       let(:new_user_signups_cap) { 10 }
 
       it { is_expected.to be true }
+    end
+  end
+
+  describe 'maintenance mode setting' do
+    it 'defaults to false' do
+      expect(subject.maintenance_mode).to be false
     end
   end
 end

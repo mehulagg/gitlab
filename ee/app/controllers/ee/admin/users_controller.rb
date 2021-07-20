@@ -19,6 +19,11 @@ module EE
 
       private
 
+      override :users_with_included_associations
+      def users_with_included_associations(users)
+        super.includes(:oncall_schedules) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
       override :log_impersonation_event
       def log_impersonation_event
         super
@@ -27,7 +32,7 @@ module EE
       end
 
       def log_audit_event
-        EE::AuditEvents::ImpersonationAuditEventService.new(current_user, request.remote_ip, 'Started Impersonation')
+        AuditEvents::ImpersonationAuditEventService.new(current_user, request.remote_ip, 'Started Impersonation')
           .for_user(full_path: user.username, entity_id: user.id).security_event
       end
 

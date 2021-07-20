@@ -36,7 +36,7 @@ const createComponent = ({
   currentGroupId = mockGroupId,
   childLevel = 0,
   childrenEpics = {},
-  childrenFlags = { 1: { itemExpanded: false } },
+  childrenFlags = { [mockEpic.id]: { itemExpanded: false } },
   hasFiltersApplied = false,
 }) => {
   return mount(EpicItemComponent, {

@@ -4,10 +4,12 @@ require 'spec_helper'
 
 RSpec.describe API::Entities::Release do
   let_it_be(:project) { create(:project) }
+
   let(:release) { create(:release, project: project) }
   let(:evidence) { release.evidences.first }
   let(:user) { create(:user) }
-  let(:entity) { described_class.new(release, current_user: user).as_json }
+  let(:entity) { described_class.new(release, current_user: user, include_html_description: include_html_description).as_json }
+  let(:include_html_description) { false }
 
   before do
     ::Releases::CreateEvidenceService.new(release).execute
@@ -53,18 +55,26 @@ RSpec.describe API::Entities::Release do
 
     subject(:description_html) { entity.as_json['description_html'] }
 
-    it 'renders special references if current user has access' do
-      project.add_reporter(user)
-
-      expect(description_html).to include(issue_path)
-      expect(description_html).to include(issue_title)
+    it 'is inexistent' do
+      expect(description_html).to be_nil
     end
 
-    it 'does not render special references if current user has no access' do
-      project.add_guest(user)
+    context 'when include_html_description option is true' do
+      let(:include_html_description) { true }
 
-      expect(description_html).not_to include(issue_path)
-      expect(description_html).not_to include(issue_title)
+      it 'renders special references if current user has access' do
+        project.add_reporter(user)
+
+        expect(description_html).to include(issue_path)
+        expect(description_html).to include(issue_title)
+      end
+
+      it 'does not render special references if current user has no access' do
+        project.add_guest(user)
+
+        expect(description_html).not_to include(issue_path)
+        expect(description_html).not_to include(issue_title)
+      end
     end
   end
 end

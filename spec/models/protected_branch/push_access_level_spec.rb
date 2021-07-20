@@ -40,11 +40,12 @@ RSpec.describe ProtectedBranch::PushAccessLevel do
     let_it_be(:protected_branch) { create(:protected_branch, :no_one_can_push, project: project) }
     let_it_be(:user) { create(:user) }
     let_it_be(:deploy_key) { create(:deploy_key, user: user) }
+
     let!(:deploy_keys_project) { create(:deploy_keys_project, project: project, deploy_key: deploy_key, can_push: can_push) }
     let(:can_push) { true }
 
     before_all do
-      project.add_guest(user)
+      project.add_maintainer(user)
     end
 
     context 'when this push_access_level is tied to a deploy key' do
@@ -53,16 +54,6 @@ RSpec.describe ProtectedBranch::PushAccessLevel do
       context 'when the deploy key is among the active keys for this project' do
         specify do
           expect(push_access_level.check_access(user)).to be_truthy
-        end
-
-        context 'when the deploy_keys_on_protected_branches FF is false' do
-          before do
-            stub_feature_flags(deploy_keys_on_protected_branches: false)
-          end
-
-          it 'is false' do
-            expect(push_access_level.check_access(user)).to be_falsey
-          end
         end
       end
 

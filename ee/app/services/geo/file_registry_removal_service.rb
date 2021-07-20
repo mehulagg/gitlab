@@ -43,8 +43,6 @@ module Geo
       strong_memoize(:file_registry) do
         if job_artifact?
           ::Geo::JobArtifactRegistry.find_by(artifact_id: object_db_id)
-        elsif lfs?
-          ::Geo::LfsObjectRegistry.find_by(lfs_object_id: object_db_id)
         elsif user_upload?
           ::Geo::UploadRegistry.find_by(file_type: object_type, file_id: object_db_id)
         elsif replicator
@@ -104,8 +102,6 @@ module Geo
     def file_uploader
       strong_memoize(:file_uploader) do
         case object_type
-        when :lfs
-          LfsObject.find(object_db_id).file
         when :job_artifact
           Ci::JobArtifact.find(object_db_id).file
         when *Gitlab::Geo::Replication::USER_UPLOADS_OBJECT_TYPES

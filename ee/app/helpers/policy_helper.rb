@@ -14,9 +14,9 @@ module PolicyHelper
     details.merge(edit_details)
   end
 
-  def threat_monitoring_alert_details_data(project, alert_id)
+  def threat_monitoring_alert_details_data(project, alert_iid)
     {
-      'alert-id' => alert_id,
+      'alert-id' => alert_iid,
       'project-path' => project.full_path,
       'project-id' => project.id,
       'project-issues-path' => project_issues_path(project),

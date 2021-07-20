@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Mutations::Issues::Update do
   let(:user) { create(:user) }
 
+  before do
+    stub_spam_services
+  end
+
   it_behaves_like 'updating health status' do
     let(:resource) { create(:issue) }
   end

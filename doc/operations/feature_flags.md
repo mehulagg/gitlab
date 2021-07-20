@@ -38,7 +38,7 @@ with GitLab, so it's up to developers to use a compatible client library and
 
 To create and enable a feature flag:
 
-1. Navigate to your project's **Operations > Feature Flags**.
+1. Navigate to your project's **Deployments > Feature Flags**.
 1. Click the **New feature flag** button.
 1. Enter a name that starts with a letter and contains only lowercase letters, digits, underscores (`_`),
    or dashes (`-`), and does not end with a dash (`-`) or underscore (`_`).
@@ -62,11 +62,11 @@ next to any feature flag in the list.
 The maximum number of feature flags per project on self-managed GitLab instances
 is 200. For GitLab SaaS, the maximum number is determined by [tier](https://about.gitlab.com/pricing/):
 
-| Tier     | Number of feature flags per project |
-|----------|-------------------------------------|
-| Free     | 50                                  |
-| Premium  | 150                                 |
-| Ultimate | 200                                 |
+| Tier     | Feature flags per project (SaaS) | Feature flags per project (self-managed) |
+|----------|----------------------------------|------------------------------------------|
+| Free     | 50                               | 200                                      |
+| Premium  | 150                              | 200                                      |
+| Ultimate | 200                              | 200                                      |
 
 ## Feature flag strategies
 
@@ -79,8 +79,8 @@ is 200. For GitLab SaaS, the maximum number is determined by [tier](https://abou
 You can apply a feature flag strategy across multiple environments, without defining
 the strategy multiple times.
 
-GitLab Feature Flags use [Unleash](https://unleash.github.io) as the feature flag
-engine. In Unleash, there are [strategies](https://unleash.github.io/docs/activation_strategy)
+GitLab Feature Flags use [Unleash](https://docs.getunleash.io/) as the feature flag
+engine. In Unleash, there are [strategies](https://docs.getunleash.io/activation_strategy/)
 for granular feature flag controls. GitLab Feature Flags can have multiple strategies,
 and the supported strategies are:
 
@@ -90,12 +90,12 @@ and the supported strategies are:
 - [User List](#user-list)
 
 Strategies can be added to feature flags when [creating a feature flag](#create-a-feature-flag),
-or by editing an existing feature flag after creation by navigating to **Operations > Feature Flags**
+or by editing an existing feature flag after creation by navigating to **Deployments > Feature Flags**
 and clicking **{pencil}** (edit).
 
 ### All users
 
-Enables the feature for all users. It uses the [`default`](https://unleash.github.io/docs/activation_strategy#default)
+Enables the feature for all users. It uses the [`default`](https://docs.getunleash.io/activation_strategy/#default)
 Unleash activation strategy.
 
 ### Percent Rollout
@@ -104,7 +104,7 @@ Unleash activation strategy.
 
 Enables the feature for a percentage of page views, with configurable consistency
 of behavior. This consistency is also known as stickiness. It uses the
-[`flexibleRollout`](https://unleash.github.io/docs/activation_strategy#flexiblerollout)
+[`flexibleRollout`](https://docs.getunleash.io/activation_strategy/#flexiblerollout)
 Unleash activation strategy.
 
 You can configure the consistency to be based on:
@@ -133,7 +133,7 @@ Selecting **Random** provides inconsistent application behavior for individual u
 ### Percent of Users
 
 Enables the feature for a percentage of authenticated users. It uses the Unleash activation strategy
-[`gradualRolloutUserId`](https://unleash.github.io/docs/activation_strategy#gradualrolloutuserid).
+[`gradualRolloutUserId`](https://docs.getunleash.io/activation_strategy/#gradualrolloutuserid).
 
 For example, set a value of 15% to enable the feature for 15% of authenticated users.
 
@@ -155,7 +155,7 @@ ID for the feature to be enabled. See the [Ruby example](#ruby-application-examp
 > - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/34363) to be defined per environment in GitLab 12.6.
 
 Enables the feature for a list of target users. It is implemented
-using the Unleash [`userWithId`](https://unleash.github.io/docs/activation_strategy#userwithid)
+using the Unleash [`userWithId`](https://docs.getunleash.io/activation_strategy/#userwithid)
 activation strategy.
 
 Enter user IDs as a comma-separated list of values (for example,
@@ -171,7 +171,7 @@ target users. See the [Ruby example](#ruby-application-example) below.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35930) in GitLab 13.1.
 
 Enables the feature for lists of users created [in the Feature Flags UI](#create-a-user-list), or with the [Feature Flag User List API](../api/feature_flag_user_lists.md).
-Similar to [User IDs](#user-ids), it uses the Unleash [`userWithId`](https://unleash.github.io/docs/activation_strategy#userwithid)
+Similar to [User IDs](#user-ids), it uses the Unleash [`userWithId`](https://docs.getunleash.io/activation_strategy/#userwithid)
 activation strategy.
 
 It's not possible to *disable* a feature for members of a user list, but you can achieve the same
@@ -184,14 +184,16 @@ For example:
 
 #### Create a user list
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13308) in GitLab 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13308) in GitLab 13.3.
+> - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/322425) in GitLab 14.0.
 
 To create a user list:
 
-1. In your project, navigate to **Operations > Feature Flags**.
-1. Click on **New list**.
+1. In your project, navigate to **Deployments > Feature Flags**.
+1. Select **View user lists**
+1. Select **New user list**.
 1. Enter a name for the list.
-1. Click **Create**.
+1. Select **Create**.
 
 You can view a list's User IDs by clicking the **{pencil}** (edit) button next to it.
 When viewing a list, you can rename it by clicking the **Edit** button.
@@ -202,7 +204,7 @@ When viewing a list, you can rename it by clicking the **Edit** button.
 
 To add users to a user list:
 
-1. In your project, navigate to **Operations > Feature Flags**.
+1. In your project, navigate to **Deployments > Feature Flags**.
 1. Click on the **{pencil}** (edit) button next to the list you want to add users to.
 1. Click on **Add Users**.
 1. Enter the user IDs as a comma-separated list of values. For example,
@@ -215,7 +217,7 @@ To add users to a user list:
 
 To remove users from a user list:
 
-1. In your project, navigate to **Operations > Feature Flags**.
+1. In your project, navigate to **Deployments > Feature Flags**.
 1. Click on the **{pencil}** (edit) button next to the list you want to change.
 1. Click on the **{remove}** (remove) button next to the ID you want to remove.
 
@@ -253,7 +255,7 @@ See [this video tutorial](https://www.youtube.com/watch?v=CAJY2IGep7Y) for help 
 In [GitLab 13.0 and earlier](https://gitlab.com/gitlab-org/gitlab/-/issues/8621),
 to disable a feature flag for a specific environment:
 
-1. Navigate to your project's **Operations > Feature Flags**.
+1. Navigate to your project's **Deployments > Feature Flags**.
 1. For the feature flag you want to disable, click the Pencil icon.
 1. To disable the flag:
 
@@ -267,7 +269,7 @@ to disable a feature flag for a specific environment:
 
 To disable a feature flag for all environments:
 
-1. Navigate to your project's **Operations > Feature Flags**.
+1. Navigate to your project's **Deployments > Feature Flags**.
 1. For the feature flag you want to disable, slide the Status toggle to **Disabled**.
 
 The feature flag is displayed on the **Disabled** tab.
@@ -281,7 +283,7 @@ Then prepare your application with a client library.
 
 To get the access credentials that your application needs to communicate with GitLab:
 
-1. Navigate to your project's **Operations > Feature Flags**.
+1. Navigate to your project's **Deployments > Feature Flags**.
 1. Click the **Configure** button to view the following:
    - **API URL**: URL where the client (application) connects to get a list of feature flags.
    - **Instance ID**: Unique token that authorizes the retrieval of the feature flags.
@@ -390,8 +392,10 @@ end
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36617) in GitLab 13.2.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/251234) in GitLab 13.5.
+> - Showing related feature flags in issues [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220333) in GitLab 14.1.
 
 You can link related issues to a feature flag. In the **Linked issues** section,
 click the `+` button and input the issue reference number or the full URL of the issue.
+The issues then appear in the related feature flag and the other way round.
 
-This feature is similar to the [related issues](../user/project/issues/related_issues.md) feature.
+This feature is similar to the [linked issues](../user/project/issues/related_issues.md) feature.

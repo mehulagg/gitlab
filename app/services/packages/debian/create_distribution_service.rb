@@ -4,7 +4,8 @@ module Packages
   module Debian
     class CreateDistributionService
       def initialize(container, user, params)
-        @container, @params = container, params
+        @container = container
+        @params = params
         @params[:creator] = user
 
         @components = params.delete(:components) || ['main']
@@ -37,14 +38,19 @@ module Packages
         append_errors(distribution)
         return error unless errors.empty?
 
-        distribution.transaction do
-          if distribution.save
-            create_components
-            create_architectures
+        result = distribution.transaction do
+          next unless distribution.save
 
-            success
-          end
-        end || error
+          create_components
+          create_architectures
+          success
+        end
+
+        result ||= error
+
+        ::Packages::Debian::GenerateDistributionWorker.perform_async(distribution.class.container_type, distribution.reset.id) if result.success?
+
+        result
       end
 
       def create_components

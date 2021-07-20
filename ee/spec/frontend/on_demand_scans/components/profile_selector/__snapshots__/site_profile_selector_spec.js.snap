@@ -29,6 +29,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
   >
      
     <fieldset
+      aria-describedby=""
       class="form-group gl-form-group"
     >
       <legend
@@ -61,13 +62,14 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             <span
               class="gl-new-dropdown-button-text"
             >
-              Site profile #1: https://foo.com (Not Validated)
+              Site profile #1: https://foo.com
             </span>
              
             <svg
               aria-hidden="true"
               class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
+              role="img"
             >
               <use
                 href="#chevron-down"
@@ -94,6 +96,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
                     aria-hidden="true"
                     class="gl-search-box-by-type-search-icon gl-icon s16"
                     data-testid="search-icon"
+                    role="img"
                   >
                     <use
                       href="#search"
@@ -134,6 +137,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
                       aria-hidden="true"
                       class="gl-icon s16 gl-new-dropdown-item-check-icon gl-mt-3 gl-align-self-start"
                       data-testid="dropdown-item-checkbox"
+                      role="img"
                     >
                       <use
                         href="#mobile-issue-close"
@@ -174,6 +178,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
                       aria-hidden="true"
                       class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden gl-mt-3 gl-align-self-start"
                       data-testid="dropdown-item-checkbox"
+                      role="img"
                     >
                       <use
                         href="#mobile-issue-close"
@@ -282,7 +287,6 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
                 </li>
               </div>
             </div>
-             
           </ul>
         </div>
          
@@ -291,7 +295,8 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
           data-testid="selected-profile-summary"
         >
           <a
-            class="btn gl-absolute gl-right-7 btn-default btn-md gl-button btn-icon"
+            aria-label="Edit profile"
+            class="btn gl-absolute gl-right-7 gl-z-index-1 btn-default btn-md gl-button btn-icon"
             href="/site_profiles/edit/1"
             title="Edit profile"
           >
@@ -301,6 +306,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
               aria-hidden="true"
               class="gl-button-icon gl-icon s16"
               data-testid="pencil-icon"
+              role="img"
             >
               <use
                 href="#pencil"
@@ -310,9 +316,6 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             <!---->
           </a>
            
-          <div>
-            Site profile #1's summary
-          </div>
         </div>
         <!---->
         <!---->
@@ -359,7 +362,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly without profiles 1`] 
     </p>
      
     <a
-      class="btn btn-success btn-md gl-button btn-success-secondary"
+      class="btn btn-confirm btn-md gl-button btn-confirm-secondary"
       data-testid="create-profile-link"
       href="/test/new/site/profile/path"
     >

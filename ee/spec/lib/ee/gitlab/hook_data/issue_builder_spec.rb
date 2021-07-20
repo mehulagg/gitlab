@@ -3,6 +3,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::HookData::IssueBuilder do
   let_it_be(:issue) { create(:issue) }
+
   let(:builder) { described_class.new(issue) }
 
   describe '#build' do

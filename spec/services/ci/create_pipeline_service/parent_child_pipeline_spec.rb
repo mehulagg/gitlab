@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:ref_name) { 'master' }
 
   let(:service) do
@@ -68,9 +69,9 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
     it_behaves_like 'successful creation' do
       let(:expected_bridge_options) do
         {
-          'trigger' => {
-            'include' => [
-              { 'local' => 'path/to/child.yml' }
+          trigger: {
+            include: [
+              { local: 'path/to/child.yml' }
             ]
           }
         }
@@ -91,6 +92,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
 
       it 'creates bridge job with resource group', :aggregate_failures do
         pipeline = create_pipeline!
+        Ci::InitialPipelineProcessWorker.new.perform(pipeline.id)
 
         test = pipeline.statuses.find_by(name: 'instrumentation_test')
         expect(pipeline).to be_created_successfully
@@ -147,9 +149,9 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
       it_behaves_like 'successful creation' do
         let(:expected_bridge_options) do
           {
-            'trigger' => {
-              'include' => [
-                { 'local' => 'path/to/child.yml' }
+            trigger: {
+              include: [
+                { local: 'path/to/child.yml' }
               ]
             }
           }
@@ -173,8 +175,8 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         it_behaves_like 'successful creation' do
           let(:expected_bridge_options) do
             {
-              'trigger' => {
-                'include' => 'path/to/child.yml'
+              trigger: {
+                include: 'path/to/child.yml'
               }
             }
           end
@@ -200,8 +202,8 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         it_behaves_like 'successful creation' do
           let(:expected_bridge_options) do
             {
-              'trigger' => {
-                'include' => ['path/to/child.yml', 'path/to/child2.yml']
+              trigger: {
+                include: ['path/to/child.yml', 'path/to/child2.yml']
               }
             }
           end
@@ -250,7 +252,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         end
 
         it_behaves_like 'creation failure' do
-          let(:expected_error) { /test job: dependency generator is not defined in prior stages/ }
+          let(:expected_error) { /test job: dependency generator is not defined in current or prior stages/ }
         end
       end
 
@@ -293,12 +295,12 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         it_behaves_like 'successful creation' do
           let(:expected_bridge_options) do
             {
-              'trigger' => {
-                'include' => [
+              trigger: {
+                include: [
                   {
-                    'file' => 'path/to/child.yml',
-                    'project' => 'my-namespace/my-project',
-                    'ref' => 'master'
+                    file: 'path/to/child.yml',
+                    project: 'my-namespace/my-project',
+                    ref: 'master'
                   }
                 ]
               }
@@ -351,11 +353,11 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         it_behaves_like 'successful creation' do
           let(:expected_bridge_options) do
             {
-              'trigger' => {
-                'include' => [
+              trigger: {
+                include: [
                   {
-                    'file' => ["path/to/child1.yml", "path/to/child2.yml"],
-                    'project' => 'my-namespace/my-project'
+                    file: ["path/to/child1.yml", "path/to/child2.yml"],
+                    project: 'my-namespace/my-project'
                   }
                 ]
               }
@@ -367,6 +369,6 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   end
 
   def create_pipeline!
-    service.execute(:push)
+    service.execute(:push).payload
   end
 end

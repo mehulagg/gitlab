@@ -1,58 +1,93 @@
-import { GlIcon, GlLink } from '@gitlab/ui';
+import { GlButton, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 import InviteMembersTrigger from '~/invite_members/components/invite_members_trigger.vue';
+import eventHub from '~/invite_members/event_hub';
+
+jest.mock('~/experimentation/experiment_tracking');
 
 const displayText = 'Invite team members';
-const icon = 'plus';
+const triggerSource = '_trigger_source_';
+
+let wrapper;
+let triggerProps;
+let findButton;
+const triggerComponent = {
+  button: GlButton,
+  anchor: GlLink,
+};
 
 const createComponent = (props = {}) => {
-  return shallowMount(InviteMembersTrigger, {
+  wrapper = shallowMount(InviteMembersTrigger, {
     propsData: {
       displayText,
+      ...triggerProps,
       ...props,
     },
   });
 };
 
-describe('InviteMembersTrigger', () => {
-  let wrapper;
+describe.each(['button', 'anchor'])('with triggerElement as %s', (triggerElement) => {
+  triggerProps = { triggerElement, triggerSource };
+  findButton = () => wrapper.findComponent(triggerComponent[triggerElement]);
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('displayText', () => {
-    const findLink = () => wrapper.find(GlLink);
+    it('includes the correct displayText for the button', () => {
+      createComponent();
 
-    beforeEach(() => {
-      wrapper = createComponent();
-    });
-
-    it('includes the correct displayText for the link', () => {
-      expect(findLink().text()).toBe(displayText);
+      expect(findButton().text()).toBe(displayText);
     });
   });
 
-  describe('icon', () => {
-    const findIcon = () => wrapper.find(GlIcon);
+  describe('clicking the link', () => {
+    let spy;
 
-    it('includes the correct icon when an icon is sent', () => {
-      wrapper = createComponent({ icon });
-
-      expect(findIcon().attributes('name')).toBe(icon);
+    beforeEach(() => {
+      spy = jest.spyOn(eventHub, '$emit');
     });
 
-    it('does not include an icon when icon is not sent', () => {
-      wrapper = createComponent();
+    it('emits openModal from a named source', () => {
+      createComponent();
 
-      expect(findIcon().exists()).toBe(false);
+      findButton().vm.$emit('click');
+
+      expect(spy).toHaveBeenCalledWith('openModal', {
+        inviteeType: 'members',
+        source: triggerSource,
+      });
+    });
+  });
+
+  describe('tracking', () => {
+    it('tracks on mounting', () => {
+      createComponent({ trackExperiment: '_track_experiment_' });
+
+      expect(ExperimentTracking).toHaveBeenCalledWith('_track_experiment_');
+      expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith('comment_invite_shown');
     });
 
-    it('does not include an icon when empty string is sent', () => {
-      wrapper = createComponent({ icon: '' });
+    it('does not track on mounting', () => {
+      createComponent();
 
-      expect(findIcon().exists()).toBe(false);
+      expect(ExperimentTracking).not.toHaveBeenCalledWith('_track_experiment_');
+    });
+
+    it('does not add tracking attributes', () => {
+      createComponent();
+
+      expect(findButton().attributes('data-track-event')).toBeUndefined();
+      expect(findButton().attributes('data-track-label')).toBeUndefined();
+    });
+
+    it('adds tracking attributes', () => {
+      createComponent({ label: '_label_', event: '_event_' });
+
+      expect(findButton().attributes('data-track-event')).toBe('_event_');
+      expect(findButton().attributes('data-track-label')).toBe('_label_');
     });
   });
 });

@@ -78,12 +78,19 @@ export default {
 };
 </script>
 <template>
-  <div data-qa-selector="admin_license_compliance_row">
+  <div
+    data-qa-selector="admin_license_compliance_container"
+    data-testid="admin-license-compliance-row"
+  >
     <issue-status-icon :status="status" class="float-left gl-mr-3" />
-    <span class="js-license-name" data-qa-selector="license_name_content">{{ license.name }}</span>
+    <span class="js-license-name">{{ license.name }}</span>
     <div class="float-right">
       <div class="d-flex">
-        <gl-loading-icon v-if="loading" class="js-loading-icon d-flex align-items-center mr-2" />
+        <gl-loading-icon
+          v-if="loading"
+          size="sm"
+          class="js-loading-icon d-flex align-items-center mr-2"
+        />
         <gl-dropdown
           :text="dropdownText"
           :disabled="loading"
@@ -99,6 +106,8 @@ export default {
             {{ $options[$options.LICENSE_APPROVAL_ACTION.DENY] }}
           </gl-dropdown-item>
         </gl-dropdown>
+
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <gl-button
           v-gl-tooltip
           v-gl-modal.modal-license-delete-confirmation
@@ -111,6 +120,7 @@ export default {
           data-toggle="modal"
           @click="setLicenseInModal(license)"
         />
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
       </div>
     </div>
   </div>

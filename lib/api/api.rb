@@ -52,13 +52,12 @@ module API
       api_endpoint = env['api.endpoint']
       feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
 
-      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
-
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin,
+        runner: -> { @current_runner || @runner },
+        caller_id: api_endpoint.endpoint_id,
         remote_ip: request.ip,
         feature_category: feature_category
       )
@@ -129,32 +128,6 @@ module API
     formatter :json, Gitlab::Json::GrapeFormatter
     content_type :json, 'application/json'
 
-    # Remove the `text/plain+deprecated` with `api_always_use_application_json` feature flag
-    # There is a small chance some users depend on the old behavior.
-    # We this change under a feature flag to see if affects GitLab.com users.
-    # The `+deprecated` is added to distinguish content type
-    # as defined by `API::API` vs ex. `API::Repositories`
-    content_type :txt, 'text/plain+deprecated'
-
-    before do
-      # the feature flag workaround is only for `.txt`
-      api_format = env[Grape::Env::API_FORMAT]
-      next unless api_format == :txt
-
-      # get all defined content-types for the endpoint
-      api_endpoint = env[Grape::Env::API_ENDPOINT]
-      content_types = api_endpoint&.namespace_stackable_with_hash(:content_types).to_h
-
-      # Only overwrite `text/plain+deprecated`
-      if content_types[api_format] == 'text/plain+deprecated'
-        if Feature.enabled?(:api_always_use_application_json)
-          content_type 'application/json'
-        else
-          content_type 'text/plain'
-        end
-      end
-    end
-
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
     helpers ::API::Helpers::CommonHelpers
@@ -169,6 +142,7 @@ module API
       mount ::API::AccessRequests
       mount ::API::Admin::Ci::Variables
       mount ::API::Admin::InstanceClusters
+      mount ::API::Admin::PlanLimits
       mount ::API::Admin::Sidekiq
       mount ::API::Appearance
       mount ::API::Applications
@@ -178,6 +152,7 @@ module API
       mount ::API::Boards
       mount ::API::Branches
       mount ::API::BroadcastMessages
+      mount ::API::BulkImports
       mount ::API::Ci::Pipelines
       mount ::API::Ci::PipelineSchedules
       mount ::API::Ci::Runner
@@ -192,13 +167,15 @@ module API
       mount ::API::Deployments
       mount ::API::Environments
       mount ::API::ErrorTracking
+      mount ::API::ErrorTrackingCollector
       mount ::API::Events
       mount ::API::FeatureFlags
-      mount ::API::FeatureFlagScopes
       mount ::API::FeatureFlagsUserLists
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
+      mount ::API::Geo
+      mount ::API::GroupAvatar
       mount ::API::GroupBoards
       mount ::API::GroupClusters
       mount ::API::GroupExport
@@ -248,10 +225,12 @@ module API
       mount ::API::NpmInstancePackages
       mount ::API::GenericPackages
       mount ::API::GoProxy
+      mount ::API::HelmPackages
       mount ::API::Pages
       mount ::API::PagesDomains
       mount ::API::ProjectClusters
       mount ::API::ProjectContainerRepositories
+      mount ::API::ProjectDebianDistributions
       mount ::API::ProjectEvents
       mount ::API::ProjectExport
       mount ::API::ProjectImport
@@ -265,6 +244,7 @@ module API
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
       mount ::API::Terraform::StateVersion
+      mount ::API::Terraform::Modules::V1::Packages
       mount ::API::PersonalAccessTokens
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
@@ -291,6 +271,8 @@ module API
       mount ::API::Triggers
       mount ::API::Unleash
       mount ::API::UsageData
+      mount ::API::UsageDataQueries
+      mount ::API::UsageDataNonSqlMetrics
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables
@@ -319,4 +301,4 @@ module API
   end
 end
 
-API::API.prepend_ee_mod
+API::API.prepend_mod

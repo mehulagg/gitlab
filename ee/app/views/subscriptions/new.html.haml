@@ -1,7 +1,4 @@
 - page_title _('Checkout')
 
-.row.flex-grow-1.flex-column.flex-nowrap.flex-lg-row.flex-xl-row.flex-lg-wrap.flex-xl-wrap
-  .checkout-pane.px-3.align-items-center.bg-gray-light.col-lg-7.d-flex.flex-column.flex-grow-1
-    #checkout{ data: subscription_data }
-  .pb-3.px-3.px-lg-7.col-lg-5.d-flex.flex-row.justify-content-center
-    #summary
+#js-new-subscription{ data: subscription_data(@eligible_groups) }
+

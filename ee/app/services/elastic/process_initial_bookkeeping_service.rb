@@ -2,8 +2,6 @@
 
 module Elastic
   class ProcessInitialBookkeepingService < Elastic::ProcessBookkeepingService
-    REDIS_SET_KEY = 'elastic:bulk:initial:0:zset'
-    REDIS_SCORE_KEY = 'elastic:bulk:initial:0:score'
     INDEXED_PROJECT_ASSOCIATIONS = [
       :issues,
       :merge_requests,
@@ -13,6 +11,14 @@ module Elastic
     ].freeze
 
     class << self
+      def redis_set_key(shard_number)
+        "elastic:bulk:initial:#{shard_number}:zset"
+      end
+
+      def redis_score_key(shard_number)
+        "elastic:bulk:initial:#{shard_number}:score"
+      end
+
       def backfill_projects!(*projects)
         track!(*projects)
 
@@ -22,7 +28,7 @@ module Elastic
           maintain_indexed_associations(project, INDEXED_PROJECT_ASSOCIATIONS)
 
           ElasticCommitIndexerWorker.perform_async(project.id)
-          ElasticCommitIndexerWorker.perform_async(project.id, nil, nil, true)
+          ElasticCommitIndexerWorker.perform_async(project.id, true)
         end
       end
     end

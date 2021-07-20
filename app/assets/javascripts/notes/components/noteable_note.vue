@@ -1,18 +1,19 @@
 <script>
 import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import $ from 'jquery';
-import { escape } from 'lodash';
+import { escape, isEmpty } from 'lodash';
 import { mapGetters, mapActions } from 'vuex';
 import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { truncateSha } from '~/lib/utils/text_utility';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
-import { deprecatedCreateFlash as Flash } from '../../flash';
 import { __, s__, sprintf } from '../../locale';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import eventHub from '../event_hub';
 import noteable from '../mixins/noteable';
 import resolvable from '../mixins/resolvable';
+import { renderMarkdown } from '../utils';
 import {
   getStartLineNumber,
   getEndLineNumber,
@@ -44,6 +45,11 @@ export default {
       required: true,
     },
     line: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    discussionFile: {
       type: Object,
       required: false,
       default: null,
@@ -86,7 +92,7 @@ export default {
       isRequesting: false,
       isResolving: false,
       commentLineStart: {},
-      resolveAsThread: this.glFeatures.removeResolveNote,
+      resolveAsThread: true,
     };
   },
   computed: {
@@ -139,14 +145,9 @@ export default {
       return this.note.isDraft;
     },
     canResolve() {
-      if (this.glFeatures.removeResolveNote && !this.discussionRoot) return false;
+      if (!this.discussionRoot) return false;
 
-      if (this.glFeatures.removeResolveNote) return this.note.current_user.can_resolve_discussion;
-
-      return (
-        this.note.current_user.can_resolve ||
-        (this.note.isDraft && this.note.discussion_id !== null)
-      );
+      return this.note.current_user.can_resolve_discussion;
     },
     lineRange() {
       return this.note.position?.line_range;
@@ -172,12 +173,18 @@ export default {
       return commentLineOptions(lines, this.commentLineStart, this.line.line_code);
     },
     diffFile() {
+      let fileResolvedFromAvailableSource;
+
       if (this.commentLineStart.line_code) {
         const lineCode = this.commentLineStart.line_code.split('_')[0];
-        return this.getDiffFileByHash(lineCode);
+        fileResolvedFromAvailableSource = this.getDiffFileByHash(lineCode);
       }
 
-      return null;
+      if (!fileResolvedFromAvailableSource && this.discussionFile) {
+        fileResolvedFromAvailableSource = this.discussionFile;
+      }
+
+      return fileResolvedFromAvailableSource || null;
     },
   },
   created() {
@@ -241,7 +248,9 @@ export default {
             this.isDeleting = false;
           })
           .catch(() => {
-            Flash(__('Something went wrong while deleting your note. Please try again.'));
+            createFlash({
+              message: __('Something went wrong while deleting your note. Please try again.'),
+            });
             this.isDeleting = false;
           });
       }
@@ -282,13 +291,17 @@ export default {
         note: {
           target_type: this.getNoteableData.targetType,
           target_id: this.note.noteable_id,
-          note: { note: noteText, position: JSON.stringify(position) },
+          note: { note: noteText },
         },
       };
+
+      // Stringifying an empty object yields `{}` which breaks graphql queries
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
+      if (!isEmpty(position)) data.note.note.position = JSON.stringify(position);
       this.isRequesting = true;
       this.oldContent = this.note.note_html;
       // eslint-disable-next-line vue/no-mutating-props
-      this.note.note_html = escape(noteText);
+      this.note.note_html = renderMarkdown(noteText);
 
       this.updateNote(data)
         .then(() => {
@@ -306,7 +319,10 @@ export default {
             this.setSelectedCommentPositionHover();
             this.$nextTick(() => {
               const msg = __('Something went wrong while editing your comment. Please try again.');
-              Flash(msg, 'alert', this.$el);
+              createFlash({
+                message: msg,
+                parent: this.$el,
+              });
               this.recoverNoteContent(noteText);
               callback();
             });
@@ -377,7 +393,9 @@ export default {
         :img-alt="author.name"
         :img-size="40"
       >
-        <slot slot="avatar-badge" name="avatar-badge"></slot>
+        <template #avatar-badge>
+          <slot name="avatar-badge"></slot>
+        </template>
       </user-avatar-link>
     </div>
     <div class="timeline-content">
@@ -388,7 +406,9 @@ export default {
           :note-id="note.id"
           :is-confidential="note.confidential"
         >
-          <slot slot="note-header-info" name="note-header-info"></slot>
+          <template #note-header-info>
+            <slot name="note-header-info"></slot>
+          </template>
           <span v-if="commit" v-safe-html="actionText"></span>
           <span v-else-if="note.created_at" class="d-none d-sm-inline">&middot;</span>
         </note-header>
@@ -416,6 +436,7 @@ export default {
           :is-draft="note.isDraft"
           :resolve-discussion="note.isDraft && note.resolve_discussion"
           :discussion-id="discussionId"
+          :award-path="note.toggle_award_path"
           @handleEdit="editHandler"
           @handleDelete="deleteHandler"
           @handleResolve="resolveHandler"

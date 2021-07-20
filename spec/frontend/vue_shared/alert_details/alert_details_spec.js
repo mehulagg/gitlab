@@ -8,7 +8,7 @@ import { joinPaths } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
 import AlertDetails from '~/vue_shared/alert_details/components/alert_details.vue';
 import AlertSummaryRow from '~/vue_shared/alert_details/components/alert_summary_row.vue';
-import { SEVERITY_LEVELS } from '~/vue_shared/alert_details/constants';
+import { PAGE_CONFIG, SEVERITY_LEVELS } from '~/vue_shared/alert_details/constants';
 import createIssueMutation from '~/vue_shared/alert_details/graphql/mutations/alert_issue_create.mutation.graphql';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from './mocks/alerts.json';
@@ -89,7 +89,7 @@ describe('AlertDetails', () => {
   const findIncidentCreationAlert = () => wrapper.findByTestId('incidentCreationError');
   const findEnvironmentName = () => wrapper.findByTestId('environmentName');
   const findEnvironmentPath = () => wrapper.findByTestId('environmentPath');
-  const findDetailsTable = () => wrapper.find(AlertDetailsTable);
+  const findDetailsTable = () => wrapper.findComponent(AlertDetailsTable);
   const findMetricsTab = () => wrapper.findByTestId('metrics');
 
   describe('Alert details', () => {
@@ -127,6 +127,10 @@ describe('AlertDetails', () => {
       it('renders a start time', () => {
         expect(wrapper.findByTestId('startTimeItem').exists()).toBe(true);
         expect(wrapper.findByTestId('startTimeItem').props('time')).toBe(mockAlert.startedAt);
+      });
+
+      it('renders the metrics tab', () => {
+        expect(findMetricsTab().exists()).toBe(true);
       });
     });
 
@@ -179,31 +183,44 @@ describe('AlertDetails', () => {
     describe('Threat Monitoring details', () => {
       it('should not render the metrics tab', () => {
         mountComponent({
-          data: { alert: mockAlert, provide: { isThreatMonitoringPage: true } },
+          data: { alert: mockAlert },
+          provide: { isThreatMonitoringPage: true },
         });
         expect(findMetricsTab().exists()).toBe(false);
+      });
+
+      it('should display "View incident" button that links the issues page when incident exists', () => {
+        const iid = '3';
+        mountComponent({
+          data: { alert: { ...mockAlert, issue: { iid } }, sidebarStatus: false },
+          provide: { isThreatMonitoringPage: true },
+        });
+
+        expect(findViewIncidentBtn().exists()).toBe(true);
+        expect(findViewIncidentBtn().attributes('href')).toBe(joinPaths(projectIssuesPath, iid));
+        expect(findCreateIncidentBtn().exists()).toBe(false);
       });
     });
 
     describe('Create incident from alert', () => {
       it('should display "View incident" button that links the incident page when incident exists', () => {
-        const issueIid = '3';
+        const iid = '3';
         mountComponent({
-          data: { alert: { ...mockAlert, issueIid }, sidebarStatus: false },
+          data: { alert: { ...mockAlert, issue: { iid } }, sidebarStatus: false },
         });
 
         expect(findViewIncidentBtn().exists()).toBe(true);
         expect(findViewIncidentBtn().attributes('href')).toBe(
-          joinPaths(projectIssuesPath, issueIid),
+          joinPaths(projectIssuesPath, 'incident', iid),
         );
         expect(findCreateIncidentBtn().exists()).toBe(false);
       });
 
       it('should display "Create incident" button when incident doesn\'t exist yet', () => {
-        const issueIid = null;
+        const issue = null;
         mountComponent({
           mountMethod: mount,
-          data: { alert: { ...mockAlert, issueIid } },
+          data: { alert: { ...mockAlert, issue } },
         });
 
         return wrapper.vm.$nextTick().then(() => {
@@ -254,7 +271,13 @@ describe('AlertDetails', () => {
       });
 
       it('should display a table of raw alert details data', () => {
-        expect(findDetailsTable().exists()).toBe(true);
+        const details = findDetailsTable();
+        expect(details.exists()).toBe(true);
+        expect(details.props()).toStrictEqual({
+          alert: mockAlert,
+          statuses: PAGE_CONFIG.OPERATIONS.STATUSES,
+          loading: false,
+        });
       });
     });
 

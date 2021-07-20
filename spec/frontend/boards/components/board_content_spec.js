@@ -1,5 +1,6 @@
 import { GlAlert } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Draggable from 'vuedraggable';
 import Vuex from 'vuex';
 import EpicsSwimlanes from 'ee_component/boards/components/epics_swimlanes.vue';
@@ -8,8 +9,7 @@ import BoardColumnDeprecated from '~/boards/components/board_column_deprecated.v
 import BoardContent from '~/boards/components/board_content.vue';
 import { mockLists, mockListsWithModel } from '../mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const actions = {
   moveList: jest.fn(),
@@ -33,20 +33,24 @@ describe('BoardContent', () => {
     });
   };
 
-  const createComponent = ({ state, props = {}, graphqlBoardListsEnabled = false } = {}) => {
+  const createComponent = ({
+    state,
+    props = {},
+    graphqlBoardListsEnabled = false,
+    canAdminList = true,
+  } = {}) => {
     const store = createStore({
       ...defaultState,
       ...state,
     });
     wrapper = shallowMount(BoardContent, {
-      localVue,
       propsData: {
         lists: mockListsWithModel,
-        canAdminList: true,
         disabled: false,
         ...props,
       },
       provide: {
+        canAdminList,
         glFeatures: { graphqlBoardLists: graphqlBoardListsEnabled },
       },
       store,
@@ -82,7 +86,7 @@ describe('BoardContent', () => {
 
     describe('can admin list', () => {
       beforeEach(() => {
-        createComponent({ graphqlBoardListsEnabled: true, props: { canAdminList: true } });
+        createComponent({ graphqlBoardListsEnabled: true, canAdminList: true });
       });
 
       it('renders draggable component', () => {
@@ -92,7 +96,7 @@ describe('BoardContent', () => {
 
     describe('can not admin list', () => {
       beforeEach(() => {
-        createComponent({ graphqlBoardListsEnabled: true, props: { canAdminList: false } });
+        createComponent({ graphqlBoardListsEnabled: true, canAdminList: false });
       });
 
       it('does not render draggable component', () => {

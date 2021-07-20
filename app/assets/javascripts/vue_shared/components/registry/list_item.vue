@@ -32,7 +32,7 @@ export default {
       return {
         'gl-border-t-transparent': !this.first && !this.selected,
         'gl-border-t-gray-100': this.first && !this.selected,
-        'disabled-content': this.disabled,
+        'gl-opacity-5': this.disabled,
         'gl-border-b-gray-100': !this.selected,
         'gl-bg-blue-50 gl-border-blue-200': this.selected,
       };
@@ -54,7 +54,7 @@ export default {
     class="gl-display-flex gl-flex-direction-column gl-border-b-solid gl-border-t-solid gl-border-t-1 gl-border-b-1"
     :class="optionalClasses"
   >
-    <div class="gl-display-flex gl-align-items-center gl-py-3">
+    <div class="gl-display-flex gl-align-items-center gl-py-3 gl-px-5">
       <div
         v-if="$slots['left-action']"
         class="gl-w-7 gl-display-none gl-sm-display-flex gl-justify-content-start gl-pl-2"
@@ -62,7 +62,7 @@ export default {
         <slot name="left-action"></slot>
       </div>
       <div
-        class="gl-display-flex gl-xs-flex-direction-column gl-justify-content-space-between gl-align-items-stretch gl-flex-fill-1"
+        class="gl-display-flex gl-xs-flex-direction-column gl-justify-content-space-between gl-align-items-stretch gl-flex-grow-1"
       >
         <div class="gl-display-flex gl-flex-direction-column gl-xs-mb-3 gl-min-w-0 gl-flex-grow-1">
           <div
@@ -81,7 +81,7 @@ export default {
           </div>
           <div
             v-if="$slots['left-secondary']"
-            class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-min-h-6 gl-min-w-0 gl-flex-fill-1"
+            class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-min-h-6 gl-min-w-0 gl-flex-grow-1"
           >
             <slot name="left-secondary"></slot>
           </div>
@@ -114,7 +114,7 @@ export default {
       <div class="gl-w-7"></div>
       <div
         v-if="isDetailsShown"
-        class="gl-display-flex gl-flex-direction-column gl-flex-fill-1 gl-bg-gray-10 gl-rounded-base gl-inset-border-1-gray-100 gl-mb-3"
+        class="gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-bg-gray-10 gl-rounded-base gl-inset-border-1-gray-100 gl-mb-3"
       >
         <div
           v-for="(row, detailIndex) in detailsSlots"

@@ -10,6 +10,7 @@ RSpec.describe TodoService do
   let_it_be(:admin) { create(:admin, username: 'administrator') }
   let_it_be(:john_doe) { create(:user, username: 'john_doe') }
   let_it_be(:skipped) { create(:user, username: 'skipped') }
+
   let(:skip_users) { [skipped] }
   let(:service) { described_class.new }
 
@@ -22,6 +23,7 @@ RSpec.describe TodoService do
     let(:description_directly_addressed) { "#{mentions}\n- [ ] Task 1\n- [ ] Task 2" }
 
     let_it_be(:group, reload: true) { create(:group) }
+
     let(:epic) { create(:epic, group: group, author: author, description: description_mentions) }
 
     let(:todos_for) { [] }
@@ -114,7 +116,7 @@ RSpec.describe TodoService do
 
           context 'for mentioned users' do
             let(:todo_params) { { action: Todo::MENTIONED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'
@@ -126,7 +128,7 @@ RSpec.describe TodoService do
             end
 
             let(:todo_params) { { action: Todo::DIRECTLY_ADDRESSED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'

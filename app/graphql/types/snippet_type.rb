@@ -5,7 +5,7 @@ module Types
     graphql_name 'Snippet'
     description 'Represents a snippet entry'
 
-    implements(Types::Notes::NoteableType)
+    implements(Types::Notes::NoteableInterface)
 
     present_using SnippetPresenter
 
@@ -60,12 +60,6 @@ module Types
     field :raw_url, type: GraphQL::STRING_TYPE,
           description: 'Raw URL of the snippet.',
           null: false
-
-    field :blob, type: Types::Snippets::BlobType,
-          description: 'Snippet blob.',
-          calls_gitaly: true,
-          null: false,
-          deprecated: { reason: 'Use `blobs`', milestone: '13.3' }
 
     field :blobs, type: Types::Snippets::BlobType.connection_type,
           description: 'Snippet blobs.',

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Group overview', :js, :aggregate_failures do
+RSpec.describe 'Group information', :js, :aggregate_failures do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:empty_project) { create(:project, namespace: group) }
@@ -14,7 +14,7 @@ RSpec.describe 'Group overview', :js, :aggregate_failures do
     sign_in(user)
   end
 
-  context 'when the default value of "Group Overview content" preference is used' do
+  context 'when the default value of "Group information content" preference is used' do
     it 'displays the Details view' do
       visit_page
 
@@ -45,6 +45,40 @@ RSpec.describe 'Group overview', :js, :aggregate_failures do
                                        'the dashboard has not been setup. Please check your permission settings '\
                                        'with your administrator or check your dashboard configurations to proceed.')
         end
+      end
+    end
+  end
+
+  describe 'qrtly reconciliation alert', :js do
+    context 'on self-managed' do
+      before do
+        visit_page
+      end
+
+      it_behaves_like 'a hidden qrtly reconciliation alert'
+    end
+
+    context 'on dotcom' do
+      before do
+        stub_ee_application_setting(should_check_namespace_plan: true)
+      end
+
+      context 'when qrtly reconciliation is available' do
+        let!(:upcoming_reconciliation) { create(:upcoming_reconciliation, :saas, namespace: group) }
+
+        before do
+          visit_page
+        end
+
+        it_behaves_like 'a visible dismissible qrtly reconciliation alert'
+      end
+
+      context 'when qrtly reconciliation is not available' do
+        before do
+          visit_page
+        end
+
+        it_behaves_like 'a hidden qrtly reconciliation alert'
       end
     end
   end

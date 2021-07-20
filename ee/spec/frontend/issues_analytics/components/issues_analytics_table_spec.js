@@ -4,7 +4,7 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import IssuesAnalyticsTable from 'ee/issues_analytics/components/issues_analytics_table.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { mockIssuesApiResponse, tableHeaders, endpoints } from '../mock_data';
 
@@ -107,7 +107,9 @@ describe('IssuesAnalyticsTable', () => {
     });
 
     it('displays an error', () => {
-      expect(createFlash).toHaveBeenCalledWith('Failed to load issues. Please try again.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Failed to load issues. Please try again.',
+      });
     });
   });
 });

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
+require 'parallel'
+
 module TestEnv
-  extend ActiveSupport::Concern
   extend self
 
   ComponentFailedToInstallError = Class.new(StandardError)
@@ -52,7 +53,7 @@ module TestEnv
     'wip'                                => 'b9238ee',
     'csv'                                => '3dd0896',
     'v1.1.0'                             => 'b83d6e3',
-    'add-ipython-files'                  => '93ee732',
+    'add-ipython-files'                  => 'f6b7a70',
     'add-pdf-file'                       => 'e774ebd',
     'squash-large-files'                 => '54cec52',
     'add-pdf-text-binary'                => '79faa7b',
@@ -77,7 +78,8 @@ module TestEnv
     'sha-starting-with-large-number'     => '8426165',
     'invalid-utf8-diff-paths'            => '99e4853',
     'compare-with-merge-head-source'     => 'f20a03d',
-    'compare-with-merge-head-target'     => '2f1e176'
+    'compare-with-merge-head-target'     => '2f1e176',
+    'trailers'                           => 'f0a5ed6'
   }.freeze
 
   # gitlab-test-fork is a fork of gitlab-fork, but we don't necessarily
@@ -91,52 +93,42 @@ module TestEnv
   }.freeze
 
   TMP_TEST_PATH = Rails.root.join('tmp', 'tests').freeze
-  REPOS_STORAGE = 'default'.freeze
+  REPOS_STORAGE = 'default'
   SECOND_STORAGE_PATH = Rails.root.join('tmp', 'tests', 'second_storage')
+  SETUP_METHODS = %i[setup_gitaly setup_gitlab_shell setup_workhorse setup_factory_repo setup_forked_repo].freeze
+
+  # Can be overriden
+  def setup_methods
+    SETUP_METHODS
+  end
 
   # Test environment
   #
   # See gitlab.yml.example test section for paths
   #
-  def init(opts = {})
+  def init
     unless Rails.env.test?
       puts "\nTestEnv.init can only be run if `RAILS_ENV` is set to 'test' not '#{Rails.env}'!\n"
       exit 1
     end
 
+    start = Time.now
     # Disable mailer for spinach tests
-    disable_mailer if opts[:mailer] == false
-
     clean_test_path
 
-    setup_gitlab_shell
-
-    setup_gitaly
-
-    # Feature specs are run through Workhorse
-    setup_workhorse
-
-    # Create repository for FactoryBot.create(:project)
-    setup_factory_repo
-
-    # Create repository for FactoryBot.create(:forked_project_with_submodules)
-    setup_forked_repo
-  end
-
-  included do |config|
-    config.append_before do
-      set_current_example_group
+    # Install components in parallel as most of the setup is I/O.
+    Parallel.each(setup_methods) do |method|
+      public_send(method)
     end
+
+    post_init
+
+    puts "\nTest environment set up in #{Time.now - start} seconds"
   end
 
-  def disable_mailer
-    allow_any_instance_of(NotificationService).to receive(:mailer)
-      .and_return(double.as_null_object)
-  end
-
-  def enable_mailer
-    allow_any_instance_of(NotificationService).to receive(:mailer)
-      .and_call_original
+  # Can be overriden
+  def post_init
+    start_gitaly(gitaly_dir)
   end
 
   # Clean /tmp/tests
@@ -149,7 +141,9 @@ module TestEnv
       end
     end
 
-    FileUtils.mkdir_p(repos_path)
+    FileUtils.mkdir_p(
+      Gitlab::GitalyClient::StorageSettings.allow_disk_access { TestEnv.repos_path }
+    )
     FileUtils.mkdir_p(SECOND_STORAGE_PATH)
     FileUtils.mkdir_p(backup_path)
     FileUtils.mkdir_p(pages_path)
@@ -161,22 +155,31 @@ module TestEnv
   end
 
   def setup_gitaly
-    install_gitaly_args = [gitaly_dir, repos_path, gitaly_url].compact.join(',')
-
     component_timed_setup('Gitaly',
       install_dir: gitaly_dir,
       version: Gitlab::GitalyClient.expected_server_version,
-      task: "gitlab:gitaly:install[#{install_gitaly_args}]") do
-        Gitlab::SetupHelper::Gitaly.create_configuration(gitaly_dir, { 'default' => repos_path }, force: true)
+      task: "gitlab:gitaly:install",
+      task_args: [gitaly_dir, repos_path, gitaly_url].compact) do
         Gitlab::SetupHelper::Gitaly.create_configuration(
           gitaly_dir,
-          { 'default' => repos_path }, force: true,
-          options: { gitaly_socket: "gitaly2.socket", config_filename: "gitaly2.config.toml" }
+          { 'default' => repos_path },
+          force: true,
+          options: {
+            prometheus_listen_addr: 'localhost:9236'
+          }
+        )
+        Gitlab::SetupHelper::Gitaly.create_configuration(
+          gitaly_dir,
+          { 'default' => repos_path },
+          force: true,
+          options: {
+            internal_socket_dir: File.join(gitaly_dir, "internal_gitaly2"),
+            gitaly_socket: "gitaly2.socket",
+            config_filename: "gitaly2.config.toml"
+          }
         )
         Gitlab::SetupHelper::Praefect.create_configuration(gitaly_dir, { 'praefect' => repos_path }, force: true)
       end
-
-    start_gitaly(gitaly_dir)
   end
 
   def gitaly_socket_path
@@ -184,7 +187,17 @@ module TestEnv
   end
 
   def gitaly_dir
-    File.dirname(gitaly_socket_path)
+    socket_path = gitaly_socket_path
+    socket_path = File.expand_path(gitaly_socket_path) if expand_path?
+
+    File.dirname(socket_path)
+  end
+
+  # Linux fails with "bind: invalid argument" if a UNIX socket path exceeds 108 characters:
+  # https://github.com/golang/go/issues/6895. We use absolute paths in CI to ensure
+  # that changes in the current working directory don't affect GRPC reconnections.
+  def expand_path?
+    !!ENV['CI']
   end
 
   def start_gitaly(gitaly_dir)
@@ -241,18 +254,17 @@ module TestEnv
     Integer(sleep_time / sleep_interval).times do
       Socket.unix(socket)
       return
-    rescue
+    rescue StandardError
       sleep sleep_interval
     end
 
     raise "could not connect to #{service} at #{socket.inspect} after #{sleep_time} seconds"
   end
 
+  # Feature specs are run through Workhorse
   def setup_workhorse
     start = Time.now
     return if skip_compile_workhorse?
-
-    puts "\n==> Setting up GitLab Workhorse..."
 
     FileUtils.rm_rf(workhorse_dir)
     Gitlab::SetupHelper::Workhorse.compile_into(workhorse_dir)
@@ -260,7 +272,7 @@ module TestEnv
 
     File.write(workhorse_tree_file, workhorse_tree) if workhorse_source_clean?
 
-    puts "    GitLab Workhorse set up in #{Time.now - start} seconds...\n"
+    puts "==> GitLab Workhorse set up in #{Time.now - start} seconds...\n"
   end
 
   def skip_compile_workhorse?
@@ -324,10 +336,12 @@ module TestEnv
     ENV.fetch('GITLAB_WORKHORSE_URL', nil)
   end
 
+  # Create repository for FactoryBot.create(:project)
   def setup_factory_repo
     setup_repo(factory_repo_path, factory_repo_path_bare, factory_repo_name, BRANCH_SHA)
   end
 
+  # Create repository for FactoryBot.create(:forked_project_with_submodules)
   # This repo has a submodule commit that is not present in the main test
   # repository.
   def setup_forked_repo
@@ -338,20 +352,18 @@ module TestEnv
     clone_url = "https://gitlab.com/gitlab-org/#{repo_name}.git"
 
     unless File.directory?(repo_path)
-      puts "\n==> Setting up #{repo_name} repository in #{repo_path}..."
       start = Time.now
       system(*%W(#{Gitlab.config.git.bin_path} clone --quiet -- #{clone_url} #{repo_path}))
-      puts "    #{repo_path} set up in #{Time.now - start} seconds...\n"
+      puts "==> #{repo_path} set up in #{Time.now - start} seconds...\n"
     end
 
     set_repo_refs(repo_path, refs)
 
     unless File.directory?(repo_path_bare)
-      puts "\n==> Setting up #{repo_name} bare repository in #{repo_path_bare}..."
       start = Time.now
       # We must copy bare repositories because we will push to them.
       system(git_env, *%W(#{Gitlab.config.git.bin_path} clone --quiet --bare -- #{repo_path} #{repo_path_bare}))
-      puts "    #{repo_path_bare} set up in #{Time.now - start} seconds...\n"
+      puts "==> #{repo_path_bare} set up in #{Time.now - start} seconds...\n"
     end
   end
 
@@ -443,10 +455,6 @@ module TestEnv
 
   private
 
-  def set_current_example_group
-    Thread.current[:current_example_group] = ::RSpec.current_example.metadata[:example_group]
-  end
-
   # These are directories that should be preserved at cleanup time
   def test_dirs
     @test_dirs ||= %w[
@@ -501,7 +509,7 @@ module TestEnv
     end
   end
 
-  def component_timed_setup(component, install_dir:, version:, task:)
+  def component_timed_setup(component, install_dir:, version:, task:, task_args: [])
     start = Time.now
 
     ensure_component_dir_name_is_correct!(component, install_dir)
@@ -510,17 +518,22 @@ module TestEnv
     return if File.exist?(install_dir) && ci?
 
     if component_needs_update?(install_dir, version)
-      puts "\n==> Setting up #{component}..."
       # Cleanup the component entirely to ensure we start fresh
       FileUtils.rm_rf(install_dir)
 
-      unless system('rake', task)
-        raise ComponentFailedToInstallError
+      if ENV['SKIP_RAILS_ENV_IN_RAKE']
+        # When we run `scripts/setup-test-env`, we take care of loading the necessary dependencies
+        # so we can run the rake task programmatically.
+        Rake::Task[task].invoke(*task_args)
+      else
+        # In other cases, we run the task via `rake` so that the environment
+        # and dependencies are automatically loaded.
+        raise ComponentFailedToInstallError unless system('rake', "#{task}[#{task_args.join(',')}]")
       end
 
       yield if block_given?
 
-      puts "    #{component} set up in #{Time.now - start} seconds...\n"
+      puts "==> #{component} set up in #{Time.now - start} seconds...\n"
     end
   rescue ComponentFailedToInstallError
     puts "\n#{component} failed to install, cleaning up #{install_dir}!\n"
@@ -587,5 +600,5 @@ end
 
 require_relative('../../../ee/spec/support/helpers/ee/test_env') if Gitlab.ee?
 
-::TestEnv.prepend_if_ee('::EE::TestEnv')
-::TestEnv.extend_if_ee('::EE::TestEnv')
+::TestEnv.prepend_mod_with('TestEnv')
+::TestEnv.extend_mod_with('TestEnv')

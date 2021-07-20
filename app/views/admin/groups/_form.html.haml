@@ -3,6 +3,8 @@
   = render 'shared/group_form', f: f
   = render 'shared/group_form_description', f: f
 
+  = render 'shared/admin/admin_note_form', f: f
+
   = render_if_exists 'shared/old_repository_size_limit_setting', form: f, type: :group
   = render_if_exists 'admin/namespace_plan', f: f
 
@@ -25,15 +27,17 @@
   - if @group.new_record?
     .form-group.row
       .offset-sm-2.col-sm-10
-        .gl-alert.gl-alert-info
-          = sprite_icon('information-o', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-          .gl-alert-body
-            = render 'shared/group_tips'
+        .gl-alert.gl-alert-
+          .gl-alert-container
+            = sprite_icon('information-o', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+            .gl-alert-content
+              .gl-alert-body
+                = render 'shared/group_tips'
     .form-actions
-      = f.submit _('Create group'), class: "gl-button btn btn-success"
+      = f.submit _('Create group'), class: "gl-button btn btn-confirm"
       = link_to  _('Cancel'), admin_groups_path, class: "gl-button btn btn-default btn-cancel"
 
   - else
     .form-actions
-      = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'save_changes_button' }
+      = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'save_changes_button' }
       = link_to  _('Cancel'), admin_group_path(@group), class: "gl-button btn btn-cancel"

@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Slash Commands
+# Slash Commands **(FREE)**
 
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24780) to GitLab Free in 11.9.
 
@@ -26,7 +26,7 @@ Taking the trigger term as `project-name`, the commands are:
 | `/project-name issue move <id> to <project>` | Moves issue ID `<id>` to `<project>` |
 | `/project-name issue comment <id> <shift+return> <comment>` | Adds a new comment to an issue with ID `<id>` and comment body `<comment>` |
 | `/project-name deploy <from> to <to>` | Deploy from the `<from>` environment to the `<to>` environment |
-| `/project-name run <job name> <arguments>` | Execute [ChatOps](../ci/chatops/index.md) job `<job name>` on `master` |
+| `/project-name run <job name> <arguments>` | Execute [ChatOps](../ci/chatops/index.md) job `<job name>` on the default branch |
 
 If you are using the [GitLab Slack application](../user/project/integrations/gitlab_slack_application.md) for
 your GitLab.com projects, [add the `gitlab` keyword at the beginning of the command](../user/project/integrations/gitlab_slack_application.md#usage).

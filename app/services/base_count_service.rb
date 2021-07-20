@@ -27,7 +27,7 @@ class BaseCountService
   end
 
   def delete_cache
-    Rails.cache.delete(cache_key)
+    ::Gitlab::Cache.delete(cache_key)
   end
 
   def raw?
@@ -49,4 +49,4 @@ class BaseCountService
   end
 end
 
-BaseCountService.prepend_if_ee('EE::BaseCountService')
+BaseCountService.prepend_mod

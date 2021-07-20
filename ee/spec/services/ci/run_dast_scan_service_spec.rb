@@ -3,30 +3,32 @@
 require 'spec_helper'
 
 RSpec.describe Ci::RunDastScanService do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository, creator: user) }
-  let(:branch) { project.default_branch }
-  let(:target_url) { generate(:url) }
-  let(:use_ajax_spider) { true }
-  let(:show_debug_messages) { false }
-  let(:full_scan_enabled) { true }
+  include Ci::TemplateHelpers
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository, creator: user) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, spider_timeout: 42, target_timeout: 21) }
+  let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
-  describe '.ci_template' do
-    it 'builds a hash' do
-      expect(described_class.ci_template).to be_a(Hash)
-    end
-
-    it 'has only one stage' do
-      expect(described_class.ci_template['stages']).to eq(['dast'])
-    end
-  end
-
   describe '#execute' do
-    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21, use_ajax_spider: use_ajax_spider, show_debug_messages: show_debug_messages, full_scan_enabled: full_scan_enabled) }
+    subject do
+      config_result = AppSec::Dast::ScanConfigs::BuildService.new(
+        container: project,
+        current_user: user,
+        params: {
+          branch: project.default_branch,
+          dast_profile: dast_profile,
+          dast_site_profile: dast_site_profile
+        }
+      ).execute
+
+      described_class.new(project, user).execute(**config_result.payload)
+    end
 
     let(:status) { subject.status }
     let(:pipeline) { subject.payload }
@@ -60,7 +62,7 @@ RSpec.describe Ci::RunDastScanService do
       end
 
       it 'sets the pipeline ref to the branch' do
-        expect(pipeline.ref).to eq(branch)
+        expect(pipeline.ref).to eq(project.default_branch)
       end
 
       it 'sets the source to indicate an ondemand scan' do
@@ -83,15 +85,15 @@ RSpec.describe Ci::RunDastScanService do
       it 'creates a build with appropriate options' do
         build = pipeline.builds.first
         expected_options = {
-          'image' => {
-            'name' => '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
+          image: {
+            name: '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
           },
-          'script' => [
+          script: [
             '/analyze'
           ],
-          'artifacts' => {
-            'reports' => {
-              'dast' => ['gl-dast-report.json']
+          artifacts: {
+            reports: {
+              dast: ['gl-dast-report.json']
             }
           }
         }
@@ -100,68 +102,103 @@ RSpec.describe Ci::RunDastScanService do
 
       it 'creates a build with appropriate variables' do
         build = pipeline.builds.first
+
         expected_variables = [
           {
-            'key' => 'DAST_VERSION',
-            'value' => '1',
-            'public' => true
+            key: 'DAST_AUTH_URL',
+            value: dast_site_profile.auth_url,
+            public: true
           }, {
-            'key' => 'SECURE_ANALYZERS_PREFIX',
-            'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
-            'public' => true
+            key: 'DAST_DEBUG',
+            value: String(dast_scanner_profile.show_debug_messages?),
+            public: true
           }, {
-            'key' => 'DAST_WEBSITE',
-            'value' => target_url,
-            'public' => true
-          },
-          {
-            'key' => 'DAST_SPIDER_MINS',
-            'value' => '42',
-            'public' => true
+            key: 'DAST_EXCLUDE_URLS',
+            value: dast_site_profile.excluded_urls.join(','),
+            public: true
           }, {
-            'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-            'value' => '21',
-            'public' => true
+            key: 'DAST_FULL_SCAN_ENABLED',
+            value: String(dast_scanner_profile.full_scan_enabled?),
+            public: true
           }, {
-            'key' => "DAST_USE_AJAX_SPIDER",
-            'public' => true,
-            'value' => 'true'
+            key: 'DAST_PASSWORD_FIELD',
+            value: dast_site_profile.auth_password_field,
+            public: true
           }, {
-            'key' => "DAST_DEBUG",
-            'public' => true,
-            'value' => 'false'
+            key: 'DAST_SPIDER_MINS',
+            value: String(dast_scanner_profile.spider_timeout),
+            public: true
           }, {
-            'key' => "DAST_FULL_SCAN_ENABLED",
-            'public' => true,
-            'value' => 'true'
+            key: 'DAST_TARGET_AVAILABILITY_TIMEOUT',
+            value: String(dast_scanner_profile.target_timeout),
+            public: true
           }, {
-            'key' => 'GIT_STRATEGY',
-            'value' => 'none',
-            'public' => true
+            key: 'DAST_USERNAME',
+            value: dast_site_profile.auth_username,
+            public: true
+          }, {
+            key: 'DAST_USERNAME_FIELD',
+            value: dast_site_profile.auth_username_field,
+            public: true
+          }, {
+            key: 'DAST_USE_AJAX_SPIDER',
+            value: String(dast_scanner_profile.use_ajax_spider?),
+            public: true
+          }, {
+            key: 'DAST_VERSION',
+            value: '2',
+            public: true
+          }, {
+            key: 'DAST_WEBSITE',
+            value: dast_site_profile.dast_site.url,
+            public: true
+          }, {
+            key: 'GIT_STRATEGY',
+            value: 'none',
+            public: true
+          }, {
+            key: 'SECURE_ANALYZERS_PREFIX',
+            value: secure_analyzers_prefix,
+            public: true
           }
         ]
-        expect(build.yaml_variables).to eq(expected_variables)
+
+        expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
-      it 'enqueues a build' do
-        build = pipeline.builds.first
-        expect(build.queued_at).not_to be_nil
+      context 'when the dast_profile and dast_site_profile are provided' do
+        it 'associates the dast_profile with the pipeline' do
+          expect(pipeline.dast_profile).to eq(dast_profile)
+        end
+
+        it 'does associate the dast_site_profile with the pipeline' do
+          expect(pipeline.dast_site_profile).to be_nil
+        end
+      end
+
+      context 'when the dast_site_profile is provided' do
+        let(:dast_profile) { nil }
+
+        it 'associates the dast_site_profile with the pipeline' do
+          expect(pipeline.dast_site_profile).to eq(dast_site_profile)
+        end
       end
 
       context 'when the pipeline fails to save' do
-        before do
-          allow_any_instance_of(Ci::Pipeline).to receive(:created_successfully?).and_return(false)
-          allow_any_instance_of(Ci::Pipeline).to receive(:full_error_messages).and_return(full_error_messages)
-        end
+        let(:fake_pipeline) { instance_double 'Ci::Pipeline', created_successfully?: false, full_error_messages: 'Fake full error messages' }
+        let(:fake_response) { ServiceResponse.error(message: 'Fake error message', payload: fake_pipeline) }
+        let(:fake_service) { instance_double "Ci::CreatePipelineService", execute: fake_response }
 
-        let(:full_error_messages) { SecureRandom.hex }
+        before do
+          allow(Ci::CreatePipelineService).to receive(:new).and_return(fake_service)
+        end
 
         it 'returns an error status' do
           expect(status).to eq(:error)
         end
 
         it 'populates message' do
-          expect(message).to eq(full_error_messages)
+          expect(message).to eq('Fake full error messages')
         end
       end
 

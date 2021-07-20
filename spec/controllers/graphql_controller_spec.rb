@@ -44,7 +44,7 @@ RSpec.describe GraphqlController do
         expect(response).to have_gitlab_http_status(:ok)
       end
 
-      it 'returns access denied template when user cannot access API' do
+      it 'returns forbidden when user cannot access API' do
         # User cannot access API in a couple of cases
         # * When user is internal(like ghost users)
         # * When user is blocked
@@ -54,7 +54,9 @@ RSpec.describe GraphqlController do
         post :execute
 
         expect(response).to have_gitlab_http_status(:forbidden)
-        expect(response).to render_template('errors/access_denied')
+        expect(json_response).to include(
+          'errors' => include(a_hash_including('message' => /API not accessible/))
+        )
       end
 
       it 'updates the users last_activity_on field' do
@@ -175,22 +177,44 @@ RSpec.describe GraphqlController do
   end
 
   describe '#append_info_to_payload' do
-    let(:graphql_query) { graphql_query_for('project', { 'fullPath' => 'foo' }, %w(id name)) }
-    let(:mock_store) { { graphql_logs: { foo: :bar } } }
+    let(:query_1) { { query: graphql_query_for('project', { 'fullPath' => 'foo' }, %w(id name), 'getProject_1') } }
+    let(:query_2) { { query: graphql_query_for('project', { 'fullPath' => 'bar' }, %w(id), 'getProject_2') } }
+    let(:graphql_queries) { [query_1, query_2] }
     let(:log_payload) { {} }
+    let(:expected_logs) do
+      [
+        {
+          operation_name: 'getProject_1',
+          complexity: 3,
+          depth: 2,
+          used_deprecated_fields: [],
+          used_fields: ['Project.id', 'Project.name', 'Query.project'],
+          variables: '{}'
+        },
+        {
+          operation_name: 'getProject_2',
+          complexity: 2,
+          depth: 2,
+          used_deprecated_fields: [],
+          used_fields: ['Project.id', 'Query.project'],
+          variables: '{}'
+        }
+      ]
+    end
 
     before do
-      allow(RequestStore).to receive(:store).and_return(mock_store)
+      RequestStore.clear!
+
       allow(controller).to receive(:append_info_to_payload).and_wrap_original do |method, *|
         method.call(log_payload)
       end
     end
 
     it 'appends metadata for logging' do
-      post :execute, params: { query: graphql_query, operationName: 'Foo' }
+      post :execute, params: { _json: graphql_queries }
 
       expect(controller).to have_received(:append_info_to_payload)
-      expect(log_payload.dig(:metadata, :graphql)).to eq({ operation_name: 'Foo', foo: :bar })
+      expect(log_payload.dig(:metadata, :graphql)).to match_array(expected_logs)
     end
   end
 end

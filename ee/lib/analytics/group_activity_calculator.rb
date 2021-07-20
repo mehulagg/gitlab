@@ -16,7 +16,11 @@ module Analytics
 
     def merge_requests_count
       @merge_requests_count ||=
-        MergeRequestsFinder.new(@current_user, params).execute.count
+        # We want to make sure the load of the following query
+        # lands on the read replica instead of the primary db
+        current_load_balancing_session.use_replicas_for_read_queries do
+          count_service.new(@group, @current_user, params).count
+        end
     end
 
     def new_members_count
@@ -37,6 +41,14 @@ module Analytics
         include_subgroups: true,
         attempt_group_search_optimizations: true,
         attempt_project_search_optimizations: true }
+    end
+
+    def current_load_balancing_session
+      ::Gitlab::Database::LoadBalancing::Session.current
+    end
+
+    def count_service
+      Groups::RecentMergeRequestsCountService
     end
   end
 end

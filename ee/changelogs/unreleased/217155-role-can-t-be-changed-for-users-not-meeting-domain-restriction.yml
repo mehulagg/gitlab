@@ -1,6 +1,0 @@
----
-title: Display error message if group member can not be updated because their email
-  does not match the list of allowed domains
-merge_request: 52014
-author:
-type: fixed

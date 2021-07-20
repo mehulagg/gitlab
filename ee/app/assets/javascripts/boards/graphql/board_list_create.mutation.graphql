@@ -1,0 +1,26 @@
+#import "./board_list.fragment.graphql"
+
+mutation CreateBoardList(
+  $boardId: BoardID!
+  $backlog: Boolean
+  $labelId: LabelID
+  $milestoneId: MilestoneID
+  $iterationId: IterationID
+  $assigneeId: UserID
+) {
+  boardListCreate(
+    input: {
+      boardId: $boardId
+      backlog: $backlog
+      labelId: $labelId
+      milestoneId: $milestoneId
+      iterationId: $iterationId
+      assigneeId: $assigneeId
+    }
+  ) {
+    list {
+      ...BoardListFragment
+    }
+    errors
+  }
+}

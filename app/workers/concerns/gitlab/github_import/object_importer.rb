@@ -9,6 +9,8 @@ module Gitlab
 
       included do
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include ReschedulingMethods
         include Gitlab::NotifyUponDeath
@@ -25,19 +27,24 @@ module Gitlab
       # client - An instance of `Gitlab::GithubImport::Client`
       # hash - A Hash containing the details of the object to import.
       def import(project, client, hash)
+        object = representation_class.from_json_hash(hash)
+
+        # To better express in the logs what object is being imported.
+        self.github_id = object.attributes.fetch(:github_id)
+
         info(project.id, message: 'starting importer')
 
-        object = representation_class.from_json_hash(hash)
         importer_class.new(object, project, client).execute
 
-        counter.increment
+        Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :imported)
+
         info(project.id, message: 'importer finished')
-      rescue => e
-        error(project.id, e)
+      rescue StandardError => e
+        error(project.id, e, hash)
       end
 
-      def counter
-        @counter ||= Gitlab::Metrics.counter(counter_name, counter_description)
+      def object_type
+        raise NotImplementedError
       end
 
       # Returns the representation class to use for the object. This class must
@@ -51,28 +58,21 @@ module Gitlab
         raise NotImplementedError
       end
 
-      # Returns the name (as a Symbol) of the Prometheus counter.
-      def counter_name
-        raise NotImplementedError
-      end
-
-      # Returns the description (as a String) of the Prometheus counter.
-      def counter_description
-        raise NotImplementedError
-      end
-
       private
+
+      attr_accessor :github_id
 
       def info(project_id, extra = {})
         logger.info(log_attributes(project_id, extra))
       end
 
-      def error(project_id, exception)
+      def error(project_id, exception, data = {})
         logger.error(
           log_attributes(
             project_id,
             message: 'importer failed',
-            'error.message': exception.message
+            'error.message': exception.message,
+            'github.data': data
           )
         )
 
@@ -86,7 +86,8 @@ module Gitlab
         extra.merge(
           import_source: :github,
           project_id: project_id,
-          importer: importer_class.name
+          importer: importer_class.name,
+          github_id: github_id
         )
       end
     end

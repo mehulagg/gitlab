@@ -4,7 +4,7 @@ stage: Manage
 group: Import
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
-# Group Import/Export
+# Group import/export **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2888) in GitLab 13.0 as an experimental feature. May change in future releases.
 
@@ -21,15 +21,15 @@ See also:
 
 To enable GitLab import/export:
 
-1. Navigate to **Admin Area > Settings > Visibility and access controls**.
-1. Scroll to **Import sources**
-1. Enable desired **Import sources**
+1. On the top bar, go to **Menu > Admin > Settings > General > Visibility and access controls**.
+1. Scroll to **Import sources**.
+1. Enable the desired **Import sources**.
 
 ## Important Notes
 
 Note the following:
 
-- Exports are stored in a temporary [shared directory](../../../development/shared_files.md) and are deleted every 24 hours by a specific worker.
+- Exports are stored in a temporary directory and are deleted every 24 hours by a specific worker.
 - To preserve group-level relationships from imported projects, run the Group Import/Export first, to allow projects to
 be imported into the desired group structure.
 - Imported groups are given a `private` visibility level, unless imported into a parent group.
@@ -48,6 +48,7 @@ The following items are exported:
 - Subgroups (including all the aforementioned data)
 - Epics
 - Events
+- Wikis **(PREMIUM SELF)** (Introduced in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53247))
 
 The following items are **not** exported:
 
@@ -57,7 +58,7 @@ The following items are **not** exported:
 
 NOTE:
 For more details on the specific data persisted in a group export, see the
-[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/group/import_export.yml) file.
+[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/import_export/group/import_export.yml) file.
 
 ## Exporting a Group
 
@@ -69,8 +70,8 @@ For more details on the specific data persisted in a group export, see the
 
    ![Export group panel](img/export_panel_v13_0.png)
 
-1. After the export is generated, you should receive an e-mail with a link to the [exported contents](#exported-contents)
-   in a compressed tar archive, with contents in JSON format.
+1. After the export is generated, you should receive an email with a link to the [exported contents](#exported-contents)
+   in a compressed tar archive, with contents in NDJSON format.
 
 1. Alternatively, you can come back to the project settings and download the
    file from there by clicking **Download export**, or generate a new file by clicking **Regenerate export**.
@@ -83,7 +84,7 @@ As an administrator, you can modify the maximum import file size. To do so, use 
 
 You can export groups from the [Community Edition to the Enterprise Edition](https://about.gitlab.com/install/ce-or-ee/) and vice versa.
 
-The Enterprise Edition retains some group data that isn't part of the Community Edition. If you're exporting a group from the Enterprise Edition to the Community Edition, you may lose this data. For more information, see [downgrading from EE to CE](../../../README.md).
+The Enterprise Edition retains some group data that isn't part of the Community Edition. If you're exporting a group from the Enterprise Edition to the Community Edition, you may lose this data. For more information, see [downgrading from EE to CE](../../../index.md).
 
 ## Importing the group
 
@@ -92,9 +93,9 @@ on an existing group's page.
 
    ![Navigation paths to create a new group](img/new_group_navigation_v13_1.png)
 
-1. On the New Group page, select the **Import group** tab.
+1. On the New Group page, select the **Import group**.
 
-   ![Fill in group details](img/import_panel_v13_4.png)
+   ![Fill in group details](img/import_panel_v14_1.png)
 
 1. Enter your group name.
 
@@ -107,6 +108,14 @@ on an existing group's page.
 1. Click **Import group** to begin importing. Your newly imported group page appears after the operation completes.
 
 ## Version history
+
+### 14.0+
+
+In GitLab 14.0, the JSON format is no longer supported for project and group exports. To allow for a
+transitional period, you can still import any JSON exports. The new format for imports and exports
+is NDJSON.
+
+### 13.0+
 
 GitLab can import bundles that were exported from a different GitLab deployment.
 This ability is limited to two previous GitLab [minor](../../../policy/maintenance.md#versioning)

@@ -4,7 +4,7 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Package Registry administration
+# GitLab Package Registry administration **(FREE SELF)**
 
 GitLab Packages allows organizations to use GitLab as a private repository
 for a variety of common package managers. Users are able to build and publish
@@ -26,6 +26,7 @@ The Package Registry supports the following formats:
 <tr><td><a href="https://docs.gitlab.com/ee/user/packages/nuget_repository/index.html">NuGet</a></td><td>12.8+</td></tr>
 <tr><td><a href="https://docs.gitlab.com/ee/user/packages/pypi_repository/index.html">PyPI</a></td><td>12.10+</td></tr>
 <tr><td><a href="https://docs.gitlab.com/ee/user/packages/generic_packages/index.html">Generic packages</a></td><td>13.5+</td></tr>
+<tr><td><a href="https://docs.gitlab.com/ee/user/packages/helm_repository/index.html">Helm Charts</a></td><td>14.1+</td></tr>
 </table>
 </div>
 </div>
@@ -43,14 +44,14 @@ guides you through the process.
 | CocoaPods | [#36890](https://gitlab.com/gitlab-org/gitlab/-/issues/36890) |
 | Conda     | [#36891](https://gitlab.com/gitlab-org/gitlab/-/issues/36891) |
 | CRAN      | [#36892](https://gitlab.com/gitlab-org/gitlab/-/issues/36892) |
-| Debian    | [WIP: Merge Request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44746) |
+| Debian    | [Draft: Merge Request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50438) |
 | Opkg      | [#36894](https://gitlab.com/gitlab-org/gitlab/-/issues/36894) |
 | P2        | [#36895](https://gitlab.com/gitlab-org/gitlab/-/issues/36895) |
 | Puppet    | [#36897](https://gitlab.com/gitlab-org/gitlab/-/issues/36897) |
 | RPM       | [#5932](https://gitlab.com/gitlab-org/gitlab/-/issues/5932) |
 | RubyGems  | [#803](https://gitlab.com/gitlab-org/gitlab/-/issues/803) |
 | SBT       | [#36898](https://gitlab.com/gitlab-org/gitlab/-/issues/36898) |
-| Terraform | [WIP: Merge Request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18834) |
+| Terraform | [Draft: Merge Request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18834) |
 | Vagrant   | [#36899](https://gitlab.com/gitlab-org/gitlab/-/issues/36899) |
 
 <!-- vale gitlab.Spelling = YES -->
@@ -97,6 +98,12 @@ To enable the Packages feature:
    ```
 
 1. [Restart GitLab](../restart_gitlab.md#helm-chart-installations "How to reconfigure Helm GitLab") for the changes to take effect.
+
+## Rate limits
+
+When downloading packages as dependencies in downstream projects, many requests are made through the
+Packages API. You may therefore reach enforced user and IP rate limits. To address this issue, you
+can define specific rate limits for the Packages API. For more details, see [Package Registry Rate Limits](../../user/admin_area/settings/package_registry_rate_limits.md).
 
 ## Changing the storage path
 
@@ -230,4 +237,18 @@ For installations from source:
 
 ```shell
 RAILS_ENV=production sudo -u git -H bundle exec rake gitlab:packages:migrate
+```
+
+You can optionally track progress and verify that all packages migrated successfully.
+
+From the [PostgreSQL console](https://docs.gitlab.com/omnibus/settings/database.html#connecting-to-the-bundled-postgresql-database)
+(`sudo gitlab-psql -d gitlabhq_production` for Omnibus GitLab), verify that `objectstg` below (where
+`file_store=2`) has the count of all packages:
+
+```shell
+gitlabhq_production=# SELECT count(*) AS total, sum(case when file_store = '1' then 1 else 0 end) AS filesystem, sum(case when file_store = '2' then 1 else 0 end) AS objectstg FROM packages_package_files;
+
+total | filesystem | objectstg
+------+------------+-----------
+ 34   |          0 |        34
 ```

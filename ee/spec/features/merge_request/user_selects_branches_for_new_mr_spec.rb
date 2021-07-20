@@ -20,12 +20,15 @@ RSpec.describe 'Merge request > User selects branches for new MR', :js do
   context 'create a merge request for the selected branches' do
     before do
       visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature_conflict' })
-      fill_in 'merge_request_title', with: 'A Test MR'
-      click_button 'Submit merge request'
     end
 
-    it 'shows the saved MR' do
-      expect(page).to have_content('A Test MR')
+    context 'saving the MR' do
+      it 'shows the saved MR' do
+        fill_in 'merge_request_title', with: 'Test'
+        click_button 'Create merge request'
+
+        expect(page).to have_button('Close merge request')
+      end
     end
   end
 end

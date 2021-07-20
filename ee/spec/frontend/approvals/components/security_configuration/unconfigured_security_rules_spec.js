@@ -54,7 +54,43 @@ describe('UnconfiguredSecurityRules component', () => {
     });
 
     it('should render a unconfigured-security-rule component for every security rule ', () => {
-      expect(wrapper.findAll(UnconfiguredSecurityRule).length).toBe(2);
+      expect(wrapper.findAll(UnconfiguredSecurityRule).length).toBe(3);
+    });
+
+    describe('when license_scanning is set to true', () => {
+      beforeEach(() => {
+        store.state.securityConfiguration.configuration = {
+          features: [{ type: 'license_scanning', configured: true }],
+        };
+      });
+
+      it('returns true', () => {
+        expect(wrapper.vm.hasConfiguredJob({ name: 'License-Check' })).toBe(true);
+      });
+    });
+
+    describe('when license_scanning is set to false', () => {
+      beforeEach(() => {
+        store.state.securityConfiguration.configuration = {
+          features: [{ type: 'license_scanning', configured: false }],
+        };
+      });
+
+      it('returns false', () => {
+        expect(wrapper.vm.hasConfiguredJob({ name: 'License-Check' })).toBe(false);
+      });
+    });
+
+    describe('when all other scanners are set to false', () => {
+      beforeEach(() => {
+        store.state.securityConfiguration.configuration = {
+          features: [{ type: 'container_scanning', configured: false }],
+        };
+      });
+
+      it('returns true', () => {
+        expect(wrapper.vm.hasConfiguredJob({ name: 'Vulnerability-Check' })).toBe(true);
+      });
     });
   });
 

@@ -18,7 +18,11 @@ RSpec.describe EE::Audit::ProjectFeatureChangesAuditor do
 
       columns.each do |column|
         previous_value = features.method(column).call
-        new_value = ProjectFeature::DISABLED
+        new_value = if previous_value == ProjectFeature::DISABLED
+                      ProjectFeature::ENABLED
+                    else
+                      ProjectFeature::DISABLED
+                    end
 
         features.update_attribute(column, new_value)
         expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)

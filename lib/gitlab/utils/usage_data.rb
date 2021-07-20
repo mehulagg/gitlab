@@ -24,7 +24,8 @@
 #     alt_usage_data(fallback: nil) { Gitlab.config.registry.enabled }
 #
 #   * redis_usage_data method
-#     handles ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent
+#     handles ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent,
+#     Gitlab::UsageDataCounters::HLLRedisCounter::EventError
 #     returns -1 when a block is sent or hash with all values -1 when a counter is sent
 #     different behaviour due to 2 different implementations of redis counter
 #
@@ -35,13 +36,13 @@
 module Gitlab
   module Utils
     module UsageData
+      include Gitlab::Utils::StrongMemoize
       extend self
 
       FALLBACK = -1
+      HISTOGRAM_FALLBACK = { '-1' => -1 }.freeze
       DISTRIBUTED_HLL_FALLBACK = -2
-      ALL_TIME_PERIOD_HUMAN_NAME = "all_time"
-      WEEKLY_PERIOD_HUMAN_NAME = "weekly"
-      MONTHLY_PERIOD_HUMAN_NAME = "monthly"
+      MAX_BUCKET_SIZE = 100
 
       def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
         if batch
@@ -86,13 +87,88 @@ module Gitlab
         FALLBACK
       end
 
+      # We don't support batching with histograms.
+      # Please avoid using this method on large tables.
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/323949.
+      #
+      # rubocop: disable CodeReuse/ActiveRecord
+      def histogram(relation, column, buckets:, bucket_size: buckets.size)
+        # Using lambda to avoid exposing histogram specific methods
+        parameters_valid = lambda do
+          error_message =
+            if buckets.first == buckets.last
+              'Lower bucket bound cannot equal to upper bucket bound'
+            elsif bucket_size == 0
+              'Bucket size cannot be zero'
+            elsif bucket_size > MAX_BUCKET_SIZE
+              "Bucket size #{bucket_size} exceeds the limit of #{MAX_BUCKET_SIZE}"
+            end
+
+          return true unless error_message
+
+          exception = ArgumentError.new(error_message)
+          exception.set_backtrace(caller)
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception)
+
+          false
+        end
+
+        return HISTOGRAM_FALLBACK unless parameters_valid.call
+
+        count_grouped = relation.group(column).select(Arel.star.count.as('count_grouped'))
+        cte = Gitlab::SQL::CTE.new(:count_cte, count_grouped)
+
+        # For example, 9 segments gives 10 buckets
+        bucket_segments = bucket_size - 1
+
+        width_bucket = Arel::Nodes::NamedFunction
+          .new('WIDTH_BUCKET', [cte.table[:count_grouped], buckets.first, buckets.last, bucket_segments])
+          .as('buckets')
+
+        query = cte
+          .table
+          .project(width_bucket, cte.table[:count])
+          .group('buckets')
+          .order('buckets')
+          .with(cte.to_arel)
+
+        # Return the histogram as a Hash because buckets are unique.
+        relation
+          .connection
+          .exec_query(query.to_sql)
+          .rows
+          .to_h
+          # Keys are converted to strings in Usage Ping JSON
+          .stringify_keys
+      rescue ActiveRecord::StatementInvalid => e
+        Gitlab::AppJsonLogger.error(
+          event: 'histogram',
+          relation: relation.table_name,
+          operation: 'histogram',
+          operation_args: [column, buckets.first, buckets.last, bucket_segments],
+          query: query.to_sql,
+          message: e.message
+        )
+
+        HISTOGRAM_FALLBACK
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      def add(*args)
+        return -1 if args.any?(&:negative?)
+
+        args.sum
+      rescue StandardError
+        FALLBACK
+      end
+
       def alt_usage_data(value = nil, fallback: FALLBACK, &block)
         if block_given?
           yield
         else
           value
         end
-      rescue
+      rescue StandardError
         fallback
       end
 
@@ -104,11 +180,13 @@ module Gitlab
         end
       end
 
-      def with_prometheus_client(fallback: nil, verify: true)
+      def with_prometheus_client(fallback: {}, verify: true)
         client = prometheus_client(verify: verify)
         return fallback unless client
 
         yield client
+      rescue StandardError
+        fallback
       end
 
       def measure_duration
@@ -126,9 +204,55 @@ module Gitlab
       # @param event_name [String] the event name
       # @param values [Array|String] the values counted
       def track_usage_event(event_name, values)
-        return unless Feature.enabled?(:"usage_data_#{event_name}", default_enabled: true)
-
         Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name.to_s, values: values)
+      end
+
+      def maximum_id(model, column = nil)
+        key = :"#{model.name.downcase.gsub('::', '_')}_maximum_id"
+        column_to_read = column || :id
+
+        strong_memoize(key) do
+          model.maximum(column_to_read)
+        end
+      end
+
+      # rubocop: disable UsageData/LargeTable:
+      def jira_integration_data
+        data = {
+          projects_jira_server_active: 0,
+          projects_jira_cloud_active: 0
+        }
+
+        # rubocop: disable CodeReuse/ActiveRecord
+        ::Integrations::Jira.active.includes(:jira_tracker_data).find_in_batches(batch_size: 100) do |services|
+          counts = services.group_by do |service|
+            # TODO: Simplify as part of https://gitlab.com/gitlab-org/gitlab/issues/29404
+            service_url = service.data_fields&.url || (service.properties && service.properties['url'])
+            service_url&.include?('.atlassian.net') ? :cloud : :server
+          end
+
+          data[:projects_jira_server_active] += counts[:server].size if counts[:server]
+          data[:projects_jira_cloud_active] += counts[:cloud].size if counts[:cloud]
+        end
+
+        data
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+      # rubocop: enable UsageData/LargeTable:
+
+      def minimum_id(model, column = nil)
+        key = :"#{model.name.downcase.gsub('::', '_')}_minimum_id"
+        column_to_read = column || :id
+
+        strong_memoize(key) do
+          model.minimum(column_to_read)
+        end
+      end
+
+      def epics_deepest_relationship_level
+        # rubocop: disable UsageData/LargeTable
+        { epics_deepest_relationship_level: ::Epic.deepest_relationship_level.to_i }
+        # rubocop: enable UsageData/LargeTable
       end
 
       private
@@ -144,7 +268,7 @@ module Gitlab
           api_url = "#{scheme}://#{server_address}"
           client = Gitlab::PrometheusClient.new(api_url, allow_local_requests: true, verify: verify)
           break client if client.ready?
-        rescue
+        rescue StandardError
           nil
         end
       end
@@ -160,7 +284,7 @@ module Gitlab
 
       def redis_usage_counter
         yield
-      rescue ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent
+      rescue ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent, Gitlab::UsageDataCounters::HLLRedisCounter::EventError
         FALLBACK
       end
 

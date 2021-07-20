@@ -1,29 +1,16 @@
 # frozen_string_literal: true
 
-require_relative 'danger_spec_helper'
+require 'gitlab-dangerfiles'
+require 'gitlab/dangerfiles/spec_helper'
 
 require_relative '../../../tooling/danger/feature_flag'
 
 RSpec.describe Tooling::Danger::FeatureFlag do
-  include DangerSpecHelper
+  include_context "with dangerfile"
 
-  let(:added_files) { nil }
-  let(:modified_files) { nil }
-  let(:deleted_files) { nil }
-  let(:fake_git) { double('fake-git', added_files: added_files, modified_files: modified_files, deleted_files: deleted_files) }
+  let(:fake_danger) { DangerSpecHelper.fake_danger.include(described_class) }
 
-  let(:mr_labels) { nil }
-  let(:mr_json) { nil }
-  let(:fake_gitlab) { double('fake-gitlab', mr_labels: mr_labels, mr_json: mr_json) }
-
-  let(:changes_by_category) { nil }
-  let(:sanitize_mr_title) { nil }
-  let(:ee?) { false }
-  let(:fake_helper) { double('fake-helper', changes_by_category: changes_by_category, sanitize_mr_title: sanitize_mr_title, ee?: ee?) }
-
-  let(:fake_danger) { new_fake_danger.include(described_class) }
-
-  subject(:feature_flag) { fake_danger.new(git: fake_git, gitlab: fake_gitlab, helper: fake_helper) }
+  subject(:feature_flag) { fake_danger.new(helper: fake_helper) }
 
   describe '#feature_flag_files' do
     let(:feature_flag_files) do
@@ -100,7 +87,11 @@ RSpec.describe Tooling::Danger::FeatureFlag do
     let(:feature_flag_path) { 'config/feature_flags/development/entry.yml' }
     let(:group) { 'group::source code' }
     let(:raw_yaml) do
-      YAML.dump('group' => group)
+      YAML.dump(
+        'group' => group,
+        'default_enabled' => true,
+        'rollout_issue_url' => 'https://gitlab.com/gitlab-org/gitlab/-/issues/1'
+      )
     end
 
     subject(:found) { described_class.new(feature_flag_path) }
@@ -119,6 +110,18 @@ RSpec.describe Tooling::Danger::FeatureFlag do
     describe '#group' do
       it 'returns the group found in the YAML' do
         expect(found.group).to eq(group)
+      end
+    end
+
+    describe '#default_enabled' do
+      it 'returns the default_enabled found in the YAML' do
+        expect(found.default_enabled).to eq(true)
+      end
+    end
+
+    describe '#rollout_issue_url' do
+      it 'returns the rollout_issue_url found in the YAML' do
+        expect(found.rollout_issue_url).to eq('https://gitlab.com/gitlab-org/gitlab/-/issues/1')
       end
     end
 

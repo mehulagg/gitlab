@@ -16,12 +16,16 @@ module EE
       params[:trial_onboarding_flow] == 'true'
     end
 
+    def show_trial_during_signup?
+      current_user.setup_for_company
+    end
+
     def in_trial_during_signup_flow?
       params[:trial] == 'true'
     end
 
-    def in_invitation_flow?
-      redirect_path.present? && redirect_path.starts_with?('/-/invites/')
+    def already_showed_trial_activation?
+      params[:hide_trial_activation_banner] == 'true'
     end
 
     def in_oauth_flow?
@@ -40,7 +44,7 @@ module EE
 
     def show_signup_flow_progress_bar?
       return true if in_subscription_flow?
-      return false if in_invitation_flow? || in_oauth_flow? || in_trial_flow?
+      return false if user_has_memberships? || in_oauth_flow? || in_trial_flow?
 
       signup_onboarding_enabled?
     end
@@ -50,7 +54,7 @@ module EE
       get_started = _('Get started!')
 
       return continue if in_subscription_flow? || in_trial_flow?
-      return get_started if in_invitation_flow? || in_oauth_flow?
+      return get_started if user_has_memberships? || in_oauth_flow?
 
       signup_onboarding_enabled? ? continue : get_started
     end
@@ -62,12 +66,14 @@ module EE
       }
     end
 
-    def skip_setup_for_company?
-      current_user.members.any?
+    def user_has_memberships?
+      strong_memoize(:user_has_memberships) do
+        current_user.members.any?
+      end
     end
 
     def signup_onboarding_enabled?
-      ::Gitlab.dev_env_or_com? && ::Feature.enabled?(:signup_onboarding, default_enabled: true)
+      ::Gitlab.dev_env_or_com?
     end
   end
 end

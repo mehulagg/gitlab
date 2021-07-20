@@ -95,7 +95,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def after_omniauth_failure_path_for(scope)
-    if Feature.enabled?(:user_mode_in_session)
+    if Gitlab::CurrentSettings.admin_mode
       return new_admin_session_path if current_user_mode.admin_mode_requested?
     end
 
@@ -112,7 +112,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
       log_audit_event(current_user, with: oauth['provider'])
 
-      if Feature.enabled?(:user_mode_in_session)
+      if Gitlab::CurrentSettings.admin_mode
         return admin_mode_flow(auth_module::User) if current_user_mode.admin_mode_requested?
       end
 
@@ -287,6 +287,10 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def fail_admin_mode_invalid_credentials
     redirect_to new_admin_session_path, alert: _('Invalid login or password')
   end
+
+  def context_user
+    current_user
+  end
 end
 
-OmniauthCallbacksController.prepend_if_ee('EE::OmniauthCallbacksController')
+OmniauthCallbacksController.prepend_mod_with('OmniauthCallbacksController')

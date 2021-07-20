@@ -31,11 +31,6 @@ rules:
     - error
     - allowElseIf: true
   lines-between-class-members: off
-  # Disabled for now, to make the plugin-vue 4.5 -> 5.0 update smoother
-  vue/no-confusing-v-for-v-if: error
-  vue/no-use-v-if-with-v-for: off
-  vue/no-v-html: error
-  vue/use-v-on-exact: off
   # all offenses of no-jquery/no-animate-toggle are false positives ( $toast.show() )
   no-jquery/no-animate-toggle: off
   no-jquery/no-event-shorthand: off
@@ -43,6 +38,17 @@ rules:
   promise/always-return: off
   promise/no-callback-in-promise: off
   '@gitlab/no-global-event-off': error
+  no-param-reassign:
+    - error
+    - props: true
+      ignorePropertyModificationsFor:
+        - acc
+        - accumulator
+        - el
+        - element
+        - state
+      ignorePropertyModificationsForRegex:
+        - '^draft'
   import/order:
     - error
     - groups:
@@ -89,3 +95,19 @@ overrides:
     rules:
       '@gitlab/require-i18n-strings': off
       '@gitlab/no-runtime-template-compiler': off
+  - files:
+      - 'config/**/*'
+      - 'scripts/**/*'
+      - '*.config.js'
+      - '*.config.*.js'
+    rules:
+      '@gitlab/require-i18n-strings': off
+      import/no-extraneous-dependencies: off
+      import/no-commonjs: off
+      import/no-nodejs-modules: off
+      filenames/match-regex: off
+      no-console: off
+  - files:
+      - '*.stories.js'
+    rules:
+      filenames/match-regex: off

@@ -30,13 +30,17 @@ export default {
       type: String,
       required: true,
     },
+    statsUrl: {
+      type: String,
+      required: true,
+    },
   },
   detailedMetrics: [
     {
       metric: 'active-record',
       title: 'pg',
       header: s__('PerformanceBar|SQL queries'),
-      keys: ['sql', 'cached'],
+      keys: ['sql', 'cached', 'transaction', 'db_role'],
     },
     {
       metric: 'bullet',
@@ -65,8 +69,14 @@ export default {
     },
     {
       metric: 'external-http',
+      title: 'external',
       header: s__('PerformanceBar|External Http calls'),
       keys: ['label', 'code', 'proxy', 'error'],
+    },
+    {
+      metric: 'memory',
+      header: s__('PerformanceBar|Memory'),
+      keys: ['item_header', 'item_content'],
     },
     {
       metric: 'total',
@@ -152,16 +162,18 @@ export default {
         id="peek-view-trace"
         class="view"
       >
-        <a class="gl-text-blue-300" :href="currentRequest.details.tracing.tracing_url">{{
-          s__('PerformanceBar|trace')
+        <a class="gl-text-blue-200" :href="currentRequest.details.tracing.tracing_url">{{
+          s__('PerformanceBar|Trace')
         }}</a>
       </div>
-      <add-request v-on="$listeners" />
       <div v-if="currentRequest.details" id="peek-download" class="view">
-        <a class="gl-text-blue-300" :download="downloadName" :href="downloadPath">{{
+        <a class="gl-text-blue-200" :download="downloadName" :href="downloadPath">{{
           s__('PerformanceBar|Download')
         }}</a>
       </div>
+      <a v-if="statsUrl" class="gl-text-blue-200 view" :href="statsUrl">{{
+        s__('PerformanceBar|Stats')
+      }}</a>
       <request-selector
         v-if="currentRequest"
         :current-request="currentRequest"
@@ -169,6 +181,7 @@ export default {
         class="ml-auto"
         @change-current-request="changeCurrentRequest"
       />
+      <add-request v-on="$listeners" />
     </div>
   </div>
 </template>

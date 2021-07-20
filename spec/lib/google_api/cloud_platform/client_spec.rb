@@ -100,7 +100,6 @@ RSpec.describe GoogleApi::CloudPlatform::Client do
             ]
           },
           master_auth: {
-            username: 'admin',
             client_certificate_config: {
               issue_client_certificate: true
             }

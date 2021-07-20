@@ -11,10 +11,10 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
   let(:description) { 'simple description' }
   let(:issue) do
     create(:issue, project: project, labels: [label1, label2],
-                   milestone: milestone, description: description)
+                   milestone: milestone, description: description, weight: 3)
   end
 
-  subject { described_class.new(issue.project, user) }
+  subject { described_class.new(project: issue.project, current_user: user) }
 
   let(:epic) { Epic.last }
 
@@ -57,15 +57,19 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           end
         end
 
+        it 'counts a usage ping event' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_issue_promoted_to_epic)
+            .with(author: user)
+
+          subject.execute(issue)
+        end
+
         context 'when promoting issue', :snowplow do
           let!(:issue_mentionable_note) { create(:note, noteable: issue, author: user, project: project, note: "note with mention #{user.to_reference}") }
           let!(:issue_note) { create(:note, noteable: issue, author: user, project: project, note: "note without mention") }
 
           before do
             subject.execute(issue)
-
-            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
           end
 
           it 'creates a new epic with correct attributes' do
@@ -97,6 +101,11 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             expect(issue.promoted_to_epic).to eq(epic)
           end
 
+          it 'emits a snowplow event' do
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
+                                  project: project, user: user, namespace: group, weight: 3)
+          end
+
           context 'when issue description has mentions and has notes with mentions' do
             let(:issue) { create(:issue, project: project, description: "description with mention to #{user.to_reference}") }
 
@@ -118,6 +127,34 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
               expect(new_image_uploader.markdown_link).not_to eq(image_uploader.markdown_link)
               expect(epic.description).to eq("A description and image: #{new_image_uploader.markdown_link}")
             end
+          end
+        end
+
+        context 'when issue has resource state event' do
+          let!(:issue_event) { create(:resource_state_event, issue: issue) }
+
+          it 'does not raise error' do
+            expect { subject.execute(issue) }.not_to raise_error
+          end
+
+          it 'creates a close state event for promoted issue' do
+            # promote issue to epic also copies over existing issue state resource events to the epic
+            # so in this case we have an existing resource event defined above and one that we create
+            # for issue close event, which we are not copying over
+            expect { subject.execute(issue) }.to change(ResourceStateEvent, :count).by(2).and(
+              change(ResourceStateEvent.where(issue_id: issue), :count).by(1)
+            )
+          end
+
+          it 'promotes issue successfully' do
+            epic = subject.execute(issue)
+
+            resource_state_event = epic.resource_state_events.first
+            expect(epic.title).to eq(issue.title)
+            expect(issue.promoted_to_epic).to eq(epic)
+            expect(resource_state_event.issue_id).to eq(nil)
+            expect(resource_state_event.epic_id).to eq(epic.id)
+            expect(resource_state_event.state).to eq(issue_event.state)
           end
         end
 
@@ -176,6 +213,21 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
               expect(epic.parent).to eq(parent_epic)
             end
           end
+
+          context 'when issue and epic are confidential' do
+            before do
+              issue.update_attribute(:confidential, true)
+              parent_epic.update_attribute(:confidential, true)
+            end
+
+            it 'promotes issue to epic' do
+              epic = subject.execute(issue, group)
+
+              expect(issue.reload.promoted_to_epic_id).to eq(epic.id)
+              expect(epic.confidential).to eq(true)
+              expect(epic.parent).to eq(parent_epic)
+            end
+          end
         end
 
         context 'when issue was already promoted' do
@@ -201,7 +253,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             expect(epic.notes.where(discussion_id: discussion.discussion_id).count).to eq(0)
             expect(issue.notes.where(discussion_id: discussion.discussion_id).count).to eq(1)
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
+                                  project: project, user: user, namespace: group, weight: 3)
           end
 
           it 'copies note attachments' do
@@ -211,7 +263,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
 
             expect(epic.notes.user.first.attachment).to be_kind_of(AttachmentUploader)
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
+                                  project: project, user: user, namespace: group, weight: 3)
           end
         end
 

@@ -17,37 +17,61 @@ RSpec.describe 'Issue Sidebar' do
     sign_in(user)
   end
 
+  context 'Assignees', :js do
+    let(:user2) { create(:user) }
+    let(:issue2) { create(:issue, project: project, author: user2) }
+
+    it 'shows label text as "Apply" when assignees are changed' do
+      project.add_developer(user)
+      visit_issue(project, issue2)
+
+      open_assignees_dropdown
+      click_on 'Unassigned'
+
+      expect(page).to have_content('Apply')
+    end
+  end
+
   context 'updating weight', :js do
     before do
       project.add_maintainer(user)
       visit_issue(project, issue)
+      wait_for_all_requests
     end
 
-    it 'updates weight in sidebar to 1' do
+    it 'updates weight in sidebar to 0' do
       page.within '.weight' do
-        click_link 'Edit'
-        find('input').send_keys 1, :enter
+        click_button 'Edit'
+        send_keys 0, :enter
 
-        page.within '.value' do
-          expect(page).to have_content '1'
-        end
+        expect(page).to have_text '0 - remove weight'
       end
     end
 
-    it 'updates weight in sidebar to no weight' do
+    it 'updates weight in sidebar to no weight by clicking `remove weight`' do
       page.within '.weight' do
-        click_link 'Edit'
-        find('input').send_keys 1, :enter
+        click_button 'Edit'
+        send_keys 1, :enter
 
-        page.within '.value' do
-          expect(page).to have_content '1'
-        end
+        expect(page).to have_text '1 - remove weight'
 
-        click_link 'remove weight'
+        click_button 'remove weight'
 
-        page.within '.value' do
-          expect(page).to have_content 'None'
-        end
+        expect(page).to have_text 'None'
+      end
+    end
+
+    it 'updates weight in sidebar to no weight by setting an empty value' do
+      page.within '.weight' do
+        click_button 'Edit'
+        send_keys 1, :enter
+
+        expect(page).to have_text '1 - remove weight'
+
+        click_button 'Edit'
+        send_keys :backspace, :enter
+
+        expect(page).to have_text 'None'
       end
     end
   end
@@ -120,39 +144,93 @@ RSpec.describe 'Issue Sidebar' do
 
   context 'Iterations', :js do
     context 'when iterations feature available' do
-      let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now, title: 'Iteration 1') }
-      let_it_be(:iteration2) { create(:iteration, group: group, start_date: 2.days.ago, due_date: 1.day.ago, title: 'Iteration 2', state: 'closed', skip_future_date_validation: true) }
+      let_it_be(:iteration_cadence) { create(:iterations_cadence, group: group, active: true) }
+      let_it_be(:iteration) { create(:iteration, iterations_cadence: iteration_cadence, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
+      let_it_be(:iteration2) { create(:iteration, iterations_cadence: iteration_cadence, group: group, start_date: 2.days.ago, due_date: 1.day.ago, state: 'closed', skip_future_date_validation: true) }
 
       before do
-        iteration
         stub_licensed_features(iterations: true)
 
         project.add_developer(user)
-
-        visit_issue(project, issue)
-
-        wait_for_all_requests
       end
 
-      it 'selects and updates the right iteration' do
-        find_and_click_edit_iteration
+      context 'when `iteration_cadences` feature flag is off' do
+        before do
+          stub_feature_flags(iteration_cadences: false)
 
-        select_iteration(iteration.title)
+          visit_issue(project, issue)
 
-        expect(page.find('[data-testid="select-iteration"]')).to have_content('Iteration 1')
+          wait_for_all_requests
+        end
 
-        find_and_click_edit_iteration
+        it 'selects and updates the right iteration', :aggregate_failures do
+          find_and_click_edit_iteration
 
-        select_iteration('No iteration')
+          within '[data-testid="iteration-edit"]' do
+            expect(page).not_to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
 
-        expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+          select_iteration(iteration.title)
+
+          within '[data-testid="select-iteration"]' do
+            expect(page).not_to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
+
+          find_and_click_edit_iteration
+
+          select_iteration('No iteration')
+
+          expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+        end
+
+        it 'does not show closed iterations' do
+          find_and_click_edit_iteration
+
+          page.within '[data-testid="iteration-edit"]' do
+            expect(page).not_to have_content iteration2.title
+          end
+        end
       end
 
-      it 'does not show closed iterations' do
-        find_and_click_edit_iteration
+      context 'when `iteration_cadences` feature flag is on' do
+        before do
+          stub_feature_flags(iteration_cadences: true)
 
-        page.within '.milestone' do
-          expect(page).not_to have_content iteration2.title
+          visit_issue(project, issue)
+
+          wait_for_all_requests
+        end
+
+        it 'selects and updates the right iteration', :aggregate_failures do
+          find_and_click_edit_iteration
+
+          within '[data-testid="iteration-edit"]' do
+            expect(page).to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
+
+          select_iteration(iteration.title)
+
+          within '[data-testid="select-iteration"]' do
+            expect(page).to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
+
+          find_and_click_edit_iteration
+
+          select_iteration('No iteration')
+
+          expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+        end
+
+        it 'does not show closed iterations' do
+          find_and_click_edit_iteration
+
+          page.within '[data-testid="iteration-edit"]' do
+            expect(page).not_to have_content iteration2.title
+          end
         end
       end
     end
@@ -191,7 +269,9 @@ RSpec.describe 'Issue Sidebar' do
   end
 
   def find_and_click_edit_iteration
-    page.find('[data-testid="iteration-edit-link"]').click
+    page.find('[data-testid="iteration-edit"] [data-testid="edit-button"]').click
+
+    wait_for_all_requests
   end
 
   def select_iteration(iteration_name)
@@ -207,5 +287,12 @@ RSpec.describe 'Issue Sidebar' do
   def open_issue_sidebar
     find('aside.right-sidebar.right-sidebar-collapsed .js-sidebar-toggle').click
     find('aside.right-sidebar.right-sidebar-expanded')
+  end
+
+  def open_assignees_dropdown
+    page.within('.assignee') do
+      click_button('Edit')
+      wait_for_requests
+    end
   end
 end

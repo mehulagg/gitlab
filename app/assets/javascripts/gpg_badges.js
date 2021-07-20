@@ -1,7 +1,8 @@
 import $ from 'jquery';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { parseQueryStringIntoObject } from '~/lib/utils/common_utils';
+import { queryToObject } from '~/lib/utils/url_utility';
+
 import { __ } from '~/locale';
 
 export default class GpgBadges {
@@ -16,7 +17,10 @@ export default class GpgBadges {
     badges.html('<span class="gl-spinner gl-spinner-orange gl-spinner-sm"></span>');
     badges.children().attr('aria-label', __('Loading'));
 
-    const displayError = () => createFlash(__('An error occurred while loading commit signatures'));
+    const displayError = () =>
+      createFlash({
+        message: __('An error occurred while loading commit signatures'),
+      });
 
     const endpoint = tag.data('signaturesPath');
     if (!endpoint) {
@@ -24,7 +28,7 @@ export default class GpgBadges {
       return Promise.reject(new Error(__('Missing commit signatures endpoint!')));
     }
 
-    const params = parseQueryStringIntoObject(tag.serialize());
+    const params = queryToObject(tag.serialize());
     return axios
       .get(endpoint, { params })
       .then(({ data }) => {

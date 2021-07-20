@@ -1,45 +1,59 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
+import { IssuableType } from '~/issue_show/constants';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { store } from '~/notes/stores';
+import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
-import IterationSelect from './components/iteration_select.vue';
-import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
+import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue';
+import IterationSidebarDropdownWidget from './components/iteration_sidebar_dropdown_widget.vue';
+import SidebarDropdownWidget from './components/sidebar_dropdown_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
-import SidebarWeight from './components/weight/sidebar_weight.vue';
-import SidebarStore from './stores/sidebar_store';
+import SidebarWeightWidget from './components/weight/sidebar_weight_widget.vue';
+import { IssuableAttributeType } from './constants';
 
 Vue.use(VueApollo);
 
-const mountWeightComponent = (mediator) => {
+const mountWeightComponent = () => {
   const el = document.querySelector('.js-sidebar-weight-entry-point');
 
   if (!el) return false;
 
+  const { canEdit, projectPath, issueIid } = el.dataset;
+
   return new Vue({
     el,
+    apolloProvider,
     components: {
-      SidebarWeight,
+      SidebarWeightWidget,
+    },
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('sidebar-weight', {
+      createElement('sidebar-weight-widget', {
         props: {
-          mediator,
+          fullPath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
         },
       }),
   });
 };
 
-const mountStatusComponent = (mediator) => {
+const mountStatusComponent = () => {
   const el = document.querySelector('.js-sidebar-status-entry-point');
 
   if (!el) {
     return false;
   }
 
+  const { iid, fullPath, issuableType, canEdit } = el.dataset;
+
   return new Vue({
     el,
+    apolloProvider,
     store,
     components: {
       SidebarStatus,
@@ -47,37 +61,64 @@ const mountStatusComponent = (mediator) => {
     render: (createElement) =>
       createElement('sidebar-status', {
         props: {
-          mediator,
+          issuableType,
+          iid,
+          fullPath,
+          canUpdate: parseBoolean(canEdit),
         },
       }),
   });
 };
 
-const mountEpicsSelect = () => {
+function mountCveIdRequestComponent() {
+  const el = document.getElementById('js-sidebar-cve-id-request-entry-point');
+
+  if (!el) {
+    return false;
+  }
+
+  const { iid, fullPath } = CEMountSidebar.getSidebarOptions();
+
+  return new Vue({
+    store,
+    el,
+    provide: {
+      iid: String(iid),
+      fullPath,
+    },
+    render: (createElement) => createElement(CveIdRequest),
+  });
+}
+
+function mountEpicsSelect() {
   const el = document.querySelector('#js-vue-sidebar-item-epics-select');
 
   if (!el) return false;
 
-  const { groupId, issueId, epicIssueId, canEdit } = el.dataset;
-  const sidebarStore = new SidebarStore();
+  const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
 
   return new Vue({
     el,
+    apolloProvider,
     components: {
-      SidebarItemEpicsSelect,
+      SidebarDropdownWidget,
+    },
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('sidebar-item-epics-select', {
+      createElement('sidebar-dropdown-widget', {
         props: {
-          sidebarStore,
-          groupId: Number(groupId),
-          issueId: Number(issueId),
-          epicIssueId: Number(epicIssueId),
-          canEdit: parseBoolean(canEdit),
+          attrWorkspacePath: groupPath,
+          workspacePath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
+          issuableAttribute: IssuableAttributeType.Epic,
         },
       }),
   });
-};
+}
 
 function mountIterationSelect() {
   const el = document.querySelector('.js-iteration-select');
@@ -86,24 +127,27 @@ function mountIterationSelect() {
     return false;
   }
 
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
   const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
+
+  const IterationDropdown = gon.features.iterationCadences
+    ? IterationSidebarDropdownWidget
+    : SidebarDropdownWidget;
 
   return new Vue({
     el,
     apolloProvider,
-    components: {
-      IterationSelect,
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('iteration-select', {
+      createElement(IterationDropdown, {
         props: {
-          groupPath,
-          canEdit: parseBoolean(canEdit),
-          projectPath,
-          issueIid,
+          attrWorkspacePath: groupPath,
+          workspacePath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
+          issuableAttribute: IssuableAttributeType.Iteration,
         },
       }),
   });
@@ -111,8 +155,12 @@ function mountIterationSelect() {
 
 export default function mountSidebar(mediator) {
   CEMountSidebar.mountSidebar(mediator);
-  mountWeightComponent(mediator);
+  mountWeightComponent();
   mountStatusComponent(mediator);
   mountEpicsSelect();
   mountIterationSelect();
+
+  if (gon.features.cveIdRequestButton) {
+    mountCveIdRequestComponent();
+  }
 }

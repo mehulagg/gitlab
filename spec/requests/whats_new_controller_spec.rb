@@ -7,7 +7,7 @@ RSpec.describe WhatsNewController, :clean_gitlab_redis_cache do
     ReleaseHighlight.instance_variable_set(:@file_paths, nil)
   end
 
-  describe 'whats_new_path' do
+  describe 'GET #index' do
     let(:item) { double(:item) }
     let(:highlights) { double(:highlight, items: [item], map: [item].map, next_page: 2) }
 
@@ -36,14 +36,15 @@ RSpec.describe WhatsNewController, :clean_gitlab_redis_cache do
       end
     end
 
-    context 'with version param' do
-      it 'returns items without pagination headers' do
-        allow(ReleaseHighlight).to receive(:for_version).with(version: '42').and_return(highlights)
+    context 'with whats_new_variant = disabled' do
+      before do
+        Gitlab::CurrentSettings.current_application_settings.whats_new_variant_disabled!
+      end
 
-        get whats_new_path(version: 42), xhr: true
+      it 'returns a 404' do
+        get whats_new_path, xhr: true
 
-        expect(response.body).to eq(highlights.items.to_json)
-        expect(response.headers['X-Next-Page']).to be_nil
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

@@ -5,19 +5,18 @@ import * as actions from 'ee/analytics/cycle_analytics/store/modules/duration_ch
 import * as getters from 'ee/analytics/cycle_analytics/store/modules/duration_chart/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/duration_chart/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
+import { createdAfter, createdBefore, group } from 'jest/cycle_analytics/mock_data';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
-import { shouldFlashAMessage } from '../../../helpers';
 import {
-  group,
   allowedStages as stages,
-  startDate,
-  endDate,
   rawDurationData,
   transformedDurationData,
   endpoints,
   valueStreams,
 } from '../../../mock_data';
 
+jest.mock('~/flash');
 const selectedGroup = { fullPath: group.path };
 const [stage1, stage2] = stages;
 const hiddenStage = { ...stage1, hidden: true, id: 3, slug: 3 };
@@ -26,14 +25,12 @@ const [selectedValueStream] = valueStreams;
 const error = new Error(`Request failed with status code ${httpStatusCodes.BAD_REQUEST}`);
 
 const rootState = {
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
   stages: [...activeStages, hiddenStage],
   selectedGroup,
   selectedValueStream,
-  featureFlags: {
-    hasDurationChart: true,
-  },
+  featureFlags: {},
 };
 
 describe('DurationChart actions', () => {
@@ -165,10 +162,6 @@ describe('DurationChart actions', () => {
   });
 
   describe('receiveDurationDataError', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
     it("commits the 'RECEIVE_DURATION_DATA_ERROR' mutation", () => {
       testAction(
         actions.receiveDurationDataError,
@@ -189,9 +182,9 @@ describe('DurationChart actions', () => {
         commit: () => {},
       });
 
-      shouldFlashAMessage(
-        'There was an error while fetching value stream analytics duration data.',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error while fetching value stream analytics duration data.',
+      });
     });
   });
 

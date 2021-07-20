@@ -1,12 +1,16 @@
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { objectToQuery } from '~/lib/utils/url_utility';
+import { FiltersInfo as FiltersInfoCE } from '~/boards/boards_util';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+// eslint-disable-next-line import/no-deprecated
+import { objectToQuery, urlParamsToObject } from '~/lib/utils/url_utility';
 import {
+  EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
   IterationIDs,
   MilestoneFilterType,
   MilestoneIDs,
   WeightFilterType,
   WeightIDs,
+  EpicFilterType,
 } from './constants';
 
 export function getMilestone({ milestone }) {
@@ -25,8 +29,72 @@ export function fullUserId(userId) {
   return `gid://gitlab/User/${userId}`;
 }
 
+export function fullEpicBoardId(epicBoardId) {
+  return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
+}
+
+export function calculateSwimlanesBufferSize(listTopCoordinate) {
+  return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
+}
+
+export function formatEpic(epic) {
+  return {
+    ...epic,
+    labels: epic.labels?.nodes || [],
+    // Epics don't support assignees as of now
+    // but `<board-card-inner>` expects it.
+    // So until https://gitlab.com/gitlab-org/gitlab/-/issues/238444
+    // is addressed, we need to pass empty array.
+    assignees: [],
+  };
+}
+
+export function formatListEpics(listEpics) {
+  const boardItems = {};
+  let listItemsCount;
+
+  const listData = listEpics.nodes.reduce((map, list) => {
+    listItemsCount = list.epicsCount;
+    const sortedEpics = list.epics.edges.map((epicNode) => ({
+      ...epicNode.node,
+    }));
+
+    return {
+      ...map,
+      [list.id]: sortedEpics.map((i) => {
+        const id = getIdFromGraphQLId(i.id);
+
+        const listEpic = {
+          ...i,
+          id,
+          fullId: i.id,
+          labels: i.labels?.nodes || [],
+          assignees: i.assignees?.nodes || [],
+        };
+
+        boardItems[id] = listEpic;
+
+        return id;
+      }),
+    };
+  }, {});
+
+  return { listData, boardItems, listItemsCount };
+}
+
+export function formatEpicListsPageInfo(lists) {
+  const listData = lists.nodes.reduce((map, list) => {
+    return {
+      ...map,
+      [list.id]: list.epics.pageInfo,
+    };
+  }, {});
+  return listData;
+}
+
 export function transformBoardConfig(boardConfig) {
   const updatedBoardConfig = {};
+  // eslint-disable-next-line import/no-deprecated
   const passedFilterParams = urlParamsToObject(window.location.search);
   const updateScopeObject = (key, value = '') => {
     if (value === null || value === '') return;
@@ -70,9 +138,8 @@ export function transformBoardConfig(boardConfig) {
   boardConfig.labels.forEach((label) => {
     const labelTitle = encodeURIComponent(label.title);
     const param = `label_name[]=${labelTitle}`;
-    const labelIndex = passedFilterParams.label_name?.indexOf(labelTitle);
 
-    if (labelIndex === -1 || labelIndex === undefined) {
+    if (!passedFilterParams.label_name?.includes(label.title)) {
       filterPath.push(param);
     }
   });
@@ -81,10 +148,45 @@ export function transformBoardConfig(boardConfig) {
   return updatedFilterPath;
 }
 
+export const FiltersInfo = {
+  ...FiltersInfoCE,
+  epicId: {
+    negatedSupport: true,
+    transform: (epicId) => fullEpicId(epicId),
+    // epic_id should be renamed to epicWildcardId when ANY or NONE is the value
+    remap: (k, v) => (v === EpicFilterType.any || v === EpicFilterType.none ? 'epicWildcardId' : k),
+  },
+  epicWildcardId: {
+    negatedSupport: false,
+    transform: (val) => val.toUpperCase(),
+  },
+  iterationId: {
+    negatedSupport: true,
+    remap: (k, v) =>
+      // iteration_id should be renamed to iterationWildcardId when CURRENT is the value
+      v === IterationFilterType.any ||
+      v === IterationFilterType.none ||
+      v === IterationFilterType.current
+        ? 'iterationWildcardId'
+        : k,
+  },
+  iterationTitle: {
+    negatedSupport: true,
+  },
+  iterationWildcardId: {
+    negatedSupport: true,
+    transform: (val) => val.toUpperCase(),
+  },
+  weight: {
+    negatedSupport: true,
+  },
+};
+
 export default {
   getMilestone,
   fullEpicId,
   fullMilestoneId,
   fullUserId,
+  fullEpicBoardId,
   transformBoardConfig,
 };

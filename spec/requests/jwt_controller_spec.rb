@@ -180,10 +180,11 @@ RSpec.describe JwtController do
         end
 
         context 'when internal auth is disabled' do
+          before do
+            stub_application_setting(password_authentication_enabled_for_git: false)
+          end
+
           it 'rejects the authorization attempt with personal access token message' do
-            allow_next_instance_of(ApplicationSetting) do |instance|
-              allow(instance).to receive(:password_authentication_enabled_for_git?) { false }
-            end
             get '/jwt/auth', params: parameters, headers: headers
 
             expect(response).to have_gitlab_http_status(:unauthorized)
@@ -226,6 +227,7 @@ RSpec.describe JwtController do
     let_it_be(:group_deploy_token) { create(:deploy_token, :group, groups: [group]) }
     let_it_be(:project_deploy_token) { create(:deploy_token, :project, projects: [project]) }
     let_it_be(:service_name) { 'dependency_proxy' }
+
     let(:headers) { { authorization: credentials(credential_user, credential_password) } }
     let(:params) { { account: credential_user, client_id: 'docker', offline_token: true, service: service_name } }
 
@@ -262,25 +264,21 @@ RSpec.describe JwtController do
       let(:credential_user) { group_deploy_token.username }
       let(:credential_password) { group_deploy_token.token }
 
-      it_behaves_like 'with valid credentials'
+      it_behaves_like 'returning response status', :forbidden
     end
 
     context 'with project deploy token' do
       let(:credential_user) { project_deploy_token.username }
       let(:credential_password) { project_deploy_token.token }
 
-      it_behaves_like 'with valid credentials'
+      it_behaves_like 'returning response status', :forbidden
     end
 
     context 'with invalid credentials' do
       let(:credential_user) { 'foo' }
       let(:credential_password) { 'bar' }
 
-      it 'returns unauthorized' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:unauthorized)
-      end
+      it_behaves_like 'returning response status', :unauthorized
     end
   end
 

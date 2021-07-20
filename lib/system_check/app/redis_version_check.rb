@@ -5,8 +5,10 @@ require 'redis'
 module SystemCheck
   module App
     class RedisVersionCheck < SystemCheck::BaseCheck
-      MIN_REDIS_VERSION = '4.0.0'
-      RECOMMENDED_REDIS_VERSION = '4.0.0' # In future we may deprecate but still support Redis 4
+      # Redis 5.x will be deprecated
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/331468
+      MIN_REDIS_VERSION = '5.0.0'
+      RECOMMENDED_REDIS_VERSION = '5.0.0'
       set_name "Redis version >= #{RECOMMENDED_REDIS_VERSION}?"
 
       @custom_error_message = ''

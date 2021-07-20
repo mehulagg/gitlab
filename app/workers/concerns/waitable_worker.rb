@@ -32,8 +32,10 @@ module WaitableWorker
       failed = []
 
       args_list.each do |args|
-        new.perform(*args)
-      rescue
+        worker = new
+        Gitlab::AppJsonLogger.info(worker.structured_payload(message: 'running inline'))
+        worker.perform(*args)
+      rescue StandardError
         failed << args
       end
 

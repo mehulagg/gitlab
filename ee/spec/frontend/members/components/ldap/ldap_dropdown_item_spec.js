@@ -3,6 +3,7 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import LdapDropdownItem from 'ee/members/components/ldap/ldap_dropdown_item.vue';
 import waitForPromises from 'helpers/wait_for_promises';
+import { MEMBER_TYPES } from '~/members/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -19,7 +20,14 @@ describe('LdapDropdownItem', () => {
       updateLdapOverride: jest.fn(() => Promise.resolve()),
     };
 
-    return new Vuex.Store({ actions });
+    return new Vuex.Store({
+      modules: {
+        [MEMBER_TYPES.user]: {
+          namespaced: true,
+          actions,
+        },
+      },
+    });
   };
 
   const createComponent = (propsData = {}) => {
@@ -30,6 +38,9 @@ describe('LdapDropdownItem', () => {
       },
       localVue,
       store: createStore(),
+      provide: {
+        namespace: MEMBER_TYPES.user,
+      },
       mocks: {
         $toast,
       },

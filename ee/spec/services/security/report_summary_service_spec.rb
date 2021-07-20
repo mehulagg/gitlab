@@ -8,18 +8,22 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
   let_it_be(:build_ds) { create(:ci_build, :success, name: 'dependency_scanning', pipeline: pipeline) }
   let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds) }
   let_it_be(:report_ds) { create(:ci_reports_security_report, type: :dependency_scanning) }
+  let_it_be(:scan_ds) { create(:security_scan, scan_type: :dependency_scanning, build: build_ds) }
 
   let_it_be(:build_sast) { create(:ci_build, :success, name: 'sast', pipeline: pipeline) }
   let_it_be(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast) }
   let_it_be(:report_sast) { create(:ci_reports_security_report, type: :sast) }
+  let_it_be(:scan_sast) { create(:security_scan, scan_type: :sast, build: build_sast) }
 
   let_it_be(:build_dast) { create(:ci_build, :success, name: 'dast', pipeline: pipeline) }
   let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast_large_scanned_resources_field, job: build_dast) }
   let_it_be(:report_dast) { create(:ci_reports_security_report, type: :dast) }
+  let_it_be(:scan_dast) { create(:security_scan, scan_type: :dast, build: build_dast) }
 
   let_it_be(:build_cs) { create(:ci_build, :success, name: 'container_scanning', pipeline: pipeline) }
   let_it_be(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs) }
   let_it_be(:report_cs) { create(:ci_reports_security_report, type: :container_scanning) }
+  let_it_be(:scan_cs) { create(:security_scan, scan_type: :container_scanning, build: build_cs) }
 
   before(:all) do
     ds_content = File.read(artifact_ds.file.path)
@@ -39,16 +43,13 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     report_cs.merge!(report_cs)
 
     { artifact_cs => report_cs, artifact_dast => report_dast, artifact_ds => report_ds, artifact_sast => report_sast }.each do |artifact, report|
-      scan = create(:security_scan, scan_type: artifact.job.name, build: artifact.job)
-
-      report.findings.each_with_index do |finding, index|
+      report.findings.each do |finding|
         create(:security_finding,
               severity: finding.severity,
               confidence: finding.confidence,
               project_fingerprint: finding.project_fingerprint,
               deduplicated: true,
-              position: index,
-              scan: scan)
+              scan: artifact.job.security_scans.first)
       end
     end
   end
@@ -98,6 +99,29 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     end
   end
 
+  context 'when scanned resources are not requested' do
+    let(:selection_information) do
+      {
+        dast: [:vulnerabilities_count],
+        container_scanning: [:vulnerabilities_count]
+      }
+    end
+
+    it 'does not download the artifact' do
+      expect(pipeline).not_to receive(:security_reports)
+
+      result
+    end
+  end
+
+  context 'when the scans is requested' do
+    let(:selection_information) { { dast: [:scans] } }
+
+    it 'responds with the scan information' do
+      expect(result).to include(dast: { scans: [scan_dast] })
+    end
+  end
+
   context 'All fields are requested' do
     let(:selection_information) do
       {
@@ -120,7 +144,7 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     it 'returns the vulnerability count' do
       expect(result).to match(a_hash_including(
                                 dast: a_hash_including(vulnerabilities_count: 20),
-                                sast: a_hash_including(vulnerabilities_count: 33),
+                                sast: a_hash_including(vulnerabilities_count: 5),
                                 container_scanning: a_hash_including(vulnerabilities_count: 8),
                                 dependency_scanning: a_hash_including(vulnerabilities_count: 4)
                               ))
@@ -146,6 +170,30 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
       it 'returns nil' do
         expect(result[:dast]).to be_nil
       end
+    end
+  end
+
+  context 'When there is a scan but no findings' do
+    let_it_be(:pipeline) { create(:ci_pipeline, :success) }
+
+    before do
+      build_dast = create(:ci_build, :success, name: 'dast', pipeline: pipeline)
+
+      create(:security_scan, scan_type: :dast, build: build_dast)
+    end
+
+    let(:selection_information) do
+      {
+        dast: [:scanned_resources_count, :vulnerabilities_count],
+        sast: [:vulnerabilities_count]
+      }
+    end
+
+    it 'still returns data for the report ran' do
+      expect(result[:dast]).not_to be_nil
+      expect(result[:sast]).to be_nil
+      expect(result[:container_scanning]).to be_nil
+      expect(result[:dependency_scanning]).to be_nil
     end
   end
 end

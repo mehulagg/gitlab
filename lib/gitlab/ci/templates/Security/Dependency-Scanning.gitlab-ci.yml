@@ -1,15 +1,19 @@
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Dependency-Scanning.gitlab-ci.yml
+
 # Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
 #
-# Configure the scanning tool through the environment variables.
-# List of the variables: https://gitlab.com/gitlab-org/security-products/dependency-scanning#settings
-# How to set: https://docs.gitlab.com/ee/ci/yaml/#variables
+# Configure dependency scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/index.html).
+# List of available variables: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/index.html#available-variables
 
 variables:
   # Setting this variable will affect all Security templates
   # (SAST, Dependency Scanning, ...)
   SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
-
   DS_DEFAULT_ANALYZERS: "bundler-audit, retire.js, gemnasium, gemnasium-maven, gemnasium-python"
+  DS_EXCLUDED_ANALYZERS: ""
   DS_EXCLUDED_PATHS: "spec, test, tests, tmp"
   DS_MAJOR_VERSION: 2
 
@@ -38,9 +42,14 @@ gemnasium-dependency_scanning:
   image:
     name: "$DS_ANALYZER_IMAGE"
   variables:
+    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+    # override the analyzer image with a custom value. This may be subject to change or
+    # breakage across GitLab releases.
     DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/gemnasium:$DS_MAJOR_VERSION"
   rules:
     - if: $DEPENDENCY_SCANNING_DISABLED
+      when: never
+    - if: $DS_EXCLUDED_ANALYZERS =~ /gemnasium([^-]|$)/
       when: never
     - if: $CI_COMMIT_BRANCH &&
           $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&
@@ -61,9 +70,14 @@ gemnasium-maven-dependency_scanning:
   image:
     name: "$DS_ANALYZER_IMAGE"
   variables:
+    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+    # override the analyzer image with a custom value. This may be subject to change or
+    # breakage across GitLab releases.
     DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/gemnasium-maven:$DS_MAJOR_VERSION"
   rules:
     - if: $DEPENDENCY_SCANNING_DISABLED
+      when: never
+    - if: $DS_EXCLUDED_ANALYZERS =~ /gemnasium-maven/
       when: never
     - if: $CI_COMMIT_BRANCH &&
           $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&
@@ -79,9 +93,14 @@ gemnasium-python-dependency_scanning:
   image:
     name: "$DS_ANALYZER_IMAGE"
   variables:
+    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+    # override the analyzer image with a custom value. This may be subject to change or
+    # breakage across GitLab releases.
     DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/gemnasium-python:$DS_MAJOR_VERSION"
   rules:
     - if: $DEPENDENCY_SCANNING_DISABLED
+      when: never
+    - if: $DS_EXCLUDED_ANALYZERS =~ /gemnasium-python/
       when: never
     - if: $CI_COMMIT_BRANCH &&
           $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&
@@ -104,9 +123,14 @@ bundler-audit-dependency_scanning:
   image:
     name: "$DS_ANALYZER_IMAGE"
   variables:
+    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+    # override the analyzer image with a custom value. This may be subject to change or
+    # breakage across GitLab releases.
     DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/bundler-audit:$DS_MAJOR_VERSION"
   rules:
     - if: $DEPENDENCY_SCANNING_DISABLED
+      when: never
+    - if: $DS_EXCLUDED_ANALYZERS =~ /bundler-audit/
       when: never
     - if: $CI_COMMIT_BRANCH &&
           $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&
@@ -119,9 +143,14 @@ retire-js-dependency_scanning:
   image:
     name: "$DS_ANALYZER_IMAGE"
   variables:
+    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+    # override the analyzer image with a custom value. This may be subject to change or
+    # breakage across GitLab releases.
     DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/retire.js:$DS_MAJOR_VERSION"
   rules:
     - if: $DEPENDENCY_SCANNING_DISABLED
+      when: never
+    - if: $DS_EXCLUDED_ANALYZERS =~ /retire.js/
       when: never
     - if: $CI_COMMIT_BRANCH &&
           $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&

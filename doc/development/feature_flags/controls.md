@@ -36,7 +36,7 @@ easier to measure the impact of both separately.
 
 The GitLab feature library (using
 [Flipper](https://github.com/jnunemaker/flipper), and covered in the [Feature
-Flags process](process.md) guide) supports rolling out changes to a percentage of
+Flags process](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/) guide) supports rolling out changes to a percentage of
 time to users. This in turn can be controlled using [GitLab ChatOps](../../ci/chatops/index.md).
 
 For an up to date list of feature flag commands please see [the source
@@ -99,7 +99,7 @@ Guidelines:
 Before toggling any feature flag, check that there are no ongoing
 significant incidents on GitLab.com. You can do this by checking the
 `#production` and `#incident-management` Slack channels, or looking for
-[open incident issues](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=incident)
+[open incident issues](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/?scope=all&state=opened&label_name[]=incident)
 (although check the dates and times).
 
 We do not want to introduce changes during an incident, as it can make
@@ -213,9 +213,6 @@ actors.
 Feature.enabled?(:some_feature, group)
 ```
 
-**Percentage of time** rollout is not a good idea if what you want is to make sure a feature
-is always on or off to the users. In that case, **Percentage of actors** rollout is a better method.
-
 Lastly, to verify that the feature is deemed stable in as many cases as possible,
 you should fully roll out the feature by enabling the flag **globally** by running:
 
@@ -224,7 +221,33 @@ you should fully roll out the feature by enabling the flag **globally** by runni
 ```
 
 This changes the feature flag state to be **enabled** always, which overrides the
-existing gates (e.g. `--group=gitlab-org`) in the above processes.
+existing gates (for example, `--group=gitlab-org`) in the above processes.
+
+Note, that if an actor based feature gate is present, switching the
+`default_enabled` attribute of the YAML definition from `false` to `true`
+will not have any effect. The feature gate must be deleted first.
+
+For example, a feature flag is set via chatops:
+
+```shell
+/chatops run feature set --project=gitlab-org/gitlab some_feature true
+```
+
+When the `default_enabled` attribute in the YAML definition is switched to
+`true`, the feature gate must be deleted to have the desired effect:
+
+```shell
+/chatops run feature delete some_feature
+```
+
+##### Percentage of actors vs percentage of time rollouts
+
+If you want to make sure a feature is always on or off for users, use a **Percentage of actors**
+rollout. Avoid using percentage of _time_ rollouts in this case.
+
+A percentage of _time_ rollout can introduce inconsistent behavior when `Feature.enabled?`
+is used multiple times in the code because the feature flag value is randomized each time
+`Feature.enabled?` is called on your code path.
 
 ##### Disabling feature flags
 
@@ -240,7 +263,9 @@ To disable a feature flag that has been enabled for a specific project you can r
 /chatops run feature set --group=gitlab-org some_feature false
 ```
 
-You cannot selectively disable feature flags for a specific project/group/user without applying a [specific method of implementing](development.md#selectively-disable-by-actor) the feature flags.
+You cannot selectively disable feature flags for a specific project/group/user without applying a [specific method of implementing](index.md#selectively-disable-by-actor) the feature flags.
+
+If a feature flag is disabled via chatops, that will take precedence over the `default_enabled` value in the YML. In other words, you could have a feature enabled for on-premise installations but not for GitLab.com.
 
 ### Feature flag change logging
 
@@ -250,7 +275,7 @@ Any feature flag change that affects GitLab.com (production) via [ChatOps](https
 is automatically logged in an issue.
 
 The issue is created in the
-[gl-infra/feature-flag-log](https://gitlab.com/gitlab-com/gl-infra/feature-flag-log/-/issues?scope=all&utf8=%E2%9C%93&state=closed)
+[gl-infra/feature-flag-log](https://gitlab.com/gitlab-com/gl-infra/feature-flag-log/-/issues?scope=all&state=closed)
 project, and it will at minimum log the Slack handle of person enabling
 a feature flag, the time, and the name of the flag being changed.
 
@@ -266,7 +291,7 @@ Changes to the issue format can be submitted in the
 Any feature flag change that affects any GitLab instance is automatically logged in
 [features_json.log](../../administration/logs.md#features_jsonlog).
 You can search the change history in [Kibana](https://about.gitlab.com/handbook/support/workflows/kibana.html).
-You can access the feature flag change history for GitLab.com [here](https://log.gprd.gitlab.net/goto/d060337c017723084c6d97e09e591fc6).
+You can also access the feature flag change history for GitLab.com [in Kibana](https://log.gprd.gitlab.net/goto/d060337c017723084c6d97e09e591fc6).
 
 ## Cleaning up
 
@@ -276,17 +301,19 @@ and reduces confidence in our testing suite covering all possible combinations.
 Additionally, a feature flag overwritten in some of the environments can result
 in undefined and untested system behavior.
 
-To remove a feature flag:
+To remove a feature flag, open **one merge request** to make the changes. In the MR:
 
-1. Open a new merge request with the ~"feature flag" label so
-   release managers are aware the changes are hidden behind a feature flag.
+1. Add the ~"feature flag" label so release managers are aware the changes are hidden behind a feature flag.
 1. If the merge request has to be picked into a stable branch, add the
    appropriate `~"Pick into X.Y"` label, for example `~"Pick into 13.0"`.
-   See [the feature flag process](process.md#including-a-feature-behind-feature-flag-in-the-final-release)
+   See [the feature flag process](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#including-a-feature-behind-feature-flag-in-the-final-release)
    for further details.
-1. Remove all references to the feature flag from the codebase.
+1. Remove all references to the feature flag from the codebase, including tests.
 1. Remove the YAML definition for the feature from the repository.
-1. Clean up the feature flag from all environments with `/chatops run feature delete some_feature`.
+
+Once the above MR has been merged, you should:
+
+1. [Clean up the feature flag from all environments](#cleanup-chatops) with `/chatops run feature delete some_feature`.
 1. Close the rollout issue for the feature flag after the feature flag is removed from the codebase.
 
 ### Cleanup ChatOps

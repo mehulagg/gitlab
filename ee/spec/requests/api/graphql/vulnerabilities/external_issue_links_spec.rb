@@ -7,7 +7,7 @@ RSpec.describe 'Query.vulnerabilities.externalIssueLinks' do
   include ReactiveCachingHelpers
 
   let_it_be(:project) { create(:project) }
-  let_it_be(:jira_service) { create(:jira_service, project: project, issues_enabled: true, project_key: 'GV') }
+  let_it_be(:jira_integration) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'GV') }
   let_it_be(:user) { create(:user, security_dashboard_projects: [project]) }
   let_it_be(:vulnerability) { create(:vulnerability, project: project) }
   let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link, external_issue_key: '10001', vulnerability: vulnerability) }

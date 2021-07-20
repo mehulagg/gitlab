@@ -6,17 +6,19 @@ import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import { TEST_HOST } from 'spec/test_constants';
 import App from '~/diffs/components/app.vue';
-import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
 import CommitWidget from '~/diffs/components/commit_widget.vue';
 import CompareVersions from '~/diffs/components/compare_versions.vue';
 import DiffFile from '~/diffs/components/diff_file.vue';
-import HiddenFilesWarning from '~/diffs/components/hidden_files_warning.vue';
 import NoChanges from '~/diffs/components/no_changes.vue';
 import TreeList from '~/diffs/components/tree_list.vue';
 
-import { EVT_VIEW_FILE_BY_FILE } from '~/diffs/constants';
+/* eslint-disable import/order */
+/* You know what: sometimes alphabetical isn't the best order */
+import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
+import HiddenFilesWarning from '~/diffs/components/hidden_files_warning.vue';
+import MergeConflictWarning from '~/diffs/components/merge_conflict_warning.vue';
+/* eslint-enable import/order */
 
-import eventHub from '~/diffs/event_hub';
 import axios from '~/lib/utils/axios_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
 import createDiffsStore from '../create_diffs_store';
@@ -59,6 +61,7 @@ describe('diffs/components/app', () => {
         endpointMetadata: `${TEST_HOST}/diff/endpointMetadata`,
         endpointBatch: `${TEST_HOST}/diff/endpointBatch`,
         endpointCoverage: `${TEST_HOST}/diff/endpointCoverage`,
+        endpointCodequality: '',
         projectPath: 'namespace/project',
         currentUser: {},
         changesEmptyStateIllustration: '',
@@ -108,7 +111,6 @@ describe('diffs/components/app', () => {
       jest.spyOn(wrapper.vm, 'fetchDiffFilesBatch').mockImplementation(fetchResolver);
       jest.spyOn(wrapper.vm, 'fetchCoverageFiles').mockImplementation(fetchResolver);
       jest.spyOn(wrapper.vm, 'setDiscussions').mockImplementation(() => {});
-      jest.spyOn(wrapper.vm, 'startRenderDiffsQueue').mockImplementation(() => {});
       jest.spyOn(wrapper.vm, 'unwatchDiscussions').mockImplementation(() => {});
       jest.spyOn(wrapper.vm, 'unwatchRetrievingBatches').mockImplementation(() => {});
       store.state.diffs.retrievingBatches = true;
@@ -122,7 +124,6 @@ describe('diffs/components/app', () => {
 
       await nextTick();
 
-      expect(wrapper.vm.startRenderDiffsQueue).toHaveBeenCalled();
       expect(wrapper.vm.fetchDiffFilesMeta).toHaveBeenCalled();
       expect(wrapper.vm.fetchDiffFilesBatch).toHaveBeenCalled();
       expect(wrapper.vm.fetchCoverageFiles).toHaveBeenCalled();
@@ -137,13 +138,22 @@ describe('diffs/components/app', () => {
 
       await nextTick();
 
-      expect(wrapper.vm.startRenderDiffsQueue).toHaveBeenCalled();
       expect(wrapper.vm.fetchDiffFilesMeta).toHaveBeenCalled();
       expect(wrapper.vm.fetchDiffFilesBatch).toHaveBeenCalled();
       expect(wrapper.vm.fetchCoverageFiles).toHaveBeenCalled();
       expect(wrapper.vm.unwatchDiscussions).toHaveBeenCalled();
       expect(wrapper.vm.diffFilesLength).toBe(100);
       expect(wrapper.vm.unwatchRetrievingBatches).toHaveBeenCalled();
+    });
+  });
+
+  describe('codequality diff', () => {
+    it('does not fetch code quality data on FOSS', async () => {
+      createComponent();
+      jest.spyOn(wrapper.vm, 'fetchCodequality');
+      wrapper.vm.fetchData(false);
+
+      expect(wrapper.vm.fetchCodequality).not.toHaveBeenCalled();
     });
   });
 
@@ -536,6 +546,43 @@ describe('diffs/components/app', () => {
           expect(getCollapsedFilesWarning(wrapper).exists()).toBe(false);
         });
       });
+
+      describe('merge conflicts', () => {
+        it('should render the merge conflicts banner if viewing the whole changeset and there are conflicts', () => {
+          createComponent({}, ({ state }) => {
+            Object.assign(state.diffs, {
+              latestDiff: true,
+              startVersion: null,
+              hasConflicts: true,
+              canMerge: false,
+              conflictResolutionPath: 'path',
+            });
+          });
+
+          expect(wrapper.find(MergeConflictWarning).exists()).toBe(true);
+        });
+
+        it.each`
+          prop              | value
+          ${'latestDiff'}   | ${false}
+          ${'startVersion'} | ${'notnull'}
+          ${'hasConflicts'} | ${false}
+        `(
+          "should not render if any of the MR properties aren't correct - like $prop: $value",
+          ({ prop, value }) => {
+            createComponent({}, ({ state }) => {
+              Object.assign(state.diffs, {
+                latestDiff: true,
+                startVersion: null,
+                hasConflicts: true,
+                [prop]: value,
+              });
+            });
+
+            expect(wrapper.find(MergeConflictWarning).exists()).toBe(false);
+          },
+        );
+      });
     });
 
     it('should display commit widget if store has a commit', () => {
@@ -699,24 +746,25 @@ describe('diffs/components/app', () => {
         },
       );
     });
+  });
 
-    describe('control via event stream', () => {
-      it.each`
-        setting
-        ${true}
-        ${false}
-      `(
-        'triggers the action with the new fileByFile setting - $setting - when the event with that setting is received',
-        async ({ setting }) => {
-          createComponent();
-          await nextTick();
+  describe('diff file tree is aware of review bar', () => {
+    it('it does not have review-bar-visible class when review bar is not visible', () => {
+      createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
+      });
 
-          eventHub.$emit(EVT_VIEW_FILE_BY_FILE, { setting });
-          await nextTick();
+      expect(wrapper.find('.js-diff-tree-list').exists()).toBe(true);
+      expect(wrapper.find('.js-diff-tree-list.review-bar-visible').exists()).toBe(false);
+    });
 
-          expect(store.state.diffs.viewDiffsFileByFile).toBe(setting);
-        },
-      );
+    it('it does have review-bar-visible class when review bar is visible', () => {
+      createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
+        state.batchComments.drafts = ['draft message'];
+      });
+
+      expect(wrapper.find('.js-diff-tree-list.review-bar-visible').exists()).toBe(true);
     });
   });
 });

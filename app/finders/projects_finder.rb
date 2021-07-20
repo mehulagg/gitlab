@@ -14,7 +14,8 @@
 #     starred: boolean
 #     sort: string
 #     visibility_level: int
-#     tags: string[]
+#     tag: string[] - deprecated, use 'topic' instead
+#     topic: string[]
 #     personal: boolean
 #     search: string
 #     search_namespaces: boolean
@@ -37,6 +38,8 @@ class ProjectsFinder < UnionFinder
     @params = params
     @current_user = current_user
     @project_ids_relation = project_ids_relation
+
+    @params[:topic] ||= @params.delete(:tag) if @params[:tag].present?
   end
 
   def execute
@@ -52,7 +55,7 @@ class ProjectsFinder < UnionFinder
     collection = Project.wrap_with_cte(collection) if use_cte
     collection = filter_projects(collection)
 
-    if params[:sort] == 'similarity' && params[:search] && Feature.enabled?(:project_finder_similarity_sort, current_user)
+    if params[:sort] == 'similarity' && params[:search]
       collection.sorted_by_similarity_desc(params[:search])
     else
       sort(collection)
@@ -76,15 +79,14 @@ class ProjectsFinder < UnionFinder
     collection = by_starred(collection)
     collection = by_trending(collection)
     collection = by_visibility_level(collection)
-    collection = by_tags(collection)
+    collection = by_topics(collection)
     collection = by_search(collection)
     collection = by_archived(collection)
     collection = by_custom_attributes(collection)
     collection = by_deleted_status(collection)
     collection = by_last_activity_after(collection)
     collection = by_last_activity_before(collection)
-    collection = by_repository_storage(collection)
-    collection
+    by_repository_storage(collection)
   end
 
   def collection_with_user
@@ -131,7 +133,7 @@ class ProjectsFinder < UnionFinder
 
     public_visibility_levels = Gitlab::VisibilityLevel.levels_for_user(current_user)
 
-    !public_visibility_levels.include?(params[:visibility_level])
+    !public_visibility_levels.include?(params[:visibility_level].to_i)
   end
 
   def owned_projects?
@@ -177,8 +179,8 @@ class ProjectsFinder < UnionFinder
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def by_tags(items)
-    params[:tag].present? ? items.tagged_with(params[:tag]) : items
+  def by_topics(items)
+    params[:topic].present? ? items.tagged_with(params[:topic]) : items
   end
 
   def by_search(items)
@@ -248,4 +250,4 @@ class ProjectsFinder < UnionFinder
   end
 end
 
-ProjectsFinder.prepend_if_ee('::EE::ProjectsFinder')
+ProjectsFinder.prepend_mod_with('ProjectsFinder')

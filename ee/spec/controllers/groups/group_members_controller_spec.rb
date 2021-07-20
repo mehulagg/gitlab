@@ -5,13 +5,44 @@ require 'spec_helper'
 RSpec.describe Groups::GroupMembersController do
   include ExternalAuthorizationServiceHelpers
 
-  let(:user)  { create(:user) }
-  let(:group) { create(:group, :public) }
-  let(:membership) { create(:group_member, group: group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group, reload: true) { create(:group, :public) }
 
   before do
     group.add_owner(user)
     sign_in(user)
+  end
+
+  describe 'GET #index' do
+    context 'with members, invites and requests queries' do
+      render_views
+
+      let!(:invited) { create(:group_member, :invited, :developer, group: group) }
+      let!(:requested) { create(:group_member, :access_request, group: group) }
+
+      it 'records queries', :request_store, :use_sql_query_cache do
+        get :index, params: { group_id: group }
+
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get :index, params: { group_id: group } }
+        create_list(:group_member, 5, group: group, created_by: user)
+        create_list(:group_member, 5, :invited, group: group, created_by: user)
+        create_list(:group_member, 5, :access_request, group: group)
+        # locally 39 vs 43 GDK vs 48 CI
+        unresolved_n_plus_ones = 4 # still have a few queries created by can_update/can_remove that could be reduced
+        multiple_members_threshold = 5 # GDK vs CI difference
+
+        expect do
+          get :index, params: { group_id: group.reload }
+        end.not_to exceed_all_query_limit(control.count).with_threshold(multiple_members_threshold + unresolved_n_plus_ones)
+      end
+
+      it 'avoids extra group_link database queries utilizing pre-loading' do
+        control = ActiveRecord::QueryRecorder.new { get :index, params: { group_id: group } }
+        count_queries = control.occurrences_by_line_method.first[1][:occurrences].any? { |i| i.include?('SELECT 1 AS one FROM "group_group_links" WHERE "group_group_links"') }
+
+        expect(count_queries).to be(false)
+      end
+    end
   end
 
   describe 'POST #create' do
@@ -58,7 +89,8 @@ RSpec.describe Groups::GroupMembersController do
     end
 
     describe 'POST #override' do
-      let(:group) { create(:group_with_ldap_group_link) }
+      let_it_be(:group) { create(:group_with_ldap_group_link) }
+      let_it_be(:membership) { create(:group_member, group: group) }
 
       before do
         allow(Ability).to receive(:allowed?).and_call_original
@@ -78,7 +110,7 @@ RSpec.describe Groups::GroupMembersController do
       end
 
       context 'when user has minimal access' do
-        let(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
+        let_it_be(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
 
         it 'is not successful' do
           post :override,
@@ -123,7 +155,7 @@ RSpec.describe Groups::GroupMembersController do
       it 'creates a new access request to the group' do
         post :request_access, params: { group_id: group }
 
-        expect(response).to set_flash.to 'Your request for access has been queued for review.'
+        expect(controller).to set_flash.to 'Your request for access has been queued for review.'
         expect(response).to redirect_to(group_path(group))
         expect(group.requesters.exists?(user_id: requesting_user)).to be_truthy
         expect(group.users).not_to include requesting_user
@@ -156,7 +188,7 @@ RSpec.describe Groups::GroupMembersController do
           it 'does not create a new access request' do
             post :request_access, params: { group_id: group }
 
-            expect(response).to set_flash.to "Your request for access could not be processed: "\
+            expect(controller).to set_flash.to "Your request for access could not be processed: "\
               "User email 'unverified@gitlab.com' is not a verified email."
             expect(response).to redirect_to(group_path(group))
             expect(group.requesters.exists?(user_id: requesting_user)).to be_falsey
@@ -168,8 +200,8 @@ RSpec.describe Groups::GroupMembersController do
       end
 
       context 'when group has email domain feature disabled' do
-        let(:email) { 'unverified@gitlab.com' }
-        let(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
+        let_it_be(:email) { 'unverified@gitlab.com' }
+        let_it_be(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
 
         before do
           stub_licensed_features(group_allowed_email_domains: false)
@@ -199,7 +231,7 @@ RSpec.describe Groups::GroupMembersController do
           post :request_access, params: { group_id: group }
 
           expect(response).to redirect_to(new_user_session_path)
-          expect(response).to set_flash.to I18n.t('devise.failure.unconfirmed')
+          expect(controller).to set_flash.to I18n.t('devise.failure.unconfirmed')
           expect(group.requesters.exists?(user_id: requesting_user)).to be_falsey
           expect(group.users).not_to include requesting_user
         end
@@ -221,8 +253,8 @@ RSpec.describe Groups::GroupMembersController do
       end
 
       context 'when group has email domain feature disabled' do
-        let(:email) { 'unverified@gitlab.com' }
-        let(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
+        let_it_be(:email) { 'unverified@gitlab.com' }
+        let_it_be(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
 
         before do
           stub_licensed_features(group_allowed_email_domains: false)
@@ -245,7 +277,7 @@ RSpec.describe Groups::GroupMembersController do
 
   describe 'POST #resend_invite' do
     context 'when user has minimal access' do
-      let(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
+      let_it_be(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
 
       it 'is not successful' do
         post :resend_invite, params: { group_id: group, id: membership }

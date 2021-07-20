@@ -1,11 +1,10 @@
+- add_page_specific_style 'page_bundles/members'
 - page_title _("Members")
-- group = @project.group
-- vue_project_members_list_enabled = Feature.enabled?(:vue_project_members_list, @project, default_enabled: :yaml)
 
 .js-remove-member-modal
 .row.gl-mt-3
   .col-lg-12
-    - if can_invite_members_for_project?(@project)
+    - if can_invite_members_for_project?(@project) || can_invite_group_for_project?(@project)
       .row
         .col-md-12.col-lg-6.gl-display-flex
           .gl-flex-direction-column.gl-flex-wrap.align-items-baseline
@@ -18,8 +17,19 @@
                 %p
                   = html_escape(_("Members can be added by project %{i_open}Maintainers%{i_close} or %{i_open}Owners%{i_close}")) % { i_open: '<i>'.html_safe, i_close: '</i>'.html_safe }
         .col-md-12.col-lg-6
-          .gl-display-flex.gl-flex-wrap.gl-lg-justify-content-end.gl-mx-n2.gl-mb-3
-            .js-invite-members-trigger.gl-px-2.gl-sm-w-auto.gl-w-full.gl-mb-4{ data: { classes: 'btn btn-success gl-button gl-mt-3 gl-sm-w-auto gl-w-full', display_text: _('Invite members') } }
+          .gl-display-flex.gl-flex-wrap.gl-justify-content-end
+            - if can_import_members?
+              = link_to _("Import a project"),
+                import_project_project_members_path(@project),
+                class: "btn btn-default btn-md gl-button gl-mt-3 gl-sm-w-auto gl-w-full",
+                title: _("Import members from another project")
+            - if @project.allowed_to_share_with_group?
+              .js-invite-group-trigger{ data: { classes: 'gl-mt-3 gl-sm-w-auto gl-w-full gl-sm-ml-3', display_text: _('Invite a group') } }
+            - if can_manage_project_members?(@project) && !membership_locked?
+              .js-invite-members-trigger{ data: { variant: 'success',
+                classes: 'gl-mt-3 gl-sm-w-auto gl-w-full gl-sm-ml-3',
+                trigger_source: 'project-members-page',
+                display_text: _('Invite members') } }
         = render 'projects/invite_members_modal', project: @project
 
     - else
@@ -32,7 +42,7 @@
           %p
             = html_escape(_("Members can be added by project %{i_open}Maintainers%{i_close} or %{i_open}Owners%{i_close}")) % { i_open: '<i>'.html_safe, i_close: '</i>'.html_safe }
 
-    - if !can_invite_members_for_project?(@project) && can_manage_project_members?(@project) && project_can_be_shared?
+    - if Feature.disabled?(:invite_members_group_modal, @project.group) && can_manage_project_members?(@project) && project_can_be_shared?
       - if !membership_locked? && @project.allowed_to_share_with_group?
         %ul.nav-links.nav.nav-tabs.gitlab-tabs{ role: 'tablist' }
           %li.nav-tab{ role: 'presentation' }
@@ -44,75 +54,15 @@
           .tab-pane.active{ id: 'invite-member-pane', role: 'tabpanel' }
             = render 'shared/members/invite_member', submit_url: project_project_members_path(@project), access_levels: ProjectMember.access_level_roles, default_access_level: @project_member.access_level, can_import_members?: can_import_members?, import_path: import_project_project_members_path(@project)
           .tab-pane{ id: 'invite-group-pane', role: 'tabpanel', class: ('active' if membership_locked?) }
-            = render 'shared/members/invite_group', submit_url: project_group_links_path(@project), access_levels: ProjectGroupLink.access_options, default_access_level: ProjectGroupLink.default_access, group_link_field: 'link_group_id', group_access_field: 'link_group_access'
+            = render 'shared/members/invite_group', submit_url: project_group_links_path(@project), access_levels: ProjectGroupLink.access_options, default_access_level: ProjectGroupLink.default_access, group_link_field: 'link_group_id', group_access_field: 'link_group_access', groups_select_tag_data: { skip_groups: @skip_groups }
       - elsif !membership_locked?
         .invite-member= render 'shared/members/invite_member', submit_url: project_project_members_path(@project), access_levels: ProjectMember.access_level_roles, default_access_level: @project_member.access_level, can_import_members?: can_import_members?, import_path: import_project_project_members_path(@project)
       - elsif @project.allowed_to_share_with_group?
-        .invite-group= render 'shared/members/invite_group', access_levels: ProjectGroupLink.access_options, default_access_level: ProjectGroupLink.default_access, submit_url: project_group_links_path(@project), group_link_field: 'link_group_id', group_access_field: 'link_group_access'
-    %ul.nav-links.mobile-separator.nav.nav-tabs
-      %li.nav-item
-        = link_to '#tab-members', class: ['nav-link', ('active' unless groups_tab_active?)], data: { toggle: 'tab' } do
-          %span
-            = _('Members')
-          %span.badge.badge-pill= @project_members.total_count
-      - if show_groups?(@group_links)
-        %li.nav-item
-          = link_to '#tab-groups', class: ['nav-link', ('active' if groups_tab_active?)] , data: { toggle: 'tab', qa_selector: 'groups_list_tab' } do
-            %span
-              = _('Groups')
-            %span.badge.badge-pill= @group_links.count
-      - if show_invited_members?(@project, @invited_members)
-        %li.nav-item
-          = link_to '#tab-invited-members', class: 'nav-link', data: { toggle: 'tab' } do
-            %span
-              = _('Invited')
-            %span.badge.badge-pill= @invited_members.count
-      - if show_access_requests?(@project, @requesters)
-        %li.nav-item
-          = link_to '#tab-access-requests', class: 'nav-link', data: { toggle: 'tab' } do
-            %span
-              = _('Access requests')
-            %span.badge.badge-pill= @requesters.count
-    .tab-content
-      #tab-members.tab-pane{ class: ('active' unless groups_tab_active?) }
-        - if vue_project_members_list_enabled
-          .js-project-members-list{ data: project_members_list_data_attributes(@project, @project_members) }
-            .loading
-              .spinner.spinner-md
-        - else
-          = render 'projects/project_members/team', project: @project, group: group, members: @project_members, current_user_is_group_owner: current_user_is_group_owner?(@project)
-        = paginate @project_members, theme: "gitlab", params: { search_groups: nil }
-      - if show_groups?(@group_links)
-        #tab-groups.tab-pane{ class: ('active' if groups_tab_active?) }
-          - if vue_project_members_list_enabled
-            .js-project-group-links-list{ data: project_group_links_list_data_attributes(@project, @group_links) }
-              .loading
-                .spinner.spinner-md
-          - else
-            = render 'projects/project_members/groups', group_links: @group_links
-      - if show_invited_members?(@project, @invited_members)
-        #tab-invited-members.tab-pane
-          - if vue_project_members_list_enabled
-            .js-project-invited-members-list{ data: project_members_list_data_attributes(@project, @invited_members) }
-              .loading
-                .spinner.spinner-md
-          - else
-            .card.card-without-border
-              = render 'shared/members/tab_pane/header' do
-                = render 'shared/members/tab_pane/title' do
-                  = html_escape(_('Members invited to %{strong_start}%{project_name}%{strong_end}')) % { project_name: @project.name, strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe }
-              %ul.content-list.members-list
-                = render partial: 'shared/members/member', collection: @invited_members, as: :member, locals: { membership_source: @project, group: group, current_user_is_group_owner: current_user_is_group_owner?(@project) }
-      - if show_access_requests?(@project, @requesters)
-        #tab-access-requests.tab-pane
-          - if vue_project_members_list_enabled
-            .js-project-access-requests-list{ data: project_members_list_data_attributes(@project, @requesters) }
-              .loading
-                .spinner.spinner-md
-          - else
-            .card.card-without-border
-              = render 'shared/members/tab_pane/header' do
-                = render 'shared/members/tab_pane/title' do
-                  = html_escape(_('Users requesting access to %{strong_start}%{project_name}%{strong_end}')) % { project_name: @project.name, strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe }
-              %ul.content-list.members-list
-                = render partial: 'shared/members/member', collection: @requesters, as: :member, locals: { membership_source: @project, group: group }
+        .invite-group= render 'shared/members/invite_group', access_levels: ProjectGroupLink.access_options, default_access_level: ProjectGroupLink.default_access, submit_url: project_group_links_path(@project), group_link_field: 'link_group_id', group_access_field: 'link_group_access', groups_select_tag_data: { skip_groups: @skip_groups }
+    .js-project-members-list-app{ data: { members_data: project_members_app_data_json(@project,
+                                                                                      members: @project_members,
+                                                                                      group_links: @group_links,
+                                                                                      invited: @invited_members,
+                                                                                      access_requests: @requesters) } }
+      .loading
+        .gl-spinner.gl-spinner-md

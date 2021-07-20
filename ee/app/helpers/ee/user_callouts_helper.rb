@@ -8,12 +8,12 @@ module EE
     ACTIVE_USER_COUNT_THRESHOLD    = 'active_user_count_threshold'
     GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
     GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
-    GOLD_TRIAL                     = 'gold_trial'
-    GOLD_TRIAL_BILLINGS            = 'gold_trial_billings'
+    ULTIMATE_TRIAL                 = 'ultimate_trial'
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
-    THREAT_MONITORING_INFO         = 'threat_monitoring_info'
     EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
+    EOA_BRONZE_PLAN_END_DATE       = '2022-01-26'
+    CL_SUBSCRIPTION_ACTIVATION = 'cloud_licensing_subscription_activation_banner'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -44,14 +44,14 @@ module EE
       any_project_not_in_hashed_storage?
     end
 
-    override :render_dashboard_gold_trial
-    def render_dashboard_gold_trial(user)
-      return unless show_gold_trial?(user, GOLD_TRIAL) &&
+    override :render_dashboard_ultimate_trial
+    def render_dashboard_ultimate_trial(user)
+      return unless show_ultimate_trial?(user, ULTIMATE_TRIAL) &&
           user_default_dashboard?(user) &&
           !user.owns_paid_namespace? &&
-          user.any_namespace_without_trial?
+          user.owns_group_without_trial?
 
-      render 'shared/gold_trial_callout_content'
+      render 'shared/ultimate_trial_callout_content'
     end
 
     def render_account_recovery_regular_check
@@ -61,18 +61,6 @@ module EE
           !user_dismissed?(ACCOUNT_RECOVERY_REGULAR_CHECK, 3.months.ago)
 
       render 'shared/check_recovery_settings'
-    end
-
-    def render_billings_gold_trial(user, namespace)
-      return if namespace.gold_plan?
-      return unless namespace.never_had_trial?
-      return unless show_gold_trial?(user, GOLD_TRIAL_BILLINGS)
-
-      render 'shared/gold_trial_callout_content', is_dismissable: !namespace.free_plan?, callout: GOLD_TRIAL_BILLINGS
-    end
-
-    def show_threat_monitoring_info?
-      !user_dismissed?(THREAT_MONITORING_INFO)
     end
 
     def show_token_expiry_notification?
@@ -105,7 +93,7 @@ module EE
     private
 
     def eoa_bronze_plan_end_date
-      Date.parse('2022-01-26')
+      Date.parse(EOA_BRONZE_PLAN_END_DATE)
     end
 
     def hashed_storage_enabled?
@@ -134,15 +122,15 @@ module EE
       linked_message.html_safe
     end
 
-    def show_gold_trial?(user, callout = GOLD_TRIAL)
+    def show_ultimate_trial?(user, callout = ULTIMATE_TRIAL)
       return false unless user
-      return false unless show_gold_trial_suitable_env?
+      return false unless show_ultimate_trial_suitable_env?
       return false if user_dismissed?(callout)
 
       true
     end
 
-    def show_gold_trial_suitable_env?
+    def show_ultimate_trial_suitable_env?
       ::Gitlab.com? && !::Gitlab::Database.read_only?
     end
 

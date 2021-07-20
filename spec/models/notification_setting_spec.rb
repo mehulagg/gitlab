@@ -51,6 +51,7 @@ RSpec.describe NotificationSetting do
 
     context 'notification_email' do
       let_it_be(:user) { create(:user) }
+
       subject { described_class.new(source_id: 1, source_type: 'Project', user_id: user.id) }
 
       it 'allows to change email to verified one' do
@@ -180,7 +181,8 @@ RSpec.describe NotificationSetting do
         :failed_pipeline,
         :success_pipeline,
         :fixed_pipeline,
-        :moved_project
+        :moved_project,
+        :merge_when_pipeline_succeeds
       )
     end
 
@@ -198,5 +200,19 @@ RSpec.describe NotificationSetting do
       expect(described_class).to receive(:email_events).with(source)
       subject.email_events
     end
+  end
+
+  describe '#order_by_id_asc' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:other_project) { create(:project) }
+    let_it_be(:notification_setting_1) { create(:notification_setting, project: project) }
+    let_it_be(:notification_setting_2) { create(:notification_setting, project: other_project) }
+    let_it_be(:notification_setting_3) { create(:notification_setting, project: project) }
+
+    let(:ids) { [notification_setting_1, notification_setting_2, notification_setting_3].map(&:id) }
+
+    subject(:ordered_records) { described_class.where(id: ids, source: project).order_by_id_asc }
+
+    it { is_expected.to eq([notification_setting_1, notification_setting_3]) }
   end
 end

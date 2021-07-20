@@ -12,13 +12,17 @@ type: reference
 
 Review Apps is a collaboration tool that takes the hard work out of providing an environment to showcase product changes.
 
+NOTE:
+If you have a Kubernetes cluster, you can automate this feature in your applications
+by using [Auto DevOps](../../topics/autodevops/index.md).
+
 ## Introduction
 
 Review Apps:
 
 - Provide an automatic live preview of changes made in a feature branch by spinning up a dynamic environment for your merge requests.
 - Allow designers and product managers to see your changes without needing to check out your branch and run your changes in a sandbox environment.
-- Are fully integrated with the [GitLab DevOps LifeCycle](../../README.md#the-entire-devops-lifecycle).
+- Are fully integrated with the [GitLab DevOps LifeCycle](../../index.md#the-entire-devops-lifecycle).
 - Allow you to deploy your changes wherever you want.
 
 ![Review Apps Workflow](img/continuous-delivery-review-apps.svg)
@@ -27,8 +31,8 @@ In the above example:
 
 - A Review App is built every time a commit is pushed to `topic branch`.
 - The reviewer fails two reviews before passing the third review.
-- After the review has passed, `topic branch` is merged into `master` where it is deployed to staging.
-- After having been approved in staging, the changes that were merged into `master` are deployed in to production.
+- After the review passes, `topic branch` is merged into the default branch, where it's deployed to staging.
+- After its approval in staging, the changes that were merged into the default branch are deployed to production.
 
 ## How Review Apps work
 
@@ -52,13 +56,13 @@ After adding Review Apps to your workflow, you follow the branched Git flow. Tha
 
 ## Configuring Review Apps
 
-Review Apps are built on [dynamic environments](../environments/index.md#configuring-dynamic-environments), which allow you to dynamically create a new environment for each branch.
+Review Apps are built on [dynamic environments](../environments/index.md#create-a-dynamic-environment), which allow you to dynamically create a new environment for each branch.
 
 The process of configuring Review Apps is as follows:
 
 1. Set up the infrastructure to host and deploy the Review Apps (check the [examples](#review-apps-examples) below).
 1. [Install](https://docs.gitlab.com/runner/install/) and [configure](https://docs.gitlab.com/runner/commands/) a runner to do deployment.
-1. Set up a job in `.gitlab-ci.yml` that uses the [predefined CI environment variable](../variables/README.md) `${CI_COMMIT_REF_NAME}`
+1. Set up a job in `.gitlab-ci.yml` that uses the [predefined CI/CD variable](../variables/index.md) `${CI_COMMIT_REF_NAME}`
    to create dynamic environments and restrict it to run only on branches.
    Alternatively, you can get a YML template for this job by [enabling review apps](#enable-review-apps-button) for your project.
 1. Optionally, set a job that [manually stops](../environments/index.md#stopping-an-environment) the Review Apps.
@@ -73,7 +77,7 @@ the **Enable Review Apps** button and GitLab prompts you with a template code bl
 you can copy and paste into `.gitlab-ci.yml` as a starting point. To do so:
 
 1. Go to the project your want to create a Review App job for.
-1. From the left nav, go to **Operations** > **Environments**.
+1. From the left nav, go to **Deployments > Environments**.
 1. Click on the **Enable Review Apps** button. It is available to you
    if you have Developer or higher [permissions](../../user/permissions.md) to that project.
 1. Copy the provided code snippet and paste it into your
@@ -85,7 +89,7 @@ you can copy and paste into `.gitlab-ci.yml` as a starting point. To do so:
 
 ## Review Apps auto-stop
 
-See how to [configure Review Apps environments to expire and auto-stop](../environments/index.md#environments-auto-stop)
+See how to [configure Review Apps environments to expire and auto-stop](../environments/index.md#stop-an-environment-after-a-certain-time-period)
 after a given period of time.
 
 ## Review Apps examples
@@ -220,7 +224,7 @@ To see Visual reviews in action, see the [Visual Reviews Walk through](https://y
 ### Configure Review Apps for Visual Reviews
 
 The feedback form is served through a script you add to pages in your Review App.
-If you have [Developer permissions](../../user/permissions.md) to the project,
+If you have the [Developer role](../../user/permissions.md) in the project,
 you can access it by clicking the **Review** button in the **Pipeline** section
 of the merge request. The form modal also shows a dropdown for changed pages
 if [route maps](#route-maps) are configured in the project.
@@ -243,14 +247,14 @@ looks for a project with code hosted in a project on GitLab.com:
 </script>
 ```
 
-Ideally, you should use [environment variables](../variables/predefined_variables.md)
+Ideally, you should use [CI/CD variables](../variables/predefined_variables.md)
 to replace those values at runtime when each review app is created:
 
 - `data-project-id` is the project ID, which can be found by the `CI_PROJECT_ID`
   variable.
 - `data-merge-request-id` is the merge request ID, which can be found by the
   `CI_MERGE_REQUEST_IID` variable. `CI_MERGE_REQUEST_IID` is available only if
-  [`only: [merge_requests]`](../merge_request_pipelines/index.md)
+  [`only: [merge_requests]`](../pipelines/merge_request_pipelines.md)
   is used and the merge request is created.
 - `data-mr-url` is the URL of the GitLab instance and is the same for all
   review apps.
@@ -282,8 +286,8 @@ The visual review tools retrieve the merge request ID from the `data-merge-reque
 data attribute included in the `script` HTML tag used to add the visual review tools
 to your review app.
 
-​After determining the ID for the merge request to link to a visual review app, you
-can supply the ID by either:​​
+After determining the ID for the merge request to link to a visual review app, you
+can supply the ID by either:
 
 - Hard-coding it in the script tag via the data attribute `data-merge-request-id` of the app.
 - Dynamically adding the `data-merge-request-id` value during the build of the app.
@@ -317,7 +321,3 @@ the user must enter a [personal access token](../../user/profile/personal_access
 with `api` scope before submitting feedback.
 
 This same method can be used to require authentication for any public projects.
-
-## Limitations
-
-Review App limitations are the same as [environments limitations](../environments/index.md#limitations).

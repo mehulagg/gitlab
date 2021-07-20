@@ -1,6 +1,0 @@
----
-title: Add alert related labels to CiliumNetworkPolicies. The label will contain the
-  project id and will be applicable to both new and existing policies
-merge_request: 53401
-author:
-type: changed

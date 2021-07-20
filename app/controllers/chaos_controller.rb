@@ -20,14 +20,18 @@ class ChaosController < ActionController::Base
   end
 
   def kill
-    do_chaos :kill, Chaos::KillWorker
+    do_chaos :kill, Chaos::KillWorker, 'KILL'
+  end
+
+  def quit
+    do_chaos :kill, Chaos::KillWorker, 'QUIT'
   end
 
   def gc
     gc_stat = Gitlab::Chaos.run_gc
 
     render json: {
-      worker_id: Prometheus::PidProvider.worker_id,
+      worker_id: ::Prometheus::PidProvider.worker_id,
       gc_stat: gc_stat
     }
   end

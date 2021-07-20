@@ -7,7 +7,6 @@ import LineHighlighter from '~/line_highlighter';
 describe('LineHighlighter', () => {
   const testContext = {};
 
-  preloadFixtures('static/line_highlighter.html');
   const clickLine = (number, eventData = {}) => {
     if ($.isEmptyObject(eventData)) {
       return $(`#L${number}`).click();
@@ -43,6 +42,15 @@ describe('LineHighlighter', () => {
 
     it('highlights a range of lines given in the URL hash', () => {
       new LineHighlighter({ hash: '#L5-25' });
+
+      expect($(`.${testContext.css}`).length).toBe(21);
+      for (let line = 5; line <= 25; line += 1) {
+        expect($(`#LC${line}`)).toHaveClass(testContext.css);
+      }
+    });
+
+    it('highlights a range of lines given in the URL hash using GitHub format', () => {
+      new LineHighlighter({ hash: '#L5-L25' });
 
       expect($(`.${testContext.css}`).length).toBe(21);
       for (let line = 5; line <= 25; line += 1) {

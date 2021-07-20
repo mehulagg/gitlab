@@ -18,7 +18,7 @@ RSpec.describe AdjournedProjectDeletionWorker do
     end
 
     it 'stops execution if user was deleted' do
-      project.update(deleting_user: nil)
+      project.update!(deleting_user: nil)
 
       expect(Projects::DestroyService).not_to receive(:new)
 

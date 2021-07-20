@@ -11,6 +11,9 @@ import {
 import { get } from 'lodash';
 import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
 import createFlash from '~/flash';
+import CleanupPolicyEnabledAlert from '~/packages_and_registries/shared/components/cleanup_policy_enabled_alert.vue';
+import { FILTERED_SEARCH_TERM } from '~/packages_and_registries/shared/constants';
+import { extractFilterAndSorting } from '~/packages_and_registries/shared/utils';
 import Tracking from '~/tracking';
 import RegistrySearch from '~/vue_shared/components/registry/registry_search.vue';
 import DeleteImage from '../components/delete_image.vue';
@@ -59,6 +62,7 @@ export default {
     RegistryHeader,
     DeleteImage,
     RegistrySearch,
+    CleanupPolicyEnabledAlert,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -81,6 +85,9 @@ export default {
   searchConfig: SORT_FIELDS,
   apollo: {
     baseImages: {
+      skip() {
+        return !this.fetchBaseQuery;
+      },
       query: getContainerRepositoriesQuery,
       variables() {
         return this.queryVariables;
@@ -124,15 +131,19 @@ export default {
       sorting: { orderBy: 'UPDATED', sort: 'desc' },
       name: null,
       mutationLoading: false,
+      fetchBaseQuery: false,
       fetchAdditionalDetails: false,
     };
   },
   computed: {
     images() {
-      return this.baseImages.map((image, index) => ({
-        ...image,
-        ...get(this.additionalDetails, index, {}),
-      }));
+      if (this.baseImages) {
+        return this.baseImages.map((image, index) => ({
+          ...image,
+          ...get(this.additionalDetails, index, {}),
+        }));
+      }
+      return [];
     },
     graphqlResource() {
       return this.config.isGroupPage ? 'group' : 'project';
@@ -171,8 +182,15 @@ export default {
     },
   },
   mounted() {
+    const { sorting, filters } = extractFilterAndSorting(this.$route.query);
+
+    this.filter = [...filters];
+    this.name = filters[0]?.value.data;
+    this.sorting = { ...this.sorting, ...sorting };
+
     // If the two graphql calls - which are not batched - resolve togheter we will have a race
     //  condition when apollo sets the cache, with this we give the 'base' call an headstart
+    this.fetchBaseQuery = true;
     setTimeout(() => {
       this.fetchAdditionalDetails = true;
     }, 200);
@@ -241,8 +259,11 @@ export default {
       };
     },
     doFilter() {
-      const search = this.filter.find((i) => i.type === 'filtered-search-term');
+      const search = this.filter.find((i) => i.type === FILTERED_SEARCH_TERM);
       this.name = search?.value?.data;
+    },
+    updateUrlQueryString(query) {
+      this.$router.push({ query });
     },
   },
 };
@@ -263,6 +284,12 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
+
+    <cleanup-policy-enabled-alert
+      v-if="config.showCleanupPolicyOnAlert"
+      :project-path="config.projectPath"
+      :cleanup-policies-settings-path="config.cleanupPoliciesSettingsPath"
+    />
 
     <gl-empty-state
       v-if="config.characterError"
@@ -288,7 +315,6 @@ export default {
         :images-count="containerRepositoriesCount"
         :expiration-policy="config.expirationPolicy"
         :help-page-path="config.helpPagePath"
-        :expiration-policy-help-page-path="config.expirationPolicyHelpPagePath"
         :hide-expiration-policy-data="config.isGroupPage"
       >
         <template #commands>
@@ -304,6 +330,7 @@ export default {
         @sorting:changed="updateSorting"
         @filter:changed="filter = $event"
         @filter:submit="doFilter"
+        @query:changed="updateUrlQueryString"
       />
 
       <div v-if="isLoading" class="gl-mt-5">

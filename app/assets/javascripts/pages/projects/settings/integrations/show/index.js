@@ -1,4 +1,3 @@
-import PersistentUserCallout from '~/persistent_user_callout';
+import initIntegrationsList from '~/integrations/index';
 
-const callout = document.querySelector('.js-webhooks-moved-alert');
-PersistentUserCallout.factory(callout);
+initIntegrationsList();

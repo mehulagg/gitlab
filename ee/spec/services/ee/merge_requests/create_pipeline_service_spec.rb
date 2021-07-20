@@ -8,7 +8,7 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
   describe '#execute' do
     subject { service.execute(merge_request) }
 
-    let(:service) { described_class.new(source_project, user) }
+    let(:service) { described_class.new(project: source_project, current_user: user) }
     let(:project) { create(:project, :repository) }
     let(:user) { create(:user) }
     let(:title) { 'Awesome merge request' }
@@ -49,8 +49,13 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
         subject
 
         expect(merge_request.all_pipelines.count).to eq(1)
-        expect(merge_request.all_pipelines.last).not_to be_merge_request_pipeline
+        expect(merge_request.all_pipelines.last).not_to be_merged_result_pipeline
         expect(merge_request.all_pipelines.last).to be_detached_merge_request_pipeline
+      end
+
+      it 'responds with success', :sidekiq_might_not_need_inline, :aggregate_failures do
+        expect(subject).to be_success
+        expect(subject.payload).to eq(Ci::Pipeline.last)
       end
     end
 
@@ -58,8 +63,13 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
       subject
 
       expect(merge_request.all_pipelines.count).to eq(1)
-      expect(merge_request.all_pipelines.last).to be_merge_request_pipeline
+      expect(merge_request.all_pipelines.last).to be_merged_result_pipeline
       expect(merge_request.all_pipelines.last).not_to be_detached_merge_request_pipeline
+    end
+
+    it 'responds with success', :sidekiq_might_not_need_inline, :aggregate_failures do
+      expect(subject).to be_success
+      expect(subject.payload).to eq(Ci::Pipeline.last)
     end
 
     context 'when merge request is WIP' do
@@ -128,10 +138,15 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
     context 'when .gitlab-ci.yml is invalid' do
       let(:ci_yaml) { 'invalid yaml file' }
 
-      it 'persists a pipeline with a config error' do
+      it 'persists a pipeline with a config error', :aggregate_failures do
         expect { subject }.to change { Ci::Pipeline.count }.by(1)
         expect(merge_request.all_pipelines.last).to be_failed
         expect(merge_request.all_pipelines.last).to be_config_error
+      end
+
+      it 'responds with error', :aggregate_failures do
+        expect(subject).to be_error
+        expect(subject.message).to eq('Cannot create a pipeline for this merge request.')
       end
     end
   end

@@ -7,9 +7,10 @@ RSpec.describe ProjectsController do
   include ProjectForksHelper
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:project, reload: true) { create(:project, service_desk_enabled: false) }
+  let_it_be(:project, reload: true) { create(:project, :with_export, service_desk_enabled: false) }
   let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:user) { create(:user) }
+
   let(:jpg) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
   let(:txt) { fixture_file_upload('spec/fixtures/doc_sample.txt', 'text/plain') }
 
@@ -118,11 +119,6 @@ RSpec.describe ProjectsController do
         get :activity, params: { namespace_id: project.namespace, id: project, format: :json }
 
         expect(json_response['html']).to eq("\n")
-      end
-
-      it 'filters out invisible event when calculating the count' do
-        get :activity, params: { namespace_id: project.namespace, id: project, format: :json }
-
         expect(json_response['count']).to eq(0)
       end
     end
@@ -159,7 +155,7 @@ RSpec.describe ProjectsController do
           before do
             setting = user.notification_settings_for(public_project)
             setting.level = :watch
-            setting.save
+            setting.save!
           end
 
           it "shows current notification setting" do
@@ -221,17 +217,29 @@ RSpec.describe ProjectsController do
         allow(controller).to receive(:record_experiment_user)
       end
 
+      context 'when user can push to default branch', :experiment do
+        let(:user) { empty_project.owner }
+
+        it 'creates an "view_project_show" experiment tracking event' do
+          expect(experiment(:empty_repo_upload)).to track(
+            :view_project_show,
+            property: 'empty'
+          ).on_next_instance
+
+          get :show, params: { namespace_id: empty_project.namespace, id: empty_project }
+        end
+      end
+
       User.project_views.keys.each do |project_view|
         context "with #{project_view} view set" do
           before do
-            user.update(project_view: project_view)
+            user.update!(project_view: project_view)
 
             get :show, params: { namespace_id: empty_project.namespace, id: empty_project }
           end
 
-          it "renders the empty project view and records the experiment user", :aggregate_failures do
+          it "renders the empty project view" do
             expect(response).to render_template('empty')
-            expect(controller).to have_received(:record_experiment_user).with(:invite_members_empty_project_version_a)
           end
         end
       end
@@ -247,7 +255,7 @@ RSpec.describe ProjectsController do
       User.project_views.keys.each do |project_view|
         context "with #{project_view} view set" do
           before do
-            user.update(project_view: project_view)
+            user.update!(project_view: project_view)
 
             get :show, params: { namespace_id: empty_project.namespace, id: empty_project }
           end
@@ -361,6 +369,23 @@ RSpec.describe ProjectsController do
       end
     end
 
+    context 'when project is moved and git format is requested' do
+      let(:old_path) { project.path + 'old' }
+
+      before do
+        project.redirect_routes.create!(path: "#{project.namespace.full_path}/#{old_path}")
+
+        project.add_developer(user)
+        sign_in(user)
+      end
+
+      it 'redirects to new project path' do
+        get :show, params: { namespace_id: project.namespace, id: old_path }, format: :git
+
+        expect(response).to redirect_to(project_path(project, format: :git))
+      end
+    end
+
     context 'when the project is forked and has a repository', :request_store do
       let(:public_project) { create(:project, :public, :repository) }
       let(:other_user) { create(:user) }
@@ -416,7 +441,8 @@ RSpec.describe ProjectsController do
         path: 'foo',
         description: 'bar',
         namespace_id: user.namespace.id,
-        visibility_level: Gitlab::VisibilityLevel::PUBLIC
+        visibility_level: Gitlab::VisibilityLevel::PUBLIC,
+        initialize_with_readme: 1
       }
     end
 
@@ -425,9 +451,11 @@ RSpec.describe ProjectsController do
     end
 
     it 'tracks a created event for the new_project_readme experiment', :experiment do
-      expect(experiment(:new_project_readme)).to track(:created, property: 'blank').on_any_instance.with_context(
-        actor: user
-      )
+      expect(experiment(:new_project_readme)).to track(
+        :created,
+        property: 'blank',
+        value: 1
+      ).with_context(actor: user).on_next_instance
 
       post :create, params: { project: project_params }
     end
@@ -532,6 +560,7 @@ RSpec.describe ProjectsController do
   describe '#housekeeping' do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, group: group) }
+
     let(:housekeeping) { Repositories::HousekeepingService.new(project) }
 
     context 'when authenticated as owner' do
@@ -1081,6 +1110,7 @@ RSpec.describe ProjectsController do
 
     context 'state filter on references' do
       let_it_be(:issue) { create(:issue, :closed, project: public_project) }
+
       let(:merge_request) { create(:merge_request, :closed, target_project: public_project) }
 
       it 'renders JSON body with state filter for issues' do
@@ -1308,7 +1338,7 @@ RSpec.describe ProjectsController do
       end
     end
 
-    describe '#download_export' do
+    describe '#download_export', :clean_gitlab_redis_cache do
       let(:action) { :download_export }
 
       context 'object storage enabled' do
@@ -1316,6 +1346,17 @@ RSpec.describe ProjectsController do
           it 'returns 302' do
             get action, params: { namespace_id: project.namespace, id: project }
 
+            expect(response).to have_gitlab_http_status(:found)
+          end
+        end
+
+        context 'when project export file is absent' do
+          it 'alerts the user and returns 302' do
+            project.export_file.file.delete
+
+            get action, params: { namespace_id: project.namespace, id: project }
+
+            expect(flash[:alert]).to include('file containing the export is not available yet')
             expect(response).to have_gitlab_http_status(:found)
           end
         end
@@ -1344,6 +1385,14 @@ RSpec.describe ProjectsController do
 
             expect(response.body).to eq('This endpoint has been requested too many times. Try again later.')
             expect(response).to have_gitlab_http_status(:too_many_requests)
+          end
+
+          it 'applies correct scope when throttling' do
+            expect(Gitlab::ApplicationRateLimiter)
+              .to receive(:throttled?)
+              .with(:project_download_export, scope: [user, project])
+
+            post action, params: { namespace_id: project.namespace, id: project }
           end
         end
       end
@@ -1421,6 +1470,30 @@ RSpec.describe ProjectsController do
       before do
         default_params.merge!(id: public_project, namespace_id: public_project.namespace)
       end
+    end
+  end
+
+  context 'GET show.atom' do
+    let_it_be(:public_project) { create(:project, :public) }
+    let_it_be(:event) { create(:event, :commented, project: public_project, target: create(:note, project: public_project)) }
+    let_it_be(:invisible_event) { create(:event, :commented, project: public_project, target: create(:note, :confidential, project: public_project)) }
+
+    it 'filters by calling event.visible_to_user?' do
+      expect(EventCollection).to receive_message_chain(:new, :to_a).and_return([event, invisible_event])
+      expect(event).to receive(:visible_to_user?).and_return(true)
+      expect(invisible_event).to receive(:visible_to_user?).and_return(false)
+
+      get :show, format: :atom, params: { id: public_project, namespace_id: public_project.namespace }
+
+      expect(response).to render_template('xml.atom')
+      expect(assigns(:events)).to eq([event])
+    end
+
+    it 'filters by calling event.visible_to_user?' do
+      get :show, format: :atom, params: { id: public_project, namespace_id: public_project.namespace }
+
+      expect(response).to render_template('xml.atom')
+      expect(assigns(:events)).to eq([event])
     end
   end
 

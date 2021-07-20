@@ -8,10 +8,6 @@ class Projects::ProjectMembersController < Projects::ApplicationController
   # Authorize
   before_action :authorize_admin_project_member!, except: [:index, :leave, :request_access]
 
-  before_action do
-    push_frontend_feature_flag(:vue_project_members_list, @project, default_enabled: :yaml)
-  end
-
   feature_category :authentication_and_authorization
 
   def index
@@ -66,6 +62,22 @@ class Projects::ProjectMembersController < Projects::ApplicationController
   def membershipable_members
     project.members
   end
+
+  def plain_source_type
+    'project'
+  end
+
+  def source_type
+    _("project")
+  end
+
+  def members_page_url
+    project_project_members_path(project)
+  end
+
+  def root_params_key
+    :project_member
+  end
 end
 
-Projects::ProjectMembersController.prepend_if_ee('EE::Projects::ProjectMembersController')
+Projects::ProjectMembersController.prepend_mod_with('Projects::ProjectMembersController')

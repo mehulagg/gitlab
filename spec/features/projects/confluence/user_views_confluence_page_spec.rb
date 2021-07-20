@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'User views the Confluence page' do
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project, :public) }
 
   before do
@@ -11,7 +12,7 @@ RSpec.describe 'User views the Confluence page' do
   end
 
   it 'shows the page when the Confluence integration is enabled' do
-    service = create(:confluence_service, project: project)
+    service = create(:confluence_integration, project: project)
 
     visit project_wikis_confluence_path(project)
 

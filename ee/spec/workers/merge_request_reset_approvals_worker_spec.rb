@@ -19,7 +19,7 @@ RSpec.describe MergeRequestResetApprovalsWorker do
     end
 
     it "executes MergeRequests::RefreshService with expected values" do
-      expect_next_instance_of(EE::MergeRequests::ResetApprovalsService, project, user) do |refresh_service|
+      expect_next_instance_of(MergeRequests::ResetApprovalsService, project: project, current_user: user) do |refresh_service|
         expect(refresh_service).to receive(:execute).with(ref, newrev)
       end
 
@@ -30,7 +30,7 @@ RSpec.describe MergeRequestResetApprovalsWorker do
       let(:project) { double("project", id: "foo") }
 
       it "doesn't execute the service" do
-        expect(EE::MergeRequests::ResetApprovalsService).not_to receive(:new)
+        expect(MergeRequests::ResetApprovalsService).not_to receive(:new)
 
         perform
       end
@@ -40,7 +40,7 @@ RSpec.describe MergeRequestResetApprovalsWorker do
       let(:user) { double("user", id: "foo") }
 
       it "doesn't execute the service" do
-        expect(EE::MergeRequests::ResetApprovalsService).not_to receive(:new)
+        expect(MergeRequests::ResetApprovalsService).not_to receive(:new)
 
         perform
       end

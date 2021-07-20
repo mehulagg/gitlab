@@ -5,7 +5,8 @@ module ResourceEvents
     attr_reader :resource, :user
 
     def initialize(resource, user)
-      @resource, @user = resource, user
+      @resource = resource
+      @user = user
     end
 
     def execute(added_labels: [], removed_labels: [])
@@ -43,4 +44,4 @@ module ResourceEvents
   end
 end
 
-ResourceEvents::ChangeLabelsService.prepend_if_ee('EE::ResourceEvents::ChangeLabelsService')
+ResourceEvents::ChangeLabelsService.prepend_mod_with('ResourceEvents::ChangeLabelsService')

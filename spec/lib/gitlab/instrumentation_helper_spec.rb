@@ -6,52 +6,6 @@ require 'rspec-parameterized'
 RSpec.describe Gitlab::InstrumentationHelper do
   using RSpec::Parameterized::TableSyntax
 
-  describe '.keys' do
-    it 'returns all available payload keys' do
-      expected_keys = [
-        :cpu_s,
-        :gitaly_calls,
-        :gitaly_duration_s,
-        :rugged_calls,
-        :rugged_duration_s,
-        :elasticsearch_calls,
-        :elasticsearch_duration_s,
-        :mem_objects,
-        :mem_bytes,
-        :mem_mallocs,
-        :redis_calls,
-        :redis_duration_s,
-        :redis_read_bytes,
-        :redis_write_bytes,
-        :redis_action_cable_calls,
-        :redis_action_cable_duration_s,
-        :redis_action_cable_read_bytes,
-        :redis_action_cable_write_bytes,
-        :redis_cache_calls,
-        :redis_cache_duration_s,
-        :redis_cache_read_bytes,
-        :redis_cache_write_bytes,
-        :redis_queues_calls,
-        :redis_queues_duration_s,
-        :redis_queues_read_bytes,
-        :redis_queues_write_bytes,
-        :redis_shared_state_calls,
-        :redis_shared_state_duration_s,
-        :redis_shared_state_read_bytes,
-        :redis_shared_state_write_bytes,
-        :db_count,
-        :db_write_count,
-        :db_cached_count,
-        :external_http_count,
-        :external_http_duration_s,
-        :rack_attack_redis_count,
-        :rack_attack_redis_duration_s
-      ]
-
-      expect(described_class.keys).to eq(expected_keys)
-    end
-  end
-
   describe '.add_instrumentation_data', :request_store do
     let(:payload) { {} }
 
@@ -145,22 +99,73 @@ RSpec.describe Gitlab::InstrumentationHelper do
           :mem_mallocs
         )
       end
+    end
 
-      context 'when trace_memory_allocations is disabled' do
+    context 'when load balancing is enabled' do
+      include_context 'clear DB Load Balancing configuration'
+
+      before do
+        allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
+      end
+
+      it 'includes DB counts' do
+        subject
+
+        expect(payload).to include(db_replica_count: 0,
+                                   db_replica_cached_count: 0,
+                                   db_primary_count: 0,
+                                   db_primary_cached_count: 0,
+                                   db_primary_wal_count: 0,
+                                   db_replica_wal_count: 0,
+                                   db_primary_wal_cached_count: 0,
+                                   db_replica_wal_cached_count: 0)
+      end
+
+      context 'when replica caught up search was made' do
         before do
-          stub_feature_flags(trace_memory_allocations: false)
-          Gitlab::Memory::Instrumentation.ensure_feature_flag!
+          Gitlab::SafeRequestStore[:caught_up_replica_pick_ok] = 2
+          Gitlab::SafeRequestStore[:caught_up_replica_pick_fail] = 1
         end
 
-        it 'does not log memory usage metrics' do
+        it 'includes related metrics' do
           subject
 
-          expect(payload).not_to include(
-            :mem_objects,
-            :mem_bytes,
-            :mem_mallocs
-          )
+          expect(payload).to include(caught_up_replica_pick_ok: 2)
+          expect(payload).to include(caught_up_replica_pick_fail: 1)
         end
+      end
+
+      context 'when only a single counter was updated' do
+        before do
+          Gitlab::SafeRequestStore[:caught_up_replica_pick_ok] = 1
+          Gitlab::SafeRequestStore[:caught_up_replica_pick_fail] = nil
+        end
+
+        it 'includes only that counter into logging' do
+          subject
+
+          expect(payload).to include(caught_up_replica_pick_ok: 1)
+          expect(payload).not_to include(:caught_up_replica_pick_fail)
+        end
+      end
+    end
+
+    context 'when load balancing is disabled' do
+      before do
+        allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(false)
+      end
+
+      it 'does not include DB counts' do
+        subject
+
+        expect(payload).not_to include(db_replica_count: 0,
+                                   db_replica_cached_count: 0,
+                                   db_primary_count: 0,
+                                   db_primary_cached_count: 0,
+                                   db_primary_wal_count: 0,
+                                   db_replica_wal_count: 0,
+                                   db_primary_wal_cached_count: 0,
+                                   db_replica_wal_cached_count: 0)
       end
     end
   end

@@ -13,8 +13,6 @@ describe('ShortcutsIssuable', () => {
   const snippetShowFixtureName = 'snippets/show.html';
   const mrShowFixtureName = 'merge_requests/merge_request_of_current_user.html';
 
-  preloadFixtures(snippetShowFixtureName, mrShowFixtureName);
-
   beforeAll((done) => {
     initCopyAsGFM();
 
@@ -331,7 +329,7 @@ describe('ShortcutsIssuable', () => {
       window.shortcut = new ShortcutsIssuable();
 
       [sidebarCollapsedBtn, sidebarExpandedBtn] = document.querySelectorAll(
-        '.sidebar-source-branch button',
+        '.js-sidebar-source-branch button',
       );
 
       [sidebarCollapsedBtn, sidebarExpandedBtn].forEach((btn) => jest.spyOn(btn, 'click'));

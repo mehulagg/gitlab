@@ -8,7 +8,8 @@ RSpec.describe GitlabSchema.types['Package'] do
       id name version package_type
       created_at updated_at
       project
-      tags pipelines versions
+      tags pipelines metadata versions
+      status
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)

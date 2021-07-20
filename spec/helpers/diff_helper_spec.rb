@@ -291,33 +291,62 @@ RSpec.describe DiffHelper do
   end
 
   describe '#render_overflow_warning?' do
-    let(:diffs_collection) { instance_double(Gitlab::Diff::FileCollection::MergeRequestDiff, raw_diff_files: diff_files) }
+    using RSpec::Parameterized::TableSyntax
+
+    let(:diffs_collection) { instance_double(Gitlab::Diff::FileCollection::MergeRequestDiff, raw_diff_files: diff_files, overflow?: false) }
     let(:diff_files) { Gitlab::Git::DiffCollection.new(files) }
     let(:safe_file) { { too_large: false, diff: '' } }
     let(:large_file) { { too_large: true, diff: '' } }
     let(:files) { [safe_file, safe_file] }
 
-    before do
-      allow(diff_files).to receive(:overflow?).and_return(false)
-    end
+    context 'when no limits are hit' do
+      before do
+        allow(diff_files).to receive(:overflow_max_bytes?).and_return(false)
+        allow(diff_files).to receive(:overflow_max_files?).and_return(false)
+        allow(diff_files).to receive(:overflow_max_lines?).and_return(false)
+        allow(diff_files).to receive(:collapsed_safe_bytes?).and_return(false)
+        allow(diff_files).to receive(:collapsed_safe_files?).and_return(false)
+        allow(diff_files).to receive(:collapsed_safe_lines?).and_return(false)
+      end
 
-    context 'when neither collection nor individual file hit the limit' do
       it 'returns false and does not log any overflow events' do
         expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_collection_limits)
         expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_single_file_limits)
+        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_max_bytes_limits)
+        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_max_files_limits)
+        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_max_lines_limits)
+        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_collapsed_bytes_limits)
+        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_collapsed_files_limits)
+        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_collapsed_lines_limits)
 
+        expect(render_overflow_warning?(diffs_collection)).to be false
+      end
+    end
+
+    where(:overflow_method, :event_name) do
+      :overflow_max_bytes?      | :diffs_overflow_max_bytes_limits
+      :overflow_max_files?      | :diffs_overflow_max_files_limits
+      :overflow_max_lines?      | :diffs_overflow_max_lines_limits
+      :collapsed_safe_bytes?    | :diffs_overflow_collapsed_bytes_limits
+      :collapsed_safe_files?    | :diffs_overflow_collapsed_files_limits
+      :collapsed_safe_lines?    | :diffs_overflow_collapsed_lines_limits
+    end
+
+    with_them do
+      it 'returns false and only logs the correct collection overflow event' do
+        allow(diff_files).to receive(overflow_method).and_return(true)
+        expect(Gitlab::Metrics).to receive(:add_event).with(event_name).once
         expect(render_overflow_warning?(diffs_collection)).to be false
       end
     end
 
     context 'when the file collection has an overflow' do
       before do
-        allow(diff_files).to receive(:overflow?).and_return(true)
+        allow(diffs_collection).to receive(:overflow?).and_return(true)
       end
 
-      it 'returns false and only logs collection overflow event' do
-        expect(Gitlab::Metrics).to receive(:add_event).with(:diffs_overflow_collection_limits).exactly(:once)
-        expect(Gitlab::Metrics).not_to receive(:add_event).with(:diffs_overflow_single_file_limits)
+      it 'returns true and only logs all the correct collection overflow event' do
+        expect(Gitlab::Metrics).to receive(:add_event).with(:diffs_overflow_collection_limits).once
 
         expect(render_overflow_warning?(diffs_collection)).to be true
       end
@@ -375,7 +404,31 @@ RSpec.describe DiffHelper do
     it "returns a valid URL" do
       allow(helper).to receive(:safe_params).and_return(params)
 
-      expect(subject).to match(/foo\/bar\/-\/commit\/#{commit.sha}\/diff_for_path/)
+      expect(subject).to match(%r{foo/bar/-/commit/#{commit.sha}/diff_for_path})
+    end
+  end
+
+  describe "#render_fork_suggestion" do
+    subject { helper.render_fork_suggestion }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+    end
+
+    context "user signed in" do
+      let(:current_user) { build(:user) }
+
+      it "renders the partial" do
+        expect(helper).to receive(:render).with(partial: "projects/fork_suggestion").exactly(:once)
+
+        5.times { subject }
+      end
+    end
+
+    context "guest" do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_nil }
     end
   end
 end

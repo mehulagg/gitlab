@@ -1,9 +1,5 @@
 import { __ } from '~/locale';
-import {
-  generateBadges as CEGenerateBadges,
-  parseDataAttributes as CEParseDataAttributes,
-  isDirectMember,
-} from '~/members/utils';
+import { generateBadges as CEGenerateBadges, isDirectMember } from '~/members/utils';
 
 export {
   isGroup,
@@ -14,8 +10,8 @@ export {
   canUpdate,
 } from '~/members/utils';
 
-export const generateBadges = (member, isCurrentUser) => [
-  ...CEGenerateBadges(member, isCurrentUser),
+export const generateBadges = ({ member, isCurrentUser, canManageMembers }) => [
+  ...CEGenerateBadges({ member, isCurrentUser, canManageMembers }),
   {
     show: member.usingLicense,
     text: __('Is using seat'),
@@ -36,15 +32,11 @@ export const generateBadges = (member, isCurrentUser) => [
     text: __('LDAP'),
     variant: 'info',
   },
+  {
+    show: member.provisionedByThisGroup,
+    text: __('Enterprise'),
+    variant: 'info',
+  },
 ];
 
 export const canOverride = (member) => member.canOverride && isDirectMember(member);
-
-export const parseDataAttributes = (el) => {
-  const { ldapOverridePath } = el.dataset;
-
-  return {
-    ...CEParseDataAttributes(el),
-    ldapOverridePath,
-  };
-};

@@ -15,7 +15,7 @@ module Mutations
               null: true,
               description: 'Issue list in the issue board.'
 
-        authorize :admin_list
+        authorize :admin_issue_board_list
 
         private
 
@@ -34,4 +34,4 @@ module Mutations
   end
 end
 
-Mutations::Boards::Lists::Create.prepend_if_ee('::EE::Mutations::Boards::Lists::Create')
+Mutations::Boards::Lists::Create.prepend_mod_with('Mutations::Boards::Lists::Create')

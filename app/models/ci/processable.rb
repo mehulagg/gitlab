@@ -120,7 +120,7 @@ module Ci
       raise NotImplementedError
     end
 
-    def scoped_variables_hash
+    def persisted_environment
       raise NotImplementedError
     end
 
@@ -169,7 +169,13 @@ module Ci
     end
 
     def all_dependencies
-      dependencies.all
+      if Feature.enabled?(:preload_associations_jobs_request_api_endpoint, project, default_enabled: :yaml)
+        strong_memoize(:all_dependencies) do
+          dependencies.all
+        end
+      else
+        dependencies.all
+      end
     end
 
     private

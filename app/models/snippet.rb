@@ -20,7 +20,6 @@ class Snippet < ApplicationRecord
   extend ::Gitlab::Utils::Override
 
   MAX_FILE_COUNT = 10
-  MASTER_BRANCH = 'master'
 
   cache_markdown_field :title, pipeline: :single_line
   cache_markdown_field :description
@@ -45,7 +44,7 @@ class Snippet < ApplicationRecord
   has_many :notes, as: :noteable, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :user_mentions, class_name: "SnippetUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :snippet_repository, inverse_of: :snippet
-  has_many :repository_storage_moves, class_name: 'SnippetRepositoryStorageMove', inverse_of: :container
+  has_many :repository_storage_moves, class_name: 'Snippets::RepositoryStorageMove', inverse_of: :container
 
   # We need to add the `dependent` in order to call the after_destroy callback
   has_one :statistics, class_name: 'SnippetStatistics', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -82,6 +81,7 @@ class Snippet < ApplicationRecord
   scope :fresh, -> { order("created_at DESC") }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> { includes(author: :status) }
+  scope :inc_statistics, -> { includes(:statistics) }
   scope :with_statistics, -> { joins(:statistics) }
   scope :inc_projects_namespace_route, -> { includes(project: [:route, :namespace]) }
 
@@ -117,7 +117,7 @@ class Snippet < ApplicationRecord
   def self.only_include_projects_visible_to(current_user = nil)
     levels = Gitlab::VisibilityLevel.levels_for_user(current_user)
 
-    joins(:project).where('projects.visibility_level IN (?)', levels)
+    joins(:project).where(projects: { visibility_level: levels })
   end
 
   def self.only_include_projects_with_snippets_enabled(include_private: false)
@@ -216,8 +216,10 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    branch = default_branch
-    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }
+    files = list_files(default_branch)
+    items = files.map { |file| [default_branch, file] }
+
+    repository.blobs_at(items).compact
   end
 
   def hook_attrs
@@ -244,7 +246,7 @@ class Snippet < ApplicationRecord
     notes.includes(:author)
   end
 
-  def check_for_spam?
+  def check_for_spam?(user:)
     visibility_level_changed?(to: Snippet::PUBLIC) ||
       (public? && (title_changed? || content_changed?))
   end
@@ -313,19 +315,19 @@ class Snippet < ApplicationRecord
 
   override :default_branch
   def default_branch
-    super || MASTER_BRANCH
+    super || Gitlab::DefaultBranch.value(object: project)
   end
 
   def repository_storage
     snippet_repository&.shard_name || Repository.pick_storage_shard
   end
 
-  # Repositories are created by default with the `master` branch.
+  # Repositories are created with a default branch. This branch
+  # can be different from the default branch set in the platform.
   # This method changes the `HEAD` file to point to the existing
-  # default branch in case it's not master.
+  # default branch in case it's different.
   def change_head_to_default_branch
     return unless repository.exists?
-    return if default_branch == MASTER_BRANCH
     # All snippets must have at least 1 file. Therefore, if
     # `HEAD` is empty is because it's pointing to the wrong
     # default branch
@@ -388,4 +390,4 @@ class Snippet < ApplicationRecord
   end
 end
 
-Snippet.prepend_if_ee('EE::Snippet')
+Snippet.prepend_mod_with('Snippet')

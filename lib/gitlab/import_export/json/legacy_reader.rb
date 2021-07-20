@@ -2,7 +2,7 @@
 
 module Gitlab
   module ImportExport
-    module JSON
+    module Json
       class LegacyReader
         class File < LegacyReader
           include Gitlab::Utils::StrongMemoize
@@ -28,9 +28,9 @@ module Gitlab
 
           def read_hash
             ActiveSupport::JSON.decode(IO.read(@path))
-          rescue => e
+          rescue StandardError => e
             Gitlab::ErrorTracking.log_exception(e)
-            raise Gitlab::ImportExport::Error.new('Incorrect JSON format')
+            raise Gitlab::ImportExport::Error, 'Incorrect JSON format'
           end
         end
 

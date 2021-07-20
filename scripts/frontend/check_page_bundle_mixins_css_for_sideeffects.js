@@ -7,8 +7,8 @@ if (process.env.RAILS_ENV !== 'production') {
   process.exit(0);
 }
 
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const glob = require('glob');
 const pjs = require('postcss');
 

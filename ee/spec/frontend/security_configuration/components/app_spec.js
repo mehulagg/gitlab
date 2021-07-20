@@ -2,10 +2,10 @@ import { GlAlert, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import SecurityConfigurationApp from 'ee/security_configuration/components/app.vue';
-import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
-import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
+import ConfigurationTable from 'ee/security_configuration/components/configuration_table.vue';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import stubChildren from 'helpers/stub_children';
+import { scanners } from '~/security_configuration/components/constants';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { generateFeatures } from './helpers';
 
@@ -19,7 +19,6 @@ const propsData = {
   gitlabCiPresent: false,
   gitlabCiHistoryPath: '/ci/history',
   autoFixSettingsProps: {},
-  createSastMergeRequestPath: 'http://createSastMergeRequestPath',
 };
 
 describe('Security Configuration App', () => {
@@ -32,7 +31,6 @@ describe('Security Configuration App', () => {
         {
           stubs: {
             ...stubChildren(SecurityConfigurationApp),
-            GlTable: false,
             GlSprintf: false,
           },
           propsData,
@@ -52,13 +50,8 @@ describe('Security Configuration App', () => {
   });
 
   const getPipelinesLink = () => wrapper.find({ ref: 'pipelinesLink' });
-  const getFeaturesTable = () => wrapper.find({ ref: 'securityControlTable' });
-  const getFeaturesRows = () => getFeaturesTable().findAll('tbody tr');
+  const getConfigurationTable = () => wrapper.find(ConfigurationTable);
   const getAlert = () => wrapper.find(GlAlert);
-  const getRowCells = (row) => {
-    const [feature, status, manage] = row.findAll('td').wrappers;
-    return { feature, status, manage };
-  };
 
   describe('header', () => {
     it.each`
@@ -162,31 +155,31 @@ describe('Security Configuration App', () => {
   });
 
   describe('features table', () => {
-    it('passes the expected data to the GlTable', () => {
-      const features = generateFeatures(5);
+    it('passes the expected features to the configuration table', () => {
+      const features = generateFeatures(scanners.length);
 
       createComponent({ propsData: { features } });
+      const table = getConfigurationTable();
+      const receivedFeatures = table.props('features');
 
-      expect(getFeaturesTable().classes('b-table-stacked-md')).toBeTruthy();
-      const rows = getFeaturesRows();
-      expect(rows).toHaveLength(5);
+      scanners.forEach((scanner, i) => {
+        expect(receivedFeatures[i]).toMatchObject({
+          ...features[i],
+          name: scanner.name,
+          description: scanner.description,
+          helpPath: scanner.helpPath,
+        });
+      });
+    });
 
-      for (let i = 0; i < features.length; i += 1) {
-        const { feature, status, manage } = getRowCells(rows.at(i));
-        expect(feature.text()).toMatch(features[i].name);
-        expect(feature.text()).toMatch(features[i].description);
-        expect(status.find(FeatureStatus).props()).toEqual({
-          feature: features[i],
-          gitlabCiPresent: propsData.gitlabCiPresent,
-          gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
-        });
-        expect(manage.find(ManageFeature).props()).toEqual({
-          feature: features[i],
-          autoDevopsEnabled: propsData.autoDevopsEnabled,
-          createSastMergeRequestPath: propsData.createSastMergeRequestPath,
-        });
-        expect(feature.find(GlLink).props('href')).toBe(features[i].href);
-      }
+    it('passes the expected props data to the configuration table', () => {
+      createComponent();
+
+      expect(getConfigurationTable().props()).toMatchObject({
+        autoDevopsEnabled: propsData.autoDevopsEnabled,
+        gitlabCiPresent: propsData.gitlabCiPresent,
+        gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+      });
     });
   });
 });

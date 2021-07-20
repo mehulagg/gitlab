@@ -8,7 +8,3 @@ export const setEpicFetchingState = (issue, value) => {
 export const getMilestoneTitle = ($boardApp) => ({
   milestoneTitle: $boardApp.dataset.boardMilestoneTitle,
 });
-
-export const getBoardsModalData = () => ({
-  isFullscreen: false,
-});

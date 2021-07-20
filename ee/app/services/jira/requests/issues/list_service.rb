@@ -11,8 +11,8 @@ module Jira
                             labels priority project reporter resolutiondate
                             status statuscategorychangeddate summary updated].join(',').freeze
 
-        def initialize(jira_service, params = {})
-          super(jira_service, params)
+        def initialize(jira_integration, params = {})
+          super(jira_integration, params)
 
           @jql = params[:jql].to_s
           @page = (params[:page] || 1).to_i

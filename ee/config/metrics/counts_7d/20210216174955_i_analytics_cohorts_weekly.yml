@@ -1,0 +1,16 @@
+---
+data_category: Optional
+key_path: redis_hll_counters.analytics.i_analytics_cohorts_weekly
+description:
+product_section: fulfillment
+product_stage: fulfillment
+product_group: group::utilization
+product_category:
+value_type: number
+status: data_available
+time_frame: 7d
+data_source: redis_hll
+distribution:
+- ee
+tier: []
+skip_validation: true

@@ -19,20 +19,6 @@ module EE
       def build_issue_params
         issue_params_from_template.merge(super)
       end
-
-      override :allowed_issue_base_params
-      def allowed_issue_base_params
-        return super - [:issue_type] if params[:issue_type] == 'test_case'
-
-        super
-      end
-
-      override :allowed_issue_admin_params
-      def allowed_issue_admin_params
-        return super + [:issue_type] if params[:issue_type] == 'test_case'
-
-        super
-      end
     end
   end
 end

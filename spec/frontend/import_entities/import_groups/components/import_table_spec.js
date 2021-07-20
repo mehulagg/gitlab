@@ -1,12 +1,21 @@
-import { GlEmptyState, GlLoadingIcon, GlSearchBoxByClick, GlSprintf } from '@gitlab/ui';
+import {
+  GlButton,
+  GlEmptyState,
+  GlLoadingIcon,
+  GlSearchBoxByClick,
+  GlSprintf,
+  GlDropdown,
+  GlDropdownItem,
+} from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import { STATUSES } from '~/import_entities/constants';
 import ImportTable from '~/import_entities/import_groups/components/import_table.vue';
 import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
-import importGroupMutation from '~/import_entities/import_groups/graphql/mutations/import_group.mutation.graphql';
+import importGroupsMutation from '~/import_entities/import_groups/graphql/mutations/import_groups.mutation.graphql';
 import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
 import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
@@ -16,12 +25,25 @@ import { availableNamespacesFixture, generateFakeEntry } from '../graphql/fixtur
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
+const GlDropdownStub = stubComponent(GlDropdown, {
+  template: '<div><h1 ref="text"><slot name="button-content"></slot></h1><slot></slot></div>',
+});
+
 describe('import table', () => {
   let wrapper;
   let apolloProvider;
 
+  const SOURCE_URL = 'https://demo.host';
   const FAKE_GROUP = generateFakeEntry({ id: 1, status: STATUSES.NONE });
+  const FAKE_GROUPS = [
+    generateFakeEntry({ id: 1, status: STATUSES.NONE }),
+    generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
+  ];
   const FAKE_PAGE_INFO = { page: 1, perPage: 20, total: 40, totalPages: 2 };
+
+  const findImportAllButton = () => wrapper.find('h1').find(GlButton);
+  const findPaginationDropdown = () => wrapper.findComponent(GlDropdown);
+  const findPaginationDropdownText = () => findPaginationDropdown().find({ ref: 'text' }).text();
 
   const createComponent = ({ bulkImportSourceGroups }) => {
     apolloProvider = createMockApollo([], {
@@ -38,10 +60,12 @@ describe('import table', () => {
 
     wrapper = shallowMount(ImportTable, {
       propsData: {
-        sourceUrl: 'https://demo.host',
+        groupPathRegex: /.*/,
+        sourceUrl: SOURCE_URL,
       },
       stubs: {
         GlSprintf,
+        GlDropdown: GlDropdownStub,
       },
       localVue,
       apolloProvider,
@@ -50,7 +74,6 @@ describe('import table', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders loading icon while performing request', async () => {
@@ -80,14 +103,10 @@ describe('import table', () => {
     });
     await waitForPromises();
 
-    expect(wrapper.find(GlEmptyState).props().title).toBe('No groups available for import');
+    expect(wrapper.find(GlEmptyState).props().title).toBe('You have no groups to import');
   });
 
   it('renders import row for each group in response', async () => {
-    const FAKE_GROUPS = [
-      generateFakeEntry({ id: 1, status: STATUSES.NONE }),
-      generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
-    ];
     createComponent({
       bulkImportSourceGroups: () => ({
         nodes: FAKE_GROUPS,
@@ -123,7 +142,7 @@ describe('import table', () => {
       event                        | payload            | mutation                      | variables
       ${'update-target-namespace'} | ${'new-namespace'} | ${setTargetNamespaceMutation} | ${{ sourceGroupId: FAKE_GROUP.id, targetNamespace: 'new-namespace' }}
       ${'update-new-name'}         | ${'new-name'}      | ${setNewNameMutation}         | ${{ sourceGroupId: FAKE_GROUP.id, newName: 'new-name' }}
-      ${'import-group'}            | ${undefined}       | ${importGroupMutation}        | ${{ sourceGroupId: FAKE_GROUP.id }}
+      ${'import-group'}            | ${undefined}       | ${importGroupsMutation}       | ${{ sourceGroupIds: [FAKE_GROUP.id] }}
     `('correctly maps $event to mutation', async ({ event, payload, mutation, variables }) => {
       jest.spyOn(apolloProvider.defaultClient, 'mutate');
       wrapper.find(ImportTableRow).vm.$emit(event, payload);
@@ -149,6 +168,20 @@ describe('import table', () => {
 
     it('correctly passes pagination info from query', () => {
       expect(wrapper.find(PaginationLinks).props().pageInfo).toStrictEqual(FAKE_PAGE_INFO);
+    });
+
+    it('renders pagination dropdown', () => {
+      expect(findPaginationDropdown().exists()).toBe(true);
+    });
+
+    it('updates page size when selected in Dropdown', async () => {
+      const otherOption = wrapper.findAllComponents(GlDropdownItem).at(1);
+      expect(otherOption.text()).toMatchInterpolatedText('50 items per page');
+
+      otherOption.vm.$emit('click');
+      await waitForPromises();
+
+      expect(findPaginationDropdownText()).toMatchInterpolatedText('50 items per page');
     });
 
     it('updates page when page change is requested', async () => {
@@ -178,7 +211,7 @@ describe('import table', () => {
       wrapper.find(PaginationLinks).props().change(REQUESTED_PAGE);
       await waitForPromises();
 
-      expect(wrapper.text()).toContain('Showing 21-21 of 38');
+      expect(wrapper.text()).toContain('Showing 21-21 of 38 groups from');
     });
   });
 
@@ -224,7 +257,7 @@ describe('import table', () => {
       findFilterInput().vm.$emit('submit', FILTER_VALUE);
       await waitForPromises();
 
-      expect(wrapper.text()).toContain('Showing 1-1 of 40 groups matching filter "foo"');
+      expect(wrapper.text()).toContain('Showing 1-1 of 40 groups matching filter "foo" from');
     });
 
     it('properly resets filter in graphql query when search box is cleared', async () => {
@@ -243,6 +276,68 @@ describe('import table', () => {
         expect.anything(),
         expect.anything(),
       );
+    });
+  });
+
+  describe('import all button', () => {
+    it('does not exists when no groups available', () => {
+      createComponent({
+        bulkImportSourceGroups: () => new Promise(() => {}),
+      });
+
+      expect(findImportAllButton().exists()).toBe(false);
+    });
+
+    it('exists when groups are available for import', async () => {
+      createComponent({
+        bulkImportSourceGroups: () => ({
+          nodes: FAKE_GROUPS,
+          pageInfo: FAKE_PAGE_INFO,
+        }),
+      });
+      await waitForPromises();
+
+      expect(findImportAllButton().exists()).toBe(true);
+    });
+
+    it('counts only not-imported groups', async () => {
+      const NEW_GROUPS = [
+        generateFakeEntry({ id: 1, status: STATUSES.NONE }),
+        generateFakeEntry({ id: 2, status: STATUSES.NONE }),
+        generateFakeEntry({ id: 3, status: STATUSES.FINISHED }),
+      ];
+
+      createComponent({
+        bulkImportSourceGroups: () => ({
+          nodes: NEW_GROUPS,
+          pageInfo: FAKE_PAGE_INFO,
+        }),
+      });
+      await waitForPromises();
+
+      expect(findImportAllButton().text()).toMatchInterpolatedText('Import 2 groups');
+    });
+
+    it('disables button when any group has validation errors', async () => {
+      const NEW_GROUPS = [
+        generateFakeEntry({ id: 1, status: STATUSES.NONE }),
+        generateFakeEntry({
+          id: 2,
+          status: STATUSES.NONE,
+          validation_errors: [{ field: 'new_name', message: 'test validation error' }],
+        }),
+        generateFakeEntry({ id: 3, status: STATUSES.FINISHED }),
+      ];
+
+      createComponent({
+        bulkImportSourceGroups: () => ({
+          nodes: NEW_GROUPS,
+          pageInfo: FAKE_PAGE_INFO,
+        }),
+      });
+      await waitForPromises();
+
+      expect(findImportAllButton().props().disabled).toBe(true);
     });
   });
 });

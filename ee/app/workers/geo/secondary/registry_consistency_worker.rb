@@ -7,6 +7,8 @@ module Geo
     # sync work only have to query the registry table for never-synced records.
     class RegistryConsistencyWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       prepend Reenqueuer
       include ::Gitlab::Geo::LogHelpers
 
@@ -14,6 +16,7 @@ module Geo
       include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
       feature_category :geo_replication
+      tags :exclude_from_gitlab_com
 
       REGISTRY_CLASSES = [
         Geo::ContainerRepositoryRegistry,
@@ -22,10 +25,12 @@ module Geo
         Geo::LfsObjectRegistry,
         Geo::MergeRequestDiffRegistry,
         Geo::PackageFileRegistry,
+        Geo::PipelineArtifactRegistry,
         Geo::ProjectRegistry,
         Geo::TerraformStateVersionRegistry,
         Geo::UploadRegistry,
-        Geo::SnippetRepositoryRegistry
+        Geo::SnippetRepositoryRegistry,
+        Geo::GroupWikiRepositoryRegistry
       ].freeze
 
       BATCH_SIZE = 10000
@@ -38,7 +43,7 @@ module Geo
         return false unless Gitlab::Geo.secondary?
 
         backfill
-      rescue => e
+      rescue StandardError => e
         log_error("Error while backfilling all", e)
 
         raise

@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlSafeHtmlDirective as SafeHtml, GlLoadingIcon } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __, s__ } from '~/locale';
 import HistoryCommentEditor from './history_comment_editor.vue';
@@ -108,11 +108,11 @@ export default {
           this.$emit(emitName, responseData, this.comment);
         })
         .catch(() => {
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to save the comment. Please try again later.',
             ),
-          );
+          });
         });
     },
     deleteComment() {
@@ -125,11 +125,11 @@ export default {
           this.$emit('onCommentDeleted', this.comment);
         })
         .catch(() =>
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to delete the comment. Please try again later.',
             ),
-          ),
+          }),
         )
         .finally(() => {
           this.isDeletingComment = false;
@@ -171,7 +171,7 @@ export default {
     class="m-3"
   >
     <div v-safe-html="noteHtml" class="md">
-      <gl-loading-icon />
+      <gl-loading-icon size="sm" />
     </div>
 
     <template #right-content>

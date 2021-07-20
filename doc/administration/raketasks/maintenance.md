@@ -67,7 +67,7 @@ GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell
 ## Show GitLab license information **(PREMIUM SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20501) in GitLab 12.6.
-> - [Moved](../../subscriptions/bronze_starter.md) to GitLab Premium in 13.9.
+> - Moved to GitLab Premium in 13.9.
 
 This command shows information about your [GitLab license](../../user/admin_area/license.md) and
 how many seats are used. It is only available on GitLab Enterprise
@@ -110,7 +110,7 @@ The `gitlab:check` Rake task runs the following Rake tasks:
 
 It checks that each component was set up according to the installation guide and suggest fixes
 for issues found. This command must be run from your application server and doesn't work correctly on
-component servers like [Gitaly](../gitaly/index.md#run-gitaly-on-its-own-server).
+component servers like [Gitaly](../gitaly/configure_gitaly.md#run-gitaly-on-its-own-server).
 
 You may also have a look at our troubleshooting guides for:
 
@@ -246,8 +246,9 @@ have been corrupted, you should reinstall the omnibus package.
 ## Check TCP connectivity to a remote site
 
 Sometimes you need to know if your GitLab installation can connect to a TCP
-service on another machine - perhaps a PostgreSQL or HTTPS server. A Rake task
-is included to help you with this:
+service on another machine (for example a PostgreSQL or web server)
+in order to troubleshoot proxy issues.
+A Rake task is included to help you with this.
 
 **Omnibus Installation**
 
@@ -329,7 +330,7 @@ migrations are completed (have an `up` status).
 ## Rebuild database indexes
 
 WARNING:
-This is an experimental feature that isn't enabled by default.
+This is an experimental feature that isn't enabled by default. It requires PostgreSQL 12 or later.
 
 Database indexes can be rebuilt regularly to reclaim space and maintain healthy levels of index bloat over time.
 
@@ -347,7 +348,6 @@ sudo gitlab-rake gitlab:db:reindex['public.a_specific_index']
 
 The following index types are not supported:
 
-1. Unique and primary key indexes
 1. Indexes used for constraint exclusion
 1. Partitioned indexes
 1. Expression indexes

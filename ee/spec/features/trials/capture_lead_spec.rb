@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Trial Capture Lead', :js do
+RSpec.describe 'Trial Capture Lead', :js, skip: Gitlab.jh? do
   include Select2Helper
   let(:user) { create(:user) }
 
@@ -28,7 +28,7 @@ RSpec.describe 'Trial Capture Lead', :js do
       it 'proceeds to the next step' do
         fill_in 'company_name', with: 'GitLab'
         select2 '1-99', from: '#company_size'
-        fill_in 'phone_number', with: '+1234567890'
+        fill_in 'phone_number', with: '+1 23 456-78-90'
         fill_in 'number_of_users', with: '1'
         select2 'US', from: '#country_select'
 
@@ -57,6 +57,29 @@ RSpec.describe 'Trial Capture Lead', :js do
 
           expect(message).to eq('Please fill out this field.')
           expect(current_path).to eq(new_trial_path)
+        end
+      end
+
+      context 'with invalid phone number format' do
+        it 'shows validation error' do
+          fill_in 'number_of_users', with: '1'
+          invalid_phone_numbers = [
+            '+1 (121) 22-12-23',
+            '+12190AX ',
+            'Tel:129120',
+            '11290+12'
+          ]
+
+          invalid_phone_numbers.each do |phone_number|
+            fill_in 'phone_number', with: phone_number
+
+            click_button 'Continue'
+
+            message = page.find('#phone_number').native.attribute('validationMessage')
+
+            expect(message).to eq('Please match the requested format.')
+            expect(current_path).to eq(new_trial_path)
+          end
         end
       end
 

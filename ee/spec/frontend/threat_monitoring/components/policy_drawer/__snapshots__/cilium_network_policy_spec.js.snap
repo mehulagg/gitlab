@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CiliumNetworkPolicy component supported YAML renders policy preview tabs 1`] = `
+<div>
+  <h5
+    class="gl-mt-3"
+  >
+    Type
+  </h5>
+   
+  <p
+    data-testid="policy-type"
+  >
+    Network
+  </p>
+   
+  <div>
+    <policy-info-row-stub
+      data-testid="description"
+      label="Description"
+    >
+      test description
+    </policy-info-row-stub>
+     
+    <policy-info-row-stub
+      label="Enforcement status"
+    >
+      Disabled
+    </policy-info-row-stub>
+     
+    <!---->
+  </div>
+   
+  <policy-preview-stub
+    class="gl-mt-4"
+    initialtab="0"
+    policydescription="Deny all traffic"
+    policyyaml="apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+description: test description
+metadata:
+  name: test-policy
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
+"
+  />
+</div>
+`;
+
+exports[`CiliumNetworkPolicy component unsupported YAML renders policy preview tabs 1`] = `
+<div>
+  <h5
+    class="gl-mt-3"
+  >
+    Type
+  </h5>
+   
+  <p
+    data-testid="policy-type"
+  >
+    Network
+  </p>
+   
+  <!---->
+   
+  <policy-preview-stub
+    class="gl-mt-4"
+    initialtab="1"
+    policyyaml="unsupportedPrimaryKey: test"
+  />
+</div>
+`;

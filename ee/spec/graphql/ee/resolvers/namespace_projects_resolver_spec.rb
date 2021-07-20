@@ -57,15 +57,35 @@ RSpec.describe Resolvers::NamespaceProjectsResolver do
           it { is_expected.to eq([project_1, project_2, project_3]) }
         end
       end
+
+      context 'has_code_coverage' do
+        subject(:projects) { resolve_projects(has_code_coverage: has_code_coverage) }
+
+        let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
+
+        context 'when has_code_coverage is false' do
+          let(:has_code_coverage) { false }
+
+          it { is_expected.to contain_exactly(project_1, project_2) }
+        end
+
+        context 'when has_code_coverage is true' do
+          let(:has_code_coverage) { true }
+
+          it { is_expected.to contain_exactly(project_1) }
+        end
+      end
     end
   end
 
-  def resolve_projects(has_vulnerabilities: false, sort: :similarity)
+  def resolve_projects(has_vulnerabilities: false, sort: :similarity, ids: nil, has_code_coverage: false)
     args = {
       include_subgroups: false,
       has_vulnerabilities: has_vulnerabilities,
       sort: sort,
-      search: nil
+      search: nil,
+      ids: nil,
+      has_code_coverage: has_code_coverage
     }
 
     resolve(described_class, obj: group, args: args, ctx: { current_user: current_user })

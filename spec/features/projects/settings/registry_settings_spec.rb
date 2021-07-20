@@ -11,7 +11,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
   let(:container_registry_enabled) { true }
   let(:container_registry_enabled_on_project) { true }
 
-  subject { visit project_settings_ci_cd_path(project) }
+  subject { visit project_settings_packages_and_registries_path(project) }
 
   before do
     project.update!(container_registry_enabled: container_registry_enabled_on_project)
@@ -25,40 +25,40 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
     it 'shows available section' do
       subject
 
-      settings_block = find('#js-registry-policies')
+      settings_block = find('[data-testid="registry-settings-app"]')
       expect(settings_block).to have_text 'Clean up image tags'
     end
 
     it 'saves cleanup policy submit the form' do
       subject
 
-      within '#js-registry-policies' do
+      within '[data-testid="registry-settings-app"]' do
         select('Every day', from: 'Run cleanup')
         select('50 tags per image name', from: 'Keep the most recent:')
         fill_in('Keep tags matching:', with: 'stable')
         select('7 days', from: 'Remove tags older than:')
         fill_in('Remove tags matching:', with: '.*-production')
 
-        submit_button = find('.btn.gl-button.btn-success')
+        submit_button = find('[data-testid="save-button"')
         expect(submit_button).not_to be_disabled
         submit_button.click
       end
-      toast = find('.gl-toast')
-      expect(toast).to have_content('Cleanup policy successfully saved.')
+
+      expect(find('.gl-toast')).to have_content('Cleanup policy successfully saved.')
     end
 
     it 'does not save cleanup policy submit form with invalid regex' do
       subject
 
-      within '#js-registry-policies' do
+      within '[data-testid="registry-settings-app"]' do
         fill_in('Remove tags matching:', with: '*-production')
 
-        submit_button = find('.btn.gl-button.btn-success')
+        submit_button = find('[data-testid="save-button"')
         expect(submit_button).not_to be_disabled
         submit_button.click
       end
-      toast = find('.gl-toast')
-      expect(toast).to have_content('Something went wrong while updating the cleanup policy.')
+
+      expect(find('.gl-toast')).to have_content('Something went wrong while updating the cleanup policy.')
     end
   end
 
@@ -81,7 +81,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
       it 'displays the expected result' do
         subject
 
-        within '#js-registry-policies' do
+        within '[data-testid="registry-settings-app"]' do
           case result
           when :available_section
             expect(find('[data-testid="enable-toggle"]')).to have_content('Disabled - Tags will not be automatically deleted.')
@@ -99,7 +99,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
     it 'does not exists' do
       subject
 
-      expect(page).not_to have_selector('#js-registry-policies')
+      expect(page).not_to have_selector('[data-testid="registry-settings-app"]')
     end
   end
 
@@ -109,7 +109,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
     it 'does not exists' do
       subject
 
-      expect(page).not_to have_selector('#js-registry-policies')
+      expect(page).not_to have_selector('[data-testid="registry-settings-app"]')
     end
   end
 end

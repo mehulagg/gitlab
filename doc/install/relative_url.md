@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Install GitLab under a relative URL
+# Install GitLab under a relative URL **(FREE SELF)**
 
 While it is recommended to install GitLab on its own (sub)domain, sometimes
 this is not possible due to a variety of reasons. In that case, GitLab can also
@@ -24,12 +24,12 @@ Note that by changing the URL on an existing GitLab installation, all remote
 URLs will change, so you'll have to manually edit them in any local repository
 that points to your GitLab instance.
 
-The TL;DR list of configuration files that you need to change in order to
-serve GitLab under a relative URL is:
+The list of configuration files you must change to serve GitLab from a
+relative URL is:
 
 - `/home/git/gitlab/config/initializers/relative_url.rb`
 - `/home/git/gitlab/config/gitlab.yml`
-- `/home/git/gitlab/config/unicorn.rb`
+- `/home/git/gitlab/config/puma.rb`
 - `/home/git/gitlab-shell/config.yml`
 - `/etc/default/gitlab`
 
@@ -88,7 +88,7 @@ Make sure to follow all steps below:
    relative_url_root: /gitlab
    ```
 
-1. Edit `/home/git/gitlab/config/unicorn.rb` and uncomment/change the
+1. Edit `/home/git/gitlab/config/puma.rb` and uncomment/change the
    following line:
 
    ```ruby

@@ -1,0 +1,22 @@
+---
+data_category: Optional
+# Name of this metric contains g_project_management prefix
+# because we are using the same slot from issue_tracking to
+# allow data aggregation.
+key_path: redis_hll_counters.epic_boards_usage.g_project_management_users_creating_epic_boards_monthly
+description: Count of MAU creating epic boards
+product_section: dev
+product_stage: plan
+product_group: group::product planning
+product_category: epics_usage
+value_type: number
+status: data_available
+milestone: "13.12"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60357
+time_frame: 28d
+data_source: redis_hll
+distribution:
+- ee
+tier:
+- premium
+- ultimate

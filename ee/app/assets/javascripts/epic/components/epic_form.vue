@@ -7,7 +7,7 @@ import {
   GlFormGroup,
   GlFormInput,
 } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
@@ -80,7 +80,9 @@ export default {
         .then(({ data }) => {
           const { errors, epic } = data.createEpic;
           if (errors?.length > 0) {
-            createFlash(errors[0]);
+            createFlash({
+              message: errors[0],
+            });
             this.loading = false;
             return;
           }
@@ -89,7 +91,9 @@ export default {
         })
         .catch(() => {
           this.loading = false;
-          createFlash(s__('Epics|Unable to save epic. Please try again'));
+          createFlash({
+            message: s__('Epics|Unable to save epic. Please try again'),
+          });
         });
     },
     updateDueDate(val) {
@@ -162,8 +166,8 @@ export default {
         <gl-form-checkbox
           id="epic-confidentiality"
           v-model="confidential"
-          data-testid="epic-confidentiality"
           data-qa-selector="confidential_epic_checkbox"
+          data-testid="epic-confidentiality"
         >
           {{ $options.i18n.confidentialityLabel }}
         </gl-form-checkbox>
@@ -224,7 +228,7 @@ export default {
       <div class="footer-block row-content-block gl-display-flex">
         <gl-button
           type="submit"
-          variant="success"
+          variant="confirm"
           :loading="loading"
           :disabled="!title"
           data-testid="save-epic"

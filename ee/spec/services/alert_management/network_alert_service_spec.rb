@@ -6,37 +6,23 @@ RSpec.describe AlertManagement::NetworkAlertService do
   let_it_be(:project, reload: true) { create(:project, :repository) }
   let_it_be(:environment) { create(:environment, project: project) }
 
+  let(:payload_raw) { build(:network_alert_payload) }
+  let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
+
+  let(:service) { described_class.new(project, payload) }
+
   describe '#execute' do
-    let(:service) { described_class.new(project, payload) }
-    let(:tool) { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:cilium] }
-    let(:starts_at) { Time.current.change(usec: 0) }
-    let(:ended_at) { nil }
-    let(:fingerprint) { 'test' }
-    let(:domain) { 'threat_monitoring' }
-
-    let(:incident_management_setting) { double(auto_close_incident?: auto_close_enabled) }
-
-    let(:auto_close_enabled) { true }
-
-    before do
-      allow(service).to receive(:incident_management_setting).and_return(
-        incident_management_setting
-      )
-    end
+    include_context 'incident management settings enabled'
 
     subject(:execute) { service.execute }
 
-    context 'with valid payload' do
-      let(:payload_raw) { build(:network_alert_payload) }
+    shared_examples 'never-before-seen network alert' do
+      it_behaves_like 'creates an alert management alert or errors'
+      it_behaves_like 'creates expected system notes for alert', :new_alert
+      it_behaves_like 'does not send alert notification emails'
+      it_behaves_like 'does not process incident issues'
 
-      let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
-
-      let(:last_alert_attributes) do
-        AlertManagement::Alert.last.attributes.except('id', 'iid', 'created_at', 'updated_at')
-          .with_indifferent_access
-      end
-
-      it 'create alert and assigns properties' do
+      it 'assigns the correct properties' do
         subject
 
         expect(last_alert_attributes).to match(a_hash_including({
@@ -45,7 +31,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
           ended_at: nil,
           environment_id: nil,
           events:  1,
-          fingerprint: '89269ffa3902af37f036a77bc9ea57cdee3a52c2',
+          fingerprint: '23907c66f431ae66aad738553ccbd03e26f6838f',
           hosts: [],
           issue_id: nil,
           monitoring_tool: 'Cilium',
@@ -57,125 +43,67 @@ RSpec.describe AlertManagement::NetworkAlertService do
           title: 'Cilium Alert'
         }))
       end
+    end
 
-      it 'creates a system note corresponding to alert creation' do
-        expect { subject }.to change(Note, :count).by(1)
-        expect(Note.last.note).to include('Cilium')
+    shared_examples 'existing network alert' do
+      it_behaves_like 'adds an alert management alert event'
+      it_behaves_like 'does not create a system note for alert'
+      it_behaves_like 'does not send alert notification emails'
+      it_behaves_like 'does not process incident issues'
+    end
+
+    context 'with valid payload' do
+      let(:source) { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:cilium] }
+      let(:last_alert_attributes) do
+        AlertManagement::Alert.last.attributes.except('id', 'iid', 'created_at', 'updated_at')
+          .with_indifferent_access
       end
 
-      context 'when alert exists' do
-        let!(:alert) do
-          create(
-            :alert_management_alert,
-            project: project, domain: :threat_monitoring, fingerprint: '89269ffa3902af37f036a77bc9ea57cdee3a52c2'
-          )
-        end
+      it_behaves_like 'never-before-seen network alert'
 
-        it_behaves_like 'does not an create alert management alert'
-      end
+      context 'for an existing alert with the same fingerprint' do
+        let_it_be(:fingerprint_sha) { '23907c66f431ae66aad738553ccbd03e26f6838f' }
 
-      context 'existing alert with same fingerprint' do
-        let(:fingerprint_sha) { '89269ffa3902af37f036a77bc9ea57cdee3a52c2' }
-        let!(:alert) do
-          create(:alert_management_alert, domain: :threat_monitoring, project: project, fingerprint: fingerprint_sha)
-        end
+        context 'which is triggered' do
+          let_it_be(:alert) do
+            create(:alert_management_alert, :triggered, domain: :threat_monitoring, project: project, fingerprint: fingerprint_sha)
+          end
 
-        it_behaves_like 'adds an alert management alert event'
+          it_behaves_like 'existing network alert'
 
-        context 'end time given' do
-          let(:ended_at) { Time.current.change(nsec: 0) }
-
-          context 'auto_close disabled' do
-            let(:auto_close_enabled) { false }
-
-            it 'does not resolve the alert' do
-              expect { subject }.not_to change { alert.reload.status }
+          context 'with an additional existing resolved alert' do
+            before do
+              create(
+                :alert_management_alert,
+                :resolved,
+                domain: :threat_monitoring,
+                project: project,
+                fingerprint: fingerprint_sha
+              )
             end
 
-            it 'does not set the ended at' do
-              subject
-
-              expect(alert.reload.ended_at).to be_nil
-            end
-
-            it_behaves_like 'does not an create alert management alert'
+            it_behaves_like 'existing network alert'
           end
         end
 
-        context 'existing alert is resolved' do
-          let!(:alert) do
-            create(
-              :alert_management_alert,
-              :resolved,
-              project: project, domain: :threat_monitoring, fingerprint: fingerprint_sha
-            )
+        context 'which is resolved' do
+          let_it_be(:alert) do
+            create(:alert_management_alert, :resolved, domain: :threat_monitoring, project: project, fingerprint: fingerprint_sha)
           end
 
-          it_behaves_like 'creates an alert management alert'
-        end
-
-        context 'existing alert is ignored' do
-          let!(:alert) do
-            create(
-              :alert_management_alert,
-              :ignored,
-              project: project, domain: :threat_monitoring, fingerprint: fingerprint_sha
-            )
-          end
-
-          it_behaves_like 'adds an alert management alert event'
-        end
-
-        context 'two existing alerts, one resolved one open' do
-          let!(:resolved_existing_alert) do
-            create(
-              :alert_management_alert,
-              :resolved,
-              project: project, fingerprint: fingerprint_sha
-            )
-          end
-
-          let!(:alert) do
-            create(:alert_management_alert, domain: :threat_monitoring, project: project, fingerprint: fingerprint_sha)
-          end
-
-          it_behaves_like 'adds an alert management alert event'
+          it_behaves_like 'never-before-seen network alert'
         end
       end
     end
 
     context 'with overlong payload' do
       let(:deep_size_object) { instance_double(Gitlab::Utils::DeepSize, valid?: false) }
-      let(:payload) { ActionController::Parameters.new({}).permit! }
 
       before do
         allow(Gitlab::Utils::DeepSize).to receive(:new).and_return(deep_size_object)
       end
 
-      it_behaves_like 'does not process incident issues due to error', http_status: :bad_request
-      it_behaves_like 'does not an create alert management alert'
-    end
-
-    context 'error duing save' do
-      let(:payload_raw) { build(:network_alert_payload) }
-
-      let(:logger) { double(warn: {}) }
-      let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
-
-      it 'logs warning' do
-        expect_any_instance_of(AlertManagement::Alert).to receive(:save).and_return(false)
-        expect_any_instance_of(described_class).to receive(:logger).and_return(logger)
-
-        subject
-
-        expect(logger).to have_received(:warn).with(
-          hash_including(
-            message: "Unable to create AlertManagement::Alert from #{tool}",
-            project_id: project.id,
-            alert_errors: {}
-          )
-        )
-      end
+      it_behaves_like 'alerts service responds with an error and takes no actions', :bad_request
     end
   end
 end

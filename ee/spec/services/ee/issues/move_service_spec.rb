@@ -7,7 +7,7 @@ RSpec.describe Issues::MoveService do
   let(:old_project) { create(:project) }
   let(:new_project) { create(:project, group: create(:group)) }
   let(:old_issue) { create(:issue, project: old_project, author: user) }
-  let(:move_service) { described_class.new(old_project, user) }
+  let(:move_service) { described_class.new(project: old_project, current_user: user) }
 
   before do
     old_project.add_reporter(user)
@@ -28,6 +28,23 @@ RSpec.describe Issues::MoveService do
         # actually get to the `after_commit` hook that queues these jobs.
         expect { move_service.execute(old_issue, new_project) }
           .not_to raise_error # Sidekiq::Worker::EnqueueFromTransactionError
+      end
+
+      context 'when moved issue belongs to epic' do
+        it 'records epic moved from project event' do
+          create(:epic_issue, issue: old_issue)
+          expect(Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_issue_moved_from_project).with(author: user)
+
+          move_service.execute(old_issue, new_project)
+        end
+      end
+
+      context 'when moved issue does not belong to epic' do
+        it 'does not record epic moved from project event' do
+          expect(Gitlab::UsageDataCounters::EpicActivityUniqueCounter).not_to receive(:track_epic_issue_moved_from_project)
+
+          move_service.execute(old_issue, new_project)
+        end
       end
     end
 

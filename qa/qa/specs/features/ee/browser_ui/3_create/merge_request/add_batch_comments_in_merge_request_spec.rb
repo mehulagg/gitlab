@@ -38,7 +38,7 @@ module QA
         end
       end
 
-      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297257', type: :investigating } do
+      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1776' do
         Flow::Login.sign_in
 
         merge_request.visit!

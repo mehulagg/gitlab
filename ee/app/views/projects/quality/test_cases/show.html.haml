@@ -6,6 +6,8 @@
 - page_description     @test_case.description
 
 #js-issuable-app{ data: { initial: issuable_initial_data(@test_case).to_json,
+  update_path: issuable_path(@test_case, format: :json),
+  lock_version: @test_case.lock_version,
   can_edit_test_case: can?(current_user, :admin_issue, @project).to_s,
   can_move_test_case: @issuable_sidebar.dig(:current_user, :can_move).to_s,
   description_preview_path: preview_markdown_path(@project),

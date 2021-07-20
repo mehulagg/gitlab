@@ -1,7 +1,7 @@
 #import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
 #import "../fragments/vulnerability.fragment.graphql"
 
-query group(
+query groupVulnerabilities(
   $fullPath: ID!
   $after: String
   $first: Int
@@ -9,6 +9,7 @@ query group(
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
+  $scannerId: [VulnerabilitiesScannerID!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
   $hasIssues: Boolean
@@ -21,6 +22,7 @@ query group(
       severity: $severity
       reportType: $reportType
       scanner: $scanner
+      scannerId: $scannerId
       state: $state
       projectId: $projectId
       sort: $sort

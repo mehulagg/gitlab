@@ -1,0 +1,10 @@
+#import "../fragments/escalation_policy.fragment.graphql"
+
+mutation escalationPolicyUpdate($input: EscalationPolicyUpdateInput!) {
+  escalationPolicyUpdate(input: $input) {
+    escalationPolicy {
+      ...EscalationPolicy
+    }
+    errors
+  }
+}

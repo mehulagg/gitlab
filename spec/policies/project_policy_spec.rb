@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ProjectPolicy do
   include ExternalAuthorizationServiceHelpers
+  include AdminModeHelper
   include_context 'ProjectPolicy context'
 
   let(:project) { public_project }
@@ -60,19 +61,19 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'does not include the issues permissions' do
-        expect_disallowed :read_issue, :read_issue_iid, :create_issue, :update_issue, :admin_issue
+        expect_disallowed :read_issue, :read_issue_iid, :create_issue, :update_issue, :admin_issue, :create_incident
       end
 
       it 'disables boards and lists permissions' do
-        expect_disallowed :read_board, :create_board, :update_board
-        expect_disallowed :read_list, :create_list, :update_list, :admin_list
+        expect_disallowed :read_issue_board, :create_board, :update_board
+        expect_disallowed :read_issue_board_list, :create_list, :update_list, :admin_issue_board_list
       end
 
       context 'when external tracker configured' do
         it 'does not include the issues permissions' do
-          create(:jira_service, project: project)
+          create(:jira_integration, project: project)
 
-          expect_disallowed :read_issue, :read_issue_iid, :create_issue, :update_issue, :admin_issue
+          expect_disallowed :read_issue, :read_issue_iid, :create_issue, :update_issue, :admin_issue, :create_incident
         end
       end
     end
@@ -104,6 +105,10 @@ RSpec.describe ProjectPolicy do
 
   context 'pipeline feature' do
     let(:project) { private_project }
+
+    before do
+      private_project.add_developer(current_user)
+    end
 
     describe 'for unconfirmed user' do
       let(:current_user) { create(:user, confirmed_at: nil) }
@@ -389,6 +394,34 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'read_storage_disk_path' do
+    context 'when no user' do
+      let(:current_user) { anonymous }
+
+      it { expect_disallowed(:read_storage_disk_path) }
+    end
+
+    context 'admin' do
+      let(:current_user) { admin }
+
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { expect_allowed(:read_storage_disk_path) }
+      end
+
+      context 'when admin mode is disabled' do
+        it { expect_disallowed(:read_storage_disk_path) }
+      end
+    end
+
+    %w(guest reporter developer maintainer owner).each do |role|
+      context role do
+        let(:current_user) { send(role) }
+
+        it { expect_disallowed(:read_storage_disk_path) }
+      end
+    end
+  end
+
   context 'alert bot' do
     let(:current_user) { User.alert_bot }
 
@@ -507,7 +540,7 @@ RSpec.describe ProjectPolicy do
         project.add_maintainer(project_bot)
       end
 
-      it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      it { is_expected.not_to be_allowed(:create_resource_access_tokens)}
     end
   end
 
@@ -763,6 +796,37 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  context 'deploy key access' do
+    context 'private project' do
+      let(:project) { private_project }
+      let!(:deploy_key) { create(:deploy_key, user: owner) }
+
+      subject { described_class.new(deploy_key, project) }
+
+      context 'when a read deploy key is enabled in the project' do
+        let!(:deploy_keys_project) { create(:deploy_keys_project, project: project, deploy_key: deploy_key) }
+
+        it { is_expected.to be_allowed(:download_code) }
+        it { is_expected.to be_disallowed(:push_code) }
+        it { is_expected.to be_disallowed(:read_project) }
+      end
+
+      context 'when a write deploy key is enabled in the project' do
+        let!(:deploy_keys_project) { create(:deploy_keys_project, :write_access, project: project, deploy_key: deploy_key) }
+
+        it { is_expected.to be_allowed(:download_code) }
+        it { is_expected.to be_allowed(:push_code) }
+        it { is_expected.to be_disallowed(:read_project) }
+      end
+
+      context 'when the deploy key is not enabled in the project' do
+        it { is_expected.to be_disallowed(:download_code) }
+        it { is_expected.to be_disallowed(:push_code) }
+        it { is_expected.to be_disallowed(:read_project) }
+      end
+    end
+  end
+
   context 'deploy token access' do
     let!(:project_deploy_token) do
       create(:project_deploy_token, project: project, deploy_token: deploy_token)
@@ -888,6 +952,8 @@ RSpec.describe ProjectPolicy do
   end
 
   describe 'design permissions' do
+    include DesignManagementTestHelpers
+
     let(:current_user) { guest }
 
     let(:design_permissions) do
@@ -895,12 +961,14 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'when design management is not available' do
+      before do
+        enable_design_management(false)
+      end
+
       it { is_expected.not_to be_allowed(*design_permissions) }
     end
 
     context 'when design management is available' do
-      include DesignManagementTestHelpers
-
       before do
         enable_design_management
       end
@@ -1260,6 +1328,333 @@ RSpec.describe ProjectPolicy do
         else
           guest_operations_permissions
         end
+      end
+    end
+  end
+
+  describe 'access_security_and_compliance' do
+    context 'when the "Security & Compliance" is enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::PRIVATE)
+      end
+
+      %w[owner maintainer developer].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      %w[reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+
+    context 'when the "Security & Compliance" is not enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::DISABLED)
+      end
+
+      %w[owner maintainer developer reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+  end
+
+  describe 'when user is authenticated via CI_JOB_TOKEN', :request_store do
+    let(:current_user) { developer }
+    let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
+
+    before do
+      current_user.set_ci_job_token_scope!(job)
+      scope_project.update!(ci_job_token_scope_enabled: true)
+    end
+
+    context 'when accessing a private project' do
+      let(:project) { private_project }
+
+      context 'when the job token comes from the same project' do
+        let(:scope_project) { project }
+
+        it { is_expected.to be_allowed(:developer_access) }
+      end
+
+      context 'when the job token comes from another project' do
+        let(:scope_project) { create(:project, :private) }
+
+        before do
+          scope_project.add_developer(current_user)
+        end
+
+        it { is_expected.to be_disallowed(:guest_access) }
+
+        context 'when job token scope is disabled' do
+          before do
+            scope_project.update!(ci_job_token_scope_enabled: false)
+          end
+
+          it { is_expected.to be_allowed(:guest_access) }
+        end
+      end
+    end
+
+    context 'when accessing a public project' do
+      let(:project) { public_project }
+
+      context 'when the job token comes from the same project' do
+        let(:scope_project) { project }
+
+        it { is_expected.to be_allowed(:developer_access) }
+      end
+
+      context 'when the job token comes from another project' do
+        let(:scope_project) { create(:project, :private) }
+
+        before do
+          scope_project.add_developer(current_user)
+        end
+
+        it { is_expected.to be_disallowed(:public_access) }
+
+        context 'when job token scope is disabled' do
+          before do
+            scope_project.update!(ci_job_token_scope_enabled: false)
+          end
+
+          it { is_expected.to be_allowed(:public_access) }
+        end
+      end
+    end
+  end
+
+  describe 'container_image policies' do
+    using RSpec::Parameterized::TableSyntax
+
+    # These are permissions that admins should not have when the project is private
+    # or the container registry is private.
+    let(:admin_excluded_permissions) { [:build_read_container_image] }
+
+    let(:anonymous_operations_permissions) { [:read_container_image] }
+    let(:guest_operations_permissions) { anonymous_operations_permissions + [:build_read_container_image] }
+
+    let(:developer_operations_permissions) do
+      guest_operations_permissions + [
+        :create_container_image, :update_container_image, :destroy_container_image
+      ]
+    end
+
+    let(:maintainer_operations_permissions) do
+      developer_operations_permissions + [
+        :admin_container_image
+      ]
+    end
+
+    let(:all_permissions) { maintainer_operations_permissions }
+
+    where(:project_visibility, :access_level, :role, :allowed) do
+      :public   | ProjectFeature::ENABLED   | :admin      | true
+      :public   | ProjectFeature::ENABLED   | :owner      | true
+      :public   | ProjectFeature::ENABLED   | :maintainer | true
+      :public   | ProjectFeature::ENABLED   | :developer  | true
+      :public   | ProjectFeature::ENABLED   | :reporter   | true
+      :public   | ProjectFeature::ENABLED   | :guest      | true
+      :public   | ProjectFeature::ENABLED   | :anonymous  | true
+      :public   | ProjectFeature::PRIVATE   | :admin      | true
+      :public   | ProjectFeature::PRIVATE   | :owner      | true
+      :public   | ProjectFeature::PRIVATE   | :maintainer | true
+      :public   | ProjectFeature::PRIVATE   | :developer  | true
+      :public   | ProjectFeature::PRIVATE   | :reporter   | true
+      :public   | ProjectFeature::PRIVATE   | :guest      | false
+      :public   | ProjectFeature::PRIVATE   | :anonymous  | false
+      :public   | ProjectFeature::DISABLED  | :admin      | false
+      :public   | ProjectFeature::DISABLED  | :owner      | false
+      :public   | ProjectFeature::DISABLED  | :maintainer | false
+      :public   | ProjectFeature::DISABLED  | :developer  | false
+      :public   | ProjectFeature::DISABLED  | :reporter   | false
+      :public   | ProjectFeature::DISABLED  | :guest      | false
+      :public   | ProjectFeature::DISABLED  | :anonymous  | false
+      :internal | ProjectFeature::ENABLED   | :admin      | true
+      :internal | ProjectFeature::ENABLED   | :owner      | true
+      :internal | ProjectFeature::ENABLED   | :maintainer | true
+      :internal | ProjectFeature::ENABLED   | :developer  | true
+      :internal | ProjectFeature::ENABLED   | :reporter   | true
+      :internal | ProjectFeature::ENABLED   | :guest      | true
+      :internal | ProjectFeature::ENABLED   | :anonymous  | false
+      :internal | ProjectFeature::PRIVATE   | :admin      | true
+      :internal | ProjectFeature::PRIVATE   | :owner      | true
+      :internal | ProjectFeature::PRIVATE   | :maintainer | true
+      :internal | ProjectFeature::PRIVATE   | :developer  | true
+      :internal | ProjectFeature::PRIVATE   | :reporter   | true
+      :internal | ProjectFeature::PRIVATE   | :guest      | false
+      :internal | ProjectFeature::PRIVATE   | :anonymous  | false
+      :internal | ProjectFeature::DISABLED  | :admin      | false
+      :internal | ProjectFeature::DISABLED  | :owner      | false
+      :internal | ProjectFeature::DISABLED  | :maintainer | false
+      :internal | ProjectFeature::DISABLED  | :developer  | false
+      :internal | ProjectFeature::DISABLED  | :reporter   | false
+      :internal | ProjectFeature::DISABLED  | :guest      | false
+      :internal | ProjectFeature::DISABLED  | :anonymous  | false
+      :private  | ProjectFeature::ENABLED   | :admin      | true
+      :private  | ProjectFeature::ENABLED   | :owner      | true
+      :private  | ProjectFeature::ENABLED   | :maintainer | true
+      :private  | ProjectFeature::ENABLED   | :developer  | true
+      :private  | ProjectFeature::ENABLED   | :reporter   | true
+      :private  | ProjectFeature::ENABLED   | :guest      | false
+      :private  | ProjectFeature::ENABLED   | :anonymous  | false
+      :private  | ProjectFeature::PRIVATE   | :admin      | true
+      :private  | ProjectFeature::PRIVATE   | :owner      | true
+      :private  | ProjectFeature::PRIVATE   | :maintainer | true
+      :private  | ProjectFeature::PRIVATE   | :developer  | true
+      :private  | ProjectFeature::PRIVATE   | :reporter   | true
+      :private  | ProjectFeature::PRIVATE   | :guest      | false
+      :private  | ProjectFeature::PRIVATE   | :anonymous  | false
+      :private  | ProjectFeature::DISABLED  | :admin      | false
+      :private  | ProjectFeature::DISABLED  | :owner      | false
+      :private  | ProjectFeature::DISABLED  | :maintainer | false
+      :private  | ProjectFeature::DISABLED  | :developer  | false
+      :private  | ProjectFeature::DISABLED  | :reporter   | false
+      :private  | ProjectFeature::DISABLED  | :guest      | false
+      :private  | ProjectFeature::DISABLED  | :anonymous  | false
+    end
+
+    with_them do
+      let(:current_user) { send(role) }
+      let(:project) { send("#{project_visibility}_project") }
+
+      before do
+        enable_admin_mode!(admin) if role == :admin
+        project.project_feature.update!(container_registry_access_level: access_level)
+      end
+
+      it 'allows/disallows the abilities based on the container_registry feature access level' do
+        if allowed
+          expect_allowed(*permissions_abilities(role))
+          expect_disallowed(*(all_permissions - permissions_abilities(role)))
+        else
+          expect_disallowed(*all_permissions)
+        end
+      end
+
+      it 'allows build_read_container_image to admins who are also team members' do
+        if allowed && role == :admin
+          project.add_reporter(current_user)
+
+          expect_allowed(:build_read_container_image)
+        end
+      end
+
+      def permissions_abilities(role)
+        case role
+        when :admin
+          if project_visibility == :private || access_level == ProjectFeature::PRIVATE
+            maintainer_operations_permissions - admin_excluded_permissions
+          else
+            maintainer_operations_permissions
+          end
+        when :maintainer, :owner
+          maintainer_operations_permissions
+        when :developer
+          developer_operations_permissions
+        when :reporter, :guest
+          guest_operations_permissions
+        when :anonymous
+          anonymous_operations_permissions
+        else
+          raise "Unknown role #{role}"
+        end
+      end
+    end
+  end
+
+  describe 'update_runners_registration_token' do
+    context 'when anonymous' do
+      let(:current_user) { anonymous }
+
+      it { is_expected.not_to be_allowed(:update_runners_registration_token) }
+    end
+
+    context 'admin' do
+      let(:current_user) { create(:admin) }
+
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { is_expected.to be_allowed(:update_runners_registration_token) }
+      end
+
+      context 'when admin mode is disabled' do
+        it { is_expected.to be_disallowed(:update_runners_registration_token) }
+      end
+    end
+
+    %w(guest reporter developer).each do |role|
+      context role do
+        let(:current_user) { send(role) }
+
+        it { is_expected.to be_disallowed(:update_runners_registration_token) }
+      end
+    end
+
+    %w(maintainer owner).each do |role|
+      context role do
+        let(:current_user) { send(role) }
+
+        it { is_expected.to be_allowed(:update_runners_registration_token) }
       end
     end
   end

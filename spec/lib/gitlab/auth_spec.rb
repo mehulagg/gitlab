@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
   let_it_be(:project) { create(:project) }
+
   let(:gl_auth) { described_class }
 
   describe 'constants' do
@@ -195,8 +196,8 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
     end
 
     it 'recognizes other ci services' do
-      project.create_drone_ci_service(active: true)
-      project.drone_ci_service.update(token: 'token')
+      project.create_drone_ci_integration(active: true)
+      project.drone_ci_integration.update(token: 'token')
 
       expect(gl_auth.find_for_git_client('drone-ci-token', 'token', project: project, ip: 'ip')).to eq(Gitlab::Auth::Result.new(nil, project, :ci, described_class.build_authentication_abilities))
     end
@@ -359,32 +360,23 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
         end
       end
 
-      context 'when using a project access token' do
-        let_it_be(:project_bot_user) { create(:user, :project_bot) }
-        let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
-
-        context 'with valid project access token' do
-          before do
-            project.add_maintainer(project_bot_user)
-          end
-
+      context 'when using a resource access token' do
+        shared_examples 'with a valid access token' do
           it 'successfully authenticates the project bot' do
-            expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+            expect(gl_auth.find_for_git_client(project_bot_user.username, access_token.token, project: project, ip: 'ip'))
               .to eq(Gitlab::Auth::Result.new(project_bot_user, nil, :personal_access_token, described_class.full_authentication_abilities))
           end
 
           it 'successfully authenticates the project bot with a nil project' do
-            expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: nil, ip: 'ip'))
+            expect(gl_auth.find_for_git_client(project_bot_user.username, access_token.token, project: nil, ip: 'ip'))
               .to eq(Gitlab::Auth::Result.new(project_bot_user, nil, :personal_access_token, described_class.full_authentication_abilities))
           end
         end
 
-        context 'with invalid project access token' do
-          context 'when project bot is not a project member' do
-            it 'fails for a non-project member' do
-              expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
-                .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
-            end
+        shared_examples 'with an invalid access token' do
+          it 'fails for a non-member' do
+            expect(gl_auth.find_for_git_client(project_bot_user.username, access_token.token, project: project, ip: 'ip'))
+              .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
           end
 
           context 'when project bot user is blocked' do
@@ -393,9 +385,59 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
             end
 
             it 'fails for a blocked project bot' do
-              expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+              expect(gl_auth.find_for_git_client(project_bot_user.username, access_token.token, project: project, ip: 'ip'))
                 .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
             end
+          end
+        end
+
+        context 'when using a personal namespace project access token' do
+          let_it_be(:project_bot_user) { create(:user, :project_bot) }
+          let_it_be(:access_token) { create(:personal_access_token, user: project_bot_user) }
+
+          context 'when the token belongs to the project' do
+            before do
+              project.add_maintainer(project_bot_user)
+            end
+
+            it_behaves_like 'with a valid access token'
+          end
+
+          it_behaves_like 'with an invalid access token'
+        end
+
+        context 'when in a group namespace' do
+          let_it_be(:group) { create(:group) }
+          let_it_be(:project) { create(:project, group: group) }
+
+          context 'when using a project access token' do
+            let_it_be(:project_bot_user) { create(:user, :project_bot) }
+            let_it_be(:access_token) { create(:personal_access_token, user: project_bot_user) }
+
+            context 'when token user belongs to the project' do
+              before do
+                project.add_maintainer(project_bot_user)
+              end
+
+              it_behaves_like 'with a valid access token'
+            end
+
+            it_behaves_like 'with an invalid access token'
+          end
+
+          context 'when using a group access token' do
+            let_it_be(:project_bot_user) { create(:user, name: 'Group token bot', email: "group_#{group.id}_bot@example.com", username: "group_#{group.id}_bot", user_type: :project_bot) }
+            let_it_be(:access_token) { create(:personal_access_token, user: project_bot_user) }
+
+            context 'when the token belongs to the group' do
+              before do
+                group.add_maintainer(project_bot_user)
+              end
+
+              it_behaves_like 'with a valid access token'
+            end
+
+            it_behaves_like 'with an invalid access token'
           end
         end
       end
@@ -543,6 +585,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
 
         context 'and belong to different projects' do
           let_it_be(:other_project) { create(:project) }
+
           let!(:read_registry) { create(:deploy_token, username: 'deployer', read_repository: false, projects: [project]) }
           let!(:read_repository) { create(:deploy_token, username: read_registry.username, read_registry: false, projects: [other_project]) }
           let(:auth_success) { Gitlab::Auth::Result.new(read_repository, other_project, :deploy_token, [:download_code]) }
@@ -681,6 +724,28 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe '#build_access_token_check' do
+    subject { gl_auth.find_for_git_client('gitlab-ci-token', build.token, project: build.project, ip: '1.2.3.4') }
+
+    let_it_be(:user) { create(:user) }
+
+    context 'for running build' do
+      let!(:build) { create(:ci_build, :running, user: user) }
+
+      it 'executes query using primary database' do
+        expect(Ci::Build).to receive(:find_by_token).with(build.token).and_wrap_original do |m, *args|
+          expect(::Gitlab::Database::LoadBalancing::Session.current.use_primary?).to eq(true)
+          m.call(*args)
+        end
+
+        expect(subject).to be_a(Gitlab::Auth::Result)
+        expect(subject.actor).to eq(user)
+        expect(subject.project).to eq(build.project)
+        expect(subject.type).to eq(:build)
+      end
+    end
+  end
+
   describe 'find_with_user_password' do
     let!(:user) do
       create(:user,
@@ -777,7 +842,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
         end.not_to change(user, :failed_attempts)
       end
 
-      context 'when the database is read only' do
+      context 'when the database is read-only' do
         before do
           allow(Gitlab::Database).to receive(:read_only?).and_return(true)
         end

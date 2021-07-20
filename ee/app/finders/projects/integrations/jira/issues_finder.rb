@@ -19,7 +19,7 @@ module Projects
 
         def initialize(project, params = {})
           @project = project
-          @jira_service = project.jira_service
+          @jira_integration = project.jira_integration
           @params = params.merge(map_sort_values(params[:sort]))
           set_pagination
         end
@@ -27,23 +27,23 @@ module Projects
         def execute
           return [] unless project.jira_issues_integration_available?
 
-          raise IntegrationError, _('Jira service not configured.') unless jira_service&.active?
+          raise IntegrationError, _('Jira service not configured.') unless jira_integration&.active?
 
-          project_key = jira_service.project_key
-          raise IntegrationError, _('Jira project key is not configured') if project_key.blank?
+          project_key = jira_integration.project_key
+          raise IntegrationError, _('Jira project key is not configured.') if project_key.blank?
 
           fetch_issues(project_key)
         end
 
         private
 
-        attr_reader :project, :jira_service, :page, :params
+        attr_reader :project, :jira_integration, :page, :params
 
         # rubocop: disable CodeReuse/ServiceClass
         def fetch_issues(project_key)
           jql = ::Jira::JqlBuilderService.new(project_key, params).execute
           response = ::Jira::Requests::Issues::ListService
-                       .new(jira_service, { jql: jql, page: page, per_page: per_page })
+                       .new(jira_integration, { jql: jql, page: page, per_page: per_page })
                        .execute
 
           if response.success?

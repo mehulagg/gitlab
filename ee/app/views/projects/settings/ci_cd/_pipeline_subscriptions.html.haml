@@ -2,14 +2,14 @@
 
 - expanded = expanded_by_default?
 
-%section.settings.no-animate#pipeline-subscriptions{ class: ('expanded' if expanded) }
+%section.settings.no-animate#pipeline-subscriptions{ class: ('expanded' if expanded), data: { qa_selector: 'pipeline_subscriptions_setting_content' } }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = _("Pipeline subscriptions")
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      - default_branch_docs = link_to(_("default branch"), help_page_path('user/project/repository/branches/index.md', anchor: 'default-branch'))
+      - default_branch_docs = link_to(_("default branch"), help_page_path('user/project/repository/branches/default.md'))
       = _("Pipeline subscriptions trigger a new pipeline on the default branch of this project when a pipeline successfully completes for a new tag on the %{default_branch_docs} of the subscribed project.").html_safe % { default_branch_docs: default_branch_docs }
     %p
       = _("A limit of %{ci_project_subscriptions_limit} subscriptions to or from a project applies.").html_safe % { ci_project_subscriptions_limit: @project.actual_limits.ci_project_subscriptions }

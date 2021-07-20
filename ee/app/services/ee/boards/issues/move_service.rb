@@ -6,8 +6,8 @@ module EE
       module MoveService
         extend ::Gitlab::Utils::Override
 
-        override :issue_params
-        def issue_params(issue)
+        override :issuable_params
+        def issuable_params(issue)
           args = super
           args[:epic_id] = params[:epic_id] if params.has_key?(:epic_id)
 
@@ -39,7 +39,7 @@ module EE
             milestone_id: milestone_id
           }
 
-          movement_args[:sprint_id] = iteration_id(issue) if ::Feature.enabled?(:iteration_board_lists, parent)
+          movement_args[:sprint_id] = iteration_id(issue) if ::Feature.enabled?(:iteration_board_lists, parent, default_enabled: :yaml)
 
           movement_args
         end

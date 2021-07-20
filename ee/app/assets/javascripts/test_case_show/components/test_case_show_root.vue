@@ -7,6 +7,7 @@ import {
   GlButton,
   GlSprintf,
   GlLink,
+  GlAlert,
 } from '@gitlab/ui';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -31,6 +32,7 @@ export default {
     GlButton,
     GlSprintf,
     GlLink,
+    GlAlert,
     IssuableShow,
     TestCaseSidebar,
   },
@@ -39,6 +41,8 @@ export default {
     'projectFullPath',
     'testCaseNewPath',
     'testCaseId',
+    'updatePath',
+    'lockVersion',
     'canEditTestCase',
     'descriptionPreviewPath',
     'descriptionHelpPath',
@@ -49,6 +53,7 @@ export default {
       editTestCaseFormVisible: false,
       testCaseSaveInProgress: false,
       testCaseStateChangeInProgress: false,
+      taskListUpdateFailed: false,
     };
   },
   computed: {
@@ -98,6 +103,9 @@ export default {
           this.testCaseStateChangeInProgress = false;
         });
     },
+    handleTaskListUpdateFailure() {
+      this.taskListUpdateFailed = true;
+    },
     handleEditTestCase() {
       this.editTestCaseFormVisible = true;
     },
@@ -132,6 +140,13 @@ export default {
 
 <template>
   <div class="test-case-container">
+    <gl-alert v-if="taskListUpdateFailed" variant="danger" @dismiss="taskListUpdateFailed = false">
+      {{
+        __(
+          'Someone edited this test case at the same time you did. The description has been updated and you will need to make your changes again.',
+        )
+      }}
+    </gl-alert>
     <gl-loading-icon v-if="testCaseLoading" size="md" class="gl-mt-3" />
     <issuable-show
       v-if="!testCaseLoading && !testCaseLoadFailed"
@@ -140,10 +155,15 @@ export default {
       :status-icon="statusIcon"
       :enable-edit="canEditTestCase"
       :enable-autocomplete="true"
+      :enable-task-list="true"
       :edit-form-visible="editTestCaseFormVisible"
       :description-preview-path="descriptionPreviewPath"
       :description-help-path="descriptionHelpPath"
+      :task-completion-status="testCase.taskCompletionStatus"
+      :task-list-update-path="updatePath"
+      :task-list-lock-version="lockVersion"
       @edit-issuable="handleEditTestCase"
+      @task-list-update-failure="handleTaskListUpdateFailure"
     >
       <template #status-badge>
         <gl-sprintf
@@ -209,13 +229,14 @@ export default {
           {{ __('Cancel') }}
         </gl-button>
       </template>
-      <template #right-sidebar-items="{ sidebarExpanded }">
+      <template #right-sidebar-items="{ sidebarExpanded, toggleSidebar }">
         <test-case-sidebar
           :sidebar-expanded="sidebarExpanded"
           :selected-labels="selectedLabels"
           :todo="todo"
           :moved="testCase.moved"
           @test-case-updated="handleTestCaseUpdated"
+          @sidebar-toggle="toggleSidebar"
         />
       </template>
     </issuable-show>

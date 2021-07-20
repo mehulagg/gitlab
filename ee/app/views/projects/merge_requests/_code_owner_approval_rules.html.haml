@@ -6,7 +6,7 @@
   %strong= _('Code owner approval is required')
   %p
     = _('At least one approval from a code owner is required to change files matching the respective CODEOWNER rules.')
-    = link_to(_('Read more'), help_page_path('user/project/protected_branches.md', anchor: 'protected-branches-approval-by-code-owners'))
+    = link_to(_('Read more'), help_page_path('user/project/protected_branches.md', anchor: 'require-code-owner-approval-on-a-protected-branch'))
 
   .border-bottom
     %table.table.m-0
@@ -14,9 +14,9 @@
         %tr.d-none.d-sm-table-row
           %th.w-25= s_('CodeOwner|Pattern')
           %th= _('Members')
-      %tbody{ data: { qa_selector: "approver_list" } }
+      %tbody{ data: { qa_selector: "approver_list_content" } }
         - code_owner_rules.each do |code_owner_approval_rule|
-          %tr{ data: { qa_selector: "approver" } }
+          %tr{ data: { qa_selector: "approver_content" } }
             %td
               - if code_owner_approval_rule.section != Gitlab::CodeOwners::Entry::DEFAULT_SECTION
                 %span.text-muted.small.d-block= code_owner_approval_rule.section

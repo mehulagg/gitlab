@@ -46,11 +46,27 @@ RSpec.describe Gitlab::Highlight do
       expect(result).to eq(%[<span id="LC1" class="line" lang="plaintext">plain text contents</span>])
     end
 
-    it 'returns plain version for long content' do
-      stub_const('Gitlab::Highlight::MAXIMUM_TEXT_HIGHLIGHT_SIZE', 1)
-      result = described_class.highlight(file_name, content)
+    context 'when content is too long to be highlighted' do
+      let(:result) { described_class.highlight(file_name, content) } # content is 44 bytes
 
-      expect(result).to eq(%[<span id="LC1" class="line" lang="">(make-pathname :defaults name</span>\n<span id="LC2" class="line" lang="">:type "assem")</span>])
+      before do
+        stub_feature_flags(one_megabyte_file_size_limit: false)
+        stub_config(extra: { 'maximum_text_highlight_size_kilobytes' => 0.0001 } ) # 1.024 bytes
+      end
+
+      it 'confirm file size is 1MB when `one_megabyte_file_size_limit` is enabled' do
+        stub_feature_flags(one_megabyte_file_size_limit: true)
+        expect(described_class.too_large?(1024.kilobytes)).to eq(false)
+        expect(described_class.too_large?(1025.kilobytes)).to eq(true)
+      end
+
+      it 'increments the metric for oversized files' do
+        expect { result }.to change { over_highlight_size_limit('file size: 0.0001') }.by(1)
+      end
+
+      it 'returns plain version for long content' do
+        expect(result).to eq(%[<span id="LC1" class="line" lang="">(make-pathname :defaults name</span>\n<span id="LC2" class="line" lang="">:type "assem")</span>])
+      end
     end
 
     it 'highlights multi-line comments' do
@@ -78,6 +94,21 @@ RSpec.describe Gitlab::Highlight do
         result = described_class.highlight(file_name, content)
 
         expect(result).to eq(expected)
+      end
+
+      context 'when start line number is set' do
+        let(:expected) do
+          %q(<span id="LC10" class="line" lang="diff"><span class="gi">+aaa</span></span>
+<span id="LC11" class="line" lang="diff"><span class="gi">+bbb</span></span>
+<span id="LC12" class="line" lang="diff"><span class="gd">- ccc</span></span>
+<span id="LC13" class="line" lang="diff"> ddd</span>)
+        end
+
+        it 'highlights each line properly' do
+          result = described_class.new(file_name, content).highlight(content, context: { line_number: 10 })
+
+          expect(result).to eq(expected)
+        end
       end
     end
 
@@ -117,5 +148,64 @@ RSpec.describe Gitlab::Highlight do
         subject.highlight("Content")
       end
     end
+
+    describe 'highlight timeouts' do
+      let(:result) { described_class.highlight(file_name, content, language: "ruby") }
+
+      context 'when there is an attempt' do
+        it "increments the attempt counter with a defined language" do
+          expect { result }.to change { highlight_attempt_total("ruby") }
+        end
+
+        it "increments the attempt counter with an undefined language" do
+          expect do
+            described_class.highlight(file_name, content)
+          end.to change { highlight_attempt_total("undefined") }
+        end
+      end
+
+      context 'when there is a timeout error while highlighting' do
+        before do
+          allow(Timeout).to receive(:timeout).twice.and_raise(Timeout::Error)
+          # This is done twice because it's rescued first and then
+          # calls the original exception
+        end
+
+        it "increments the foreground counter if it's in the foreground" do
+          expect { result }
+            .to raise_error(Timeout::Error)
+            .and change { highlight_timeout_total('foreground') }.by(1)
+            .and not_change { highlight_timeout_total('background') }
+        end
+
+        it "increments the background counter if it's in the background" do
+          allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
+
+          expect { result }
+            .to raise_error(Timeout::Error)
+            .and change { highlight_timeout_total('background') }.by(1)
+            .and not_change { highlight_timeout_total('foreground') }
+        end
+      end
+    end
+  end
+
+  def highlight_timeout_total(source)
+    Gitlab::Metrics
+      .counter(:highlight_timeout, 'Counts the times highlights have timed out')
+      .get(source: source)
+  end
+
+  def highlight_attempt_total(source)
+    Gitlab::Metrics
+      .counter(:file_highlighting_attempt, 'Counts the times highlighting has been attempted on a file')
+      .get(source: source)
+  end
+
+  def over_highlight_size_limit(source)
+    Gitlab::Metrics
+      .counter(:over_highlight_size_limit,
+               'Count the times text has been over the highlight size limit')
+      .get(source: source)
   end
 end

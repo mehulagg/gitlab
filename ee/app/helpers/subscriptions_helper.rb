@@ -3,7 +3,7 @@
 module SubscriptionsHelper
   include ::Gitlab::Utils::StrongMemoize
 
-  def subscription_data
+  def subscription_data(eligible_groups)
     {
       setup_for_company: (current_user.setup_for_company == true).to_s,
       full_name: current_user.name,
@@ -11,7 +11,16 @@ module SubscriptionsHelper
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
-      group_data: group_data.to_json
+      group_data: present_groups(eligible_groups).to_json,
+      source: params[:source]
+    }
+  end
+
+  def addon_data(group)
+    {
+      group_data: [present_group(group)].to_json,
+      namespace_id: params[:selected_group],
+      source: params[:source]
     }
   end
 
@@ -31,25 +40,28 @@ module SubscriptionsHelper
   end
 
   def plans_data
-    FetchSubscriptionPlansService.new(plan: :free).execute
+    GitlabSubscriptions::FetchSubscriptionPlansService.new(plan: :free).execute
       .map(&:symbolize_keys)
       .reject { |plan_data| plan_data[:free] }
-      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name) }
+      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name, :hide_card) }
   end
 
   def subscription_available_plans
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
-    plans_data.reject { |plan_data| plan_data[:deprecated] }
+    plans_data.reject { |plan_data| plan_data[:deprecated] || plan_data[:hide_card] }
   end
 
-  def group_data
-    current_user.manageable_groups_eligible_for_subscription.with_counts(archived: false).map do |namespace|
-      {
-        id: namespace.id,
-        name: namespace.name,
-        users: namespace.member_count
-      }
-    end
+  def present_groups(groups)
+    groups.map { |namespace| present_group(namespace) }
+  end
+
+  def present_group(namespace)
+    {
+      id: namespace.id,
+      name: namespace.name,
+      users: namespace.member_count,
+      guests: namespace.guest_count
+    }
   end
 end

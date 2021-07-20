@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe MemberEntity do
   let_it_be(:current_user) { create(:user) }
+
   let(:entity) { described_class.new(member, { current_user: current_user, group: group }) }
   let(:entity_hash) { entity.as_json }
 
@@ -35,6 +36,12 @@ RSpec.describe MemberEntity do
       allow(member).to receive(:can_override?).and_return(true)
 
       expect(entity_hash[:can_override]).to be(true)
+    end
+
+    it 'correctly exposes `provisioned_by_this_group`' do
+      allow(member).to receive(:provisioned_by_this_group?).and_return(true)
+
+      expect(entity_hash[:provisioned_by_this_group]).to be(true)
     end
   end
 

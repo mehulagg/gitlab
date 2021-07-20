@@ -14,7 +14,7 @@ RSpec.describe Ci::PipelinePresenter do
         pipeline.failure_reason = :activity_limit_exceeded
 
         expect(presenter.failure_reason)
-          .to eq 'Pipeline activity limit exceeded!'
+          .to eq 'The pipeline activity limit was exceeded.'
       end
     end
 
@@ -148,6 +148,7 @@ RSpec.describe Ci::PipelinePresenter do
 
   describe '#degradation_threshold' do
     let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
+
     let(:current_user) { create(:user) }
 
     before do

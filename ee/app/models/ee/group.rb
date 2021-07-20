@@ -12,7 +12,6 @@ module EE
     prepended do
       include TokenAuthenticatable
       include InsightsFeature
-      include HasTimelogsReport
       include HasWiki
       include CanMoveRepositoryStorage
 
@@ -20,17 +19,19 @@ module EE
 
       has_many :epics
       has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
-
+      has_many :iterations
+      has_many :iterations_cadences, class_name: 'Iterations::Cadence'
       has_one :saml_provider
       has_many :scim_identities
       has_many :ip_restrictions, autosave: true
+      has_many :protected_environments, inverse_of: :group
       has_one :insight, foreign_key: :namespace_id
       accepts_nested_attributes_for :insight, allow_destroy: true
       has_one :scim_oauth_access_token
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
       has_many :saml_group_links, foreign_key: 'group_id'
-      has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
+      has_many :hooks, class_name: 'GroupHook'
 
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
@@ -55,9 +56,11 @@ module EE
       has_one :group_wiki_repository
       has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
 
+      has_many :epic_board_recent_visits, class_name: 'Boards::EpicBoardRecentVisit', inverse_of: :group
+
       belongs_to :file_template_project, class_name: "Project"
 
-      belongs_to :push_rule
+      belongs_to :push_rule, inverse_of: :group
 
       # Use +checked_file_template_project+ instead, which implements important
       # visibility checks
@@ -72,22 +75,24 @@ module EE
 
       validate :custom_project_templates_group_allowed, if: :custom_project_templates_group_id_changed?
 
-      scope :aimed_for_deletion, -> (date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
+      scope :aimed_for_deletion, ->(date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
       scope :with_deletion_schedule, -> { preload(deletion_schedule: :deleting_user) }
       scope :with_deletion_schedule_only, -> { preload(:deletion_schedule) }
+
+      scope :with_saml_provider, -> { preload(:saml_provider) }
 
       scope :where_group_links_with_provider, ->(provider) do
         joins(:ldap_group_links).where(ldap_group_links: { provider: provider })
       end
 
-      scope :with_managed_accounts_enabled, -> {
+      scope :with_managed_accounts_enabled, -> do
         joins(:saml_provider).where(saml_providers:
           {
             enabled: true,
             enforced_sso: true,
             enforced_group_managed_accounts: true
           })
-      }
+      end
 
       scope :with_no_pat_expiry_policy, -> { where(max_personal_access_token_lifetime: nil) }
 
@@ -105,6 +110,8 @@ module EE
         epics_query = epics.select(:group_id)
         joins("INNER JOIN (#{epics_query.to_sql}) as epics on epics.group_id = namespaces.id")
       end
+
+      scope :user_is_member, -> (user) { id_in(user.authorized_groups(with_minimal_access: false)) }
 
       state_machine :ldap_sync_status, namespace: :ldap_sync, initial: :ready do
         state :ready
@@ -227,8 +234,7 @@ module EE
     end
 
     def saml_group_sync_available?
-      ::Feature.enabled?(:saml_group_links, self, default_enabled: true) &&
-        feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
+      feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
     end
 
     override :multiple_issue_boards_available?
@@ -236,8 +242,16 @@ module EE
       feature_available?(:multiple_group_issue_boards)
     end
 
+    def multiple_iteration_cadences_available?
+      feature_available?(:multiple_iteration_cadences)
+    end
+
     def group_project_template_available?
       feature_available?(:group_project_templates)
+    end
+
+    def scoped_variables_available?
+      feature_available?(:group_scoped_ci_variables)
     end
 
     def actual_size_limit
@@ -286,31 +300,21 @@ module EE
 
     override :billable_members_count
     def billable_members_count(requested_hosted_plan = nil)
-      billed_user_ids(requested_hosted_plan).count
+      billable_ids = billed_user_ids(requested_hosted_plan)
+
+      billable_ids[:user_ids].count
     end
 
     # For now, we are not billing for members with a Guest role for subscriptions
-    # with a Gold plan. The other plans will treat Guest members as a regular member
+    # with a Gold/Ultimate plan. The other plans will treat Guest members as a regular member
     # for billing purposes.
     #
-    # We are plucking the user_ids from the "Members" table in an array and
+    # For the user_ids key, we are plucking the user_ids from the "Members" table in an array and
     # converting the array of user_ids to a Set which will have unique user_ids.
     def billed_user_ids(requested_hosted_plan = nil)
-      if [actual_plan_name, requested_hosted_plan].include?(::Plan::GOLD)
-        strong_memoize(:gold_billed_user_ids) do
-          (billed_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_project_members.non_guests.distinct.pluck(:user_id) +
-          billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)).to_set
-        end
-      else
-        strong_memoize(:non_gold_billed_user_ids) do
-          (billed_group_members.distinct.pluck(:user_id) +
-          billed_project_members.distinct.pluck(:user_id) +
-          billed_shared_group_members.distinct.pluck(:user_id) +
-          billed_invited_group_to_project_members.distinct.pluck(:user_id)).to_set
-        end
-      end
+      exclude_guests = ([actual_plan_name, requested_hosted_plan] & [::Plan::GOLD, ::Plan::ULTIMATE]).any?
+
+      exclude_guests ? billed_user_ids_excluding_guests : billed_user_ids_including_guests
     end
 
     override :supports_events?
@@ -423,7 +427,7 @@ module EE
 
     override :users_count
     def users_count
-      return all_group_members.count unless minimal_access_role_allowed?
+      return all_group_members.count if minimal_access_role_allowed?
 
       members.count
     end
@@ -451,7 +455,7 @@ module EE
 
       return unless feature_available?(:group_webhooks)
 
-      self_and_ancestor_hooks = GroupHook.where(group_id: self.self_and_ancestors)
+      self_and_ancestor_hooks = GroupHook.where(group_id: self_and_ancestors)
       self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
         hook.async_execute(data, hooks_scope.to_s)
       end
@@ -464,6 +468,10 @@ module EE
 
     def repository_storage
       group_wiki_repository&.shard_name || ::Repository.pick_storage_shard
+    end
+
+    def iteration_cadences_feature_flag_enabled?
+      ::Feature.enabled?(:iteration_cadences, self, default_enabled: :yaml)
     end
 
     private
@@ -484,7 +492,6 @@ module EE
 
     def execute_subgroup_hooks(event)
       return unless subgroup?
-      return unless parent.group? # TODO: Remove this after fixing https://gitlab.com/gitlab-org/gitlab/-/issues/301013
       return unless feature_available?(:group_webhooks)
 
       run_after_commit do
@@ -504,6 +511,40 @@ module EE
       errors.add(:custom_project_templates_group_id, 'has to be a subgroup of the group')
     end
 
+    def billed_user_ids_excluding_guests
+      strong_memoize(:billed_user_ids_excluding_guests) do
+        group_member_user_ids = billed_group_members.non_guests.distinct.pluck(:user_id)
+        project_member_user_ids = billed_project_users(non_guests: true).distinct.pluck(:id)
+        shared_group_user_ids = billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id)
+        shared_project_user_ids = billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)
+
+        {
+          user_ids: (group_member_user_ids + project_member_user_ids + shared_group_user_ids + shared_project_user_ids).to_set,
+          group_member_user_ids: group_member_user_ids.to_set,
+          project_member_user_ids: project_member_user_ids.to_set,
+          shared_group_user_ids: shared_group_user_ids.to_set,
+          shared_project_user_ids: shared_project_user_ids.to_set
+        }
+      end
+    end
+
+    def billed_user_ids_including_guests
+      strong_memoize(:billed_user_ids_including_guests) do
+        group_member_user_ids = billed_group_members.distinct.pluck(:user_id)
+        project_member_user_ids = billed_project_users.distinct.pluck(:id)
+        shared_group_user_ids = billed_shared_group_members.distinct.pluck(:user_id)
+        shared_project_user_ids = billed_invited_group_to_project_members.distinct.pluck(:user_id)
+
+        {
+          user_ids: (group_member_user_ids + project_member_user_ids + shared_group_user_ids + shared_project_user_ids).to_set,
+          group_member_user_ids: group_member_user_ids.to_set,
+          project_member_user_ids: project_member_user_ids.to_set,
+          shared_group_user_ids: shared_group_user_ids.to_set,
+          shared_project_user_ids: shared_project_user_ids.to_set
+        }
+      end
+    end
+
     # Members belonging directly to Group or its subgroups
     def billed_group_members
       ::GroupMember.active_without_invites_and_requests.where(
@@ -512,10 +553,18 @@ module EE
     end
 
     # Members belonging directly to Projects within Group or Projects within subgroups
-    def billed_project_members
-      ::ProjectMember.active_without_invites_and_requests.without_project_bots.where(
+    def billed_project_users(non_guests: false)
+      members = ::ProjectMember.without_invites_and_requests
+
+      members = members.non_guests if non_guests
+
+      user_ids = members.where(
         source_id: ::Project.joins(:group).where(namespace: self_and_descendants)
       )
+      .distinct
+      .select(:user_id)
+
+      ::User.with_state(:active).without_project_bot.where(id: user_ids)
     end
 
     # Members belonging to Groups invited to collaborate with Projects

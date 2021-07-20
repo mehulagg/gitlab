@@ -15,6 +15,7 @@ RSpec.describe 'Updating a DAST Profile' do
       full_path: project.full_path,
       id: global_id_of(dast_profile),
       name: 'updated dast_profiles.name',
+      branch_name: project.default_branch,
       run_after_update: true
     )
   end
@@ -40,7 +41,7 @@ RSpec.describe 'Updating a DAST Profile' do
 
     context 'when updating fails' do
       it 'returns an error' do
-        allow_next_instance_of(::Dast::Profiles::UpdateService) do |service|
+        allow_next_instance_of(::AppSec::Dast::Profiles::UpdateService) do |service|
           allow(service).to receive(:execute).and_return(
             ServiceResponse.error(message: 'Profile failed to update')
           )

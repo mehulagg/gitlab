@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-include ActionDispatch::TestProcess
-
 FactoryBot.define do
   factory :ci_job_artifact, class: 'Ci::JobArtifact' do
     job factory: :ci_build
@@ -279,6 +277,16 @@ FactoryBot.define do
       end
     end
 
+    trait :sast_minimal do
+      file_type { :sast }
+      file_format { :raw }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('spec/fixtures/security_reports/master/gl-sast-report-minimal.json'), 'application/json')
+      end
+    end
+
     trait :secret_detection do
       file_type { :secret_detection }
       file_format { :raw }
@@ -306,21 +314,6 @@ FactoryBot.define do
       after(:build) do |artifact, evaluator|
         artifact.file = fixture_file_upload(
           Rails.root.join('spec/fixtures/build.env.gz'), 'application/x-gzip')
-      end
-    end
-
-    trait :cluster_applications do
-      file_type { :cluster_applications }
-      file_format { :gzip }
-
-      transient do
-        file do
-          fixture_file_upload(Rails.root.join('spec/fixtures/helm/helm_list_v2_prometheus_missing.json.gz'), 'application/x-gzip')
-        end
-      end
-
-      after(:build) do |artifact, evaluator|
-        artifact.file = evaluator.file
       end
     end
 

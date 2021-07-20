@@ -73,6 +73,10 @@ export default {
     parentFlags.hasMoreIssues = pageInfo.hasNextPage;
   },
 
+  [types.SET_WEIGHT_SUM](state, data) {
+    state.weightSum = data;
+  },
+
   [types.REQUEST_ITEMS](state, { parentItem, isSubItem }) {
     if (isSubItem) {
       state.childrenFlags[parentItem.reference].itemChildrenFetchInProgress = true;

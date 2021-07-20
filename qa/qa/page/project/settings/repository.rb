@@ -56,10 +56,18 @@ module QA
               ProtectedTags.perform(&block)
             end
           end
+
+          def expand_default_branch(&block)
+            within('#default-branch-settings') do
+              find('.btn-default').click do
+                DefaultBranch.perform(&block)
+              end
+            end
+          end
         end
       end
     end
   end
 end
 
-QA::Page::Project::Settings::Repository.prepend_if_ee('QA::EE::Page::Project::Settings::Repository')
+QA::Page::Project::Settings::Repository.prepend_mod_with('Page::Project::Settings::Repository', namespace: QA)

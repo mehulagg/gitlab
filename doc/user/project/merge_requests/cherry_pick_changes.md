@@ -9,14 +9,14 @@ type: reference, concepts
 
 GitLab implements Git's powerful feature to
 [cherry-pick any commit](https://git-scm.com/docs/git-cherry-pick "Git cherry-pick documentation")
-with introducing a **Cherry-pick** button in merge requests and commit details.
+with a **Cherry-pick** button in merge requests and commit details.
 
 ## Cherry-picking a merge request
 
 After the merge request has been merged, a **Cherry-pick** button displays
 to cherry-pick the changes introduced by that merge request.
 
-![Cherry-pick Merge Request](img/cherry_pick_changes_mr.png)
+![Cherry-pick merge request](img/cherry_pick_changes_mr.png)
 
 After you click that button, a modal displays a
 [branch filter search box](../repository/branches/index.md#branch-filter-search-box)
@@ -32,7 +32,7 @@ where you can choose to either:
 When you cherry-pick a merge commit, GitLab displays a system note to the related merge
 request thread. It crosslinks the new commit and the existing merge request.
 
-![Cherry-pick tracking in Merge Request timeline](img/cherry_pick_mr_timeline_v12_9.png)
+![Cherry-pick tracking in merge request timeline](img/cherry_pick_mr_timeline_v12_9.png)
 
 Each deployment's [list of associated merge requests](../../../api/deployments.md#list-of-merge-requests-associated-with-a-deployment) includes cherry-picked merge commits.
 
@@ -59,6 +59,29 @@ mainline:
 ```shell
 git cherry-pick -m 2 7a39eb0
 ```
+
+### Cherry-pick into a project
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/21268) in GitLab 13.11.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/324154) in GitLab 14.0
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can use the GitLab UI to cherry-pick merge requests into a project, even if the
+merge request is from a fork:
+
+1. In the merge request's secondary menu, click **Commits** to display the commit details page.
+1. Click on the **Options** dropdown and select **Cherry-pick** to show the cherry-pick modal.
+1. In **Pick into project** and **Pick into branch**, select the destination project and branch:
+   ![Cherry-pick commit](img/cherry_pick_into_project_v13_11.png)
+1. (Optional) Select **Start a new merge request** if you're ready to create a merge request.
+1. Click **Cherry-pick**.
+
+## Related links
+
+- The [Commits API](../../../api/commits.md) enables you to add custom messages
+  to changes you cherry-pick through the API.
 
 <!-- ## Troubleshooting
 

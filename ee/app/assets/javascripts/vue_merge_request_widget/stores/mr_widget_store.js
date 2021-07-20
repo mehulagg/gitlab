@@ -46,6 +46,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.mergeTrainsCount = data.merge_trains_count || 0;
     this.mergeTrainIndex = data.merge_train_index;
     this.policyViolation = data.policy_violation;
+    this.jiraAssociation = data.jira_associations || {};
 
     super.setData(data, isRebased);
   }
@@ -55,6 +56,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     super.setPaths(data);
 
     this.discoverProjectSecurityPath = data.discover_project_security_path;
+    this.apiStatusChecksPath = data.api_status_checks_path;
 
     // Security scan diff paths
     this.containerScanningComparisonPath = data.container_scanning_comparison_path;

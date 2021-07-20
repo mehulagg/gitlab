@@ -46,6 +46,10 @@ RSpec.describe Projects::SnippetsController do
       let(:params) { base_params }
     end
 
+    it_behaves_like 'snippets views' do
+      let(:params) { base_params }
+    end
+
     context 'when the project snippet is private' do
       let_it_be(:project_snippet) { create(:project_snippet, :private, project: project, author: user) }
 
@@ -207,14 +211,14 @@ RSpec.describe Projects::SnippetsController do
         subject
 
         expect(assigns(:snippet)).to eq(project_snippet)
-        expect(assigns(:blobs)).to eq(project_snippet.blobs)
+        expect(assigns(:blobs).map(&:name)).to eq(project_snippet.blobs.map(&:name))
         expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'does not show the blobs expanded by default' do
         subject
 
-        expect(project_snippet.blobs.map(&:expanded?)).to be_all(false)
+        expect(assigns(:blobs).map(&:expanded?)).to be_all(false)
       end
 
       context 'when param expanded is set' do
@@ -223,7 +227,7 @@ RSpec.describe Projects::SnippetsController do
         it 'shows all blobs expanded' do
           subject
 
-          expect(project_snippet.blobs.map(&:expanded?)).to be_all(true)
+          expect(assigns(:blobs).map(&:expanded?)).to be_all(true)
         end
       end
     end

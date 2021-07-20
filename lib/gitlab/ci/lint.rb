@@ -21,7 +21,7 @@ module Gitlab
       def initialize(project:, current_user:, sha: nil)
         @project = project
         @current_user = current_user
-        @sha = sha || project.repository.commit.sha
+        @sha = sha || project.repository.commit&.sha
       end
 
       def validate(content, dry_run: false)
@@ -38,6 +38,7 @@ module Gitlab
         pipeline = ::Ci::CreatePipelineService
           .new(@project, @current_user, ref: @project.default_branch)
           .execute(:push, dry_run: true, content: content)
+          .payload
 
         Result.new(
           jobs: dry_run_convert_to_jobs(pipeline.stages),

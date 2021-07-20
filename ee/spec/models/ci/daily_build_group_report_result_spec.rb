@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::DailyBuildGroupReportResult do
   let_it_be(:project) { create(:project) }
   let_it_be(:group) { create(:group, projects: [project]) }
+
   let(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project) }
   let(:old_build_group_report_result) do
     create(:ci_daily_build_group_report_result, date: 1.week.ago, project: project)

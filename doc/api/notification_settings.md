@@ -1,25 +1,23 @@
 ---
-stage: none
-group: unassigned
+stage: Plan
+group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Notification settings API
+# Notification settings API **(FREE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5632) in GitLab 8.12.
+Change [notification settings](../user/profile/notifications.md) using the REST API.
 
 ## Valid notification levels
 
 The notification levels are defined in the `NotificationSetting.level` model enumeration. Currently, these levels are recognized:
 
-```plaintext
-disabled
-participating
-watch
-global
-mention
-custom
-```
+- `disabled`
+- `participating`
+- `watch`
+- `global`
+- `mention`
+- `custom`
 
 If the `custom` level is used, specific email events can be controlled. Available events are returned by `NotificationSetting.email_events`. Currently, these events are recognized:
 
@@ -39,6 +37,7 @@ If the `custom` level is used, specific email events can be controlled. Availabl
 - `fixed_pipeline`
 - `success_pipeline`
 - `moved_project`
+- `merge_when_pipeline_succeeds`
 - `new_epic` **(ULTIMATE)**
 
 ## Global notification settings
@@ -94,6 +93,7 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 | `fixed_pipeline` | boolean | no | Enable/disable this notification |
 | `success_pipeline` | boolean | no | Enable/disable this notification |
 | `moved_project` | boolean | no | Enable/disable this notification ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30371) in GitLab 13.3) |
+| `merge_when_pipeline_succeeds` | boolean | no | Enable/disable this notification ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/244840) in GitLab 13.9) |
 | `new_epic` | boolean | no | Enable/disable this notification ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5863) in GitLab 11.3) **(ULTIMATE)** |
 
 Example response:
@@ -121,7 +121,7 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The group/project ID or path |
+| `id` | integer or string | yes | The ID, or [URL-encoded path, of the group or project](index.md#namespaced-path-encoding). |
 
 Example response:
 
@@ -147,7 +147,7 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The group/project ID or path |
+| `id` | integer or string | yes | The ID, or [URL-encoded path, of the group or project](index.md#namespaced-path-encoding) |
 | `level` | string | no | The global notification level |
 | `new_note` | boolean | no | Enable/disable this notification |
 | `new_issue` | boolean | no | Enable/disable this notification |
@@ -165,6 +165,7 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 | `fixed_pipeline` | boolean | no | Enable/disable this notification |
 | `success_pipeline` | boolean | no | Enable/disable this notification |
 | `moved_project` | boolean | no | Enable/disable this notification ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30371) in GitLab 13.3) |
+| `merge_when_pipeline_succeeds` | boolean | no | Enable/disable this notification ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/244840) in GitLab 13.9) |
 | `new_epic` | boolean | no | Enable/disable this notification ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5863) in GitLab 11.3) **(ULTIMATE)** |
 
 Example responses:
@@ -173,7 +174,9 @@ Example responses:
 {
   "level": "watch"
 }
+```
 
+```json
 {
   "level": "custom",
   "events": {

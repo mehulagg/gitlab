@@ -85,6 +85,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       merge_request_diff = create(:merge_request_diff, :external)
       package_file = create(:conan_package_file, :conan_package)
       terraform_state_version = create(:terraform_state_version)
+      pipeline_artifact = create(:ci_pipeline_artifact)
       upload = create(:upload)
 
       expect(Geo::ContainerRepositoryRegistry.where(container_repository_id: container_repository.id).count).to eq(0)
@@ -93,6 +94,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(0)
       expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(0)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(0)
+      expect(Geo::PipelineArtifactRegistry.where(pipeline_artifact_id: pipeline_artifact.id).count).to eq(0)
       expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(0)
       expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(0)
       expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(0)
@@ -105,6 +107,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(1)
       expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(1)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(1)
+      expect(Geo::PipelineArtifactRegistry.where(pipeline_artifact_id: pipeline_artifact.id).count).to eq(1)
       expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(1)
       expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(1)
       expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(1)

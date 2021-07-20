@@ -22,10 +22,7 @@
     .container-fluid {
       .navbar-toggler {
         border-left: 1px solid lighten($border-and-box-shadow, 10%);
-
-        svg {
-          fill: $search-and-nav-links;
-        }
+        color: $search-and-nav-links;
       }
     }
 
@@ -92,6 +89,7 @@
 
             .notification-dot {
               will-change: border-color, background-color;
+              // stylelint-disable-next-line
               border-color: $nav-svg-color + 33;
             }
 
@@ -176,20 +174,20 @@
   }
 
   // Sidebar
-  .nav-sidebar li.active {
-    box-shadow: inset 4px 0 0 $border-and-box-shadow;
-
-    > a {
-      color: $sidebar-text;
-    }
-
-    .nav-icon-container svg {
-      fill: $sidebar-text;
-    }
+  .nav-sidebar li.active > a {
+    color: $sidebar-text;
   }
 
-  .sidebar-top-level-items > li.active .badge.badge-pill {
-    color: $sidebar-text;
+  .nav-sidebar {
+    .fly-out-top-item {
+      a,
+      a:hover,
+      &.active a,
+      .fly-out-top-item-container {
+        background-color: $purple-900;
+        color: var(--black, $white);
+      }
+    }
   }
 
   .nav-links li {
@@ -204,6 +202,10 @@
     }
   }
 
+  .emoji-picker-category-active {
+    border-bottom-color: $active-tab-border;
+  }
+
   .branch-header-title {
     color: $border-and-box-shadow;
   }
@@ -211,7 +213,6 @@
   .ide-sidebar-link {
     &.active {
       color: $border-and-box-shadow;
-      box-shadow: inset 3px 0 $border-and-box-shadow;
 
       &.is-right {
         box-shadow: inset -3px 0 $border-and-box-shadow;

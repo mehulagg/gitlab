@@ -2,11 +2,8 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
 import createDefaultClient from '~/lib/graphql';
-import {
-  urlParamsToObject,
-  convertObjectPropsToCamelCase,
-  parseBoolean,
-} from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
+import { queryToObject } from '~/lib/utils/url_utility';
 
 import TestCaseListApp from './components/test_case_list_root.vue';
 
@@ -35,9 +32,12 @@ const initTestCaseList = ({ mountPointSelector }) => {
   } = mountPointEl.dataset;
 
   const initialFilterParams = Object.assign(
-    convertObjectPropsToCamelCase(urlParamsToObject(window.location.search.substring(1)), {
-      dropKeys: ['scope', 'utf8', 'state', 'sort'], // These keys are unsupported/unnecessary
-    }),
+    convertObjectPropsToCamelCase(
+      queryToObject(window.location.search.substring(1), { gatherArrays: true }),
+      {
+        dropKeys: ['scope', 'utf8', 'state', 'sort'], // These keys are unsupported/unnecessary
+      },
+    ),
   );
 
   return new Vue({

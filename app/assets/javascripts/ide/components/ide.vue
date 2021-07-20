@@ -1,7 +1,7 @@
 <script>
-import { GlAlert, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { __, s__ } from '~/locale';
+import { __ } from '~/locale';
 import {
   WEBIDE_MARK_APP_START,
   WEBIDE_MARK_FILE_FINISH,
@@ -14,6 +14,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { modalTypes } from '../constants';
 import eventHub from '../eventhub';
 import { measurePerformance } from '../utils';
+import CannotPushCodeAlert from './cannot_push_code_alert.vue';
 import IdeSidebar from './ide_side_bar.vue';
 import RepoEditor from './repo_editor.vue';
 
@@ -25,15 +26,10 @@ eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION, () =>
   ),
 );
 
-const MSG_CANNOT_PUSH_CODE = s__(
-  'WebIDE|You need permission to edit files directly in this project. Fork this project to make your changes and submit a merge request.',
-);
-
 export default {
   components: {
     IdeSidebar,
     RepoEditor,
-    GlAlert,
     GlButton,
     GlLoadingIcon,
     ErrorMessage: () => import(/* webpackChunkName: 'ide_runtime' */ './error_message.vue'),
@@ -45,6 +41,7 @@ export default {
       import(/* webpackChunkName: 'ide_runtime' */ '~/vue_shared/components/file_finder/index.vue'),
     RightPane: () => import(/* webpackChunkName: 'ide_runtime' */ './panes/right.vue'),
     NewModal: () => import(/* webpackChunkName: 'ide_runtime' */ './new_dropdown/modal.vue'),
+    CannotPushCodeAlert,
   },
   mixins: [glFeatureFlagsMixin()],
   data() {
@@ -63,7 +60,7 @@ export default {
       'loading',
     ]),
     ...mapGetters([
-      'canPushCode',
+      'canPushCodeStatus',
       'activeFile',
       'someUncommittedChanges',
       'isCommitModeActive',
@@ -116,7 +113,6 @@ export default {
       this.loadDeferred = true;
     },
   },
-  MSG_CANNOT_PUSH_CODE,
 };
 </script>
 
@@ -125,14 +121,15 @@ export default {
     class="ide position-relative d-flex flex-column align-items-stretch"
     :class="{ [`theme-${themeName}`]: themeName }"
   >
-    <gl-alert v-if="!canPushCode" :dismissible="false">{{
-      $options.MSG_CANNOT_PUSH_CODE
-    }}</gl-alert>
+    <cannot-push-code-alert
+      v-if="!canPushCodeStatus.isAllowed"
+      :message="canPushCodeStatus.message"
+      :action="canPushCodeStatus.action"
+    />
     <error-message v-if="errorMessage" :message="errorMessage" />
     <div class="ide-view flex-grow d-flex">
       <template v-if="loadDeferred">
         <find-file
-          v-show="fileFindVisible"
           :files="allBlobs"
           :visible="fileFindVisible"
           :loading="loading"

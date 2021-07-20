@@ -51,6 +51,16 @@ RSpec.describe NetworkPolicies::FindResourceService do
       end
     end
 
+    context 'with invalid policy kind' do
+      let(:kind) { 'InvalidKind' }
+
+      it 'returns error response' do
+        expect(subject).to be_error
+        expect(subject.http_status).to eq(:bad_request)
+        expect(subject.message).not_to be_nil
+      end
+    end
+
     context 'without deployment_platform' do
       let(:platform) { nil }
 
@@ -61,23 +71,6 @@ RSpec.describe NetworkPolicies::FindResourceService do
       end
     end
 
-    context 'with Kubeclient::HttpError' do
-      let(:request_url) { 'https://kubernetes.local' }
-      let(:response) {  RestClient::Response.create('', {}, RestClient::Request.new(url: request_url, method: :get)) }
-
-      before do
-        allow(kubeclient).to receive(:get_network_policy).and_raise(Kubeclient::HttpError.new(500, 'system failure', response))
-      end
-
-      it 'returns error response' do
-        expect(subject).to be_error
-        expect(subject.http_status).to eq(:bad_request)
-        expect(subject.message).not_to be_nil
-      end
-
-      it 'returns error message without request url' do
-        expect(subject.message).not_to include(request_url)
-      end
-    end
+    include_examples 'responds to Kubeclient::HttpError', :get_network_policy
   end
 end

@@ -5,7 +5,8 @@ module Licenses
     include Gitlab::Allowable
 
     def initialize(license, user)
-      @license, @user = license, user
+      @license = license
+      @user = user
     end
 
     def execute

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module VulnerabilitiesHelper
-  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid].freeze
+  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details dismissal_feedback].freeze
 
   def vulnerability_details_json(vulnerability, pipeline)
     vulnerability_details(vulnerability, pipeline).to_json
@@ -15,7 +15,7 @@ module VulnerabilitiesHelper
       new_issue_url: new_issue_url_for(vulnerability),
       create_jira_issue_url: create_jira_issue_url_for(vulnerability),
       related_jira_issues_path: project_integrations_jira_issues_path(vulnerability.project, vulnerability_ids: [vulnerability.id]),
-      jira_integration_settings_path: edit_project_service_path(vulnerability.project, ::JiraService),
+      jira_integration_settings_path: edit_project_service_path(vulnerability.project, ::Integrations::Jira),
       has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_id),
       create_mr_url: create_vulnerability_feedback_merge_request_path(vulnerability.finding.project),
       discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
@@ -24,10 +24,15 @@ module VulnerabilitiesHelper
       pipeline: vulnerability_pipeline_data(pipeline),
       can_modify_related_issues: current_user.can?(:admin_vulnerability_issue_link, vulnerability),
       issue_tracking_help_path: help_page_path('user/project/settings', anchor: 'sharing-and-permissions'),
-      permissions_help_path: help_page_path('user/permissions', anchor: 'project-members-permissions')
+      permissions_help_path: help_page_path('user/permissions', anchor: 'project-members-permissions'),
+      dismissal_descriptions: dismissal_descriptions
     }
 
     result.merge(vulnerability_data(vulnerability), vulnerability_finding_data(vulnerability))
+  end
+
+  def dismissal_descriptions
+    Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] }
   end
 
   def new_issue_url_for(vulnerability)
@@ -44,7 +49,7 @@ module VulnerabilitiesHelper
     description = ApplicationController.render(template: 'vulnerabilities/jira_issue_description.md.erb',
                                                locals: { vulnerability: decorated_vulnerability })
 
-    vulnerability.project.jira_service.new_issue_url_with_predefined_fields(summary, description)
+    vulnerability.project.jira_integration.new_issue_url_with_predefined_fields(summary, description)
   end
 
   def vulnerability_pipeline_data(pipeline)
@@ -66,5 +71,9 @@ module VulnerabilitiesHelper
     data = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding, only: FINDING_FIELDS)
     data[:location].merge!('blob_path' => vulnerability.blob_path).compact!
     data
+  end
+
+  def vulnerability_scan_data?(vulnerability)
+    vulnerability.scanner.present? || vulnerability.scan.present?
   end
 end

@@ -58,7 +58,7 @@ module Pseudonymizer
                            whitelist_columns,
                            pseudonymity_columns)
       )
-    rescue => e
+    rescue StandardError => e
       Gitlab::AppLogger.error("Failed to export #{table}: #{e}")
       raise e
     end

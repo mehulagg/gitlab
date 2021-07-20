@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import { Sortable, MultiDrag } from 'sortablejs';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { sprintf, __ } from '~/locale';
 import eventHub from '../eventhub';
@@ -11,7 +11,7 @@ import {
   sortableEnd,
 } from '../mixins/sortable_default_options';
 import boardsStore from '../stores/boards_store';
-import boardCard from './board_card.vue';
+import boardCard from './board_card_deprecated.vue';
 import boardNewIssue from './board_new_issue_deprecated.vue';
 
 // This component is being replaced in favor of './board_list.vue' for GraphQL boards
@@ -91,6 +91,13 @@ export default {
         }
       });
     },
+    'list.id': {
+      handler(id) {
+        if (id) {
+          eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
+        }
+      },
+    },
   },
   created() {
     eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
@@ -134,9 +141,10 @@ export default {
               e.target.closest('.js-board-list') || e.target.querySelector('.js-board-list');
             const toBoardType = containerEl.dataset.boardType;
             const cloneActions = {
-              label: ['milestone', 'assignee'],
-              assignee: ['milestone', 'label'],
-              milestone: ['label', 'assignee'],
+              label: ['milestone', 'assignee', 'iteration'],
+              assignee: ['milestone', 'label', 'iteration'],
+              milestone: ['label', 'assignee', 'iteration'],
+              iteration: ['label', 'assignee', 'milestone'],
             };
 
             if (toBoardType) {
@@ -294,7 +302,9 @@ export default {
         }
 
         if (!toList) {
-          createFlash(__('Something went wrong while performing the action.'));
+          createFlash({
+            message: __('Something went wrong while performing the action.'),
+          });
         }
 
         if (!isSameList) {
@@ -419,7 +429,7 @@ export default {
     data-qa-selector="board_list_cards_area"
   >
     <div v-if="loading" class="board-list-loading text-center" :aria-label="__('Loading issues')">
-      <gl-loading-icon />
+      <gl-loading-icon size="sm" />
     </div>
     <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
     <ul
@@ -440,7 +450,7 @@ export default {
         :disabled="disabled"
       />
       <li v-if="showCount" class="board-list-count text-center" data-issue-id="-1">
-        <gl-loading-icon v-show="list.loadingMore" label="Loading more issues" />
+        <gl-loading-icon v-show="list.loadingMore" size="sm" label="Loading more issues" />
         <span v-if="list.issues.length === list.issuesSize">{{ __('Showing all issues') }}</span>
         <span v-else>{{ paginatedIssueText }}</span>
       </li>

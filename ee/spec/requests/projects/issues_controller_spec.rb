@@ -36,6 +36,20 @@ RSpec.describe Projects::IssuesController do
         expect { get_show }.not_to exceed_query_limit(control)
       end
     end
+
+    context 'with test case' do
+      before do
+        project.add_guest(user)
+      end
+
+      it 'redirects to test cases show' do
+        test_case = create(:quality_test_case, project: project)
+
+        get project_issue_path(project, test_case)
+
+        expect(response).to redirect_to(project_quality_test_case_path(project, test_case))
+      end
+    end
   end
 
   describe 'GET #index' do
@@ -46,6 +60,7 @@ RSpec.describe Projects::IssuesController do
     context 'when listing epic issues' do
       let_it_be(:epic) { create(:epic, group: group) }
       let_it_be(:subepic) { create(:epic, group: group, parent: epic) }
+
       let(:params) { { epic_id: epic.id, include_subepics: true } }
 
       before do

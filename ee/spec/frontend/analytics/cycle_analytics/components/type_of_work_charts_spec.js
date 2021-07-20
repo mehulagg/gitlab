@@ -51,9 +51,9 @@ describe('TypeOfWorkCharts', () => {
 
   let wrapper = null;
 
-  const findSubjectFilters = (_wrapper) => _wrapper.find(TasksByTypeFilters);
-  const findTasksByTypeChart = (_wrapper) => _wrapper.find(TasksByTypeChart);
-  const findLoader = (_wrapper) => _wrapper.find(ChartSkeletonLoader);
+  const findSubjectFilters = (_wrapper) => _wrapper.findComponent(TasksByTypeFilters);
+  const findTasksByTypeChart = (_wrapper) => _wrapper.findComponent(TasksByTypeChart);
+  const findLoader = (_wrapper) => _wrapper.findComponent(ChartSkeletonLoader);
   const selectedFilterText =
     "Type of work Showing data for group 'Gitlab Org' from Dec 11, 2019 to Jan 10, 2020";
 
@@ -105,7 +105,7 @@ describe('TypeOfWorkCharts', () => {
 
     beforeEach(() => {
       wrapper = createComponent();
-      findSubjectFilters(wrapper).vm.$emit('updateFilter', payload);
+      findSubjectFilters(wrapper).vm.$emit('update-filter', payload);
       return wrapper.vm.$nextTick();
     });
 

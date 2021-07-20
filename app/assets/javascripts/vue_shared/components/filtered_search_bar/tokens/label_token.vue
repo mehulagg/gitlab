@@ -1,27 +1,20 @@
 <script>
-import {
-  GlToken,
-  GlFilteredSearchToken,
-  GlFilteredSearchSuggestion,
-  GlDropdownDivider,
-  GlLoadingIcon,
-} from '@gitlab/ui';
-import { debounce } from 'lodash';
+import { GlToken, GlFilteredSearchSuggestion } from '@gitlab/ui';
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
-import { DEFAULT_LABELS, DEBOUNCE_DELAY } from '../constants';
+import { DEFAULT_LABELS } from '../constants';
 import { stripQuotes } from '../filtered_search_utils';
+
+import BaseToken from './base_token.vue';
 
 export default {
   components: {
+    BaseToken,
     GlToken,
-    GlFilteredSearchToken,
     GlFilteredSearchSuggestion,
-    GlDropdownDivider,
-    GlLoadingIcon,
   },
   props: {
     config: {
@@ -32,43 +25,49 @@ export default {
       type: Object,
       required: true,
     },
+    active: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
       labels: this.config.initialLabels || [],
       defaultLabels: this.config.defaultLabels || DEFAULT_LABELS,
-      loading: true,
+      loading: false,
     };
   },
-  computed: {
-    currentValue() {
-      return this.value.data.toLowerCase();
-    },
-    activeLabel() {
-      return this.labels.find(
-        (label) => label.title.toLowerCase() === stripQuotes(this.currentValue),
+  methods: {
+    getActiveLabel(labels, currentValue) {
+      return labels.find(
+        (label) => this.getLabelName(label).toLowerCase() === stripQuotes(currentValue),
       );
     },
-    containerStyle() {
-      if (this.activeLabel) {
-        const { color, textColor } = convertObjectPropsToCamelCase(this.activeLabel);
+    /**
+     * There's an inconsistency between private and public API
+     * for labels where label name is included in a different
+     * property;
+     *
+     * Private API => `label.title`
+     * Public API => `label.name`
+     *
+     * This method allows compatibility as there may be instances
+     * where `config.fetchLabels` provided externally may still be
+     * using either of the two APIs.
+     */
+    getLabelName(label) {
+      return label.name || label.title;
+    },
+    getContainerStyle(activeLabel) {
+      if (activeLabel) {
+        const { color: backgroundColor, textColor: color } = convertObjectPropsToCamelCase(
+          activeLabel,
+        );
 
-        return { backgroundColor: color, color: textColor };
+        return { backgroundColor, color };
       }
       return {};
     },
-  },
-  watch: {
-    active: {
-      immediate: true,
-      handler(newValue) {
-        if (!newValue && !this.labels.length) {
-          this.fetchLabelBySearchTerm(this.value.data);
-        }
-      },
-    },
-  },
-  methods: {
     fetchLabelBySearchTerm(searchTerm) {
       this.loading = true;
       this.config
@@ -79,51 +78,57 @@ export default {
           // return response differently.
           this.labels = Array.isArray(res) ? res : res.data;
         })
-        .catch(() => createFlash(__('There was a problem fetching labels.')))
+        .catch(() =>
+          createFlash({
+            message: __('There was a problem fetching labels.'),
+          }),
+        )
         .finally(() => {
           this.loading = false;
         });
     },
-    searchLabels: debounce(function debouncedSearch({ data }) {
-      this.fetchLabelBySearchTerm(data);
-    }, DEBOUNCE_DELAY),
   },
 };
 </script>
 
 <template>
-  <gl-filtered-search-token
+  <base-token
     :config="config"
-    v-bind="{ ...$props, ...$attrs }"
+    :value="value"
+    :active="active"
+    :suggestions-loading="loading"
+    :suggestions="labels"
+    :fn-active-token-value="getActiveLabel"
+    :default-suggestions="defaultLabels"
+    :recent-suggestions-storage-key="config.recentSuggestionsStorageKey"
+    @fetch-suggestions="fetchLabelBySearchTerm"
     v-on="$listeners"
-    @input="searchLabels"
   >
-    <template #view-token="{ inputValue, cssClasses, listeners }">
-      <gl-token variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners"
-        >~{{ activeLabel ? activeLabel.title : inputValue }}</gl-token
+    <template
+      #view-token="{ viewTokenProps: { inputValue, cssClasses, listeners, activeTokenValue } }"
+    >
+      <gl-token
+        variant="search-value"
+        :class="cssClasses"
+        :style="getContainerStyle(activeTokenValue)"
+        v-on="listeners"
+        >~{{ activeTokenValue ? getLabelName(activeTokenValue) : inputValue }}</gl-token
       >
     </template>
-    <template #suggestions>
+    <template #suggestions-list="{ suggestions }">
       <gl-filtered-search-suggestion
-        v-for="label in defaultLabels"
-        :key="label.value"
-        :value="label.value"
+        v-for="label in suggestions"
+        :key="label.id"
+        :value="getLabelName(label)"
       >
-        {{ label.text }}
+        <div class="gl-display-flex gl-align-items-center">
+          <span
+            :style="{ backgroundColor: label.color }"
+            class="gl-display-inline-block mr-2 p-2"
+          ></span>
+          <div>{{ getLabelName(label) }}</div>
+        </div>
       </gl-filtered-search-suggestion>
-      <gl-dropdown-divider v-if="defaultLabels.length" />
-      <gl-loading-icon v-if="loading" />
-      <template v-else>
-        <gl-filtered-search-suggestion v-for="label in labels" :key="label.id" :value="label.title">
-          <div class="gl-display-flex">
-            <span
-              :style="{ backgroundColor: label.color }"
-              class="gl-display-inline-block mr-2 p-2"
-            ></span>
-            <div>{{ label.title }}</div>
-          </div>
-        </gl-filtered-search-suggestion>
-      </template>
     </template>
-  </gl-filtered-search-token>
+  </base-token>
 </template>

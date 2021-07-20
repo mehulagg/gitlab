@@ -14,30 +14,6 @@ module Ci
       (local + cross_pipeline + cross_project).uniq
     end
 
-    # Dependencies local to the given pipeline
-    def local
-      return [] if no_local_dependencies_specified?
-
-      deps = model_class.where(pipeline_id: processable.pipeline_id).latest
-      deps = from_previous_stages(deps)
-      deps = from_needs(deps)
-      deps = from_dependencies(deps)
-      deps
-    end
-
-    # Dependencies from the same parent-pipeline hierarchy excluding
-    # the current job's pipeline
-    def cross_pipeline
-      strong_memoize(:cross_pipeline) do
-        fetch_dependencies_in_hierarchy
-      end
-    end
-
-    # Dependencies that are defined by project and ref
-    def cross_project
-      []
-    end
-
     def invalid_local
       local.reject(&:valid_dependency?)
     end
@@ -52,6 +28,40 @@ module Ci
     # can create artifacts
     def model_class
       ::Ci::Build
+    end
+
+    # Dependencies local to the given pipeline
+    def local
+      strong_memoize(:local) do
+        next [] if no_local_dependencies_specified?
+        next [] unless processable.pipeline_id # we don't have any dependency when creating the pipeline
+
+        deps = model_class.where(pipeline_id: processable.pipeline_id).latest
+        deps = find_dependencies(processable, deps)
+
+        from_dependencies(deps).to_a
+      end
+    end
+
+    def find_dependencies(processable, deps)
+      if processable.scheduling_type_dag?
+        from_needs(deps)
+      else
+        from_previous_stages(deps)
+      end
+    end
+
+    # Dependencies from the same parent-pipeline hierarchy excluding
+    # the current job's pipeline
+    def cross_pipeline
+      strong_memoize(:cross_pipeline) do
+        fetch_dependencies_in_hierarchy
+      end
+    end
+
+    # Dependencies that are defined by project and ref
+    def cross_project
+      []
     end
 
     def fetch_dependencies_in_hierarchy
@@ -103,8 +113,6 @@ module Ci
     end
 
     def valid_local?
-      return true unless Gitlab::Ci::Features.validate_build_dependencies?(project)
-
       local.all?(&:valid_dependency?)
     end
 
@@ -125,8 +133,6 @@ module Ci
     end
 
     def from_needs(scope)
-      return scope unless processable.scheduling_type_dag?
-
       needs_names = processable.needs.artifacts.select(:name)
       scope.where(name: needs_names)
     end
@@ -143,8 +149,6 @@ module Ci
 
     def specified_cross_pipeline_dependencies
       strong_memoize(:specified_cross_pipeline_dependencies) do
-        next [] unless Feature.enabled?(:ci_cross_pipeline_artifacts_download, processable.project, default_enabled: true)
-
         specified_cross_dependencies.select { |dep| dep[:pipeline] && dep[:artifacts] }
       end
     end
@@ -155,4 +159,4 @@ module Ci
   end
 end
 
-Ci::BuildDependencies.prepend_if_ee('EE::Ci::BuildDependencies')
+Ci::BuildDependencies.prepend_mod_with('Ci::BuildDependencies')

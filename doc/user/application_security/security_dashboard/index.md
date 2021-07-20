@@ -33,15 +33,14 @@ The security dashboard and vulnerability report displays information about vulne
 - [Dynamic Application Security Testing](../dast/index.md)
 - [Dependency Scanning](../dependency_scanning/index.md)
 - [Static Application Security Testing](../sast/index.md)
+- [Cluster Image Scanning](../cluster_image_scanning/index.md)
 - And [others](../index.md#security-scanning-tools)!
 
-## Requirements
-
-To use the security dashboards and vulnerability reports:
+## Prerequisites
 
 1. At least one project inside a group must be configured with at least one of
    the [supported reports](#supported-reports).
-1. The configured jobs must use the [new `reports` syntax](../../../ci/pipelines/job_artifacts.md#artifactsreports).
+1. The configured jobs must use the [new `reports` syntax](../../../ci/yaml/index.md#artifactsreports).
 1. [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or newer must be used.
    If you're using the shared runners on GitLab.com, this is already the case.
 
@@ -52,7 +51,7 @@ To use the security dashboards and vulnerability reports:
 At the pipeline level, the Security section displays the vulnerabilities present in the branch of
 the project the pipeline ran against.
 
-![Pipeline Security Dashboard](img/pipeline_security_dashboard_v13_3.png)
+![Pipeline Security Dashboard](img/pipeline_security_dashboard_v13_10.png)
 
 Visit the page for any pipeline that ran any of the [supported reports](#supported-reports). To view
 the pipeline's security findings, select the **Security** tab when viewing the pipeline.
@@ -63,18 +62,45 @@ job finishes but the DAST job fails, the security dashboard doesn't show SAST re
 the analyzer outputs an
 [exit code](../../../development/integrations/secure.md#exit-code).
 
+### Scan details
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3728) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
+
+The **Scan details** section lists the scans run in the pipeline and the total number of
+vulnerabilities per scan. For the DAST scan, select **Download scanned resources** to download a
+CSV file containing details of the resources scanned.
+
 ## Project Security Dashboard
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235558) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235558) in GitLab 13.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285476) in GitLab 13.10, options to zoom in on a date range, and download the vulnerabilities chart.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285477) in GitLab 13.11, date range slider to visualize data between given dates.
 
-At the project level, the Security Dashboard displays a chart with the number of vulnerabilities over time.
-Access it by navigating to **Security & Compliance > Security Dashboard**. We display historical
-data up to 365 days.
+A project's Security Dashboard displays a chart with the total number of vulnerabilities
+over time with up to 365 days of historical data. Data is refreshed daily at 1:15am UTC. By default,
+it shows statistics for all vulnerability severities.
 
-![Project Security Dashboard](img/project_security_dashboard_chart_v13_6.png)
+To access the dashboard, from your project's home page go to **Security & Compliance > Security Dashboard**.
 
-Filter the historical data by clicking on the corresponding legend name. The image above, for example, shows
-only the graph for vulnerabilities with **high** severity.
+![Project Security Dashboard](img/project_security_dashboard_chart_v13_11.png)
+
+### Filter the vulnerabilities chart
+
+To filter the chart by vulnerability severity, select the corresponding legend name.
+
+In the previous example, the chart shows statistics only for vulnerabilities of medium or unknown severity.
+
+### Customize vulnerabilities chart display
+
+To customize the view of the vulnerability chart, you can select:
+
+- A specific time frame by using the time range handles (**{scroll-handle}**).
+- A specific area of the chart by using the left-most icon (**{marquee-selection}**) then drag
+  across the chart. To reset to the original range, select **Remove Selection** (**{redo}**).
+
+### Download a copy of the vulnerabilities chart
+
+To download an SVG image of the chart, select **Save chart to an image** (**{download}**).
 
 ## Group Security Dashboard
 
@@ -125,14 +151,7 @@ the following:
 
 ![Security Center Dashboard with projects](img/security_center_dashboard_v13_4.png)
 
-You can access the Security Center from the menu
-bar at the top of the page. Under **More**, select **Security**.
-
-![Security Center navigation link](img/security_center_dashboard_link_v12_4.png)
-
-The dashboard and vulnerability report are empty before you add projects.
-
-![Uninitialized Security Center](img/security_center_dashboard_empty_v13_4.png)
+To view the Security Center, on the top bar, select **Menu > Security**.
 
 ### Adding projects to the Security Center
 
@@ -150,7 +169,7 @@ found in those projects' default branches.
 ## Keeping the dashboards up to date
 
 The Security Dashboard displays information from the results of the most recent
-security scan on the [default branch](../../project/repository/branches/index.md#default-branch),
+security scan on the [default branch](../../project/repository/branches/default.md),
 which means that security scans are performed every time the branch is updated.
 
 If the default branch is updated infrequently, scans are run infrequently and the
@@ -175,7 +194,7 @@ lock files. Python projects can have lock files, but GitLab Secure tools don't s
 ## Security scans using Auto DevOps
 
 When using [Auto DevOps](../../../topics/autodevops/index.md), use
-[special environment variables](../../../topics/autodevops/customize.md#environment-variables)
+[special environment variables](../../../topics/autodevops/customize.md#cicd-variables)
 to configure daily security scans.
 
 <!-- ## Troubleshooting
@@ -190,4 +209,4 @@ Each scenario can be a third-level heading, e.g. `### Getting error message X`.
 If you have none to add when creating a doc, leave this section in place
 but commented out to help encourage others to add to it in the future. -->
 
-Read more on how to [interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
+Read more on how to [address the vulnerabilities](../vulnerabilities/index.md).

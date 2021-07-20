@@ -1,8 +1,0 @@
-#import "~/graphql_shared/fragments/epic.fragment.graphql"
-query Epic($fullPath: ID!, $iid: ID!) {
-  group(fullPath: $fullPath) {
-    epic(iid: $iid) {
-      ...EpicNode
-    }
-  }
-}

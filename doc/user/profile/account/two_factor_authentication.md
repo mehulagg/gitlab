@@ -5,7 +5,7 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Two-factor authentication
+# Two-factor authentication **(FREE)**
 
 Two-factor authentication (2FA) provides an additional level of security to your
 GitLab account. After being enabled, in addition to supplying your username and
@@ -44,16 +44,19 @@ To enable 2FA:
 
 1. **In GitLab:**
    1. Sign in to your GitLab account.
-   1. Go to your [**User settings**](../index.md#user-settings).
+   1. Go to your [**User settings**](../index.md#access-your-user-settings).
    1. Go to **Account**.
    1. Select **Enable Two-factor Authentication**.
 1. **On your device (usually your phone):**
    1. Install a compatible application, like:
-      - [Authenticator](https://mattrubin.me/authenticator/): open source app for iOS devices.
-      - [andOTP](https://github.com/andOTP/andOTP): feature rich open source app for Android which supports PGP encrypted backups.
-      - [FreeOTP](https://freeotp.github.io/): open source app for Android.
-      - [Google Authenticator](https://support.google.com/accounts/answer/1066447?hl=en): proprietary app for iOS and Android.
-      - [SailOTP](https://openrepos.net/content/seiichiro0185/sailotp): open source app for SailFish OS.
+      - [Authy](https://authy.com/)
+      - [Duo Mobile](https://duo.com/product/multi-factor-authentication-mfa/duo-mobile-app)
+      - [LastPass Authenticator](https://lastpass.com/auth/)
+      - [Authenticator](https://mattrubin.me/authenticator/)
+      - [andOTP](https://github.com/andOTP/andOTP)
+      - [Google Authenticator](https://support.google.com/accounts/answer/1066447?hl=en)
+      - [Microsoft Authenticator](https://www.microsoft.com/en-us/account/authenticator)
+      - [SailOTP](https://openrepos.net/content/seiichiro0185/sailotp)
    1. In the application, add a new entry in one of two ways:
       - Scan the code presented in GitLab with your device's camera to add the
         entry automatically.
@@ -159,7 +162,7 @@ have FortiToken configured in FortiToken Cloud.
 
 You'll also need a `client_id` and `client_secret` to configure FortiToken Cloud.
 To get these, see the `REST API Guide` at
-[`Fortinet Document Library`](https://docs.fortinet.com/document/fortitoken-cloud/20.4.d/rest-api).
+[`Fortinet Document Library`](https://docs.fortinet.com/document/fortitoken-cloud/latest/rest-api).
 
 First configure FortiToken Cloud in GitLab. On your GitLab server:
 
@@ -246,7 +249,7 @@ Search for `security.webauth.u2f` and double click on it to toggle to `true`.
 To set up 2FA with a U2F device:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Click **Enable Two-Factor Authentication**.
 1. Connect your U2F device.
@@ -282,7 +285,7 @@ and the following mobile browsers:
 To set up 2FA with a WebAuthn compatible device:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Select **Enable Two-Factor Authentication**.
 1. Plug in your WebAuthn device.
@@ -349,7 +352,7 @@ request and you're automatically signed in.
 If you ever need to disable 2FA:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Click **Disable**, under **Two-Factor Authentication**.
 
@@ -363,7 +366,7 @@ Support for disabling 2FA is limited, depending on your subscription level. For 
 
 When 2FA is enabled, you can no longer use your normal account password to
 authenticate with Git over HTTPS on the command line or when using
-the [GitLab API](../../../api/README.md). You must use a
+the [GitLab API](../../../api/index.md). You must use a
 [personal access token](../personal_access_tokens.md) instead.
 
 ## Recovery options
@@ -443,7 +446,7 @@ To regenerate 2FA recovery codes, you need access to a desktop browser:
 
 1. Navigate to GitLab.
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Select **Account > Two-Factor Authentication (2FA)**.
 1. If you've already configured 2FA, click **Manage two-factor authentication**.
 1. In the **Register Two-Factor Authenticator** pane, click **Regenerate recovery codes**.
@@ -502,7 +505,18 @@ Feature.disable(:webauthn)
 
 If you are receiving an `invalid pin code` error, this may indicate that there is a time sync issue between the authentication application and the GitLab instance itself.
 
-Most authentication apps have a feature in the settings for syncing the time for the codes themselves. For Google Authenticator for example, go to `Settings > Time correction for codes`.
+To avoid the time sync issue, enable time synchronization in the device that generates the codes. For example:
+
+- For Android (Google Authenticator):
+  1. Go to the Main Menu in Google Authenticator.
+  1. Select Settings.
+  1. Select the Time correction for the codes.
+  1. Select Sync now.
+- For iOS:
+  1. Go to Settings.
+  1. Select General.
+  1. Select Date & Time.
+  1. Enable Set Automatically. If it’s already enabled, disable it, wait a few seconds, and re-enable.
 
 <!-- ## Troubleshooting
 

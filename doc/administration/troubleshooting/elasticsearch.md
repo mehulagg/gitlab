@@ -36,7 +36,7 @@ The type of problem will determine what steps to take. The possible troubleshoot
 - Indexing.
 - Integration.
 - Performance.
-- Background Migrations.
+- Advanced Search Migrations.
 
 ### Search Results workflow
 
@@ -53,7 +53,7 @@ graph TD;
   B5 --> |No| B7
   B7 --> B8
   B{Is GitLab using<br>Elasticsearch for<br>searching?}
-  B1[Check Admin Area > Integrations<br>to ensure the settings are correct]
+  B1[From the Admin Area, select<br>Integrations from the left<br>sidebar to ensure the settings<br>are correct.]
   B2[Perform a search via<br>the rails console]
   B3[If all settings are correct<br>and it still doesn't show Elasticsearch<br>doing the searches, escalate<br>to GitLab support.]
   B4[Perform<br>the same search via the<br>Elasticsearch API]
@@ -148,7 +148,7 @@ graph TD;
   F7(Escalate to<br>GitLab support.)
 ```
 
-### Background Migrations workflow
+### Advanced Search Migrations workflow
 
 ```mermaid
 graph TD;
@@ -180,7 +180,7 @@ Most Elasticsearch troubleshooting can be broken down into 4 categories:
 - [Troubleshooting indexing](#troubleshooting-indexing)
 - [Troubleshooting integration](#troubleshooting-integration)
 - [Troubleshooting performance](#troubleshooting-performance)
-- [Troubleshooting background migrations](#troubleshooting-background-migrations)
+- [Troubleshooting Advanced Search migrations](#troubleshooting-advanced-search-migrations)
 
 Generally speaking, if it does not fall into those four categories, it is either:
 
@@ -196,14 +196,16 @@ Troubleshooting search result issues is rather straight forward on Elasticsearch
 The first step is to confirm GitLab is using Elasticsearch for the search function.
 To do this:
 
-1. Confirm the integration is enabled in **Admin Area > Settings > General**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > General**, and then confirm the
+   integration is enabled.
 1. Confirm searches use Elasticsearch by accessing the rails console
    (`sudo gitlab-rails console`) and running the following commands:
 
    ```rails
    u = User.find_by_email('email_of_user_doing_search')
    s = SearchService.new(u, {:search => 'search_term'})
-   pp s.search_objects.class.name
+   pp s.search_objects.class
    ```
 
 The output from the last command is the key here. If it shows:
@@ -217,7 +219,9 @@ The output from the last command is the key here. If it shows:
 
 If all the settings look correct and it is still not using Elasticsearch for the search function, it is best to escalate to GitLab support. This could be a bug/issue.
 
-Moving past that, it is best to attempt the same search using the [Elasticsearch Search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html) and compare the results from what you see in GitLab.
+Moving past that, it is best to attempt the same [search via the Rails console](../../integration/elasticsearch.md#i-indexed-all-the-repositories-but-i-cant-get-any-hits-for-my-search-term-in-the-ui)
+or the [Elasticsearch Search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html),
+and compare the results from what you see in GitLab.
 
 If the results:
 
@@ -249,13 +253,13 @@ can be made. If the indices:
 - Can be made, Escalate this to GitLab support.
 
 If the issue is not with creating an empty index, the next step is to check for errors
-during the indexing of projects. If errors do occur, they will either stem from the indexing:
+during the indexing of projects. If errors do occur, they stem from either the indexing:
 
 - On the GitLab side. You need to rectify those. If they are not
   something you are familiar with, contact GitLab support for guidance.
 - Within the Elasticsearch instance itself. See if the error is [documented and has a fix](../../integration/elasticsearch.md#troubleshooting). If not, speak with your Elasticsearch administrator.
 
-If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following Rake tasks:
+If the indexing process does not present errors, check the status of the indexed projects. You can do this via the following Rake tasks:
 
 - [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows the overall status)
 - [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows specific projects that are not indexed)
@@ -288,13 +292,13 @@ If the issue is:
   regarding the error(s) you are seeing. If you are unsure here, it never hurts to reach
   out to GitLab support.
 
-Beyond that, you will want to review the error. If it is:
+Beyond that, review the error. If it is:
 
 - Specifically from the indexer, this could be a bug/issue and should be escalated to
   GitLab support.
-- An OS issue, you will want to reach out to your systems administrator.
+- An OS issue, you should reach out to your systems administrator.
 - A `Faraday::TimeoutError (execution expired)` error **and** you're using a proxy,
-  [set a custom  `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
+  [set a custom `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
   with the IP address of your Elasticsearch host.
 
 ### Troubleshooting performance
@@ -356,15 +360,16 @@ dig further into these.
 Feel free to reach out to GitLab support, but this is likely to be something a skilled
 Elasticsearch administrator has more experience with.
 
-### Troubleshooting background migrations
+### Troubleshooting Advanced Search migrations
 
-Troubleshooting background migration failures can be difficult and may require contacting 
-an Elasticsearch administrator or GitLab Support.
+Troubleshooting Advanced Search migration failures can be difficult and may
+require contacting an Elasticsearch administrator or GitLab Support.
 
-The best place to start while debugging issues with a background migration is the 
-[`elasticsearch.log` file](../logs.md#elasticsearchlog). Migrations will
-print information while a migration is in progress and any errors encountered.
-Apply fixes for any errors found in the log and retry the migration.
+The best place to start while debugging issues with an Advanced Search
+migration is the [`elasticsearch.log` file](../logs.md#elasticsearchlog).
+Migrations log information while a migration is in progress and any
+errors encountered. Apply fixes for any errors found in the log and retry
+the migration.
 
 If you still encounter issues after retrying the migration, reach out to GitLab support.
 

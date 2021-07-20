@@ -50,10 +50,11 @@ module Geo
     end
 
     def update_root_ref
-      # Find the remote root ref, using a JWT header for authentication
-      repository.with_config(jwt_authentication_header) do
-        project.update_root_ref(GEO_REMOTE_NAME)
-      end
+      authorization = ::Gitlab::Geo::RepoSyncRequest.new(
+        scope: repository.full_path
+      ).authorization
+
+      repository.update_root_ref(GEO_REMOTE_NAME, remote_url, authorization)
     end
 
     def execute_housekeeping

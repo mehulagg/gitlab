@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
 module JiraConnect
-  class SyncFeatureFlagsWorker
+  class SyncFeatureFlagsWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
-    idempotent!
-    worker_has_external_dependencies!
+    sidekiq_options retry: 3
 
     queue_namespace :jira_connect
     feature_category :integrations
+    data_consistency :delayed
+    tags :exclude_from_kubernetes
+
+    worker_has_external_dependencies!
 
     def perform(feature_flag_id, sequence_id)
       feature_flag = ::Operations::FeatureFlag.find_by_id(feature_flag_id)

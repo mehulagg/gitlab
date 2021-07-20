@@ -1,14 +1,15 @@
 import { GlLabel } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
-import { labels as TEST_LABELS, mockIssue as TEST_ISSUE } from 'jest/boards/mock_data';
+import {
+  labels as TEST_LABELS,
+  mockIssue as TEST_ISSUE,
+  mockIssueFullPath as TEST_ISSUE_FULLPATH,
+} from 'jest/boards/mock_data';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import { createStore } from '~/boards/stores';
-import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-
-jest.mock('~/flash');
 
 const TEST_LABELS_PAYLOAD = TEST_LABELS.map((label) => ({ ...label, set: true }));
 const TEST_LABELS_TITLES = TEST_LABELS.map((label) => label.title);
@@ -23,18 +24,18 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     wrapper = null;
   });
 
-  const createWrapper = ({ labels = [] } = {}) => {
+  const createWrapper = ({ labels = [], providedValues = {} } = {}) => {
     store = createStore();
-    store.state.issues = { [TEST_ISSUE.id]: { ...TEST_ISSUE, labels } };
+    store.state.boardItems = { [TEST_ISSUE.id]: { ...TEST_ISSUE, labels } };
     store.state.activeId = TEST_ISSUE.id;
 
     wrapper = shallowMount(BoardSidebarLabelsSelect, {
       store,
       provide: {
         canUpdate: true,
-        labelsFetchPath: TEST_HOST,
         labelsManagePath: TEST_HOST,
         labelsFilterBasePath: TEST_HOST,
+        ...providedValues,
       },
       stubs: {
         BoardEditableItem,
@@ -47,6 +48,22 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
   const findLabelsTitles = () =>
     wrapper.findAll(GlLabel).wrappers.map((item) => item.props('title'));
   const findCollapsed = () => wrapper.find('[data-testid="collapsed-content"]');
+
+  describe('when labelsFetchPath is provided', () => {
+    it('uses injected labels fetch path', () => {
+      createWrapper({ providedValues: { labelsFetchPath: 'foobar' } });
+
+      expect(findLabelsSelect().props('labelsFetchPath')).toEqual('foobar');
+    });
+  });
+
+  it('uses the default project label endpoint', () => {
+    createWrapper();
+
+    expect(findLabelsSelect().props('labelsFetchPath')).toEqual(
+      `/${TEST_ISSUE_FULLPATH}/-/labels?include_ancestor_groups=true`,
+    );
+  });
 
   it('renders "None" when no labels are selected', () => {
     createWrapper();
@@ -64,9 +81,9 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     beforeEach(async () => {
       createWrapper();
 
-      jest.spyOn(wrapper.vm, 'setActiveIssueLabels').mockImplementation(() => TEST_LABELS);
+      jest.spyOn(wrapper.vm, 'setActiveBoardItemLabels').mockImplementation(() => TEST_LABELS);
       findLabelsSelect().vm.$emit('updateSelectedLabels', TEST_LABELS_PAYLOAD);
-      store.state.issues[TEST_ISSUE.id].labels = TEST_LABELS;
+      store.state.boardItems[TEST_ISSUE.id].labels = TEST_LABELS;
       await wrapper.vm.$nextTick();
     });
 
@@ -76,9 +93,9 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     });
 
     it('commits change to the server', () => {
-      expect(wrapper.vm.setActiveIssueLabels).toHaveBeenCalledWith({
+      expect(wrapper.vm.setActiveBoardItemLabels).toHaveBeenCalledWith({
         addLabelIds: TEST_LABELS.map((label) => label.id),
-        projectPath: 'gitlab-org/test-subgroup/gitlab-test',
+        projectPath: TEST_ISSUE_FULLPATH,
         removeLabelIds: [],
       });
     });
@@ -94,16 +111,16 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     beforeEach(async () => {
       createWrapper({ labels: TEST_LABELS });
 
-      jest.spyOn(wrapper.vm, 'setActiveIssueLabels').mockImplementation(() => expectedLabels);
+      jest.spyOn(wrapper.vm, 'setActiveBoardItemLabels').mockImplementation(() => expectedLabels);
       findLabelsSelect().vm.$emit('updateSelectedLabels', testLabelsPayload);
       await wrapper.vm.$nextTick();
     });
 
     it('commits change to the server', () => {
-      expect(wrapper.vm.setActiveIssueLabels).toHaveBeenCalledWith({
+      expect(wrapper.vm.setActiveBoardItemLabels).toHaveBeenCalledWith({
         addLabelIds: [5, 7],
         removeLabelIds: [6],
-        projectPath: 'gitlab-org/test-subgroup/gitlab-test',
+        projectPath: TEST_ISSUE_FULLPATH,
       });
     });
   });
@@ -114,15 +131,15 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     beforeEach(async () => {
       createWrapper({ labels: [testLabel] });
 
-      jest.spyOn(wrapper.vm, 'setActiveIssueLabels').mockImplementation(() => {});
+      jest.spyOn(wrapper.vm, 'setActiveBoardItemLabels').mockImplementation(() => {});
     });
 
     it('commits change to the server', () => {
       wrapper.find(GlLabel).vm.$emit('close', testLabel);
 
-      expect(wrapper.vm.setActiveIssueLabels).toHaveBeenCalledWith({
+      expect(wrapper.vm.setActiveBoardItemLabels).toHaveBeenCalledWith({
         removeLabelIds: [getIdFromGraphQLId(testLabel.id)],
-        projectPath: 'gitlab-org/test-subgroup/gitlab-test',
+        projectPath: TEST_ISSUE_FULLPATH,
       });
     });
   });
@@ -131,9 +148,10 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     beforeEach(async () => {
       createWrapper({ labels: TEST_LABELS });
 
-      jest.spyOn(wrapper.vm, 'setActiveIssueLabels').mockImplementation(() => {
+      jest.spyOn(wrapper.vm, 'setActiveBoardItemLabels').mockImplementation(() => {
         throw new Error(['failed mutation']);
       });
+      jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
       findLabelsSelect().vm.$emit('updateSelectedLabels', [{ id: '?' }]);
       await wrapper.vm.$nextTick();
     });
@@ -141,7 +159,7 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
     it('collapses sidebar and renders former issue weight', () => {
       expect(findCollapsed().isVisible()).toBe(true);
       expect(findLabelsTitles()).toEqual(TEST_LABELS_TITLES);
-      expect(createFlash).toHaveBeenCalled();
+      expect(wrapper.vm.setError).toHaveBeenCalled();
     });
   });
 });

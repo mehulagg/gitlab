@@ -7,7 +7,7 @@ RSpec.describe Mattermost::Team do
     session = Mattermost::Session.new(nil)
     session.base_uri = 'http://mattermost.example.com'
 
-    allow_any_instance_of(Mattermost::Client).to receive(:with_session)
+    allow_any_instance_of(::Mattermost::Client).to receive(:with_session)
       .and_yield(session)
   end
 
@@ -65,13 +65,13 @@ RSpec.describe Mattermost::Team do
       end
 
       it 'raises an error with message' do
-        expect { subject }.to raise_error(Mattermost::Error, 'Cannot list teams.')
+        expect { subject }.to raise_error(::Mattermost::Error, 'Cannot list teams.')
       end
     end
   end
 
   describe '#create' do
-    subject { described_class.new(nil).create(name: "devteam", display_name: "Dev Team", type: "O") }
+    subject { described_class.new(nil).create(name: "devteam", display_name: "Dev Team", type: "O") } # rubocop:disable Rails/SaveBang
 
     context 'for a new team' do
       let(:response) do
@@ -123,7 +123,7 @@ RSpec.describe Mattermost::Team do
       end
 
       it 'raises an error with message' do
-        expect { subject }.to raise_error(Mattermost::Error, 'A team with that name already exists')
+        expect { subject }.to raise_error(::Mattermost::Error, 'A team with that name already exists')
       end
     end
   end
@@ -169,7 +169,7 @@ RSpec.describe Mattermost::Team do
       end
 
       it 'raises an error with message' do
-        expect { subject }.to raise_error(Mattermost::Error, "We couldn't find the existing team")
+        expect { subject }.to raise_error(::Mattermost::Error, "We couldn't find the existing team")
       end
     end
   end

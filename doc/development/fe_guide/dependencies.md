@@ -20,13 +20,13 @@ This distinction is used by omnibus to determine which dependencies it requires 
 
 Exceptions are made for some tools that we require in the
 `compile-production-assets` CI job such as `webpack-bundle-analyzer` to analyze our
-production assets post-compile. 
+production assets post-compile.
 
 ## Updating dependencies
 
 We use the [Renovate GitLab Bot](https://gitlab.com/gitlab-org/frontend/renovate-gitlab-bot) to
 automatically create merge requests for updating dependencies of several projects.
-You can find the up-to-date list of projects managed by the renovate bot in the project’s README.
+You can find the up-to-date list of projects managed by the renovate bot in the project's README.
 
 Some key dependencies updated using renovate are:
 

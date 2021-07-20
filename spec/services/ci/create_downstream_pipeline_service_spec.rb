@@ -3,9 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
+  include Ci::SourcePipelineHelpers
+
   let_it_be(:user) { create(:user) }
   let(:upstream_project) { create(:project, :repository) }
-  let_it_be(:downstream_project) { create(:project, :repository) }
+  let_it_be(:downstream_project, refind: true) { create(:project, :repository) }
 
   let!(:upstream_pipeline) do
     create(:ci_pipeline, :running, project: upstream_project)
@@ -112,7 +114,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
     it 'updates bridge status when downstream pipeline gets processed' do
       pipeline = service.execute(bridge)
 
-      expect(pipeline.reload).to be_pending
+      expect(pipeline.reload).to be_created
       expect(bridge.reload).to be_success
     end
 
@@ -134,7 +136,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
             bridge_id: bridge.id, project_id: bridge.project.id)
           .and_call_original
         expect(Ci::CreatePipelineService).not_to receive(:new)
-        expect(service.execute(bridge)).to be_nil
+        expect(service.execute(bridge)).to eq({ message: "Already has a downstream pipeline", status: :error })
       end
     end
 
@@ -227,7 +229,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
           it 'updates bridge status when downstream pipeline gets processed' do
             pipeline = service.execute(bridge)
 
-            expect(pipeline.reload).to be_pending
+            expect(pipeline.reload).to be_created
             expect(bridge.reload).to be_success
           end
 
@@ -391,6 +393,92 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
             end
           end
         end
+
+        context 'when multi-project pipeline runs from child pipelines bridge job' do
+          before do
+            stub_ci_pipeline_yaml_file(YAML.dump(rspec: { script: 'rspec' }))
+          end
+
+          # instantiate new service, to clear memoized values from child pipeline run
+          subject(:execute_with_trigger_project_bridge) do
+            described_class.new(upstream_project, user).execute(trigger_project_bridge)
+          end
+
+          let!(:child_pipeline) do
+            service.execute(bridge)
+            bridge.downstream_pipeline
+          end
+
+          let!(:trigger_downstream_project) do
+            {
+              trigger: {
+                project: downstream_project.full_path,
+                branch: 'feature'
+              }
+            }
+          end
+
+          let!(:trigger_project_bridge) do
+            create(
+              :ci_bridge, status: :pending,
+              user: user,
+              options: trigger_downstream_project,
+              pipeline: child_pipeline
+            )
+          end
+
+          it 'creates a new pipeline' do
+            expect { execute_with_trigger_project_bridge }
+              .to change { Ci::Pipeline.count }.by(1)
+
+            new_pipeline = trigger_project_bridge.downstream_pipeline
+
+            expect(new_pipeline.child?).to eq(false)
+            expect(new_pipeline.triggered_by_pipeline).to eq child_pipeline
+            expect(trigger_project_bridge.reload).not_to be_failed
+          end
+        end
+      end
+    end
+
+    context 'when relationship between pipelines is cyclical' do
+      before do
+        pipeline_a = create(:ci_pipeline, project: upstream_project)
+        pipeline_b = create(:ci_pipeline, project: downstream_project)
+        pipeline_c = create(:ci_pipeline, project: upstream_project)
+
+        create_source_pipeline(pipeline_a, pipeline_b)
+        create_source_pipeline(pipeline_b, pipeline_c)
+        create_source_pipeline(pipeline_c, upstream_pipeline)
+      end
+
+      it 'does not create a new pipeline' do
+        expect { service.execute(bridge) }
+          .not_to change { Ci::Pipeline.count }
+      end
+
+      it 'changes status of the bridge build' do
+        service.execute(bridge)
+
+        expect(bridge.reload).to be_failed
+        expect(bridge.failure_reason).to eq 'pipeline_loop_detected'
+      end
+
+      context 'when ci_drop_cyclical_triggered_pipelines is not enabled' do
+        before do
+          stub_feature_flags(ci_drop_cyclical_triggered_pipelines: false)
+        end
+
+        it 'creates a new pipeline' do
+          expect { service.execute(bridge) }
+            .to change { Ci::Pipeline.count }
+        end
+
+        it 'expect bridge build not to be failed' do
+          service.execute(bridge)
+
+          expect(bridge.reload).not_to be_failed
+        end
       end
     end
 
@@ -536,6 +624,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
       let(:primary_pipeline) do
         Ci::CreatePipelineService.new(upstream_project, upstream_project.owner, { ref: 'master' })
           .execute(:push, save_on_errors: false)
+          .payload
       end
 
       let(:bridge)  { primary_pipeline.processables.find_by(name: 'bridge-job') }

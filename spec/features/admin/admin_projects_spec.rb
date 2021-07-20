@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe "Admin::Projects" do
   include Spec::Support::Helpers::Features::MembersHelpers
+  include Spec::Support::Helpers::Features::InviteMembersModalHelper
   include Select2Helper
 
   let(:user) { create :user }
@@ -51,6 +52,8 @@ RSpec.describe "Admin::Projects" do
   end
 
   describe "GET /admin/projects/:namespace_id/:id" do
+    let!(:access_request) { create(:project_member, :access_request, project: project) }
+
     before do
       expect(project).to be_persisted
 
@@ -65,6 +68,15 @@ RSpec.describe "Admin::Projects" do
       expect(page).to have_content(project.full_name)
       expect(page).to have_content(project.creator.name)
       expect(page).to have_content(project.id)
+    end
+
+    context 'when project has open access requests' do
+      it 'shows access requests with link to manage access' do
+        page.within '[data-testid="access-requests"]' do
+          expect(page).to have_content access_request.user.name
+          expect(page).to have_link 'Manage access', href: project_project_members_path(project, tab: 'access_requests')
+        end
+      end
     end
   end
 
@@ -92,97 +104,67 @@ RSpec.describe "Admin::Projects" do
     end
   end
 
-  context 'when `vue_project_members_list` feature flag is enabled', :js do
-    describe 'admin adds themselves to the project' do
-      before do
-        project.add_maintainer(user)
-        stub_feature_flags(invite_members_group_modal: false)
-      end
-
-      it 'adds admin to the project as developer', :js do
-        visit project_project_members_path(project)
-
-        page.within '.invite-users-form' do
-          select2(current_user.id, from: '#user_ids', multiple: true)
-          select 'Developer', from: 'access_level'
-        end
-
-        click_button 'Invite'
-
-        expect(find_member_row(current_user)).to have_content('Developer')
-      end
+  describe 'admin adds themselves to the project', :js do
+    before do
+      project.add_maintainer(user)
     end
 
-    describe 'admin removes themselves from the project' do
-      before do
-        project.add_maintainer(user)
-        project.add_developer(current_user)
-      end
+    it 'adds admin to the project as developer' do
+      visit project_project_members_path(project)
 
-      it 'removes admin from the project' do
+      invite_member(current_user.name, role: 'Developer')
+
+      expect(find_member_row(current_user)).to have_content('Developer')
+    end
+
+    context 'with the invite_members_group_modal feature flag disabled' do
+      it 'adds admin to the project as developer' do
+        stub_feature_flags(invite_members_group_modal: false)
+
         visit project_project_members_path(project)
 
+        add_member_using_form(current_user.id, role: 'Developer')
+
         expect(find_member_row(current_user)).to have_content('Developer')
-
-        page.within find_member_row(current_user) do
-          click_button 'Leave'
-        end
-
-        page.within('[role="dialog"]') do
-          click_button('Leave')
-        end
-
-        expect(current_path).to match dashboard_projects_path
       end
     end
   end
 
-  context 'when `vue_project_members_list` feature flag is disabled' do
+  describe 'admin removes themselves from the project', :js do
     before do
-      stub_feature_flags(vue_project_members_list: false)
+      project.add_maintainer(user)
+      project.add_developer(current_user)
     end
 
-    describe 'admin adds themselves to the project' do
-      before do
-        project.add_maintainer(user)
-        stub_feature_flags(invite_members_group_modal: false)
+    it 'removes admin from the project' do
+      visit project_project_members_path(project)
+
+      expect(find_member_row(current_user)).to have_content('Developer')
+
+      page.within find_member_row(current_user) do
+        click_button 'Leave'
       end
 
-      it 'adds admin to the project as developer', :js do
-        visit project_project_members_path(project)
-
-        page.within '.invite-users-form' do
-          select2(current_user.id, from: '#user_ids', multiple: true)
-          select 'Developer', from: 'access_level'
-        end
-
-        click_button 'Invite'
-
-        page.within '.content-list' do
-          expect(page).to have_content(current_user.name)
-          expect(page).to have_content('Developer')
-        end
+      page.within('[role="dialog"]') do
+        click_button('Leave')
       end
+
+      expect(current_path).to match dashboard_projects_path
     end
+  end
 
-    describe 'admin removes themselves from the project' do
-      before do
-        project.add_maintainer(user)
-        project.add_developer(current_user)
-      end
+  # temporary method for the form until the :invite_members_group_modal feature flag is
+  # enabled: https://gitlab.com/gitlab-org/gitlab/-/issues/247208
+  def add_member_using_form(id, role: 'Developer')
+    page.within '.invite-users-form' do
+      select2(id, from: '#user_ids', multiple: true)
 
-      it 'removes admin from the project' do
-        visit project_project_members_path(project)
+      fill_in 'expires_at', with: 5.days.from_now.to_date
+      find_field('expires_at').native.send_keys :enter
 
-        page.within '.content-list' do
-          expect(page).to have_content(current_user.name)
-          expect(page).to have_content('Developer')
-        end
+      select(role, from: "access_level")
 
-        find(:css, '.content-list li', text: current_user.name).find(:css, 'a.btn-danger').click
-
-        expect(page).not_to have_selector(:css, '.content-list')
-      end
+      click_on 'Invite'
     end
   end
 end

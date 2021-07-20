@@ -16,12 +16,14 @@ RSpec.describe MergeRequests::BuildService do
   let(:commits) { nil }
 
   let(:service) do
-    described_class.new(project, user,
-                                    description: description,
-                                    source_branch: source_branch,
-                                    target_branch: target_branch,
-                                    source_project: source_project,
-                                    target_project: target_project)
+    described_class.new(project: project, current_user: user,
+                        params: {
+                          description: description,
+                          source_branch: source_branch,
+                          target_branch: target_branch,
+                          source_project: source_project,
+                          target_project: target_project
+                        })
   end
 
   before do
@@ -72,15 +74,16 @@ RSpec.describe MergeRequests::BuildService do
 
         let(:service) do
           described_class.new(
-            project,
-            user,
-            description: description,
-            source_branch: source_branch,
-            target_branch: target_branch,
-            source_project: source_project,
-            target_project: target_project,
-            issue_iid: issue.iid
-          )
+            project: project,
+            current_user: user,
+            params: {
+              description: description,
+              source_branch: source_branch,
+              target_branch: target_branch,
+              source_project: source_project,
+              target_project: target_project,
+              issue_iid: issue.iid
+            })
         end
 
         before do

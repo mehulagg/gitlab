@@ -12,7 +12,7 @@ export const DISMISSAL_STATES = {
 
 export const BASE_FILTERS = {
   state: {
-    name: s__('VulnerabilityStatusTypes|All'),
+    name: s__('VulnerabilityStatusTypes|All statuses'),
     id: ALL,
   },
   severity: {
@@ -24,7 +24,7 @@ export const BASE_FILTERS = {
     id: ALL,
   },
   activity: {
-    name: s__('SecurityReports|All'),
+    name: s__('SecurityReports|All activity'),
     id: ALL,
   },
   project_id: {

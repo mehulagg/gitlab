@@ -1,0 +1,17 @@
+#import "./environments.fragment.graphql"
+
+query networkPolicies($fullPath: ID!, $environmentId: EnvironmentID) {
+  project(fullPath: $fullPath) {
+    networkPolicies(environmentId: $environmentId) {
+      nodes {
+        name
+        kind
+        yaml
+        enabled
+        fromAutoDevops
+        updatedAt
+        ...Environments
+      }
+    }
+  }
+}

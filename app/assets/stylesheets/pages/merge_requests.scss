@@ -4,6 +4,7 @@
  */
 
 $mr-widget-min-height: 69px;
+$tabs-holder-z-index: 250;
 
 .space-children {
   @include clearfix;
@@ -42,8 +43,6 @@ $mr-widget-min-height: 69px;
 }
 
 .mr-widget-section {
-  border-radius: $border-radius-default $border-radius-default 0 0;
-
   .code-text {
     flex: 1;
   }
@@ -87,8 +86,11 @@ $mr-widget-min-height: 69px;
 .mr-section-container {
   border: 1px solid $border-color;
   border-radius: $border-radius-default;
-  border-top: 0;
   background: var(--white, $white);
+
+  > .mr-widget-border-top:first-of-type {
+    border-top: 0;
+  }
 }
 
 .mr-widget-body,
@@ -109,9 +111,13 @@ $mr-widget-min-height: 69px;
     border-radius: $border-radius-default;
   }
 
-  .mr-widget-section,
+  .mr-widget-section:not(:first-child),
   .mr-widget-footer {
     border-top: solid 1px $border-color;
+  }
+
+  .mr-widget-alert-container + .mr-widget-section {
+    border-top: 0;
   }
 
   .mr-fast-forward-message {
@@ -225,10 +231,6 @@ $mr-widget-min-height: 69px;
     }
   }
 
-  .mini-pipeline-graph-dropdown-toggle {
-    vertical-align: top;
-  }
-
   .normal {
     flex: 1;
     flex-basis: auto;
@@ -239,8 +241,8 @@ $mr-widget-min-height: 69px;
   }
 
   .label-branch {
-    @extend .ref-name;
-
+    @include gl-font-monospace;
+    font-size: 95%;
     color: $gl-text-color;
     font-weight: normal;
     overflow: hidden;
@@ -528,9 +530,7 @@ $mr-widget-min-height: 69px;
 
 .mr-source-target {
   flex-wrap: wrap;
-  border-radius: $border-radius-default;
   padding: $gl-padding;
-  border: 1px solid $border-color;
   background: var(--white, $white);
   min-height: $mr-widget-min-height;
 
@@ -675,7 +675,7 @@ $mr-widget-min-height: 69px;
 
 .mr-version-controls {
   position: relative;
-  z-index: 203;
+  z-index: $tabs-holder-z-index + 10;
   background: $white;
   color: $gl-text-color;
   margin-top: -1px;
@@ -706,7 +706,7 @@ $mr-widget-min-height: 69px;
 
   .mr-version-dropdown,
   .mr-version-compare-dropdown {
-    margin: 0 7px;
+    margin: 0 0.5rem;
   }
 
   .dropdown-title {
@@ -715,7 +715,7 @@ $mr-widget-min-height: 69px;
 
   // Shortening button height by 1px to make compare-versions
   // header 56px and fit into our 8px design grid
-  button {
+  .btn {
     height: 34px;
   }
 
@@ -745,7 +745,7 @@ $mr-widget-min-height: 69px;
 .merge-request-tabs-holder,
 .epic-tabs-holder {
   top: $header-height;
-  z-index: 250;
+  z-index: $tabs-holder-z-index;
   background-color: $body-bg;
   border-bottom: 1px solid $border-color;
 
@@ -889,7 +889,7 @@ $mr-widget-min-height: 69px;
   .media-body {
     min-width: 0;
     font-size: 12px;
-    margin-left: 40px;
+    margin-left: 32px;
   }
 
   &:not(:last-child) {
@@ -981,15 +981,15 @@ $mr-widget-min-height: 69px;
     line-height: initial;
   }
 
-  .mini-pipeline-graph-dropdown-toggle,
-  .stage-cell .mini-pipeline-graph-dropdown-toggle svg,
-  // As the `mini-pipeline-item` mixin specificity is lower
-  // than the toggle of dropdown with 'variant="link"' we add
-  // classes ".gl-button.btn-link" to make it more specific.
-  // Once FF ci_mini_pipeline_gl_dropdown is removed, the `mini-pipeline-item`
-  // itself could increase its specificity to simplify this selector
-  button.gl-button.btn-link.mini-pipeline-graph-gl-dropdown-toggle,
-  .stage-cell button.gl-button.btn-link.mini-pipeline-graph-gl-dropdown-toggle svg {
+  // GlDropdown mini pipeline (Vue)
+  //   As the `mini-pipeline-item` mixin specificity is lower
+  //   than the toggle of dropdown with 'variant="link"' we add
+  //   classes ".gl-button.btn-link" to make it more specific
+  //   and avoid having the size overriden
+  //
+  //   See https://gitlab.com/gitlab-org/gitlab/-/issues/320737
+  button.gl-button.btn-link.mini-pipeline-graph-dropdown-toggle,
+  .stage-cell button.gl-button.btn-link.mini-pipeline-graph-dropdown-toggle svg {
     height: $ci-action-icon-size-lg;
     width: $ci-action-icon-size-lg;
   }
@@ -1028,5 +1028,15 @@ $mr-widget-min-height: 69px;
 
   > svg {
     vertical-align: middle;
+  }
+}
+
+.mr-widget-alert-container {
+  $radius: $border-radius-default - 1px;
+
+  border-radius: $radius $radius 0 0;
+
+  .gl-alert:not(:last-child) {
+    margin-bottom: 1px;
   }
 }

@@ -6,7 +6,11 @@ module Types
     description 'State of a GitLab iteration'
 
     value 'upcoming'
-    value 'started'
+    value 'started', deprecated: {
+      reason: "Use current instead",
+      milestone: '14.1'
+    }
+    value 'current'
     value 'opened'
     value 'closed'
     value 'all'

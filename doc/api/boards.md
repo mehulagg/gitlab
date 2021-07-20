@@ -4,9 +4,9 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Project Issue Boards API
+# Project issue boards API **(FREE)**
 
-Every API call to boards must be authenticated.
+Every API call to [issue boards](../user/project/issue_board.md) must be authenticated.
 
 If a user is not a member of a private project,
 a `GET` request on that project results in a `404` status code.
@@ -21,7 +21,7 @@ GET /projects/:id/boards
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards"
@@ -105,7 +105,7 @@ GET /projects/:id/boards/:board_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
 ```shell
@@ -182,7 +182,7 @@ POST /projects/:id/boards
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `name` | string | yes | The name of the new board |
 
 ```shell
@@ -215,7 +215,7 @@ Example response:
 
 ## Update an issue board
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in GitLab 11.1.
 
 Updates a project issue board.
 
@@ -225,13 +225,13 @@ PUT /projects/:id/boards/:board_id
 
 | Attribute                    | Type           | Required | Description |
 | ---------------------------- | -------------- | -------- | ----------- |
-| `id`                         | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`                         | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id`                   | integer        | yes      | The ID of a board |
 | `name`                       | string         | no       | The new name of the board |
-| `assignee_id` **(STARTER)**  | integer        | no       | The assignee the board should be scoped to |
-| `milestone_id` **(STARTER)** | integer        | no       | The milestone the board should be scoped to |
-| `labels` **(STARTER)**       | string         | no       | Comma-separated list of label names which the board should be scoped to |
-| `weight` **(STARTER)**       | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
+| `assignee_id` **(PREMIUM)**  | integer        | no       | The assignee the board should be scoped to |
+| `milestone_id` **(PREMIUM)** | integer        | no       | The milestone the board should be scoped to |
+| `labels` **(PREMIUM)**       | string         | no       | Comma-separated list of label names which the board should be scoped to |
+| `weight` **(PREMIUM)**       | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1?name=new_name&milestone_id=43&assignee_id=1&labels=Doing&weight=4"
@@ -250,7 +250,8 @@ Example response:
       "path_with_namespace": "diaspora/diaspora-project-site",
       "created_at": "2018-07-03T05:48:49.982Z",
       "default_branch": null,
-      "tag_list": [],
+      "tag_list": [], //deprecated, use `topics` instead
+      "topics": [],
       "ssh_url_to_repo": "ssh://user@example.com/diaspora/diaspora-project-site.git",
       "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
       "web_url": "http://example.com/diaspora/diaspora-project-site",
@@ -304,7 +305,7 @@ DELETE /projects/:id/boards/:board_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
 ```shell
@@ -322,7 +323,7 @@ GET /projects/:id/boards/:board_id/lists
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
 ```shell
@@ -382,7 +383,7 @@ GET /projects/:id/boards/:board_id/lists/:list_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 | `list_id`| integer | yes | The ID of a board's list |
 
@@ -417,7 +418,7 @@ POST /projects/:id/boards/:board_id/lists
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 | `label_id` | integer | no | The ID of a label |
 | `assignee_id` **(PREMIUM)** | integer | no | The ID of a user |
@@ -460,7 +461,7 @@ PUT /projects/:id/boards/:board_id/lists/:list_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 | `list_id` | integer | yes | The ID of a board's list |
 | `position` | integer | yes | The position of the list |
@@ -496,7 +497,7 @@ DELETE /projects/:id/boards/:board_id/lists/:list_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 | `list_id` | integer | yes | The ID of a board's list |
 

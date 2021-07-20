@@ -34,7 +34,7 @@ RSpec.describe API::Ci::Pipelines do
         expect(json_response.first['sha']).to match(/\A\h{40}\z/)
         expect(json_response.first['id']).to eq pipeline.id
         expect(json_response.first['web_url']).to be_present
-        expect(json_response.first.keys).to contain_exactly(*%w[id sha ref status web_url created_at updated_at])
+        expect(json_response.first.keys).to contain_exactly(*%w[id project_id sha ref status web_url created_at updated_at])
       end
 
       context 'when parameter is passed' do
@@ -312,7 +312,7 @@ RSpec.describe API::Ci::Pipelines do
     let(:query) { {} }
     let(:api_user) { user }
     let_it_be(:job) do
-      create(:ci_build, :success, pipeline: pipeline,
+      create(:ci_build, :success, name: 'build', pipeline: pipeline,
                                   artifacts_expire_at: 1.day.since)
     end
 
@@ -350,6 +350,7 @@ RSpec.describe API::Ci::Pipelines do
 
         expect(json_job['pipeline']).not_to be_empty
         expect(json_job['pipeline']['id']).to eq job.pipeline.id
+        expect(json_job['pipeline']['project_id']).to eq job.pipeline.project_id
         expect(json_job['pipeline']['ref']).to eq job.pipeline.ref
         expect(json_job['pipeline']['sha']).to eq job.pipeline.sha
         expect(json_job['pipeline']['status']).to eq job.pipeline.status
@@ -361,6 +362,25 @@ RSpec.describe API::Ci::Pipelines do
         it do
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response).to be_an Array
+
+          expect(json_response).to all match a_hash_including(
+            'duration' => be_nil,
+            'queued_duration' => (be >= 0.0)
+          )
+        end
+      end
+
+      context 'when filtering to only running jobs' do
+        let(:query) { { 'scope' => 'running' } }
+
+        it do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_an Array
+
+          expect(json_response).to all match a_hash_including(
+            'duration' => (be >= 0.0),
+            'queued_duration' => (be >= 0.0)
+          )
         end
       end
 
@@ -405,6 +425,38 @@ RSpec.describe API::Ci::Pipelines do
           get api("/projects/#{project.id}/pipelines/#{pipeline.id}/jobs", api_user), params: query
         end.not_to exceed_all_query_limit(control_count)
       end
+
+      context 'pipeline has retried jobs' do
+        before_all do
+          job.update!(retried: true)
+        end
+
+        let_it_be(:successor) { create(:ci_build, :success, name: 'build', pipeline: pipeline) }
+
+        it 'does not return retried jobs by default' do
+          expect(json_response).to be_an Array
+          expect(json_response.length).to eq(1)
+        end
+
+        context 'when include_retried is false' do
+          let(:query) { { include_retried: false } }
+
+          it 'does not return retried jobs' do
+            expect(json_response).to be_an Array
+            expect(json_response.length).to eq(1)
+          end
+        end
+
+        context 'when include_retried is true' do
+          let(:query) { { include_retried: true } }
+
+          it 'returns retried jobs' do
+            expect(json_response).to be_an Array
+            expect(json_response.length).to eq(2)
+            expect(json_response[0]['name']).to eq(json_response[1]['name'])
+          end
+        end
+      end
     end
 
     context 'no pipeline is found' do
@@ -439,6 +491,7 @@ RSpec.describe API::Ci::Pipelines do
 
   describe 'GET /projects/:id/pipelines/:pipeline_id/bridges' do
     let_it_be(:bridge) { create(:ci_bridge, pipeline: pipeline) }
+
     let(:downstream_pipeline) { create(:ci_pipeline) }
 
     let!(:pipeline_source) do
@@ -480,6 +533,7 @@ RSpec.describe API::Ci::Pipelines do
 
         expect(json_bridge['pipeline']).not_to be_empty
         expect(json_bridge['pipeline']['id']).to eq bridge.pipeline.id
+        expect(json_bridge['pipeline']['project_id']).to eq bridge.pipeline.project_id
         expect(json_bridge['pipeline']['ref']).to eq bridge.pipeline.ref
         expect(json_bridge['pipeline']['sha']).to eq bridge.pipeline.sha
         expect(json_bridge['pipeline']['status']).to eq bridge.pipeline.status
@@ -490,6 +544,7 @@ RSpec.describe API::Ci::Pipelines do
 
         expect(json_bridge['downstream_pipeline']).not_to be_empty
         expect(json_bridge['downstream_pipeline']['id']).to eq downstream_pipeline.id
+        expect(json_bridge['downstream_pipeline']['project_id']).to eq downstream_pipeline.project_id
         expect(json_bridge['downstream_pipeline']['ref']).to eq downstream_pipeline.ref
         expect(json_bridge['downstream_pipeline']['sha']).to eq downstream_pipeline.sha
         expect(json_bridge['downstream_pipeline']['status']).to eq downstream_pipeline.status

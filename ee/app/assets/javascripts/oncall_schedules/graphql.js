@@ -2,19 +2,18 @@ import produce from 'immer';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import getShiftTimeUnitWidthQuery from './graphql/queries/get_shift_time_unit_width.query.graphql';
+import getTimelineWidthQuery from './graphql/queries/get_timeline_width.query.graphql';
 
 Vue.use(VueApollo);
 
 const resolvers = {
   Mutation: {
-    updateShiftTimeUnitWidth: (_, { shiftTimeUnitWidth = 0 }, { cache }) => {
-      const sourceData = cache.readQuery({ query: getShiftTimeUnitWidthQuery });
+    updateTimelineWidth: (_, { timelineWidth = 0 }, { cache }) => {
+      const sourceData = cache.readQuery({ query: getTimelineWidthQuery });
       const data = produce(sourceData, (draftData) => {
-        // eslint-disable-next-line no-param-reassign
-        draftData.shiftTimeUnitWidth = shiftTimeUnitWidth;
+        draftData.timelineWidth = timelineWidth;
       });
-      cache.writeQuery({ query: getShiftTimeUnitWidthQuery, data });
+      cache.writeQuery({ query: getTimelineWidthQuery, data });
     },
   },
 };

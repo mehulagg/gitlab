@@ -3,9 +3,12 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 
 import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
 
+import { IssuableType } from '~/issue_show/constants';
 import notesEventHub from '~/notes/event_hub';
-import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
+import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import sidebarEventHub from '~/sidebar/event_hub';
 import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapsed_grouped_date_picker.vue';
 
@@ -14,7 +17,6 @@ import epicUtils from '../utils/epic_utils';
 import SidebarDatePicker from './sidebar_items/sidebar_date_picker.vue';
 import SidebarHeader from './sidebar_items/sidebar_header.vue';
 import SidebarLabels from './sidebar_items/sidebar_labels.vue';
-import SidebarSubscription from './sidebar_items/sidebar_subscription.vue';
 import SidebarTodo from './sidebar_items/sidebar_todo.vue';
 
 export default {
@@ -27,8 +29,15 @@ export default {
     SidebarLabels,
     AncestorsTree,
     SidebarParticipants,
-    SidebarSubscription,
-    ConfidentialIssueSidebar,
+    SidebarConfidentialityWidget,
+    SidebarSubscriptionsWidget,
+    SidebarReferenceWidget,
+  },
+  inject: ['iid'],
+  data() {
+    return {
+      sidebarExpandedOnClick: false,
+    };
   },
   computed: {
     ...mapState([
@@ -63,6 +72,9 @@ export default {
       'dueDateForCollapsedSidebar',
       'ancestors',
     ]),
+    issuableType() {
+      return IssuableType.Epic;
+    },
   },
   mounted() {
     this.toggleSidebarFlag(epicUtils.getCollapsedGutter());
@@ -80,6 +92,7 @@ export default {
       'toggleStartDateType',
       'toggleDueDateType',
       'saveDate',
+      'updateConfidentialityOnIssuable',
     ]),
     getDateFromMilestonesTooltip(dateType) {
       return epicUtils.getDateFromMilestonesTooltip({
@@ -92,7 +105,7 @@ export default {
         dueDateTimeFromMilestones: this.dueDateTimeFromMilestones,
       });
     },
-    changeStartDateType(dateTypeIsFixed, typeChangeOnEdit) {
+    changeStartDateType({ dateTypeIsFixed, typeChangeOnEdit }) {
       this.toggleStartDateType({ dateTypeIsFixed });
       if (!typeChangeOnEdit) {
         this.saveDate({
@@ -109,7 +122,7 @@ export default {
         dateTypeIsFixed: true,
       });
     },
-    changeDueDateType(dateTypeIsFixed, typeChangeOnEdit) {
+    changeDueDateType({ dateTypeIsFixed, typeChangeOnEdit }) {
       this.toggleDueDateType({ dateTypeIsFixed });
       if (!typeChangeOnEdit) {
         this.saveDate({
@@ -128,6 +141,15 @@ export default {
     },
     updateEpicConfidentiality(confidential) {
       notesEventHub.$emit('notesApp.updateIssuableConfidentiality', confidential);
+    },
+    handleSidebarToggle() {
+      if (this.sidebarCollapsed) {
+        this.sidebarExpandedOnClick = true;
+        this.toggleSidebar({ sidebarCollapsed: true });
+      } else if (this.sidebarExpandedOnClick) {
+        this.sidebarExpandedOnClick = false;
+        this.toggleSidebar({ sidebarCollapsed: false });
+      }
     },
   },
 };
@@ -206,23 +228,33 @@ export default {
         :sidebar-collapsed="sidebarCollapsed"
         data-testid="labels-select"
       />
+      <sidebar-confidentiality-widget
+        :iid="String(iid)"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        @closeForm="handleSidebarToggle"
+        @expandSidebar="handleSidebarToggle"
+        @confidentialityUpdated="updateConfidentialityOnIssuable($event)"
+      />
       <div v-if="allowSubEpics" class="block ancestors">
         <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
       </div>
-
-      <confidential-issue-sidebar
-        :is-editable="canUpdate"
-        :full-path="fullPath"
-        issuable-type="epic"
-      />
-
       <div class="block participants">
         <sidebar-participants
           :participants="participants"
           @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
         />
       </div>
-      <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" data-testid="subscribe" />
+      <sidebar-subscriptions-widget
+        :iid="String(iid)"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        data-testid="subscribe"
+        @expandSidebar="handleSidebarToggle"
+      />
+      <div class="block with-sub-blocks">
+        <sidebar-reference-widget :issuable-type="issuableType" />
+      </div>
     </div>
   </aside>
 </template>

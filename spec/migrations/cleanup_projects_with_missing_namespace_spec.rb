@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-require Rails.root.join('db', 'post_migrate', '20200511080113_add_projects_foreign_key_to_namespaces.rb')
-require Rails.root.join('db', 'post_migrate', '20200511083541_cleanup_projects_with_missing_namespace.rb')
+require_migration!('add_projects_foreign_key_to_namespaces')
+require_migration!
 
 # In order to test the CleanupProjectsWithMissingNamespace migration, we need
 #  to first create an orphaned project (one with an invalid namespace_id)
@@ -95,12 +95,12 @@ RSpec.describe CleanupProjectsWithMissingNamespace, :migration, schema: SchemaVe
     expect(
       described_class::Group
         .joins('INNER JOIN members ON namespaces.id = members.source_id')
-        .where('namespaces.type = ?', 'Group')
-        .where('members.type = ?', 'GroupMember')
-        .where('members.source_type = ?', 'Namespace')
-        .where('members.user_id = ?', ghost_user.id)
-        .where('members.requested_at IS NULL')
-        .where('members.access_level = ?', described_class::ACCESS_LEVEL_OWNER)
+        .where(namespaces: { type: 'Group' })
+        .where(members: { type: 'GroupMember' })
+        .where(members: { source_type: 'Namespace' })
+        .where(members: { user_id: ghost_user.id })
+        .where(members: { requested_at: nil })
+        .where(members: { access_level: described_class::ACCESS_LEVEL_OWNER })
         .where(
           described_class::Group
           .arel_table[:name]

@@ -7,6 +7,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::DeleteService do
   let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user, refind: true) { create(:user) }
   let_it_be(:stage, refind: true) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream) }
+
   let(:params) { { id: stage.id } }
 
   subject { described_class.new(parent: group, params: params, current_user: user).execute }

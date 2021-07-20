@@ -12,10 +12,16 @@ module QA
               super
 
               base.class_eval do
-                view 'ee/app/assets/javascripts/sidebar/components/iteration_select.vue' do
-                  element :edit_iteration_link
-                  element :iteration_container
+                view 'app/assets/javascripts/sidebar/components/sidebar_editable_item.vue' do
+                  element :edit_link
+                end
+
+                view 'ee/app/assets/javascripts/sidebar/components/iteration_sidebar_dropdown_widget.vue' do
                   element :iteration_link
+                end
+
+                view 'app/views/shared/issuable/_sidebar.html.haml' do
+                  element :iteration_container
                 end
 
                 view 'ee/app/assets/javascripts/sidebar/components/weight/weight.vue' do
@@ -29,8 +35,8 @@ module QA
             end
 
             def assign_iteration(iteration)
-              click_element(:edit_iteration_link)
               within_element(:iteration_container) do
+                click_element(:edit_link)
                 click_on("#{iteration.title}")
               end
 

@@ -19,8 +19,8 @@ class ProtectedBranch::PushAccessLevel < ApplicationRecord
   end
 
   def check_access(user)
-    if Feature.enabled?(:deploy_keys_on_protected_branches, project) && user && deploy_key.present?
-      return true if user.can?(:read_project, project) && enabled_deploy_key_for_user?(deploy_key, user)
+    if user && deploy_key.present?
+      return user.can?(:read_project, project) && enabled_deploy_key_for_user?(deploy_key, user)
     end
 
     super

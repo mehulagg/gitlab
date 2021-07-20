@@ -131,7 +131,6 @@ export default {
         :target="`milestone-item-${milestone.id}`"
         boundary="viewport"
         placement="left"
-        triggers="hover"
         :title="milestone.title"
       >
         <div class="milestone-item-type gl-line-height-normal">

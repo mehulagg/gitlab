@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
 module JiraConnect
-  class SyncDeploymentsWorker
+  class SyncDeploymentsWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
-    idempotent!
-    worker_has_external_dependencies!
+    sidekiq_options retry: 3
 
     queue_namespace :jira_connect
     feature_category :integrations
+    data_consistency :delayed
+    tags :exclude_from_kubernetes
+
+    worker_has_external_dependencies!
 
     def perform(deployment_id, sequence_id)
       deployment = Deployment.find_by_id(deployment_id)

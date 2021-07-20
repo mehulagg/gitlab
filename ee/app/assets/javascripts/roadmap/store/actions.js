@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { s__ } from '~/locale';
 
 import { EXTEND_AS } from '../constants';
@@ -32,9 +32,11 @@ const fetchGroupEpics = (
     }),
   };
 
+  const transformedFilterParams = roadmapItemUtils.transformFetchEpicFilterParams(filterParams);
+
   // When epicIid is present,
   // Roadmap is being accessed from within an Epic,
-  // and then we don't need to pass `filterParams`.
+  // and then we don't need to pass `transformedFilterParams`.
   if (epicIid) {
     query = epicChildEpics;
     variables.iid = epicIid;
@@ -42,9 +44,13 @@ const fetchGroupEpics = (
     query = groupEpics;
     variables = {
       ...variables,
-      ...filterParams,
+      ...transformedFilterParams,
       first: gon.roadmap_epics_limit + 1,
     };
+
+    if (transformedFilterParams?.epicIid) {
+      variables.iid = transformedFilterParams.epicIid.split('::&').pop();
+    }
   }
 
   return epicUtils.gqClient
@@ -57,7 +63,7 @@ const fetchGroupEpics = (
         ? data?.group?.epic?.children?.edges || []
         : data?.group?.epics?.edges || [];
 
-      return epicUtils.extractGroupEpics(edges);
+      return edges.map((e) => e.node);
     });
 };
 
@@ -72,7 +78,7 @@ export const fetchChildrenEpics = (state, { parentItem }) => {
     })
     .then(({ data }) => {
       const edges = data?.group?.epic?.children?.edges || [];
-      return epicUtils.extractGroupEpics(edges);
+      return edges.map((e) => e.node);
     });
 };
 
@@ -119,7 +125,9 @@ export const receiveEpicsSuccess = (
 };
 export const receiveEpicsFailure = ({ commit }) => {
   commit(types.RECEIVE_EPICS_FAILURE);
-  flash(s__('GroupRoadmap|Something went wrong while fetching epics'));
+  createFlash({
+    message: s__('GroupRoadmap|Something went wrong while fetching epics'),
+  });
 };
 
 export const requestChildrenEpics = ({ commit }, { parentItemId }) => {
@@ -335,7 +343,9 @@ export const receiveMilestonesSuccess = (
 
 export const receiveMilestonesFailure = ({ commit }) => {
   commit(types.RECEIVE_MILESTONES_FAILURE);
-  flash(s__('GroupRoadmap|Something went wrong while fetching milestones'));
+  createFlash({
+    message: s__('GroupRoadmap|Something went wrong while fetching milestones'),
+  });
 };
 
 export const refreshMilestoneDates = ({ commit, state }) => {

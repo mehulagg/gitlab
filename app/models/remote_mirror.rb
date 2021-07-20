@@ -84,13 +84,7 @@ class RemoteMirror < ApplicationRecord
     end
 
     after_transition started: :failed do |remote_mirror|
-      Gitlab::Metrics.add_event(:remote_mirrors_failed)
-
-      remote_mirror.update(last_update_at: Time.current)
-
-      remote_mirror.run_after_commit do
-        RemoteMirrorNotificationWorker.perform_async(remote_mirror.id)
-      end
+      remote_mirror.send_failure_notifications
     end
   end
 
@@ -106,10 +100,11 @@ class RemoteMirror < ApplicationRecord
     update_status == 'started'
   end
 
-  def update_repository
+  def update_repository(inmemory_remote:)
     Gitlab::Git::RemoteMirror.new(
       project.repository.raw,
       remote_name,
+      inmemory_remote ? remote_url : nil,
       **options_for_update
     ).update
   end
@@ -188,6 +183,24 @@ class RemoteMirror < ApplicationRecord
     update_fail!
   end
 
+  # Force the mrror into the retry state
+  def hard_retry!(error_message)
+    update_error_message(error_message)
+    self.update_status = :to_retry
+
+    save!(validate: false)
+  end
+
+  # Force the mirror into the failed state
+  def hard_fail!(error_message)
+    update_error_message(error_message)
+    self.update_status = :failed
+
+    save!(validate: false)
+
+    send_failure_notifications
+  end
+
   def url=(value)
     super(value) && return unless Gitlab::UrlSanitizer.valid?(value)
 
@@ -202,12 +215,12 @@ class RemoteMirror < ApplicationRecord
     if super
       Gitlab::UrlSanitizer.new(super, credentials: credentials).full_url
     end
-  rescue
+  rescue StandardError
     super
   end
 
   def safe_url
-    super(usernames_whitelist: %w[git])
+    super(allowed_usernames: %w[git])
   end
 
   def bare_url
@@ -239,6 +252,17 @@ class RemoteMirror < ApplicationRecord
     last_update_at.present? ? MAX_INCREMENTAL_RUNTIME : MAX_FIRST_RUNTIME
   end
 
+  def send_failure_notifications
+    Gitlab::Metrics.add_event(:remote_mirrors_failed)
+
+    run_after_commit do
+      RemoteMirrorNotificationWorker.perform_async(id)
+    end
+
+    self.last_update_at = Time.current
+    save!(validate: false)
+  end
+
   private
 
   def store_credentials
@@ -252,7 +276,7 @@ class RemoteMirror < ApplicationRecord
     return url unless ssh_key_auth? && password.present?
 
     Gitlab::UrlSanitizer.new(read_attribute(:url), credentials: { user: user }).full_url
-  rescue
+  rescue StandardError
     super
   end
 
@@ -316,4 +340,4 @@ class RemoteMirror < ApplicationRecord
   end
 end
 
-RemoteMirror.prepend_if_ee('EE::RemoteMirror')
+RemoteMirror.prepend_mod_with('RemoteMirror')

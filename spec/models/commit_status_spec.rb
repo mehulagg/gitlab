@@ -79,6 +79,32 @@ RSpec.describe CommitStatus do
     end
   end
 
+  describe '.updated_before' do
+    let!(:lookback) { 5.days.ago }
+    let!(:timeout) { 1.day.ago }
+    let!(:before_lookback) { lookback - 1.hour }
+    let!(:after_lookback) { lookback + 1.hour }
+    let!(:before_timeout) { timeout - 1.hour }
+    let!(:after_timeout) { timeout + 1.hour }
+
+    subject { described_class.updated_before(lookback: lookback, timeout: timeout) }
+
+    def create_build_with_set_timestamps(created_at:, updated_at:)
+      travel_to(created_at) { create(:ci_build, created_at: Time.current) }.tap do |build|
+        travel_to(updated_at) { build.update!(status: :failed) }
+      end
+    end
+
+    it 'finds builds updated and created in the window between lookback and timeout' do
+      build_in_lookback_timeout_window = create_build_with_set_timestamps(created_at: after_lookback, updated_at: before_timeout)
+      build_outside_lookback_window = create_build_with_set_timestamps(created_at: before_lookback, updated_at: before_timeout)
+      build_outside_timeout_window = create_build_with_set_timestamps(created_at: after_lookback, updated_at: after_timeout)
+
+      expect(subject).to contain_exactly(build_in_lookback_timeout_window)
+      expect(subject).not_to include(build_outside_lookback_window, build_outside_timeout_window)
+    end
+  end
+
   describe '#processed' do
     subject { commit_status.processed }
 
@@ -213,12 +239,12 @@ RSpec.describe CommitStatus do
 
     context 'when it is canceled' do
       before do
-        commit_status.update(status: 'canceled')
+        commit_status.update!(status: 'canceled')
       end
 
       context 'when there is auto_canceled_by' do
         before do
-          commit_status.update(auto_canceled_by: create(:ci_empty_pipeline))
+          commit_status.update!(auto_canceled_by: create(:ci_empty_pipeline))
         end
 
         it 'is auto canceled' do
@@ -256,6 +282,40 @@ RSpec.describe CommitStatus do
 
       it { is_expected.to be_a(Float) }
       it { is_expected.to be > 0.0 }
+    end
+  end
+
+  describe '#queued_duration' do
+    subject { commit_status.queued_duration }
+
+    around do |example|
+      travel_to(Time.current) { example.run }
+    end
+
+    context 'when created, then enqueued, then started' do
+      before do
+        commit_status.queued_at = 30.seconds.ago
+        commit_status.started_at = 25.seconds.ago
+      end
+
+      it { is_expected.to eq(5.0) }
+    end
+
+    context 'when created but not yet enqueued' do
+      before do
+        commit_status.queued_at = nil
+      end
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when enqueued, but not started' do
+      before do
+        commit_status.queued_at = Time.current - 1.minute
+        commit_status.started_at = nil
+      end
+
+      it { is_expected.to eq(1.minute) }
     end
   end
 
@@ -524,18 +584,24 @@ RSpec.describe CommitStatus do
       'rspec1 0/2'                                          | 'rspec1'
       'rspec:windows'                                       | 'rspec:windows'
       'rspec:windows 0'                                     | 'rspec:windows 0'
+      'rspec:windows 0 2/2'                                 | 'rspec:windows 0'
       'rspec:windows 0 test'                                | 'rspec:windows 0 test'
-      'rspec:windows 0 1'                                   | 'rspec:windows'
-      'rspec:windows 0 1 name'                              | 'rspec:windows name'
+      'rspec:windows 0 test 2/2'                            | 'rspec:windows 0 test'
+      'rspec:windows 0 1 2/2'                               | 'rspec:windows'
+      'rspec:windows 0 1 [aws] 2/2'                         | 'rspec:windows'
+      'rspec:windows 0 1 name [aws] 2/2'                    | 'rspec:windows 0 1 name'
+      'rspec:windows 0 1 name'                              | 'rspec:windows 0 1 name'
+      'rspec:windows 0 1 name 1/2'                          | 'rspec:windows 0 1 name'
       'rspec:windows 0/1'                                   | 'rspec:windows'
-      'rspec:windows 0/1 name'                              | 'rspec:windows name'
+      'rspec:windows 0/1 name'                              | 'rspec:windows 0/1 name'
+      'rspec:windows 0/1 name 1/2'                          | 'rspec:windows 0/1 name'
       'rspec:windows 0:1'                                   | 'rspec:windows'
-      'rspec:windows 0:1 name'                              | 'rspec:windows name'
+      'rspec:windows 0:1 name'                              | 'rspec:windows 0:1 name'
       'rspec:windows 10000 20000'                           | 'rspec:windows'
       'rspec:windows 0 : / 1'                               | 'rspec:windows'
-      'rspec:windows 0 : / 1 name'                          | 'rspec:windows name'
-      '0 1 name ruby'                                       | 'name ruby'
-      '0 :/ 1 name ruby'                                    | 'name ruby'
+      'rspec:windows 0 : / 1 name'                          | 'rspec:windows 0 : / 1 name'
+      '0 1 name ruby'                                       | '0 1 name ruby'
+      '0 :/ 1 name ruby'                                    | '0 :/ 1 name ruby'
       'rspec: [aws]'                                        | 'rspec'
       'rspec: [aws] 0/1'                                    | 'rspec'
       'rspec: [aws, max memory]'                            | 'rspec'
@@ -604,7 +670,7 @@ RSpec.describe CommitStatus do
       end
 
       it "raise exception when trying to update" do
-        expect { commit_status.save }.to raise_error(ActiveRecord::StaleObjectError)
+        expect { commit_status.save! }.to raise_error(ActiveRecord::StaleObjectError)
       end
     end
 
@@ -623,30 +689,45 @@ RSpec.describe CommitStatus do
     end
   end
 
-  describe 'set failure_reason when drop' do
+  describe '#drop' do
     let(:commit_status) { create(:commit_status, :created) }
+    let(:counter) { Gitlab::Metrics.counter(:gitlab_ci_job_failure_reasons, 'desc') }
+    let(:failure_reason) { reason.to_s }
 
     subject do
       commit_status.drop!(reason)
       commit_status
     end
 
+    shared_examples 'incrementing failure reason counter' do
+      it 'increments the counter with the failure_reason' do
+        expect { subject }.to change { counter.get(reason: failure_reason) }.by(1)
+      end
+    end
+
     context 'when failure_reason is nil' do
       let(:reason) { }
+      let(:failure_reason) { 'unknown_failure' }
 
       it { is_expected.to be_unknown_failure }
+
+      it_behaves_like 'incrementing failure reason counter'
     end
 
     context 'when failure_reason is script_failure' do
       let(:reason) { :script_failure }
 
       it { is_expected.to be_script_failure }
+
+      it_behaves_like 'incrementing failure reason counter'
     end
 
     context 'when failure_reason is unmet_prerequisites' do
       let(:reason) { :unmet_prerequisites }
 
       it { is_expected.to be_unmet_prerequisites }
+
+      it_behaves_like 'incrementing failure reason counter'
     end
   end
 
@@ -812,6 +893,25 @@ RSpec.describe CommitStatus do
       end
 
       it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#update_older_statuses_retried!' do
+    let!(:build_old) { create_status(name: 'build') }
+    let!(:build_new) { create_status(name: 'build') }
+    let!(:test) { create_status(name: 'test') }
+    let!(:build_from_other_pipeline) do
+      new_pipeline = create(:ci_pipeline, project: project, sha: project.commit.id)
+      create_status(name: 'build', pipeline: new_pipeline)
+    end
+
+    it "updates 'retried' and 'status' columns of the latest status with the same name in the same pipeline" do
+      build_new.update_older_statuses_retried!
+
+      expect(build_new.reload).to have_attributes(retried: false, processed: false)
+      expect(build_old.reload).to have_attributes(retried: true, processed: true)
+      expect(test.reload).to have_attributes(retried: false, processed: false)
+      expect(build_from_other_pipeline.reload).to have_attributes(retried: false, processed: false)
     end
   end
 end

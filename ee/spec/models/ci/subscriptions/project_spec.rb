@@ -21,7 +21,7 @@ RSpec.describe Ci::Subscriptions::Project do
     it { is_expected.to validate_uniqueness_of(:upstream_project_id).scoped_to(:downstream_project_id) }
 
     it 'validates that upstream project is public' do
-      upstream_project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      upstream_project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
       expect(subscription).not_to be_valid
     end

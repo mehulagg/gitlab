@@ -1,0 +1,43 @@
+[
+  {
+    "id": "37",
+    "name": "Escalation policy",
+    "description": "Description 1 lives here",
+    "rules": [
+      {
+        "id": "gid://gitlab/IncidentManagement::EscalationRule/22",
+        "status": "ACKNOWLEDGED",
+        "elapsedTimeSeconds": 60,
+        "oncallSchedule": {
+          "iid": "3",
+          "name": "Schedule to fill in"
+        }
+      },
+      {
+        "id": "gid://gitlab/IncidentManagement::EscalationRule/23",
+        "status": "RESOLVED",
+        "elapsedTimeSeconds": 120,
+        "oncallSchedule": {
+          "iid": "4",
+          "name": "Monitor schedule"
+        }
+      }
+    ]
+  },
+  {
+    "id": "39",
+    "name": "Another escalation policy",
+    "description": "Description 1 lives here",
+    "rules": [
+      {
+        "id": "gid://gitlab/IncidentManagement::EscalationRule/48",
+        "status": "ACKNOWLEDGED",
+        "elapsedTimeSeconds": 180,
+        "oncallSchedule": {
+          "iid": "3",
+          "name": "Schedule to fill in"
+        }
+      }
+    ]
+  }
+]

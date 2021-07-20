@@ -21,25 +21,18 @@ module Mutations
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
         id = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id)
 
-        dast_site_profile = find_dast_site_profile(project: project, global_id: id)
+        service = ::AppSec::Dast::SiteProfiles::DestroyService.new(project, current_user)
+        result = service.execute(id: id.model_id)
 
-        return { errors: dast_site_profile.errors.full_messages } unless dast_site_profile.destroy
+        return { errors: result.errors } unless result.success?
 
         { errors: [] }
-      rescue ActiveRecord::RecordNotFound
-        raise_resource_not_available_error!
       end
 
       private
 
       def find_object(full_path)
         Project.find_by_full_path(full_path)
-      end
-
-      def find_dast_site_profile(project:, global_id:)
-        project.dast_site_profiles.find(global_id.model_id)
-      rescue ActiveRecord::RecordNotFound
-        raise_resource_not_available_error!
       end
     end
   end

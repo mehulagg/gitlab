@@ -13,7 +13,13 @@ RSpec.describe Emails::ServiceDesk do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:email) { 'someone@gitlab.com' }
+
   let(:template) { double(content: template_content) }
+
+  before_all do
+    issue.issue_email_participants.create!(email: email)
+  end
 
   before do
     stub_const('ServiceEmailClass', Class.new(ApplicationMailer))
@@ -71,6 +77,10 @@ RSpec.describe Emails::ServiceDesk do
   shared_examples 'read template from repository' do |template_key|
     let(:template_content) { 'custom text' }
     let(:issue) { create(:issue, project: project)}
+
+    before do
+      issue.issue_email_participants.create!(email: email)
+    end
 
     context 'when a template is in the repository' do
       let(:project) { create(:project, :custom_repo, files: { ".gitlab/service_desk_templates/#{template_key}.md" => template_content }) }
@@ -151,7 +161,7 @@ RSpec.describe Emails::ServiceDesk do
     let_it_be(:note) { create(:note_on_issue, noteable: issue, project: project) }
     let_it_be(:default_text) { note.note }
 
-    subject { ServiceEmailClass.service_desk_new_note_email(issue.id, note.id) }
+    subject { ServiceEmailClass.service_desk_new_note_email(issue.id, note.id, email) }
 
     it_behaves_like 'read template from repository', 'new_note'
 
@@ -189,7 +199,7 @@ RSpec.describe Emails::ServiceDesk do
         let_it_be(:note) { create(:note_on_issue, noteable: issue, project: project, note: "a new comment with [file](#{upload_path})") }
 
         let(:template_content) { 'some text %{ NOTE_TEXT  }' }
-        let(:expected_body) { %Q(some text a new comment with <a href="#{project.web_url}#{upload_path}" data-link="true" class="gfm">file</a>) }
+        let(:expected_body) { %Q(some text a new comment with <a href="#{project.web_url}#{upload_path}" data-canonical-src="#{upload_path}" data-link="true" class="gfm">file</a>) }
 
         it_behaves_like 'handle template content', 'new_note'
       end

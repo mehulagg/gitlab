@@ -7,6 +7,7 @@ RSpec.describe Gitlab::GitAccessWiki do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :wiki_repo) }
+
   let(:wiki) { create(:project_wiki, project: project) }
   let(:changes) { ['6f6d7e7ed 570e7b2ab refs/heads/master'] }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
@@ -24,6 +25,7 @@ RSpec.describe Gitlab::GitAccessWiki do
 
   describe 'group wiki access' do
     let_it_be_with_refind(:group) { create(:group, :private, :wiki_repo) }
+
     let(:wiki) { create(:group_wiki, group: group) }
 
     describe '#push_access_check' do
@@ -52,6 +54,16 @@ RSpec.describe Gitlab::GitAccessWiki do
 
             expect { push_changes(changes) }.to raise_forbidden('The repository is temporarily read-only. Please try again later.')
             expect { pull_changes(changes) }.not_to raise_error
+          end
+        end
+
+        context 'when the group is renamed' do
+          let(:redirected_path) { 'some/other-path' }
+
+          it 'enqueues a redirected message for pushing' do
+            subject
+
+            expect(Gitlab::Checks::ContainerMoved.fetch_message(user, wiki.repository)).not_to be_nil
           end
         end
       end
@@ -105,6 +117,14 @@ RSpec.describe Gitlab::GitAccessWiki do
       context 'the user does not have access' do
         it_behaves_like 'not-found git access' do
           let(:message) { 'The group you were looking for could not be found.' }
+        end
+      end
+
+      context 'when actor is geo' do
+        let(:user) { :geo }
+
+        it 'gives access to download wiki code' do
+          expect { subject }.not_to raise_error
         end
       end
 

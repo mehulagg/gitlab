@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class NotificationSetting < ApplicationRecord
+  include FromUnion
+
   enum level: { global: 3, watch: 2, participating: 1, mention: 4, disabled: 0, custom: 5 }
 
   default_value_for :level, NotificationSetting.levels[:global]
@@ -30,6 +32,8 @@ class NotificationSetting < ApplicationRecord
 
   scope :preload_source_route, -> { preload(source: [:route]) }
 
+  scope :order_by_id_asc, -> { order(id: :asc) }
+
   # NOTE: Applicable unfound_translations.rb also needs to be updated when below events are changed.
   EMAIL_EVENTS = [
     :new_release,
@@ -49,7 +53,8 @@ class NotificationSetting < ApplicationRecord
     :failed_pipeline,
     :fixed_pipeline,
     :success_pipeline,
-    :moved_project
+    :moved_project,
+    :merge_when_pipeline_succeeds
   ].freeze
 
   def self.email_events(source = nil)
@@ -113,4 +118,4 @@ class NotificationSetting < ApplicationRecord
   end
 end
 
-NotificationSetting.prepend_if_ee('EE::NotificationSetting')
+NotificationSetting.prepend_mod_with('NotificationSetting')

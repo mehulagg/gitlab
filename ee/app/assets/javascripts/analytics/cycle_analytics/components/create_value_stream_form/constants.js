@@ -2,9 +2,12 @@ import { __, s__, sprintf } from '~/locale';
 
 export const NAME_MAX_LENGTH = 100;
 
-export const I18N = {
-  FORM_TITLE: __('Create Value Stream'),
+export const i18n = {
+  FORM_TITLE: s__('CreateValueStreamForm|Create Value Stream'),
+  EDIT_FORM_TITLE: s__('CreateValueStreamForm|Edit Value Stream'),
+  EDIT_FORM_ACTION: s__('CreateValueStreamForm|Save Value Stream'),
   FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
+  FORM_EDITED: s__("CreateValueStreamForm|'%{name}' Value Stream saved"),
   RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
   RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
   RESTORE_DEFAULTS: s__('CreateValueStreamForm|Restore defaults'),
@@ -34,6 +37,9 @@ export const I18N = {
   ISSUE_STAGE_END: s__('CreateValueStreamForm|Issue stage end'),
   PLAN_STAGE_START: s__('CreateValueStreamForm|Plan stage start'),
   CODE_STAGE_START: s__('CreateValueStreamForm|Code stage start'),
+  DEFAULT_STAGE_FEATURES: s__(
+    'CreateValueStreamForm|Default stages can only be hidden or re-ordered',
+  ),
 };
 
 export const ERRORS = {
@@ -55,23 +61,17 @@ export const STAGE_SORT_DIRECTION = {
   DOWN: 'DOWN',
 };
 
-export const defaultErrors = {
-  id: [],
-  name: [],
-  startEventIdentifier: [],
-  startEventLabelId: [],
-  endEventIdentifier: [],
-  endEventLabelId: [],
-};
+export const formFieldKeys = [
+  'id',
+  'name',
+  'startEventIdentifier',
+  'endEventIdentifier',
+  'startEventLabelId',
+  'endEventLabelId',
+];
 
-export const defaultFields = {
-  id: null,
-  name: null,
-  startEventIdentifier: null,
-  startEventLabelId: null,
-  endEventIdentifier: null,
-  endEventLabelId: null,
-};
+export const defaultFields = formFieldKeys.reduce((acc, field) => ({ ...acc, [field]: null }), {});
+export const defaultErrors = formFieldKeys.reduce((acc, field) => ({ ...acc, [field]: [] }), {});
 
 export const defaultCustomStageFields = { ...defaultFields, custom: true };
 
@@ -79,11 +79,11 @@ export const PRESET_OPTIONS_DEFAULT = 'default';
 export const PRESET_OPTIONS_BLANK = 'blank';
 export const PRESET_OPTIONS = [
   {
-    text: I18N.TEMPLATE_DEFAULT,
+    text: i18n.TEMPLATE_DEFAULT,
     value: PRESET_OPTIONS_DEFAULT,
   },
   {
-    text: I18N.TEMPLATE_BLANK,
+    text: i18n.TEMPLATE_BLANK,
     value: PRESET_OPTIONS_BLANK,
   },
 ];
@@ -95,14 +95,14 @@ export const PRESET_OPTIONS = [
 export const ADDITIONAL_DEFAULT_STAGE_EVENTS = [
   {
     identifier: 'issue_stage_end',
-    name: I18N.ISSUE_STAGE_END,
+    name: i18n.ISSUE_STAGE_END,
   },
   {
     identifier: 'plan_stage_start',
-    name: I18N.PLAN_STAGE_START,
+    name: i18n.PLAN_STAGE_START,
   },
   {
     identifier: 'code_stage_start',
-    name: I18N.CODE_STAGE_START,
+    name: i18n.CODE_STAGE_START,
   },
 ];

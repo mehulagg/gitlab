@@ -54,9 +54,9 @@ which have to be stubbed.
 - Jest runs in a Node.js environment, not in a browser. Support for running Jest tests in a browser [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/26982).
 - Because Jest runs in a Node.js environment, it uses [jsdom](https://github.com/jsdom/jsdom) by default. See also its [limitations](#limitations-of-jsdom) below.
 - Jest does not have access to Webpack loaders or aliases.
-  The aliases used by Jest are defined in its [own configuration](https://gitlab.com/gitlab-org/gitlab/blob/master/jest.config.js).
-- All calls to `setTimeout` and `setInterval` are mocked away. See also [Jest Timer Mocks](https://jestjs.io/docs/en/timer-mocks).
-- `rewire` is not required because Jest supports mocking modules. See also [Manual Mocks](https://jestjs.io/docs/en/manual-mocks).
+  The aliases used by Jest are defined in its [own configuration](https://gitlab.com/gitlab-org/gitlab/-/blob/master/jest.config.js).
+- All calls to `setTimeout` and `setInterval` are mocked away. See also [Jest Timer Mocks](https://jestjs.io/docs/timer-mocks).
+- `rewire` is not required because Jest supports mocking modules. See also [Manual Mocks](https://jestjs.io/docs/manual-mocks).
 - No [context object](https://jasmine.github.io/tutorials/your_first_suite#section-The_%3Ccode%3Ethis%3C/code%3E_keyword) is passed to tests in Jest.
   This means sharing `this.something` between `beforeEach()` and `it()` for example does not work.
   Instead you should declare shared variables in the context that they are needed (via `const` / `let`).
@@ -78,18 +78,18 @@ See also the issue for [support running Jest tests in browsers](https://gitlab.c
 
 ### Debugging Jest tests
 
-Running `yarn jest-debug` runs Jest in debug mode, allowing you to debug/inspect as described in the [Jest docs](https://jestjs.io/docs/en/troubleshooting#tests-are-failing-and-you-don-t-know-why).
+Running `yarn jest-debug` runs Jest in debug mode, allowing you to debug/inspect as described in the [Jest docs](https://jestjs.io/docs/troubleshooting#tests-are-failing-and-you-don-t-know-why).
 
 ### Timeout error
 
 The default timeout for Jest is set in
-[`/spec/frontend/test_setup.js`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/test_setup.js).
+[`/spec/frontend/test_setup.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/test_setup.js).
 
 If your test exceeds that time, it fails.
 
 If you cannot improve the performance of the tests, you can increase the timeout
 for a specific test using
-[`setTestTimeout`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__/timeout.js).
+[`setTestTimeout`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/__helpers__/timeout.js).
 
 ```javascript
 import { setTestTimeout } from 'helpers/timeout';
@@ -103,6 +103,15 @@ describe('Component', () => {
 ```
 
 Remember that the performance of each test depends on the environment.
+
+### Test-specific stylesheets
+
+To help facilitate RSpec integration tests we have two test-specific stylesheets. These can be used to do things like disable animations to improve test speed, or to make elements visible when they need to be targeted by Capybara click events:
+
+- `app/assets/stylesheets/disable_animations.scss`
+- `app/assets/stylesheets/test_environment.scss`
+
+Because the test environment should match the production environment as much as possible, use these minimally and only add to them when necessary.
 
 ## What and how to test
 
@@ -126,7 +135,7 @@ It does not make sense to test our `getFahrenheit` function because underneath i
 Let's take a short look into Vue land. Vue is a critical part of the GitLab JavaScript codebase. When writing specs for Vue components, a common gotcha is to actually end up testing Vue provided functionality, because it appears to be the easiest thing to test. Here's an example taken from our codebase.
 
 ```javascript
-// Component
+// Component script
 {
   computed: {
     hasMetricTypes() {
@@ -135,27 +144,46 @@ Let's take a short look into Vue land. Vue is a critical part of the GitLab Java
 }
 ```
 
-and here's the corresponding spec
+```html
+<!-- Component template -->
+<template>
+  <gl-dropdown v-if="hasMetricTypes">
+    <!-- Dropdown content -->
+  </gl-dropdown>
+</template>
+```
+
+Testing the `hasMetricTypes` computed prop would seem like a given here. But to test if the computed property is returning the length of `metricTypes`, is testing the Vue library itself. There is no value in this, besides it adding to the test suite. It's better to test a component in the way the user interacts with it: checking the rendered template.
 
 ```javascript
- describe('computed', () => {
-    describe('hasMetricTypes', () => {
-      it('returns true if metricTypes exist', () => {
-        factory({ metricTypes });
-        expect(wrapper.vm.hasMetricTypes).toBe(2);
-      });
-
-      it('returns true if no metricTypes exist', () => {
-        factory();
-        expect(wrapper.vm.hasMetricTypes).toBe(0);
-      });
+// Bad
+describe('computed', () => {
+  describe('hasMetricTypes', () => {
+    it('returns true if metricTypes exist', () => {
+      factory({ metricTypes });
+      expect(wrapper.vm.hasMetricTypes).toBe(2);
     });
+
+    it('returns true if no metricTypes exist', () => {
+      factory();
+      expect(wrapper.vm.hasMetricTypes).toBe(0);
+    });
+  });
+});
+
+// Good
+it('displays a dropdown if metricTypes exist', () => {
+  factory({ metricTypes });
+  expect(wrapper.findComponent(GlDropdown).exists()).toBe(true);
+});
+
+it('does not display a dropdown if no metricTypes exist', () => {
+  factory();
+  expect(wrapper.findComponent(GlDropdown).exists()).toBe(false);
 });
 ```
 
-Testing the `hasMetricTypes` computed prop would seem like a given, but to test if the computed property is returning the length of `metricTypes`, is testing the Vue library itself. There is no value in this, besides it adding to the test suite. Better is to test it in the way the user interacts with it. Probably through the template.
-
-Keep an eye out for these kinds of tests, as they just make updating logic more fragile and tedious than it needs to be. This is also true for other libraries.
+Keep an eye out for these kinds of tests, as they just make updating logic more fragile and tedious than it needs to be. This is also true for other libraries. A rule of thumb here is: if you are checking a `wrapper.vm` property, you should probably stop and rethink the test to check the rendered template instead.
 
 Some more examples can be found in the [Frontend unit tests section](testing_levels.md#frontend-unit-tests)
 
@@ -193,8 +221,8 @@ When it comes to querying DOM elements in your tests, it is best to uniquely and
 the element.
 
 Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro/).
-When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries/#byrole)
-as these enforce accessibility best practices as well. The examples below demonstrate the order of preference.
+When selecting by text it is best to use the [`byRole`](https://testing-library.com/docs/queries/byrole/) query
+as it helps enforce accessibility best practices. `findByRole` and the other [DOM Testing Library queries](https://testing-library.com/docs/queries/about/) are available when using [`shallowMountExtended` or `mountExtended`](#shallowmountextended-and-mountextended).
 
 When writing Vue component unit tests, it can be wise to query children by component, so that the unit test can focus on comprehensive value coverage
 rather than dealing with the complexity of a child component's behavior.
@@ -204,25 +232,27 @@ possible selectors include:
 
 - A semantic attribute like `name` (also verifies that `name` was setup properly)
 - A `data-testid` attribute ([recommended by maintainers of `@vue/test-utils`](https://github.com/vuejs/vue-test-utils/issues/1498#issuecomment-610133465))
-  optionally combined with [`findByTestId`](#extendedwrapper-and-findbytestid)
+  optionally combined with [`shallowMountExtended` or `mountExtended`](#shallowmountextended-and-mountextended)
 - a Vue `ref` (if using `@vue/test-utils`)
 
 ```javascript
-import { getByRole, getByText } from '@testing-library/dom'
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper'
+
+const wrapper = shallowMountExtended(ExampleComponent);
 
 // In this example, `wrapper` is a `@vue/test-utils` wrapper returned from `mount` or `shallowMount`.
 it('exists', () => {
   // Best (especially for integration tests)
-  getByRole(wrapper.element, 'link', { name: /Click Me/i })
-  getByRole(wrapper.element, 'link', { name: 'Click Me' })
-  getByText(wrapper.element, 'Click Me')
-  getByText(wrapper.element, /Click Me/i)
+  wrapper.findByRole('link', { name: /Click Me/i })
+  wrapper.findByRole('link', { name: 'Click Me' })
+  wrapper.findByText('Click Me')
+  wrapper.findByText(/Click Me/i)
 
   // Good (especially for unit tests)
-  wrapper.find(FooComponent);
+  wrapper.findComponent(FooComponent);
   wrapper.find('input[name=foo]');
   wrapper.find('[data-testid="my-foo-id"]');
-  wrapper.findByTestId('my-foo-id'); // with the extendedWrapper utility – check below
+  wrapper.findByTestId('my-foo-id'); // with shallowMountExtended or mountExtended – check below
   wrapper.find({ ref: 'foo'});
 
   // Bad
@@ -251,7 +281,7 @@ Example:
 
 ```javascript
 it('exists', () => {
-    wrapper.find(FooComponent);
+  wrapper.findComponent(FooComponent);
 });
 ```
 
@@ -356,8 +386,8 @@ Sometimes we have to test time-sensitive code. For example, recurring events tha
 #### `setTimeout()` / `setInterval()` in application
 
 If the application itself is waiting for some time, mock await the waiting. In Jest this is already
-[done by default](https://gitlab.com/gitlab-org/gitlab/blob/a2128edfee799e49a8732bfa235e2c5e14949c68/jest.config.js#L47)
-(see also [Jest Timer Mocks](https://jestjs.io/docs/en/timer-mocks)). In Karma you can use the
+[done by default](https://gitlab.com/gitlab-org/gitlab/-/blob/a2128edfee799e49a8732bfa235e2c5e14949c68/jest.config.js#L47)
+(see also [Jest Timer Mocks](https://jestjs.io/docs/timer-mocks)). In Karma you can use the
 [Jasmine mock clock](https://jasmine.github.io/api/2.9/Clock.html).
 
 ```javascript
@@ -539,30 +569,15 @@ When looking at this initially you'd suspect that the component is setup before 
 
 This is however not entirely true as the `destroy` method does not remove everything which has been mutated on the `wrapper` object. For functional components, destroy only removes the rendered DOM elements from the document.
 
-In order to ensure that a clean wrapper object and DOM are being used in each test, the breakdown of the component should rather be performed as follows:
-
-```javascript
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-  });
-```
-
-<!-- vale gitlab.Spelling = NO -->
-
-See also the [Vue Test Utils documentation on `destroy`](https://vue-test-utils.vuejs.org/api/wrapper/#destroy).
-
-<!-- vale gitlab.Spelling = YES -->
-
 ### Jest best practices
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34209) in GitLab 13.2.
 
 #### Prefer `toBe` over `toEqual` when comparing primitive values
 
-Jest has [`toBe`](https://jestjs.io/docs/en/expect#tobevalue) and
-[`toEqual`](https://jestjs.io/docs/en/expect#toequalvalue) matchers.
-As [`toBe`](https://jestjs.io/docs/en/expect#tobevalue) uses
+Jest has [`toBe`](https://jestjs.io/docs/expect#tobevalue) and
+[`toEqual`](https://jestjs.io/docs/expect#toequalvalue) matchers.
+As [`toBe`](https://jestjs.io/docs/expect#tobevalue) uses
 [`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is)
 to compare values, it's faster (by default) than using `toEqual`.
 While the latter eventually falls back to leverage [`Object.is`](https://github.com/facebook/jest/blob/master/packages/expect/src/jasmineUtils.ts#L91),
@@ -584,7 +599,7 @@ expect(foo).toBe(1);
 
 Jest provides useful matchers like `toHaveLength` or `toBeUndefined` to make your tests more
 readable and to produce more understandable error messages. Check their docs for the
-[full list of matchers](https://jestjs.io/docs/en/expect#methods).
+[full list of matchers](https://jestjs.io/docs/expect#methods).
 
 Examples:
 
@@ -687,7 +702,7 @@ Similarly, if you really need to use the real `Date` class, then you can import 
 ```javascript
 import { useRealDate } from 'helpers/fake_date';
 
-// NOTE: `useRealDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.). 
+// NOTE: `useRealDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.).
 describe('with real date', () => {
   useRealDate();
 });
@@ -715,7 +730,7 @@ TBU
 Jasmine provides stubbing and mocking capabilities. There are some subtle differences in how to use it within Karma and Jest.
 
 Stubs or spies are often used synonymously. In Jest it's quite easy thanks to the `.spyOn` method.
-[Official docs](https://jestjs.io/docs/en/jest-object#jestspyonobject-methodname)
+[Official docs](https://jestjs.io/docs/jest-object#jestspyonobject-methodname)
 The more challenging part are mocks, which can be used for functions or even dependencies.
 
 ### Manual module mocks
@@ -724,16 +739,16 @@ Manual mocks are used to mock modules across the entire Jest environment. This i
 unit testing by mocking out modules which cannot be easily consumed in our test environment.
 
 > **WARNING:** Do not use manual mocks if a mock should not be consistently applied in every spec (i.e. it's only needed by a few specs).
-> Instead, consider using [`jest.mock(..)`](https://jestjs.io/docs/en/jest-object#jestmockmodulename-factory-options)
+> Instead, consider using [`jest.mock(..)`](https://jestjs.io/docs/jest-object#jestmockmodulename-factory-options)
 > (or a similar mocking function) in the relevant spec file.
 
 #### Where should I put manual mocks?
 
-Jest supports [manual module mocks](https://jestjs.io/docs/en/manual-mocks) by placing a mock in a `__mocks__/` directory next to the source module
+Jest supports [manual module mocks](https://jestjs.io/docs/manual-mocks) by placing a mock in a `__mocks__/` directory next to the source module
 (e.g. `app/assets/javascripts/ide/__mocks__`). **Don't do this.** We want to keep all of our test-related code in one place (the `spec/` folder).
 
 If a manual mock is needed for a `node_modules` package, use the `spec/frontend/__mocks__` folder. Here's an example of
-a [Jest mock for the package `monaco-editor`](https://gitlab.com/gitlab-org/gitlab/blob/b7f914cddec9fc5971238cdf12766e79fa1629d7/spec/frontend/__mocks__/monaco-editor/index.js#L1).
+a [Jest mock for the package `monaco-editor`](https://gitlab.com/gitlab-org/gitlab/-/blob/b7f914cddec9fc5971238cdf12766e79fa1629d7/spec/frontend/__mocks__/monaco-editor/index.js#L1).
 
 If a manual mock is needed for a CE module, place it in `spec/frontend/mocks/ce`.
 
@@ -744,14 +759,14 @@ If a manual mock is needed for a CE module, place it in `spec/frontend/mocks/ce`
 
 #### Manual mock examples
 
-- [`mocks/axios_utils`](https://gitlab.com/gitlab-org/gitlab/blob/bd20aeb64c4eed117831556c54b40ff4aee9bfd1/spec/frontend/mocks/ce/lib/utils/axios_utils.js#L1) -
+- [`mocks/axios_utils`](https://gitlab.com/gitlab-org/gitlab/-/blob/bd20aeb64c4eed117831556c54b40ff4aee9bfd1/spec/frontend/mocks/ce/lib/utils/axios_utils.js#L1) -
   This mock is helpful because we don't want any unmocked requests to pass any tests. Also, we are able to inject some test helpers such as `axios.waitForAll`.
-- [`__mocks__/mousetrap/index.js`](https://gitlab.com/gitlab-org/gitlab/blob/cd4c086d894226445be9d18294a060ba46572435/spec/frontend/__mocks__/mousetrap/index.js#L1) -
+- [`__mocks__/mousetrap/index.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/cd4c086d894226445be9d18294a060ba46572435/spec/frontend/__mocks__/mousetrap/index.js#L1) -
   This mock is helpful because the module itself uses AMD format which webpack understands, but is incompatible with the jest environment. This mock doesn't remove
   any behavior, only provides a nice es6 compatible wrapper.
-- [`__mocks__/monaco-editor/index.js`](https://gitlab.com/gitlab-org/gitlab/blob/b7f914cddec9fc5971238cdf12766e79fa1629d7/spec/frontend/__mocks__/monaco-editor/index.js) -
+- [`__mocks__/monaco-editor/index.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/b7f914cddec9fc5971238cdf12766e79fa1629d7/spec/frontend/__mocks__/monaco-editor/index.js) -
   This mock is helpful because the Monaco package is completely incompatible in a Jest environment. In fact, webpack requires a special loader to make it work. This mock
-  simply makes this package consumable by Jest.
+  makes this package consumable by Jest.
 
 ### Keep mocks light
 
@@ -762,7 +777,7 @@ Global mocks introduce magic and technically can reduce test coverage. When mock
 
 ### Additional mocking techniques
 
-Consult the [official Jest docs](https://jestjs.io/docs/en/jest-object#mock-modules) for a full overview of the available mocking features.
+Consult the [official Jest docs](https://jestjs.io/docs/jest-object#mock-modules) for a full overview of the available mocking features.
 
 ## Running Frontend Tests
 
@@ -875,15 +890,14 @@ helper method. For example:
 describe GraphQL::Query, type: :request do
   include GraphqlHelpers
 
-  all_releases_query_path = 'releases/queries/all_releases.query.graphql'
-  fragment_paths = ['releases/queries/release.fragment.graphql']
+  all_releases_query_path = 'releases/graphql/queries/all_releases.query.graphql'
 
   before(:all) do
     clean_frontend_fixtures('graphql/releases/')
   end
 
   it "graphql/#{all_releases_query_path}.json" do
-    query = get_graphql_query_as_string(all_releases_query_path, fragment_paths)
+    query = get_graphql_query_as_string(all_releases_query_path)
 
     post_graphql(query, current_user: admin, variables: { fullPath: project.full_path })
 
@@ -893,11 +907,7 @@ end
 ```
 
 This will create a new fixture located at
-`tmp/tests/frontend/fixtures-ee/graphql/releases/queries/all_releases.query.graphql.json`.
-
-You will need to provide the paths to all fragments used by the query.
-`get_graphql_query_as_string` reads all of the provided file paths and returns
-the result as a single, concatenated string.
+`tmp/tests/frontend/fixtures-ee/graphql/releases/graphql/queries/all_releases.query.graphql.json`.
 
 You can import the JSON fixture in a Jest test using the `getJSONFixture` method
 [as described below](#use-fixtures).
@@ -935,8 +945,8 @@ it('uses some HTML element', () => {
 Similar to [RSpec's parameterized tests](best_practices.md#table-based--parameterized-tests),
 Jest supports data-driven tests for:
 
-- Individual tests using [`test.each`](https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout) (aliased to `it.each`).
-- Groups of tests using [`describe.each`](https://jestjs.io/docs/en/api#describeeachtable-name-fn-timeout).
+- Individual tests using [`test.each`](https://jestjs.io/docs/api#testeachtable-name-fn-timeout) (aliased to `it.each`).
+- Groups of tests using [`describe.each`](https://jestjs.io/docs/api#describeeachtable-name-fn-timeout).
 
 These can be useful for reducing repetition within tests. Each option can take an array of
 data values or a tagged template literal.
@@ -1034,7 +1044,7 @@ describe "Admin::AbuseReports", :js do
 end
 ```
 
-### Jest test timeout due to async imports
+### Jest test timeout due to asynchronous imports
 
 If a module asynchronously imports some other modules at runtime, these modules must be
 transpiled by the Jest loaders at runtime. It's possible that this can cause [Jest to timeout](https://gitlab.com/gitlab-org/gitlab/-/issues/280809).
@@ -1094,7 +1104,7 @@ See also [Notes on testing Vue components](../fe_guide/vue.md#testing-vue-compon
 
 ## Test helpers
 
-Test helpers can be found in [`spec/frontend/__helpers__`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__).
+Test helpers can be found in [`spec/frontend/__helpers__`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/__helpers__).
 If you introduce new helpers, place them in that directory.
 
 ### Vuex Helper: `testAction`
@@ -1134,23 +1144,40 @@ These are very useful if you don't have a handle to the request's Promise, for e
 
 Both functions run `callback` on the next tick after the requests finish (using `setImmediate()`), to allow any `.then()` or `.catch()` handlers to run.
 
-### `extendedWrapper` and `findByTestId`
+### `shallowMountExtended` and `mountExtended`
 
-Using `data-testid` is one of the [recommended ways to query DOM elements](#how-to-query-dom-elements).
-You can use the `extendedWrapper` utility on the `wrapper` returned by `shalowMount`/`mount`.
-By doing so, the `wrapper` provides you with the ability to perform a `findByTestId`,
-which is a shortcut to the more verbose `wrapper.find('[data-testid="my-test-id"]');`
+The `shallowMountExtended` and `mountExtended` utilities provide you with the ability to perform
+any of the available [DOM Testing Library queries](https://testing-library.com/docs/queries/about/)
+by prefixing them with `find` or `findAll`.
 
 ```javascript
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 describe('FooComponent', () => {
-  const wrapper = extendedWrapper(shallowMount({
-    template: `<div data-testid="my-test-id"></div>`,
-  }));
+  const wrapper = shallowMountExtended({
+    template: `
+      <div data-testid="gitlab-frontend-stack">
+        <p>GitLab frontend stack</p>
+        <div role="tablist">
+          <button role="tab" aria-selected="true">Vue.js</button>
+          <button role="tab" aria-selected="false">GraphQL</button>
+          <button role="tab" aria-selected="false">SCSS</button>
+        </div>
+      </div>
+    `,
+  });
 
-  it('exists', () => {
-    expect(wrapper.findByTestId('my-test-id').exists()).toBe(true);
+  it('finds elements with `findByTestId`', () => {
+    expect(wrapper.findByTestId('gitlab-frontend-stack').exists()).toBe(true);
+  });
+
+  it('finds elements with `findByText`', () => {
+    expect(wrapper.findByText('GitLab frontend stack').exists()).toBe(true);
+    expect(wrapper.findByText('TypeScript').exists()).toBe(false);
+  });
+
+  it('finds elements with `findAllByRole`', () => {
+    expect(wrapper.findAllByRole('tab').length).toBe(3);
   });
 });
 ```
@@ -1182,6 +1209,95 @@ You can download any older version of Firefox from the releases FTP server, <htt
 1. Move the application to the `Applications` folder.
 1. Open up a terminal and run `/Applications/Firefox_Old.app/Contents/MacOS/firefox-bin -profilemanager` to create a new profile specific to that Firefox version.
 1. Once the profile has been created, quit the app, and run it again like normal. You now have a working older Firefox version.
+
+## Snapshots
+
+By now you've probably heard of [Jest snapshot tests](https://jestjs.io/docs/snapshot-testing) and why they are useful for various reasons.
+To use them within GitLab, there are a few guidelines that should be highlighted:
+
+- Treat snapshots as code
+- Don't think of a snapshot file as a Blackbox
+- Care for the output of the snapshot, otherwise, it's not providing any real value. This will usually involve reading the generated snapshot file as you would read any other piece of code
+
+Think of a snapshot test as a simple way to store a raw `String` representation of what you've put into the item being tested. This can be used to evaluate changes in a component, a store, a complex piece of generated output, etc. You can see more in the list below for some recommended `Do's and Don'ts`.
+While snapshot tests can be a very powerful tool. They are meant to supplement, not to replace unit tests.
+
+Jest provides a great set of docs on [best practices](https://jestjs.io/docs/snapshot-testing#best-practices) that we should keep in mind when creating snapshots.
+
+### How does a snapshot work?
+
+A snapshot is purely a stringified version of what you ask to be tested on the lefthand side of the function call. This means any kind of changes you make to the formatting of the string has an impact on the outcome. This process is done by leveraging serializers for an automatic transform step. For Vue this is already taken care of by leveraging the `vue-jest` package, which offers the proper serializer.
+
+Should the outcome of your spec be different from what is in the generated snapshot file, you'll be notified about it by a failing test in your test suite.
+
+Find all the details in Jests official documentation [https://jestjs.io/docs/snapshot-testing](https://jestjs.io/docs/snapshot-testing)
+
+### How to take a snapshot
+
+```javascript
+it('makes the name look pretty', () => {
+  expect(prettifyName('Homer Simpson')).toMatchSnapshot()
+})
+```
+
+When this test runs the first time a fresh `.snap` file will be created. It will look something like this:
+
+```txt
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`makes the name look pretty`] = `
+Sir Homer Simpson the Third
+`
+```
+
+Now, every time you call this test, the new snapshot will be evaluated against the previously created version. This should highlight the fact that it's important to understand the content of your snapshot file and treat it with care. Snapshots will lose their value if the output of the snapshot is too big or complex to read, this means keeping snapshots isolated to human-readable items that can be either evaluated in a merge request review or are guaranteed to never change.
+The same can be done for `wrappers` or `elements`
+
+```javascript
+it('renders the component correctly', () => {
+  expect(wrapper).toMatchSnapshot()
+  expect(wrapper.element).toMatchSnapshot();
+})
+```
+
+The above test will create two snapshots, what's important is to decide which of the snapshots provide more value for the codebase safety i.e. if one of these snapshots changes, does that highlight a possible un-wanted break in the codebase? This can help catch unexpected changes if something in an underlying dependency changes without our knowledge.
+
+### Pros and Cons
+
+**Pros**
+
+- Speed up the creation of unit tests
+- Easy to maintain
+- Provides a good safety net to protect against accidental breakage of important HTML structures
+
+**Cons**
+
+- Is not a catch-all solution that replaces the work of integration or unit tests
+- No meaningful assertions or expectations within snapshots
+- When carelessly used with [GitLab UI](https://gitlab.com/gitlab-org/gitlab-ui) it can create fragility in tests when the underlying library changes the HTML of a component we are testing
+
+A good guideline to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
+
+### When to use
+
+**Use snapshots when**
+
+- to capture a components rendered output
+- to fully or partially match templates
+- to match readable data structures
+- to verify correctly composed native HTML elements
+- as a safety net for critical structures so others don't break it by accident
+- Template heavy component
+- Not a lot of logic in the component
+- Composed of native HTML elements
+
+### When not to use
+
+**Don't use snapshots when**
+
+- To capture large data structures just to have something
+- To just have some kind of test written
+- To capture highly volatile UI elements without stubbing them (Think of GitLab UI version updates)
 
 ---
 

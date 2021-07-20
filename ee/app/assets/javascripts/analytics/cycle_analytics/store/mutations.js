@@ -1,5 +1,10 @@
+import Vue from 'vue';
+import {
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from '~/cycle_analytics/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { transformRawStages, prepareStageErrors } from '../utils';
+import { transformRawStages, prepareStageErrors, formatMedianValuesWithOverview } from '../utils';
 import * as types from './mutation_types';
 
 export default {
@@ -12,53 +17,66 @@ export default {
   [types.SET_SELECTED_STAGE](state, rawData) {
     state.selectedStage = convertObjectPropsToCamelCase(rawData);
   },
-  [types.SET_DATE_RANGE](state, { startDate, endDate }) {
-    state.startDate = startDate;
-    state.endDate = endDate;
+  [types.SET_DATE_RANGE](state, { createdBefore, createdAfter }) {
+    state.createdBefore = createdBefore;
+    state.createdAfter = createdAfter;
   },
-  [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
+  [types.SET_STAGE_EVENTS](state, data = []) {
+    state.formEvents = data.map((ev) => convertObjectPropsToCamelCase(ev, { deep: true }));
+  },
+  [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },
-  [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state) {
+  [types.RECEIVE_VALUE_STREAM_DATA_SUCCESS](state) {
     state.errorCode = null;
     state.isLoading = false;
   },
-  [types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state, errCode) {
+  [types.RECEIVE_VALUE_STREAM_DATA_ERROR](state, errCode) {
     state.errorCode = errCode;
     state.isLoading = false;
   },
   [types.REQUEST_STAGE_DATA](state) {
     state.isLoadingStage = true;
-    state.isEmptyStage = false;
     state.selectedStageError = '';
+    state.selectedStageEvents = [];
+    state.pagination = {};
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
-    state.currentStageEvents = events.map((fields) =>
+    state.selectedStageEvents = events.map((fields) =>
       convertObjectPropsToCamelCase(fields, { deep: true }),
     );
-    state.isEmptyStage = !events.length;
     state.isLoadingStage = false;
     state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_ERROR](state, message) {
-    state.isEmptyStage = true;
     state.isLoadingStage = false;
     state.selectedStageError = message;
+    state.selectedStageEvents = [];
+    state.pagination = {};
   },
   [types.REQUEST_STAGE_MEDIANS](state) {
     state.medians = {};
   },
   [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians = []) {
-    state.medians = medians.reduce(
-      (acc, { id, value, error = null }) => ({
+    state.medians = formatMedianValuesWithOverview(medians);
+  },
+  [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
+    state.medians = {};
+  },
+  [types.REQUEST_STAGE_COUNTS](state) {
+    state.stageCounts = {};
+  },
+  [types.RECEIVE_STAGE_COUNTS_SUCCESS](state, stageCounts = []) {
+    state.stageCounts = stageCounts.reduce(
+      (acc, { id, count }) => ({
         ...acc,
-        [id]: { value, error },
+        [id]: count,
       }),
       {},
     );
   },
-  [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
-    state.medians = {};
+  [types.RECEIVE_STAGE_COUNTS_ERROR](state) {
+    state.stageCounts = {};
   },
   [types.REQUEST_GROUP_STAGES](state) {
     state.stages = [];
@@ -67,57 +85,36 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    const transformedStages = transformRawStages(stages);
-    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
+    state.stages = transformRawStages(stages);
   },
-  [types.REQUEST_UPDATE_STAGE](state) {
-    state.isLoading = true;
-  },
-  [types.RECEIVE_UPDATE_STAGE_SUCCESS](state) {
-    state.isLoading = false;
-  },
-  [types.RECEIVE_UPDATE_STAGE_ERROR](state) {
-    state.isLoading = false;
-  },
-  [types.REQUEST_REMOVE_STAGE](state) {
-    state.isLoading = true;
-  },
-  [types.RECEIVE_REMOVE_STAGE_RESPONSE](state) {
-    state.isLoading = false;
-  },
-  [types.INITIALIZE_CYCLE_ANALYTICS](
+  [types.INITIALIZE_VSA](
     state,
     {
       group = null,
-      createdAfter: startDate = null,
-      createdBefore: endDate = null,
+      createdAfter = null,
+      createdBefore = null,
       selectedProjects = [],
       selectedValueStream = {},
       defaultStageConfig = [],
+      pagination = {},
     } = {},
   ) {
     state.isLoading = true;
     state.currentGroup = group;
     state.selectedProjects = selectedProjects;
     state.selectedValueStream = selectedValueStream;
-    state.startDate = startDate;
-    state.endDate = endDate;
+    state.createdBefore = createdBefore;
+    state.createdAfter = createdAfter;
     state.defaultStageConfig = defaultStageConfig;
+
+    Vue.set(state, 'pagination', {
+      page: pagination.page ?? state.pagination.page,
+      sort: pagination.sort ?? state.pagination.sort,
+      direction: pagination.direction ?? state.pagination.direction,
+    });
   },
-  [types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS](state) {
+  [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
-  },
-  [types.REQUEST_REORDER_STAGE](state) {
-    state.isSavingStageOrder = true;
-    state.errorSavingStageOrder = false;
-  },
-  [types.RECEIVE_REORDER_STAGE_SUCCESS](state) {
-    state.isSavingStageOrder = false;
-    state.errorSavingStageOrder = false;
-  },
-  [types.RECEIVE_REORDER_STAGE_ERROR](state) {
-    state.isSavingStageOrder = false;
-    state.errorSavingStageOrder = true;
   },
   [types.REQUEST_CREATE_VALUE_STREAM](state) {
     state.isCreatingValueStream = true;
@@ -179,5 +176,13 @@ export default {
       .sort(({ name: aName = '' }, { name: bName = '' }) => {
         return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
       });
+  },
+  [types.SET_PAGINATION](state, { page, hasNextPage, sort, direction }) {
+    Vue.set(state, 'pagination', {
+      page,
+      hasNextPage,
+      sort: sort || PAGINATION_SORT_FIELD_END_EVENT,
+      direction: direction || PAGINATION_SORT_DIRECTION_DESC,
+    });
   },
 };

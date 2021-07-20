@@ -3,25 +3,41 @@
 module BulkImports
   module Pipeline
     class Context
-      attr_reader :entity, :bulk_import
       attr_accessor :extra
 
-      def initialize(entity, extra = {})
-        @entity = entity
-        @bulk_import = entity.bulk_import
+      attr_reader :tracker
+
+      def initialize(tracker, extra = {})
+        @tracker = tracker
         @extra = extra
       end
 
+      def entity
+        @entity ||= tracker.entity
+      end
+
+      def portable
+        @portable ||= entity.group || entity.project
+      end
+
+      def import_export_config
+        @import_export_config ||= ::BulkImports::FileTransfer.config_for(portable)
+      end
+
       def group
-        entity.group
+        @group ||= entity.group
+      end
+
+      def bulk_import
+        @bulk_import ||= entity.bulk_import
       end
 
       def current_user
-        bulk_import.user
+        @current_user ||= bulk_import.user
       end
 
       def configuration
-        bulk_import.configuration
+        @configuration ||= bulk_import.configuration
       end
     end
   end

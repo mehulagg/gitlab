@@ -11,7 +11,7 @@ RSpec.describe ProtectedEnvironments::CreateService, '#execute' do
                    deploy_access_levels_attributes: [{ access_level: maintainer_access }])
   end
 
-  subject { described_class.new(project, user, params).execute }
+  subject { described_class.new(container: project, current_user: user, params: params).execute }
 
   context 'with valid params' do
     it { is_expected.to be_truthy }

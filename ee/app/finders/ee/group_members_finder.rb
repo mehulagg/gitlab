@@ -21,9 +21,9 @@ module EE::GroupMembersFinder
     super
   end
 
-  override :relation_group_members
-  def relation_group_members(relation)
-    return all_group_members(relation) if group.minimal_access_role_allowed?
+  override :all_group_members
+  def all_group_members(groups)
+    return members_of_groups(groups) if group.minimal_access_role_allowed?
 
     super
   end

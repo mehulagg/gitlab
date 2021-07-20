@@ -8,20 +8,22 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { isListDraggable } from '~/boards/boards_util';
-import { isScopedLabel } from '~/lib/utils/common_utils';
+import { isScopedLabel, parseBoolean } from '~/lib/utils/common_utils';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { n__, s__, __ } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
+import Tracking from '~/tracking';
 import AccessorUtilities from '../../lib/utils/accessor';
-import { inactiveId, LIST, ListType } from '../constants';
+import { inactiveId, LIST, ListType, toggleFormEventPrefix } from '../constants';
 import eventHub from '../eventhub';
-import IssueCount from './issue_count.vue';
+import ItemCount from './item_count.vue';
 
 export default {
   i18n: {
     newIssue: __('New issue'),
+    newEpic: s__('Boards|New epic'),
     listSettings: __('List settings'),
     expand: s__('Boards|Expand'),
     collapse: s__('Boards|Collapse'),
@@ -33,11 +35,12 @@ export default {
     GlTooltip,
     GlIcon,
     GlSprintf,
-    IssueCount,
+    ItemCount,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [Tracking.mixin()],
   inject: {
     boardId: {
       default: '',
@@ -70,6 +73,7 @@ export default {
   },
   computed: {
     ...mapState(['activeId']),
+    ...mapGetters(['isEpicBoard', 'isSwimlanesOn']),
     isLoggedIn() {
       return Boolean(this.currentUserId);
     },
@@ -97,11 +101,20 @@ export default {
     showListDetails() {
       return !this.list.collapsed || !this.isSwimlanesHeader;
     },
-    issuesCount() {
+    showListHeaderActions() {
+      if (this.isLoggedIn) {
+        return this.isNewIssueShown || this.isNewEpicShown || this.isSettingsShown;
+      }
+      return false;
+    },
+    itemsCount() {
       return this.list.issuesCount;
     },
-    issuesTooltipLabel() {
-      return n__(`%d issue`, `%d issues`, this.issuesCount);
+    countIcon() {
+      return 'issues';
+    },
+    itemsTooltipLabel() {
+      return n__(`%d issue`, `%d issues`, this.itemsCount);
     },
     chevronTooltip() {
       return this.list.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
@@ -110,7 +123,10 @@ export default {
       return this.list.collapsed ? 'chevron-down' : 'chevron-right';
     },
     isNewIssueShown() {
-      return this.listType === ListType.backlog || this.showListHeaderButton;
+      return (this.listType === ListType.backlog || this.showListHeaderButton) && !this.isEpicBoard;
+    },
+    isNewEpicShown() {
+      return this.isEpicBoard && this.listType !== ListType.closed;
     },
     isSettingsShown() {
       return (
@@ -131,25 +147,43 @@ export default {
       return !this.disabled && isListDraggable(this.list);
     },
   },
+  created() {
+    const localCollapsed = parseBoolean(localStorage.getItem(`${this.uniqueKey}.collapsed`));
+    if ((!this.isLoggedIn || this.isEpicBoard) && localCollapsed) {
+      this.toggleListCollapsed({ listId: this.list.id, collapsed: true });
+    }
+  },
   methods: {
-    ...mapActions(['updateList', 'setActiveId']),
+    ...mapActions(['updateList', 'setActiveId', 'toggleListCollapsed']),
     openSidebarSettings() {
       if (this.activeId === inactiveId) {
         sidebarEventHub.$emit('sidebar.closeAll');
       }
 
       this.setActiveId({ id: this.list.id, sidebarType: LIST });
+
+      this.track('click_button', { label: 'list_settings' });
     },
     showScopedLabels(label) {
       return this.scopedLabelsAvailable && isScopedLabel(label);
     },
 
     showNewIssueForm() {
-      eventHub.$emit(`toggle-issue-form-${this.list.id}`);
+      if (this.isSwimlanesOn) {
+        eventHub.$emit('open-unassigned-lane');
+        this.$nextTick(() => {
+          eventHub.$emit(`${toggleFormEventPrefix.issue}${this.list.id}`);
+        });
+      } else {
+        eventHub.$emit(`${toggleFormEventPrefix.issue}${this.list.id}`);
+      }
+    },
+    showNewEpicForm() {
+      eventHub.$emit(`${toggleFormEventPrefix.epic}${this.list.id}`);
     },
     toggleExpanded() {
-      // eslint-disable-next-line vue/no-mutating-props
-      this.list.collapsed = !this.list.collapsed;
+      const collapsed = !this.list.collapsed;
+      this.toggleListCollapsed({ listId: this.list.id, collapsed });
 
       if (!this.isLoggedIn) {
         this.addToLocalStorage();
@@ -160,10 +194,15 @@ export default {
       // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
       // Close all tooltips manually to prevent dangling tooltips.
       this.$root.$emit(BV_HIDE_TOOLTIP);
+
+      this.track('click_toggle_button', {
+        label: 'toggle_list',
+        property: collapsed ? 'closed' : 'open',
+      });
     },
     addToLocalStorage() {
       if (AccessorUtilities.isLocalStorageAccessSafe()) {
-        localStorage.setItem(`${this.uniqueKey}.expanded`, !this.list.collapsed);
+        localStorage.setItem(`${this.uniqueKey}.collapsed`, this.list.collapsed);
       }
     },
     updateListFunction() {
@@ -203,6 +242,7 @@ export default {
         class="board-title-caret no-drag gl-cursor-pointer"
         category="tertiary"
         size="small"
+        data-testid="board-title-caret"
         @click="toggleExpanded"
       />
       <!-- EE start -->
@@ -301,11 +341,11 @@ export default {
         <div v-if="list.maxIssueCount !== 0">
           •
           <gl-sprintf :message="__('%{issuesSize} with a limit of %{maxIssueCount}')">
-            <template #issuesSize>{{ issuesTooltipLabel }}</template>
+            <template #issuesSize>{{ itemsTooltipLabel }}</template>
             <template #maxIssueCount>{{ list.maxIssueCount }}</template>
           </gl-sprintf>
         </div>
-        <div v-else>• {{ issuesTooltipLabel }}</div>
+        <div v-else>• {{ itemsTooltipLabel }}</div>
         <div v-if="weightFeatureAvailable">
           •
           <gl-sprintf :message="__('%{totalWeight} total weight')">
@@ -316,20 +356,21 @@ export default {
       <!-- EE end -->
 
       <div
-        class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag gl-text-gray-500"
+        class="issue-count-badge gl-display-inline-flex gl-pr-2 no-drag gl-text-gray-500"
+        data-testid="issue-count-badge"
         :class="{
           'gl-display-none!': list.collapsed && isSwimlanesHeader,
           'gl-p-0': list.collapsed,
         }"
       >
         <span class="gl-display-inline-flex">
-          <gl-tooltip :target="() => $refs.issueCount" :title="issuesTooltipLabel" />
-          <span ref="issueCount" class="issue-count-badge-count">
-            <gl-icon class="gl-mr-2" name="issues" />
-            <issue-count :issues-size="issuesCount" :max-issue-count="list.maxIssueCount" />
+          <gl-tooltip :target="() => $refs.itemCount" :title="itemsTooltipLabel" />
+          <span ref="itemCount" class="issue-count-badge-count">
+            <gl-icon class="gl-mr-2" :name="countIcon" />
+            <item-count :items-size="itemsCount" :max-issue-count="list.maxIssueCount" />
           </span>
           <!-- EE start -->
-          <template v-if="weightFeatureAvailable">
+          <template v-if="weightFeatureAvailable && !isEpicBoard">
             <gl-tooltip :target="() => $refs.weightTooltip" :title="weightCountToolTip" />
             <span ref="weightTooltip" class="gl-display-inline-flex gl-ml-3">
               <gl-icon class="gl-mr-2" name="weight" />
@@ -339,10 +380,7 @@ export default {
           <!-- EE end -->
         </span>
       </div>
-      <gl-button-group
-        v-if="isNewIssueShown || isSettingsShown"
-        class="board-list-button-group pl-2"
-      >
+      <gl-button-group v-if="showListHeaderActions" class="board-list-button-group gl-pl-2">
         <gl-button
           v-if="isNewIssueShown"
           v-show="!list.collapsed"
@@ -353,6 +391,17 @@ export default {
           class="issue-count-badge-add-button no-drag"
           icon="plus"
           @click="showNewIssueForm"
+        />
+
+        <gl-button
+          v-if="isNewEpicShown"
+          v-show="!list.collapsed"
+          v-gl-tooltip.hover
+          :aria-label="$options.i18n.newEpic"
+          :title="$options.i18n.newEpic"
+          class="no-drag"
+          icon="plus"
+          @click="showNewEpicForm"
         />
 
         <gl-button

@@ -35,11 +35,18 @@ RSpec.describe Banzai::Filter::UploadLinkFilter do
 
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:user) { create(:user) }
+
   let(:group) { nil }
   let(:project_path) { project.full_path }
   let(:only_path) { true }
   let(:upload_path) { '/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg' }
   let(:relative_path) { "/#{project.full_path}#{upload_path}" }
+
+  it 'preserves original url in data-canonical-src attribute' do
+    doc = filter(link(upload_path))
+
+    expect(doc.at_css('a')['data-canonical-src']).to eq(upload_path)
+  end
 
   context 'to a project upload' do
     context 'with an absolute URL' do
@@ -114,6 +121,7 @@ RSpec.describe Banzai::Filter::UploadLinkFilter do
   context 'to a group upload' do
     let(:upload_link) { link('/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg') }
     let_it_be(:group) { create(:group) }
+
     let(:project) { nil }
     let(:relative_path) { "/groups/#{group.full_path}/-/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg" }
 

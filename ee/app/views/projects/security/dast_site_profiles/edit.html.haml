@@ -1,9 +1,10 @@
 - add_to_breadcrumbs _('Security Configuration'), project_security_configuration_path(@project)
-- add_to_breadcrumbs s_('DastProfiles|Manage profiles'), project_security_configuration_dast_profiles_path(@project, anchor: 'site-profiles')
+- add_to_breadcrumbs s_('DastProfiles|Manage profiles'), project_security_configuration_dast_scans_path(@project, anchor: 'site-profiles')
 - breadcrumb_title s_('DastProfiles|Edit site profile')
 - page_title s_('DastProfiles|Edit site profile')
 
 .js-dast-site-profile-form{ data: { full_path: @project.path_with_namespace,
-profiles_library_path: project_security_configuration_dast_profiles_path(@project, anchor: 'site-profiles'),
-site_profile: { id: @site_profile.to_global_id.to_s, name: @site_profile.name, target_url: @site_profile.dast_site.url }.to_json,
-on_demand_scans_path: Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml) ? new_project_on_demand_scan_path(@project) : project_on_demand_scans_path(@project) } }
+profiles_library_path: project_security_configuration_dast_scans_path(@project, anchor: 'site-profiles'),
+site_profile: @site_profile.to_json,
+on_demand_scans_path: new_project_on_demand_scan_path(@project),
+dast_configuration_path: project_security_configuration_dast_path(@project) } }

@@ -30,7 +30,7 @@ RSpec.describe API::NpmProjectPackages do
   end
 
   describe 'GET /api/v4/projects/:id/packages/npm/*package_name/-/*file_name' do
-    let_it_be(:package_file) { package.package_files.first }
+    let(:package_file) { package.package_files.first }
 
     let(:headers) { {} }
     let(:url) { api("/projects/#{project.id}/packages/npm/#{package.name}/-/#{package_file.file_name}") }
@@ -39,6 +39,15 @@ RSpec.describe API::NpmProjectPackages do
 
     before do
       project.add_developer(user)
+    end
+
+    shared_examples 'successfully downloads the file' do
+      it 'returns the file' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq('application/octet-stream')
+      end
     end
 
     shared_examples 'a package file that requires auth' do
@@ -51,35 +60,30 @@ RSpec.describe API::NpmProjectPackages do
       context 'with access token' do
         let(:headers) { build_token_auth_header(token.token) }
 
-        it 'returns the file' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response.media_type).to eq('application/octet-stream')
-        end
+        it_behaves_like 'successfully downloads the file'
       end
 
       context 'with job token' do
         let(:headers) { build_token_auth_header(job.token) }
 
-        it 'returns the file' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response.media_type).to eq('application/octet-stream')
-        end
+        it_behaves_like 'successfully downloads the file'
       end
     end
 
     context 'a public project' do
-      it 'returns the file with no token needed' do
-        subject
+      let(:snowplow_gitlab_standard_context) { { project: project, namespace: project.namespace } }
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.media_type).to eq('application/octet-stream')
-      end
-
+      it_behaves_like 'successfully downloads the file'
       it_behaves_like 'a package tracking event', 'API::NpmPackages', 'pull_package'
+
+      context 'with a job token for a different user' do
+        let_it_be(:other_user) { create(:user) }
+        let_it_be_with_reload(:other_job) { create(:ci_build, :running, user: other_user, project: project) }
+
+        let(:headers) { build_token_auth_header(other_job.token) }
+
+        it_behaves_like 'successfully downloads the file'
+      end
     end
 
     context 'private project' do
@@ -127,24 +131,6 @@ RSpec.describe API::NpmProjectPackages do
 
     context 'when params are correct' do
       context 'invalid package record' do
-        context 'unscoped package' do
-          let(:package_name) { 'my_unscoped_package' }
-          let(:params) { upload_params(package_name: package_name) }
-
-          it_behaves_like 'handling invalid record with 400 error'
-
-          context 'with empty versions' do
-            let(:params) { upload_params(package_name: package_name).merge!(versions: {}) }
-
-            it 'throws a 400 error' do
-              expect { upload_package_with_token(package_name, params) }
-              .not_to change { project.packages.count }
-
-              expect(response).to have_gitlab_http_status(:bad_request)
-            end
-          end
-        end
-
         context 'invalid package name' do
           let(:package_name) { "@#{group.path}/my_inv@@lid_package_name" }
           let(:params) { upload_params(package_name: package_name) }
@@ -175,52 +161,72 @@ RSpec.describe API::NpmProjectPackages do
         end
       end
 
-      context 'scoped package' do
-        let(:package_name) { "@#{group.path}/my_package_name" }
+      context 'valid package record' do
         let(:params) { upload_params(package_name: package_name) }
+        let(:snowplow_gitlab_standard_context) { { project: project, namespace: project.namespace, user: user } }
 
-        context 'with access token' do
-          subject { upload_package_with_token(package_name, params) }
+        shared_examples 'handling upload with different authentications' do
+          context 'with access token' do
+            subject { upload_package_with_token(package_name, params) }
 
-          it_behaves_like 'a package tracking event', 'API::NpmPackages', 'push_package'
+            it_behaves_like 'a package tracking event', 'API::NpmPackages', 'push_package'
 
-          it 'creates npm package with file' do
-            expect { subject }
-              .to change { project.packages.count }.by(1)
-              .and change { Packages::PackageFile.count }.by(1)
-              .and change { Packages::Tag.count }.by(1)
+            it 'creates npm package with file' do
+              expect { subject }
+                .to change { project.packages.count }.by(1)
+                .and change { Packages::PackageFile.count }.by(1)
+                .and change { Packages::Tag.count }.by(1)
 
-            expect(response).to have_gitlab_http_status(:ok)
-          end
-        end
-
-        it 'creates npm package with file with job token' do
-          expect { upload_package_with_job_token(package_name, params) }
-            .to change { project.packages.count }.by(1)
-            .and change { Packages::PackageFile.count }.by(1)
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-
-        context 'with an authenticated job token' do
-          let!(:job) { create(:ci_build, user: user) }
-
-          before do
-            Grape::Endpoint.before_each do |endpoint|
-              expect(endpoint).to receive(:current_authenticated_job) { job }
+              expect(response).to have_gitlab_http_status(:ok)
             end
           end
 
-          after do
-            Grape::Endpoint.before_each nil
-          end
-
-          it 'creates the package metadata' do
-            upload_package_with_token(package_name, params)
+          it 'creates npm package with file with job token' do
+            expect { upload_package_with_job_token(package_name, params) }
+              .to change { project.packages.count }.by(1)
+              .and change { Packages::PackageFile.count }.by(1)
 
             expect(response).to have_gitlab_http_status(:ok)
-            expect(project.reload.packages.find(json_response['id']).original_build_info.pipeline).to eq job.pipeline
           end
+
+          context 'with an authenticated job token' do
+            let!(:job) { create(:ci_build, user: user) }
+
+            before do
+              Grape::Endpoint.before_each do |endpoint|
+                expect(endpoint).to receive(:current_authenticated_job) { job }
+              end
+            end
+
+            after do
+              Grape::Endpoint.before_each nil
+            end
+
+            it 'creates the package metadata' do
+              upload_package_with_token(package_name, params)
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(project.reload.packages.find(json_response['id']).original_build_info.pipeline).to eq job.pipeline
+            end
+          end
+        end
+
+        context 'with a scoped name' do
+          let(:package_name) { "@#{group.path}/my_package_name" }
+
+          it_behaves_like 'handling upload with different authentications'
+        end
+
+        context 'with any scoped name' do
+          let(:package_name) { "@any_scope/my_package_name" }
+
+          it_behaves_like 'handling upload with different authentications'
+        end
+
+        context 'with an unscoped name' do
+          let(:package_name) { "my_unscoped_package_name" }
+
+          it_behaves_like 'handling upload with different authentications'
         end
       end
 

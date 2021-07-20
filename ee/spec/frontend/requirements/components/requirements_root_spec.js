@@ -1,21 +1,30 @@
-import { GlPagination } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { GlPagination, GlIcon } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import VueApollo from 'vue-apollo';
 
 import RequirementItem from 'ee/requirements/components/requirement_item.vue';
+import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';
 import RequirementsEmptyState from 'ee/requirements/components/requirements_empty_state.vue';
 import RequirementsLoading from 'ee/requirements/components/requirements_loading.vue';
 import RequirementsRoot from 'ee/requirements/components/requirements_root.vue';
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 
+import { TestReportStatus } from 'ee/requirements/constants';
 import createRequirement from 'ee/requirements/queries/createRequirement.mutation.graphql';
 import exportRequirement from 'ee/requirements/queries/exportRequirements.mutation.graphql';
+
+import projectRequirements from 'ee/requirements/queries/projectRequirements.query.graphql';
+import projectRequirementsCount from 'ee/requirements/queries/projectRequirementsCount.query.graphql';
 import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import createFlash from '~/flash';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
 import {
   FilterState,
@@ -23,12 +32,21 @@ import {
   mockRequirementsCount,
   mockPageInfo,
   mockFilters,
+  mockAuthorToken,
+  mockStatusToken,
+  mockInitialRequirementCounts,
+  mockProjectRequirementCounts,
+  mockProjectRequirements,
+  mockUpdateRequirementTitle,
+  mockUpdateRequirementToFailed,
+  mockProjectRequirementPassed,
 } from '../mock_data';
 
 jest.mock('ee/requirements/constants', () => ({
   DEFAULT_PAGE_SIZE: 2,
   FilterState: jest.requireActual('ee/requirements/constants').FilterState,
   AvailableSortOptions: jest.requireActual('ee/requirements/constants').AvailableSortOptions,
+  TestReportStatus: jest.requireActual('ee/requirements/constants').TestReportStatus,
 }));
 
 jest.mock('~/flash');
@@ -37,53 +55,92 @@ const $toast = {
   show: jest.fn(),
 };
 
-const createComponent = ({
-  projectPath = 'gitlab-org/gitlab-shell',
-  initialFilterBy = FilterState.opened,
-  initialRequirementsCount = mockRequirementsCount,
-  showCreateRequirement = false,
-  emptyStatePath = '/assets/illustrations/empty-state/requirements.svg',
-  loading = false,
-  canCreateRequirement = true,
-  requirementsWebUrl = '/gitlab-org/gitlab-shell/-/requirements',
-  importCsvPath = '/gitlab-org/gitlab-shell/-/requirements/import_csv',
-  currentUserEmail = 'admin@example.com',
-} = {}) =>
-  shallowMount(RequirementsRoot, {
-    propsData: {
-      projectPath,
-      initialFilterBy,
-      initialRequirementsCount,
-      showCreateRequirement,
-      emptyStatePath,
-      canCreateRequirement,
-      requirementsWebUrl,
-      importCsvPath,
-      currentUserEmail,
-    },
-    mocks: {
-      $apollo: {
-        queries: {
-          requirements: {
-            loading,
-            list: [],
-            pageInfo: {},
-            refetch: jest.fn(),
-          },
-          requirementsCount: {
-            ...initialRequirementsCount,
-            refetch: jest.fn(),
-          },
-        },
-        mutate: jest.fn(),
+const localVue = createLocalVue();
+
+const defaultProps = {
+  projectPath: 'gitlab-org/gitlab-shell',
+  initialFilterBy: FilterState.opened,
+  initialRequirementsCount: mockRequirementsCount,
+  showCreateRequirement: false,
+  emptyStatePath: '/assets/illustrations/empty-state/requirements.svg',
+  canCreateRequirement: true,
+  requirementsWebUrl: '/gitlab-org/gitlab-shell/-/requirements',
+  importCsvPath: '/gitlab-org/gitlab-shell/-/requirements/import_csv',
+  currentUserEmail: 'admin@example.com',
+};
+
+const createComponent = ({ props = {}, loading = false } = {}) =>
+  extendedWrapper(
+    shallowMount(RequirementsRoot, {
+      propsData: {
+        ...defaultProps,
+        ...props,
       },
-      $toast,
+      mocks: {
+        $apollo: {
+          queries: {
+            requirements: {
+              loading,
+              list: [],
+              pageInfo: {},
+              refetch: jest.fn(),
+            },
+            requirementsCount: {
+              ...defaultProps.initialRequirementsCount,
+              refetch: jest.fn(),
+            },
+          },
+          mutate: jest.fn(),
+        },
+        $toast,
+      },
+    }),
+  );
+
+const createComponentWithApollo = ({ props = {}, requestHandlers = [] } = {}) => {
+  localVue.use(VueApollo);
+
+  const mockApollo = createMockApollo(
+    [
+      [projectRequirements, jest.fn().mockResolvedValue(mockProjectRequirements)],
+      [projectRequirementsCount, jest.fn().mockResolvedValue(mockProjectRequirementCounts)],
+      ...requestHandlers,
+    ],
+    {},
+    {
+      dataIdFromObject: (object) =>
+        // eslint-disable-next-line no-underscore-dangle
+        object.__typename === 'Requirement' ? object.iid : defaultDataIdFromObject(object),
     },
-  });
+  );
+
+  return extendedWrapper(
+    shallowMount(RequirementsRoot, {
+      localVue,
+      apolloProvider: mockApollo,
+      propsData: {
+        ...defaultProps,
+        initialRequirementsCount: mockInitialRequirementCounts,
+        ...props,
+      },
+      mocks: {
+        $toast,
+      },
+      stubs: {
+        RequirementItem,
+        RequirementStatusBadge,
+        GlIcon,
+      },
+    }),
+  );
+};
 
 describe('RequirementsRoot', () => {
   let wrapper;
   let trackingSpy;
+
+  const findRequirementEditForm = () => wrapper.findByTestId('edit-form');
+  const findFailedStatusIcon = () => wrapper.findByTestId('status_failed-icon');
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -106,7 +163,7 @@ describe('RequirementsRoot', () => {
         wrapperLoading.destroy();
       });
 
-      it('returns `false` when `requirements.list` is empty', () => {
+      it('returns `true` when `requirements.list` is empty', () => {
         wrapper.setData({
           requirements: {
             list: [],
@@ -114,7 +171,7 @@ describe('RequirementsRoot', () => {
         });
 
         return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.requirementsListEmpty).toBe(false);
+          expect(wrapper.vm.requirementsListEmpty).toBe(true);
         });
       });
 
@@ -272,6 +329,7 @@ describe('RequirementsRoot', () => {
       it('returns array containing applied filter search values', () => {
         wrapper.setData({
           authorUsernames: ['root', 'john.doe'],
+          status: 'satisfied',
           textSearch: 'foo',
         });
 
@@ -423,51 +481,6 @@ describe('RequirementsRoot', () => {
             },
           }),
         );
-      });
-
-      describe('when `lastTestReportState` is included in object param', () => {
-        beforeEach(() => {
-          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
-        });
-
-        it('calls `$apollo.mutate` with `lastTestReportState` when it is not null', () => {
-          wrapper.vm.updateRequirement({
-            iid: '1',
-            lastTestReportState: 'PASSED',
-          });
-
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              mutation: updateRequirement,
-              variables: {
-                updateRequirementInput: {
-                  projectPath: 'gitlab-org/gitlab-shell',
-                  iid: '1',
-                  lastTestReportState: 'PASSED',
-                },
-              },
-            }),
-          );
-        });
-
-        it('calls `$apollo.mutate` without `lastTestReportState` when it is null', () => {
-          wrapper.vm.updateRequirement({
-            iid: '1',
-            lastTestReportState: null,
-          });
-
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              mutation: updateRequirement,
-              variables: {
-                updateRequirementInput: {
-                  projectPath: 'gitlab-org/gitlab-shell',
-                  iid: '1',
-                },
-              },
-            }),
-          );
-        });
       });
 
       it('calls `createFlash` with provided `errorFlashMessage` param when request fails', () => {
@@ -828,31 +841,35 @@ describe('RequirementsRoot', () => {
         wrapper.vm.handleFilterRequirements(mockFilters);
 
         expect(wrapper.vm.authorUsernames).toEqual(['root', 'john.doe']);
+        expect(wrapper.vm.status).toBe('satisfied');
         expect(wrapper.vm.textSearch).toBe('foo');
         expect(wrapper.vm.currentPage).toBe(1);
         expect(wrapper.vm.prevPageCursor).toBe('');
         expect(wrapper.vm.nextPageCursor).toBe('');
         expect(global.window.location.href).toBe(
-          `${TEST_HOST}/?page=1&state=opened&search=foo&sort=created_desc&author_username%5B%5D=root&author_username%5B%5D=john.doe`,
+          `${TEST_HOST}/?page=1&state=opened&search=foo&sort=created_desc&author_username%5B%5D=root&author_username%5B%5D=john.doe&status=satisfied`,
         );
         expect(trackingSpy).toHaveBeenCalledWith(undefined, 'filter', {
           property: JSON.stringify([
             { type: 'author_username', value: { data: 'root' } },
             { type: 'author_username', value: { data: 'john.doe' } },
-            'foo',
+            { type: 'status', value: { data: 'satisfied' } },
+            { type: 'filtered-search-term', value: { data: 'foo' } },
           ]),
         });
       });
 
       it('updates props `textSearch` and `authorUsernames` with empty values when passed filters param is empty', () => {
         wrapper.setData({
-          authorUsernames: ['foo'],
-          textSearch: 'bar',
+          authorUsernames: ['root'],
+          status: 'satisfied',
+          textSearch: 'foo',
         });
 
         wrapper.vm.handleFilterRequirements([]);
 
         expect(wrapper.vm.authorUsernames).toEqual([]);
+        expect(wrapper.vm.status).toBe('');
         expect(wrapper.vm.textSearch).toBe('');
         expect(trackingSpy).not.toHaveBeenCalled();
       });
@@ -934,17 +951,8 @@ describe('RequirementsRoot', () => {
         'Search requirements',
       );
       expect(wrapper.find(FilteredSearchBarRoot).props('tokens')).toEqual([
-        {
-          type: 'author_username',
-          icon: 'user',
-          title: 'Author',
-          unique: false,
-          symbol: '@',
-          token: AuthorToken,
-          operators: [{ value: '=', description: 'is', default: 'true' }],
-          fetchPath: 'gitlab-org/gitlab-shell',
-          fetchAuthors: expect.any(Function),
-        },
+        mockAuthorToken,
+        mockStatusToken,
       ]);
       expect(wrapper.find(FilteredSearchBarRoot).props('recentSearchesStorageKey')).toBe(
         'requirements',
@@ -1025,6 +1033,91 @@ describe('RequirementsRoot', () => {
         expect(pagination.props('value')).toBe(1);
         expect(pagination.props('perPage')).toBe(2); // We're mocking this page size
         expect(pagination.props('align')).toBe('center');
+      });
+    });
+  });
+
+  describe('with apollo mock', () => {
+    describe('when requirement is edited', () => {
+      let updateRequirementSpy;
+
+      describe('when user changes the requirement\'s status to "FAILED" from "SUCCESS"', () => {
+        const editRequirementToFailed = () => {
+          findRequirementEditForm().vm.$emit('save', {
+            description: mockProjectRequirementPassed.description,
+            iid: mockProjectRequirementPassed.iid,
+            title: mockProjectRequirementPassed.title,
+            lastTestReportState: TestReportStatus.Failed,
+          });
+        };
+
+        beforeEach(() => {
+          updateRequirementSpy = jest.fn().mockResolvedValue(mockUpdateRequirementToFailed);
+
+          wrapper = createComponentWithApollo({
+            requestHandlers: [[updateRequirement, updateRequirementSpy]],
+          });
+        });
+
+        it('calls `updateRequirement` mutation with correct parameters', () => {
+          editRequirementToFailed();
+
+          expect(updateRequirementSpy).toHaveBeenCalledWith({
+            updateRequirementInput: {
+              projectPath: 'gitlab-org/gitlab-shell',
+              iid: mockProjectRequirementPassed.iid,
+              lastTestReportState: TestReportStatus.Failed,
+              title: mockProjectRequirementPassed.title,
+            },
+          });
+        });
+
+        it('renders a failed badge after the update', async () => {
+          expect(findFailedStatusIcon().exists()).toBe(false);
+
+          editRequirementToFailed();
+          await waitForPromises();
+
+          expect(findFailedStatusIcon().exists()).toBe(true);
+        });
+      });
+
+      describe('when user changes the title of a requirement', () => {
+        const editRequirementTitle = () => {
+          findRequirementEditForm().vm.$emit('save', {
+            description: mockProjectRequirementPassed.description,
+            iid: mockProjectRequirementPassed.iid,
+            title: 'edited title',
+            lastTestReportState: null,
+          });
+        };
+
+        beforeEach(async () => {
+          updateRequirementSpy = jest.fn().mockResolvedValue(mockUpdateRequirementTitle);
+
+          wrapper = createComponentWithApollo({
+            requestHandlers: [[updateRequirement, updateRequirementSpy]],
+          });
+        });
+
+        it('calls `updateRequirement` mutation with correct parameters without `lastTestReport`', () => {
+          editRequirementTitle();
+
+          expect(updateRequirementSpy).toHaveBeenCalledWith({
+            updateRequirementInput: {
+              projectPath: 'gitlab-org/gitlab-shell',
+              iid: mockProjectRequirementPassed.iid,
+              title: 'edited title',
+            },
+          });
+        });
+
+        it('renders the edited title', async () => {
+          editRequirementTitle();
+          await waitForPromises();
+
+          expect(wrapper.find('.issue-title-text').text()).toContain('edited title');
+        });
       });
     });
   });

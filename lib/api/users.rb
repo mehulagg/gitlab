@@ -58,6 +58,7 @@ module API
           optional :color_scheme_id, type: Integer, desc: 'The color scheme for the file viewer'
           optional :private_profile, type: Boolean, desc: 'Flag indicating the user has a private profile'
           optional :note, type: String, desc: 'Admin note for this user'
+          optional :view_diffs_file_by_file, type: Boolean, desc: 'Flag indicating the user sees only one file diff per page'
           all_or_none_of :extern_uid, :provider
 
           use :optional_params_ee
@@ -82,6 +83,7 @@ module API
         optional :search, type: String, desc: 'Search for a username'
         optional :active, type: Boolean, default: false, desc: 'Filters only active users'
         optional :external, type: Boolean, default: false, desc: 'Filters only external users'
+        optional :exclude_external, as: :non_external, type: Boolean, default: false, desc: 'Filters only non external users'
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
         optional :created_after, type: DateTime, desc: 'Return users created after the specified time'
         optional :created_before, type: DateTime, desc: 'Return users created before the specified time'
@@ -97,7 +99,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get feature_category: :users do
-        authenticated_as_admin! if params[:external].present? || (params[:extern_uid].present? && params[:provider].present?)
+        authenticated_as_admin! if params[:extern_uid].present? && params[:provider].present?
 
         unless current_user&.admin?
           params.except!(:created_after, :created_before, :order_by, :sort, :two_factor, :without_projects)
@@ -229,7 +231,7 @@ module API
         optional :password, type: String, desc: 'The password of the new user'
         optional :reset_password, type: Boolean, desc: 'Flag indicating the user will be sent a password reset token'
         optional :skip_confirmation, type: Boolean, desc: 'Flag indicating the account is confirmed'
-        at_least_one_of :password, :reset_password
+        at_least_one_of :password, :reset_password, :force_random_password
         requires :name, type: String, desc: 'The name of the user'
         requires :username, type: String, desc: 'The username of the user'
         optional :force_random_password, type: Boolean, desc: 'Flag indicating a random password will be set'
@@ -239,7 +241,7 @@ module API
         authenticated_as_admin!
 
         params = declared_params(include_missing: false)
-        user = ::Users::CreateService.new(current_user, params).execute(skip_authorization: true)
+        user = ::Users::AuthorizedCreateService.new(current_user, params).execute
 
         if user.persisted?
           present user, with: Entities::UserWithAdmin, current_user: current_user
@@ -569,8 +571,6 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       delete ":id", feature_category: :users do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/20757')
-
         authenticated_as_admin!
 
         user = User.find_by(id: params[:id])
@@ -996,6 +996,63 @@ module API
         present paginate(current_user.emails), with: Entities::Email
       end
 
+      desc "Update a user's credit_card_validation" do
+        success Entities::UserCreditCardValidations
+      end
+      params do
+        requires :user_id, type: String, desc: 'The ID or username of the user'
+        requires :credit_card_validated_at, type: DateTime, desc: 'The time when the user\'s credit card was validated'
+      end
+      put ":user_id/credit_card_validation", feature_category: :users do
+        authenticated_as_admin!
+
+        user = find_user(params[:user_id])
+        not_found!('User') unless user
+
+        attrs = declared_params(include_missing: false)
+
+        service = ::Users::UpsertCreditCardValidationService.new(attrs).execute
+
+        if service.success?
+          present user.credit_card_validation, with: Entities::UserCreditCardValidations
+        else
+          render_api_error!('400 Bad Request', 400)
+        end
+      end
+
+      desc "Update the current user's preferences" do
+        success Entities::UserPreferences
+        detail 'This feature was introduced in GitLab 13.10.'
+      end
+      params do
+        optional :view_diffs_file_by_file, type: Boolean, desc: 'Flag indicating the user sees only one file diff per page'
+        optional :show_whitespace_in_diffs, type: Boolean, desc: 'Flag indicating the user sees whitespace changes in diffs'
+        at_least_one_of :view_diffs_file_by_file, :show_whitespace_in_diffs
+      end
+      put "preferences", feature_category: :users do
+        authenticate!
+
+        preferences = current_user.user_preference
+
+        attrs = declared_params(include_missing: false)
+
+        service = ::UserPreferences::UpdateService.new(current_user, attrs).execute
+
+        if service.success?
+          present preferences, with: Entities::UserPreferences
+        else
+          render_api_error!('400 Bad Request', 400)
+        end
+      end
+
+      desc "Get the current user's preferences" do
+        success Entities::UserPreferences
+        detail 'This feature was introduced in GitLab 14.0.'
+      end
+      get "preferences", feature_category: :users do
+        present current_user.user_preference, with: Entities::UserPreferences
+      end
+
       desc 'Get a single email address owned by the currently authenticated user' do
         success Entities::Email
       end
@@ -1071,10 +1128,7 @@ module API
       put "status", feature_category: :users do
         forbidden! unless can?(current_user, :update_user_status, current_user)
 
-        update_params = declared_params
-        update_params.delete(:clear_status_after) if Feature.disabled?(:clear_status_with_quick_options, current_user)
-
-        if ::Users::SetStatusService.new(current_user, update_params).execute
+        if ::Users::SetStatusService.new(current_user, declared_params).execute
           present current_user.status, with: Entities::UserStatus
         else
           render_validation_error!(current_user.status)

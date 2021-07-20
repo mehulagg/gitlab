@@ -3,13 +3,11 @@ import * as actions from 'ee/threat_monitoring/store/modules/network_policies/ac
 import * as types from 'ee/threat_monitoring/store/modules/network_policies/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/network_policies/state';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-
-import { mockPoliciesResponse } from '../../../mock_data';
 
 jest.mock('~/flash');
 
@@ -46,118 +44,6 @@ describe('Network Policy actions', () => {
         ],
         [],
       ));
-  });
-
-  describe('fetchPolicies', () => {
-    describe('on success', () => {
-      beforeEach(() => {
-        mock
-          .onGet(networkPoliciesEndpoint, {
-            params: { environment_id: environmentId },
-          })
-          .replyOnce(httpStatus.OK, mockPoliciesResponse);
-      });
-
-      it('should dispatch the request and success actions', () =>
-        testAction(
-          actions.fetchPolicies,
-          environmentId,
-          state,
-          [
-            { type: types.REQUEST_POLICIES },
-            {
-              type: types.RECEIVE_POLICIES_SUCCESS,
-              payload: mockPoliciesResponse,
-            },
-          ],
-          [],
-        ));
-
-      describe('without environment id', () => {
-        beforeEach(() => {
-          mock.onGet(networkPoliciesEndpoint, null).replyOnce(httpStatus.OK, mockPoliciesResponse);
-        });
-        it('should dispatch the request and success actions', () =>
-          testAction(
-            actions.fetchPolicies,
-            null,
-            state,
-            [
-              { type: types.REQUEST_POLICIES },
-              {
-                type: types.RECEIVE_POLICIES_SUCCESS,
-                payload: mockPoliciesResponse,
-              },
-            ],
-            [],
-          ));
-      });
-    });
-
-    describe('on error', () => {
-      describe('without payload', () => {
-        const error = { error: 'foo' };
-
-        beforeEach(() => {
-          mock.onGet(networkPoliciesEndpoint).replyOnce(500, error);
-        });
-
-        it('should dispatch the request, error actions and updates payload', () =>
-          testAction(
-            actions.fetchPolicies,
-            environmentId,
-            state,
-            [{ type: types.REQUEST_POLICIES }, { type: types.RECEIVE_POLICIES_ERROR, payload: [] }],
-            [],
-          ).then(() => {
-            expect(createFlash).toHaveBeenCalled();
-          }));
-      });
-
-      describe('with payload', () => {
-        const payload = { error: 'foo', payload: [policy] };
-
-        beforeEach(() => {
-          mock.onGet(networkPoliciesEndpoint).replyOnce(500, payload);
-        });
-
-        it('should dispatch the request, error actions and updates payload', () =>
-          testAction(
-            actions.fetchPolicies,
-            environmentId,
-            state,
-            [
-              { type: types.REQUEST_POLICIES },
-              { type: types.RECEIVE_POLICIES_ERROR, payload: [policy] },
-            ],
-            [],
-          ).then(() => {
-            expect(createFlash).toHaveBeenCalled();
-          }));
-      });
-    });
-
-    describe('with an empty endpoint', () => {
-      beforeEach(() => {
-        state.policiesEndpoint = '';
-      });
-
-      it('should dispatch RECEIVE_POLICES_ERROR', () =>
-        testAction(
-          actions.fetchPolicies,
-          environmentId,
-          state,
-          [
-            {
-              type: types.RECEIVE_POLICIES_ERROR,
-              payload: [],
-            },
-          ],
-          [],
-        ).then(() => {
-          expect(createFlash).toHaveBeenCalled();
-        }));
-    });
   });
 
   describe('createPolicy', () => {

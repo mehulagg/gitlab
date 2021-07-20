@@ -6,13 +6,14 @@ RSpec.describe BulkCreateIntegrationService do
   include JiraServiceHelper
 
   before_all do
-    stub_jira_service_test
+    stub_jira_integration_test
   end
 
   let_it_be(:excluded_group) { create(:group) }
   let_it_be(:excluded_project) { create(:project, group: excluded_group) }
-  let(:instance_integration) { create(:jira_service, :instance) }
-  let(:template_integration) { create(:jira_service, :template) }
+
+  let(:instance_integration) { create(:jira_integration, :instance) }
+  let(:template_integration) { create(:jira_integration, :template) }
   let(:excluded_attributes) { %w[id project_id group_id inherit_from_id instance template created_at updated_at] }
 
   shared_examples 'creates integration from batch ids' do
@@ -30,7 +31,7 @@ RSpec.describe BulkCreateIntegrationService do
         described_class.new(integration, batch, association).execute
 
         expect(created_integration.reload.data_fields.attributes.except(*excluded_attributes))
-          .to eq(integration.data_fields.attributes.except(*excluded_attributes))
+          .to eq(integration.reload.data_fields.attributes.except(*excluded_attributes))
       end
     end
   end
@@ -49,7 +50,7 @@ RSpec.describe BulkCreateIntegrationService do
 
     context 'with a project association' do
       let!(:project) { create(:project) }
-      let(:created_integration) { project.jira_service }
+      let(:created_integration) { project.jira_integration }
       let(:batch) { Project.where(id: project.id) }
       let(:association) { 'project' }
 
@@ -59,7 +60,7 @@ RSpec.describe BulkCreateIntegrationService do
 
     context 'with a group association' do
       let!(:group) { create(:group) }
-      let(:created_integration) { Service.find_by(group: group) }
+      let(:created_integration) { Integration.find_by(group: group) }
       let(:batch) { Group.where(id: group.id) }
       let(:association) { 'group' }
 
@@ -73,8 +74,8 @@ RSpec.describe BulkCreateIntegrationService do
 
     context 'with a project association' do
       let!(:project) { create(:project, group: group) }
-      let(:integration) { create(:jira_service, group: group, project: nil) }
-      let(:created_integration) { project.jira_service }
+      let(:integration) { create(:jira_integration, group: group, project: nil) }
+      let(:created_integration) { project.jira_integration }
       let(:batch) { Project.where(id: Project.minimum(:id)..Project.maximum(:id)).without_integration(integration).in_namespace(integration.group.self_and_descendants) }
       let(:association) { 'project' }
       let(:inherit_from_id) { integration.id }
@@ -85,8 +86,8 @@ RSpec.describe BulkCreateIntegrationService do
 
     context 'with a group association' do
       let!(:subgroup) { create(:group, parent: group) }
-      let(:integration) { create(:jira_service, group: group, project: nil, inherit_from_id: instance_integration.id) }
-      let(:created_integration) { Service.find_by(group: subgroup) }
+      let(:integration) { create(:jira_integration, group: group, project: nil, inherit_from_id: instance_integration.id) }
+      let(:created_integration) { Integration.find_by(group: subgroup) }
       let(:batch) { Group.where(id: subgroup.id) }
       let(:association) { 'group' }
       let(:inherit_from_id) { instance_integration.id }
@@ -101,7 +102,7 @@ RSpec.describe BulkCreateIntegrationService do
 
     context 'with a project association' do
       let!(:project) { create(:project) }
-      let(:created_integration) { project.jira_service }
+      let(:created_integration) { project.jira_integration }
       let(:batch) { Project.where(id: project.id) }
       let(:association) { 'project' }
       let(:inherit_from_id) { integration.id }

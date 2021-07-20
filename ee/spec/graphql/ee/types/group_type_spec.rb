@@ -12,14 +12,15 @@ RSpec.describe GitlabSchema.types['Group'] do
   end
 
   it { expect(described_class).to have_graphql_field(:iterations) }
-  it { expect(described_class).to have_graphql_field(:groupTimelogsEnabled) }
+  it { expect(described_class).to have_graphql_field(:iteration_cadences) }
   it { expect(described_class).to have_graphql_field(:timelogs, complexity: 5) }
   it { expect(described_class).to have_graphql_field(:vulnerabilities) }
   it { expect(described_class).to have_graphql_field(:vulnerability_scanners) }
-  it { expect(described_class).to have_graphql_field(:vulnerabilities_count_by_day_and_severity) }
+  it { expect(described_class).to have_graphql_field(:vulnerabilities_count_by_day) }
   it { expect(described_class).to have_graphql_field(:vulnerability_grades) }
   it { expect(described_class).to have_graphql_field(:code_coverage_activities) }
   it { expect(described_class).to have_graphql_field(:stats) }
+  it { expect(described_class).to have_graphql_field(:billable_members_count) }
 
   describe 'timelogs field' do
     subject { described_class.fields['timelogs'] }
@@ -72,5 +73,11 @@ RSpec.describe GitlabSchema.types['Group'] do
       expect(vulnerabilities.first['state']).to eq('DETECTED')
       expect(vulnerabilities.first['severity']).to eq('CRITICAL')
     end
+  end
+
+  describe 'dora field' do
+    subject { described_class.fields['dora'] }
+
+    it { is_expected.to have_graphql_type(Types::DoraType) }
   end
 end

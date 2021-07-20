@@ -18,7 +18,7 @@ RSpec.describe EpicPresenter do
     let(:milestone2) { create(:milestone, title: 'make me a pizza', start_date: '2020-01-01', due_date: '2029-12-31') }
 
     before do
-      epic.update(
+      epic.update!(
         start_date_sourcing_milestone: milestone1, start_date: Date.new(2000, 1, 1),
         due_date_sourcing_milestone: milestone2, due_date: Date.new(2000, 1, 2)
       )

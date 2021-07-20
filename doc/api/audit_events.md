@@ -4,13 +4,16 @@ group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Audit Events API
+# Audit Events API **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/121) in GitLab 12.4.
 
 ## Instance Audit Events **(PREMIUM SELF)**
 
 The Audit Events API allows you to retrieve [instance audit events](../administration/audit_events.md#instance-events).
+This API cannot retrieve group or project audit events.
 
-To retrieve audit events using the API, you must [authenticate yourself](README.md#authentication) as an Administrator.
+To retrieve audit events using the API, you must [authenticate yourself](index.md#authentication) as an Administrator.
 
 ### Retrieve all instance audit events
 
@@ -28,7 +31,7 @@ GET /audit_events
 By default, `GET` requests return 20 results at a time because the API results
 are paginated.
 
-Read more on [pagination](README.md#pagination).
+Read more on [pagination](index.md#pagination).
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/audit_events"
@@ -126,11 +129,12 @@ Example response:
 }
 ```
 
-## Group Audit Events **(PREMIUM)**
+## Group Audit Events
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34078) in GitLab 12.5.
 
 The Group Audit Events API allows you to retrieve [group audit events](../administration/audit_events.md#group-events).
+This API cannot retrieve project audit events.
 
 A user with a Owner role (or above) can retrieve group audit events of all users.
 A user with a Developer or Maintainer role is limited to group audit events based on their individual actions.
@@ -143,14 +147,14 @@ GET /groups/:id/audit_events
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) |
 | `created_after` | string | no | Return group audit events created on or after the given time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ  |
 | `created_before` | string | no | Return group audit events created on or before the given time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ |
 
 By default, `GET` requests return 20 results at a time because the API results
 are paginated.
 
-Read more on [pagination](README.md#pagination).
+Read more on [pagination](index.md#pagination).
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/groups/60/audit_events"
@@ -205,7 +209,7 @@ GET /groups/:id/audit_events/:audit_event_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) |
 | `audit_event_id` | integer | yes | The ID of the audit event |
 
 ```shell
@@ -233,7 +237,7 @@ Example response:
 }
 ```
 
-## Project Audit Events **(PREMIUM)**
+## Project Audit Events
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/219238) in GitLab 13.1.
 
@@ -250,14 +254,14 @@ GET /projects/:id/audit_events
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `created_after` | string | no | Return project audit events created on or after the given time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ  |
 | `created_before` | string | no | Return project audit events created on or before the given time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ |
 
 By default, `GET` requests return 20 results at a time because the API results
 are paginated.
 
-Read more on [pagination](README.md#pagination).
+Read more on [pagination](index.md#pagination).
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/projects/7/audit_events"
@@ -316,7 +320,7 @@ GET /projects/:id/audit_events/:audit_event_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `audit_event_id` | integer | yes | The ID of the audit event |
 
 ```shell

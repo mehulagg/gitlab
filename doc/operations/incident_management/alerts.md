@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -11,7 +11,7 @@ Alerts are a critical entity in your incident management workflow. They represen
 ## Alert List
 
 Users with at least Developer [permissions](../../user/permissions.md) can
-access the Alert list at **Operations > Alerts** in your project's
+access the Alert list at **Monitor > Alerts** in your project's
 sidebar. The Alert list displays alerts sorted by start time, but
 you can change the sort order by clicking the headers in the Alert list.
 ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217745) in GitLab 13.1.)
@@ -33,9 +33,10 @@ The alert list displays the following information:
 - **Event count**: The number of times that an alert has fired.
 - **Issue**: A link to the incident issue that has been created for the alert.
 - **Status**: The current status of the alert:
-  - **Triggered**: No one has begun investigation.
+  - **Triggered**: Investigation has not started.
   - **Acknowledged**: Someone is actively investigating the problem.
   - **Resolved**: No further work is required.
+  - **Ignored**: No action will be taken on the alert.
 
 NOTE:
 Check out a live example available from the
@@ -84,17 +85,16 @@ The **Alert details** tab has two sections. The top section provides a short lis
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.2.
 
-The **Metrics** tab displays a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab is empty. To set up alerts for GitLab-managed Prometheus instances, see [Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances). For externally-managed Prometheus instances, you must configure your alerting
-rules to display a chart in the alert. For information about how to configure
+The **Metrics** tab displays a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab is empty.
+For externally-managed Prometheus instances, you must configure your alerting rules to display a chart in the alert. For information about how to configure
 your alerting rules, see [Embedding metrics based on alerts in incident issues](../metrics/embed.md#embedding-metrics-based-on-alerts-in-incident-issues). See
-[External Prometheus instances](../metrics/alerts.md#external-prometheus-instances)
-for information about setting up alerts for your self-managed Prometheus
+[External Prometheus instances](../metrics/alerts.md#external-prometheus-instances) for information about setting up alerts for your self-managed Prometheus
 instance.
 
 To view the metrics for an alert:
 
 1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
-1. Navigate to **Operations > Alerts**.
+1. Navigate to **Monitor > Alerts**.
 1. Select the alert you want to view.
 1. Below the title of the alert, select the **Metrics** tab.
 
@@ -114,7 +114,7 @@ your application's performance and how to resolve any problems.
 To view the logs for an alert:
 
 1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
-1. Navigate to **Operations > Alerts**.
+1. Navigate to **Monitor > Alerts**.
 1. Select the alert you want to view.
 1. Below the title of the alert, select the **Metrics** tab.
 1. Select the [menu](../metrics/dashboards/index.md#chart-context-menu) of
@@ -167,21 +167,18 @@ difficult to track who is investigating and working on it. Assigning alerts ease
 
 To assign an alert:
 
-1. To display the list of current alerts, navigate to **Operations > Alerts**:
+1. To display the list of current alerts, navigate to **Monitor > Alerts**.
 
-   ![Alert List View Assignee(s)](img/alert_list_assignees_v13_1.png)
-
-1. Select your desired alert to display its **Alert Details View**:
+1. Select your desired alert to display its details.
 
    ![Alert Details View Assignee(s)](img/alert_details_assignees_v13_1.png)
 
 1. If the right sidebar is not expanded, select
    **{angle-double-right}** **Expand sidebar** to expand it.
+
 1. In the right sidebar, locate the **Assignee**, and then select **Edit**.
    From the dropdown menu, select each user you want to assign to the alert.
    GitLab creates a [to-do item](../../user/todos.md) for each user.
-
-   ![Alert Details View Assignee(s)](img/alert_todo_assignees_v13_1.png)
 
 After completing their portion of investigating or fixing the alert, users can
 unassign themselves from the alert. To remove an assignee, select **Edit** next to the **Assignee** dropdown menu
@@ -195,28 +192,13 @@ You can manually create [To-Do list items](../../user/todos.md) for yourself
 from the Alert details screen, and view them later on your **To-Do List**. To
 add a to-do item:
 
-1. To display the list of current alerts, navigate to **Operations > Alerts**.
+1. To display the list of current alerts, navigate to **Monitor > Alerts**.
 1. Select your desired alert to display its **Alert Management Details View**.
 1. Select the **Add a to do** button in the right sidebar:
 
    ![Alert Details Add a to do](img/alert_detail_add_todo_v13_9.png)
 
 Select the **To-Do List** **{todo-done}** in the navigation bar to view your current to-do list.
-
-![Alert Details Added to do](img/alert_detail_added_todo_v13_1.png)
-
-## Link runbooks to alerts
-
-> Runbook URLs [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39315) in GitLab 13.3.
-
-When creating alerts from the metrics dashboard for
-[managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances),
-you can link a runbook. When the alert triggers, you can access the runbook through
-the [chart context menu](../metrics/dashboards/index.md#chart-context-menu) in the
-upper-right corner of the metrics chart, making it easy for you to locate and access
-the correct runbook:
-
-![Linked Runbook in charts](img/link_runbooks_to_alerts_v13_5.png)
 
 ## View the environment that generated the alert
 

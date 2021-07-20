@@ -2,6 +2,7 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import ProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
 import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
+import SiteProfileSummary from 'ee/on_demand_scans/components/profile_selector/site_profile_summary.vue';
 import { siteProfiles } from '../../mocks/mock_data';
 
 const TEST_LIBRARY_PATH = '/test/site/profiles/library/path';
@@ -10,10 +11,9 @@ const TEST_ATTRS = {
   'data-foo': 'bar',
 };
 const profiles = siteProfiles.map((x) => {
-  const suffix = x.validationStatus === 'PASSED_VALIDATION' ? 'Validated' : 'Not Validated';
   return {
     ...x,
-    dropdownLabel: `${x.profileName}: ${x.targetUrl} (${suffix})`,
+    dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
   };
 });
 
@@ -32,10 +32,6 @@ describe('OnDemandScansSiteProfileSelector', () => {
           provide: {
             siteProfilesLibraryPath: TEST_LIBRARY_PATH,
             newSiteProfilePath: TEST_NEW_PATH,
-            glFeatures: {
-              securityOnDemandScansSiteValidation: true,
-              securityDastSiteProfilesAdditionalFields: true,
-            },
           },
           slots: {
             summary: `<div>${profiles[0].profileName}'s summary</div>`,
@@ -68,6 +64,26 @@ describe('OnDemandScansSiteProfileSelector', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
+  describe('profile summary', () => {
+    it('is rendered when a profile is selected', () => {
+      const selectedProfile = profiles[0];
+
+      createComponent({
+        propsData: { profiles, value: selectedProfile.id, selectedProfile },
+      });
+
+      expect(wrapper.findComponent(SiteProfileSummary).exists()).toBe(true);
+    });
+
+    it('is not rendered when no profile is selected', () => {
+      createComponent({
+        propsData: { profiles, selectedProfile: null },
+      });
+
+      expect(wrapper.findComponent(SiteProfileSummary).exists()).toBe(false);
+    });
+  });
+
   it('sets listeners on profile selector component', () => {
     const inputHandler = jest.fn();
     createComponent({
@@ -94,35 +110,6 @@ describe('OnDemandScansSiteProfileSelector', () => {
         value: null,
       });
       expect(sel.attributes()).toMatchObject(TEST_ATTRS);
-    });
-
-    describe('feature flags disabled', () => {
-      beforeEach(() => {
-        createComponent({
-          propsData: { profiles },
-          provide: {
-            glFeatures: {
-              securityOnDemandScansSiteValidation: false,
-              securityDastSiteProfilesAdditionalFields: false,
-            },
-          },
-        });
-      });
-
-      it('renders profile selector', () => {
-        const sel = findProfileSelector();
-
-        expect(sel.props()).toEqual({
-          libraryPath: TEST_LIBRARY_PATH,
-          newProfilePath: TEST_NEW_PATH,
-          profiles: siteProfiles.map((x) => ({
-            ...x,
-            dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
-          })),
-          value: null,
-        });
-        expect(sel.attributes()).toMatchObject(TEST_ATTRS);
-      });
     });
   });
 });

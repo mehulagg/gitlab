@@ -12,6 +12,7 @@ class ElasticDeleteProjectWorker
 
   def perform(project_id, es_id)
     remove_project_and_children_documents(project_id, es_id)
+    IndexStatus.for_project(project_id).delete_all
   end
 
   private
@@ -19,11 +20,17 @@ class ElasticDeleteProjectWorker
   def indices
     helper = Gitlab::Elastic::Helper.default
 
-    if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
-      [helper.target_name] + helper.standalone_indices_proxies.map(&:index_name)
-    else
-      [helper.target_name]
+    index_names = [helper.target_name] + helper.standalone_indices_proxies(target_classes: [Issue]).map(&:index_name)
+
+    if Elastic::DataMigrationService.migration_has_finished?(:migrate_notes_to_separate_index)
+      index_names << helper.standalone_indices_proxies(target_classes: [Note]).map(&:index_name)
     end
+
+    if Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
+      index_names << helper.standalone_indices_proxies(target_classes: [MergeRequest]).map(&:index_name)
+    end
+
+    index_names
   end
 
   def remove_project_and_children_documents(project_id, es_id)
@@ -46,7 +53,13 @@ class ElasticDeleteProjectWorker
               },
               {
                 term: {
-                  target_project_id: project_id # handle merge_request which aliases project_id to target_project_id
+                  # We never set `project_id` for commits instead they have a nested rid which is the project_id
+                  "commit.rid" => project_id
+                }
+              },
+              {
+                term: {
+                  target_project_id: project_id # handle merge_request which previously did not store project_id and only stored target_project_id
                 }
               }
             ]

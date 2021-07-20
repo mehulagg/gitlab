@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Target component renders target 1`] = `
+<span
+  class="gl-text-gray-900"
+>
+   294444-apollo-management-table 
+</span>
+`;
+
+exports[`Target component without target renders Not Set with icon 1`] = `
+<span
+  class="gl-text-gray-900"
+>
+  <gl-icon-stub
+    class="gl-mr-1"
+    name="information-o"
+    size="16"
+  />
+  
+  Not Set
+
+</span>
+`;

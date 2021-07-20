@@ -17,7 +17,7 @@ RSpec.describe ProtectedEnvironments::UpdateService, '#execute' do
     }
   end
 
-  subject { described_class.new(project, user, params).execute(protected_environment) }
+  subject { described_class.new(container: project, current_user: user, params: params).execute(protected_environment) }
 
   before do
     deploy_access_level

@@ -1,0 +1,16 @@
+#import "../fragments/latest_snapshot.fragment.graphql"
+
+query devopsAdoptionEnabledNamespaces($displayNamespaceId: NamespaceID) {
+  devopsAdoptionEnabledNamespaces(displayNamespaceId: $displayNamespaceId) {
+    nodes {
+      id
+      latestSnapshot {
+        ...LatestSnapshot
+      }
+      namespace {
+        fullName
+        id
+      }
+    }
+  }
+}

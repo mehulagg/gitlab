@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Release', :smoke, :runner do
+  RSpec.describe 'Release', :runner do
+    # TODO: Convert back to :smoke once proved to be stable. Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/300906
     describe 'Pages' do
       let!(:project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -30,7 +31,7 @@ module QA
         pipeline.visit!
       end
 
-      it 'runs a Pages-specific pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/877' do
+      it 'runs a Pages-specific pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1783' do
         Page::Project::Pipeline::Show.perform do |show|
           expect(show).to have_job(:pages)
           show.click_job(:pages)

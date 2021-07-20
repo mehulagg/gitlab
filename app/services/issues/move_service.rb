@@ -48,19 +48,23 @@ module Issues
 
     def create_new_entity
       new_params = {
-                     id: nil,
-                     iid: nil,
-                     project: target_project,
-                     author: original_entity.author,
-                     assignee_ids: original_entity.assignee_ids,
-                     moved_issue: true
-                   }
+        id: nil,
+        iid: nil,
+        relative_position: relative_position,
+        project: target_project,
+        author: original_entity.author,
+        assignee_ids: original_entity.assignee_ids,
+        moved_issue: true
+      }
 
       new_params = original_entity.serializable_hash.symbolize_keys.merge(new_params)
+      # spam checking is not necessary, as no new content is being created. Passing nil for
+      # spam_params will cause SpamActionService to skip checking and return a success response.
+      spam_params = nil
 
       # Skip creation of system notes for existing attributes of the issue. The system notes of the old
       # issue are copied over so we don't want to end up with duplicate notes.
-      CreateService.new(@target_project, @current_user, new_params).execute(skip_system_notes: true)
+      CreateService.new(project: @target_project, current_user: @current_user, params: new_params, spam_params: spam_params).execute(skip_system_notes: true)
     end
 
     def queue_copy_designs
@@ -105,4 +109,4 @@ module Issues
   end
 end
 
-Issues::MoveService.prepend_if_ee('EE::Issues::MoveService')
+Issues::MoveService.prepend_mod_with('Issues::MoveService')

@@ -1,10 +1,10 @@
 - navbar_links = links.sort_by(&:title)
 - all_paths = navbar_links.map(&:path)
-- analytics_link = navbar_links.find { |link| link.title == _('Value Stream') } || navbar_links.first
+- analytics_link = navbar_links.find { |link| link.title == _('Value stream') } || navbar_links.first
 
 - if navbar_links.any?
   = nav_link(path: all_paths) do
-    = link_to analytics_link.link, {class: 'shortcuts-analytics', data: { qa_selector: 'analytics_anchor' } } do
+    = link_to analytics_link.link, {class: 'shortcuts-analytics has-sub-items', data: { qa_selector: 'analytics_anchor' } } do
       .nav-icon-container
         = sprite_icon('chart')
       %span.nav-item-name{ data: { qa_selector: 'analytics_link' } }

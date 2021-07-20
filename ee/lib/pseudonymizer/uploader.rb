@@ -28,7 +28,7 @@ module Pseudonymizer
 
     def available?
       !connect_to_remote_directory.nil?
-    rescue
+    rescue StandardError
       false
     end
 
@@ -46,7 +46,7 @@ module Pseudonymizer
       progress_output.print "Deleting tmp directory #{@output_dir} ... "
       FileUtils.rm_rf(@output_dir)
       progress_output.puts "done"
-    rescue
+    rescue StandardError
       progress_output.puts "failed"
     end
 

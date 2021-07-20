@@ -25,14 +25,14 @@ A database review is required for:
   generally up to the author of a merge request to decide whether or
   not complex queries are being introduced and if they require a
   database review.
-- Changes in usage data metrics that use `count`, `distinct_count` and `estimate_batch_distinct_count`.
+- Changes in Service Data metrics that use `count`, `distinct_count` and `estimate_batch_distinct_count`.
   These metrics could have complex queries over large tables.
   See the [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
   for implementation details.
 
-A database reviewer is expected to look out for obviously complex
+A database reviewer is expected to look out for overly complex
 queries in the change and review those closer. If the author does not
-point out specific queries for review and there are no obviously
+point out specific queries for review and there are no overly
 complex queries, it is enough to concentrate on reviewing the
 migration only.
 
@@ -43,7 +43,7 @@ If your merge request description does not include these items, the review will 
 
 If new migrations are introduced, in the MR **you are required to provide**:
 
-- The output of both migrating and rolling back for all migrations
+- The output of both migrating (`db:migrate`) and rolling back (`db:rollback`) for all migrations.
 
 If new queries have been introduced or existing queries have been updated, **you are required to provide**:
 
@@ -67,8 +67,8 @@ A database **reviewer**'s role is to:
 - Ensure the [required](#required) artifacts are provided and in the proper format. If they are not, reassign the merge request back to the author.
 - Perform a first-pass review on the MR and suggest improvements to the author.
 - Once satisfied, relabel the MR with ~"database::reviewed", approve it, and
-  reassign MR to the database **maintainer** suggested by Reviewer
-  Roulette.
+  request a review from the database **maintainer** suggested by Reviewer
+  Roulette. Remove yourself as a reviewer once this has been done.
 
 A database **maintainer**'s role is to:
 
@@ -78,12 +78,13 @@ A database **maintainer**'s role is to:
 - Finally approve the MR and relabel the MR with ~"database::approved"
 - Merge the MR if no other approvals are pending or pass it on to
   other maintainers as required (frontend, backend, docs).
+  - If not merging, remove yourself as a reviewer.
 
 ### Distributing review workload
 
 Review workload is distributed using [reviewer roulette](code_review.md#reviewer-roulette)
 ([example](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/25181#note_147551725)).
-The MR author should then co-assign the suggested database
+The MR author should request a review from the suggested database
 **reviewer**. When they give their sign-off, they will hand over to
 the suggested database **maintainer**.
 
@@ -103,7 +104,7 @@ the following preparations into account.
 `db/schema_migrations` were added or removed.
 - Make migrations reversible by using the `change` method or include a `down` method when using `up`.
   - Include either a rollback procedure or describe how to rollback changes.
-- Add the output of both migrating and rolling back for all migrations into the MR description.
+- Add the output of both migrating (`db:migrate`) and rolling back (`db:rollback`) for all migrations into the MR description.
   - Ensure the down method reverts the changes in `db/structure.sql`.
   - Update the migration output whenever you modify the migrations during the review process.
 - Add tests for the migration in `spec/migrations` if necessary. See [Testing Rails migrations at GitLab](testing_guide/testing_migrations_guide.md) for more details.
@@ -116,6 +117,9 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - If the execution from `#database-lab` is longer than `1h`, the index should be moved to a [post-migration](post_deployment_migrations.md).
     Keep in mind that in this case you may need to split the migration and the application changes in separate releases to ensure the index
     will be in place when the code that needs it will be deployed.
+- Trigger the [database testing](../architecture/blueprints/database_testing/index.md) job (`db:gitlabcom-database-testing`) in the `test` stage.
+  - This job runs migrations in a production-like environment (similar to `#database_lab`) and posts to the MR its findings (queries, runtime, size change).
+  - Review migration runtimes and any warnings.
 
 #### Preparation when adding or modifying queries
 
@@ -147,7 +151,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
 - Provide a public link to the plan from either:
   - [postgres.ai](https://postgres.ai/): Follow the link in `#database-lab` and generate a shareable, public link
     by clicking the **Share** button in the upper right corner.
-  - [explain.depesz.com](https://explain.depesz.com): Paste both the plan and the query used in the form.
+  - [explain.depesz.com](https://explain.depesz.com) or [explain.dalibo.com](https://explain.dalibo.com): Paste both the plan and the query used in the form.
 - When providing query plans, make sure it hits enough data:
   - You can use a GitLab production replica to test your queries on a large scale,
   through the `#database-lab` Slack channel or through [ChatOps](understanding_explain_plans.md#chatops).
@@ -175,7 +179,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
 
 #### Preparation when removing columns, tables, indexes, or other structures
 
-- Follow the [guidelines on dropping columns](what_requires_downtime.md#dropping-columns).
+- Follow the [guidelines on dropping columns](avoiding_downtime_in_migrations.md#dropping-columns).
 - Generally it's best practice (but not a hard rule) to remove indexes and foreign keys in a post-deployment migration.
   - Exceptions include removing indexes and foreign keys for small tables.
 - If you're adding a composite index, another index might become redundant, so remove that in the same migration.
@@ -198,7 +202,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - Check that the relevant version files under `db/schema_migrations` were added or removed.
   - Check queries timing (If any): In a single transaction, cumulative query time executed in a migration
     needs to fit comfortably within `15s` - preferably much less than that - on GitLab.com.
-  - For column removals, make sure the column has been [ignored in a previous release](what_requires_downtime.md#dropping-columns)
+  - For column removals, make sure the column has been [ignored in a previous release](avoiding_downtime_in_migrations.md#dropping-columns)
 - Check [background migrations](background_migrations.md):
   - Establish a time estimate for execution on GitLab.com. For historical purposes,
     it's highly recommended to include this estimation on the merge request description.
@@ -220,7 +224,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - Data migrations should be reversible too or come with a description of how to reverse, when possible.
     This applies to all types of migrations (regular, post-deploy, background).
 - Query performance
-  - Check for any obviously complex queries and queries the author specifically
+  - Check for any overly complex queries and queries the author specifically
     points out for review (if any)
   - If not present yet, ask the author to provide SQL queries and query plans
     (for example, by using [ChatOps](understanding_explain_plans.md#chatops) or direct

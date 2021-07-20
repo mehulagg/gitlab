@@ -11,6 +11,22 @@ RSpec.describe Geo::CacheInvalidationEventStore do
 
   subject { described_class.new(cache_key) }
 
+  describe '#initialize' do
+    context 'when the key is a String' do
+      it 'does not modify the key' do
+        expect(subject.key).to eq(cache_key)
+      end
+    end
+
+    context 'when the key is an Array' do
+      let(:cache_key) { %w{a cache key} }
+
+      it 'expands the key' do
+        expect(subject.key).to eq('a/cache/key')
+      end
+    end
+  end
+
   describe '#create' do
     it_behaves_like 'a Geo event store', Geo::CacheInvalidationEvent
 

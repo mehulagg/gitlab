@@ -576,55 +576,127 @@ describe('GfmAutoComplete', () => {
     });
   });
 
-  describe('Members.templateFunction', () => {
-    it('should return html with avatarTag and username', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '',
-          availabilityStatus: '',
-        }),
-      ).toBe('<li>IMG my-group <small></small> </li>');
-    });
+  describe('GfmAutoComplete.Members', () => {
+    const member = {
+      name: 'Marge Simpson',
+      username: 'msimpson',
+      search: 'MargeSimpson msimpson',
+    };
 
-    it('should add icon if icon is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '<i class="icon"/>',
-          availabilityStatus: '',
-        }),
-      ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
-    });
+    describe('templateFunction', () => {
+      it('should return html with avatarTag and username', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small></small> </li>');
+      });
 
-    it('should add escaped title if title is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: 'MyGroup+',
-          icon: '<i class="icon"/>',
-          availabilityStatus: '',
-        }),
-      ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
-    });
+      it('should add icon if icon is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
+      });
 
-    it('should add user availability status if availabilityStatus is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '<i class="icon"/>',
-          availabilityStatus: '<span class="gl-text-gray-500"> (Busy)</span>',
-        }),
-      ).toBe(
-        '<li>IMG my-group <small><span class="gl-text-gray-500"> (Busy)</span></small> <i class="icon"/></li>',
-      );
+      it('should add escaped title if title is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: 'MyGroup+',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
+      });
+
+      it('should add user availability status if availabilityStatus is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '<span class="gl-text-gray-500"> (Busy)</span>',
+          }),
+        ).toBe(
+          '<li>IMG my-group <small><span class="gl-text-gray-500"> (Busy)</span></small> <i class="icon"/></li>',
+        );
+      });
+
+      describe('nameOrUsernameStartsWith', () => {
+        it.each`
+          query             | result
+          ${'mar'}          | ${true}
+          ${'msi'}          | ${true}
+          ${'margesimpson'} | ${true}
+          ${'msimpson'}     | ${true}
+          ${'arge'}         | ${false}
+          ${'rgesimp'}      | ${false}
+          ${'maria'}        | ${false}
+          ${'homer'}        | ${false}
+        `('returns $result for $query', ({ query, result }) => {
+          expect(GfmAutoComplete.Members.nameOrUsernameStartsWith(member, query)).toBe(result);
+        });
+      });
+
+      describe('nameOrUsernameIncludes', () => {
+        it.each`
+          query             | result
+          ${'mar'}          | ${true}
+          ${'msi'}          | ${true}
+          ${'margesimpson'} | ${true}
+          ${'msimpson'}     | ${true}
+          ${'arge'}         | ${true}
+          ${'rgesimp'}      | ${true}
+          ${'maria'}        | ${false}
+          ${'homer'}        | ${false}
+        `('returns $result for $query', ({ query, result }) => {
+          expect(GfmAutoComplete.Members.nameOrUsernameIncludes(member, query)).toBe(result);
+        });
+      });
+
+      describe('sorter', () => {
+        const query = 'c';
+
+        const items = [
+          { search: 'DougHackett elayne.krieger' },
+          { search: 'BerylHuel cherie.block' },
+          { search: 'ErlindaMayert nicolle' },
+          { search: 'Administrator root' },
+          { search: 'PhoebeSchaden salina' },
+          { search: 'CatherinTerry tommy.will' },
+          { search: 'AntoineLedner ammie' },
+          { search: 'KinaCummings robena' },
+          { search: 'CharlsieHarber xzbdulia' },
+        ];
+
+        const expected = [
+          // Members whose name/username starts with `c` are grouped first
+          { search: 'BerylHuel cherie.block' },
+          { search: 'CatherinTerry tommy.will' },
+          { search: 'CharlsieHarber xzbdulia' },
+          // Members whose name/username contains `c` are grouped second
+          { search: 'DougHackett elayne.krieger' },
+          { search: 'ErlindaMayert nicolle' },
+          { search: 'PhoebeSchaden salina' },
+          { search: 'KinaCummings robena' },
+        ];
+
+        it('filters out non-matches, then puts matches with start of name/username first', () => {
+          expect(GfmAutoComplete.Members.sort(query, items)).toMatchObject(expected);
+        });
+      });
     });
   });
 

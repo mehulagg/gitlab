@@ -3,15 +3,15 @@ import { shallowMount } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import DeleteButton from '~/registry/explorer/components/delete_button.vue';
+import CleanupStatus from '~/registry/explorer/components/list_page/cleanup_status.vue';
 import Component from '~/registry/explorer/components/list_page/image_list_row.vue';
 import {
   ROW_SCHEDULED_FOR_DELETION,
   LIST_DELETE_BUTTON_DISABLED,
   REMOVE_REPOSITORY_LABEL,
-  ASYNC_DELETE_IMAGE_ERROR_MESSAGE,
-  CLEANUP_TIMED_OUT_ERROR_MESSAGE,
   IMAGE_DELETE_SCHEDULED_STATUS,
-  IMAGE_FAILED_DELETED_STATUS,
+  SCHEDULED_STATUS,
+  ROOT_IMAGE_TEXT,
 } from '~/registry/explorer/constants';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
@@ -24,10 +24,11 @@ describe('Image List Row', () => {
 
   const findDetailsLink = () => wrapper.find('[data-testid="details-link"]');
   const findTagsCount = () => wrapper.find('[data-testid="tags-count"]');
-  const findDeleteBtn = () => wrapper.find(DeleteButton);
-  const findClipboardButton = () => wrapper.find(ClipboardButton);
-  const findWarningIcon = () => wrapper.find('[data-testid="warning-icon"]');
-  const findSkeletonLoader = () => wrapper.find(GlSkeletonLoader);
+  const findDeleteBtn = () => wrapper.findComponent(DeleteButton);
+  const findClipboardButton = () => wrapper.findComponent(ClipboardButton);
+  const findCleanupStatus = () => wrapper.findComponent(CleanupStatus);
+  const findSkeletonLoader = () => wrapper.findComponent(GlSkeletonLoader);
+  const findListItemComponent = () => wrapper.findComponent(ListItem);
 
   const mountComponent = (props) => {
     wrapper = shallowMount(Component, {
@@ -51,20 +52,28 @@ describe('Image List Row', () => {
     wrapper = null;
   });
 
-  describe('main tooltip', () => {
-    it(`the title is ${ROW_SCHEDULED_FOR_DELETION}`, () => {
-      mountComponent();
+  describe('list item component', () => {
+    describe('tooltip', () => {
+      it(`the title is ${ROW_SCHEDULED_FOR_DELETION}`, () => {
+        mountComponent();
 
-      const tooltip = getBinding(wrapper.element, 'gl-tooltip');
-      expect(tooltip).toBeDefined();
-      expect(tooltip.value.title).toBe(ROW_SCHEDULED_FOR_DELETION);
+        const tooltip = getBinding(wrapper.element, 'gl-tooltip');
+        expect(tooltip).toBeDefined();
+        expect(tooltip.value.title).toBe(ROW_SCHEDULED_FOR_DELETION);
+      });
+
+      it('is disabled when item is being deleted', () => {
+        mountComponent({ item: { ...item, status: IMAGE_DELETE_SCHEDULED_STATUS } });
+
+        const tooltip = getBinding(wrapper.element, 'gl-tooltip');
+        expect(tooltip.value.disabled).toBe(false);
+      });
     });
 
-    it('is disabled when item is being deleted', () => {
+    it('is disabled when the item is in deleting status', () => {
       mountComponent({ item: { ...item, status: IMAGE_DELETE_SCHEDULED_STATUS } });
 
-      const tooltip = getBinding(wrapper.element, 'gl-tooltip');
-      expect(tooltip.value.disabled).toBe(false);
+      expect(findListItemComponent().props('disabled')).toBe(true);
     });
   });
 
@@ -73,13 +82,19 @@ describe('Image List Row', () => {
       mountComponent();
 
       const link = findDetailsLink();
-      expect(link.html()).toContain(item.path);
-      expect(link.props('to')).toMatchObject({
+      expect(link.text()).toBe(item.path);
+      expect(findDetailsLink().props('to')).toMatchObject({
         name: 'details',
         params: {
           id: getIdFromGraphQLId(item.id),
         },
       });
+    });
+
+    it(`when the image has no name appends ${ROOT_IMAGE_TEXT} to the path`, () => {
+      mountComponent({ item: { ...item, name: '' } });
+
+      expect(findDetailsLink().text()).toBe(`${item.path}/ ${ROOT_IMAGE_TEXT}`);
     });
 
     it('contains a clipboard button', () => {
@@ -90,26 +105,39 @@ describe('Image List Row', () => {
       expect(button.props('title')).toBe(item.location);
     });
 
-    describe('warning icon', () => {
+    describe('cleanup status component', () => {
       it.each`
-        status                         | expirationPolicyStartedAt | shown    | title
-        ${IMAGE_FAILED_DELETED_STATUS} | ${true}                   | ${true}  | ${ASYNC_DELETE_IMAGE_ERROR_MESSAGE}
-        ${''}                          | ${true}                   | ${true}  | ${CLEANUP_TIMED_OUT_ERROR_MESSAGE}
-        ${''}                          | ${false}                  | ${false} | ${''}
+        expirationPolicyCleanupStatus | shown
+        ${null}                       | ${false}
+        ${SCHEDULED_STATUS}           | ${true}
       `(
-        'when status is $status and expirationPolicyStartedAt is $expirationPolicyStartedAt',
-        ({ expirationPolicyStartedAt, status, shown, title }) => {
-          mountComponent({ item: { ...item, status, expirationPolicyStartedAt } });
+        'when expirationPolicyCleanupStatus is $expirationPolicyCleanupStatus it is $shown that the component exists',
+        ({ expirationPolicyCleanupStatus, shown }) => {
+          mountComponent({ item: { ...item, expirationPolicyCleanupStatus } });
 
-          const icon = findWarningIcon();
-          expect(icon.exists()).toBe(shown);
+          expect(findCleanupStatus().exists()).toBe(shown);
 
           if (shown) {
-            const tooltip = getBinding(icon.element, 'gl-tooltip');
-            expect(tooltip.value.title).toBe(title);
+            expect(findCleanupStatus().props()).toMatchObject({
+              status: expirationPolicyCleanupStatus,
+            });
           }
         },
       );
+    });
+
+    describe('when the item is deleting', () => {
+      beforeEach(() => {
+        mountComponent({ item: { ...item, status: IMAGE_DELETE_SCHEDULED_STATUS } });
+      });
+
+      it('the router link is disabled', () => {
+        // we check the event prop as is the only workaround to disable a router link
+        expect(findDetailsLink().props('event')).toBe('');
+      });
+      it('the clipboard button is disabled', () => {
+        expect(findClipboardButton().attributes('disabled')).toBe('true');
+      });
     });
   });
 

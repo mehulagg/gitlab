@@ -35,7 +35,7 @@ module BoardsResponses
   end
 
   def authorize_read_list
-    authorize_action_for!(board, :read_list)
+    authorize_action_for!(board, :read_issue_board_list)
   end
 
   def authorize_read_issue
@@ -54,7 +54,7 @@ module BoardsResponses
   end
 
   def authorize_admin_list
-    authorize_action_for!(board, :admin_list)
+    authorize_action_for!(board, :admin_issue_board_list)
   end
 
   def authorize_action_for!(resource, ability)
@@ -66,7 +66,11 @@ module BoardsResponses
   end
 
   def respond_with_board
-    respond_with(@board) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    return render_404 unless @board
+
+    respond_with(@board)
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
   end
 
   def serialize_as_json(resource)
@@ -87,4 +91,4 @@ module BoardsResponses
   end
 end
 
-BoardsResponses.prepend_if_ee('EE::BoardsResponses')
+BoardsResponses.prepend_mod_with('BoardsResponses')

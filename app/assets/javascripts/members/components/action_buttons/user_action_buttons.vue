@@ -33,20 +33,25 @@ export default {
 
       if (user) {
         return sprintf(
-          s__('Members|Are you sure you want to remove %{usersName} from "%{source}"'),
+          s__('Members|Are you sure you want to remove %{usersName} from "%{source}"?'),
           {
             usersName: user.name,
             source: source.fullName,
           },
+          false,
         );
       }
 
       return sprintf(
-        s__('Members|Are you sure you want to remove this orphaned member from "%{source}"'),
+        s__('Members|Are you sure you want to remove this orphaned member from "%{source}"?'),
         {
           source: source.fullName,
         },
       );
+    },
+    oncallScheduleUserData() {
+      const { user: { name, oncallSchedules: schedules } = {} } = this.member;
+      return { name, schedules };
     },
   },
 };
@@ -59,6 +64,8 @@ export default {
       <remove-member-button
         v-else
         :member-id="member.id"
+        :member-type="member.type"
+        :oncall-schedules="oncallScheduleUserData"
         :message="message"
         :title="s__('Member|Remove member')"
       />

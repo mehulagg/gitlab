@@ -3,52 +3,38 @@
 require 'spec_helper'
 
 RSpec.describe 'Admin::Users::User' do
+  include Spec::Support::Helpers::Features::AdminUsersHelpers
+
   let_it_be(:user) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
-  let_it_be(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
+  let_it_be(:current_user) { create(:admin) }
 
   before do
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
-    stub_feature_flags(vue_admin_users: false)
   end
 
   describe 'GET /admin/users/:id' do
-    it 'has user info', :aggregate_failures do
-      visit admin_users_path
-      click_link user.name
+    it 'has user info', :js, :aggregate_failures do
+      visit admin_user_path(user)
 
       expect(page).to have_content(user.email)
       expect(page).to have_content(user.name)
       expect(page).to have_content("ID: #{user.id}")
       expect(page).to have_content("Namespace ID: #{user.namespace_id}")
-      expect(page).to have_button('Deactivate user')
-      expect(page).to have_button('Block user')
+
+      click_user_dropdown_toggle(user.id)
+
+      expect(page).to have_button('Block')
+      expect(page).to have_button('Deactivate')
       expect(page).to have_button('Delete user')
       expect(page).to have_button('Delete user and contributions')
-    end
-
-    context 'user pending approval' do
-      it 'shows user info', :aggregate_failures do
-        user = create(:user, :blocked_pending_approval)
-
-        visit admin_users_path
-        click_link 'Pending approval'
-        click_link user.name
-
-        expect(page).to have_content(user.name)
-        expect(page).to have_content('Pending approval')
-        expect(page).to have_link('Approve user')
-        expect(page).to have_link('Reject request')
-      end
     end
 
     context 'when blocking/unblocking the user' do
       it 'shows confirmation and allows blocking and unblocking', :js do
         visit admin_user_path(user)
 
-        find('button', text: 'Block user').click
-
-        wait_for_requests
+        click_action_in_user_dropdown(user.id, 'Block')
 
         expect(page).to have_content('Block user')
         expect(page).to have_content('You can always unblock their account, their data will remain intact.')
@@ -58,21 +44,18 @@ RSpec.describe 'Admin::Users::User' do
         wait_for_requests
 
         expect(page).to have_content('Successfully blocked')
-        expect(page).to have_content('This user is blocked')
 
-        find('button', text: 'Unblock user').click
-
-        wait_for_requests
+        click_action_in_user_dropdown(user.id, 'Unblock')
 
         expect(page).to have_content('Unblock user')
         expect(page).to have_content('You can always block their account again if needed.')
 
         find('.modal-footer button', text: 'Unblock').click
 
-        wait_for_requests
-
         expect(page).to have_content('Successfully unblocked')
-        expect(page).to have_content('Block this user')
+
+        click_user_dropdown_toggle(user.id)
+        expect(page).to have_content('Block')
       end
     end
 
@@ -80,9 +63,7 @@ RSpec.describe 'Admin::Users::User' do
       it 'shows confirmation and allows deactivating/re-activating', :js do
         visit admin_user_path(user)
 
-        find('button', text: 'Deactivate user').click
-
-        wait_for_requests
+        click_action_in_user_dropdown(user.id, 'Deactivate')
 
         expect(page).to have_content('Deactivate user')
         expect(page).to have_content('You can always re-activate their account, their data will remain intact.')
@@ -92,11 +73,8 @@ RSpec.describe 'Admin::Users::User' do
         wait_for_requests
 
         expect(page).to have_content('Successfully deactivated')
-        expect(page).to have_content('Reactivate this user')
 
-        find('button', text: 'Activate user').click
-
-        wait_for_requests
+        click_action_in_user_dropdown(user.id, 'Activate')
 
         expect(page).to have_content('Activate user')
         expect(page).to have_content('You can always deactivate their account again if needed.')
@@ -106,7 +84,9 @@ RSpec.describe 'Admin::Users::User' do
         wait_for_requests
 
         expect(page).to have_content('Successfully activated')
-        expect(page).to have_content('Deactivate this user')
+
+        click_user_dropdown_toggle(user.id)
+        expect(page).to have_content('Deactivate')
       end
     end
 
@@ -171,6 +151,8 @@ RSpec.describe 'Admin::Users::User' do
         it 'logs in as the user when impersonate is clicked' do
           subject
 
+          find('[data-qa-selector="user_menu"]').click
+
           expect(page.find(:css, '[data-testid="user-profile-link"]')['data-user']).to eql(another_user.username)
         end
 
@@ -205,6 +187,8 @@ RSpec.describe 'Admin::Users::User' do
         it 'logs out of impersonated user back to original user' do
           subject
 
+          find('[data-qa-selector="user_menu"]').click
+
           expect(page.find(:css, '[data-testid="user-profile-link"]')['data-user']).to eq(current_user.username)
         end
 
@@ -238,6 +222,8 @@ RSpec.describe 'Admin::Users::User' do
       end
 
       it 'shows when disabled' do
+        user.update!(otp_required_for_login: false)
+
         visit admin_user_path(user)
 
         expect_two_factor_status('Disabled')
@@ -251,7 +237,7 @@ RSpec.describe 'Admin::Users::User' do
     end
 
     describe 'Email verification status' do
-      let!(:secondary_email) do
+      let_it_be(:secondary_email) do
         create :email, email: 'secondary@example.com', user: user
       end
 
@@ -274,99 +260,148 @@ RSpec.describe 'Admin::Users::User' do
         expect(page).to have_content("#{secondary_email.email} Verified")
       end
     end
-  end
 
-  describe 'show user attributes' do
-    it 'has expected attributes', :aggregate_failures do
-      visit admin_users_path
+    describe 'show user identities' do
+      it 'shows user identities', :aggregate_failures do
+        visit admin_user_identities_path(user)
 
-      click_link user.name
-
-      expect(page).to have_content 'Account'
-      expect(page).to have_content 'Personal projects limit'
-    end
-  end
-
-  describe 'remove users secondary email', :js do
-    let!(:secondary_email) do
-      create :email, email: 'secondary@example.com', user: user
+        expect(page).to have_content(user.name)
+        expect(page).to have_content('twitter')
+      end
     end
 
-    it do
-      visit admin_user_path(user.username)
-
-      expect(page).to have_content("Secondary email: #{secondary_email.email}")
-
-      accept_confirm { find("#remove_email_#{secondary_email.id}").click }
-
-      expect(page).not_to have_content(secondary_email.email)
-    end
-  end
-
-  describe 'show user keys', :js do
-    it do
-      key1 = create(:key, user: user, title: 'ssh-rsa Key1', key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4FIEBXGi4bPU8kzxMefudPIJ08/gNprdNTaO9BR/ndy3+58s2HCTw2xCHcsuBmq+TsAqgEidVq4skpqoTMB+Uot5Uzp9z4764rc48dZiI661izoREoKnuRQSsRqUTHg5wrLzwxlQbl1MVfRWQpqiz/5KjBC7yLEb9AbusjnWBk8wvC1bQPQ1uLAauEA7d836tgaIsym9BrLsMVnR4P1boWD3Xp1B1T/ImJwAGHvRmP/ycIqmKdSpMdJXwxcb40efWVj0Ibbe7ii9eeoLdHACqevUZi6fwfbymdow+FeqlkPoHyGg3Cu4vD/D8+8cRc7mE/zGCWcQ15Var83Tczour Key1')
-      key2 = create(:key, user: user, title: 'ssh-rsa Key2', key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQSTWXhJAX/He+nG78MiRRRn7m0Pb0XbcgTxE0etArgoFoh9WtvDf36HG6tOSg/0UUNcp0dICsNAmhBKdncp6cIyPaXJTURPRAGvhI0/VDk4bi27bRnccGbJ/hDaUxZMLhhrzY0r22mjVf8PF6dvv5QUIQVm1/LeaWYsHHvLgiIjwrXirUZPnFrZw6VLREoBKG8uWvfSXw1L5eapmstqfsME8099oi+vWLR8MgEysZQmD28M73fgW4zek6LDQzKQyJx9nB+hJkKUDvcuziZjGmRFlNgSA2mguERwL1OXonD8WYUrBDGKroIvBT39zS5d9tQDnidEJZ9Y8gv5ViYP7x Key2')
-
-      visit admin_users_path
-
-      click_link user.name
-      click_link 'SSH keys'
-
-      expect(page).to have_content(key1.title)
-      expect(page).to have_content(key2.title)
-
-      click_link key2.title
-
-      expect(page).to have_content(key2.title)
-      expect(page).to have_content(key2.key)
-
-      click_button 'Delete'
-
-      page.within('.modal') do
-        page.click_button('Delete')
+    describe 'update user identities' do
+      before do
+        allow(Gitlab::Auth::OAuth::Provider).to receive(:providers).and_return([:twitter, :twitter_updated])
       end
 
-      expect(page).not_to have_content(key2.title)
+      it 'modifies twitter identity', :aggregate_failures do
+        visit admin_user_identities_path(user)
+
+        find('.table').find(:link, 'Edit').click
+        fill_in 'identity_extern_uid', with: '654321'
+        select 'twitter_updated', from: 'identity_provider'
+        click_button 'Save changes'
+
+        expect(page).to have_content(user.name)
+        expect(page).to have_content('twitter_updated')
+        expect(page).to have_content('654321')
+      end
+    end
+
+    describe 'remove users secondary email', :js do
+      let_it_be(:secondary_email) do
+        create :email, email: 'secondary@example.com', user: user
+      end
+
+      it do
+        visit admin_user_path(user.username)
+
+        expect(page).to have_content("Secondary email: #{secondary_email.email}")
+
+        accept_confirm { find("#remove_email_#{secondary_email.id}").click }
+
+        expect(page).not_to have_content(secondary_email.email)
+      end
+    end
+
+    describe 'remove user with identities' do
+      it 'removes user with twitter identity', :aggregate_failures do
+        visit admin_user_identities_path(user)
+
+        click_link 'Delete'
+
+        expect(page).to have_content(user.name)
+        expect(page).not_to have_content('twitter')
+      end
+    end
+
+    describe 'show user keys', :js do
+      it do
+        key1 = create(:key, user: user, title: 'ssh-rsa Key1', key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4FIEBXGi4bPU8kzxMefudPIJ08/gNprdNTaO9BR/ndy3+58s2HCTw2xCHcsuBmq+TsAqgEidVq4skpqoTMB+Uot5Uzp9z4764rc48dZiI661izoREoKnuRQSsRqUTHg5wrLzwxlQbl1MVfRWQpqiz/5KjBC7yLEb9AbusjnWBk8wvC1bQPQ1uLAauEA7d836tgaIsym9BrLsMVnR4P1boWD3Xp1B1T/ImJwAGHvRmP/ycIqmKdSpMdJXwxcb40efWVj0Ibbe7ii9eeoLdHACqevUZi6fwfbymdow+FeqlkPoHyGg3Cu4vD/D8+8cRc7mE/zGCWcQ15Var83Tczour Key1')
+        key2 = create(:key, user: user, title: 'ssh-rsa Key2', key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQSTWXhJAX/He+nG78MiRRRn7m0Pb0XbcgTxE0etArgoFoh9WtvDf36HG6tOSg/0UUNcp0dICsNAmhBKdncp6cIyPaXJTURPRAGvhI0/VDk4bi27bRnccGbJ/hDaUxZMLhhrzY0r22mjVf8PF6dvv5QUIQVm1/LeaWYsHHvLgiIjwrXirUZPnFrZw6VLREoBKG8uWvfSXw1L5eapmstqfsME8099oi+vWLR8MgEysZQmD28M73fgW4zek6LDQzKQyJx9nB+hJkKUDvcuziZjGmRFlNgSA2mguERwL1OXonD8WYUrBDGKroIvBT39zS5d9tQDnidEJZ9Y8gv5ViYP7x Key2')
+
+        visit admin_user_path(user)
+
+        click_link 'SSH keys'
+
+        expect(page).to have_content(key1.title)
+        expect(page).to have_content(key2.title)
+
+        click_link key2.title
+
+        expect(page).to have_content(key2.title)
+        expect(page).to have_content(key2.key)
+
+        click_button 'Delete'
+
+        page.within('.modal') do
+          page.click_button('Delete')
+        end
+
+        expect(page).not_to have_content(key2.title)
+      end
+    end
+
+    describe 'show user attributes' do
+      it 'has expected attributes', :aggregate_failures do
+        visit admin_user_path(user)
+
+        expect(page).to have_content 'Account'
+        expect(page).to have_content 'Personal projects limit'
+      end
     end
   end
 
-  describe 'show user identities' do
-    it 'shows user identities', :aggregate_failures do
-      visit admin_user_identities_path(user)
+  describe 'GET /admin/users', :js do
+    context 'user pending approval' do
+      it 'shows user info', :aggregate_failures do
+        user = create(:user, :blocked_pending_approval)
 
-      expect(page).to have_content(user.name)
-      expect(page).to have_content('twitter')
+        visit admin_users_path
+        click_link 'Pending approval'
+        click_link user.name
+
+        expect(page).to have_content(user.name)
+        expect(page).to have_content('Pending approval')
+
+        click_user_dropdown_toggle(user.id)
+
+        expect(page).to have_button('Approve')
+        expect(page).to have_button('Reject')
+      end
     end
   end
 
-  describe 'update user identities' do
-    before do
-      allow(Gitlab::Auth::OAuth::Provider).to receive(:providers).and_return([:twitter, :twitter_updated])
+  context 'when user has an unconfirmed email', :js do
+    let(:unconfirmed_user) { create(:user, :unconfirmed) }
+
+    where(:path_helper) do
+      [
+        [-> (user) { admin_user_path(user) }],
+        [-> (user) { projects_admin_user_path(user) }],
+        [-> (user) { keys_admin_user_path(user) }],
+        [-> (user) { admin_user_identities_path(user) }],
+        [-> (user) { admin_user_impersonation_tokens_path(user) }]
+      ]
     end
 
-    it 'modifies twitter identity', :aggregate_failures do
-      visit admin_user_identities_path(user)
+    with_them do
+      it "allows an admin to force confirmation of the user's email", :aggregate_failures do
+        visit path_helper.call(unconfirmed_user)
 
-      find('.table').find(:link, 'Edit').click
-      fill_in 'identity_extern_uid', with: '654321'
-      select 'twitter_updated', from: 'identity_provider'
-      click_button 'Save changes'
+        click_button 'Confirm user'
 
-      expect(page).to have_content(user.name)
-      expect(page).to have_content('twitter_updated')
-      expect(page).to have_content('654321')
-    end
-  end
+        page.within('[role="dialog"]') do
+          expect(page).to have_content("Confirm user #{unconfirmed_user.name}?")
+          expect(page).to have_content('This user has an unconfirmed email address. You may force a confirmation.')
 
-  describe 'remove user with identities' do
-    it 'removes user with twitter identity', :aggregate_failures do
-      visit admin_user_identities_path(user)
+          click_button 'Confirm user'
+        end
 
-      click_link 'Delete'
-
-      expect(page).to have_content(user.name)
-      expect(page).not_to have_content('twitter')
+        expect(page).to have_content('Successfully confirmed')
+        expect(page).not_to have_button('Confirm user')
+      end
     end
   end
 end

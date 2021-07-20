@@ -33,12 +33,14 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
   end
 
   describe 'index' do
-    it 'show all public Geo Nodes and create new node link' do
+    before do
       visit admin_geo_nodes_path
       wait_for_requests
+    end
 
-      expect(page).to have_link('New node', href: new_admin_geo_node_path)
-      page.within(find('.card', match: :first)) do
+    it 'shows all public Geo Nodes and Add site link' do
+      expect(page).to have_link('Add site', href: new_admin_geo_node_path)
+      page.within(find('.geo-node-core-details-grid-columns', match: :first)) do
         expect(page).to have_content(geo_node.url)
       end
     end
@@ -128,7 +130,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
       wait_for_requests
       expect(current_path).to eq admin_geo_nodes_path
 
-      page.within(find('.card', match: :first)) do
+      page.within(find('.geo-node-core-details-grid-columns', match: :first)) do
         expect(page).to have_content(geo_node.url)
       end
     end
@@ -153,15 +155,8 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
       wait_for_requests
       expect(current_path).to eq admin_geo_nodes_path
 
-      page.within(find('.card', match: :first)) do
+      page.within(find('.geo-node-core-details-grid-columns', match: :first)) do
         expect(page).to have_content('http://newsite.com')
-        expect(page).to have_content('Primary')
-
-        click_button 'Other information'
-
-        page.within(find('.other-section')) do
-          expect(page).to have_content('http://internal-url.com')
-        end
       end
     end
 
@@ -177,16 +172,15 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'removes an existing Geo Node' do
-      page.within(find('[data-testid="nodeActions"]', match: :first)) do
-        page.click_button('Remove')
-      end
-      page.within('.modal') do
-        page.click_button('Remove')
+      page.click_button('Remove')
+
+      page.within('.gl-modal') do
+        page.click_button('Remove node')
       end
 
       expect(current_path).to eq admin_geo_nodes_path
       wait_for_requests
-      expect(page).not_to have_css('.card')
+      expect(page).not_to have_css('.geo-node-core-details-grid-columns')
     end
   end
 
@@ -198,13 +192,11 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'hides the New Node button' do
-      expect(page).not_to have_link('New node', href: new_admin_geo_node_path)
+      expect(page).not_to have_link('Add site', href: new_admin_geo_node_path)
     end
 
     it 'shows Discover GitLab Geo' do
-      page.within(find('h4')) do
-        expect(page).to have_content('Discover GitLab Geo')
-      end
+      expect(page).to have_content('Discover GitLab Geo')
     end
   end
 

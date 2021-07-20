@@ -11,6 +11,8 @@ There are a few ways to reset the password of a user.
 
 ## Rake Task
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52347) in GitLab 13.9.
+
 GitLab provides a Rake Task to reset passwords of users using their usernames,
 which can be invoked by the following command:
 
@@ -18,8 +20,8 @@ which can be invoked by the following command:
 sudo gitlab-rake "gitlab:password:reset"
 ```
 
-You will be asked for username, password, and password confirmation. Upon giving
-proper values for them, the password of the specified user will be updated.
+GitLab asks for a username, a password, and a password confirmation. Upon giving
+proper values for them, the password of the specified user is updated.
 
 The Rake task also takes the username as an argument, as shown in the example
 below:
@@ -38,15 +40,15 @@ The Rake task is capable of finding users via their usernames. However, if only
 user ID or email ID of the user is known, Rails console can be used to find user
 using user ID and then change password of the user manually.
 
-1. Start a Rails console
+1. [Start a Rails console](../administration/operations/rails_console.md)
 
-    ```shell
-    sudo gitlab-rails console -e production
-    ```
-
-1. Find the user either by user ID or email ID:
+1. Find the user either by username, user ID or email ID:
 
     ```ruby
+    user = User.find_by_username 'exampleuser'
+
+    #or
+
     user = User.find(123)
 
     #or
@@ -81,6 +83,23 @@ using user ID and then change password of the user manually.
 NOTE:
 You can also reset passwords by using the [Users API](../api/users.md#user-modification).
 
+## Password reset does not appear to work
+
+If you can't sign on with the new password, it might be because of the [reconfirmation feature](../user/upgrade_email_bypass.md).
+
+Try fixing this on the rails console. For example, if your new `root` password isn't working:
+
+1. [Start a Rails console](../administration/operations/rails_console.md).
+
+1. Find the user and skip reconfirmation, using any of the methods above:
+
+    ```ruby
+    user = User.find(1)
+    user.skip_reconfirmation!
+    ```
+
+1. Try to sign in again.
+
 ## Reset your root password
 
 The previously described steps can also be used to reset the root password.
@@ -91,7 +110,7 @@ password.
 
 If the username was changed to something else and has been forgotten, one
 possible way is to reset the password using Rails console with user ID `1` (in
-almost all the cases, the first user will be the default admin account).
+almost all the cases, the first user is the default admin account).
 
 <!-- ## Troubleshooting
 

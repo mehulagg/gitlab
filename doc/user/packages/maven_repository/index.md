@@ -4,13 +4,16 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Maven packages in the Package Repository
+# Maven packages in the Package Repository **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in GitLab Premium 11.3.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
-Publish [Maven](https://maven.apache.org) artifacts in your project’s Package Registry.
+Publish [Maven](https://maven.apache.org) artifacts in your project's Package Registry.
 Then, install the packages whenever you need to use them as a dependency.
+
+For documentation of the specific API endpoints that the Maven package manager
+client uses, see the [Maven API documentation](../../../api/packages/maven.md).
 
 ## Build a Maven package
 
@@ -338,7 +341,7 @@ file:
 ```groovy
 repositories {
     maven {
-        url "https://gitlab.example.com/api/v4/groups/<group>/-/packages/maven"
+        url "${CI_API_V4_URL}/groups/<group>/-/packages/maven"
         name "GitLab"
         credentials(HttpHeaderCredentials) {
             name = 'Job-Token'
@@ -409,7 +412,7 @@ repositories {
 - The `PROJECT_ID` is your project ID, which you can view on your project's home page.
 - Replace `gitlab.example.com` with your domain name.
 - For retrieving artifacts, use either the
-  [URL-encoded](../../../api/README.md#namespaced-path-encoding) path of the project
+  [URL-encoded](../../../api/index.md#namespaced-path-encoding) path of the project
   (like `group%2Fproject`) or the project's ID (like `42`). However, only the
   project's ID can be used for publishing.
 
@@ -468,7 +471,7 @@ repositories {
 - For `PROJECT_ID`, use your project ID, which you can view on your project's home page.
 - Replace `gitlab.example.com` with your domain name.
 - For retrieving artifacts, use either the
-  [URL-encoded](../../../api/README.md#namespaced-path-encoding) path of the group
+  [URL-encoded](../../../api/index.md#namespaced-path-encoding) path of the group
   (like `group%2Fsubgroup`) or the group's ID (like `12`).
 
 ### Instance-level Maven endpoint
@@ -527,7 +530,7 @@ repositories {
 - The `PROJECT_ID` is your project ID, which you can view on your project's home page.
 - Replace `gitlab.example.com` with your domain name.
 - For retrieving artifacts, use either the
-  [URL-encoded](../../../api/README.md#namespaced-path-encoding) path of the project
+  [URL-encoded](../../../api/index.md#namespaced-path-encoding) path of the project
   (like `group%2Fproject`) or the project's ID (like `42`). However, only the
   project's ID can be used for publishing.
 
@@ -608,8 +611,11 @@ Now navigate to your project's **Packages & Registries** page and view the publi
 
 ### Publishing a package with the same name or version
 
-When you publish a package with the same name or version as an existing package,
-the existing package is overwritten.
+When you publish a package with the same name and version as an existing package, the new package
+files are added to the existing package. You can still use the UI or API to access and view the
+existing package's older files.
+
+To delete these older package versions, consider using the Packages API or the UI.
 
 #### Do not allow duplicate Maven packages
 
@@ -622,7 +628,7 @@ In the UI:
 1. For your group, go to **Settings > Packages & Registries**.
 1. Expand the **Package Registry** section.
 1. Turn on the **Reject duplicates** toggle.
-1. Optional. To allow some duplicate packages, in the **Exceptions** box, enter a regex pattern that matches the names of packages you want to allow.
+1. Optional. To allow some duplicate packages, in the **Exceptions** box, enter a regex pattern that matches the names and/or versions of packages you want to allow.
 
 Your changes are automatically saved.
 
@@ -739,17 +745,17 @@ You can create a new package each time the `master` branch is updated.
    <repositories>
      <repository>
        <id>gitlab-maven</id>
-       <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+       <url>${env.CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</url>
      </repository>
    </repositories>
    <distributionManagement>
      <repository>
        <id>gitlab-maven</id>
-       <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+       <url>${CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</url>
      </repository>
      <snapshotRepository>
        <id>gitlab-maven</id>
-       <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+       <url>${CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</url>
      </snapshotRepository>
    </distributionManagement>
    ```
@@ -806,6 +812,19 @@ The version string is validated by using the following regex.
 You can play around with the regex and try your version strings on [this regular expression editor](https://rubular.com/r/rrLQqUXjfKEoL6).
 
 ## Troubleshooting
+
+To improve performance, Maven caches files related to a package. If you encounter issues, clear
+the cache with these commands:
+
+```shell
+rm -rf ~/.m2/repository
+```
+
+If you're using Gradle, run this command to clear the cache:
+
+```shell
+rm -rf ~/.gradle/caches
+```
 
 ### Review network trace logs
 
@@ -868,3 +887,11 @@ package:
     - 'mvn help:system'
     - 'mvn package'
 ```
+
+## Supported CLI commands
+
+The GitLab Maven repository supports the following Maven CLI commands:
+
+- `mvn deploy`: Publish your package to the Package Registry.
+- `mvn install`: Install packages specified in your Maven project.
+- `mvn dependency:get`: Install a specific package.

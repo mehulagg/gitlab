@@ -1,8 +1,9 @@
 - add_to_breadcrumbs _('Security Configuration'), project_security_configuration_path(@project)
-- add_to_breadcrumbs s_('DastProfiles|Manage profiles'), project_security_configuration_dast_profiles_path(@project, anchor: 'scanner-profiles')
+- add_to_breadcrumbs s_('DastProfiles|Manage profiles'), project_security_configuration_dast_scans_path(@project, anchor: 'scanner-profiles')
 - breadcrumb_title s_('DastProfiles|New scanner profile')
 - page_title s_('DastProfiles|New scanner profile')
 
 .js-dast-scanner-profile-form{ data: { project_full_path: @project.path_with_namespace,
-profiles_library_path: project_security_configuration_dast_profiles_path(@project, anchor: 'scanner-profiles'),
-on_demand_scans_path: Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml) ? new_project_on_demand_scan_path(@project) : project_on_demand_scans_path(@project) } }
+profiles_library_path: project_security_configuration_dast_scans_path(@project, anchor: 'scanner-profiles'),
+on_demand_scans_path: new_project_on_demand_scan_path(@project),
+dast_configuration_path: project_security_configuration_dast_path(@project) } }

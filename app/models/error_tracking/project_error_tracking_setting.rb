@@ -24,6 +24,8 @@ module ErrorTracking
     self.reactive_cache_key = ->(setting) { [setting.class.model_name.singular, setting.project_id] }
     self.reactive_cache_work_type = :external_dependency
 
+    self.table_name = 'project_error_tracking_settings'
+
     belongs_to :project
 
     validates :api_url, length: { maximum: 255 }, public_url: { enforce_sanitization: true, ascii_only: true }, allow_nil: true
@@ -38,7 +40,7 @@ module ErrorTracking
 
     attr_encrypted :token,
       mode: :per_attribute_iv,
-      key: Settings.attr_encrypted_db_key_base_truncated,
+      key: Settings.attr_encrypted_db_key_base_32,
       algorithm: 'aes-256-gcm'
 
     after_save :clear_reactive_cache!
@@ -77,7 +79,7 @@ module ErrorTracking
 
     def sentry_client
       strong_memoize(:sentry_client) do
-        Sentry::Client.new(api_url, token)
+        ErrorTracking::SentryClient.new(api_url, token)
       end
     end
 
@@ -168,13 +170,13 @@ module ErrorTracking
 
     def handle_exceptions
       yield
-    rescue Sentry::Client::Error => e
+    rescue ErrorTracking::SentryClient::Error => e
       { error: e.message, error_type: SENTRY_API_ERROR_TYPE_NON_20X_RESPONSE }
-    rescue Sentry::Client::MissingKeysError => e
+    rescue ErrorTracking::SentryClient::MissingKeysError => e
       { error: e.message, error_type: SENTRY_API_ERROR_TYPE_MISSING_KEYS }
-    rescue Sentry::Client::ResponseInvalidSizeError => e
+    rescue ErrorTracking::SentryClient::ResponseInvalidSizeError => e
       { error: e.message, error_type: SENTRY_API_ERROR_INVALID_SIZE }
-    rescue Sentry::Client::BadRequestError => e
+    rescue ErrorTracking::SentryClient::BadRequestError => e
       { error: e.message, error_type: SENTRY_API_ERROR_TYPE_BAD_REQUEST }
     rescue StandardError => e
       Gitlab::ErrorTracking.track_exception(e)

@@ -37,8 +37,9 @@ class BulkImports::Entity < ApplicationRecord
 
   validates :project, absence: true, if: :group
   validates :group, absence: true, if: :project
-  validates :source_type, :source_full_path, :destination_name,
-            :destination_namespace, presence: true
+  validates :source_type, :source_full_path, :destination_name, presence: true
+  validates :destination_namespace, exclusion: [nil], if: :group
+  validates :destination_namespace, presence: true, if: :project
 
   validate :validate_parent_is_a_group, if: :parent
   validate :validate_imported_entity_type
@@ -46,6 +47,8 @@ class BulkImports::Entity < ApplicationRecord
   validate :validate_destination_namespace_ascendency, if: :group_entity?
 
   enum source_type: { group_entity: 0, project_entity: 1 }
+
+  scope :by_user_id, ->(user_id) { joins(:bulk_import).where(bulk_imports: { user_id: user_id }) }
 
   state_machine :status, initial: :created do
     state :created, value: 0
@@ -67,23 +70,12 @@ class BulkImports::Entity < ApplicationRecord
     end
   end
 
-  def update_tracker_for(relation:, has_next_page:, next_page: nil)
-    attributes = {
-      relation: relation,
-      has_next_page: has_next_page,
-      next_page: next_page,
-      bulk_import_entity_id: id
-    }
-
-    trackers.upsert(attributes, unique_by: %i[bulk_import_entity_id relation])
+  def self.all_human_statuses
+    state_machine.states.map(&:human_name)
   end
 
-  def has_next_page?(relation)
-    trackers.find_by(relation: relation)&.has_next_page
-  end
-
-  def next_page_for(relation)
-    trackers.find_by(relation: relation)&.next_page
+  def encoded_source_full_path
+    ERB::Util.url_encode(source_full_path)
   end
 
   private
@@ -117,8 +109,8 @@ class BulkImports::Entity < ApplicationRecord
 
     if source.self_and_descendants.any? { |namespace| namespace.full_path == destination_namespace }
       errors.add(
-        :destination_namespace,
-        s_('BulkImport|destination group cannot be part of the source group tree')
+        :base,
+        s_('BulkImport|Import failed: Destination cannot be a subgroup of the source group. Change the destination and try again.')
       )
     end
   end

@@ -1,6 +1,7 @@
 <script>
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 
 import { __ } from '~/locale';
 
@@ -58,7 +59,7 @@ export default {
      * across the UI so we directly call `requestEpicStatusChangeSuccess` action
      * to update store state.
      */
-    epicUtils.bindDocumentEvent('issuable_vue_app:change', (e, isClosed) => {
+    epicUtils.bindDocumentEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, (e, isClosed) => {
       const isEpicOpen = e.detail ? !e.detail.isClosed : !isClosed;
       this.requestEpicStatusChangeSuccess({
         state: isEpicOpen ? statusType.open : statusType.close,
@@ -90,7 +91,7 @@ export default {
         >
           <gl-icon name="eye-slash" class="icon" />
         </div>
-        {{ __('Opened') }}
+        {{ __('Created') }}
         <timeago-tooltip :time="created" />
         {{ __('by') }}
         <strong class="text-nowrap">
@@ -126,7 +127,7 @@ export default {
         :loading="epicStatusChangeInProgress"
         :class="actionButtonClass"
         category="secondary"
-        variant="warning"
+        variant="default"
         class="gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
         data-qa-selector="close_reopen_epic_button"
         data-testid="toggle-status-button"
@@ -138,7 +139,7 @@ export default {
         v-if="canCreate"
         :href="newEpicWebUrl"
         category="secondary"
-        variant="success"
+        variant="confirm"
         class="gl-mt-3 gl-sm-mt-0! gl-sm-ml-3 gl-w-full gl-sm-w-auto!"
         data-testid="new-epic-button"
       >

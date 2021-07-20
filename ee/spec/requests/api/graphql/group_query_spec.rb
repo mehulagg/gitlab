@@ -249,8 +249,6 @@ RSpec.describe 'getting group information' do
         QUERY
       end
 
-      let(:group_level_release_statistics) { true }
-
       let(:query) do
         graphql_query_for('group', { 'fullPath' => group.full_path }, query_fields)
       end
@@ -260,8 +258,6 @@ RSpec.describe 'getting group information' do
       end
 
       before do
-        stub_feature_flags(group_level_release_statistics: group_level_release_statistics)
-
         group.add_guest(guest_user)
 
         post_graphql(query, current_user: current_user)
@@ -334,20 +330,6 @@ RSpec.describe 'getting group information' do
 
         it_behaves_like 'correct access to release statistics'
       end
-
-      context 'when the group_level_release_statistics feature flag is disabled' do
-        let_it_be(:group) { create(:group, :public) }
-
-        let(:current_user) { guest_user }
-        let(:group_level_release_statistics) { false }
-
-        it 'returns null for both statistics' do
-          expect(release_stats).to match(
-            releasesCount: nil,
-            releasesPercentage: nil
-          )
-        end
-      end
     end
   end
 
@@ -372,12 +354,12 @@ RSpec.describe 'getting group information' do
     end
 
     context 'when default sorting' do
-      let_it_be(:cov_1) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 77.0) }
-      let_it_be(:cov_2) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 88.8, date: 1.week.ago) }
-      let_it_be(:cov_3) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 66.6, date: 2.weeks.ago) }
-      let_it_be(:cov_4) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 99.9, date: 3.weeks.ago) }
-      let_it_be(:cov_5) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 44.4, date: 4.weeks.ago) }
-      let_it_be(:cov_6) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 100.0, date: 6.weeks.ago) }
+      let_it_be(:cov_1) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 77.0, group: group) }
+      let_it_be(:cov_2) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 88.8, date: 1.week.ago, group: group) }
+      let_it_be(:cov_3) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 66.6, date: 2.weeks.ago, group: group) }
+      let_it_be(:cov_4) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 99.9, date: 3.weeks.ago, group: group) }
+      let_it_be(:cov_5) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 44.4, date: 4.weeks.ago, group: group) }
+      let_it_be(:cov_6) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 100.0, date: 6.weeks.ago, group: group) }
 
       let(:start_date) { 5.weeks.ago.to_date.to_s }
 

@@ -69,13 +69,56 @@ module EE
             bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
 
             sorting = params[:sort] || 'id_asc'
-            users = paginate(
-              BilledUsersFinder.new(group,
-                                    search_term: params[:search],
-                                    order_by: sorting).execute
-            )
 
-            present users, with: ::EE::API::Entities::BillableMember, current_user: current_user
+            result = BilledUsersFinder.new(group,
+                                             search_term: params[:search],
+                                             order_by: sorting).execute
+
+            present paginate(result[:users]),
+                    with: ::EE::API::Entities::BillableMember,
+                    current_user: current_user,
+                    group_member_user_ids: result[:group_member_user_ids],
+                    project_member_user_ids: result[:project_member_user_ids],
+                    shared_group_user_ids: result[:shared_group_user_ids],
+                    shared_project_user_ids: result[:shared_project_user_ids]
+          end
+
+          desc 'Get the memberships of a billable user of a root group.' do
+            success ::EE::API::Entities::BillableMembership
+          end
+          params do
+            requires :user_id, type: Integer, desc: 'The user ID of the member'
+            use :pagination
+          end
+          get ":id/billable_members/:user_id/memberships" do
+            group = find_group!(params[:id])
+
+            bad_request! unless can?(current_user, :admin_group_member, group)
+            bad_request! if group.subgroup?
+
+            user = ::User.find(params[:user_id])
+
+            not_found!('User') unless group.billed_user_ids[:user_ids].include?(user.id)
+
+            memberships = user.members.in_hierarchy(group).including_source
+
+            present paginate(memberships), with: ::EE::API::Entities::BillableMembership
+          end
+
+          desc 'Removes a billable member from a group or project.'
+          params do
+            requires :user_id, type: Integer, desc: 'The user ID of the member'
+          end
+          delete ":id/billable_members/:user_id" do
+            group = find_group!(params[:id])
+
+            result = ::BillableMembers::DestroyService.new(group, user_id: params[:user_id], current_user: current_user).execute
+
+            if result[:status] == :success
+              no_content!
+            else
+              bad_request!(result[:message])
+            end
           end
         end
       end

@@ -1,8 +1,8 @@
-/* eslint-disable no-new */
+import initDeprecatedRemoveRowBehavior from '~/behaviors/deprecated_remove_row_behavior';
 import UsersSelect from '~/users_select';
 import AbuseReports from './abuse_reports';
 
-document.addEventListener('DOMContentLoaded', () => {
-  new AbuseReports();
-  new UsersSelect();
-});
+new AbuseReports(); /* eslint-disable-line no-new */
+new UsersSelect(); /* eslint-disable-line no-new */
+
+initDeprecatedRemoveRowBehavior();

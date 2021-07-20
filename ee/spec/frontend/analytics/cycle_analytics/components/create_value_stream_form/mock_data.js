@@ -1,4 +1,4 @@
-import { groupLabels, labelStartEvent, labelStopEvent } from '../../mock_data';
+import { groupLabels, labelStartEvent, labelEndEvent } from '../../mock_data';
 
 export const MERGE_REQUEST_CREATED = 'merge_request_created';
 export const ISSUE_CREATED = 'issue_created';
@@ -30,7 +30,7 @@ export const formInitialData = {
   name: 'Cool stage pre',
   startEventIdentifier: labelStartEvent.identifier,
   startEventLabelId: firstLabel.id,
-  endEventIdentifier: labelStopEvent.identifier,
+  endEventIdentifier: labelEndEvent.identifier,
   endEventLabelId: firstLabel.id,
 };
 

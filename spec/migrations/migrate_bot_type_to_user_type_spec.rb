@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-require Rails.root.join('db', 'migrate', '20200311074438_migrate_bot_type_to_user_type.rb')
+require_migration!
 
 RSpec.describe MigrateBotTypeToUserType, :migration do
   let(:users) { table(:users) }
@@ -15,6 +15,6 @@ RSpec.describe MigrateBotTypeToUserType, :migration do
 
     migrate!
 
-    expect(users.where('user_type IS NOT NULL').map(&:user_type)).to match_array([1, 2, 3])
+    expect(users.where.not(user_type: nil).map(&:user_type)).to match_array([1, 2, 3])
   end
 end

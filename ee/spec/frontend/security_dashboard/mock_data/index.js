@@ -193,3 +193,125 @@ export const mockProjectSecurityChartsWithData = () => ({
     },
   },
 });
+
+export const mockVulnerableProjectsInstance = () => ({
+  data: {
+    instanceSecurityDashboard: {
+      projects: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Project/2',
+            name: 'Gitlab Shell',
+            nameWithNamespace: 'Group / Gitlab Shell',
+          },
+        ],
+      },
+    },
+  },
+});
+
+export const mockVulnerableProjectsGroup = () => ({
+  data: {
+    group: {
+      projects: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Project/2',
+            name: 'Gitlab Shell',
+          },
+        ],
+      },
+    },
+  },
+});
+
+export const mockVulnerabilitySeveritiesGraphQLResponse = ({ dashboardType }) => ({
+  data: {
+    [dashboardType]: {
+      vulnerabilitySeveritiesCount: {
+        __typename: 'VulnerabilitySeveritiesCount',
+        critical: 0,
+        high: 0,
+        info: 0,
+        low: 0,
+        medium: 4,
+        unknown: 2,
+      },
+    },
+    __typename: { project: 'Project', instance: 'InstanceSecurityDashboard', group: 'Group' }[
+      dashboardType
+    ],
+  },
+});
+
+export const mockPipelineFindingsResponse = ({ hasNextPage } = {}) => ({
+  data: {
+    project: {
+      pipeline: {
+        securityReportFindings: {
+          nodes: [
+            {
+              uuid: '322ace94-2d2a-5efa-bd62-a04c927a4b9a',
+              name: 'growl_command-injection in growl',
+              description: null,
+              confidence: 'unknown',
+              identifiers: [
+                {
+                  externalType: 'npm',
+                  name: 'NPM-146',
+                  __typename: 'VulnerabilityIdentifier',
+                },
+              ],
+              scanner: null,
+              severity: 'HIGH',
+              state: 'DETECTED',
+              location: {
+                __typename: 'VulnerabilityLocationDependencyScanning',
+                blobPath: null,
+                file: 'package.json',
+                image: null,
+                startLine: null,
+                path: null,
+              },
+              __typename: 'PipelineSecurityReportFinding',
+            },
+            {
+              uuid: '31ad79c6-b545-5408-89af-c4e90fc21eb4',
+              name:
+                'A prototype pollution vulnerability in handlebars may lead to remote code execution if an attacker can control the template in handlebars',
+              description: null,
+              confidence: 'unknown',
+              state: 'RESOLVED',
+              identifiers: [
+                {
+                  externalType: 'retire.js',
+                  name: 'RETIRE-JS-baf1b2b5f9a7c1dc0fb152365126e6c3',
+                  __typename: 'VulnerabilityIdentifier',
+                },
+              ],
+              scanner: null,
+              severity: 'HIGH',
+              location: {
+                __typename: 'VulnerabilityLocationDependencyScanning',
+                blobPath: null,
+                file: 'package.json',
+                image: null,
+                startLine: null,
+                path: null,
+              },
+              __typename: 'PipelineSecurityReportFinding',
+            },
+          ],
+          pageInfo: {
+            __typename: 'PageInfo',
+            startCursor: 'MQ',
+            endCursor: hasNextPage ? 'MjA' : false,
+          },
+          __typename: 'PipelineSecurityReportFindingConnection',
+        },
+        __typename: 'Pipeline',
+      },
+      __typename: 'Project',
+    },
+  },
+});

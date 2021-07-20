@@ -2,7 +2,7 @@
 import { GlFilteredSearchToken, GlFilteredSearchSuggestion, GlLoadingIcon } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { FETCH_TAG_ERROR_MESSAGE, FILTER_PIPELINES_SEARCH_DELAY } from '../../../constants';
 
 export default {
@@ -38,7 +38,9 @@ export default {
           this.loading = false;
         })
         .catch((err) => {
-          createFlash(FETCH_TAG_ERROR_MESSAGE);
+          createFlash({
+            message: FETCH_TAG_ERROR_MESSAGE,
+          });
           this.loading = false;
           throw err;
         });
@@ -53,7 +55,7 @@ export default {
 <template>
   <gl-filtered-search-token v-bind="{ ...$props, ...$attrs }" v-on="$listeners" @input="searchTags">
     <template #suggestions>
-      <gl-loading-icon v-if="loading" />
+      <gl-loading-icon v-if="loading" size="sm" />
       <template v-else>
         <gl-filtered-search-suggestion v-for="(tag, index) in tags" :key="index" :value="tag">
           {{ tag }}

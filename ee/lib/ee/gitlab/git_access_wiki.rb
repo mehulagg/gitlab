@@ -20,9 +20,9 @@ module EE
 
       override :check_container!
       def check_container!
-        return check_group! if group?
-
         super
+
+        check_group! if group?
       end
 
       override :check_push_access!
@@ -57,6 +57,8 @@ module EE
       end
 
       def can_read_group?
+        return true if geo?
+
         if user
           user.can?(:read_group, group)
         else

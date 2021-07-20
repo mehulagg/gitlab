@@ -1,4 +1,4 @@
-import { DEFAULT_SORT } from '~/members/constants';
+import { DEFAULT_SORT, MEMBER_TYPES } from '~/members/constants';
 import {
   generateBadges,
   isGroup,
@@ -17,10 +17,12 @@ import {
   member as memberMock,
   directMember,
   inheritedMember,
+  member2faEnabled,
   group,
   invite,
-  membersJsonString,
   members,
+  pagination,
+  dataAttribute,
 } from './mock_data';
 
 const IS_CURRENT_USER_ID = 123;
@@ -30,7 +32,11 @@ const URL_HOST = 'https://localhost/';
 describe('Members Utils', () => {
   describe('generateBadges', () => {
     it('has correct properties for each badge', () => {
-      const badges = generateBadges(memberMock, true);
+      const badges = generateBadges({
+        member: memberMock,
+        isCurrentUser: true,
+        canManageMembers: true,
+      });
 
       badges.forEach((badge) => {
         expect(badge).toEqual(
@@ -44,12 +50,32 @@ describe('Members Utils', () => {
     });
 
     it.each`
-      member                                                                     | expected
-      ${memberMock}                                                              | ${{ show: true, text: "It's you", variant: 'success' }}
-      ${{ ...memberMock, user: { ...memberMock.user, blocked: true } }}          | ${{ show: true, text: 'Blocked', variant: 'danger' }}
-      ${{ ...memberMock, user: { ...memberMock.user, twoFactorEnabled: true } }} | ${{ show: true, text: '2FA', variant: 'info' }}
+      member                                                            | expected
+      ${memberMock}                                                     | ${{ show: true, text: "It's you", variant: 'success' }}
+      ${{ ...memberMock, user: { ...memberMock.user, blocked: true } }} | ${{ show: true, text: 'Blocked', variant: 'danger' }}
+      ${member2faEnabled}                                               | ${{ show: true, text: '2FA', variant: 'info' }}
     `('returns expected output for "$expected.text" badge', ({ member, expected }) => {
-      expect(generateBadges(member, true)).toContainEqual(expect.objectContaining(expected));
+      expect(
+        generateBadges({ member, isCurrentUser: true, canManageMembers: true }),
+      ).toContainEqual(expect.objectContaining(expected));
+    });
+
+    describe('when `canManageMembers` argument is `false`', () => {
+      describe.each`
+        description                  | memberIsCurrentUser | expectedBadgeToBeShown
+        ${'is not the current user'} | ${false}            | ${false}
+        ${'is the current user'}     | ${true}             | ${true}
+      `('when member is $description', ({ memberIsCurrentUser, expectedBadgeToBeShown }) => {
+        it(`sets 'show' to '${expectedBadgeToBeShown}' for 2FA badge`, () => {
+          const badges = generateBadges({
+            member: member2faEnabled,
+            isCurrentUser: memberIsCurrentUser,
+            canManageMembers: false,
+          });
+
+          expect(badges.find((badge) => badge.text === '2FA').show).toBe(expectedBadgeToBeShown);
+        });
+      });
     });
   });
 
@@ -233,18 +259,20 @@ describe('Members Utils', () => {
 
     beforeEach(() => {
       el = document.createElement('div');
-      el.setAttribute('data-members', membersJsonString);
-      el.setAttribute('data-source-id', '234');
-      el.setAttribute('data-can-manage-members', 'true');
+      el.setAttribute('data-members-data', dataAttribute);
     });
 
     afterEach(() => {
       el = null;
     });
 
-    it('correctly parses the data attributes', () => {
-      expect(parseDataAttributes(el)).toEqual({
-        members,
+    it('correctly parses the data attribute', () => {
+      expect(parseDataAttributes(el)).toMatchObject({
+        [MEMBER_TYPES.user]: {
+          members,
+          pagination,
+          memberPath: '/groups/foo-bar/-/group_members/:id',
+        },
         sourceId: 234,
         canManageMembers: true,
       });

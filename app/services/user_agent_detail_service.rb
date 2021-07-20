@@ -1,15 +1,21 @@
 # frozen_string_literal: true
 
 class UserAgentDetailService
-  attr_accessor :spammable, :request
-
-  def initialize(spammable, request)
-    @spammable, @request = spammable, request
+  def initialize(spammable:, spam_params:)
+    @spammable = spammable
+    @spam_params = spam_params
   end
 
   def create
-    return unless request
+    unless spam_params&.user_agent && spam_params&.ip_address
+      messasge = 'Skipped UserAgentDetail creation because necessary spam_params were not provided'
+      return ServiceResponse.success(message: messasge)
+    end
 
-    spammable.create_user_agent_detail(user_agent: request.env['HTTP_USER_AGENT'], ip_address: request.env['action_dispatch.remote_ip'].to_s)
+    spammable.create_user_agent_detail(user_agent: spam_params.user_agent, ip_address: spam_params.ip_address)
   end
+
+  private
+
+  attr_reader :spammable, :spam_params
 end

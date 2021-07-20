@@ -797,7 +797,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
       end
 
       it 'sets repository_retry_at to a future time' do
-        subject.update(repository_retry_count: 0)
+        subject.update!(repository_retry_count: 0)
 
         subject.fail_sync!(type, message, error)
 
@@ -805,7 +805,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
       end
 
       it 'ensures repository_retry_at is capped at one hour' do
-        subject.update(repository_retry_count: 31)
+        subject.update!(repository_retry_count: 31)
 
         subject.fail_sync!(type, message, error)
 
@@ -882,7 +882,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
       end
 
       it 'sets wiki_retry_at to a future time' do
-        subject.update(wiki_retry_count: 0)
+        subject.update!(wiki_retry_count: 0)
 
         subject.fail_sync!(type, message, error)
 
@@ -890,7 +890,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
       end
 
       it 'ensures wiki_retry_at is capped at one hour' do
-        subject.update(wiki_retry_count: 31)
+        subject.update!(wiki_retry_count: 31)
 
         subject.fail_sync!(type, message, error)
 

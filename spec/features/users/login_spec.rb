@@ -97,6 +97,8 @@ RSpec.describe 'Login' do
   describe 'with an unconfirmed email address' do
     let!(:user) { create(:user, confirmed_at: nil) }
     let(:grace_period) { 2.days }
+    let(:alert_title) { 'Please confirm your email address' }
+    let(:alert_message) { "To continue, you need to select the link in the confirmation email we sent to verify your email address. If you didn't get our email, select Resend confirmation email" }
 
     before do
       stub_application_setting(send_user_confirmation_email: true)
@@ -109,13 +111,14 @@ RSpec.describe 'Login' do
 
         gitlab_sign_in(user)
 
-        expect(page).not_to have_content(I18n.t('devise.failure.unconfirmed'))
+        expect(page).not_to have_content(alert_title)
+        expect(page).not_to have_content(alert_message)
         expect(page).not_to have_link('Resend confirmation email', href: new_user_confirmation_path)
       end
     end
 
     context 'when the confirmation grace period is expired' do
-      it 'prevents the user from logging in and renders a resend confirmation email link' do
+      it 'prevents the user from logging in and renders a resend confirmation email link', :js do
         travel_to((grace_period + 1.day).from_now) do
           expect(authentication_metrics)
             .to increment(:user_unauthenticated_counter)
@@ -123,9 +126,24 @@ RSpec.describe 'Login' do
 
           gitlab_sign_in(user)
 
-          expect(page).to have_content(I18n.t('devise.failure.unconfirmed'))
+          expect(page).to have_content(alert_title)
+          expect(page).to have_content(alert_message)
           expect(page).to have_link('Resend confirmation email', href: new_user_confirmation_path)
         end
+      end
+    end
+
+    context 'when resending the confirmation email' do
+      it 'redirects to the "almost there" page' do
+        stub_feature_flags(soft_email_confirmation: false)
+
+        user = create(:user)
+
+        visit new_user_confirmation_path
+        fill_in 'user_email', with: user.email
+        click_button 'Resend'
+
+        expect(current_path).to eq users_almost_there_path
       end
     end
   end
@@ -138,7 +156,7 @@ RSpec.describe 'Login' do
 
       gitlab_sign_in(User.ghost)
 
-      expect(page).to have_content('Invalid Login or password.')
+      expect(page).to have_content('Invalid login or password.')
     end
 
     it 'does not update Devise trackable attributes', :clean_gitlab_redis_shared_state do
@@ -239,7 +257,7 @@ RSpec.describe 'Login' do
           expect(codes.size).to eq 10
 
           # Ensure the generated codes get saved
-          user.save(touch: false)
+          user.save!(touch: false)
         end
 
         context 'with valid code' do
@@ -394,6 +412,25 @@ RSpec.describe 'Login' do
 
         gitlab_sign_in(user)
       end
+
+      context 'when the users password is expired' do
+        before do
+          user.update!(password_expires_at: Time.parse('2018-05-08 11:29:46 UTC'))
+        end
+
+        it 'asks for a new password' do
+          expect(authentication_metrics)
+            .to increment(:user_authenticated_counter)
+
+          visit new_user_session_path
+
+          fill_in 'user_login', with: user.email
+          fill_in 'user_password', with: '12345678'
+          click_button 'Sign in'
+
+          expect(current_path).to eq(new_profile_password_path)
+        end
+      end
     end
 
     context 'with invalid username and password' do
@@ -406,7 +443,7 @@ RSpec.describe 'Login' do
 
         gitlab_sign_in(user)
 
-        expect(page).to have_content('Invalid Login or password.')
+        expect(page).to have_content('Invalid login or password.')
       end
     end
   end
@@ -856,6 +893,8 @@ RSpec.describe 'Login' do
   context 'when sending confirmation email and not yet confirmed' do
     let!(:user) { create(:user, confirmed_at: nil) }
     let(:grace_period) { 2.days }
+    let(:alert_title) { 'Please confirm your email address' }
+    let(:alert_message) { "To continue, you need to select the link in the confirmation email we sent to verify your email address. If you didn't get our email, select Resend confirmation email" }
 
     before do
       stub_application_setting(send_user_confirmation_email: true)
@@ -873,7 +912,7 @@ RSpec.describe 'Login' do
     end
 
     context "when not having confirmed within Devise's allow_unconfirmed_access_for time" do
-      it 'does not allow login and shows a flash alert to confirm the email address' do
+      it 'does not allow login and shows a flash alert to confirm the email address', :js do
         travel_to((grace_period + 1.day).from_now) do
           expect(authentication_metrics)
             .to increment(:user_unauthenticated_counter)
@@ -882,7 +921,9 @@ RSpec.describe 'Login' do
           gitlab_sign_in(user)
 
           expect(current_path).to eq new_user_session_path
-          expect(page).to have_content(I18n.t('devise.failure.unconfirmed'))
+          expect(page).to have_content(alert_title)
+          expect(page).to have_content(alert_message)
+          expect(page).to have_link('Resend confirmation email', href: new_user_confirmation_path)
         end
       end
     end

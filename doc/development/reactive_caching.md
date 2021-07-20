@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # `ReactiveCaching`
 
-> This doc refers to [`reactive_caching.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/models/concerns/reactive_caching.rb).
+> This doc refers to [`reactive_caching.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/reactive_caching.rb).
 
 The `ReactiveCaching` concern is used for fetching some data in the background and storing it
 in the Rails cache, keeping it up-to-date for as long as it is being requested. If the
@@ -72,27 +72,27 @@ For more information, read the internal issue
 
 ## How to use
 
-### In models and services
+### In models and integrations
 
-The ReactiveCaching concern can be used in models as well as `project_services`
-(`app/models/project_services`).
+The ReactiveCaching concern can be used in models as well as `integrations`
+(`app/models/integrations`).
 
-1. Include the concern in your model or service.
+1. Include the concern in your model or integration.
 
-   When including in a model:
+   To include the concern in a model:
 
    ```ruby
    include ReactiveCaching
    ```
 
-   or when including in a `project_service`:
+   To include the concern in an integration:
 
    ```ruby
    include ReactiveService
    ```
 
-1. Implement the `calculate_reactive_cache` method in your model/service.
-1. Call `with_reactive_cache` in your model/service where the cached value is needed.
+1. Implement the `calculate_reactive_cache` method in your model or integration.
+1. Call `with_reactive_cache` in your model or integration where the cached value is needed.
 1. Set the [`reactive_cache_work_type` accordingly](#selfreactive_cache_work_type).
 
 ### In controllers
@@ -258,7 +258,7 @@ self.reactive_cache_hard_limit = 5.megabytes
 - This is the type of work performed by the `calculate_reactive_cache` method. Based on this attribute,
 it's able to pick the right worker to process the caching job. Make sure to
 set it as `:external_dependency` if the work performs any external request
-(e.g. Kubernetes, Sentry); otherwise set it to `:no_dependency`.
+(for example, Kubernetes, Sentry); otherwise set it to `:no_dependency`.
 
 #### `self.reactive_cache_worker_finder`
 

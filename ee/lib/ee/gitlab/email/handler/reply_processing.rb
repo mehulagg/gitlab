@@ -11,7 +11,7 @@ module EE
 
           override :upload_params
           def upload_params
-            return super unless try(:noteable)&.is_a?(Epic)
+            return super unless try(:noteable).is_a?(Epic)
 
             {
               upload_parent: noteable.group,

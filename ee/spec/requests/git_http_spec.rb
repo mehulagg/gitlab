@@ -153,4 +153,102 @@ RSpec.describe 'Git HTTP requests' do
 
     it_behaves_like 'pulls are allowed'
   end
+
+  describe 'when user cannot use password-based login' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :repository, :private, group: group) }
+    let_it_be(:user) { create(:user, provisioned_by_group: group) }
+
+    let(:env) { { user: user.username, password: user.password } }
+    let(:path) { "#{project.full_path}.git" }
+
+    before do
+      project.add_developer(user)
+    end
+
+    context 'with feature flag switched off' do
+      before do
+        stub_feature_flags(block_password_auth_for_saml_users: false)
+      end
+
+      it_behaves_like 'pulls are allowed'
+      it_behaves_like 'pushes are allowed'
+    end
+
+    context 'with feature flag switched on' do
+      it 'responds with status 401 Unauthorized for pull action' do
+        download(path, **env) do |response|
+          expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+      end
+
+      it 'responds with status 401 Unauthorized for push action' do
+        upload(path, **env) do |response|
+          expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+      end
+
+      context 'when username and personal access token are provided' do
+        let(:user) { create(:user, provisioned_by_group: group) }
+        let(:access_token) { create(:personal_access_token, user: user) }
+        let(:env) { { user: user.username, password: access_token.token } }
+
+        it_behaves_like 'pulls are allowed'
+        it_behaves_like 'pushes are allowed'
+      end
+
+      context 'when user has 2FA enabled' do
+        let(:user) { create(:user, :two_factor, provisioned_by_group: group) }
+        let(:access_token) { create(:personal_access_token, user: user) }
+
+        context 'when username and personal access token are provided' do
+          let(:env) { { user: user.username, password: access_token.token } }
+
+          it_behaves_like 'pulls are allowed'
+          it_behaves_like 'pushes are allowed'
+
+          it 'rejects the push attempt for read_repository scope' do
+            read_access_token = create(:personal_access_token, user: user, scopes: [:read_repository])
+
+            upload(path, user: user.username, password: read_access_token.token) do |response|
+              expect(response).to have_gitlab_http_status(:forbidden)
+              expect(response.body).to include('You are not allowed to upload code')
+            end
+          end
+
+          it 'accepts the push attempt for write_repository scope' do
+            write_access_token = create(:personal_access_token, user: user, scopes: [:write_repository])
+
+            upload(path, user: user.username, password: write_access_token.token) do |response|
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+          end
+
+          it 'accepts the pull attempt for read_repository scope' do
+            read_access_token = create(:personal_access_token, user: user, scopes: [:read_repository])
+
+            download(path, user: user.username, password: read_access_token.token) do |response|
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+          end
+
+          it 'accepts the pull attempt for api scope' do
+            read_access_token = create(:personal_access_token, user: user, scopes: [:api])
+
+            download(path, user: user.username, password: read_access_token.token) do |response|
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+          end
+
+          it 'accepts the push attempt for api scope' do
+            write_access_token = create(:personal_access_token, user: user, scopes: [:api])
+
+            upload(path, user: user.username, password: write_access_token.token) do |response|
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+          end
+        end
+      end
+    end
+  end
 end

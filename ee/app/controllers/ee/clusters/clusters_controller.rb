@@ -60,9 +60,9 @@ module EE
       end
 
       def prometheus_adapter
-        return unless cluster&.application_prometheus_available?
+        return unless cluster&.integration_prometheus_available?
 
-        cluster.application_prometheus
+        cluster.integration_prometheus
       end
     end
   end

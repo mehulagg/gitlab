@@ -2,23 +2,28 @@ import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_prof
 import { TEST_HOST } from 'helpers/test_constants';
 import * as urlUtility from '~/lib/utils/url_utility';
 
-const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
-const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
+const fullPath = '/group/project';
+const profilesLibraryPath = `${fullPath}/-/security/configuration/dast_scans`;
+const onDemandScansPath = `${fullPath}/-/on_demand_scans`;
+const dastConfigPath = `${fullPath}/-/security/configuration/dast`;
 const urlParamKey = 'site_profile_id';
 const originalReferrer = document.referrer;
 
+const allowedPaths = [onDemandScansPath, dastConfigPath];
+const disallowedPaths = [profilesLibraryPath, fullPath];
+const defaultRedirectionPath = profilesLibraryPath;
+
 const params = {
-  onDemandScansPath,
-  profilesLibraryPath,
+  allowedPaths,
+  profilesLibraryPath: defaultRedirectionPath,
   urlParamKey,
 };
 
 const factory = (id) => returnToPreviousPageFactory(params)(id);
 
-const setReferrer = (value = onDemandScansPath) => {
+const setReferrer = (value) => {
   Object.defineProperty(document, 'referrer', {
-    value,
+    value: new URL(value, TEST_HOST).href,
     configurable: true,
   });
 };
@@ -33,30 +38,43 @@ describe('DAST Profiles redirector', () => {
       jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
     });
 
-    it('default - redirects to profile library page', () => {
-      factory();
-      expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
-    });
-
-    describe('when a referrer is set', () => {
-      beforeEach(() => {
-        setReferrer();
+    describe('redirects to default page', () => {
+      it('when no referrer is present', () => {
+        factory();
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(defaultRedirectionPath);
       });
 
-      afterEach(() => {
+      it.each(disallowedPaths)('when previous path is %s', (path) => {
+        setReferrer(path);
+
+        factory();
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(defaultRedirectionPath);
+
         resetReferrer();
       });
+    });
 
-      it('redirects to previous page', () => {
-        factory();
-        expect(urlUtility.redirectTo).toHaveBeenCalledWith(onDemandScansPath);
-      });
+    describe('redirects to previous page', () => {
+      describe.each(allowedPaths)('when previous path is %s', (path) => {
+        beforeEach(() => {
+          setReferrer(path);
+        });
 
-      it('redirects to previous page with id', () => {
-        factory(2);
-        expect(urlUtility.redirectTo).toHaveBeenCalledWith(
-          `${onDemandScansPath}?site_profile_id=2`,
-        );
+        afterEach(() => {
+          resetReferrer();
+        });
+
+        it('without params', () => {
+          factory();
+          expect(urlUtility.redirectTo).toHaveBeenCalledWith(path);
+        });
+
+        it('with params', () => {
+          factory({ id: 2 });
+          expect(urlUtility.redirectTo).toHaveBeenCalledWith(
+            `${TEST_HOST}${path}?site_profile_id=2`,
+          );
+        });
       });
     });
   });

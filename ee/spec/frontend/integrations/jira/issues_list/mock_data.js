@@ -17,21 +17,26 @@ export const mockJiraIssue1 = {
   status: 'Selected for Development',
   labels: [
     {
+      title: 'backend',
       name: 'backend',
-      color: '#EBECF0',
-      text_color: '#283856',
+      color: '#0052CC',
+      text_color: '#FFFFFF',
     },
   ],
   author: {
     name: 'jhope',
     web_url: 'https://gitlab-jira.atlassian.net/people/5e32f803e127810e82875bc1',
+    avatar_url: null,
   },
   assignees: [
     {
       name: 'Kushal Pandya',
+      web_url: 'https://gitlab-jira.atlassian.net/people/1920938475',
+      avatar_url: null,
     },
   ],
   web_url: 'https://gitlab-jira.atlassian.net/browse/IG-31596',
+  gitlab_web_url: '',
   references: {
     relative: 'IG-31596',
   },
@@ -49,9 +54,11 @@ export const mockJiraIssue2 = {
   author: {
     name: 'Gabe Weaver',
     web_url: 'https://gitlab-jira.atlassian.net/people/5e320a31fe03e20c9d1dccde',
+    avatar_url: null,
   },
   assignees: [],
   web_url: 'https://gitlab-jira.atlassian.net/browse/IG-31595',
+  gitlab_web_url: '',
   references: {
     relative: 'IG-31595',
   },
@@ -69,9 +76,11 @@ export const mockJiraIssue3 = {
   author: {
     name: 'Gabe Weaver',
     web_url: 'https://gitlab-jira.atlassian.net/people/5e320a31fe03e20c9d1dccde',
+    avatar_url: null,
   },
   assignees: [],
   web_url: 'https://gitlab-jira.atlassian.net/browse/IG-31594',
+  gitlab_web_url: '',
   references: {
     relative: 'IG-31594',
   },

@@ -2,6 +2,8 @@
 
 module DevOpsReport
   class MetricPresenter < Gitlab::View::Presenter::Simple
+    delegate :created_at, to: :subject
+
     def cards
       [
         Card.new(
@@ -36,7 +38,7 @@ module DevOpsReport
         ),
         Card.new(
           metric: subject,
-          title: 'Merge Requests',
+          title: 'Merge requests',
           description: 'per active user',
           feature: 'merge_requests',
           blog: 'https://8thlight.com/blog/uncle-bob/2013/02/01/The-Humble-Craftsman.html',
@@ -48,7 +50,7 @@ module DevOpsReport
           description: 'created per active user',
           feature: 'ci_pipelines',
           blog: 'https://martinfowler.com/bliki/ContinuousDelivery.html',
-          docs: help_page_path('ci/README')
+          docs: help_page_path('ci/index')
         ),
         Card.new(
           metric: subject,

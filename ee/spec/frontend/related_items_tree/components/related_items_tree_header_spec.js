@@ -29,6 +29,10 @@ const createComponent = ({ slots } = {}) => {
     isSubItem: false,
     children,
   });
+  store.dispatch('setWeightSum', {
+    openedIssues: 10,
+    closedIssues: 5,
+  });
   store.dispatch('setChildrenCount', mockParentItem.descendantCounts);
 
   return shallowMount(RelatedItemsTreeHeader, {
@@ -61,6 +65,16 @@ describe('RelatedItemsTree', () => {
       it('returns string containing issue count based on available direct children within state', () => {
         expect(wrapper.find(GlTooltip).text()).toContain(`Issues •
         2 open, 1 closed`);
+      });
+    });
+
+    describe('totalWeight', () => {
+      beforeEach(() => {
+        wrapper = createComponent();
+      });
+
+      it('total of openedIssues and closedIssues weight', () => {
+        expect(wrapper.vm.totalWeight).toBe(15);
       });
     });
 
@@ -234,6 +248,15 @@ describe('RelatedItemsTree', () => {
         expect(issuesEl.text().trim()).toContain('3');
         expect(issueIcon.isVisible()).toBe(true);
         expect(issueIcon.props('name')).toBe('issues');
+      });
+
+      it('renders totalWeight count and gl-icon', () => {
+        const weightEl = wrapper.findAll('.issue-count-badge > span').at(2);
+        const weightIcon = weightEl.find(GlIcon);
+
+        expect(weightEl.text().trim()).toContain('15');
+        expect(weightIcon.isVisible()).toBe(true);
+        expect(weightIcon.props('name')).toBe('weight');
       });
     });
   });

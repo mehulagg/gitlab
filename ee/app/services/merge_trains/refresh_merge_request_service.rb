@@ -62,7 +62,7 @@ module MergeTrains
     def merge!
       merge_train.start_merge!
 
-      MergeRequests::MergeService.new(project, merge_user, merge_request.merge_params)
+      MergeRequests::MergeService.new(project: project, current_user: merge_user, params: merge_request.merge_params.with_indifferent_access)
                                  .execute(merge_request, skip_discussions_check: true)
 
       raise ProcessError, "failed to merge. #{merge_request.merge_error}" unless merge_request.merged?

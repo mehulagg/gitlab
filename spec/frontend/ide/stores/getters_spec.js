@@ -1,18 +1,43 @@
 import { TEST_HOST } from 'helpers/test_constants';
+import {
+  DEFAULT_PERMISSIONS,
+  PERMISSION_PUSH_CODE,
+  PUSH_RULE_REJECT_UNSIGNED_COMMITS,
+} from '~/ide/constants';
+import {
+  MSG_CANNOT_PUSH_CODE,
+  MSG_CANNOT_PUSH_CODE_GO_TO_FORK,
+  MSG_CANNOT_PUSH_CODE_SHOULD_FORK,
+  MSG_CANNOT_PUSH_UNSIGNED,
+  MSG_CANNOT_PUSH_UNSIGNED_SHORT,
+  MSG_FORK,
+  MSG_GO_TO_FORK,
+} from '~/ide/messages';
 import { createStore } from '~/ide/stores';
 import * as getters from '~/ide/stores/getters';
-import { DEFAULT_PERMISSIONS } from '../../../../app/assets/javascripts/ide/constants';
 import { file } from '../helpers';
 
 const TEST_PROJECT_ID = 'test_project';
+const TEST_IDE_PATH = '/test/ide/path';
+const TEST_FORK_PATH = '/test/fork/path';
 
 describe('IDE store getters', () => {
   let localState;
   let localStore;
+  let origGon;
 
   beforeEach(() => {
+    origGon = window.gon;
+
+    // Feature flag is defaulted to on in prod
+    window.gon = { features: { rejectUnsignedCommitsByGitlab: true } };
+
     localStore = createStore();
     localState = localStore.state;
+  });
+
+  afterEach(() => {
+    window.gon = origGon;
   });
 
   describe('activeFile', () => {
@@ -184,12 +209,12 @@ describe('IDE store getters', () => {
   describe('currentBranch', () => {
     it('returns current projects branch', () => {
       localState.currentProjectId = 'abcproject';
-      localState.currentBranchId = 'master';
+      localState.currentBranchId = 'main';
       localState.projects.abcproject = {
         name: 'abcproject',
         branches: {
-          master: {
-            name: 'master',
+          main: {
+            name: 'main',
           },
         },
       };
@@ -198,7 +223,7 @@ describe('IDE store getters', () => {
       };
       getters.currentBranch(localState, localGetters);
 
-      expect(localGetters.findBranch).toHaveBeenCalledWith('abcproject', 'master');
+      expect(localGetters.findBranch).toHaveBeenCalledWith('abcproject', 'main');
     });
   });
 
@@ -218,12 +243,12 @@ describe('IDE store getters', () => {
 
     it('returns the selected branch from a project', () => {
       localState.currentProjectId = 'abcproject';
-      localState.currentBranchId = 'master';
+      localState.currentBranchId = 'main';
       localState.projects.abcproject = {
         name: 'abcproject',
         branches: {
-          master: {
-            name: 'master',
+          main: {
+            name: 'main',
           },
         },
       };
@@ -231,9 +256,9 @@ describe('IDE store getters', () => {
         findProject: () => localState.projects.abcproject,
       };
 
-      result = getters.findBranch(localState, localGetters)('abcproject', 'master');
+      result = getters.findBranch(localState, localGetters)('abcproject', 'main');
 
-      expect(result.name).toBe('master');
+      expect(result.name).toBe('main');
     });
   });
 
@@ -249,9 +274,9 @@ describe('IDE store getters', () => {
     it("returns true when project's default branch matches current branch", () => {
       const localGetters = {
         currentProject: {
-          default_branch: 'master',
+          default_branch: 'main',
         },
-        branchName: 'master',
+        branchName: 'main',
       };
 
       expect(getters.isOnDefaultBranch({}, localGetters)).toBeTruthy();
@@ -260,7 +285,7 @@ describe('IDE store getters', () => {
     it("returns false when project's default branch doesn't match current branch", () => {
       const localGetters = {
         currentProject: {
-          default_branch: 'master',
+          default_branch: 'main',
         },
         branchName: 'feature',
       };
@@ -385,22 +410,23 @@ describe('IDE store getters', () => {
     );
   });
 
-  describe('findProjectPermissions', () => {
-    it('returns false if project not found', () => {
-      expect(localStore.getters.findProjectPermissions(TEST_PROJECT_ID)).toEqual(
-        DEFAULT_PERMISSIONS,
-      );
+  describe.each`
+    getterName                  | projectField         | defaultValue
+    ${'findProjectPermissions'} | ${'userPermissions'} | ${DEFAULT_PERMISSIONS}
+    ${'findPushRules'}          | ${'pushRules'}       | ${{}}
+  `('$getterName', ({ getterName, projectField, defaultValue }) => {
+    const callGetter = (...args) => localStore.getters[getterName](...args);
+
+    it('returns default if project not found', () => {
+      expect(callGetter(TEST_PROJECT_ID)).toEqual(defaultValue);
     });
 
-    it('finds permission in given project', () => {
-      const userPermissions = {
-        readMergeRequest: true,
-        createMergeRequestsIn: false,
-      };
+    it('finds field in given project', () => {
+      const obj = { test: 'foo' };
 
-      localState.projects[TEST_PROJECT_ID] = { userPermissions };
+      localState.projects[TEST_PROJECT_ID] = { [projectField]: obj };
 
-      expect(localStore.getters.findProjectPermissions(TEST_PROJECT_ID)).toBe(userPermissions);
+      expect(callGetter(TEST_PROJECT_ID)).toBe(obj);
     });
   });
 
@@ -408,7 +434,6 @@ describe('IDE store getters', () => {
     getterName                  | permissionKey
     ${'canReadMergeRequests'}   | ${'readMergeRequest'}
     ${'canCreateMergeRequests'} | ${'createMergeRequestIn'}
-    ${'canPushCode'}            | ${'pushCode'}
   `('$getterName', ({ getterName, permissionKey }) => {
     it.each([true, false])('finds permission for current project (%s)', (val) => {
       localState.projects[TEST_PROJECT_ID] = {
@@ -419,6 +444,111 @@ describe('IDE store getters', () => {
       localState.currentProjectId = TEST_PROJECT_ID;
 
       expect(localStore.getters[getterName]).toBe(val);
+    });
+  });
+
+  describe('canPushCodeStatus', () => {
+    it.each([
+      [
+        'when can push code, and can push unsigned commits',
+        {
+          input: { pushCode: true, rejectUnsignedCommits: false },
+          output: { isAllowed: true, message: '', messageShort: '' },
+        },
+      ],
+      [
+        'when cannot push code, and can push unsigned commits',
+        {
+          input: { pushCode: false, rejectUnsignedCommits: false },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_CODE,
+            messageShort: MSG_CANNOT_PUSH_CODE,
+          },
+        },
+      ],
+      [
+        'when cannot push code, and has ide_path in forkInfo',
+        {
+          input: {
+            pushCode: false,
+            rejectUnsignedCommits: false,
+            forkInfo: { ide_path: TEST_IDE_PATH },
+          },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_CODE_GO_TO_FORK,
+            messageShort: MSG_CANNOT_PUSH_CODE,
+            action: { href: TEST_IDE_PATH, text: MSG_GO_TO_FORK },
+          },
+        },
+      ],
+      [
+        'when cannot push code, and has fork_path in forkInfo',
+        {
+          input: {
+            pushCode: false,
+            rejectUnsignedCommits: false,
+            forkInfo: { fork_path: TEST_FORK_PATH },
+          },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_CODE_SHOULD_FORK,
+            messageShort: MSG_CANNOT_PUSH_CODE,
+            action: { href: TEST_FORK_PATH, text: MSG_FORK, isForm: true },
+          },
+        },
+      ],
+      [
+        'when can push code, but cannot push unsigned commits',
+        {
+          input: { pushCode: true, rejectUnsignedCommits: true },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_UNSIGNED,
+            messageShort: MSG_CANNOT_PUSH_UNSIGNED_SHORT,
+          },
+        },
+      ],
+      [
+        'when can push code, but cannot push unsigned commits, with reject_unsigned_commits_by_gitlab feature off',
+        {
+          input: {
+            pushCode: true,
+            rejectUnsignedCommits: true,
+            features: { rejectUnsignedCommitsByGitlab: false },
+          },
+          output: {
+            isAllowed: true,
+            message: '',
+            messageShort: '',
+          },
+        },
+      ],
+    ])('%s', (testName, { input, output }) => {
+      const { forkInfo, rejectUnsignedCommits, pushCode, features = {} } = input;
+
+      Object.assign(window.gon.features, features);
+      localState.links = { forkInfo };
+      localState.projects[TEST_PROJECT_ID] = {
+        pushRules: {
+          [PUSH_RULE_REJECT_UNSIGNED_COMMITS]: rejectUnsignedCommits,
+        },
+        userPermissions: {
+          [PERMISSION_PUSH_CODE]: pushCode,
+        },
+      };
+      localState.currentProjectId = TEST_PROJECT_ID;
+
+      expect(localStore.getters.canPushCodeStatus).toEqual(output);
+    });
+  });
+
+  describe('canPushCode', () => {
+    it.each([true, false])('with canPushCodeStatus.isAllowed = $s', (isAllowed) => {
+      const canPushCodeStatus = { isAllowed };
+
+      expect(getters.canPushCode({}, { canPushCodeStatus })).toBe(isAllowed);
     });
   });
 
@@ -490,10 +620,10 @@ describe('IDE store getters', () => {
   describe('getUrlForPath', () => {
     it('returns a route url for the given path', () => {
       localState.currentProjectId = 'test/test';
-      localState.currentBranchId = 'master';
+      localState.currentBranchId = 'main';
 
       expect(localStore.getters.getUrlForPath('path/to/foo/bar-1.jpg')).toBe(
-        `/project/test/test/tree/master/-/path/to/foo/bar-1.jpg/`,
+        `/project/test/test/tree/main/-/path/to/foo/bar-1.jpg/`,
       );
     });
   });
@@ -501,13 +631,13 @@ describe('IDE store getters', () => {
   describe('getJsonSchemaForPath', () => {
     beforeEach(() => {
       localState.currentProjectId = 'path/to/some/project';
-      localState.currentBranchId = 'master';
+      localState.currentBranchId = 'main';
     });
 
     it('returns a json schema uri and match config for a json/yaml file that can be loaded by monaco', () => {
       expect(localStore.getters.getJsonSchemaForPath('.gitlab-ci.yml')).toEqual({
         fileMatch: ['*.gitlab-ci.yml'],
-        uri: `${TEST_HOST}/path/to/some/project/-/schema/master/.gitlab-ci.yml`,
+        uri: `${TEST_HOST}/path/to/some/project/-/schema/main/.gitlab-ci.yml`,
       });
     });
 
@@ -515,8 +645,8 @@ describe('IDE store getters', () => {
       localState.projects['path/to/some/project'] = {
         name: 'project',
         branches: {
-          master: {
-            name: 'master',
+          main: {
+            name: 'main',
             commit: {
               id: 'abcdef123456',
             },

@@ -3,13 +3,7 @@ import mutations from 'ee/roadmap/store/mutations';
 
 import defaultState from 'ee/roadmap/store/state';
 
-import {
-  mockGroupId,
-  basePath,
-  epicsPath,
-  mockSortedBy,
-  mockEpic,
-} from 'ee_jest/roadmap/mock_data';
+import { mockGroupId, basePath, mockSortedBy, mockEpic } from 'ee_jest/roadmap/mock_data';
 
 const setEpicMockData = (state) => {
   state.epics = [mockEpic];
@@ -33,7 +27,6 @@ describe('Roadmap Store Mutations', () => {
         epicsFetchResultEmpty: false,
         currentGroupId: mockGroupId,
         sortedBy: mockSortedBy,
-        initialEpicsPath: epicsPath,
         defaultInnerHeight: 600,
         extendedTimeframe: [],
         filterQueryString: '',

@@ -7,6 +7,7 @@ RSpec.describe 'Set an Epic Subscription' do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group) }
+
   let(:epic) { create(:epic, group: group) }
   let(:subscribed_state) { true }
 

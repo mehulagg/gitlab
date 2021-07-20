@@ -47,7 +47,7 @@ module Gitlab
 
       # From Prometheus docs: This endpoint returns 200 when Prometheus is ready to serve traffic (i.e. respond to queries).
       response.code == 200
-    rescue => e
+    rescue StandardError => e
       raise PrometheusClient::UnexpectedResponseError, "#{e.message}"
     end
 
@@ -140,7 +140,7 @@ module Gitlab
     end
 
     def mapped_options
-      options.keys.map { |k| [gitlab_http_key(k), options[k]] }.to_h
+      options.keys.to_h { |k| [gitlab_http_key(k), options[k]] }
     end
 
     def http_options

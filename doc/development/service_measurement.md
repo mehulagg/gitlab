@@ -52,7 +52,7 @@ class DummyService
   end
 end
 
-DummyService.prepend_if_ee('EE::DummyService')
+DummyService.prepend_mod_with('DummyService')
 DummyService.prepend(Measurable)
 ```
 
@@ -75,7 +75,7 @@ To actually use it, you need to enable measuring for the desired service by enab
 ### Enabling measurement using feature flags
 
 In the following example, the `:gitlab_service_measuring_projects_import_service`
-[feature flag](feature_flags/development.md#enabling-a-feature-flag-locally-in-development) is used to enable the measuring feature
+[feature flag](feature_flags/index.md#enabling-a-feature-flag-locally-in-development) is used to enable the measuring feature
 for `Projects::ImportService`.
 
 From ChatOps:

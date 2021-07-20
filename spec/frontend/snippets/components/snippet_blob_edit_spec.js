@@ -4,11 +4,11 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import BlobHeaderEdit from '~/blob/components/blob_edit_header.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import SnippetBlobEdit from '~/snippets/components/snippet_blob_edit.vue';
-import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import SourceEditor from '~/vue_shared/components/source_editor.vue';
 
 jest.mock('~/flash');
 
@@ -48,7 +48,7 @@ describe('Snippet Blob Edit component', () => {
 
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findHeader = () => wrapper.find(BlobHeaderEdit);
-  const findContent = () => wrapper.find(EditorLite);
+  const findContent = () => wrapper.find(SourceEditor);
   const getLastUpdatedArgs = () => {
     const event = wrapper.emitted()['blob-updated'];
 
@@ -125,9 +125,9 @@ describe('Snippet Blob Edit component', () => {
     it('should call flash', async () => {
       await waitForPromises();
 
-      expect(createFlash).toHaveBeenCalledWith(
-        "Can't fetch content for the blob: Error: Request failed with status code 500",
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: "Can't fetch content for the blob: Error: Request failed with status code 500",
+      });
     });
   });
 

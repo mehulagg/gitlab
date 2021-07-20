@@ -1,30 +1,9 @@
-import $ from 'jquery';
 import timezoneMock from 'timezone-mock';
 import * as datetimeUtility from '~/lib/utils/datetime_utility';
 import { __, s__ } from '~/locale';
 import '~/commons/bootstrap';
 
 describe('Date time utils', () => {
-  describe('timeFor', () => {
-    it('returns localize `past due` when in past', () => {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() - 1);
-
-      expect(datetimeUtility.timeFor(date)).toBe(s__('Timeago|Past due'));
-    });
-
-    it('returns localized remaining time when in the future', () => {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() + 1);
-
-      // Add a day to prevent a transient error. If date is even 1 second
-      // short of a full year, timeFor will return '11 months remaining'
-      date.setDate(date.getDate() + 1);
-
-      expect(datetimeUtility.timeFor(date)).toBe(s__('Timeago|1 year remaining'));
-    });
-  });
-
   describe('get localized day name', () => {
     it('should return Sunday', () => {
       const day = datetimeUtility.getDayName(new Date('07/17/2016'));
@@ -101,13 +80,13 @@ describe('Date time utils', () => {
     it('should format date properly', () => {
       const formattedDate = datetimeUtility.formatDate(new Date('07/23/2016'));
 
-      expect(formattedDate).toBe('Jul 23, 2016 12:00am GMT+0000');
+      expect(formattedDate).toBe('Jul 23, 2016 12:00am UTC');
     });
 
     it('should format ISO date properly', () => {
       const formattedDate = datetimeUtility.formatDate('2016-07-23T00:00:00.559Z');
 
-      expect(formattedDate).toBe('Jul 23, 2016 12:00am GMT+0000');
+      expect(formattedDate).toBe('Jul 23, 2016 12:00am UTC');
     });
 
     it('should throw an error if date is invalid', () => {
@@ -176,6 +155,30 @@ describe('timeIntervalInWords', () => {
     expect(datetimeUtility.timeIntervalInWords(200)).toEqual(s__('Timeago|3 minutes 20 seconds'));
     expect(datetimeUtility.timeIntervalInWords(6008)).toEqual(s__('Timeago|100 minutes 8 seconds'));
   });
+});
+
+describe('humanizeTimeInterval', () => {
+  it.each`
+    intervalInSeconds | expected
+    ${0}              | ${'0 seconds'}
+    ${1}              | ${'1 second'}
+    ${1.48}           | ${'1.5 seconds'}
+    ${2}              | ${'2 seconds'}
+    ${60}             | ${'1 minute'}
+    ${91}             | ${'1.5 minutes'}
+    ${120}            | ${'2 minutes'}
+    ${3600}           | ${'1 hour'}
+    ${5401}           | ${'1.5 hours'}
+    ${7200}           | ${'2 hours'}
+    ${86400}          | ${'1 day'}
+    ${129601}         | ${'1.5 days'}
+    ${172800}         | ${'2 days'}
+  `(
+    'returns "$expected" when the time interval is $intervalInSeconds seconds',
+    ({ intervalInSeconds, expected }) => {
+      expect(datetimeUtility.humanizeTimeInterval(intervalInSeconds)).toBe(expected);
+    },
+  );
 });
 
 describe('dateInWords', () => {
@@ -764,6 +767,21 @@ describe('date addition/subtraction methods', () => {
     );
   });
 
+  describe('nYearsAfter', () => {
+    it.each`
+      date            | numberOfYears | expected
+      ${'2020-07-06'} | ${1}          | ${'2021-07-06'}
+      ${'2020-07-06'} | ${15}         | ${'2035-07-06'}
+    `(
+      'returns $expected for "$numberOfYears year(s) after $date"',
+      ({ date, numberOfYears, expected }) => {
+        expect(datetimeUtility.nYearsAfter(new Date(date), numberOfYears)).toEqual(
+          new Date(expected),
+        );
+      },
+    );
+  });
+
   describe('nMonthsBefore', () => {
     // The previous month (February) has 28 days
     const march2019 = '2019-03-15T00:00:00.000Z';
@@ -828,36 +846,6 @@ describe('approximateDuration', () => {
     ${180000} | ${'2 days'}
   `('converts $seconds seconds to $approximation', ({ seconds, approximation }) => {
     expect(datetimeUtility.approximateDuration(seconds)).toBe(approximation);
-  });
-});
-
-describe('localTimeAgo', () => {
-  beforeEach(() => {
-    document.body.innerHTML = `<time title="some time" datetime="2020-02-18T22:22:32Z">1 hour ago</time>`;
-  });
-
-  it.each`
-    timeagoArg | title
-    ${false}   | ${'some time'}
-    ${true}    | ${'Feb 18, 2020 10:22pm GMT+0000'}
-  `('converts $seconds seconds to $approximation', ({ timeagoArg, title }) => {
-    const element = document.querySelector('time');
-    datetimeUtility.localTimeAgo($(element), timeagoArg);
-
-    jest.runAllTimers();
-
-    expect(element.getAttribute('title')).toBe(title);
-  });
-});
-
-describe('dateFromParams', () => {
-  it('returns the expected date object', () => {
-    const expectedDate = new Date('2019-07-17T00:00:00.000Z');
-    const date = datetimeUtility.dateFromParams(2019, 6, 17);
-
-    expect(date.getYear()).toBe(expectedDate.getYear());
-    expect(date.getMonth()).toBe(expectedDate.getMonth());
-    expect(date.getDate()).toBe(expectedDate.getDate());
   });
 });
 
@@ -951,62 +939,6 @@ describe('format24HourTimeStringFromInt', () => {
   });
 });
 
-describe('getOverlapDateInPeriods', () => {
-  const start = new Date(2021, 0, 11);
-  const end = new Date(2021, 0, 13);
-
-  describe('when date periods overlap', () => {
-    const givenPeriodLeft = new Date(2021, 0, 11);
-    const givenPeriodRight = new Date(2021, 0, 14);
-
-    it('returns an overlap object that contains the amount of days overlapping, the amount of hours overlapping, start date of overlap and end date of overlap', () => {
-      expect(
-        datetimeUtility.getOverlapDateInPeriods(
-          { start, end },
-          { start: givenPeriodLeft, end: givenPeriodRight },
-        ),
-      ).toEqual({
-        daysOverlap: 2,
-        hoursOverlap: 48,
-        overlapStartDate: givenPeriodLeft.getTime(),
-        overlapEndDate: end.getTime(),
-      });
-    });
-  });
-
-  describe('when date periods do not overlap', () => {
-    const givenPeriodLeft = new Date(2021, 0, 9);
-    const givenPeriodRight = new Date(2021, 0, 10);
-
-    it('returns an overlap object that contains a 0 value for days overlapping', () => {
-      expect(
-        datetimeUtility.getOverlapDateInPeriods(
-          { start, end },
-          { start: givenPeriodLeft, end: givenPeriodRight },
-        ),
-      ).toEqual({ daysOverlap: 0 });
-    });
-  });
-
-  describe('when date periods contain an invalid Date', () => {
-    const startInvalid = new Date(NaN);
-    const endInvalid = new Date(NaN);
-    const error = __('Invalid period');
-
-    it('throws an exception when the left period contains an invalid date', () => {
-      expect(() =>
-        datetimeUtility.getOverlapDateInPeriods({ start, end }, { start: startInvalid, end }),
-      ).toThrow(error);
-    });
-
-    it('throws an exception when the right period contains an invalid date', () => {
-      expect(() =>
-        datetimeUtility.getOverlapDateInPeriods({ start, end }, { start, end: endInvalid }),
-      ).toThrow(error);
-    });
-  });
-});
-
 describe('isToday', () => {
   const today = new Date();
   it.each`
@@ -1015,6 +947,81 @@ describe('isToday', () => {
     ${new Date('2021-01-21T12:00:00.000Z')} | ${false} | ${'is NOT'}
   `('returns $expected as $date $negation today', ({ date, expected }) => {
     expect(datetimeUtility.isToday(date)).toBe(expected);
+  });
+});
+
+describe('isInPast', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2024-12-15')}              | ${false}
+    ${new Date('2020-07-06T00:00')}        | ${false}
+    ${new Date('2020-07-05T23:59:59.999')} | ${true}
+    ${new Date('2020-07-05')}              | ${true}
+    ${new Date('1999-03-21')}              | ${true}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.isInPast(date)).toBe(expected);
+  });
+});
+
+describe('isInFuture', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2024-12-15')}              | ${true}
+    ${new Date('2020-07-07T00:00')}        | ${true}
+    ${new Date('2020-07-06T23:59:59.999')} | ${false}
+    ${new Date('2020-07-06')}              | ${false}
+    ${new Date('1999-03-21')}              | ${false}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.isInFuture(date)).toBe(expected);
+  });
+});
+
+describe('fallsBefore', () => {
+  it.each`
+    dateA                                  | dateB                                  | expected
+    ${new Date('2020-07-06T23:59:59.999')} | ${new Date('2020-07-07T00:00')}        | ${true}
+    ${new Date('2020-07-07T00:00')}        | ${new Date('2020-07-06T23:59:59.999')} | ${false}
+    ${new Date('2020-04-04')}              | ${new Date('2021-10-10')}              | ${true}
+    ${new Date('2021-10-10')}              | ${new Date('2020-04-04')}              | ${false}
+  `('returns $expected for "$dateA falls before $dateB"', ({ dateA, dateB, expected }) => {
+    expect(datetimeUtility.fallsBefore(dateA, dateB)).toBe(expected);
+  });
+});
+
+describe('removeTime', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2020-07-07')}              | ${new Date('2020-07-07T00:00:00.000')}
+    ${new Date('2020-07-07T00:00:00.001')} | ${new Date('2020-07-07T00:00:00.000')}
+    ${new Date('2020-07-07T23:59:59.999')} | ${new Date('2020-07-07T00:00:00.000')}
+    ${new Date('2020-07-07T12:34:56.789')} | ${new Date('2020-07-07T00:00:00.000')}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.removeTime(date)).toEqual(expected);
+  });
+});
+
+describe('getTimeRemainingInWords', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2020-07-06T12:34:56.789')} | ${'0 days remaining'}
+    ${new Date('2020-07-07T12:34:56.789')} | ${'1 day remaining'}
+    ${new Date('2020-07-08T12:34:56.789')} | ${'2 days remaining'}
+    ${new Date('2020-07-12T12:34:56.789')} | ${'6 days remaining'}
+    ${new Date('2020-07-13T12:34:56.789')} | ${'1 week remaining'}
+    ${new Date('2020-07-19T12:34:56.789')} | ${'1 week remaining'}
+    ${new Date('2020-07-20T12:34:56.789')} | ${'2 weeks remaining'}
+    ${new Date('2020-07-27T12:34:56.789')} | ${'3 weeks remaining'}
+    ${new Date('2020-08-03T12:34:56.789')} | ${'4 weeks remaining'}
+    ${new Date('2020-08-05T12:34:56.789')} | ${'4 weeks remaining'}
+    ${new Date('2020-08-06T12:34:56.789')} | ${'1 month remaining'}
+    ${new Date('2020-09-06T12:34:56.789')} | ${'2 months remaining'}
+    ${new Date('2021-06-06T12:34:56.789')} | ${'11 months remaining'}
+    ${new Date('2021-07-06T12:34:56.789')} | ${'1 year remaining'}
+    ${new Date('2022-07-06T12:34:56.789')} | ${'2 years remaining'}
+    ${new Date('2030-07-06T12:34:56.789')} | ${'10 years remaining'}
+    ${new Date('2119-07-06T12:34:56.789')} | ${'99 years remaining'}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.getTimeRemainingInWords(date)).toEqual(expected);
   });
 });
 
@@ -1041,6 +1048,35 @@ describe('getStartOfDay', () => {
     ({ inputAsString, options, expectedAsString }) => {
       const inputDate = new Date(inputAsString);
       const actual = datetimeUtility.getStartOfDay(inputDate, options);
+
+      expect(actual.toISOString()).toEqual(expectedAsString);
+    },
+  );
+});
+
+describe('getStartOfWeek', () => {
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
+
+  it.each`
+    inputAsString                      | options           | expectedAsString
+    ${'2021-01-29T18:08:23.014Z'}      | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-29T13:08:23.014-05:00'} | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-30T03:08:23.014+09:00'} | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{}}             | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{ utc: false }} | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{ utc: true }}  | ${'2021-01-26T00:00:00.000Z'}
+  `(
+    'when the provided date is $inputAsString and the options parameter is $options, returns $expectedAsString',
+    ({ inputAsString, options, expectedAsString }) => {
+      const inputDate = new Date(inputAsString);
+      const actual = datetimeUtility.getStartOfWeek(inputDate, options);
 
       expect(actual.toISOString()).toEqual(expectedAsString);
     },

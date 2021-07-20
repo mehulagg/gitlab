@@ -10,11 +10,6 @@ module Types
     field :id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
           description: 'ID of the DAST scanner profile.'
 
-    field :global_id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
-          description: 'ID of the DAST scanner profile.',
-          deprecated: { reason: 'Use `id`', milestone: '13.6' },
-          method: :id
-
     field :profile_name, GraphQL::STRING_TYPE, null: true,
           description: 'Name of the DAST scanner profile.',
           method: :name
@@ -40,8 +35,19 @@ module Types
     field :edit_path, GraphQL::STRING_TYPE, null: true,
           description: 'Relative web path to the edit page of a scanner profile.'
 
+    field :referenced_in_security_policies, [GraphQL::STRING_TYPE], null: true,
+          calls_gitaly: true,
+          description: 'List of security policy names that are referencing given project.'
+
     def edit_path
-      Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_scanner_profile_path(object.project, object)
+      Rails.application.routes.url_helpers.edit_project_security_configuration_dast_scans_dast_scanner_profile_path(object.project, object)
+    end
+
+    def referenced_in_security_policies
+      ::Gitlab::Graphql::Aggregations::SecurityOrchestrationPolicies::LazyDastProfileAggregate.new(
+        context,
+        object
+      )
     end
   end
 end

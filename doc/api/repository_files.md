@@ -168,8 +168,8 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 
 Parameters:
 
-- `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
-- `ref` (required) - The name of branch, tag or commit
+- `file_path` (required) - URL encoded full path to new file, such as lib%2Fclass%2Erb.
+- `ref` (optional) - The name of branch, tag or commit. Default is the `HEAD` of the project.
 
 NOTE:
 Like [Get file from repository](repository_files.md#get-file-from-repository) you can use `HEAD` to get just file metadata.
@@ -183,10 +183,11 @@ POST /projects/:id/repository/files/:file_path
 ```
 
 ```shell
-curl --request POST --header 'PRIVATE-TOKEN: <your_access_token>' --header "Content-Type: application/json" \
-  --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
-    "content": "some content", "commit_message": "create a new file"}' \
-  "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
+curl --request POST --header 'PRIVATE-TOKEN: <your_access_token>' \
+     --header "Content-Type: application/json" \
+     --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
+               "content": "some content", "commit_message": "create a new file"}' \
+     "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
 ```
 
 Example response:
@@ -203,7 +204,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `branch` (required) - Name of the branch
 - `start_branch` (optional) - Name of the branch to start the new commit from
-- `encoding` (optional) - Change encoding to 'base64'. Default is text.
+- `encoding` (optional) - Change encoding to `base64`. Default is `text`.
 - `author_email` (optional) - Specify the commit author's email address
 - `author_name` (optional) - Specify the commit author's name
 - `content` (required) - File content
@@ -218,10 +219,11 @@ PUT /projects/:id/repository/files/:file_path
 ```
 
 ```shell
-curl --request PUT --header 'PRIVATE-TOKEN: <your_access_token>' --header "Content-Type: application/json" \
-  --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
-    "content": "some content", "commit_message": "update file"}' \
-  "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
+curl --request PUT --header 'PRIVATE-TOKEN: <your_access_token>' \
+     --header "Content-Type: application/json" \
+     --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
+       "content": "some content", "commit_message": "update file"}' \
+     "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
 ```
 
 Example response:
@@ -238,7 +240,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `branch` (required) - Name of the branch
 - `start_branch` (optional) - Name of the branch to start the new commit from
-- `encoding` (optional) - Change encoding to 'base64'. Default is text.
+- `encoding` (optional) - Change encoding to `base64`. Default is `text`.
 - `author_email` (optional) - Specify the commit author's email address
 - `author_name` (optional) - Specify the commit author's name
 - `content` (required) - New file content
@@ -253,7 +255,7 @@ error message. Possible causes for a failed commit include:
   user tried to make an empty commit;
 - the branch was updated by a Git push while the file edit was in progress.
 
-Currently GitLab Shell has a boolean return code, preventing GitLab from specifying the error.
+GitLab Shell has a boolean return code, preventing GitLab from specifying the error.
 
 ## Delete existing file in repository
 
@@ -264,10 +266,11 @@ DELETE /projects/:id/repository/files/:file_path
 ```
 
 ```shell
-curl --request DELETE --header 'PRIVATE-TOKEN: <your_access_token>' --header "Content-Type: application/json" \
-  --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
-    "commit_message": "delete file"}' \
-  "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
+curl --request DELETE --header 'PRIVATE-TOKEN: <your_access_token>' \
+     --header "Content-Type: application/json" \
+     --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
+       "commit_message": "delete file"}' \
+     "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
 ```
 
 Parameters:

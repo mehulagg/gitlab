@@ -7,6 +7,7 @@ RSpec.describe Projects::MirrorsController do
 
   describe 'setting up a remote mirror' do
     let_it_be(:project) { create(:project, :repository) }
+
     let(:url) { 'http://foo.com' }
 
     context 'when the current project is a mirror' do

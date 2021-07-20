@@ -8,24 +8,26 @@ import * as epicUtils from 'ee/roadmap/utils/epic_utils';
 import * as roadmapItemUtils from 'ee/roadmap/utils/roadmap_item_utils';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import {
   mockGroupId,
   basePath,
-  epicsPath,
   mockTimeframeInitialDate,
   mockTimeframeMonthsPrepend,
   mockTimeframeMonthsAppend,
   rawEpics,
   mockRawEpic,
+  mockRawEpic2,
   mockFormattedEpic,
+  mockFormattedEpic2,
   mockSortedBy,
   mockGroupEpicsQueryResponse,
-  mockGroupEpicsQueryResponseFormatted,
-  mockGroupMilestonesQueryResponse,
+  mockGroupEpics,
   mockEpicChildEpicsQueryResponse,
-  rawMilestones,
+  mockChildEpicNode1,
+  mockGroupMilestonesQueryResponse,
+  mockGroupMilestones,
   mockMilestone,
   mockFormattedMilestone,
 } from '../mock_data';
@@ -46,7 +48,6 @@ describe('Roadmap Vuex Actions', () => {
       timeframe: mockTimeframeMonths,
       presetType: PRESET_TYPES.MONTHS,
       sortedBy: mockSortedBy,
-      initialEpicsPath: epicsPath,
       filterQueryString: '',
       basePath,
       timeframeStartDate,
@@ -76,55 +77,21 @@ describe('Roadmap Vuex Actions', () => {
       return testAction(
         actions.receiveEpicsSuccess,
         {
-          rawEpics: [
-            {
-              ...mockRawEpic,
-              start_date: '2017-12-31',
-              end_date: '2018-2-15',
-              descendantWeightSum: {
-                closedIssues: 3,
-                openedIssues: 2,
-              },
-              descendantCounts: {
-                openedEpics: 3,
-                closedEpics: 2,
-              },
-            },
-          ],
+          rawEpics: [mockRawEpic2],
         },
         state,
         [
-          { type: types.UPDATE_EPIC_IDS, payload: [mockRawEpic.id] },
+          { type: types.UPDATE_EPIC_IDS, payload: [mockRawEpic2.id] },
           {
             type: types.RECEIVE_EPICS_SUCCESS,
-            payload: [
-              {
-                ...mockFormattedEpic,
-                startDateOutOfRange: false,
-                endDateOutOfRange: false,
-                startDate: new Date(2017, 11, 31),
-                originalStartDate: new Date(2017, 11, 31),
-                endDate: new Date(2018, 1, 15),
-                originalEndDate: new Date(2018, 1, 15),
-              },
-            ],
+            payload: [mockFormattedEpic2],
           },
         ],
         [
           {
             type: 'initItemChildrenFlags',
             payload: {
-              epics: [
-                {
-                  ...mockFormattedEpic,
-                  startDateOutOfRange: false,
-                  endDateOutOfRange: false,
-                  startDate: new Date(2017, 11, 31),
-                  originalStartDate: new Date(2017, 11, 31),
-                  endDate: new Date(2018, 1, 15),
-                  originalEndDate: new Date(2018, 1, 15),
-                },
-              ],
+              epics: [mockFormattedEpic2],
             },
           },
         ],
@@ -135,15 +102,7 @@ describe('Roadmap Vuex Actions', () => {
       return testAction(
         actions.receiveEpicsSuccess,
         {
-          rawEpics: [
-            {
-              ...mockRawEpic,
-              descendantWeightSum: {
-                closedIssues: 3,
-                openedIssues: 2,
-              },
-            },
-          ],
+          rawEpics: [mockRawEpic],
           newEpic: true,
           timeframeExtended: true,
         },
@@ -162,9 +121,9 @@ describe('Roadmap Vuex Actions', () => {
               epics: [
                 {
                   ...mockFormattedEpic,
+                  newEpic: true,
                   startDateOutOfRange: true,
                   endDateOutOfRange: false,
-                  newEpic: true,
                 },
               ],
             },
@@ -188,7 +147,9 @@ describe('Roadmap Vuex Actions', () => {
     it('should show flash error', () => {
       actions.receiveEpicsFailure({ commit: () => {} });
 
-      expect(createFlash).toHaveBeenCalledWith('Something went wrong while fetching epics');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong while fetching epics',
+      });
     });
   });
 
@@ -223,7 +184,7 @@ describe('Roadmap Vuex Actions', () => {
           [
             {
               type: 'receiveEpicsSuccess',
-              payload: { rawEpics: mockGroupEpicsQueryResponseFormatted },
+              payload: { rawEpics: mockGroupEpics },
             },
           ],
         );
@@ -275,7 +236,7 @@ describe('Roadmap Vuex Actions', () => {
             {
               type: 'receiveEpicsSuccess',
               payload: {
-                rawEpics: mockGroupEpicsQueryResponseFormatted,
+                rawEpics: mockGroupEpics,
                 newEpic: true,
                 timeframeExtended: true,
               },
@@ -369,21 +330,7 @@ describe('Roadmap Vuex Actions', () => {
         actions.receiveChildrenSuccess,
         {
           parentItemId: '41',
-          rawChildren: [
-            {
-              ...mockRawEpic,
-              start_date: '2017-12-31',
-              end_date: '2018-2-15',
-              descendantWeightSum: {
-                closedIssues: 3,
-                openedIssues: 2,
-              },
-              descendantCounts: {
-                openedEpics: 3,
-                closedEpics: 2,
-              },
-            },
-          ],
+          rawChildren: [mockRawEpic2],
         },
         state,
         [
@@ -393,13 +340,7 @@ describe('Roadmap Vuex Actions', () => {
               parentItemId: '41',
               children: [
                 {
-                  ...mockFormattedEpic,
-                  startDateOutOfRange: false,
-                  endDateOutOfRange: false,
-                  startDate: new Date(2017, 11, 31),
-                  originalStartDate: new Date(2017, 11, 31),
-                  endDate: new Date(2018, 1, 15),
-                  originalEndDate: new Date(2018, 1, 15),
+                  ...mockFormattedEpic2,
                   isChildEpic: true,
                 },
               ],
@@ -416,13 +357,7 @@ describe('Roadmap Vuex Actions', () => {
             payload: {
               epics: [
                 {
-                  ...mockFormattedEpic,
-                  startDateOutOfRange: false,
-                  endDateOutOfRange: false,
-                  startDate: new Date(2017, 11, 31),
-                  originalStartDate: new Date(2017, 11, 31),
-                  endDate: new Date(2018, 1, 15),
-                  originalEndDate: new Date(2018, 1, 15),
+                  ...mockFormattedEpic2,
                   isChildEpic: true,
                 },
               ],
@@ -504,10 +439,6 @@ describe('Roadmap Vuex Actions', () => {
         itemExpanded: false,
       };
 
-      const children = epicUtils.extractGroupEpics(
-        mockEpicChildEpicsQueryResponse.data.group.epic.children.edges,
-      );
-
       testAction(
         actions.toggleEpic,
         { parentItem },
@@ -522,7 +453,7 @@ describe('Roadmap Vuex Actions', () => {
             type: 'receiveChildrenSuccess',
             payload: {
               parentItemId: parentItem.id,
-              rawChildren: children,
+              rawChildren: [mockChildEpicNode1],
             },
           },
         ],
@@ -620,8 +551,10 @@ describe('Roadmap Vuex Actions', () => {
       expectedVariables = {
         fullPath: 'gitlab-org',
         state: mockState.milestonessState,
-        startDate: '2017-11-1',
-        dueDate: '2018-6-30',
+        timeframe: {
+          start: '2017-11-01',
+          end: '2018-06-30',
+        },
         includeDescendants: true,
       };
     });
@@ -668,7 +601,7 @@ describe('Roadmap Vuex Actions', () => {
             },
             {
               type: 'receiveMilestonesSuccess',
-              payload: { rawMilestones },
+              payload: { rawMilestones: mockGroupMilestones },
             },
           ],
         );
@@ -741,13 +674,15 @@ describe('Roadmap Vuex Actions', () => {
     it('should show flash error', () => {
       actions.receiveMilestonesFailure({ commit: () => {} });
 
-      expect(createFlash).toHaveBeenCalledWith('Something went wrong while fetching milestones');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong while fetching milestones',
+      });
     });
   });
 
   describe('refreshMilestoneDates', () => {
     it('should update milestones after refreshing milestone dates to match with updated timeframe', () => {
-      const milestones = rawMilestones.map((milestone) =>
+      const milestones = mockGroupMilestones.map((milestone) =>
         roadmapItemUtils.formatRoadmapItemDetails(
           milestone,
           state.timeframeStartDate,

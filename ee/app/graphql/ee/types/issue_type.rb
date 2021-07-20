@@ -18,8 +18,16 @@ module EE
         field :blocked, GraphQL::BOOLEAN_TYPE, null: false,
               description: 'Indicates the issue is blocked.'
 
+        field :blocking_count, GraphQL::INT_TYPE, null: false,
+              method: :blocking_issues_count,
+              description: 'Count of issues this issue is blocking.'
+
         field :blocked_by_count, GraphQL::INT_TYPE, null: true,
               description: 'Count of issues blocking this issue.'
+
+        field :blocked_by_issues, ::Types::IssueType.connection_type, null: true,
+              description: 'Issues blocking this issue.',
+              complexity: 5
 
         field :health_status, ::Types::HealthStatusEnum, null: true,
               description: 'Current health status.'
@@ -51,6 +59,10 @@ module EE
           ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id) do |count|
             count || 0
           end
+        end
+
+        def blocked_by_issues
+          object.blocked_by_issues_for(current_user)
         end
 
         def health_status

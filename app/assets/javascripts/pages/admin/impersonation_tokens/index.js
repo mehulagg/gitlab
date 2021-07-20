@@ -1,3 +1,8 @@
-import initExpiresAtField from '~/access_tokens';
+import { initExpiresAtField } from '~/access_tokens';
+import { initAdminUserActions, initDeleteUserModals } from '~/admin/users';
+import initConfirmModal from '~/confirm_modal';
 
-document.addEventListener('DOMContentLoaded', initExpiresAtField);
+initAdminUserActions();
+initDeleteUserModals();
+initExpiresAtField();
+initConfirmModal();

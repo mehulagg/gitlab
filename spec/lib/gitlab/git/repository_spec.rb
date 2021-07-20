@@ -133,32 +133,10 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect(metadata['ArchivePrefix']).to eq(expected_prefix)
     end
 
-    context 'when :include_lfs_blobs_in_archive feature flag is disabled' do
-      let(:expected_path) { File.join(storage_path, cache_key, expected_filename) }
+    it 'sets ArchivePath to the expected globally-unique path' do
+      expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
 
-      before do
-        stub_feature_flags(include_lfs_blobs_in_archive: false)
-      end
-
-      it 'sets ArchivePath to the expected globally-unique path' do
-        # This is really important from a security perspective. Think carefully
-        # before changing it: https://gitlab.com/gitlab-org/gitlab-foss/issues/45689
-        expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
-
-        expect(metadata['ArchivePath']).to eq(expected_path)
-      end
-    end
-
-    context 'when :include_lfs_blobs_in_archive feature flag is enabled' do
-      before do
-        stub_feature_flags(include_lfs_blobs_in_archive: true)
-      end
-
-      it 'sets ArchivePath to the expected globally-unique path' do
-        expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
-
-        expect(metadata['ArchivePath']).to eq(expected_path)
-      end
+      expect(metadata['ArchivePath']).to eq(expected_path)
     end
 
     context 'path is set' do
@@ -521,7 +499,9 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
         no_tags: true,
         timeout: described_class::GITLAB_PROJECTS_TIMEOUT,
         prune: false,
-        check_tags_changed: false
+        check_tags_changed: false,
+        url: nil,
+        refmap: nil
       }
 
       expect(repository.gitaly_repository_client).to receive(:fetch_remote).with('remote-name', expected_opts)
@@ -564,34 +544,69 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
   end
 
+  describe '#search_files_by_regexp' do
+    let(:ref) { 'master' }
+
+    subject(:result) { mutable_repository.search_files_by_regexp(filter, ref) }
+
+    context 'when sending a valid regexp' do
+      let(:filter) { 'files\/.*\/.*\.rb' }
+
+      it 'returns matched files' do
+        expect(result).to contain_exactly('files/links/regex.rb',
+                                          'files/ruby/popen.rb',
+                                          'files/ruby/regex.rb',
+                                          'files/ruby/version_info.rb')
+      end
+    end
+
+    context 'when sending an ivalid regexp' do
+      let(:filter) { '*.rb' }
+
+      it 'raises error' do
+        expect { result }.to raise_error(GRPC::InvalidArgument,
+                                         /missing argument to repetition operator: `*`/)
+      end
+    end
+
+    context "when the ref doesn't exist" do
+      let(:filter) { 'files\/.*\/.*\.rb' }
+      let(:ref) { 'non-existing-branch' }
+
+      it 'returns an empty array' do
+        expect(result).to eq([])
+      end
+    end
+  end
+
   describe '#find_remote_root_ref' do
     it 'gets the remote root ref from GitalyClient' do
       expect_any_instance_of(Gitlab::GitalyClient::RemoteService)
         .to receive(:find_remote_root_ref).and_call_original
 
-      expect(repository.find_remote_root_ref('origin')).to eq 'master'
+      expect(repository.find_remote_root_ref('origin', SeedHelper::GITLAB_GIT_TEST_REPO_URL)).to eq 'master'
     end
 
     it 'returns UTF-8' do
-      expect(repository.find_remote_root_ref('origin')).to be_utf8
+      expect(repository.find_remote_root_ref('origin', SeedHelper::GITLAB_GIT_TEST_REPO_URL)).to be_utf8
     end
 
     it 'returns nil when remote name is nil' do
       expect_any_instance_of(Gitlab::GitalyClient::RemoteService)
         .not_to receive(:find_remote_root_ref)
 
-      expect(repository.find_remote_root_ref(nil)).to be_nil
+      expect(repository.find_remote_root_ref(nil, nil)).to be_nil
     end
 
     it 'returns nil when remote name is empty' do
       expect_any_instance_of(Gitlab::GitalyClient::RemoteService)
         .not_to receive(:find_remote_root_ref)
 
-      expect(repository.find_remote_root_ref('')).to be_nil
+      expect(repository.find_remote_root_ref('', '')).to be_nil
     end
 
     it_behaves_like 'wrapping gRPC errors', Gitlab::GitalyClient::RemoteService, :find_remote_root_ref do
-      subject { repository.find_remote_root_ref('origin') }
+      subject { repository.find_remote_root_ref('origin', SeedHelper::GITLAB_GIT_TEST_REPO_URL) }
     end
   end
 
@@ -851,6 +866,128 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
     context 'when Gitaly find_commits feature is enabled' do
       it_behaves_like 'repository log'
+    end
+  end
+
+  describe '#blobs' do
+    let_it_be(:commit_oid) { '4b4918a572fa86f9771e5ba40fbd48e1eb03e2c6' }
+
+    shared_examples 'a blob enumeration' do
+      it 'enumerates blobs' do
+        blobs = repository.blobs(revisions).to_a
+
+        expect(blobs.size).to eq(expected_blobs)
+        blobs.each do |blob|
+          expect(blob.data).to be_empty
+          expect(blob.id.size).to be(40)
+        end
+      end
+    end
+
+    context 'single revision' do
+      let(:revisions) { [commit_oid] }
+      let(:expected_blobs) { 53 }
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'multiple revisions' do
+      let(:revisions) { ["^#{commit_oid}~", commit_oid] }
+      let(:expected_blobs) { 1 }
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'pseudo revisions' do
+      let(:revisions) { ['master', '--not', '--all'] }
+      let(:expected_blobs) { 0 }
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'blank revisions' do
+      let(:revisions) { [::Gitlab::Git::BLANK_SHA] }
+      let(:expected_blobs) { 0 }
+
+      before do
+        expect_any_instance_of(Gitlab::GitalyClient::BlobService)
+          .not_to receive(:list_blobs)
+      end
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'partially blank revisions' do
+      let(:revisions) { [::Gitlab::Git::BLANK_SHA, commit_oid] }
+      let(:expected_blobs) { 53 }
+
+      before do
+        expect_next_instance_of(Gitlab::GitalyClient::BlobService) do |service|
+          expect(service)
+            .to receive(:list_blobs)
+            .with([commit_oid], kind_of(Hash))
+            .and_call_original
+        end
+      end
+
+      it_behaves_like 'a blob enumeration'
+    end
+  end
+
+  describe '#new_commits' do
+    let(:repository) { mutable_repository }
+    let(:new_commit) do
+      author = { name: 'Test User', email: 'mail@example.com', time: Time.now }
+
+      Rugged::Commit.create(repository_rugged,
+                            author: author,
+                            committer: author,
+                            message: "Message",
+                            parents: [],
+                            tree: "4b825dc642cb6eb9a060e54bf8d69288fbee4904")
+    end
+
+    let(:expected_commits) { 1 }
+    let(:revisions) { [new_commit] }
+
+    shared_examples 'an enumeration of new commits' do
+      it 'enumerates commits' do
+        commits = repository.new_commits(revisions).to_a
+
+        expect(commits.size).to eq(expected_commits)
+        commits.each do |commit|
+          expect(commit.id).to eq(new_commit)
+          expect(commit.message).to eq("Message")
+        end
+      end
+    end
+
+    context 'with list_commits disabled' do
+      before do
+        stub_feature_flags(list_commits: false)
+
+        expect_next_instance_of(Gitlab::GitalyClient::RefService) do |service|
+          expect(service)
+            .to receive(:list_new_commits)
+            .with(new_commit)
+            .and_call_original
+        end
+      end
+
+      it_behaves_like 'an enumeration of new commits'
+    end
+
+    context 'with list_commits enabled' do
+      before do
+        expect_next_instance_of(Gitlab::GitalyClient::CommitService) do |service|
+          expect(service)
+            .to receive(:list_commits)
+            .with([new_commit, '--not', '--all'])
+            .and_call_original
+        end
+      end
+
+      it_behaves_like 'an enumeration of new commits'
     end
   end
 
@@ -1711,14 +1848,15 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:right_branch) { 'test-master' }
     let(:first_parent_ref) { 'refs/heads/test-master' }
     let(:target_ref) { 'refs/merge-requests/999/merge' }
-    let(:allow_conflicts) { false }
 
     before do
       repository.create_branch(right_branch, branch_head) unless repository.ref_exists?(first_parent_ref)
     end
 
     def merge_to_ref
-      repository.merge_to_ref(user, left_sha, right_branch, target_ref, 'Merge message', first_parent_ref, allow_conflicts)
+      repository.merge_to_ref(user,
+          source_sha: left_sha, branch: right_branch, target_ref: target_ref,
+          message: 'Merge message', first_parent_ref: first_parent_ref)
     end
 
     it 'generates a commit in the target_ref' do

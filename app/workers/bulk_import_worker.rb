@@ -4,6 +4,7 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :importers
+  tags :exclude_from_kubernetes
 
   sidekiq_options retry: false, dead: false
 
@@ -14,20 +15,24 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
     @bulk_import = BulkImport.find_by_id(bulk_import_id)
 
     return unless @bulk_import
-    return if @bulk_import.finished?
+    return if @bulk_import.finished? || @bulk_import.failed?
+    return @bulk_import.fail_op! if all_entities_failed?
     return @bulk_import.finish! if all_entities_processed? && @bulk_import.started?
     return re_enqueue if max_batch_size_exceeded? # Do not start more jobs if max allowed are already running
 
     @bulk_import.start! if @bulk_import.created?
 
     created_entities.first(next_batch_size).each do |entity|
-      entity.start!
+      create_pipeline_tracker_for(entity)
 
+      BulkImports::ExportRequestWorker.perform_async(entity.id)
       BulkImports::EntityWorker.perform_async(entity.id)
+
+      entity.start!
     end
 
     re_enqueue
-  rescue => e
+  rescue StandardError => e
     Gitlab::ErrorTracking.track_exception(e, bulk_import_id: @bulk_import&.id)
 
     @bulk_import&.fail_op
@@ -51,6 +56,10 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
     entities.all? { |entity| entity.finished? || entity.failed? }
   end
 
+  def all_entities_failed?
+    entities.all? { |entity| entity.failed? }
+  end
+
   def max_batch_size_exceeded?
     started_entities.count >= DEFAULT_BATCH_SIZE
   end
@@ -64,5 +73,14 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
   #   - Or to mark the `bulk_import` as finished
   def re_enqueue
     BulkImportWorker.perform_in(PERFORM_DELAY, @bulk_import.id)
+  end
+
+  def create_pipeline_tracker_for(entity)
+    BulkImports::Stage.pipelines.each do |stage, pipeline|
+      entity.trackers.create!(
+        stage: stage,
+        pipeline_name: pipeline
+      )
+    end
   end
 end

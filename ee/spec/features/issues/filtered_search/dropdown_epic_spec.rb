@@ -5,15 +5,16 @@ require 'spec_helper'
 RSpec.describe 'Dropdown epic', :js do
   include FilteredSearchHelpers
 
-  let(:group) { create(:group) }
-  let(:project) { create(:project, group: group) }
-  let(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:epic) { create(:epic, group: group) }
+  let_it_be(:epic2) { create(:epic, group: group) }
+  let_it_be(:issue) { create(:issue, project: project) }
+
   let(:filtered_search) { find('.filtered-search') }
   let(:js_dropdown_epic) { '#js-dropdown-epic' }
   let(:filter_dropdown) { find("#{js_dropdown_epic} .filter-dropdown") }
-  let!(:epic) { create(:epic, group: group) }
-  let!(:epic2) { create(:epic, group: group) }
-  let!(:issue) { create(:issue, project: project) }
 
   before do
     stub_licensed_features(epics: true)

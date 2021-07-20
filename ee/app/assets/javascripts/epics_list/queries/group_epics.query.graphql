@@ -8,12 +8,15 @@ query groupEpics(
   $authorUsername: String
   $labelName: [String!]
   $milestoneTitle: String = ""
+  $myReactionEmoji: String
   $confidential: Boolean
+  $search: String = ""
   $sortBy: EpicSort
   $firstPageSize: Int
   $lastPageSize: Int
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
+  $isSignedIn: Boolean = false
 ) {
   group(fullPath: $groupPath) {
     epics(
@@ -21,7 +24,9 @@ query groupEpics(
       authorUsername: $authorUsername
       labelName: $labelName
       milestoneTitle: $milestoneTitle
+      myReactionEmoji: $myReactionEmoji
       confidential: $confidential
+      search: $search
       sort: $sortBy
       first: $firstPageSize
       last: $lastPageSize
@@ -37,8 +42,11 @@ query groupEpics(
         startDate
         dueDate
         webUrl
-        userDiscussionsCount
+        userDiscussionsCount @include(if: $isSignedIn)
         confidential
+        group {
+          fullPath
+        }
         author {
           ...Author
         }

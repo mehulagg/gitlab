@@ -11,7 +11,8 @@ module IssueAvailableFeatures
     def available_features_for_issue_types
       {
         assignee: %w(issue incident),
-        confidentiality: %(issue incident)
+        confidentiality: %w(issue incident),
+        time_tracking: %w(issue incident)
       }.with_indifferent_access
     end
   end
@@ -29,5 +30,5 @@ module IssueAvailableFeatures
   end
 end
 
-IssueAvailableFeatures.prepend_if_ee('EE::IssueAvailableFeatures')
-IssueAvailableFeatures::ClassMethods.prepend_if_ee('EE::IssueAvailableFeatures::ClassMethods')
+IssueAvailableFeatures.prepend_mod_with('IssueAvailableFeatures')
+IssueAvailableFeatures::ClassMethods.prepend_mod_with('IssueAvailableFeatures::ClassMethods')

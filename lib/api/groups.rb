@@ -22,7 +22,7 @@ module API
         optional :all_available, type: Boolean, desc: 'Show all group that you have access to'
         optional :search, type: String, desc: 'Search for a specific group'
         optional :owned, type: Boolean, default: false, desc: 'Limit by owned by authenticated user'
-        optional :order_by, type: String, values: %w[name path id], default: 'name', desc: 'Order by name, path or id'
+        optional :order_by, type: String, values: %w[name path id similarity], default: 'name', desc: 'Order by name, path, id or similarity if searching'
         optional :sort, type: String, values: %w[asc desc], default: 'asc', desc: 'Sort by asc (ascending) or desc (descending)'
         optional :min_access_level, type: Integer, values: Gitlab::Access.all_values, desc: 'Minimum access level of authenticated user'
         optional :top_level_only, type: Boolean, desc: 'Only include top level groups'
@@ -50,11 +50,8 @@ module API
         groups = GroupsFinder.new(current_user, find_params).execute
         groups = groups.search(params[:search], include_parents: true) if params[:search].present?
         groups = groups.where.not(id: params[:skip_groups]) if params[:skip_groups].present?
-        order_options = { params[:order_by] => params[:sort] }
-        order_options["id"] ||= "asc"
-        groups = groups.reorder(order_options)
 
-        groups
+        order_groups(groups)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -112,7 +109,6 @@ module API
       end
 
       def delete_group(group)
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/46285')
         destroy_conditionally!(group) do |group|
           ::Groups::DestroyService.new(group, current_user).async_execute
         end
@@ -126,6 +122,23 @@ module API
         reorder_projects(projects)
       end
 
+      def order_groups(groups)
+        return groups.sorted_by_similarity_and_parent_id_desc(params[:search]) if order_by_similarity?
+
+        groups.reorder(group_without_similarity_options) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
+      def order_by_similarity?
+        params[:order_by] == 'similarity' && params[:search].present?
+      end
+
+      def group_without_similarity_options
+        order_options = { params[:order_by] => params[:sort] }
+        order_options['name'] = order_options.delete('similarity') if order_options.has_key?('similarity')
+        order_options["id"] ||= "asc"
+        order_options
+      end
+
       # rubocop: disable CodeReuse/ActiveRecord
       def handle_similarity_order(group, projects)
         if params[:search].present? && Feature.enabled?(:similarity_search, group, default_enabled: true)
@@ -137,6 +150,14 @@ module API
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def authorize_group_creation!
+        authorize! :create_group
+      end
+
+      def check_subscription!(group)
+        render_api_error!("This group can't be removed because it is linked to a subscription.", :bad_request) if group.paid?
+      end
     end
 
     resource :groups do
@@ -169,7 +190,7 @@ module API
         if parent_group
           authorize! :create_subgroup, parent_group
         else
-          authorize! :create_group
+          authorize_group_creation!
         end
 
         group = create_group
@@ -194,6 +215,7 @@ module API
         optional :name, type: String, desc: 'The name of the group'
         optional :path, type: String, desc: 'The path of the group'
         use :optional_params
+        use :optional_update_params
         use :optional_update_params_ee
       end
       put ':id' do
@@ -235,6 +257,7 @@ module API
       delete ":id" do
         group = find_group!(params[:id])
         authorize! :admin_group, group
+        check_subscription! group
 
         delete_group(group)
       end
@@ -366,7 +389,7 @@ module API
           expires_at: params[:expires_at]
         }
 
-        result = ::Groups::GroupLinks::CreateService.new(shared_with_group, current_user, group_link_create_params).execute(shared_group)
+        result = ::Groups::GroupLinks::CreateService.new(shared_group, shared_with_group, current_user, group_link_create_params).execute
         shared_group.preload_shared_group_links
 
         if result[:status] == :success
@@ -395,4 +418,4 @@ module API
   end
 end
 
-API::Groups.prepend_if_ee('EE::API::Groups')
+API::Groups.prepend_mod_with('API::Groups')

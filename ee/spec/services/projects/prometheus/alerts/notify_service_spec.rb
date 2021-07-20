@@ -10,16 +10,11 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
   let(:service) { described_class.new(project, payload) }
   let(:token_input) { 'token' }
 
-  let!(:setting) do
+  let_it_be(:setting) do
     create(:project_incident_management_setting, project: project, send_email: true, create_issue: true)
   end
 
   let(:subject) { service.execute(token_input) }
-
-  before do
-    # We use `let_it_be(:project)` so we make sure to clear caches
-    project.clear_memoization(:licensed_feature_available)
-  end
 
   context 'with valid payload' do
     let(:alert_firing) { create(:prometheus_alert, project: project) }
@@ -28,6 +23,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
     let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
     let(:payload_alert_firing) { payload_raw['alerts'].first }
     let(:token) { 'token' }
+    let(:source) { 'Prometheus' }
 
     context 'with environment specific clusters' do
       let(:prd_cluster) do
@@ -47,20 +43,20 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       end
 
       before do
-        create(:clusters_applications_prometheus, :installed,
+        create(:clusters_integrations_prometheus,
                cluster: prd_cluster, alert_manager_token: token)
-        create(:clusters_applications_prometheus, :installed,
+        create(:clusters_integrations_prometheus,
                cluster: stg_cluster, alert_manager_token: nil)
       end
 
       context 'without token' do
         let(:token_input) { nil }
 
-        it_behaves_like 'Alert Notification Service sends notification email'
+        include_examples 'processes one firing and one resolved prometheus alerts'
       end
 
       context 'with token' do
-        it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+        it_behaves_like 'alerts service responds with an error', :unauthorized
       end
     end
   end

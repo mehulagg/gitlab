@@ -4,6 +4,7 @@
     "description": "foo",
     "default_branch": "master",
     "tag_list": [],
+    "topics": [],
     "archived": false,
     "visibility": "internal",
     "ssh_url_to_repo": "git@gitlab.example.com/html5-boilerplate.git",

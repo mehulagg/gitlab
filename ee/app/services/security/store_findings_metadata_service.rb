@@ -30,25 +30,24 @@ module Security
     end
 
     def store_findings
-      report_findings.each_with_index { |report_finding, position| store_finding!(report_finding, position) }
+      report_findings.each { |report_finding| store_finding!(report_finding) }
     end
 
     def report_findings
       report.findings.select(&:valid?)
     end
 
-    def store_finding!(report_finding, position)
-      security_scan.findings.create!(finding_data(report_finding, position))
+    def store_finding!(report_finding)
+      security_scan.findings.create!(finding_data(report_finding))
     end
 
-    def finding_data(report_finding, position)
+    def finding_data(report_finding)
       {
         severity: report_finding.severity,
         confidence: report_finding.confidence,
         uuid: report_finding.uuid,
         project_fingerprint: report_finding.project_fingerprint,
-        scanner: persisted_scanner_for(report_finding.scanner),
-        position: position
+        scanner: persisted_scanner_for(report_finding.scanner)
       }
     end
 

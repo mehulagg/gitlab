@@ -7,13 +7,14 @@ module Gitlab
     include WebpackHelper
 
     def add_gon_variables
-      gon.api_version            = 'v4'
-      gon.default_avatar_url     = default_avatar_url
-      gon.max_file_size          = Gitlab::CurrentSettings.max_attachment_size
-      gon.asset_host             = ActionController::Base.asset_host
-      gon.webpack_public_path    = webpack_public_path
-      gon.relative_url_root      = Gitlab.config.gitlab.relative_url_root
-      gon.user_color_scheme      = Gitlab::ColorSchemes.for_user(current_user).css_class
+      gon.api_version             = 'v4'
+      gon.default_avatar_url      = default_avatar_url
+      gon.max_file_size           = Gitlab::CurrentSettings.max_attachment_size
+      gon.asset_host              = ActionController::Base.asset_host
+      gon.webpack_public_path     = webpack_public_path
+      gon.relative_url_root       = Gitlab.config.gitlab.relative_url_root
+      gon.user_color_scheme       = Gitlab::ColorSchemes.for_user(current_user).css_class
+      gon.markdown_surround_selection = current_user&.markdown_surround_selection
 
       if Gitlab.config.sentry.enabled
         gon.sentry_dsn           = Gitlab.config.sentry.clientside_dsn
@@ -22,6 +23,7 @@ module Gitlab
 
       gon.gitlab_url             = Gitlab.config.gitlab.url
       gon.revision               = Gitlab.revision
+      gon.feature_category       = Gitlab::ApplicationContext.current_context_attribute(:feature_category).presence
       gon.gitlab_logo            = ActionController::Base.helpers.asset_path('gitlab_logo.png')
       gon.sprite_icons           = IconsHelper.sprite_icon_path
       gon.sprite_file_icons      = IconsHelper.sprite_file_icons_path
@@ -31,6 +33,7 @@ module Gitlab
       gon.disable_animations     = Gitlab.config.gitlab['disable_animations']
       gon.suggested_label_colors = LabelsHelper.suggested_colors
       gon.first_day_of_week      = current_user&.first_day_of_week || Gitlab::CurrentSettings.first_day_of_week
+      gon.time_display_relative  = true
       gon.ee                     = Gitlab.ee?
       gon.dot_com                = Gitlab.com?
 
@@ -39,13 +42,15 @@ module Gitlab
         gon.current_username = current_user.username
         gon.current_user_fullname = current_user.name
         gon.current_user_avatar_url = current_user.avatar_url
+        gon.time_display_relative = current_user.time_display_relative
       end
 
       # Initialize gon.features with any flags that should be
       # made globally available to the frontend
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
-      push_frontend_feature_flag(:usage_data_api, default_enabled: true)
+      push_frontend_feature_flag(:usage_data_api, type: :ops, default_enabled: :yaml)
       push_frontend_feature_flag(:security_auto_fix, default_enabled: false)
+      push_frontend_feature_flag(:improved_emoji_picker, default_enabled: :yaml)
     end
 
     # Exposes the state of a feature flag to the frontend code.
@@ -79,4 +84,4 @@ module Gitlab
   end
 end
 
-Gitlab::GonHelper.prepend_if_ee('EE::Gitlab::GonHelper')
+Gitlab::GonHelper.prepend_mod_with('Gitlab::GonHelper')

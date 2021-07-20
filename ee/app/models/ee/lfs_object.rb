@@ -11,7 +11,9 @@ module EE
     STORE_COLUMN = :file_store
 
     prepended do
-      after_destroy :log_geo_deleted_event
+      include ::Gitlab::Geo::ReplicableModel
+
+      with_replicator Geo::LfsObjectReplicator
 
       scope :project_id_in, ->(ids) { joins(:projects).merge(::Project.id_in(ids)) }
     end
@@ -21,16 +23,22 @@ module EE
       # @return [ActiveRecord::Relation<LfsObject>] everything that should be synced to this node, restricted by primary key
       def replicables_for_current_secondary(primary_key_in)
         node = ::Gitlab::Geo.current_node
-        local_storage_only = !node.sync_object_storage
+        node.lfs_objects(primary_key_in: primary_key_in)
+          .merge(object_storage_scope(node))
+      end
 
-        scope = node.lfs_objects(primary_key_in: primary_key_in)
-        scope = scope.with_files_stored_locally if local_storage_only
-        scope
+      private
+
+      def object_storage_scope(node)
+        return all if node.sync_object_storage?
+
+        with_files_stored_locally
       end
     end
 
     def log_geo_deleted_event
-      ::Geo::LfsObjectDeletedEventStore.new(self).create!
+      # Keep empty for now. Should be addressed in future
+      # by https://gitlab.com/gitlab-org/gitlab/-/issues/232917
     end
   end
 end

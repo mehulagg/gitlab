@@ -1,9 +1,15 @@
-import { GlDropdownItem, GlLoadingIcon, GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import {
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownSectionHeader,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import IterationDropdown from 'ee/sidebar/components/iteration_dropdown.vue';
-import { iterationSelectTextMap } from 'ee/sidebar/constants';
-import groupIterationsQuery from 'ee/sidebar/queries/group_iterations.query.graphql';
+import groupIterationsQuery from 'ee/sidebar/queries/iterations.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 
 const localVue = createLocalVue();
@@ -14,16 +20,34 @@ const TEST_SEARCH = 'search';
 const TEST_FULL_PATH = 'gitlab-test/test';
 const TEST_ITERATIONS = [
   {
-    id: '1',
+    id: '11',
     title: 'Test Title',
     webUrl: '',
     state: '',
+    iterationCadence: {
+      id: '111',
+      title: 'My Cadence',
+    },
   },
   {
-    id: '2',
+    id: '22',
     title: 'Another Test Title',
     webUrl: '',
     state: '',
+    iterationCadence: {
+      id: '222',
+      title: 'My Second Cadence',
+    },
+  },
+  {
+    id: '33',
+    title: 'Yet Another Test Title',
+    webUrl: '',
+    state: '',
+    iterationCadence: {
+      id: '333',
+      title: 'My Cadence',
+    },
   },
 ];
 
@@ -53,7 +77,7 @@ describe('IterationDropdown', () => {
     await wrapper.vm.$nextTick();
     jest.runOnlyPendingTimers();
   };
-  const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
   const findDropdownItemWithText = (text) =>
     findDropdownItems().wrappers.find((x) => x.text() === text);
   const findDropdownItemsData = () =>
@@ -69,15 +93,15 @@ describe('IterationDropdown', () => {
 
     await wrapper.vm.$nextTick();
   };
-  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdown = () => wrapper.findComponent(GlDropdown);
   const showDropdownAndWait = async () => {
     findDropdown().vm.$emit('show');
 
     await waitForDebounce();
   };
-  const isLoading = () => wrapper.find(GlLoadingIcon).exists();
+  const isLoading = () => wrapper.findComponent(GlLoadingIcon).exists();
 
-  const createComponent = ({ mountFn = shallowMount } = {}) => {
+  const createComponent = ({ mountFn = shallowMount, iterationCadences = false } = {}) => {
     fakeApollo = createMockApollo([[groupIterationsQuery, groupIterationsSpy]]);
 
     wrapper = mountFn(IterationDropdown, {
@@ -85,6 +109,11 @@ describe('IterationDropdown', () => {
       apolloProvider: fakeApollo,
       propsData: {
         fullPath: TEST_FULL_PATH,
+      },
+      provide: {
+        glFeatures: {
+          iterationCadences,
+        },
       },
     });
   };
@@ -99,8 +128,8 @@ describe('IterationDropdown', () => {
     });
 
     it('shows gl-dropdown', () => {
-      expect(wrapper.find(GlDropdown).exists()).toBe(true);
-      expect(wrapper.find(GlDropdown).element).toMatchSnapshot();
+      expect(findDropdown().exists()).toBe(true);
+      expect(findDropdown().element).toMatchSnapshot();
     });
   });
 
@@ -140,7 +169,7 @@ describe('IterationDropdown', () => {
     });
 
     it('shows dropdown items', () => {
-      const result = iterationSelectTextMap.noIterationItem.concat(TEST_ITERATIONS);
+      const result = [IterationDropdown.noIteration].concat(TEST_ITERATIONS);
 
       expect(findDropdownItemsData()).toEqual(
         result.map((x) => ({
@@ -159,7 +188,7 @@ describe('IterationDropdown', () => {
     });
 
     describe.each([0, 1, 2])('when item %s is selected', (index) => {
-      const allIterations = iterationSelectTextMap.noIterationItem.concat(TEST_ITERATIONS);
+      const allIterations = [IterationDropdown.noIteration].concat(TEST_ITERATIONS);
       const selected = allIterations[index];
       const asNotChecked = ({ title }) => ({ isCheckItem: true, isChecked: false, text: title });
 
@@ -211,7 +240,7 @@ describe('IterationDropdown', () => {
 
       groupIterationsSpy.mockClear();
 
-      wrapper.find(GlSearchBoxByType).vm.$emit('input', TEST_SEARCH);
+      wrapper.findComponent(GlSearchBoxByType).vm.$emit('input', TEST_SEARCH);
 
       await waitForDebounce();
     });
@@ -222,6 +251,30 @@ describe('IterationDropdown', () => {
         state: 'opened',
         title: `"${TEST_SEARCH}"`,
       });
+    });
+  });
+
+  describe('when iteration_cadences feature flag is on', () => {
+    beforeEach(async () => {
+      createComponent({ iterationCadences: true, mountFn: mount });
+
+      await showDropdownAndWait();
+    });
+
+    it('shows dropdown items grouped by iteration cadence', () => {
+      const dropdownItems = wrapper.findAll('li');
+
+      expect(dropdownItems.at(0).text()).toBe('Assign Iteration');
+      expect(dropdownItems.at(1).text()).toBe('No iteration');
+      expect(dropdownItems.at(2).findComponent(GlDropdownDivider).exists()).toBe(true);
+      expect(dropdownItems.at(3).findComponent(GlDropdownSectionHeader).text()).toBe('My Cadence');
+      expect(dropdownItems.at(4).text()).toBe('Test Title');
+      expect(dropdownItems.at(5).text()).toBe('Yet Another Test Title');
+      expect(dropdownItems.at(6).findComponent(GlDropdownDivider).exists()).toBe(true);
+      expect(dropdownItems.at(7).findComponent(GlDropdownSectionHeader).text()).toBe(
+        'My Second Cadence',
+      );
+      expect(dropdownItems.at(8).text()).toBe('Another Test Title');
     });
   });
 });

@@ -4,7 +4,7 @@ module API
   class JobArtifacts < ::API::Base
     before { authenticate_non_get! }
 
-    feature_category :continuous_integration
+    feature_category :build_artifacts
 
     # EE::API::JobArtifacts would override the following helpers
     helpers do
@@ -13,7 +13,7 @@ module API
       end
     end
 
-    prepend_if_ee('EE::API::JobArtifacts') # rubocop: disable Cop/InjectEnterpriseEditionModule
+    prepend_mod_with('API::JobArtifacts') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -45,6 +45,7 @@ module API
         requires :job, type: String, desc: 'The name for the job'
         requires :artifact_path, type: String, desc: 'Artifact path'
       end
+      route_setting :authentication, job_token_allowed: true
       get ':id/jobs/artifacts/:ref_name/raw/*artifact_path',
           format: false,
           requirements: { ref_name: /.+/ } do
@@ -84,13 +85,14 @@ module API
         requires :job_id, type: Integer, desc: 'The ID of a job'
         requires :artifact_path, type: String, desc: 'Artifact path'
       end
+      route_setting :authentication, job_token_allowed: true
       get ':id/jobs/:job_id/artifacts/*artifact_path', format: false do
         authorize_download_artifacts!
 
         build = find_build!(params[:job_id])
         authorize_read_job_artifacts!(build)
 
-        not_found! unless build.artifacts?
+        not_found! unless build.available_artifacts?
 
         path = Gitlab::Ci::Build::Artifacts::Path
           .new(params[:artifact_path])

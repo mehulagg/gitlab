@@ -18,7 +18,9 @@ export default (el) => {
     provide: {
       reportType: vulnerability.reportType,
       newIssueUrl: vulnerability.newIssueUrl,
+      commitPathTemplate: el.dataset.commitPathTemplate,
       projectFingerprint: vulnerability.projectFingerprint,
+      projectFullPath: vulnerability.project?.fullPath,
       vulnerabilityId: vulnerability.id,
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
       permissionsHelpPath: vulnerability.permissionsHelpPath,

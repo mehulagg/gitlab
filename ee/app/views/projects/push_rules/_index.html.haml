@@ -3,7 +3,7 @@
 - expanded = expanded_by_default?
 %section.settings.no-animate#js-push-rules{ class: ('expanded' if expanded), data: { qa_selector: 'push_rules_content' } }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = s_('PushRule|Push rules')
     %button.gl-button.btn.btn-default.js-settings-toggle
       = expanded ? _('Collapse') : _('Expand')

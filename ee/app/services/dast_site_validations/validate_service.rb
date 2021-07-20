@@ -6,7 +6,7 @@ module DastSiteValidations
     TokenNotFound = Class.new(StandardError)
 
     def execute!
-      raise PermissionsError.new('Insufficient permissions') unless allowed?
+      raise PermissionsError, 'Insufficient permissions' unless allowed?
 
       return if dast_site_validation.passed?
 
@@ -24,8 +24,7 @@ module DastSiteValidations
     private
 
     def allowed?
-      container.feature_available?(:security_on_demand_scans) &&
-        Feature.enabled?(:security_on_demand_scans_site_validation, container, default_enabled: :yaml)
+      container.feature_available?(:security_on_demand_scans)
     end
 
     def dast_site_validation
@@ -33,7 +32,7 @@ module DastSiteValidations
     end
 
     def make_http_request!
-      Gitlab::HTTP.get(dast_site_validation.validation_url)
+      Gitlab::HTTP.get(dast_site_validation.validation_url, use_read_total_timeout: true)
     end
 
     def token_found?(response)
@@ -50,7 +49,7 @@ module DastSiteValidations
     end
 
     def validate!(response)
-      raise TokenNotFound.new('Could not find token') unless token_found?(response)
+      raise TokenNotFound, 'Could not find token' unless token_found?(response)
 
       dast_site_validation.pass
     end

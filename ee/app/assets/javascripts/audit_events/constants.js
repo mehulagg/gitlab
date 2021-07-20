@@ -1,12 +1,12 @@
-import { __, s__ } from '~/locale';
-
+import { s__ } from '~/locale';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import GroupToken from './components/tokens/group_token.vue';
 import MemberToken from './components/tokens/member_token.vue';
 import ProjectToken from './components/tokens/project_token.vue';
 import UserToken from './components/tokens/user_token.vue';
 
 const DEFAULT_TOKEN_OPTIONS = {
-  operators: [{ value: '=', description: __('is'), default: 'true' }],
+  operators: OPERATOR_IS_ONLY,
   unique: true,
 };
 

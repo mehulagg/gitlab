@@ -41,20 +41,20 @@ module BlobHelper
     result
   end
 
-  def ide_fork_and_edit_path(project = @project, ref = @ref, path = @path, options = {})
-    fork_path_for_current_user(project, ide_edit_path(project, ref, path))
+  def ide_fork_and_edit_path(project = @project, ref = @ref, path = @path, with_notice: true)
+    fork_path_for_current_user(project, ide_edit_path(project, ref, path), with_notice: with_notice)
   end
 
   def fork_and_edit_path(project = @project, ref = @ref, path = @path, options = {})
     fork_path_for_current_user(project, edit_blob_path(project, ref, path, options))
   end
 
-  def fork_path_for_current_user(project, path)
+  def fork_path_for_current_user(project, path, with_notice: true)
     return unless current_user
 
     project_forks_path(project,
                       namespace_key: current_user.namespace&.id,
-                      continue: edit_blob_fork_params(path))
+                      continue: edit_blob_fork_params(path, with_notice: with_notice))
   end
 
   def encode_ide_path(path)
@@ -65,7 +65,7 @@ module BlobHelper
     return unless blob = readable_blob(options, path, project, ref)
 
     common_classes = "btn gl-button btn-confirm js-edit-blob gl-ml-3 #{options[:extra_class]}"
-    data = { track_event: 'click_edit', track_label: 'Edit' }
+    data = { track_action: 'click_edit', track_label: 'edit' }
 
     if Feature.enabled?(:web_ide_primary_edit, project.group)
       common_classes += " btn-inverted"
@@ -85,7 +85,7 @@ module BlobHelper
     return unless blob
 
     common_classes = 'btn gl-button btn-confirm ide-edit-button gl-ml-3'
-    data = { track_event: 'click_edit_ide', track_label: 'Web IDE' }
+    data = { track_action: 'click_edit_ide', track_label: 'web_ide' }
 
     unless Feature.enabled?(:web_ide_primary_edit, project.group)
       common_classes += " btn-inverted"
@@ -206,10 +206,6 @@ module BlobHelper
     @gitlab_ci_ymls ||= TemplateFinder.all_template_names(project, :gitlab_ci_ymls)
   end
 
-  def gitlab_ci_syntax_ymls(project)
-    @gitlab_ci_syntax_ymls ||= TemplateFinder.all_template_names(project, :gitlab_ci_syntax_ymls)
-  end
-
   def metrics_dashboard_ymls(project)
     @metrics_dashboard_ymls ||= TemplateFinder.all_template_names(project, :metrics_dashboard_ymls)
   end
@@ -235,7 +231,9 @@ module BlobHelper
   def copy_blob_source_button(blob)
     return unless blob.rendered_as_text?(ignore_errors: false)
 
-    clipboard_button(target: ".blob-content[data-blob-id='#{blob.id}'] > pre", class: "btn gl-button btn-default btn-icon js-copy-blob-source-btn", title: _("Copy file contents"))
+    content_tag(:span, class: 'btn-group has-tooltip js-copy-blob-source-btn-tooltip') do
+      clipboard_button(target: ".blob-content[data-blob-id='#{blob.id}'] > pre", class: "btn gl-button btn-default btn-icon js-copy-blob-source-btn", hide_tooltip: true)
+    end
   end
 
   def open_raw_blob_button(blob)
@@ -328,12 +326,12 @@ module BlobHelper
     blob if blob&.readable_text?
   end
 
-  def edit_blob_fork_params(path)
+  def edit_blob_fork_params(path, with_notice: true)
     {
       to: path,
-      notice: edit_in_new_fork_notice,
-      notice_now: edit_in_new_fork_notice_now
-    }
+      notice: (edit_in_new_fork_notice if with_notice),
+      notice_now: (edit_in_new_fork_notice_now if with_notice)
+    }.compact
   end
 
   def edit_modify_file_fork_params(action)

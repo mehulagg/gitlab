@@ -17,7 +17,7 @@ module Projects
                          .from_and_to_forks(@project)
 
       merge_requests.find_each do |mr|
-        ::MergeRequests::CloseService.new(@project, @current_user).execute(mr)
+        ::MergeRequests::CloseService.new(project: @project, current_user: @current_user).execute(mr)
         log_info(message: "UnlinkForkService: Closed merge request", merge_request_id: mr.id)
       end
 
@@ -32,6 +32,8 @@ module Projects
         if fork_network = @project.root_of_fork_network
           fork_network.update(root_project: nil, deleted_root_project_name: @project.full_name)
         end
+
+        @project.leave_pool_repository
       end
 
       # rubocop: disable Cop/InBatches

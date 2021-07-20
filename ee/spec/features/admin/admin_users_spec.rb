@@ -2,17 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe "Admin::Users" do
-  include Spec::Support::Helpers::Features::ResponsiveTableHelpers
-
-  let!(:user) do
-    create(:omniauth_user, provider: 'twitter', extern_uid: '123456')
-  end
-
-  let!(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
+RSpec.describe "Admin::Users", :js do
+  let_it_be(:user) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
+  let_it_be(:current_user) { create(:admin) }
 
   before do
-    stub_feature_flags(vue_admin_users: false)
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
   end
@@ -34,12 +28,44 @@ RSpec.describe "Admin::Users" do
       context 'when `send_emails_from_admin_area` feature is disabled' do
         before do
           stub_licensed_features(send_emails_from_admin_area: false)
+          stub_application_setting(usage_ping_enabled: false)
         end
 
         it "does not show the 'Send email to users' link" do
           visit admin_users_path
 
           expect(page).not_to have_link(href: admin_email_path)
+        end
+      end
+
+      context 'when usage ping is enabled' do
+        before do
+          stub_licensed_features(send_emails_from_admin_area: false)
+          stub_application_setting(usage_ping_enabled: true)
+        end
+
+        context 'when feature is activated' do
+          before do
+            stub_application_setting(usage_ping_features_enabled: true)
+          end
+
+          it "shows the 'Send email to users' link" do
+            visit admin_users_path
+
+            expect(page).to have_link(href: admin_email_path)
+          end
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_application_setting(usage_ping_features_enabled: false)
+          end
+
+          it "does not show the 'Send email to users' link" do
+            visit admin_users_path
+
+            expect(page).not_to have_link(href: admin_email_path)
+          end
         end
       end
     end
@@ -108,13 +134,10 @@ RSpec.describe "Admin::Users" do
   end
 
   describe "GET /admin/users/:id/edit" do
-    before do
-      visit admin_users_path
-      click_link "edit_user_#{user.id}"
-    end
-
     describe "Update user account type" do
       before do
+        visit_edit_user(user.id)
+
         allow_any_instance_of(AuditorUserHelper).to receive(:license_allows_auditor_user?).and_return(true)
         choose "user_access_level_auditor"
         click_button "Save changes"
@@ -129,25 +152,33 @@ RSpec.describe "Admin::Users" do
     end
 
     describe 'Update shared runners quota' do
-      let!(:project) { create(:project, namespace: user.namespace, shared_runners_enabled: true) }
-
-      before do
-        fill_in "user_namespace_attributes_shared_runners_minutes_limit", with: "500"
-        click_button "Save changes"
-      end
+      let_it_be(:project) { create(:project, namespace: user.namespace, shared_runners_enabled: true) }
 
       it "shows page with new data" do
+        visit_edit_user(user.id)
+        fill_in "user_namespace_attributes_shared_runners_minutes_limit", with: "500"
+
+        click_button "Save changes"
+
         expect(page).to have_content('Pipeline minutes quota: 0 / 500')
+      end
+    end
+
+    def visit_edit_user(user_id)
+      visit admin_users_path
+
+      page.within("[data-testid='user-actions-#{user_id}']") do
+        click_link 'Edit'
       end
     end
   end
 
   describe 'show user keys for SSH and LDAP' do
-    let!(:key1) do
+    let_it_be(:key1) do
       create(:ldap_key, user: user, title: "LDAP Key1")
     end
 
-    let!(:key2) do
+    let_it_be(:key2) do
       create(:key, user: user, title: "ssh-rsa Key2", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4FIEBXGi4bPU8kzxMefudPIJ08/gNprdNTaO9BR/ndy3+58s2HCTw2xCHcsuBmq+TsAqgEidVq4skpqoTMB+Uot5Uzp9z4764rc48dZiI661izoREoKnuRQSsRqUTHg5wrLzwxlQbl1MVfRWQpqiz/5KjBC7yLEb9AbusjnWBk8wvC1bQPQ1uLAauEA7d836tgaIsym9BrLsMVnR4P1boWD3Xp1B1T/ImJwAGHvRmP/ycIqmKdSpMdJXwxcb40efWVj0Ibbe7ii9eeoLdHACqevUZi6fwfbymdow+FeqlkPoHyGg3Cu4vD/D8+8cRc7mE/zGCWcQ15Var83Tczour Key2")
     end
 

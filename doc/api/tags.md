@@ -21,7 +21,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string| yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user|
+| `id` | integer/string| yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user|
 | `order_by` | string | no | Return tags ordered by `name` or `updated` fields. Default is `updated` |
 | `sort` | string | no | Return tags sorted in `asc` or `desc` order. Default is `desc` |
 | `search` | string | no | Return list of tags matching the search criteria. You can use `^term` and `term$` to find tags that begin and end with `term` respectively. |
@@ -72,7 +72,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `tag_name` | string | yes | The name of the tag |
 
 ```shell
@@ -119,11 +119,10 @@ Parameters:
 
 | Attribute             | Type           | Required | Description                                                                                                     |
 | --------------------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `id`                  | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`                  | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `tag_name`            | string         | yes      | The name of a tag                                                                                               |
 | `ref`                 | string         | yes      | Create tag using commit SHA, another tag name, or branch name                                                   |
 | `message`             | string         | no       | Creates annotated tag                                                                                           |
-| `release_description` | string         | no       | This parameter is [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766) for use in GitLab 11.7, and is planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/290311) in GitLab 14.0. Use the [Releases API](../api/releases/index.md) instead. |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/tags?tag_name=test&ref=master"
@@ -149,10 +148,7 @@ Example response:
     "committer_email": "jack@example.com",
     "committed_date": "2012-05-28T04:42:42-07:00"
   },
-  "release": {
-    "tag_name": "1.0.0",
-    "description": "Amazing release. Wow"
-  },
+  "release": null,
   "name": "v1.0.0",
   "target": "2695effb5807a22ff3d138d593fd856244e155e7",
   "message": null,
@@ -160,11 +156,10 @@ Example response:
 }
 ```
 
-The message will be `null` when creating a lightweight tag otherwise
-it will contain the annotation.
+The message is `null` when creating a lightweight tag. Otherwise, it contains the annotation.
 
-The target will contain the tag objects ID when creating annotated tags,
-otherwise it will contain the commit ID when creating lightweight tags.
+The target contains the tag objects ID when creating annotated tags,
+otherwise it contains the commit ID when creating lightweight tags.
 
 In case of an error,
 status code `405` with an explaining error message is returned.
@@ -181,84 +176,5 @@ Parameters:
 
 | Attribute  | Type           | Required | Description                                                                                                     |
 | ---------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `tag_name` | string         | yes      | The name of a tag                                                                                               |
-
-## Create a new release
-
-WARNING:
-This feature is in its end-of-life process. It is [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766)
-for use in GitLab 11.7, and is planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/290311)
-in GitLab 14.0. Use the [Releases API](../api/releases/index.md) instead.
-
-Add release notes to the existing Git tag. If there
-already exists a release for the given tag, status code `409` is returned.
-
-```plaintext
-POST /projects/:id/repository/tags/:tag_name/release
-```
-
-Parameters:
-
-| Attribute  | Type           | Required | Description                                                                                                     |
-| ---------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `tag_name` | string         | yes      | The name of a tag                                                                                               |
-
-Request body:
-
-- `description` (required) - Release notes with Markdown support
-
-```json
-{
-  "description": "Amazing release. Wow"
-}
-```
-
-Response:
-
-```json
-{
-  "tag_name": "1.0.0",
-  "description": "Amazing release. Wow"
-}
-```
-
-## Update a release
-
-WARNING:
-This feature is in its end-of-life process. It is [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766)
-for use in GitLab 11.7, and is planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/290311)
-in GitLab 14.0. Use the [Releases API](../api/releases/index.md) instead.
-
-Updates the release notes of a given release.
-
-```plaintext
-PUT /projects/:id/repository/tags/:tag_name/release
-```
-
-Parameters:
-
-| Attribute  | Type           | Required | Description                                                                                                     |
-| ---------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `tag_name` | string         | yes      | The name of a tag                                                                                               |
-
-Request body:
-
-- `description` (required) - Release notes with Markdown support
-
-```json
-{
-  "description": "Amazing release. Wow"
-}
-```
-
-Response:
-
-```json
-{
-  "tag_name": "1.0.0",
-  "description": "Amazing release. Wow"
-}
-```

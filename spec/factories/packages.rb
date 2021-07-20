@@ -6,6 +6,19 @@ FactoryBot.define do
     name { 'my/company/app/my-app' }
     sequence(:version) { |n| "1.#{n}-SNAPSHOT" }
     package_type { :maven }
+    status { :default }
+
+    trait :hidden do
+      status { :hidden }
+    end
+
+    trait :processing do
+      status { :processing }
+    end
+
+    trait :error do
+      status { :error }
+    end
 
     factory :maven_package do
       maven_metadatum
@@ -27,8 +40,8 @@ FactoryBot.define do
       package_type { :rubygems }
 
       after :create do |package|
-        create :package_file, :gem, package: package
-        create :package_file, :gemspec, package: package
+        create :package_file, package.processing? ? :unprocessed_gem : :gem, package: package
+        create :package_file, :gemspec, package: package unless package.processing?
       end
 
       trait(:with_metadatum) do
@@ -62,7 +75,7 @@ FactoryBot.define do
           create :debian_package_file, :source, evaluator.file_metadatum_trait, package: package
           create :debian_package_file, :dsc, evaluator.file_metadatum_trait, package: package
           create :debian_package_file, :deb, evaluator.file_metadatum_trait, package: package
-          create :debian_package_file, :deb2, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :deb_dev, evaluator.file_metadatum_trait, package: package
           create :debian_package_file, :udeb, evaluator.file_metadatum_trait, package: package
           create :debian_package_file, :buildinfo, evaluator.file_metadatum_trait, package: package
           create :debian_package_file, :changes, evaluator.file_metadatum_trait, package: package
@@ -81,6 +94,22 @@ FactoryBot.define do
       end
     end
 
+    factory :helm_package do
+      sequence(:name) { |n| "package-#{n}" }
+      sequence(:version) { |n| "v1.0.#{n}" }
+      package_type { :helm }
+
+      transient do
+        without_package_files { false }
+      end
+
+      after :create do |package, evaluator|
+        unless evaluator.without_package_files
+          create :helm_package_file, package: package
+        end
+      end
+    end
+
     factory :npm_package do
       sequence(:name) { |n| "@#{project.root_namespace.path}/package-#{n}"}
       version { '1.0.0' }
@@ -88,6 +117,25 @@ FactoryBot.define do
 
       after :create do |package|
         create :package_file, :npm, package: package
+      end
+
+      trait :with_build do
+        after :create do |package|
+          user = package.project.creator
+          pipeline = create(:ci_pipeline, user: user)
+          create(:ci_build, user: user, pipeline: pipeline)
+          create :package_build_info, package: package, pipeline: pipeline
+        end
+      end
+    end
+
+    factory :terraform_module_package do
+      sequence(:name) { |n| "module-#{n}/system" }
+      version { '1.0.0' }
+      package_type { :terraform_module }
+
+      after :create do |package|
+        create :package_file, :terraform_module, package: package
       end
 
       trait :with_build do
@@ -112,6 +160,12 @@ FactoryBot.define do
       trait(:with_metadatum) do
         after :build do |pkg|
           pkg.nuget_metadatum = build(:nuget_metadatum)
+        end
+      end
+
+      trait(:with_symbol_package) do
+        after :create do |package|
+          create :package_file, :snupkg, package: package, file_name: "#{package.name}.#{package.version}.snupkg"
         end
       end
     end
@@ -268,6 +322,10 @@ FactoryBot.define do
   factory :packages_dependency, class: 'Packages::Dependency' do
     sequence(:name) { |n| "@test/package-#{n}"}
     sequence(:version_pattern) { |n| "~6.2.#{n}" }
+
+    trait(:rubygems) do
+      sequence(:name) { |n| "gem-dependency-#{n}"}
+    end
   end
 
   factory :packages_dependency_link, class: 'Packages::DependencyLink' do
@@ -279,6 +337,11 @@ FactoryBot.define do
       after :build do |link|
         link.nuget_metadatum = build(:nuget_dependency_link_metadatum)
       end
+    end
+
+    trait(:rubygems) do
+      package { association(:rubygems_package) }
+      dependency { association(:packages_dependency, :rubygems) }
     end
   end
 

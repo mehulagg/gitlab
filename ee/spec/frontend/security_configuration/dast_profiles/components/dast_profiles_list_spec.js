@@ -4,7 +4,7 @@ import { mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { merge } from 'lodash';
 import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { siteProfiles as profiles } from '../mocks/mock_data';
+import { siteProfiles as profiles, policySiteProfile } from '../mocks/mock_data';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
 
@@ -58,8 +58,9 @@ describe('EE - DastProfilesList', () => {
   const getErrorMessage = () => withinComponent().queryByText(TEST_ERROR_MESSAGE);
   const getErrorDetails = () => withinComponent().queryByRole('list', { name: /error details/i });
   const getDeleteButtonWithin = (element) =>
-    createWrapper(within(element).queryByRole('button', { name: /delete/i }));
+    createWrapper(within(element).queryByTestId('dast-profile-delete-button'));
   const getModal = () => wrapper.find(GlModal);
+  const getDeleteTooltip = () => wrapper.find('[data-testid="dast-profile-delete-tooltip"');
 
   afterEach(() => {
     wrapper.destroy();
@@ -133,7 +134,7 @@ describe('EE - DastProfilesList', () => {
 
         expect(profileCell.innerText).toContain(profile.profileName);
         expect(targetUrlCell.innerText).toContain(profile.targetUrl);
-        expect(within(actionsCell).getByRole('button', { name: /delete/i })).not.toBe(null);
+        expect(within(actionsCell).queryByTestId('dast-profile-delete-button')).not.toBe(null);
 
         const editLink = within(actionsCell).getByRole('link', { name: /edit/i });
         expect(editLink).not.toBe(null);
@@ -194,10 +195,8 @@ describe('EE - DastProfilesList', () => {
         getDeleteButtonWithin(getTableRowForProfile(profile));
 
       it('shows a tooltip on the delete button', () => {
-        expect(getBinding(getCurrentProfileDeleteButton().element, 'gl-tooltip')).not.toBe(
-          undefined,
-        );
-        expect(getCurrentProfileDeleteButton().attributes().title).toBe('Delete profile');
+        expect(getBinding(getDeleteTooltip().element, 'gl-tooltip')).not.toBe(undefined);
+        expect(getDeleteTooltip().attributes('title')).toBe('Delete profile');
       });
 
       it('opens a modal with the correct title when a delete button is clicked', async () => {
@@ -244,6 +243,35 @@ describe('EE - DastProfilesList', () => {
       expect(getErrorDetails()).not.toBe(null);
       expect(within(getErrorDetails()).getByText(errorDetails[0])).not.toBe(null);
       expect(within(getErrorDetails()).getByText(errorDetails[1])).not.toBe(null);
+    });
+
+    it('properly renders errors containing markup', () => {
+      const errorDetails = ['an error <a href="#">with a link</a>'];
+      createFullComponent({
+        propsData: { errorMessage: TEST_ERROR_MESSAGE, errorDetails },
+      });
+
+      expect(getErrorMessage()).not.toBe(null);
+      expect(getErrorDetails()).not.toBe(null);
+      expect(within(getErrorDetails()).getByRole('link', { name: 'with a link' })).not.toBe(null);
+    });
+  });
+
+  describe('profile referenced in a security policy', () => {
+    it('disables the delete button', () => {
+      createFullComponent({ propsData: { profiles: policySiteProfile } });
+      const disabledRow = getAllTableRows()[0];
+      const deleteButton = getDeleteButtonWithin(disabledRow);
+      expect(deleteButton.attributes('disabled')).toBe('disabled');
+      expect(deleteButton.attributes('aria-disabled')).toBe('true');
+    });
+
+    it('shows the correct tooltip text', () => {
+      createFullComponent({ propsData: { profiles: policySiteProfile } });
+      expect(getBinding(getDeleteTooltip().element, 'gl-tooltip')).not.toBe(undefined);
+      expect(getDeleteTooltip().attributes('title')).toBe(
+        'This profile is currently being used in a policy.',
+      );
     });
   });
 });

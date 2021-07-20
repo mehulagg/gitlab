@@ -14,6 +14,9 @@ module Types
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the milestone.'
 
+    field :iid, GraphQL::ID_TYPE, null: false,
+          description: "Internal ID of the milestone."
+
     field :title, GraphQL::STRING_TYPE, null: false,
           description: 'Title of the milestone.'
 
@@ -22,6 +25,9 @@ module Types
 
     field :state, Types::MilestoneStateEnum, null: false,
           description: 'State of the milestone.'
+
+    field :expired, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Expired state of the milestone (a milestone is expired when the due date is past the current date). Defaults to `false` when due date has not been set.'
 
     field :web_path, GraphQL::STRING_TYPE, null: false, method: :milestone_path,
           description: 'Web path of the milestone.'
@@ -54,11 +60,9 @@ module Types
           description: 'Milestone statistics.'
 
     def stats
-      return unless Feature.enabled?(:graphql_milestone_stats, milestone.project || milestone.group, default_enabled: true)
-
       milestone
     end
   end
 end
 
-Types::MilestoneType.prepend_if_ee('::EE::Types::MilestoneType')
+Types::MilestoneType.prepend_mod_with('Types::MilestoneType')

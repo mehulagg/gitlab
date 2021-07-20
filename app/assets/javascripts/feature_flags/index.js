@@ -22,8 +22,9 @@ export default () => {
     unleashApiUrl,
     canUserAdminFeatureFlag,
     newFeatureFlagPath,
-    newUserListPath,
+    userListPath,
     featureFlagsLimitExceeded,
+    featureFlagsLimit,
   } = el.dataset;
 
   return new Vue({
@@ -39,8 +40,9 @@ export default () => {
       csrfToken: csrf.token,
       canUserConfigure: canUserAdminFeatureFlag !== undefined,
       newFeatureFlagPath,
-      newUserListPath,
-      featureFlagsLimitExceeded,
+      featureFlagsLimitExceeded: featureFlagsLimitExceeded !== undefined,
+      featureFlagsLimit,
+      userListPath,
     },
     render(createElement) {
       return createElement(FeatureFlagsComponent);

@@ -9,28 +9,35 @@ type: reference
 
 You can set a maximum size for display of diff files (patches).
 
-For details about diff files, [View changes between files](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-changes-between-file-versions).
+For details about diff files, [view changes between files](../project/merge_requests/changes.md).
+Read more about the [built-in limits for merge requests and diffs](../../administration/instance_limits.md#merge-requests).
 
-## Maximum diff patch size
-
-Diff files which exceed this value are presented as 'too large' and cannot
-be expandable. Instead of an expandable view, a link to the blob view is
-shown.
-
-Patches greater than 10% of this size are automatically collapsed, and a
-link to expand the diff is presented.
-This affects merge requests and branch comparison views.
-
-To set the maximum diff patch size:
-
-1. Go to **Admin Area > Settings > General**.
-1. Expand **Diff limits**.
-1. Enter a value for **Maximum diff patch size**, measured in bytes.
-1. Click on **Save changes**.
+## Configure diff limits
 
 WARNING:
-This setting is experimental. An increased maximum increases resource
+These settings are experimental. An increased maximum increases resource
 consumption of your instance. Keep this in mind when adjusting the maximum.
+
+To speed the loading time of merge request views and branch comparison views
+on your instance, you can configure three instance-level maximum values for diffs:
+
+| Value | Definition | Default value | Maximum value |
+| ----- | ---------- | :-----------: | :-----------: |
+| **Maximum diff patch size** | The total size, in bytes, of the entire diff. | 200 KB | 500 KB |
+| **Maximum diff files** | The total number of files changed in a diff. | 1000 | 3000 |
+| **Maximum diff lines** | The total number of lines changed in a diff. | 50,000 | 100,000 |
+
+When a diff reaches 10% of any of these values, the files are shown in a
+collapsed view, with a link to expand the diff. Diffs that exceed any of the
+set values are presented as **Too large** are cannot be expanded in the UI.
+
+To configure these values:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**.
+1. Expand **Diff limits**.
+1. Enter a value for the diff limit.
+1. Select **Save changes**.
 
 <!-- ## Troubleshooting
 

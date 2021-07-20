@@ -1,49 +1,66 @@
 <script>
-import sidebarEventHub from '~/sidebar/event_hub';
-import eventHub from '../eventhub';
-import boardsStore from '../stores/boards_store';
-import BoardCardLayout from './board_card_layout.vue';
-import BoardCardLayoutDeprecated from './board_card_layout_deprecated.vue';
+import { mapActions, mapState } from 'vuex';
+import Tracking from '~/tracking';
+import BoardCardInner from './board_card_inner.vue';
 
 export default {
-  name: 'BoardsIssueCard',
+  name: 'BoardCard',
   components: {
-    BoardCardLayout: gon.features?.graphqlBoardLists ? BoardCardLayout : BoardCardLayoutDeprecated,
+    BoardCardInner,
   },
+  mixins: [Tracking.mixin()],
   props: {
     list: {
       type: Object,
       default: () => ({}),
       required: false,
     },
-    issue: {
+    item: {
       type: Object,
       default: () => ({}),
       required: false,
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
+    index: {
+      type: Number,
+      default: 0,
+      required: false,
+    },
+  },
+  computed: {
+    ...mapState(['selectedBoardItems', 'activeId']),
+    isActive() {
+      return this.item.id === this.activeId;
+    },
+    multiSelectVisible() {
+      return (
+        !this.activeId &&
+        this.selectedBoardItems.findIndex((boardItem) => boardItem.id === this.item.id) > -1
+      );
+    },
+    isDisabled() {
+      return this.disabled || !this.item.id || this.item.isLoading;
+    },
+    isDraggable() {
+      return !this.disabled && this.item.id && !this.item.isLoading;
+    },
   },
   methods: {
-    // These are methods instead of computed's, because boardsStore is not reactive.
-    isActive() {
-      return this.getActiveId() === this.issue.id;
-    },
-    getActiveId() {
-      return boardsStore.detail?.issue?.id;
-    },
-    showIssue({ isMultiSelect }) {
-      // If no issues are opened, close all sidebars first
-      if (!this.getActiveId()) {
-        sidebarEventHub.$emit('sidebar.closeAll');
-      }
-      if (this.isActive()) {
-        eventHub.$emit('clearDetailIssue', isMultiSelect);
+    ...mapActions(['toggleBoardItemMultiSelection', 'toggleBoardItem']),
+    toggleIssue(e) {
+      // Don't do anything if this happened on a no trigger element
+      if (e.target.closest('.js-no-trigger')) return;
 
-        if (isMultiSelect) {
-          eventHub.$emit('newDetailIssue', this.issue, isMultiSelect);
-        }
+      const isMultiSelect = e.ctrlKey || e.metaKey;
+      if (isMultiSelect && gon?.features?.boardMultiSelect) {
+        this.toggleBoardItemMultiSelection(this.item);
       } else {
-        eventHub.$emit('newDetailIssue', this.issue, isMultiSelect);
-        boardsStore.setListDetail(this.list);
+        this.toggleBoardItem({ boardItem: this.item });
+        this.track('click_card', { label: 'right_sidebar' });
       }
     },
   },
@@ -51,12 +68,23 @@ export default {
 </script>
 
 <template>
-  <board-card-layout
+  <li
     data-qa-selector="board_card"
-    :issue="issue"
-    :list="list"
-    :is-active="isActive()"
-    v-bind="$attrs"
-    @show="showIssue"
-  />
+    :class="{
+      'multi-select': multiSelectVisible,
+      'user-can-drag': isDraggable,
+      'is-disabled': isDisabled,
+      'is-active': isActive,
+      'gl-cursor-not-allowed gl-bg-gray-10': item.isLoading,
+    }"
+    :index="index"
+    :data-item-id="item.id"
+    :data-item-iid="item.iid"
+    :data-item-path="item.referencePath"
+    data-testid="board_card"
+    class="board-card gl-p-5 gl-rounded-base"
+    @mouseup="toggleIssue($event)"
+  >
+    <board-card-inner :list="list" :item="item" :update-filters="true" />
+  </li>
 </template>

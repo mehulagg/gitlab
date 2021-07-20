@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Apps for a Testing Environment
+# Apps for a testing environment **(FREE SELF)**
 
 This is the GitLab Support Team's collection of information regarding testing environments,
 for use while troubleshooting. It is listed here for transparency, and it may be useful
@@ -92,7 +92,7 @@ gitlab_rails['omniauth_providers'] = [
 
 #### GroupSAML for GitLab.com
 
-See [the GDK SAML documentation](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/saml.md).
+See [the GDK SAML documentation](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/saml.md).
 
 ### Elasticsearch
 

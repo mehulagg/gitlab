@@ -26,7 +26,18 @@ module Pages
     end
 
     def source
-      zip_source || legacy_source
+      return unless deployment&.file
+
+      global_id = ::Gitlab::GlobalId.build(deployment, id: deployment.id).to_s
+
+      {
+        type: 'zip',
+        path: deployment.file.url_or_file_path(expire_at: 1.day.from_now),
+        global_id: global_id,
+        sha256: deployment.file_sha256,
+        file_size: deployment.size,
+        file_count: deployment.file_count
+      }
     end
 
     def prefix
@@ -43,42 +54,8 @@ module Pages
 
     def deployment
       strong_memoize(:deployment) do
-        next unless Feature.enabled?(:pages_serve_from_deployments, project, default_enabled: true)
-
         project.pages_metadatum.pages_deployment
       end
-    end
-
-    def zip_source
-      return unless deployment&.file
-
-      return if deployment.file.file_storage? && !Feature.enabled?(:pages_serve_with_zip_file_protocol, project)
-
-      return if deployment.migrated? && !Feature.enabled?(:pages_serve_from_migrated_zip, project)
-
-      global_id = ::Gitlab::GlobalId.build(deployment, id: deployment.id).to_s
-
-      {
-        type: 'zip',
-        path: deployment.file.url_or_file_path(expire_at: 1.day.from_now),
-        global_id: global_id,
-        sha256: deployment.file_sha256,
-        file_size: deployment.size,
-        file_count: deployment.file_count
-      }
-    end
-
-    def legacy_source
-      raise LegacyStorageDisabledError unless Feature.enabled?(:pages_serve_from_legacy_storage, default_enabled: true)
-
-      {
-        type: 'file',
-        path: File.join(project.full_path, 'public/')
-      }
-    rescue LegacyStorageDisabledError => e
-      Gitlab::ErrorTracking.track_exception(e)
-
-      nil
     end
   end
 end

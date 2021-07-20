@@ -13,6 +13,26 @@ FactoryBot.define do
         Rails.root.join('spec/fixtures/pipeline_artifacts/code_coverage.json'), 'application/json')
     end
 
+    trait :unlocked do
+      association :pipeline, :unlocked, factory: :ci_pipeline
+    end
+
+    trait :checksummed do
+      verification_checksum { 'abc' }
+    end
+
+    trait :checksum_failure do
+      verification_failure { 'Could not calculate the checksum' }
+    end
+
+    trait :expired do
+      expire_at { Date.yesterday }
+    end
+
+    trait :remote_store do
+      file_store { ::ObjectStorage::Store::REMOTE}
+    end
+
     trait :with_coverage_report do
       file_type { :code_coverage }
 

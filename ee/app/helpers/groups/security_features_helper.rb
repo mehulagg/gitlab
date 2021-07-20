@@ -2,11 +2,11 @@
 
 module Groups::SecurityFeaturesHelper
   def group_level_security_dashboard_available?(group)
-    group.feature_available?(:security_dashboard)
+    group.licensed_feature_available?(:security_dashboard)
   end
 
   def group_level_compliance_dashboard_available?(group)
-    group.feature_available?(:group_level_compliance_dashboard) &&
+    group.licensed_feature_available?(:group_level_compliance_dashboard) &&
     can?(current_user, :read_group_compliance_dashboard, group)
   end
 
@@ -16,7 +16,7 @@ module Groups::SecurityFeaturesHelper
 
   def group_level_credentials_inventory_available?(group)
     can?(current_user, :read_group_credentials_inventory, group) &&
-    group.feature_available?(:credentials_inventory) &&
+    group.licensed_feature_available?(:credentials_inventory) &&
     group.enforced_group_managed_accounts?
   end
 
@@ -33,7 +33,7 @@ module Groups::SecurityFeaturesHelper
   end
 
   def group_level_audit_events_available?(group)
-    group.feature_available?(:audit_events) &&
+    group.licensed_feature_available?(:audit_events) &&
       can?(current_user, :read_group_audit_events, group)
   end
 
@@ -43,6 +43,7 @@ module Groups::SecurityFeaturesHelper
       group_full_path: group.full_path,
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
       empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+      survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
       dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
       vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id)),
       scanners: VulnerabilityScanners::ListService.new(group).execute.to_json

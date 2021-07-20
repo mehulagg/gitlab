@@ -6,6 +6,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::ListService do
   let_it_be(:group, refind: true) { create(:group) }
   let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user) { create(:user) }
+
   let(:stages) { subject.payload[:stages] }
 
   subject { described_class.new(parent: group, current_user: user).execute }

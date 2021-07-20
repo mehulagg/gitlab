@@ -38,7 +38,7 @@ module EE
 
       override :allowed_scopes
       def allowed_scopes
-        return super unless group.feature_available?(:epics)
+        return super unless group.licensed_feature_available?(:epics)
 
         strong_memoize(:ee_group_allowed_scopes) do
           super + %w(epics)

@@ -1,6 +1,7 @@
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlFormInput } from '@gitlab/ui';
 import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import CiEnvironmentsDropdown from '~/ci_variable_list/components/ci_environments_dropdown.vue';
 import CiVariableModal from '~/ci_variable_list/components/ci_variable_modal.vue';
 import { AWS_ACCESS_KEY_ID } from '~/ci_variable_list/constants';
 import createStore from '~/ci_variable_list/store';
@@ -15,7 +16,7 @@ describe('Ci variable modal', () => {
   let store;
 
   const createComponent = (method, options = {}) => {
-    store = createStore();
+    store = createStore({ isGroup: options.isGroup });
     wrapper = method(CiVariableModal, {
       attachTo: document.body,
       stubs: {
@@ -27,6 +28,7 @@ describe('Ci variable modal', () => {
     });
   };
 
+  const findCiEnvironmentsDropdown = () => wrapper.find(CiEnvironmentsDropdown);
   const findModal = () => wrapper.find(ModalStub);
   const findAddorUpdateButton = () =>
     findModal()
@@ -149,6 +151,43 @@ describe('Ci variable modal', () => {
     });
   });
 
+  describe('Environment scope', () => {
+    describe('group level variables', () => {
+      it('renders the environment dropdown', () => {
+        createComponent(shallowMount, {
+          isGroup: true,
+          provide: {
+            glFeatures: {
+              groupScopedCiVariables: true,
+            },
+          },
+        });
+
+        expect(findCiEnvironmentsDropdown().exists()).toBe(true);
+        expect(findCiEnvironmentsDropdown().isVisible()).toBe(true);
+      });
+
+      describe('licensed feature is not available', () => {
+        it('disables the dropdown', () => {
+          createComponent(mount, {
+            isGroup: true,
+            provide: {
+              glFeatures: {
+                groupScopedCiVariables: false,
+              },
+            },
+          });
+
+          const environmentScopeInput = wrapper
+            .find('[data-testid="environment-scope"]')
+            .find(GlFormInput);
+          expect(findCiEnvironmentsDropdown().exists()).toBe(false);
+          expect(environmentScopeInput.attributes('readonly')).toBe('readonly');
+        });
+      });
+    });
+  });
+
   describe('Validations', () => {
     const maskError = 'This variable can not be masked.';
 
@@ -187,7 +226,7 @@ describe('Ci variable modal', () => {
         };
         createComponent(mount);
         store.state.variable = validMaskandKeyVariable;
-        store.state.maskableRegex = /^[a-zA-Z0-9_+=/@:-]{8,}$/;
+        store.state.maskableRegex = /^[a-zA-Z0-9_+=/@:.~-]{8,}$/;
       });
 
       it('does not disable the submit button', () => {

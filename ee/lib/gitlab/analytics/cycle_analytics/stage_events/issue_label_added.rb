@@ -13,6 +13,10 @@ module Gitlab
             :issue_label_added
           end
 
+          def markdown_description
+            s_("CycleAnalyticsEvent|%{label_reference} label was added to the issue") % { label_reference: label.to_reference }
+          end
+
           def object_type
             Issue
           end

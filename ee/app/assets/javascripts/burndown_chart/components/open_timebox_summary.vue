@@ -1,5 +1,4 @@
 <script>
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
 import { Namespace, Unit } from '../constants';
 import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
@@ -58,7 +57,7 @@ export default {
     queryVariables() {
       return {
         fullPath: this.fullPath,
-        id: getIdFromGraphQLId(this.iterationId),
+        id: this.iterationId,
         isGroup: this.namespaceType === Namespace.Group,
         weight: this.displayValue === Unit.weight,
       };

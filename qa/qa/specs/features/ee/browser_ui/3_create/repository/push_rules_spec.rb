@@ -3,8 +3,11 @@
 module QA
   RSpec.describe 'Create' do
     context 'Push Rules' do
-      describe 'using non signed commits' do
+      # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+      describe 'using non signed commits', :requires_admin do
         before(:context) do
+          Runtime::Feature.enable(:invite_members_group_modal)
+
           prepare
 
           @file_name_limitation = 'denied_file'
@@ -52,7 +55,7 @@ module QA
           expect_error_on_push(file: large_file,
             error: 'File "file" is larger than the allowed size of 1 MB')
           expect_error_on_push(file: wrongly_named_file,
-            error: Regexp.escape("File name #{@file_name_limitation} was blacklisted by the pattern #{@file_name_limitation}"))
+            error: Regexp.escape(%Q{File name #{@file_name_limitation} was prohibited by the pattern "#{@file_name_limitation}"}))
         end
 
         it 'restricts users by email format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/652' do
@@ -83,7 +86,7 @@ module QA
           }]
 
           expect_error_on_push(file: secret_file,
-            error: Regexp.escape('File name id_rsa was blacklisted by the pattern id_rsa$'))
+            error: Regexp.escape('File name id_rsa was prohibited by the pattern "id_rsa$"'))
         end
 
         it 'restricts removal of tag', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/650' do
@@ -110,8 +113,8 @@ module QA
           end
         end
 
-        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1677', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
-          non_member_user = Resource::User.new.tap do |user|
+        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1778', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
+          non_member_user = Resource::User.init do |user|
             user.username = ''
             user.password = ''
             user.name = 'non_member_user'
@@ -164,9 +167,9 @@ module QA
 
       def standard_file
         [{
-           name: 'file',
-           content: SecureRandom.hex(100)
-         }]
+          name: 'file',
+          content: SecureRandom.hex(100)
+        }]
       end
 
       def push(commit_message:, branch:, file:, user:, tag:, gpg:)
@@ -202,7 +205,7 @@ module QA
           user.password = Runtime::User.password
         end
 
-        @root = Resource::User.new.tap do |user|
+        @root = Resource::User.init do |user|
           user.username = 'root'
           user.name = 'GitLab QA'
           user.email = 'root@gitlab.com'

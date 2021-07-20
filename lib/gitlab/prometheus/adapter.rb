@@ -19,15 +19,14 @@ module Gitlab
       end
 
       def cluster_prometheus_adapter
-        application = cluster&.application_prometheus
-
-        application if application&.available?
+        integration = cluster&.integration_prometheus
+        integration if integration&.available?
       end
 
       private
 
       def service_prometheus_adapter
-        project.find_or_initialize_service('prometheus')
+        project.find_or_initialize_integration('prometheus')
       end
     end
   end

@@ -1,5 +1,4 @@
 import createFlash, {
-  deprecatedCreateFlash,
   createFlashEl,
   createAction,
   hideFlash,
@@ -125,92 +124,6 @@ describe('Flash', () => {
     });
   });
 
-  describe('deprecatedCreateFlash', () => {
-    describe('no flash-container', () => {
-      it('does not add to the DOM', () => {
-        const flashEl = deprecatedCreateFlash('testing');
-
-        expect(flashEl).toBeNull();
-
-        expect(document.querySelector('.flash-alert')).toBeNull();
-      });
-    });
-
-    describe('with flash-container', () => {
-      beforeEach(() => {
-        document.body.innerHTML += `
-          <div class="content-wrapper js-content-wrapper">
-            <div class="flash-container"></div>
-          </div>
-        `;
-      });
-
-      afterEach(() => {
-        document.querySelector('.js-content-wrapper').remove();
-      });
-
-      it('adds flash element into container', () => {
-        deprecatedCreateFlash('test', 'alert', document, null, false, true);
-
-        expect(document.querySelector('.flash-alert')).not.toBeNull();
-
-        expect(document.body.className).toContain('flash-shown');
-      });
-
-      it('adds flash into specified parent', () => {
-        deprecatedCreateFlash('test', 'alert', document.querySelector('.content-wrapper'));
-
-        expect(document.querySelector('.content-wrapper .flash-alert')).not.toBeNull();
-      });
-
-      it('adds container classes when inside content-wrapper', () => {
-        deprecatedCreateFlash('test');
-
-        expect(document.querySelector('.flash-text').className).toBe('flash-text');
-      });
-
-      it('does not add container when outside of content-wrapper', () => {
-        document.querySelector('.content-wrapper').className = 'js-content-wrapper';
-        deprecatedCreateFlash('test');
-
-        expect(document.querySelector('.flash-text').className.trim()).toContain('flash-text');
-      });
-
-      it('removes element after clicking', () => {
-        deprecatedCreateFlash('test', 'alert', document, null, false, true);
-
-        document.querySelector('.flash-alert .js-close-icon').click();
-
-        expect(document.querySelector('.flash-alert')).toBeNull();
-
-        expect(document.body.className).not.toContain('flash-shown');
-      });
-
-      describe('with actionConfig', () => {
-        it('adds action link', () => {
-          deprecatedCreateFlash('test', 'alert', document, {
-            title: 'test',
-          });
-
-          expect(document.querySelector('.flash-action')).not.toBeNull();
-        });
-
-        it('calls actionConfig clickHandler on click', () => {
-          const actionConfig = {
-            title: 'test',
-            clickHandler: jest.fn(),
-          };
-
-          deprecatedCreateFlash('test', 'alert', document, actionConfig);
-
-          document.querySelector('.flash-action').click();
-
-          expect(actionConfig.clickHandler).toHaveBeenCalled();
-        });
-      });
-    });
-  });
-
   describe('createFlash', () => {
     const message = 'test';
     const type = 'alert';
@@ -311,31 +224,64 @@ describe('Flash', () => {
           expect(actionConfig.clickHandler).toHaveBeenCalled();
         });
       });
+
+      describe('additional behavior', () => {
+        describe('close', () => {
+          it('clicks the close icon', () => {
+            const flash = createFlash({ ...defaultParams });
+            const close = document.querySelector('.flash-alert .js-close-icon');
+
+            jest.spyOn(close, 'click');
+            flash.close();
+
+            expect(close.click.mock.calls.length).toBe(1);
+          });
+        });
+      });
     });
   });
 
   describe('removeFlashClickListener', () => {
-    beforeEach(() => {
-      document.body.innerHTML += `
-        <div class="flash-container">
-          <div class="flash">
-            <div class="close-icon js-close-icon"></div>
+    let el;
+
+    describe('with close icon', () => {
+      beforeEach(() => {
+        el = document.createElement('div');
+        el.innerHTML = `
+          <div class="flash-container">
+            <div class="flash">
+              <div class="close-icon js-close-icon"></div>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      });
+
+      it('removes global flash on click', (done) => {
+        removeFlashClickListener(el, false);
+
+        el.querySelector('.js-close-icon').click();
+
+        setImmediate(() => {
+          expect(document.querySelector('.flash')).toBeNull();
+
+          done();
+        });
+      });
     });
 
-    it('removes global flash on click', (done) => {
-      const flashEl = document.querySelector('.flash');
+    describe('without close icon', () => {
+      beforeEach(() => {
+        el = document.createElement('div');
+        el.innerHTML = `
+          <div class="flash-container">
+            <div class="flash">
+            </div>
+          </div>
+        `;
+      });
 
-      removeFlashClickListener(flashEl, false);
-
-      flashEl.querySelector('.js-close-icon').click();
-
-      setImmediate(() => {
-        expect(document.querySelector('.flash')).toBeNull();
-
-        done();
+      it('does not throw', () => {
+        expect(() => removeFlashClickListener(el, false)).not.toThrow();
       });
     });
   });

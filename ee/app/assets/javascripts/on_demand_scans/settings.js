@@ -1,6 +1,5 @@
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
-import dastSiteProfilesExtendedQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles_extended.query.graphql';
 import { s__ } from '~/locale';
 
 export const ERROR_RUN_SCAN = 'ERROR_RUN_SCAN';
@@ -28,11 +27,3 @@ export const SITE_PROFILES_QUERY = {
   fetchQuery: dastSiteProfilesQuery,
   fetchError: ERROR_FETCH_SITE_PROFILES,
 };
-
-export const SITE_PROFILES_EXTENDED_QUERY = {
-  ...SITE_PROFILES_QUERY,
-  fetchQuery: dastSiteProfilesExtendedQuery,
-};
-
-export const TYPE_SITE_PROFILE = 'DastSiteProfile';
-export const TYPE_SCANNER_PROFILE = 'DastScannerProfile';

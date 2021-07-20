@@ -4,13 +4,13 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Authentication
+# Authentication **(FREE)**
 
 This page gathers all the resources for the topic **Authentication** within GitLab.
 
 ## GitLab users
 
-- [SSH](../../ssh/README.md)
+- [SSH](../../ssh/index.md)
 - [Two-Factor Authentication (2FA)](../../user/profile/account/two_factor_authentication.md#two-factor-authentication)
 - [Why do I keep getting signed out?](../../user/profile/index.md#why-do-i-keep-getting-signed-out)
 - **Articles:**
@@ -33,17 +33,16 @@ This page gathers all the resources for the topic **Authentication** within GitL
   - [Atlassian Crowd OmniAuth Provider](../../administration/auth/crowd.md)
   - [CAS OmniAuth Provider](../../integration/cas.md)
   - [SAML OmniAuth Provider](../../integration/saml.md)
-  - [SAML for GitLab.com Groups](../../user/group/saml_sso/index.md) **(PREMIUM SAAS)**
-  - [SCIM user provisioning for GitLab.com Groups](../../user/group/saml_sso/scim_setup.md) **(PREMIUM SAAS)**
-  - [Okta SSO provider](../../administration/auth/okta.md)
-  - [Kerberos integration (GitLab EE)](../../integration/kerberos.md) **(STARTER)**
+  - [SAML for GitLab.com Groups](../../user/group/saml_sso/index.md)
+  - [SCIM user provisioning for GitLab.com Groups](../../user/group/saml_sso/scim_setup.md)
+  - [Kerberos integration (GitLab EE)](../../integration/kerberos.md)
 
 ## API
 
-- [OAuth 2 Tokens](../../api/README.md#oauth2-tokens)
-- [Personal access tokens](../../api/README.md#personalproject-access-tokens)
-- [Project access tokens](../../api/README.md#personalproject-access-tokens) **(FREE SELF)**
-- [Impersonation tokens](../../api/README.md#impersonation-tokens)
+- [OAuth 2 Tokens](../../api/index.md#oauth2-tokens)
+- [Personal access tokens](../../api/index.md#personalproject-access-tokens)
+- [Project access tokens](../../api/index.md#personalproject-access-tokens)
+- [Impersonation tokens](../../api/index.md#impersonation-tokens)
 - [GitLab as an OAuth2 provider](../../api/oauth2.md#gitlab-as-an-oauth2-provider)
 
 ## Third-party resources

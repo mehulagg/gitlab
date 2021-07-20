@@ -3,6 +3,7 @@
 exports[`Subscription Seats renders table content renders the correct data 1`] = `
 Array [
   Object {
+    "dropdownExists": true,
     "email": "administrator@email.com",
     "tooltip": undefined,
     "user": Object {
@@ -18,6 +19,7 @@ Array [
     },
   },
   Object {
+    "dropdownExists": true,
     "email": "agustin_walker@email.com",
     "tooltip": undefined,
     "user": Object {
@@ -33,13 +35,16 @@ Array [
     },
   },
   Object {
+    "dropdownExists": true,
     "email": "Private",
     "tooltip": "An email address is only visible for users with public emails.",
     "user": Object {
       "avatarLabeled": Object {
         "size": "32",
         "src": "path/to/img_joella_miller",
-        "text": "Joella Miller  @era",
+        "text": "Joella Miller  
+                Group invite
+               @era",
       },
       "avatarLink": Object {
         "alt": "Joella Miller",

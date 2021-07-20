@@ -1,64 +1,77 @@
-export const NODE_ACTIONS = {
-  TOGGLE: 'toggle',
-  REMOVE: 'remove',
+import { helpPagePath } from '~/helpers/help_page_helper';
+import { __, s__ } from '~/locale';
+
+export const GEO_INFO_URL = helpPagePath('administration/geo/index.md');
+
+export const GEO_FEATURE_URL = 'https://about.gitlab.com/features/gitlab-geo/';
+
+export const HELP_NODE_HEALTH_URL = helpPagePath(
+  'administration/geo/replication/troubleshooting.html',
+  { anchor: 'check-the-health-of-the-secondary-node' },
+);
+
+export const GEO_TROUBLESHOOTING_URL = helpPagePath(
+  'administration/geo/replication/troubleshooting.html',
+);
+
+export const HELP_INFO_URL = helpPagePath(
+  'administration/geo/disaster_recovery/background_verification.html',
+  { anchor: 'repository-verification' },
+);
+
+export const REPLICATION_PAUSE_URL = helpPagePath('administration/geo/index.html', {
+  anchor: 'pausing-and-resuming-replication',
+});
+
+export const GEO_REPLICATION_TYPES_URL = helpPagePath(
+  'administration/geo/replication/datatypes.html',
+);
+
+export const HEALTH_STATUS_UI = {
+  healthy: {
+    icon: 'status_success',
+    variant: 'success',
+    text: s__('Geo|Healthy'),
+  },
+  unhealthy: {
+    icon: 'status_failed',
+    variant: 'danger',
+    text: s__('Geo|Unhealthy'),
+  },
+  disabled: {
+    icon: 'status_canceled',
+    variant: 'neutral',
+    text: s__('Geo|Disabled'),
+  },
+  unknown: {
+    icon: 'status_notfound',
+    variant: 'neutral',
+    text: s__('Geo|Unknown'),
+  },
+  offline: {
+    icon: 'status_canceled',
+    variant: 'neutral',
+    text: s__('Geo|Offline'),
+  },
 };
 
-export const VALUE_TYPE = {
-  PLAIN: 'plain',
-  GRAPH: 'graph',
-  CUSTOM: 'custom',
-};
-
-export const CUSTOM_TYPE = {
-  SYNC: 'sync',
-  EVENT: 'event',
-  STATUS: 'status',
-};
-
-export const HEALTH_STATUS_ICON = {
-  healthy: 'status_success',
-  unhealthy: 'status_failed',
-  disabled: 'status_canceled',
-  unknown: 'status_notfound',
-  offline: 'status_canceled',
-};
-
-export const HEALTH_STATUS_CLASS = {
-  healthy: 'text-success-600 bg-success-100',
-  unhealthy: 'text-danger-600 bg-danger-100',
-  disabled: 'text-secondary-800 bg-secondary-100',
-  unknown: 'text-secondary-800 bg-secondary-100',
-  offline: 'text-secondary-800 bg-secondary-100',
-};
-
-export const REPLICATION_STATUS_CLASS = {
-  enabled: 'gl-text-green-600 gl-bg-green-100',
-  disabled: 'gl-text-orange-600 gl-bg-orange-100',
-};
-
-export const REPLICATION_STATUS_ICON = {
-  enabled: 'play',
-  disabled: 'pause',
-};
-
-export const TIME_DIFF = {
-  FIVE_MINS: 300,
-  HOUR: 3600,
+export const REPLICATION_STATUS_UI = {
+  enabled: {
+    icon: 'play',
+    color: 'gl-text-green-600',
+    text: __('Enabled'),
+  },
+  disabled: {
+    icon: 'pause',
+    color: 'gl-text-orange-600',
+    text: __('Paused'),
+  },
 };
 
 export const STATUS_DELAY_THRESHOLD_MS = 600000;
 
-export const HELP_INFO_URL =
-  'https://docs.gitlab.com/ee/administration/geo/disaster_recovery/background_verification.html#repository-verification';
+export const REPOSITORY = 'repository';
 
-export const REPLICATION_HELP_URL =
-  'https://docs.gitlab.com/ee/administration/geo/replication/datatypes.html#limitations-on-replicationverification';
+export const BLOB = 'blob';
 
-export const REPLICATION_PAUSE_URL =
-  'https://docs.gitlab.com/ee/administration/geo/replication/#pausing-and-resuming-replication';
-
-export const HELP_NODE_HEALTH_URL =
-  'https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html#check-the-health-of-the-secondary-node';
-
-export const GEO_TROUBLESHOOTING_URL =
-  'https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html';
+export const REMOVE_NODE_MODAL_ID = 'remove-node-modal';

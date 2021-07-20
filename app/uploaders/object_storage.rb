@@ -283,8 +283,9 @@ module ObjectStorage
         if file_storage?
           IO.copy_stream(path, file)
         else
-          streamer = lambda { |chunk, _, _| file.write(chunk) }
-          Excon.get(url, response_block: streamer)
+          Faraday.get(url) do |req|
+            req.options.on_data = proc { |chunk, _| file.write(chunk) }
+          end
         end
 
         file.seek(0, IO::SEEK_SET)
@@ -451,7 +452,7 @@ module ObjectStorage
     def with_exclusive_lease
       lease_key = exclusive_lease_key
       uuid = Gitlab::ExclusiveLease.new(lease_key, timeout: 1.hour.to_i).try_obtain
-      raise ExclusiveLeaseTaken.new(lease_key) unless uuid
+      raise ExclusiveLeaseTaken, lease_key unless uuid
 
       yield uuid
     ensure
@@ -483,7 +484,7 @@ module ObjectStorage
       end
 
       file
-    rescue => e
+    rescue StandardError => e
       # in case of failure delete new file
       new_file.delete unless new_file.nil?
       # revert back to the old file
@@ -508,4 +509,4 @@ module ObjectStorage
   end
 end
 
-ObjectStorage::Concern.include_if_ee('::EE::ObjectStorage::Concern')
+ObjectStorage::Concern.include_mod_with('ObjectStorage::Concern')

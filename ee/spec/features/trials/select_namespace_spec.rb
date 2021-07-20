@@ -5,10 +5,12 @@ require 'spec_helper'
 RSpec.describe 'Trial Select Namespace', :js do
   include Select2Helper
 
-  let(:new_group_name) { 'GitLab' }
-  let(:user) { create(:user) }
+  let_it_be(:group) { create(:group, path: 'group-test') }
+  let_it_be(:new_group_name) { 'GitLab' }
+  let_it_be(:user) { create(:user) }
 
   before do
+    group.add_owner(user)
     allow(Gitlab).to receive(:com?).and_return(true).at_least(:once)
     sign_in(user)
   end
@@ -117,7 +119,7 @@ RSpec.describe 'Trial Select Namespace', :js do
 
     context 'selects an existing group' do
       before do
-        select2 user.namespace.id, from: '#namespace_id'
+        select2 group.id, from: '#namespace_id'
       end
 
       context 'without trial plan' do
@@ -135,7 +137,7 @@ RSpec.describe 'Trial Select Namespace', :js do
 
           wait_for_requests
 
-          expect(current_path).to eq("/#{user.namespace.path}")
+          expect(current_path).to eq("/#{group.path}")
         end
       end
 
@@ -151,7 +153,7 @@ RSpec.describe 'Trial Select Namespace', :js do
 
           expect(find('.flash-text')).to have_text(error_message)
           expect(current_path).to eq(apply_trials_path)
-          expect(find('#namespace_id', visible: false).value).to eq(user.namespace.id.to_s)
+          expect(find('#namespace_id', visible: false).value).to eq(group.id.to_s)
 
           # new group name should be functional
           select2 '0', from: '#namespace_id'

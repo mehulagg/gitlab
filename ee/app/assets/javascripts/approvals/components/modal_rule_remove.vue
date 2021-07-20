@@ -1,13 +1,25 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { escape } from 'lodash';
+import { GlSprintf } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { sprintf, n__, s__ } from '~/locale';
+import { n__, __ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
+
+const i18n = {
+  cancelButtonText: __('Cancel'),
+  primaryButtonText: __('Remove approvers'),
+  modalTitle: __('Remove approvers?'),
+  removeWarningText: (i) =>
+    n__(
+      'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{strongStart}%{count} member%{strongEnd}. Approvals from this member are not revoked.',
+      'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{strongStart}%{count} members%{strongEnd}. Approvals from these members are not revoked.',
+      i,
+    ),
+};
 
 export default {
   components: {
     GlModalVuex,
+    GlSprintf,
   },
   props: {
     modalId: {
@@ -19,33 +31,24 @@ export default {
     ...mapState('deleteModal', {
       rule: 'data',
     }),
-    message() {
-      if (!this.rule) {
-        return '';
-      }
-
-      const nMembers = n__(
+    approversCount() {
+      return this.rule.approvers.length;
+    },
+    membersText() {
+      return n__(
         'ApprovalRuleRemove|%d member',
         'ApprovalRuleRemove|%d members',
         this.rule.approvers.length,
       );
-      const removeWarning = sprintf(
-        s__(
-          'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}.',
-        ),
-        {
-          name: `<strong>${escape(this.rule.name)}</strong>`,
-          nMembers: `<strong>${nMembers}</strong>`,
-        },
-        false,
-      );
-      const revokeWarning = n__(
-        'ApprovalRuleRemove|Approvals from this member are not revoked.',
-        'ApprovalRuleRemove|Approvals from these members are not revoked.',
-        this.rule.approvers.length,
-      );
-
-      return `${removeWarning} ${revokeWarning}`;
+    },
+    modalText() {
+      return i18n.removeWarningText(this.approversCount);
+    },
+    primaryButtonProps() {
+      return {
+        text: i18n.primaryButtonText,
+        attributes: [{ variant: 'danger' }],
+      };
     },
   },
   methods: {
@@ -54,6 +57,10 @@ export default {
       this.deleteRule(this.rule.id);
     },
   },
+  cancelButtonProps: {
+    text: i18n.cancelButtonText,
+  },
+  i18n,
 };
 </script>
 
@@ -61,12 +68,24 @@ export default {
   <gl-modal-vuex
     modal-module="deleteModal"
     :modal-id="modalId"
-    :title="__('Remove approvers?')"
-    :ok-title="__('Remove approvers')"
-    ok-variant="remove"
-    :cancel-title="__('Cancel')"
+    :title="$options.i18n.modalTitle"
+    :action-primary="primaryButtonProps"
+    :action-cancel="$options.cancelButtonProps"
     @ok.prevent="submit"
   >
-    <p v-html="message"></p>
+    <p v-if="rule">
+      <gl-sprintf :message="modalText">
+        <template #name>
+          <strong>{{ rule.name }}</strong>
+        </template>
+        <template #strong="{ content }">
+          <strong>
+            <gl-sprintf :message="content">
+              <template #count>{{ approversCount }}</template>
+            </gl-sprintf>
+          </strong>
+        </template>
+      </gl-sprintf>
+    </p>
   </gl-modal-vuex>
 </template>

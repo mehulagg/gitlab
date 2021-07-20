@@ -14,6 +14,11 @@ module Types
             null: true,
             description: 'Timestamp the cluster agent was created.'
 
+      field :created_by_user,
+            Types::UserType,
+            null: true,
+            description: 'User object, containing information about the person who created the agent.'
+
       field :id, GraphQL::ID_TYPE,
             null: false,
             description: 'ID of the cluster agent.'
@@ -38,8 +43,17 @@ module Types
             null: true,
             description: 'Timestamp the cluster agent was updated.'
 
+      field :web_path,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Web path of the cluster agent.'
+
       def project
         Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find
+      end
+
+      def web_path
+        ::Gitlab::Routing.url_helpers.project_cluster_agent_path(object.project, object.name)
       end
     end
   end

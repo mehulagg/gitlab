@@ -20,7 +20,11 @@ module ClustersHelper
     {
       default_branch_name: clusterable_project.default_branch,
       empty_state_image: image_path('illustrations/clusters_empty.svg'),
-      project_path: clusterable_project.full_path
+      project_path: clusterable_project.full_path,
+      agent_docs_url: help_page_path('user/clusters/agent/index'),
+      install_docs_url: help_page_path('administration/clusters/kas'),
+      get_started_docs_url: help_page_path('user/clusters/agent/index', anchor: 'define-a-configuration-repository'),
+      integration_docs_url: help_page_path('user/clusters/agent/index', anchor: 'get-started-with-gitops-and-the-gitlab-agent')
     }
   end
 
@@ -44,7 +48,7 @@ module ClustersHelper
       base_domain: cluster.base_domain,
       application_ingress_external_ip: cluster.application_ingress_external_ip,
       auto_devops_help_path: help_page_path('topics/autodevops/index'),
-      external_endpoint_help_path: help_page_path('user/clusters/applications.md', anchor: 'pointing-your-dns-at-the-external-endpoint')
+      external_endpoint_help_path: help_page_path('user/project/clusters/index.md', anchor: 'base-domain')
     }
   end
 
@@ -71,6 +75,8 @@ module ClustersHelper
       render_if_exists 'clusters/clusters/health'
     when 'apps'
       render 'applications'
+    when 'integrations'
+      render 'integrations'
     when 'settings'
       render 'advanced_settings_container'
     else

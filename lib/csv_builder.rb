@@ -14,8 +14,9 @@
 #     CsvBuilder.new(@posts, columns).render
 #
 class CsvBuilder
-  DEFAULT_ORDER_BY = 'id'.freeze
+  DEFAULT_ORDER_BY = 'id'
   DEFAULT_BATCH_SIZE = 1000
+  PREFIX_REGEX = /\A[=\+\-@;]/.freeze
 
   attr_reader :rows_written
 
@@ -114,8 +115,8 @@ class CsvBuilder
 
   def excel_sanitize(line)
     return if line.nil?
+    return line unless line.is_a?(String) && line.match?(PREFIX_REGEX)
 
-    line = ["'", line].join if line =~ /^[=\+\-@;]/
-    line
+    ["'", line].join
   end
 end

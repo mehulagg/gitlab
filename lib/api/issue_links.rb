@@ -18,12 +18,15 @@ module API
       end
       get ':id/issues/:issue_iid/links' do
         source_issue = find_project_issue(params[:issue_iid])
-        related_issues = source_issue.related_issues(current_user)
+        related_issues = source_issue.related_issues(current_user) do |issues|
+          issues.with_api_entity_associations.preload_awardable
+        end
 
         present related_issues,
                 with: Entities::RelatedIssue,
                 current_user: current_user,
-                project: user_project
+                project: user_project,
+                include_subscribed: false
       end
 
       desc 'Relate issues' do

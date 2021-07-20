@@ -28,8 +28,12 @@ module Gitlab
 
         def handle_response_error(response)
           unless response.success?
-            raise StrategyError.new("Error uploading the project. Code #{response.code}: #{response.message}")
+            raise StrategyError, "Error uploading the project. Code #{response.code}: #{response.message}"
           end
+        end
+
+        def delete_export?
+          false
         end
 
         private

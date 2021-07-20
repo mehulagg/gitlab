@@ -1,0 +1,5 @@
+fragment JiraUser on UserCore {
+  avatarUrl
+  name
+  webUrl
+}

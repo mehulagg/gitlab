@@ -17,15 +17,15 @@ module Banzai
 
       def self.reference_filters
         [
-          Filter::UserReferenceFilter,
-          Filter::IssueReferenceFilter,
-          Filter::ExternalIssueReferenceFilter,
-          Filter::MergeRequestReferenceFilter,
-          Filter::SnippetReferenceFilter,
-          Filter::CommitRangeReferenceFilter,
-          Filter::CommitReferenceFilter,
-          Filter::AlertReferenceFilter,
-          Filter::FeatureFlagReferenceFilter
+          Filter::References::UserReferenceFilter,
+          Filter::References::IssueReferenceFilter,
+          Filter::References::ExternalIssueReferenceFilter,
+          Filter::References::MergeRequestReferenceFilter,
+          Filter::References::SnippetReferenceFilter,
+          Filter::References::CommitRangeReferenceFilter,
+          Filter::References::CommitReferenceFilter,
+          Filter::References::AlertReferenceFilter,
+          Filter::References::FeatureFlagReferenceFilter
         ]
       end
 
@@ -40,4 +40,4 @@ module Banzai
   end
 end
 
-Banzai::Pipeline::SingleLinePipeline.prepend_if_ee('EE::Banzai::Pipeline::SingleLinePipeline')
+Banzai::Pipeline::SingleLinePipeline.prepend_mod_with('Banzai::Pipeline::SingleLinePipeline')

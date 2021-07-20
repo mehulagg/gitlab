@@ -8,10 +8,13 @@ module Ci
     include ::Checksummable
     include ::Gitlab::ExclusiveLeaseHelpers
     include ::Gitlab::OptimisticLocking
+    include IgnorableColumns
+
+    ignore_columns :build_id_convert_to_bigint, remove_with: '14.1', remove_after: '2021-07-22'
 
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
-    default_value_for :data_store, :redis
+    default_value_for :data_store, :redis_trace_chunks
 
     after_create { metrics.increment_trace_operation(operation: :chunked) }
 
@@ -22,22 +25,22 @@ module Ci
 
     FailedToPersistDataError = Class.new(StandardError)
 
-    # Note: The ordering of this hash is related to the precedence of persist store.
-    # The bottom item takes the highest precedence, and the top item takes the lowest precedence.
     DATA_STORES = {
       redis: 1,
       database: 2,
-      fog: 3
+      fog: 3,
+      redis_trace_chunks: 4
     }.freeze
 
-    STORE_TYPES = DATA_STORES.keys.map do |store|
-      [store, "Ci::BuildTraceChunks::#{store.capitalize}".constantize]
-    end.to_h.freeze
+    STORE_TYPES = DATA_STORES.keys.to_h do |store|
+      [store, "Ci::BuildTraceChunks::#{store.to_s.camelize}".constantize]
+    end.freeze
+    LIVE_STORES = %i[redis redis_trace_chunks].freeze
 
     enum data_store: DATA_STORES
 
-    scope :live, -> { redis }
-    scope :persisted, -> { not_redis.order(:chunk_index) }
+    scope :live, -> { where(data_store: LIVE_STORES) }
+    scope :persisted, -> { where.not(data_store: LIVE_STORES).order(:chunk_index) }
 
     class << self
       def all_stores
@@ -45,8 +48,7 @@ module Ci
       end
 
       def persistable_store
-        # get first available store from the back of the list
-        all_stores.reverse.find { |store| get_store_class(store).available? }
+        STORE_TYPES[:fog].available? ? :fog : :database
       end
 
       def get_store_class(store)
@@ -82,14 +84,8 @@ module Ci
       # change the behavior in CE.
       #
       def with_read_consistency(build, &block)
-        return yield unless consistent_reads_enabled?(build)
-
         ::Gitlab::Database::Consistency
           .with_read_consistency(&block)
-      end
-
-      def consistent_reads_enabled?(build)
-        Feature.enabled?(:gitlab_ci_trace_read_consistency, build.project, type: :development, default_enabled: true)
       end
 
       ##
@@ -113,7 +109,7 @@ module Ci
       raise ArgumentError, 'Offset is out of range' if offset > size || offset < 0
       return if offset == size # Skip the following process as it doesn't affect anything
 
-      self.append("", offset)
+      self.append(+"", offset)
     end
 
     def append(new_data, offset)
@@ -198,7 +194,7 @@ module Ci
     end
 
     def flushed?
-      !redis?
+      !live?
     end
 
     def migrated?
@@ -206,7 +202,7 @@ module Ci
     end
 
     def live?
-      redis?
+      LIVE_STORES.include?(data_store.to_sym)
     end
 
     def <=>(other)

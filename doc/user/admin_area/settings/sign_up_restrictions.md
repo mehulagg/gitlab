@@ -22,7 +22,8 @@ you do not expect public users to sign up for an account.
 
 To disable sign ups:
 
-1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**, and expand **Sign-up restrictions**.
 1. Clear the **Sign-up enabled** checkbox, then select **Save changes**.
 
 ## Require administrator approval for new sign ups
@@ -30,11 +31,12 @@ To disable sign ups:
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4491) in GitLab 13.5.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/267568) in GitLab 13.6.
 
-When this setting is enabled, any user visiting your GitLab domain and signing up for a new account must be explicitly [approved](../approving_users.md#approving-a-user) by an administrator before they can start using their account. This setting is enabled by default for newly created instances. This setting is only applicable if sign ups are enabled.
+When this setting is enabled, any user visiting your GitLab domain and signing up for a new account must be explicitly [approved](../approving_users.md#approve-or-reject-a-user-sign-up) by an administrator before they can start using their account. In GitLab 13.6 and later, this setting is enabled by default for new GitLab instances. It is only applicable if sign ups are enabled.
 
 To require administrator approval for new sign ups:
 
-1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**, and expand **Sign-up restrictions**.
 1. Select the **Require admin approval for new sign-ups** checkbox, then select **Save changes**.
 
 In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/273258), if an administrator disables this setting, the users in pending approval state are
@@ -47,7 +49,8 @@ their email address before they are allowed to sign in.
 
 To enforce confirmation of the email address used for new sign ups:
 
-1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**, and expand **Sign-up restrictions**.
 1. Select the **Enable email restrictions for sign ups** checkbox, then select **Save changes**.
 
 ## User cap **(FREE SELF)**
@@ -56,10 +59,31 @@ To enforce confirmation of the email address used for new sign ups:
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/292600) in GitLab 13.9.
 
 When the number of billable users reaches the user cap, any user who is added or requests access must be
-[approved](../approving_users.md#approving-a-user) by an administrator before they can start using
+[approved](../approving_users.md#approve-or-reject-a-user-sign-up) by an administrator before they can start using
 their account.
 
-If an administrator increases or removes the user cap, the users in pending approval state are
+If an administrator [increases](#set-the-user-cap-number) or [removes](#remove-the-user-cap) the
+user cap, the users in pending approval state are automatically approved in a background job.
+
+### Set the user cap number
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**.
+1. Expand **Sign-up restrictions**.
+1. Enter a number in **User cap**.
+1. Select **Save changes**.
+
+New user sign ups are subject to the user cap restriction.
+
+## Remove the user cap
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**.
+1. Expand **Sign-up restrictions**.
+1. Remove the number from **User cap**.
+1. Select **Save changes**.
+
+New users sign ups are not subject to the user cap restriction. Users in pending approval state are
 automatically approved in a background job.
 
 ## Soft email confirmation
@@ -111,7 +135,8 @@ reduce the risk of malicious users creating spam accounts with disposable email 
 
 To create an email domain allowlist or denylist:
 
-1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**, and expand **Sign-up restrictions**.
 1. For the allowlist, you must enter the list manually. For the denylist, you can enter the list
    manually or upload a `.txt` file that contains list entries.
 

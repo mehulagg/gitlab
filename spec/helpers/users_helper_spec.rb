@@ -136,6 +136,16 @@ RSpec.describe UsersHelper do
       end
     end
 
+    context 'with a banned user' do
+      it 'returns the banned badge' do
+        banned_user = create(:user, :banned)
+
+        badges = helper.user_badges_in_admin_section(banned_user)
+
+        expect(filter_ee_badges(badges)).to eq([text: 'Banned', variant: 'danger'])
+      end
+    end
+
     context 'with an admin user' do
       it "returns the admin badge" do
         admin_user = create(:admin)
@@ -160,7 +170,7 @@ RSpec.describe UsersHelper do
       it 'returns the "It\'s You" badge' do
         badges = helper.user_badges_in_admin_section(user)
 
-        expect(filter_ee_badges(badges)).to eq([text: "It's you!", variant: nil])
+        expect(filter_ee_badges(badges)).to eq([text: "It's you!", variant: "muted"])
       end
     end
 
@@ -348,6 +358,56 @@ RSpec.describe UsersHelper do
       end
       expect(entity).to receive(:to_json).and_return("{\"username\":\"admin\"}")
       expect(data[:users]).to eq "{\"username\":\"admin\"}"
+    end
+
+    it 'paths matches the schema' do
+      expect(data[:paths]).to match_schema('entities/admin_users_data_attributes_paths')
+    end
+  end
+
+  describe '#confirm_user_data' do
+    confirm_admin_user_path = '/admin/users/root/confirm'
+
+    before do
+      allow(helper).to receive(:confirm_admin_user_path).with(user).and_return(confirm_admin_user_path)
+    end
+
+    subject(:confirm_user_data) { helper.confirm_user_data(user) }
+
+    it 'sets `path` key correctly' do
+      expect(confirm_user_data[:path]).to eq(confirm_admin_user_path)
+    end
+
+    it 'sets `modal_attributes` key to valid json' do
+      expect(confirm_user_data[:modal_attributes]).to be_valid_json
+    end
+
+    context 'when `user.unconfirmed_email` is set' do
+      let(:user) { create(:user, unconfirmed_email: 'foo@bar.com') }
+
+      it 'sets `modal_attributes.messageHtml` correctly' do
+        expect(Gitlab::Json.parse(confirm_user_data[:modal_attributes])['messageHtml']).to eq('This user has an unconfirmed email address (foo@bar.com). You may force a confirmation.')
+      end
+    end
+
+    context 'when `user.unconfirmed_email` is not set' do
+      it 'sets `modal_attributes.messageHtml` correctly' do
+        expect(Gitlab::Json.parse(confirm_user_data[:modal_attributes])['messageHtml']).to eq('This user has an unconfirmed email address. You may force a confirmation.')
+      end
+    end
+  end
+
+  describe '#admin_user_actions_data_attributes' do
+    subject(:data) { helper.admin_user_actions_data_attributes(user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(Admin::UserEntity).to receive(:represent).and_call_original
+    end
+
+    it 'user matches the serialized json' do
+      expect(data[:user]).to be_valid_json
+      expect(Admin::UserEntity).to have_received(:represent).with(user, hash_including({ current_user: user }))
     end
 
     it 'paths matches the schema' do

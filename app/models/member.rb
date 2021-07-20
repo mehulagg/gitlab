@@ -14,6 +14,7 @@ class Member < ApplicationRecord
   include UpdateHighestRole
 
   AVATAR_SIZE = 40
+  ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
   attr_accessor :raw_invite_token
 
@@ -75,19 +76,46 @@ class Member < ApplicationRecord
 
     left_join_users
       .where(user_ok)
-      .where(requested_at: nil)
+      .non_request
       .non_minimal_access
       .reorder(nil)
+  end
+
+  scope :blocked, -> do
+    is_external_invite = arel_table[:user_id].eq(nil).and(arel_table[:invite_token].not_eq(nil))
+    user_is_blocked = User.arel_table[:state].eq(:blocked)
+
+    left_join_users
+      .where(user_is_blocked)
+      .where.not(is_external_invite)
+      .non_request
+      .non_minimal_access
+      .reorder(nil)
+  end
+
+  scope :connected_to_user, -> { where.not(user_id: nil) }
+
+  # This scope is exclusively used to get the members
+  # that can possibly have project_authorization records
+  # to projects/groups.
+  scope :authorizable, -> do
+    connected_to_user
+      .non_request
+      .non_minimal_access
   end
 
   # Like active, but without invites. For when a User is required.
   scope :active_without_invites_and_requests, -> do
     left_join_users
       .where(users: { state: 'active' })
-      .non_request
+      .without_invites_and_requests
+      .reorder(nil)
+  end
+
+  scope :without_invites_and_requests, -> do
+    non_request
       .non_invite
       .non_minimal_access
-      .reorder(nil)
   end
 
   scope :invite, -> { where.not(invite_token: nil) }
@@ -124,6 +152,13 @@ class Member < ApplicationRecord
   scope :with_source_id, ->(source_id) { where(source_id: source_id) }
   scope :including_source, -> { includes(:source) }
 
+  scope :distinct_on_user_with_max_access_level, -> do
+    distinct_members = select('DISTINCT ON (user_id, invite_email) *')
+                       .order('user_id, invite_email, access_level DESC, expires_at DESC, created_at ASC')
+
+    unscoped.from(distinct_members, :members)
+  end
+
   scope :order_name_asc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'ASC')) }
   scope :order_name_desc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'DESC')) }
   scope :order_recent_sign_in, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.last_sign_in_at', 'DESC')) }
@@ -136,10 +171,10 @@ class Member < ApplicationRecord
   after_create :send_invite, if: :invite?, unless: :importing?
   after_create :send_request, if: :request?, unless: :importing?
   after_create :create_notification_setting, unless: [:pending?, :importing?]
-  after_create :post_create_hook, unless: [:pending?, :importing?]
-  after_update :post_update_hook, unless: [:pending?, :importing?]
+  after_create :post_create_hook, unless: [:pending?, :importing?], if: :hook_prerequisites_met?
+  after_update :post_update_hook, unless: [:pending?, :importing?], if: :hook_prerequisites_met?
   after_destroy :destroy_notification_setting
-  after_destroy :post_destroy_hook, unless: :pending?
+  after_destroy :post_destroy_hook, unless: :pending?, if: :hook_prerequisites_met?
   after_commit :refresh_member_authorized_projects
 
   default_value_for :notification_level, NotificationSetting.levels[:global]
@@ -197,132 +232,8 @@ class Member < ApplicationRecord
       find_by(invite_token: invite_token)
     end
 
-    def add_user(source, user, access_level, existing_members: nil, current_user: nil, expires_at: nil, ldap: false)
-      # rubocop: disable CodeReuse/ServiceClass
-      # `user` can be either a User object, User ID or an email to be invited
-      member = retrieve_member(source, user, existing_members)
-      access_level = retrieve_access_level(access_level)
-
-      return member unless can_update_member?(current_user, member)
-
-      set_member_attributes(
-        member,
-        access_level,
-        current_user: current_user,
-        expires_at: expires_at,
-        ldap: ldap
-      )
-
-      if member.request?
-        ::Members::ApproveAccessRequestService.new(
-          current_user,
-          access_level: access_level
-        ).execute(
-          member,
-          skip_authorization: ldap,
-          skip_log_audit_event: ldap
-        )
-      else
-        member.save
-      end
-
-      member
-      # rubocop: enable CodeReuse/ServiceClass
-    end
-
-    # Populates the attributes of a member.
-    #
-    # This logic resides in a separate method so that EE can extend this logic,
-    # without having to patch the `add_user` method directly.
-    def set_member_attributes(member, access_level, current_user: nil, expires_at: nil, ldap: false)
-      member.attributes = {
-        created_by: member.created_by || current_user,
-        access_level: access_level,
-        expires_at: expires_at
-      }
-    end
-
-    def add_users(source, users, access_level, current_user: nil, expires_at: nil)
-      return [] unless users.present?
-
-      emails, users, existing_members = parse_users_list(source, users)
-
-      self.transaction do
-        (emails + users).map! do |user|
-          add_user(
-            source,
-            user,
-            access_level,
-            existing_members: existing_members,
-            current_user: current_user,
-            expires_at: expires_at
-          )
-        end
-      end
-    end
-
-    def access_levels
-      Gitlab::Access.sym_options
-    end
-
-    private
-
-    def parse_users_list(source, list)
-      emails, user_ids, users = [], [], []
-      existing_members = {}
-
-      list.each do |item|
-        case item
-        when User
-          users << item
-        when Integer
-          user_ids << item
-        when /\A\d+\Z/
-          user_ids << item.to_i
-        when Devise.email_regexp
-          emails << item
-        end
-      end
-
-      if user_ids.present?
-        users.concat(User.where(id: user_ids))
-        existing_members = source.members_and_requesters.where(user_id: user_ids).index_by(&:user_id)
-      end
-
-      [emails, users, existing_members]
-    end
-
-    # This method is used to find users that have been entered into the "Add members" field.
-    # These can be the User objects directly, their IDs, their emails, or new emails to be invited.
-    def retrieve_user(user)
-      return user if user.is_a?(User)
-
-      return User.find_by(id: user) if user.is_a?(Integer)
-
-      User.find_by(email: user) || user
-    end
-
-    def retrieve_member(source, user, existing_members)
-      user = retrieve_user(user)
-
-      if user.is_a?(User)
-        if existing_members
-          existing_members[user.id] || source.members.build(user_id: user.id)
-        else
-          source.members_and_requesters.find_or_initialize_by(user_id: user.id)
-        end
-      else
-        source.members.build(invite_email: user)
-      end
-    end
-
-    def retrieve_access_level(access_level)
-      access_levels.fetch(access_level) { access_level.to_i }
-    end
-
-    def can_update_member?(current_user, member)
-      # There is no current user for bulk actions, in which case anything is allowed
-      !current_user || current_user.can?(:"update_#{member.type.underscore}", member)
+    def valid_email?(email)
+      Devise.email_regexp.match?(email)
     end
   end
 
@@ -344,6 +255,12 @@ class Member < ApplicationRecord
 
   def pending?
     invite? || request?
+  end
+
+  def hook_prerequisites_met?
+    # It is essential that an associated user record exists
+    # so that we can successfully fire any member related hooks/notifications.
+    user.present?
   end
 
   def accept_request
@@ -522,7 +439,7 @@ class Member < ApplicationRecord
   def update_highest_role?
     return unless user_id.present?
 
-    previous_changes[:access_level].present?
+    previous_changes[:access_level].present? || destroyed?
   end
 
   def update_highest_role_attribute
@@ -534,4 +451,4 @@ class Member < ApplicationRecord
   end
 end
 
-Member.prepend_if_ee('EE::Member')
+Member.prepend_mod_with('Member')

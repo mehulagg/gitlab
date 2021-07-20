@@ -68,7 +68,7 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
       todo_path: group_todos_path(group),
       lock_version: epic.lock_version,
       state: epic.state,
-      scoped_labels: group.feature_available?(:scoped_labels)
+      scoped_labels: group.licensed_feature_available?(:scoped_labels)
     }
   end
 
@@ -131,7 +131,7 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
       url: user_path(epic.author),
       username: "@#{epic.author.username}",
       src: author_icon,
-      is_gitlab_employee: epic.author.gitlab_employee?
+      is_gitlab_employee: epic.author.gitlab_employee? && ::Feature.enabled?(:gitlab_employee_badge)
     }
   end
 

@@ -10,80 +10,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
   end
 
   describe '#call', :request_store do
-    let(:timestamp) { Time.iso8601('2018-01-01T12:00:00.000Z') }
-    let(:created_at) { timestamp - 1.second }
-    let(:scheduling_latency_s) { 1.0 }
-
-    let(:job) do
-      {
-        "class" => "TestWorker",
-        "args" => [1234, 'hello', { 'key' => 'value' }],
-        "retry" => false,
-        "queue" => "cronjob:test_queue",
-        "queue_namespace" => "cronjob",
-        "jid" => "da883554ee4fe414012f5f42",
-        "created_at" => created_at.to_f,
-        "enqueued_at" => created_at.to_f,
-        "correlation_id" => 'cid',
-        "error_message" => "wrong number of arguments (2 for 3)",
-        "error_class" => "ArgumentError",
-        "error_backtrace" => []
-      }
-    end
-
-    let(:logger) { double }
-    let(:clock_realtime_start) { 0.222222299 }
-    let(:clock_realtime_end) { 1.333333799 }
-    let(:clock_thread_cputime_start) { 0.222222299 }
-    let(:clock_thread_cputime_end) { 1.333333799 }
-    let(:start_payload) do
-      job.except('error_backtrace', 'error_class', 'error_message').merge(
-        'message' => 'TestWorker JID-da883554ee4fe414012f5f42: start',
-        'job_status' => 'start',
-        'pid' => Process.pid,
-        'created_at' => created_at.to_f,
-        'enqueued_at' => created_at.to_f,
-        'scheduling_latency_s' => scheduling_latency_s,
-        'job_size_bytes' => be > 0
-      )
-    end
-
-    let(:end_payload) do
-      start_payload.merge(
-        'message' => 'TestWorker JID-da883554ee4fe414012f5f42: done: 0.0 sec',
-        'job_status' => 'done',
-        'duration_s' => 0.0,
-        'completed_at' => timestamp.to_f,
-        'cpu_s' => 1.111112,
-        'db_duration_s' => 0.0,
-        'db_cached_count' => 0,
-        'db_count' => 0,
-        'db_write_count' => 0
-      )
-    end
-
-    let(:exception_payload) do
-      end_payload.merge(
-        'message' => 'TestWorker JID-da883554ee4fe414012f5f42: fail: 0.0 sec',
-        'job_status' => 'fail',
-        'error_class' => 'ArgumentError',
-        'error_message' => 'Something went wrong',
-        'error_backtrace' => be_a(Array).and(be_present)
-      )
-    end
-
-    before do
-      allow(Sidekiq).to receive(:logger).and_return(logger)
-
-      allow(subject).to receive(:current_time).and_return(timestamp.to_f)
-
-      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_REALTIME, :float_second)
-        .and_return(clock_realtime_start, clock_realtime_end)
-      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_THREAD_CPUTIME_ID, :float_second)
-        .and_return(clock_thread_cputime_start, clock_thread_cputime_end)
-    end
-
-    subject { described_class.new }
+    include_context 'structured_logger'
 
     context 'with SIDEKIQ_LOG_ARGUMENTS enabled' do
       before do
@@ -142,7 +69,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
           expect do
             call_subject(job, 'test_queue') do
               raise ArgumentError, 'Something went wrong'
-            rescue
+            rescue StandardError
               raise Sidekiq::JobRetry::Skip
             end
           end.to raise_error(Sidekiq::JobRetry::Skip)
@@ -159,7 +86,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
           expect do
             call_subject(job, 'test_queue') do
               raise ArgumentError, 'Something went wrong'
-            rescue
+            rescue StandardError
               raise Sidekiq::JobRetry::Handled
             end
           end.to raise_error(Sidekiq::JobRetry::Handled)
@@ -283,19 +210,26 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
         end_payload.merge(timing_data.stringify_keys)
       end
 
-      it 'logs with Gitaly and Rugged timing data' do
+      before do
+        allow(::Gitlab::InstrumentationHelper).to receive(:add_instrumentation_data).and_wrap_original do |method, values|
+          method.call(values)
+          values.merge!(timing_data)
+        end
+      end
+
+      it 'logs with Gitaly and Rugged timing data', :aggregate_failures do
         Timecop.freeze(timestamp) do
           expect(logger).to receive(:info).with(start_payload).ordered
           expect(logger).to receive(:info).with(expected_end_payload).ordered
 
-          call_subject(job, 'test_queue') do
-            job.merge!(timing_data)
-          end
+          call_subject(job, 'test_queue') { }
         end
       end
     end
 
     context 'when the job performs database queries' do
+      include_context 'clear DB Load Balancing configuration'
+
       before do
         allow(Time).to receive(:now).and_return(timestamp)
         allow(Process).to receive(:clock_gettime).and_call_original
@@ -316,28 +250,119 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
         )
       end
 
-      it 'logs the database time' do
-        expect(logger).to receive(:info).with(expected_start_payload).ordered
-        expect(logger).to receive(:info).with(expected_end_payload_with_db).ordered
+      shared_examples 'performs database queries' do
+        it 'logs the database time', :aggregate_errors do
+          expect(logger).to receive(:info).with(expected_start_payload).ordered
+          expect(logger).to receive(:info).with(expected_end_payload_with_db).ordered
 
-        call_subject(job, 'test_queue') do
-          ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+          call_subject(job, 'test_queue') do
+            ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+          end
+        end
+
+        it 'prevents database time from leaking to the next job', :aggregate_errors do
+          expect(logger).to receive(:info).with(expected_start_payload).ordered
+          expect(logger).to receive(:info).with(expected_end_payload_with_db).ordered
+          expect(logger).to receive(:info).with(expected_start_payload).ordered
+          expect(logger).to receive(:info).with(expected_end_payload).ordered
+
+          call_subject(job.dup, 'test_queue') do
+            ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+          end
+
+          Gitlab::SafeRequestStore.clear!
+
+          call_subject(job.dup, 'test_queue') { }
         end
       end
 
-      it 'prevents database time from leaking to the next job' do
-        expect(logger).to receive(:info).with(expected_start_payload).ordered
-        expect(logger).to receive(:info).with(expected_end_payload_with_db).ordered
-        expect(logger).to receive(:info).with(expected_start_payload).ordered
-        expect(logger).to receive(:info).with(expected_end_payload).ordered
-
-        call_subject(job.dup, 'test_queue') do
-          ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+      context 'when load balancing is disabled' do
+        before do
+          allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(false)
         end
 
-        Gitlab::SafeRequestStore.clear!
+        let(:expected_end_payload_with_db) do
+          expected_end_payload.merge(
+            'db_duration_s' => a_value >= 0.1,
+            'db_count' => a_value >= 1,
+            'db_cached_count' => 0,
+            'db_write_count' => 0
+          )
+        end
 
-        call_subject(job.dup, 'test_queue') { }
+        include_examples 'performs database queries'
+      end
+
+      context 'when load balancing is enabled' do
+        before do
+          allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
+        end
+
+        let(:dbname) { ::Gitlab::Database.dbname(ActiveRecord::Base.connection) }
+
+        let(:expected_end_payload_with_db) do
+          expected_end_payload.merge(
+            'db_duration_s' => a_value >= 0.1,
+            'db_count' => a_value >= 1,
+            'db_cached_count' => 0,
+            'db_write_count' => 0,
+            'db_replica_count' => 0,
+            'db_replica_cached_count' => 0,
+            'db_replica_wal_count' => 0,
+            'db_replica_duration_s' => a_value >= 0,
+            'db_primary_count' => a_value >= 1,
+            'db_primary_cached_count' => 0,
+            'db_primary_wal_count' => 0,
+            'db_primary_duration_s' => a_value > 0,
+            "db_primary_#{dbname}_duration_s" => a_value > 0,
+            'db_primary_wal_cached_count' => 0,
+            'db_replica_wal_cached_count' => 0
+          )
+        end
+
+        let(:end_payload) do
+          start_payload.merge(
+            'message' => 'TestWorker JID-da883554ee4fe414012f5f42: done: 0.0 sec',
+            'job_status' => 'done',
+            'duration_s' => 0.0,
+            'completed_at' => timestamp.to_f,
+            'cpu_s' => 1.111112,
+            'db_duration_s' => 0.0,
+            'db_cached_count' => 0,
+            'db_count' => 0,
+            'db_write_count' => 0,
+            'db_replica_count' => 0,
+            'db_replica_cached_count' => 0,
+            'db_replica_wal_count' => 0,
+            'db_replica_duration_s' => 0,
+            'db_primary_count' => 0,
+            'db_primary_cached_count' => 0,
+            'db_primary_wal_count' => 0,
+            'db_primary_wal_cached_count' => 0,
+            'db_replica_wal_cached_count' => 0,
+            'db_primary_duration_s' => 0
+          )
+        end
+
+        include_examples 'performs database queries'
+      end
+    end
+
+    context 'when the job uses load balancing capabilities' do
+      let(:expected_payload) { { 'load_balancing_strategy' => 'retry' } }
+
+      before do
+        allow(Time).to receive(:now).and_return(timestamp)
+        allow(Process).to receive(:clock_gettime).and_call_original
+      end
+
+      it 'logs the database chosen' do
+        expect(logger).to receive(:info).with(start_payload).ordered
+        expect(logger).to receive(:info).with(include(expected_payload)).ordered
+
+        call_subject(job, 'test_queue') do
+          job['load_balancing_strategy'] = 'retry'
+        end
       end
     end
 
@@ -362,11 +387,45 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
     end
 
-    def call_subject(job, queue)
-      # This structured logger strongly depends on execution of `InstrumentationLogger`
-      subject.call(job, queue) do
-        ::Gitlab::SidekiqMiddleware::InstrumentationLogger.new.call('worker', job, queue) do
-          yield
+    context 'when instrumentation data is not loaded' do
+      before do
+        allow(logger).to receive(:info)
+      end
+
+      it 'does not raise exception' do
+        expect { subject.call(job.dup, 'test_queue') {} }.not_to raise_error
+      end
+    end
+
+    context 'when the job payload is compressed' do
+      let(:compressed_args) { "eJyLVspIzcnJV4oFAA88AxE=" }
+      let(:expected_start_payload) do
+        start_payload.merge(
+          'args' => ['[COMPRESSED]'],
+          'job_size_bytes' => Sidekiq.dump_json([compressed_args]).bytesize,
+          'compressed' => true
+        )
+      end
+
+      let(:expected_end_payload) do
+        end_payload.merge(
+          'args' => ['[COMPRESSED]'],
+          'job_size_bytes' => Sidekiq.dump_json([compressed_args]).bytesize,
+          'compressed' => true
+        )
+      end
+
+      it 'logs it in the done log' do
+        Timecop.freeze(timestamp) do
+          expect(logger).to receive(:info).with(expected_start_payload).ordered
+          expect(logger).to receive(:info).with(expected_end_payload).ordered
+
+          job['args'] = [compressed_args]
+          job['compressed'] = true
+
+          call_subject(job, 'test_queue') do
+            ::Gitlab::SidekiqMiddleware::SizeLimiter::Compressor.decompress(job)
+          end
         end
       end
     end

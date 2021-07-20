@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Group do
+  include ReloadHelpers
+
   let!(:group) { create(:group) }
 
   describe 'associations' do
@@ -25,13 +27,13 @@ RSpec.describe Group do
     it { is_expected.to have_many(:clusters).class_name('Clusters::Cluster') }
     it { is_expected.to have_many(:container_repositories) }
     it { is_expected.to have_many(:milestones) }
-    it { is_expected.to have_many(:iterations) }
     it { is_expected.to have_many(:group_deploy_keys) }
-    it { is_expected.to have_many(:services) }
+    it { is_expected.to have_many(:integrations) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
     it { is_expected.to have_many(:dependency_proxy_blobs) }
     it { is_expected.to have_many(:dependency_proxy_manifests) }
     it { is_expected.to have_many(:debian_distributions).class_name('Packages::Debian::GroupDistribution').dependent(:destroy) }
+    it { is_expected.to have_many(:daily_build_group_report_results).class_name('Ci::DailyBuildGroupReportResult') }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
@@ -63,6 +65,59 @@ RSpec.describe Group do
     it { is_expected.not_to validate_presence_of :owner }
     it { is_expected.to validate_presence_of :two_factor_grace_period }
     it { is_expected.to validate_numericality_of(:two_factor_grace_period).is_greater_than_or_equal_to(0) }
+
+    context 'validating the parent of a group' do
+      context 'when the group has no parent' do
+        it 'allows a group to have no parent associated with it' do
+          group = build(:group)
+
+          expect(group).to be_valid
+        end
+      end
+
+      context 'when the group has a parent' do
+        it 'does not allow a group to have a namespace as its parent' do
+          group = build(:group, parent: build(:namespace))
+
+          expect(group).not_to be_valid
+          expect(group.errors[:parent_id].first).to eq('a group cannot have a user namespace as its parent')
+        end
+
+        it 'allows a group to have another group as its parent' do
+          group = build(:group, parent: build(:group))
+
+          expect(group).to be_valid
+        end
+      end
+
+      context 'when the feature flag `validate_namespace_parent_type` is disabled' do
+        before do
+          stub_feature_flags(validate_namespace_parent_type: false)
+        end
+
+        context 'when the group has no parent' do
+          it 'allows a group to have no parent associated with it' do
+            group = build(:group)
+
+            expect(group).to be_valid
+          end
+        end
+
+        context 'when the group has a parent' do
+          it 'allows a group to have a namespace as its parent' do
+            group = build(:group, parent: build(:namespace))
+
+            expect(group).to be_valid
+          end
+
+          it 'allows a group to have another group as its parent' do
+            group = build(:group, parent: build(:group))
+
+            expect(group).to be_valid
+          end
+        end
+      end
+    end
 
     describe 'path validation' do
       it 'rejects paths reserved on the root namespace when the group has no parent' do
@@ -228,7 +283,7 @@ RSpec.describe Group do
     end
 
     describe '#two_factor_authentication_allowed' do
-      let_it_be(:group) { create(:group) }
+      let_it_be_with_reload(:group) { create(:group) }
 
       context 'for a parent group' do
         it 'is valid' do
@@ -258,13 +313,263 @@ RSpec.describe Group do
     end
   end
 
+  context 'traversal_ids on create' do
+    context 'default traversal_ids' do
+      let(:group) { build(:group) }
+
+      before do
+        group.save!
+        group.reload
+      end
+
+      it { expect(group.traversal_ids).to eq [group.id] }
+    end
+
+    context 'has a parent' do
+      let(:parent) { create(:group) }
+      let(:group) { build(:group, parent: parent) }
+
+      before do
+        group.save!
+        reload_models(parent, group)
+      end
+
+      it { expect(parent.traversal_ids).to eq [parent.id] }
+      it { expect(group.traversal_ids).to eq [parent.id, group.id] }
+    end
+
+    context 'has a parent update before save' do
+      let(:parent) { create(:group) }
+      let(:group) { build(:group, parent: parent) }
+      let!(:new_grandparent) { create(:group) }
+
+      before do
+        parent.update!(parent: new_grandparent)
+        group.save!
+        reload_models(parent, group)
+      end
+
+      it 'avoid traversal_ids race condition' do
+        expect(parent.traversal_ids).to eq [new_grandparent.id, parent.id]
+        expect(group.traversal_ids).to eq [new_grandparent.id, parent.id, group.id]
+      end
+    end
+  end
+
+  context 'traversal_ids on update' do
+    context 'parent is updated' do
+      let(:new_parent) { create(:group) }
+
+      subject {group.update!(parent: new_parent, name: 'new name') }
+
+      it_behaves_like 'update on column', :traversal_ids
+    end
+
+    context 'parent is not updated' do
+      subject { group.update!(name: 'new name') }
+
+      it_behaves_like 'no update on column', :traversal_ids
+    end
+  end
+
+  context 'traversal_ids on ancestral update' do
+    context 'update multiple ancestors before save' do
+      let(:parent) { create(:group) }
+      let(:group) { create(:group, parent: parent) }
+      let!(:new_grandparent) { create(:group) }
+      let!(:new_parent) { create(:group) }
+
+      before do
+        group.parent = new_parent
+        new_parent.update!(parent: new_grandparent)
+
+        group.save!
+        reload_models(parent, group, new_grandparent, new_parent)
+      end
+
+      it 'avoids traversal_ids race condition' do
+        expect(parent.traversal_ids).to eq [parent.id]
+        expect(group.traversal_ids).to eq [new_grandparent.id, new_parent.id, group.id]
+        expect(new_grandparent.traversal_ids).to eq [new_grandparent.id]
+        expect(new_parent.traversal_ids).to eq [new_grandparent.id, new_parent.id]
+      end
+    end
+
+    context 'assign a new parent' do
+      let!(:group) { create(:group, parent: old_parent) }
+      let(:recorded_queries) { ActiveRecord::QueryRecorder.new }
+
+      subject do
+        recorded_queries.record do
+          group.update(parent: new_parent)
+        end
+      end
+
+      before do
+        subject
+        reload_models(old_parent, new_parent, group)
+      end
+
+      context 'within the same hierarchy' do
+        let!(:root) { create(:group).reload }
+        let!(:old_parent) { create(:group, parent: root) }
+        let!(:new_parent) { create(:group, parent: root) }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [root.id, new_parent.id, group.id]
+        end
+
+        it_behaves_like 'hierarchy with traversal_ids'
+        it_behaves_like 'locked row' do
+          let(:row) { root }
+        end
+      end
+
+      context 'to another hierarchy' do
+        let!(:old_parent) { create(:group) }
+        let!(:new_parent) { create(:group) }
+        let!(:group) { create(:group, parent: old_parent) }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [new_parent.id, group.id]
+        end
+
+        it_behaves_like 'locked rows' do
+          let(:rows) { [old_parent, new_parent] }
+        end
+
+        context 'old hierarchy' do
+          let(:root) { old_parent.root_ancestor }
+
+          it_behaves_like 'hierarchy with traversal_ids'
+        end
+
+        context 'new hierarchy' do
+          let(:root) { new_parent.root_ancestor }
+
+          it_behaves_like 'hierarchy with traversal_ids'
+        end
+      end
+
+      context 'from being a root ancestor' do
+        let!(:old_parent) { nil }
+        let!(:new_parent) { create(:group) }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [new_parent.id, group.id]
+        end
+
+        it_behaves_like 'locked rows' do
+          let(:rows) { [group, new_parent] }
+        end
+
+        it_behaves_like 'hierarchy with traversal_ids' do
+          let(:root) { new_parent }
+        end
+      end
+
+      context 'to being a root ancestor' do
+        let!(:old_parent) { create(:group) }
+        let!(:new_parent) { nil }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [group.id]
+        end
+
+        it_behaves_like 'locked rows' do
+          let(:rows) { [old_parent, group] }
+        end
+
+        it_behaves_like 'hierarchy with traversal_ids' do
+          let(:root) { group }
+        end
+      end
+    end
+
+    context 'assigning a new grandparent' do
+      let!(:old_grandparent) { create(:group) }
+      let!(:new_grandparent) { create(:group) }
+      let!(:parent_group) { create(:group, parent: old_grandparent) }
+      let!(:group) { create(:group, parent: parent_group) }
+
+      before do
+        parent_group.update(parent: new_grandparent)
+      end
+
+      it 'updates traversal_ids for all descendants' do
+        expect(parent_group.reload.traversal_ids).to eq [new_grandparent.id, parent_group.id]
+        expect(group.reload.traversal_ids).to eq [new_grandparent.id, parent_group.id, group.id]
+      end
+    end
+  end
+
+  context 'traversal queries' do
+    let_it_be(:group, reload: true) { create(:group, :nested) }
+
+    context 'recursive' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
+
+      it_behaves_like 'namespace traversal'
+
+      describe '#self_and_descendants' do
+        it { expect(group.self_and_descendants.to_sql).not_to include 'traversal_ids @>' }
+      end
+
+      describe '#self_and_descendant_ids' do
+        it { expect(group.self_and_descendant_ids.to_sql).not_to include 'traversal_ids @>' }
+      end
+
+      describe '#descendants' do
+        it { expect(group.descendants.to_sql).not_to include 'traversal_ids @>' }
+      end
+
+      describe '#ancestors' do
+        it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
+      end
+    end
+
+    context 'linear' do
+      it_behaves_like 'namespace traversal'
+
+      describe '#self_and_descendants' do
+        it { expect(group.self_and_descendants.to_sql).to include 'traversal_ids @>' }
+      end
+
+      describe '#self_and_descendant_ids' do
+        it { expect(group.self_and_descendant_ids.to_sql).to include 'traversal_ids @>' }
+      end
+
+      describe '#descendants' do
+        it { expect(group.descendants.to_sql).to include 'traversal_ids @>' }
+      end
+
+      describe '#ancestors' do
+        it { expect(group.ancestors.to_sql).to include "\"namespaces\".\"id\" = #{group.parent_id}" }
+
+        it 'hierarchy order' do
+          expect(group.ancestors(hierarchy_order: :asc).to_sql).to include 'ORDER BY "depth" ASC'
+        end
+
+        context 'ancestor linear queries feature flag disabled' do
+          before do
+            stub_feature_flags(use_traversal_ids_for_ancestors: false)
+          end
+
+          it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
+        end
+      end
+    end
+  end
+
   describe '.without_integration' do
     let(:another_group) { create(:group) }
-    let(:instance_integration) { build(:jira_service, :instance) }
+    let(:instance_integration) { build(:jira_integration, :instance) }
 
     before do
-      create(:jira_service, group: group, project: nil)
-      create(:slack_service, group: another_group, project: nil)
+      create(:jira_integration, group: group, project: nil)
+      create(:integrations_slack, group: another_group, project: nil)
     end
 
     it 'returns groups without integration' do
@@ -333,6 +638,16 @@ RSpec.describe Group do
       subject { described_class.non_public_only.to_a }
 
       it { is_expected.to match_array([private_group, internal_group]) }
+    end
+
+    describe 'with_onboarding_progress' do
+      subject { described_class.with_onboarding_progress }
+
+      it 'joins onboarding_progress' do
+        create(:onboarding_progress, namespace: group)
+
+        expect(subject).to eq([group])
+      end
     end
 
     describe 'for_authorized_group_members' do
@@ -410,7 +725,9 @@ RSpec.describe Group do
 
     it "is false if avatar is html page" do
       group.update_attribute(:avatar, 'uploads/avatar.html')
-      expect(group.avatar_type).to eq(["file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp"])
+      group.avatar_type
+
+      expect(group.errors.added?(:avatar, "file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp")).to be true
     end
   end
 
@@ -512,6 +829,181 @@ RSpec.describe Group do
     end
   end
 
+  describe '#member_last_blocked_owner?' do
+    let_it_be(:blocked_user) { create(:user, :blocked) }
+
+    let(:member) { blocked_user.group_members.last }
+
+    before do
+      group.add_user(blocked_user, GroupMember::OWNER)
+    end
+
+    context 'when last_blocked_owner is set' do
+      before do
+        expect(group).not_to receive(:members_with_parents)
+      end
+
+      it 'returns true' do
+        member.last_blocked_owner = true
+
+        expect(group.member_last_blocked_owner?(member)).to be(true)
+      end
+
+      it 'returns false' do
+        member.last_blocked_owner = false
+
+        expect(group.member_last_blocked_owner?(member)).to be(false)
+      end
+    end
+
+    context 'when last_blocked_owner is not set' do
+      it { expect(group.member_last_blocked_owner?(member)).to be(true) }
+
+      context 'with another active owner' do
+        before do
+          group.add_user(create(:user), GroupMember::OWNER)
+        end
+
+        it { expect(group.member_last_blocked_owner?(member)).to be(false) }
+      end
+
+      context 'with 2 blocked owners' do
+        before do
+          group.add_user(create(:user, :blocked), GroupMember::OWNER)
+        end
+
+        it { expect(group.member_last_blocked_owner?(member)).to be(false) }
+      end
+
+      context 'with owners from a parent' do
+        before do
+          parent_group = create(:group)
+          create(:group_member, :owner, group: parent_group)
+          group.update(parent: parent_group)
+        end
+
+        it { expect(group.member_last_blocked_owner?(member)).to be(false) }
+      end
+    end
+  end
+
+  context 'when analyzing blocked owners' do
+    let_it_be(:blocked_user) { create(:user, :blocked) }
+
+    describe '#single_blocked_owner?' do
+      context 'when there is only one blocked owner' do
+        before do
+          group.add_user(blocked_user, GroupMember::OWNER)
+        end
+
+        it 'returns true' do
+          expect(group.single_blocked_owner?).to eq(true)
+        end
+      end
+
+      context 'when there are multiple blocked owners' do
+        let_it_be(:blocked_user_2) { create(:user, :blocked) }
+
+        before do
+          group.add_user(blocked_user, GroupMember::OWNER)
+          group.add_user(blocked_user_2, GroupMember::OWNER)
+        end
+
+        it 'returns true' do
+          expect(group.single_blocked_owner?).to eq(false)
+        end
+      end
+
+      context 'when there are no blocked owners' do
+        it 'returns false' do
+          expect(group.single_blocked_owner?).to eq(false)
+        end
+      end
+    end
+
+    describe '#blocked_owners' do
+      let_it_be(:user) { create(:user) }
+
+      before do
+        group.add_user(blocked_user, GroupMember::OWNER)
+        group.add_user(user, GroupMember::OWNER)
+      end
+
+      it 'has only blocked owners' do
+        expect(group.blocked_owners.map(&:user)).to match([blocked_user])
+      end
+    end
+  end
+
+  describe '#single_owner?' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when there is only one owner' do
+      before do
+        group.add_user(user, GroupMember::OWNER)
+      end
+
+      it 'returns true' do
+        expect(group.single_owner?).to eq(true)
+      end
+    end
+
+    context 'when there are multiple owners' do
+      let_it_be(:user_2) { create(:user) }
+
+      before do
+        group.add_user(user, GroupMember::OWNER)
+        group.add_user(user_2, GroupMember::OWNER)
+      end
+
+      it 'returns true' do
+        expect(group.single_owner?).to eq(false)
+      end
+    end
+
+    context 'when there are no owners' do
+      it 'returns false' do
+        expect(group.single_owner?).to eq(false)
+      end
+    end
+  end
+
+  describe '#member_last_owner?' do
+    let_it_be(:user) { create(:user) }
+
+    let(:member) { group.members.last }
+
+    before do
+      group.add_user(user, GroupMember::OWNER)
+    end
+
+    context 'when last_owner is set' do
+      before do
+        expect(group).not_to receive(:last_owner?)
+      end
+
+      it 'returns true' do
+        member.last_owner = true
+
+        expect(group.member_last_owner?(member)).to be(true)
+      end
+
+      it 'returns false' do
+        member.last_owner = false
+
+        expect(group.member_last_owner?(member)).to be(false)
+      end
+    end
+
+    context 'when last_owner is not set' do
+      it 'returns true' do
+        expect(group).to receive(:last_owner?).and_call_original
+
+        expect(group.member_last_owner?(member)).to be(true)
+      end
+    end
+  end
+
   describe '#lfs_enabled?' do
     context 'LFS enabled globally' do
       before do
@@ -610,10 +1102,48 @@ RSpec.describe Group do
   end
 
   describe '#max_member_access_for_user' do
+    let_it_be(:group_user) { create(:user) }
+
+    context 'with user in the group' do
+      before do
+        group.add_owner(group_user)
+      end
+
+      it 'returns correct access level' do
+        expect(group.max_member_access_for_user(group_user)).to eq(Gitlab::Access::OWNER)
+      end
+    end
+
+    context 'when user is nil' do
+      it 'returns NO_ACCESS' do
+        expect(group.max_member_access_for_user(nil)).to eq(Gitlab::Access::NO_ACCESS)
+      end
+    end
+
+    context 'evaluating admin access level' do
+      let_it_be(:admin) { create(:admin) }
+
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'returns OWNER by default' do
+          expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::OWNER)
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'returns NO_ACCESS' do
+          expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      it 'returns NO_ACCESS when only concrete membership should be considered' do
+        expect(group.max_member_access_for_user(admin, only_concrete_membership: true))
+          .to eq(Gitlab::Access::NO_ACCESS)
+      end
+    end
+
     context 'group shared with another group' do
-      let(:parent_group_user) { create(:user) }
-      let(:group_user) { create(:user) }
-      let(:child_group_user) { create(:user) }
+      let_it_be(:parent_group_user) { create(:user) }
+      let_it_be(:child_group_user) { create(:user) }
 
       let_it_be(:group_parent) { create(:group, :private) }
       let_it_be(:group) { create(:group, :private, parent: group_parent) }
@@ -634,12 +1164,10 @@ RSpec.describe Group do
       end
 
       context 'with user in the group' do
-        let(:user) { group_user }
-
         it 'returns correct access level' do
-          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
-          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
+          expect(shared_group_parent.max_member_access_for_user(group_user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(group_user)).to eq(Gitlab::Access::DEVELOPER)
+          expect(shared_group_child.max_member_access_for_user(group_user)).to eq(Gitlab::Access::DEVELOPER)
         end
 
         context 'with lower group access level than max access level for share' do
@@ -656,22 +1184,18 @@ RSpec.describe Group do
       end
 
       context 'with user in the parent group' do
-        let(:user) { parent_group_user }
-
         it 'returns correct access level' do
-          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_parent.max_member_access_for_user(parent_group_user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(parent_group_user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(parent_group_user)).to eq(Gitlab::Access::NO_ACCESS)
         end
       end
 
       context 'with user in the child group' do
-        let(:user) { child_group_user }
-
         it 'returns correct access level' do
-          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_parent.max_member_access_for_user(child_group_user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(child_group_user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(child_group_user)).to eq(Gitlab::Access::NO_ACCESS)
         end
       end
 
@@ -724,22 +1248,36 @@ RSpec.describe Group do
         expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::MAINTAINER)
       end
     end
+  end
 
-    context 'evaluating admin access level' do
-      let_it_be(:admin) { create(:admin) }
+  describe '#direct_members' do
+    let_it_be(:group) { create(:group, :nested) }
+    let_it_be(:maintainer) { group.parent.add_user(create(:user), GroupMember::MAINTAINER) }
+    let_it_be(:developer) { group.add_user(create(:user), GroupMember::DEVELOPER) }
 
-      it 'returns OWNER by default' do
-        expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::OWNER)
+    it 'does not return members of the parent' do
+      expect(group.direct_members).not_to include(maintainer)
+    end
+
+    it 'returns the direct member of the group' do
+      expect(group.direct_members).to include(developer)
+    end
+
+    context 'group sharing' do
+      let!(:shared_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: group)
       end
 
-      it 'returns NO_ACCESS when only concrete membership should be considered' do
-        expect(group.max_member_access_for_user(admin, only_concrete_membership: true))
-          .to eq(Gitlab::Access::NO_ACCESS)
+      it 'does not return members of the shared_with group' do
+        expect(shared_group.direct_members).not_to(
+          include(developer))
       end
     end
   end
 
-  describe '#members_with_parents' do
+  shared_examples_for 'members_with_parents' do
     let!(:group) { create(:group, :nested) }
     let!(:maintainer) { group.parent.add_user(create(:user), GroupMember::MAINTAINER) }
     let!(:developer) { group.add_user(create(:user), GroupMember::DEVELOPER) }
@@ -759,6 +1297,50 @@ RSpec.describe Group do
       it 'returns shared with group members' do
         expect(shared_group.members_with_parents).to(
           include(developer))
+      end
+    end
+  end
+
+  describe '#members_with_parents' do
+    it_behaves_like 'members_with_parents'
+  end
+
+  describe '#authorizable_members_with_parents' do
+    let(:group) { create(:group) }
+
+    it_behaves_like 'members_with_parents'
+
+    context 'members with associated user but also having invite_token' do
+      let!(:member) { create(:group_member, :developer, :invited, user: create(:user), group: group) }
+
+      it 'includes such members in the result' do
+        expect(group.authorizable_members_with_parents).to include(member)
+      end
+    end
+
+    context 'invited members' do
+      let!(:member) { create(:group_member, :developer, :invited, group: group) }
+
+      it 'does not include such members in the result' do
+        expect(group.authorizable_members_with_parents).not_to include(member)
+      end
+    end
+
+    context 'members from group shares' do
+      let(:shared_group) { group }
+      let(:shared_with_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: shared_with_group)
+      end
+
+      context 'an invited member that is part of the shared_with_group' do
+        let!(:member) { create(:group_member, :developer, :invited, group: shared_with_group) }
+
+        it 'does not include such members in the result' do
+          expect(shared_group.authorizable_members_with_parents).not_to(
+            include(member))
+        end
       end
     end
   end
@@ -931,6 +1513,65 @@ RSpec.describe Group do
     end
   end
 
+  describe '#refresh_members_authorized_projects' do
+    let_it_be(:group) { create(:group, :nested) }
+    let_it_be(:parent_group_user) { create(:user) }
+    let_it_be(:group_user) { create(:user) }
+
+    before do
+      group.parent.add_maintainer(parent_group_user)
+      group.add_developer(group_user)
+    end
+
+    context 'users for which authorizations refresh is executed' do
+      it 'processes authorizations refresh for all members of the group' do
+        expect(UserProjectAccessChangedService).to receive(:new).with(contain_exactly(group_user.id, parent_group_user.id)).and_call_original
+
+        group.refresh_members_authorized_projects
+      end
+
+      context 'when explicitly specified to run only for direct members' do
+        it 'processes authorizations refresh only for direct members of the group' do
+          expect(UserProjectAccessChangedService).to receive(:new).with(contain_exactly(group_user.id)).and_call_original
+
+          group.refresh_members_authorized_projects(direct_members_only: true)
+        end
+      end
+    end
+  end
+
+  describe '#users_ids_of_direct_members' do
+    let_it_be(:group) { create(:group, :nested) }
+    let_it_be(:parent_group_user) { create(:user) }
+    let_it_be(:group_user) { create(:user) }
+
+    before do
+      group.parent.add_maintainer(parent_group_user)
+      group.add_developer(group_user)
+    end
+
+    it 'does not return user ids of the members of the parent' do
+      expect(group.users_ids_of_direct_members).not_to include(parent_group_user.id)
+    end
+
+    it 'returns the user ids of the direct member of the group' do
+      expect(group.users_ids_of_direct_members).to include(group_user.id)
+    end
+
+    context 'group sharing' do
+      let!(:shared_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: group)
+      end
+
+      it 'does not return the user ids of members of the shared_with group' do
+        expect(shared_group.users_ids_of_direct_members).not_to(
+          include(group_user.id))
+      end
+    end
+  end
+
   describe '#user_ids_for_project_authorizations' do
     it 'returns the user IDs for which to refresh authorizations' do
       maintainer = create(:user)
@@ -956,6 +1597,29 @@ RSpec.describe Group do
       it 'returns the user IDs for shared with group members' do
         expect(shared_group.user_ids_for_project_authorizations).to(
           include(group_user.id))
+      end
+    end
+
+    context 'distinct user ids' do
+      let_it_be(:subgroup) { create(:group, :nested) }
+      let_it_be(:user) { create(:user) }
+      let_it_be(:shared_with_group) { create(:group) }
+      let_it_be(:other_subgroup_user) { create(:user) }
+
+      before do
+        create(:group_group_link, shared_group: subgroup, shared_with_group: shared_with_group)
+        subgroup.add_maintainer(other_subgroup_user)
+
+        # `user` is added as a direct member of the parent group, the subgroup
+        # and another group shared with the subgroup.
+        subgroup.parent.add_maintainer(user)
+        subgroup.add_developer(user)
+        shared_with_group.add_guest(user)
+      end
+
+      it 'returns only distinct user ids of users for which to refresh authorizations' do
+        expect(subgroup.user_ids_for_project_authorizations).to(
+          contain_exactly(user.id, other_subgroup_user.id))
       end
     end
   end
@@ -1148,9 +1812,10 @@ RSpec.describe Group do
 
   describe '#ci_variables_for' do
     let(:project) { create(:project, group: group) }
+    let(:environment_scope) { '*' }
 
     let!(:ci_variable) do
-      create(:ci_group_variable, value: 'secret', group: group)
+      create(:ci_group_variable, value: 'secret', group: group, environment_scope: environment_scope)
     end
 
     let!(:protected_variable) do
@@ -1159,13 +1824,16 @@ RSpec.describe Group do
 
     subject { group.ci_variables_for('ref', project) }
 
-    it 'memoizes the result by ref', :request_store do
+    it 'memoizes the result by ref and environment', :request_store do
+      scoped_variable = create(:ci_group_variable, value: 'secret', group: group, environment_scope: 'scoped')
+
       expect(project).to receive(:protected_for?).with('ref').once.and_return(true)
-      expect(project).to receive(:protected_for?).with('other').once.and_return(false)
+      expect(project).to receive(:protected_for?).with('other').twice.and_return(false)
 
       2.times do
-        expect(group.ci_variables_for('ref', project)).to contain_exactly(ci_variable, protected_variable)
+        expect(group.ci_variables_for('ref', project, environment: 'production')).to contain_exactly(ci_variable, protected_variable)
         expect(group.ci_variables_for('other', project)).to contain_exactly(ci_variable)
+        expect(group.ci_variables_for('other', project, environment: 'scoped')).to contain_exactly(ci_variable, scoped_variable)
       end
     end
 
@@ -1202,6 +1870,96 @@ RSpec.describe Group do
       it_behaves_like 'ref is protected'
     end
 
+    context 'when environment name is specified' do
+      let(:environment) { 'review/name' }
+
+      subject do
+        group.ci_variables_for('ref', project, environment: environment)
+      end
+
+      context 'when environment scope is exactly matched' do
+        let(:environment_scope) { 'review/name' }
+
+        it { is_expected.to contain_exactly(ci_variable) }
+      end
+
+      context 'when environment scope is matched by wildcard' do
+        let(:environment_scope) { 'review/*' }
+
+        it { is_expected.to contain_exactly(ci_variable) }
+      end
+
+      context 'when environment scope does not match' do
+        let(:environment_scope) { 'review/*/special' }
+
+        it { is_expected.not_to contain_exactly(ci_variable) }
+      end
+
+      context 'when environment scope has _' do
+        let(:environment_scope) { '*_*' }
+
+        it 'does not treat it as wildcard' do
+          is_expected.not_to contain_exactly(ci_variable)
+        end
+
+        context 'when environment name contains underscore' do
+          let(:environment) { 'foo_bar/test' }
+          let(:environment_scope) { 'foo_bar/*' }
+
+          it 'matches literally for _' do
+            is_expected.to contain_exactly(ci_variable)
+          end
+        end
+      end
+
+      # The environment name and scope cannot have % at the moment,
+      # but we're considering relaxing it and we should also make sure
+      # it doesn't break in case some data sneaked in somehow as we're
+      # not checking this integrity in database level.
+      context 'when environment scope has %' do
+        it 'does not treat it as wildcard' do
+          ci_variable.update_attribute(:environment_scope, '*%*')
+
+          is_expected.not_to contain_exactly(ci_variable)
+        end
+
+        context 'when environment name contains a percent' do
+          let(:environment) { 'foo%bar/test' }
+
+          it 'matches literally for %' do
+            ci_variable.update(environment_scope: 'foo%bar/*')
+
+            is_expected.to contain_exactly(ci_variable)
+          end
+        end
+      end
+
+      context 'when variables with the same name have different environment scopes' do
+        let!(:partially_matched_variable) do
+          create(:ci_group_variable,
+                 key: ci_variable.key,
+                 value: 'partial',
+                 environment_scope: 'review/*',
+                 group: group)
+        end
+
+        let!(:perfectly_matched_variable) do
+          create(:ci_group_variable,
+                 key: ci_variable.key,
+                 value: 'prefect',
+                 environment_scope: 'review/name',
+                 group: group)
+        end
+
+        it 'puts variables matching environment scope more in the end' do
+          is_expected.to eq(
+            [ci_variable,
+             partially_matched_variable,
+             perfectly_matched_variable])
+        end
+      end
+    end
+
     context 'when group has children' do
       let(:group_child)      { create(:group, parent: group) }
       let(:group_child_2)    { create(:group, parent: group_child) }
@@ -1214,13 +1972,35 @@ RSpec.describe Group do
         allow(project).to receive(:protected_for?).with('ref').and_return(true)
       end
 
-      it 'returns all variables belong to the group and parent groups' do
-        expected_array1 = [protected_variable, ci_variable]
-        expected_array2 = [variable_child, variable_child_2, variable_child_3]
-        got_array = group_child_3.ci_variables_for('ref', project).to_a
+      context 'traversal queries' do
+        shared_examples 'correct ancestor order' do
+          it 'returns all variables belong to the group and parent groups' do
+            expected_array1 = [protected_variable, ci_variable]
+            expected_array2 = [variable_child, variable_child_2, variable_child_3]
+            got_array = group_child_3.ci_variables_for('ref', project).to_a
 
-        expect(got_array.shift(2)).to contain_exactly(*expected_array1)
-        expect(got_array).to eq(expected_array2)
+            expect(got_array.shift(2)).to contain_exactly(*expected_array1)
+            expect(got_array).to eq(expected_array2)
+          end
+        end
+
+        context 'recursive' do
+          before do
+            stub_feature_flags(use_traversal_ids: false)
+          end
+
+          include_examples 'correct ancestor order'
+        end
+
+        context 'linear' do
+          before do
+            stub_feature_flags(use_traversal_ids: true)
+
+            group_child_3.reload # make sure traversal_ids are reloaded
+          end
+
+          include_examples 'correct ancestor order'
+        end
       end
     end
   end
@@ -1457,21 +2237,32 @@ RSpec.describe Group do
   end
 
   describe '#access_request_approvers_to_be_notified' do
-    it 'returns a maximum of ten, active, non_requested owners of the group in recent_sign_in descending order' do
-      group = create(:group, :public)
+    let_it_be(:group) { create(:group, :public) }
 
-      users = create_list(:user, 12, :with_sign_ins)
+    it 'returns a maximum of ten owners of the group in recent_sign_in descending order' do
+      limit = 2
+      stub_const("Member::ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT", limit)
+      users = create_list(:user, limit + 1, :with_sign_ins)
       active_owners = users.map do |user|
         create(:group_member, :owner, group: group, user: user)
       end
 
-      create(:group_member, :owner, :blocked, group: group)
-      create(:group_member, :maintainer, group: group)
-      create(:group_member, :access_request, :owner, group: group)
-
-      active_owners_in_recent_sign_in_desc_order = group.members_and_requesters.where(id: active_owners).order_recent_sign_in.limit(10)
+      active_owners_in_recent_sign_in_desc_order = group.members_and_requesters
+                                                        .id_in(active_owners)
+                                                        .order_recent_sign_in.limit(limit)
 
       expect(group.access_request_approvers_to_be_notified).to eq(active_owners_in_recent_sign_in_desc_order)
+    end
+
+    it 'returns active, non_invited, non_requested owners of the group' do
+      owner = create(:group_member, :owner, source: group)
+
+      create(:group_member, :maintainer, group: group)
+      create(:group_member, :owner, :invited, group: group)
+      create(:group_member, :owner, :access_request, group: group)
+      create(:group_member, :owner, :blocked, group: group)
+
+      expect(group.access_request_approvers_to_be_notified.to_a).to eq([owner])
     end
   end
 
@@ -1514,24 +2305,28 @@ RSpec.describe Group do
     end
   end
 
-  def subject_and_reload(*models)
-    subject
-    models.map(&:reload)
-  end
-
   describe '#update_shared_runners_setting!' do
     context 'enabled' do
       subject { group.update_shared_runners_setting!('enabled') }
 
       context 'group that its ancestors have shared runners disabled' do
-        let_it_be(:parent) { create(:group, :shared_runners_disabled) }
-        let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
-        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+        let_it_be(:parent, reload: true) { create(:group, :shared_runners_disabled) }
+        let_it_be(:group, reload: true) { create(:group, :shared_runners_disabled, parent: parent) }
+        let_it_be(:project, reload: true) { create(:project, shared_runners_enabled: false, group: group) }
 
-        it 'raises error and does not enable shared Runners' do
-          expect { subject_and_reload(parent, group, project) }
+        it 'raises exception' do
+          expect { subject }
             .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Shared runners enabled cannot be enabled because parent group has shared Runners disabled')
-            .and not_change { parent.shared_runners_enabled }
+        end
+
+        it 'does not enable shared runners' do
+          expect do
+            subject rescue nil
+
+            parent.reload
+            group.reload
+            project.reload
+          end.to not_change { parent.shared_runners_enabled }
             .and not_change { group.shared_runners_enabled }
             .and not_change { project.shared_runners_enabled }
         end
@@ -1617,13 +2412,21 @@ RSpec.describe Group do
       end
 
       context 'when parent does not allow' do
-        let_it_be(:parent) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false ) }
-        let_it_be(:group) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent: parent) }
+        let_it_be(:parent, reload: true) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false ) }
+        let_it_be(:group, reload: true) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent: parent) }
 
-        it 'raises error and does not allow descendants to override' do
-          expect { subject_and_reload(parent, group) }
+        it 'raises exception' do
+          expect { subject }
             .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Allow descendants override disabled shared runners cannot be enabled because parent group does not allow it')
-            .and not_change { parent.allow_descendants_override_disabled_shared_runners }
+        end
+
+        it 'does not allow descendants to override' do
+          expect do
+            subject rescue nil
+
+            parent.reload
+            group.reload
+          end.to not_change { parent.allow_descendants_override_disabled_shared_runners }
             .and not_change { parent.shared_runners_enabled }
             .and not_change { group.allow_descendants_override_disabled_shared_runners }
             .and not_change { group.shared_runners_enabled }
@@ -1647,17 +2450,17 @@ RSpec.describe Group do
   end
 
   describe "#default_branch_name" do
-    context "group.namespace_settings does not have a default branch name" do
+    context "when group.namespace_settings does not have a default branch name" do
       it "returns nil" do
         expect(group.default_branch_name).to be_nil
       end
     end
 
-    context "group.namespace_settings has a default branch name" do
+    context "when group.namespace_settings has a default branch name" do
       let(:example_branch_name) { "example_branch_name" }
 
       before do
-        expect(group.namespace_settings)
+        allow(group.namespace_settings)
           .to receive(:default_branch_name)
           .and_return(example_branch_name)
       end
@@ -1779,5 +2582,97 @@ RSpec.describe Group do
     subject { create(:group) }
 
     it_behaves_like 'model with Debian distributions'
+  end
+
+  describe '.ids_with_disabled_email' do
+    let!(:parent_1) { create(:group, emails_disabled: true) }
+    let!(:child_1) { create(:group, parent: parent_1) }
+
+    let!(:parent_2) { create(:group, emails_disabled: false) }
+    let!(:child_2) { create(:group, parent: parent_2) }
+
+    let!(:other_group) { create(:group, emails_disabled: false) }
+
+    subject(:group_ids_where_email_is_disabled) { described_class.ids_with_disabled_email([child_1, child_2, other_group]) }
+
+    it { is_expected.to eq(Set.new([child_1.id])) }
+  end
+
+  describe '#to_ability_name' do
+    it 'returns group' do
+      group = build(:group)
+
+      expect(group.to_ability_name).to eq('group')
+    end
+  end
+
+  describe '#activity_path' do
+    it 'returns the group activity_path' do
+      expected_path = "/groups/#{group.name}/-/activity"
+
+      expect(group.activity_path).to eq(expected_path)
+    end
+  end
+
+  context 'with export' do
+    let(:group) { create(:group, :with_export) }
+
+    it '#export_file_exists? returns true' do
+      expect(group.export_file_exists?).to be true
+    end
+
+    it '#export_archive_exists? returns true' do
+      expect(group.export_archive_exists?).to be true
+    end
+  end
+
+  describe '#open_issues_count', :aggregate_failures do
+    let(:group) { build(:group) }
+
+    it 'provides the issue count' do
+      expect(group.open_issues_count).to eq 0
+    end
+
+    it 'invokes the count service with current_user' do
+      user = build(:user)
+      count_service = instance_double(Groups::OpenIssuesCountService)
+      expect(Groups::OpenIssuesCountService).to receive(:new).with(group, user).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_issues_count(user)
+    end
+
+    it 'invokes the count service with no current_user' do
+      count_service = instance_double(Groups::OpenIssuesCountService)
+      expect(Groups::OpenIssuesCountService).to receive(:new).with(group, nil).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_issues_count
+    end
+  end
+
+  describe '#open_merge_requests_count', :aggregate_failures do
+    let(:group) { build(:group) }
+
+    it 'provides the merge request count' do
+      expect(group.open_merge_requests_count).to eq 0
+    end
+
+    it 'invokes the count service with current_user' do
+      user = build(:user)
+      count_service = instance_double(Groups::MergeRequestsCountService)
+      expect(Groups::MergeRequestsCountService).to receive(:new).with(group, user).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_merge_requests_count(user)
+    end
+
+    it 'invokes the count service with no current_user' do
+      count_service = instance_double(Groups::MergeRequestsCountService)
+      expect(Groups::MergeRequestsCountService).to receive(:new).with(group, nil).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_merge_requests_count
+    end
   end
 end

@@ -37,20 +37,6 @@ module EE
         unauthorized! unless ::Gitlab::Geo.allowed_ip?(request.ip)
       end
 
-      override :current_user
-      def current_user
-        strong_memoize(:current_user) do
-          user = super
-
-          if user
-            ::Gitlab::Database::LoadBalancing::RackMiddleware
-              .stick_or_unstick(env, :user, user.id)
-          end
-
-          user
-        end
-      end
-
       def authorization_header_valid?
         return unless gitlab_geo_node_token?
 
@@ -86,6 +72,8 @@ module EE
       override :find_project!
       def find_project!(id)
         project = find_project(id)
+
+        return forbidden! unless authorized_project_scope?(project)
 
         # CI job token authentication:
         # this method grants limited privileged for admin users
@@ -128,7 +116,7 @@ module EE
 
       override :send_git_archive
       def send_git_archive(repository, **kwargs)
-        EE::AuditEvents::RepositoryDownloadStartedAuditEventService.new(
+        AuditEvents::RepositoryDownloadStartedAuditEventService.new(
           current_user,
           repository.project,
           ip_address

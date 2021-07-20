@@ -6,6 +6,7 @@ module EE
 
     prepended do
       include ::Gitlab::Geo::ReplicableModel
+      include ::Gitlab::Geo::VerificationState
       include FromUnion
 
       with_replicator Geo::SnippetRepositoryReplicator

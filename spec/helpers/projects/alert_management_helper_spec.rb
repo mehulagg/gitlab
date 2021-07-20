@@ -7,6 +7,7 @@ RSpec.describe Projects::AlertManagementHelper do
 
   let_it_be(:project, reload: true) { create(:project) }
   let_it_be(:current_user) { create(:user) }
+
   let(:project_path) { project.full_path }
   let(:project_id) { project.id }
 
@@ -33,31 +34,60 @@ RSpec.describe Projects::AlertManagementHelper do
           'empty-alert-svg-path' => match_asset_path('/assets/illustrations/alert-management-empty-state.svg'),
           'user-can-enable-alert-management' => 'true',
           'alert-management-enabled' => 'false',
+          'has-managed-prometheus' => 'false',
           'text-query': nil,
           'assignee-username-query': nil
         )
       end
     end
 
-    context 'with prometheus service' do
-      let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
+    context 'with prometheus integration' do
+      let_it_be(:prometheus_integration) { create(:prometheus_integration, project: project) }
 
-      context 'when prometheus service is active' do
-        it 'enables alert management' do
+      context 'when manual prometheus integration is active' do
+        it "enables alert management and doesn't show managed prometheus" do
+          prometheus_integration.update!(manual_configuration: true)
+
           expect(data).to include(
             'alert-management-enabled' => 'true'
+          )
+          expect(data).to include(
+            'has-managed-prometheus' => 'false'
           )
         end
       end
 
-      context 'when prometheus service is inactive' do
-        it 'disables alert management' do
-          prometheus_service.update!(manual_configuration: false)
+      context 'when a cluster prometheus is available' do
+        let(:cluster) { create(:cluster, projects: [project]) }
+
+        it 'has managed prometheus' do
+          create(:clusters_integrations_prometheus, cluster: cluster)
+
+          expect(data).to include(
+            'has-managed-prometheus' => 'true'
+          )
+        end
+      end
+
+      context 'when prometheus integration is inactive' do
+        it 'disables alert management and hides managed prometheus' do
+          prometheus_integration.update!(manual_configuration: false)
 
           expect(data).to include(
             'alert-management-enabled' => 'false'
           )
+          expect(data).to include(
+            'has-managed-prometheus' => 'false'
+          )
         end
+      end
+    end
+
+    context 'without prometheus integration' do
+      it "doesn't have managed prometheus" do
+        expect(data).to include(
+          'has-managed-prometheus' => 'false'
+        )
       end
     end
 

@@ -7,9 +7,9 @@ module EE
 
     prepended do
       WEIGHT_RANGE = (0..20).freeze
-      WEIGHT_ALL = 'Everything'.freeze
-      WEIGHT_ANY = 'Any'.freeze
-      WEIGHT_NONE = 'None'.freeze
+      WEIGHT_ALL = 'Everything'
+      WEIGHT_ANY = 'Any'
+      WEIGHT_NONE = 'None'
       ELASTICSEARCH_PERMISSION_TRACKED_FIELDS = %w(assignee_ids author_id confidential).freeze
 
       include Elastic::ApplicationVersionedSearch
@@ -18,6 +18,10 @@ module EE
       include IterationEventable
       include HealthStatus
 
+      # widget supporting custom issue types - see https://gitlab.com/gitlab-org/gitlab/-/issues/292035
+      include IssueWidgets::ActsLikeRequirement
+
+      scope :order_blocking_issues_asc, -> { reorder(blocking_issues_count: :asc) }
       scope :order_blocking_issues_desc, -> { reorder(blocking_issues_count: :desc) }
       scope :order_weight_desc, -> { reorder ::Gitlab::Database.nulls_last_order('weight', 'DESC') }
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
@@ -25,10 +29,12 @@ module EE
       scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
       scope :order_sla_due_at_asc, -> { includes(:issuable_sla).order('issuable_slas.due_at ASC NULLS LAST') }
       scope :order_sla_due_at_desc, -> { includes(:issuable_sla).order('issuable_slas.due_at DESC NULLS LAST') }
+      scope :without_weights, ->(weights) { where(weight: nil).or(where.not(weight: weights)) }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
       scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
+      scope :sorted_by_epic_position, -> { joins(:epic_issue).select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id').order('epic_issues.relative_position, epic_issues.id') }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
@@ -67,8 +73,6 @@ module EE
       validates :weight, allow_nil: true, numericality: { greater_than_or_equal_to: 0 }
       validate :validate_confidential_epic
 
-      after_create :update_generic_alert_title, if: :generic_alert_with_default_title?
-
       state_machine :state_id do
         after_transition do |issue|
           issue.refresh_blocking_and_blocked_issues_cache!
@@ -78,13 +82,13 @@ module EE
 
     class_methods do
       def with_api_entity_associations
-        super.preload(:epic)
+        super.preload(epic: { group: :route })
       end
-    end
 
-    # override
-    def check_for_spam?
-      author.bot? && (title_changed? || description_changed? || confidential_changed?) || super
+      # override
+      def use_separate_indices?
+        true
+      end
     end
 
     # override
@@ -108,25 +112,6 @@ module EE
         ::IssuesFinder.new(user).execute.where(id: blocking_issues_ids)
 
       issues.preload(project: [:route, { namespace: [:route] }])
-    end
-
-    # override
-    def subscribed_without_subscriptions?(user, *)
-      # TODO: this really shouldn't be necessary, because the support
-      # bot should be a participant (which is what the superclass
-      # method checks for). However, the support bot gets filtered out
-      # at the end of Participable#raw_participants as not being able
-      # to read the project. Overriding *that* behavior is problematic
-      # because it doesn't use the Policy framework, and instead uses a
-      # custom-coded Ability.users_that_can_read_project, which is...
-      # a pain to override in EE. So... here we say, the support bot
-      # is subscribed by default, until an unsubscribed record appears,
-      # even though it's not *technically* a participant in this issue.
-
-      # Making the support bot subscribed to every issue is not as bad as it
-      # seems, though, since it isn't permitted to :receive_notifications,
-      # and doesn't actually show up in the participants list.
-      user.bot? || super
     end
 
     # override
@@ -176,21 +161,6 @@ module EE
         user.can?(:admin_issue, project) && user.can?(:create_epic, group)
     end
 
-    # Issue position on boards list should be relative to all group projects
-    def parent_ids
-      return super unless has_group_boards?
-
-      board_group.all_projects.select(:id)
-    end
-
-    def has_group_boards?
-      board_group && board_group.boards.any?
-    end
-
-    def board_group
-      @group ||= project.group
-    end
-
     def promoted?
       !!promoted_to_epic_id
     end
@@ -212,6 +182,7 @@ module EE
       override :sort_by_attribute
       def sort_by_attribute(method, excluded_labels: [])
         case method.to_s
+        when 'blocking_issues_asc'  then order_blocking_issues_asc.with_order_id_desc
         when 'blocking_issues_desc' then order_blocking_issues_desc.with_order_id_desc
         when 'weight', 'weight_asc' then order_weight_asc.with_order_id_desc
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
@@ -247,6 +218,20 @@ module EE
       SQL
     end
 
+    def related_feature_flags(current_user, preload: nil)
+      feature_flags = ::Operations::FeatureFlag
+        .select('operations_feature_flags.*, operations_feature_flags_issues.id AS link_id')
+        .joins(:feature_flag_issues)
+        .where(operations_feature_flags_issues: { issue_id: id })
+        .order('operations_feature_flags_issues.id ASC')
+        .includes(preload)
+
+      cross_project_filter = -> (feature_flags) { feature_flags.where(project: project) }
+      Ability.feature_flags_readable_by_user(feature_flags,
+        current_user,
+        filters: { read_cross_project: cross_project_filter })
+    end
+
     override :relocation_target
     def relocation_target
       super || promoted_to_epic
@@ -257,19 +242,17 @@ module EE
       issue_type_supports?(:epics) && project.group.present?
     end
 
+    override :update_upvotes_count
+    def update_upvotes_count
+      maintain_elasticsearch_update if maintaining_elasticsearch?
+
+      super
+    end
+
     private
 
     def blocking_issues_ids
       @blocking_issues_ids ||= ::IssueLink.blocking_issue_ids_for(self)
-    end
-
-    def update_generic_alert_title
-      update(title: "#{title} #{iid}")
-    end
-
-    def generic_alert_with_default_title?
-      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
-        author == ::User.alert_bot
     end
 
     def validate_confidential_epic

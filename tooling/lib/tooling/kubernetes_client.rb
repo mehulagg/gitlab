@@ -22,7 +22,16 @@ module Tooling
 
     def cleanup_by_created_at(resource_type:, created_before:, wait: true)
       resource_names = resource_names_created_before(resource_type: resource_type, created_before: created_before)
+      return if resource_names.empty?
+
       delete_by_exact_names(resource_type: resource_type, resource_names: resource_names, wait: wait)
+    end
+
+    def cleanup_review_app_namespaces(created_before:, wait: true)
+      namespaces = review_app_namespaces_created_before(created_before: created_before)
+      return if namespaces.empty?
+
+      delete_namespaces_by_exact_names(resource_names: namespaces, wait: wait)
     end
 
     private
@@ -55,6 +64,19 @@ module Tooling
         'delete',
         resource_type,
         %(--namespace "#{namespace}"),
+        '--now',
+        '--ignore-not-found',
+        %(--wait=#{wait}),
+        resource_names.join(' ')
+      ]
+
+      run_command(command)
+    end
+
+    def delete_namespaces_by_exact_names(resource_names:, wait:)
+      command = [
+        'delete',
+        'namespace',
         '--now',
         '--ignore-not-found',
         %(--wait=#{wait}),
@@ -99,9 +121,32 @@ module Tooling
       ]
 
       response = run_command(command)
-      JSON.parse(response)['items'] # rubocop:disable Gitlab/Json
-        .map { |resource| resource.dig('metadata', 'name') if Time.parse(resource.dig('metadata', 'creationTimestamp')) < created_before }
-        .compact
+
+      resources_created_before_date(response, created_before)
+    end
+
+    def review_app_namespaces_created_before(created_before:)
+      command = [
+        'get',
+        'namespace',
+        "-l tls=review-apps-tls", # Get only namespaces used for review-apps
+        "--sort-by='{.metadata.creationTimestamp}'",
+        '-o json'
+      ]
+
+      response = run_command(command)
+
+      resources_created_before_date(response, created_before)
+    end
+
+    def resources_created_before_date(response, date)
+      items = JSON.parse(response)['items'] # rubocop:disable Gitlab/Json
+
+      items.filter_map do |item|
+        item_created_at = Time.parse(item.dig('metadata', 'creationTimestamp'))
+
+        item.dig('metadata', 'name') if item_created_at < date
+      end
     rescue ::JSON::ParserError => ex
       puts "Ignoring this JSON parsing error: #{ex}\n\nResponse was:\n#{response}" # rubocop:disable Rails/Output
       []

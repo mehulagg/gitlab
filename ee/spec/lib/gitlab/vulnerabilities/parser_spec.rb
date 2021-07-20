@@ -39,6 +39,15 @@ RSpec.describe Gitlab::Vulnerabilities::Parser do
       end
     end
 
+    context 'with cluster image scanning as category' do
+      it 'returns a Scanning Vulnerability' do
+        params[:category] = 'cluster_image_scanning'
+
+        expect(subject).to be_a(Gitlab::Vulnerabilities::ContainerScanningVulnerability)
+        expect(subject.target_branch).to eq('master')
+      end
+    end
+
     context 'with an invalid category' do
       it 'raises an exception' do
         params[:category] = 'foo'

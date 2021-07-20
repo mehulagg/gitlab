@@ -12,6 +12,7 @@ RSpec.describe Gitlab::GithubImport::ImportNoteWorker do
       importer = double(:importer)
       hash = {
         'noteable_id' => 42,
+        'github_id' => 42,
         'noteable_type' => 'issues',
         'user' => { 'id' => 4, 'login' => 'alice' },
         'note' => 'Hello world',
@@ -31,7 +32,7 @@ RSpec.describe Gitlab::GithubImport::ImportNoteWorker do
       expect(importer)
         .to receive(:execute)
 
-      expect(worker.counter)
+      expect(Gitlab::GithubImport::ObjectCounter)
         .to receive(:increment)
         .and_call_original
 

@@ -51,7 +51,6 @@ RSpec.describe 'Groups > Members > List members' do
 
     before do
       stub_licensed_features(group_saml: true)
-      stub_feature_flags(invite_members_group_modal: false)
       allow(Gitlab::Session).to receive(:current).and_return(session)
 
       create(:identity, saml_provider: saml_provider, user: user1)
@@ -68,12 +67,45 @@ RSpec.describe 'Groups > Members > List members' do
 
       wait_for_requests
 
-      find('.select2-container').click
+      click_on 'Invite members'
 
-      expect(page).to have_content(user1.name)
-      expect(page).to have_content(user2.name)
-      expect(page).not_to have_content(user3.name)
-      expect(page).not_to have_content(user4.name)
+      page.within '#invite-members-modal' do
+        [user1, user2].each do |user_with_saml|
+          find('[data-testid="members-token-select-input"]').set(user_with_saml.name)
+          wait_for_requests
+
+          expect(page).to have_content(user_with_saml.name)
+        end
+
+        [user3, user4].each do |user_without_saml|
+          find('[data-testid="members-token-select-input"]').set(user_without_saml.name)
+          wait_for_requests
+
+          expect(page).not_to have_content(user_without_saml.name)
+        end
+      end
+    end
+
+    context 'when the :invite_members_group_modal feature flag is disabled' do
+      before do
+        stub_feature_flags(invite_members_group_modal: false)
+      end
+
+      it 'returns only users with SAML in autocomplete', :js do
+        create(:identity, saml_provider: saml_provider, user: user2)
+        create(:identity, user: user3)
+
+        visit group_group_members_path(group)
+
+        wait_for_requests
+
+        find('.select2-container').click
+
+        expect(page).to have_content(user1.name)
+        expect(page).to have_content(user2.name)
+        expect(page).not_to have_content(user3.name)
+        expect(page).not_to have_content(user4.name)
+      end
     end
   end
 end

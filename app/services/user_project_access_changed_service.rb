@@ -13,17 +13,32 @@ class UserProjectAccessChangedService
   def execute(blocking: true, priority: HIGH_PRIORITY)
     bulk_args = @user_ids.map { |id| [id] }
 
-    if blocking
-      AuthorizedProjectsWorker.bulk_perform_and_wait(bulk_args)
-    else
-      if priority == HIGH_PRIORITY
-        AuthorizedProjectsWorker.bulk_perform_async(bulk_args) # rubocop:disable Scalability/BulkPerformWithContext
+    result =
+      if blocking
+        AuthorizedProjectsWorker.bulk_perform_and_wait(bulk_args)
       else
-        AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker.bulk_perform_in( # rubocop:disable Scalability/BulkPerformWithContext
-          DELAY, bulk_args, batch_size: 100, batch_delay: 30.seconds)
+        if priority == HIGH_PRIORITY
+          AuthorizedProjectsWorker.bulk_perform_async(bulk_args) # rubocop:disable Scalability/BulkPerformWithContext
+        else
+          with_related_class_context do
+            # We wrap the execution in `with_related_class_context`so as to obtain
+            # the location of the original caller
+            # in jobs enqueued from within `AuthorizedProjectUpdate::UserRefreshFromReplicaWorker`
+            AuthorizedProjectUpdate::UserRefreshFromReplicaWorker.bulk_perform_in( # rubocop:disable Scalability/BulkPerformWithContext
+              DELAY, bulk_args, batch_size: 100, batch_delay: 30.seconds)
+          end
+        end
       end
-    end
+
+    ::Gitlab::Database::LoadBalancing::Sticking.bulk_stick(:user, @user_ids)
+
+    result
+  end
+
+  private
+
+  def with_related_class_context(&block)
+    current_caller_id = Gitlab::ApplicationContext.current_context_attribute('meta.caller_id').presence
+    Gitlab::ApplicationContext.with_context(related_class: current_caller_id, &block)
   end
 end
-
-UserProjectAccessChangedService.prepend_if_ee('EE::UserProjectAccessChangedService')

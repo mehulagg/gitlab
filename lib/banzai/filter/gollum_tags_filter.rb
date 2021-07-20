@@ -60,7 +60,7 @@ module Banzai
       IGNORED_ANCESTOR_TAGS = %w(pre code tt).to_set
 
       def call
-        doc.search(".//text()").each do |node|
+        doc.xpath('descendant-or-self::text()').each do |node|
           next if has_ancestor?(node, IGNORED_ANCESTOR_TAGS)
           next unless node.content =~ TAGS_PATTERN
 
@@ -98,14 +98,15 @@ module Banzai
 
         return unless image?(content)
 
-        if url?(content)
-          path = content
-        elsif file = wiki.find_file(content)
-          path = ::File.join(wiki_base_path, file.path)
-        end
+        path =
+          if url?(content)
+            content
+          elsif file = wiki.find_file(content, load_content: false)
+            file.path
+          end
 
         if path
-          content_tag(:img, nil, data: { src: path }, class: 'gfm')
+          content_tag(:img, nil, src: path, class: 'gfm')
         end
       end
 

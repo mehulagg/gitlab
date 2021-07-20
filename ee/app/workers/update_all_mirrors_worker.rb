@@ -2,13 +2,16 @@
 
 class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include CronjobQueue
 
   feature_category :source_code_management
+  data_consistency :sticky, feature_flag: :load_balancing_for_update_all_mirrors_worker
 
   LEASE_TIMEOUT = 5.minutes
   SCHEDULE_WAIT_TIMEOUT = 4.minutes
-  LEASE_KEY = 'update_all_mirrors'.freeze
+  LEASE_KEY = 'update_all_mirrors'
   RESCHEDULE_WAIT = 1.second
 
   def perform

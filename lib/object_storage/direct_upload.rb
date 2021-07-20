@@ -79,8 +79,8 @@ module ObjectStorage
           Provider: 'AWS',
           S3Config: {
             Bucket: bucket_name,
-            Region: credentials[:region],
-            Endpoint: config.s3_endpoint,
+            Region: credentials[:region] || ::Fog::AWS::Storage::DEFAULT_REGION,
+            Endpoint: credentials[:endpoint],
             PathStyle: config.use_path_style?,
             UseIamProfile: config.use_iam_profile?,
             ServerSideEncryption: config.server_side_encryption,
@@ -112,7 +112,6 @@ module ObjectStorage
     end
 
     def use_workhorse_s3_client?
-      return false unless Feature.enabled?(:use_workhorse_s3_client, default_enabled: true)
       return false unless config.use_iam_profile? || config.consolidated_settings?
       # The Golang AWS SDK does not support V2 signatures
       return false unless credentials.fetch(:aws_signature_version, 4).to_i >= 4
@@ -229,7 +228,7 @@ module ObjectStorage
     end
 
     def connection
-      config.fog_connection
+      @connection ||= ::Fog::Storage.new(credentials)
     end
   end
 end

@@ -532,10 +532,6 @@ table.code {
       &.parallel {
         display: table-cell;
         width: 46%;
-
-        span {
-          word-break: break-all;
-        }
       }
 
       &.old {
@@ -602,7 +598,9 @@ table.code {
   .diff-grid-left,
   .diff-grid-right {
     display: grid;
-    grid-template-columns: 50px 8px 1fr;
+    // Zero width column is a placeholder for the EE inline code quality diff
+    // see ee/.../diffs.scss for more details
+    grid-template-columns: 50px 8px 0 1fr;
   }
 
   .diff-grid-comments {
@@ -632,7 +630,9 @@ table.code {
 
     .diff-grid-left,
     .diff-grid-right {
-      grid-template-columns: 50px 50px 8px 1fr;
+      // Zero width column is a placeholder for the EE inline code quality diff
+      // see ee/../diffs.scss for more details
+      grid-template-columns: 50px 50px 8px 0 1fr;
     }
   }
 }
@@ -645,6 +645,10 @@ table.code {
 .diff-stats {
   align-items: center;
   padding: 0 1rem;
+
+  .diff-stats-contents {
+    display: contents;
+  }
 
   .diff-stats-group {
     padding: 0 0.25rem;
@@ -672,10 +676,6 @@ table.code {
 
 .inline-parallel-buttons {
   float: right;
-}
-
-.files-changed {
-  border-bottom: 0;
 }
 
 .merge-request-details .file-content.image_file img {
@@ -737,7 +737,7 @@ table.code {
 }
 
 .files {
-  .diff-file:last-child {
+  .diff-file:not(.is-virtual-scrolling):last-child {
     margin-bottom: 0;
   }
 }
@@ -847,8 +847,6 @@ table.code {
 
   .commit-stat-summary {
     @include media-breakpoint-up(sm) {
-      margin-left: -$gl-padding;
-      padding-left: $gl-padding;
       background-color: $white;
     }
   }
@@ -1035,7 +1033,6 @@ table.code {
     auto;
 
   // Retina cursor
-  // scss-lint:disable DuplicateProperty
   cursor: image-set(image-url('illustrations/image_comment_light_cursor.svg') 1x,
   image-url('illustrations/image_comment_light_cursor@2x.svg') 2x) $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
     auto;
@@ -1190,4 +1187,10 @@ table.code {
     margin: $gl-padding;
     margin-top: 0;
   }
+}
+
+// Note: Prevents tall files from appearing above sticky tabs
+.diffs .vue-recycle-scroller__item-view > div:not(.active) {
+  position: absolute;
+  bottom: 100vh;
 }

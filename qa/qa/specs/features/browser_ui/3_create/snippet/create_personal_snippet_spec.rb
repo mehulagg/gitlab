@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', :smoke do
+  RSpec.describe 'Create' do # convert back to a smoke test once proved to be stable
     describe 'Personal snippet creation' do
-      it 'user creates a personal snippet', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/840' do
+      it 'user creates a personal snippet', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1704' do
         Flow::Login.sign_in
 
         Page::Main::Menu.perform do |menu|
-          menu.go_to_more_dropdown_option(:snippets_link)
+          menu.go_to_menu_dropdown_option(:snippets_link)
         end
 
         Resource::Snippet.fabricate_via_browser_ui! do |snippet|

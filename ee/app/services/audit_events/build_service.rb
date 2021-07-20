@@ -2,28 +2,44 @@
 
 module AuditEvents
   class BuildService
-    def initialize(author:, scope:, target:, ip_address:, message:)
-      @author = author
+    # Handle missing attributes
+    MissingAttributeError = Class.new(StandardError)
+
+    # @raise [MissingAttributeError] when required attributes are blank
+    #
+    # @return [BuildService]
+    def initialize(author:, scope:, target:, message:)
+      raise MissingAttributeError if missing_attribute?(author, scope, target, message)
+
+      @author = build_author(author)
       @scope = scope
-      @target = target
-      @ip_address = ip_address
-      @message = message
+      @target = build_target(target)
+      @ip_address = build_ip_address
+      @message = build_message(message)
     end
 
+    # Create an instance of AuditEvent
+    #
+    # @return [AuditEvent]
     def execute
       AuditEvent.new(payload)
     end
 
     private
 
+    def missing_attribute?(author, scope, target, message)
+      author.blank? || scope.blank? || target.blank? || message.blank?
+    end
+
     def payload
       if License.feature_available?(:admin_audit_log)
         base_payload.merge(
           details: base_details_payload.merge(
             ip_address: @ip_address,
-            entity_path: @scope.full_path
+            entity_path: @scope.full_path,
+            custom_message: @message
           ),
-          ip_address: ip_address
+          ip_address: @ip_address
         )
       else
         base_payload.merge(details: base_details_payload)
@@ -44,14 +60,30 @@ module AuditEvents
       {
         author_name: @author.name,
         target_id: @target.id,
-        target_type: @target.class.name,
-        target_details: @target.name,
+        target_type: @target.type,
+        target_details: @target.details,
         custom_message: @message
       }
     end
 
-    def ip_address
-      @ip_address.presence || @author.current_sign_in_ip
+    def build_author(author)
+      author.impersonated? ? ::Gitlab::Audit::ImpersonatedAuthor.new(author) : author
+    end
+
+    def build_target(target)
+      ::Gitlab::Audit::Target.new(target)
+    end
+
+    def build_message(message)
+      if License.feature_available?(:admin_audit_log) && @author.impersonated?
+        "#{message} (by #{@author.impersonated_by})"
+      else
+        message
+      end
+    end
+
+    def build_ip_address
+      Gitlab::RequestContext.instance.client_ip || @author.current_sign_in_ip
     end
   end
 end

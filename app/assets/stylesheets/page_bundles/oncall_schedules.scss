@@ -95,7 +95,7 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
       @include gl-font-weight-normal;
 
       &.label-dark {
-        @include gl-text-gray-900;
+        color: var(--gray-900, $gray-900);
       }
 
       &.label-bold {
@@ -180,12 +180,5 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
     background-color: var(--red-500, $red-500);
     @include gl-pointer-events-none;
     transform: translateX(-50%);
-  }
-}
-
-.gl-token {
-  .gl-avatar-labeled-label {
-    @include gl-text-white;
-    @include gl-font-weight-normal;
   }
 }

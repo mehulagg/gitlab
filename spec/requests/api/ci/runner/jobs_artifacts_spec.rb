@@ -17,9 +17,9 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
   end
 
   describe '/api/v4/jobs' do
-    let(:root_namespace) { create(:namespace) }
-    let(:namespace) { create(:namespace, parent: root_namespace) }
-    let(:project) { create(:project, namespace: namespace, shared_runners_enabled: false) }
+    let(:parent_group) { create(:group) }
+    let(:group) { create(:group, parent: parent_group) }
+    let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master') }
     let(:runner) { create(:ci_runner, :project, projects: [project]) }
     let(:user) { create(:user) }
@@ -78,7 +78,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
           before do
             stub_application_setting(max_artifacts_size: application_max_size)
-            root_namespace.update!(max_artifacts_size: sample_max_size)
+            parent_group.update!(max_artifacts_size: sample_max_size)
           end
 
           it_behaves_like 'failed request'
@@ -90,8 +90,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
           before do
             stub_application_setting(max_artifacts_size: application_max_size)
-            root_namespace.update!(max_artifacts_size: root_namespace_max_size)
-            namespace.update!(max_artifacts_size: sample_max_size)
+            parent_group.update!(max_artifacts_size: root_namespace_max_size)
+            group.update!(max_artifacts_size: sample_max_size)
           end
 
           it_behaves_like 'failed request'
@@ -104,8 +104,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
           before do
             stub_application_setting(max_artifacts_size: application_max_size)
-            root_namespace.update!(max_artifacts_size: root_namespace_max_size)
-            namespace.update!(max_artifacts_size: child_namespace_max_size)
+            parent_group.update!(max_artifacts_size: root_namespace_max_size)
+            group.update!(max_artifacts_size: child_namespace_max_size)
             project.update!(max_artifacts_size: sample_max_size)
           end
 
@@ -127,7 +127,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
               authorize_artifacts_with_token_in_params
             end
 
-            it_behaves_like 'API::CI::Runner application context metadata', '/api/:version/jobs/:id/artifacts/authorize' do
+            it_behaves_like 'API::CI::Runner application context metadata', 'POST /api/:version/jobs/:id/artifacts/authorize' do
               let(:send_request) { subject }
             end
 
@@ -178,6 +178,18 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
                 end
 
                 it_behaves_like 'authorizes local file'
+              end
+            end
+
+            context 'when job does not exist anymore' do
+              before do
+                allow(job).to receive(:id).and_return(non_existing_record_id)
+              end
+
+              it 'returns 403 Forbidden' do
+                subject
+
+                expect(response).to have_gitlab_http_status(:forbidden)
               end
             end
           end
@@ -262,7 +274,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
       end
 
       describe 'POST /api/v4/jobs/:id/artifacts' do
-        it_behaves_like 'API::CI::Runner application context metadata', '/api/:version/jobs/:id/artifacts' do
+        it_behaves_like 'API::CI::Runner application context metadata', 'POST /api/:version/jobs/:id/artifacts' do
           let(:send_request) do
             upload_artifacts(file_upload, headers_with_token)
           end
@@ -315,6 +327,18 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             end
 
             it 'responds with forbidden' do
+              upload_artifacts(file_upload, headers_with_token)
+
+              expect(response).to have_gitlab_http_status(:forbidden)
+            end
+          end
+
+          context 'when job does not exist anymore' do
+            before do
+              allow(job).to receive(:id).and_return(non_existing_record_id)
+            end
+
+            it 'returns 403 Forbidden' do
               upload_artifacts(file_upload, headers_with_token)
 
               expect(response).to have_gitlab_http_status(:forbidden)
@@ -784,7 +808,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
       describe 'GET /api/v4/jobs/:id/artifacts' do
         let(:token) { job.token }
 
-        it_behaves_like 'API::CI::Runner application context metadata', '/api/:version/jobs/:id/artifacts' do
+        it_behaves_like 'API::CI::Runner application context metadata', 'GET /api/:version/jobs/:id/artifacts' do
           let(:send_request) { download_artifact }
         end
 
@@ -864,6 +888,18 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             download_artifact
 
             expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+
+        context 'when job does not exist anymore' do
+          before do
+            allow(job).to receive(:id).and_return(non_existing_record_id)
+          end
+
+          it 'responds with 403 Forbidden' do
+            get api("/jobs/#{job.id}/artifacts"), params: { token: token }, headers: headers
+
+            expect(response).to have_gitlab_http_status(:forbidden)
           end
         end
 

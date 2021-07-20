@@ -4,6 +4,7 @@ import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import { __, s__, sprintf } from '~/locale';
+import CiCdAnalyticsCharts from '~/vue_shared/components/ci_cd_analytics/ci_cd_analytics_charts.vue';
 import {
   DEFAULT,
   CHART_CONTAINER_HEIGHT,
@@ -21,7 +22,6 @@ import {
 } from '../constants';
 import getPipelineCountByStatus from '../graphql/queries/get_pipeline_count_by_status.query.graphql';
 import getProjectPipelineStatistics from '../graphql/queries/get_project_pipeline_statistics.query.graphql';
-import CiCdAnalyticsCharts from './ci_cd_analytics_charts.vue';
 import StatisticsList from './statistics_list.vue';
 
 const defaultAnalyticsValues = {
@@ -225,11 +225,21 @@ export default {
           {
             name: 'success',
             data: this.mergeLabelsAndValues(labels, success),
+            areaStyle: {
+              color: this.$options.successColor,
+            },
+            lineStyle: {
+              color: this.$options.successColor,
+            },
+            itemStyle: {
+              color: this.$options.successColor,
+            },
           },
         ],
       };
     },
   },
+  successColor: '#608b2f',
   chartContainerHeight: CHART_CONTAINER_HEIGHT,
   timesChartOptions: {
     height: INNER_CHART_HEIGHT,
@@ -252,10 +262,10 @@ export default {
   },
   errorTexts: {
     [LOAD_ANALYTICS_FAILURE]: s__(
-      'PipelineCharts|An error has ocurred when retrieving the analytics data',
+      'PipelineCharts|An error has occurred when retrieving the analytics data',
     ),
     [LOAD_PIPELINES_FAILURE]: s__(
-      'PipelineCharts|An error has ocurred when retrieving the pipelines data',
+      'PipelineCharts|An error has occurred when retrieving the pipelines data',
     ),
     [PARSE_FAILURE]: s__('PipelineCharts|There was an error parsing the data for the charts.'),
     [DEFAULT]: s__('PipelineCharts|An unknown error occurred while processing CI/CD analytics.'),
@@ -292,7 +302,7 @@ export default {
       failure.text
     }}</gl-alert>
     <div class="gl-mb-3">
-      <h3>{{ s__('PipelineCharts|CI / CD Analytics') }}</h3>
+      <h3>{{ s__('PipelineCharts|CI/CD Analytics') }}</h3>
     </div>
     <h4 class="gl-my-4">{{ s__('PipelineCharts|Overall statistics') }}</h4>
     <div class="row">
@@ -301,7 +311,7 @@ export default {
         <statistics-list v-else :counts="formattedCounts" />
       </div>
       <div v-if="!loading" class="col-md-6">
-        <strong>{{ __('Duration for the last 30 commits') }}</strong>
+        <strong>{{ __('Pipeline durations for the last 30 commits') }}</strong>
         <gl-column-chart
           :height="$options.chartContainerHeight"
           :option="$options.timesChartOptions"

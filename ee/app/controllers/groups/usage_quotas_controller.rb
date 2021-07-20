@@ -10,7 +10,7 @@ class Groups::UsageQuotasController < Groups::ApplicationController
   feature_category :purchase
 
   def index
-    @projects = @group.all_projects.with_shared_runners_limit_enabled.page(params[:page])
+    @projects = @group.all_projects.with_shared_runners.page(params[:page])
   end
 
   private

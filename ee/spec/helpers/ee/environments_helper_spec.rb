@@ -61,7 +61,7 @@ RSpec.describe EnvironmentsHelper do
     it 'returns environment parameters data' do
       expect(subject).to include(
         "environment_name": environment.name,
-        "environments_path": project_environments_path(project, format: :json)
+        "environments_path": api_v4_projects_environments_path(id: project.id)
       )
     end
 

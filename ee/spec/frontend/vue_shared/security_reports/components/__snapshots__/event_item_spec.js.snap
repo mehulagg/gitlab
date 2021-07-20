@@ -11,6 +11,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       aria-hidden="true"
       class="gl-icon s16"
       data-testid="plus-icon"
+      role="img"
     >
       <use
         href="#plus"
@@ -36,6 +37,9 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
           class="note-header-author-name gl-font-weight-bold"
         >
           Tanuki
+      
+          <!---->
+           
         </span>
       </a>
        
@@ -81,6 +85,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     class="gl-flex-shrink-0 gl-align-self-start"
   >
     <button
+      aria-label="Foo Action"
       class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
       title="Foo Action"
       type="button"
@@ -91,6 +96,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
         aria-hidden="true"
         class="gl-button-icon gl-icon s16"
         data-testid="pencil-icon"
+        role="img"
       >
         <use
           href="#pencil"
@@ -100,6 +106,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       <!---->
     </button>
     <button
+      aria-label="Bar Action"
       class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
       title="Bar Action"
       type="button"
@@ -110,6 +117,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
         aria-hidden="true"
         class="gl-button-icon gl-icon s16"
         data-testid="remove-icon"
+        role="img"
       >
         <use
           href="#remove"

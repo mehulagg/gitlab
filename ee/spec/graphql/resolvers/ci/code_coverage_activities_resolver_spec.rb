@@ -13,11 +13,12 @@ RSpec.describe Resolvers::Ci::CodeCoverageActivitiesResolver do
     let_it_be(:project_1) { create(:project) }
     let_it_be(:project_2) { create(:project) }
     let_it_be(:group) { create(:group, projects: [project_1, project_2]) }
+
     let(:start_date) { 1.day.ago.to_date.to_s }
 
     context 'when group has projects with coverage' do
-      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
-      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2) }
+      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1, group: group) }
+      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2, group: group) }
 
       it 'returns coverage activity for the group' do
         expected_results = expected_activities(
@@ -42,8 +43,8 @@ RSpec.describe Resolvers::Ci::CodeCoverageActivitiesResolver do
     end
 
     context 'when coverage is included within start date' do
-      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1, date: 1.week.ago) }
-      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_1, date: 1.week.ago, group_name: 'karma') }
+      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1, date: 1.week.ago, group: group) }
+      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_1, date: 1.week.ago, group_name: 'karma', group: group) }
       let(:start_date) { 1.week.ago.to_date.to_s }
 
       it 'returns coverage from the start_date' do

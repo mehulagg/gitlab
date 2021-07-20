@@ -7,6 +7,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:issue, refind: true) { create(:issue, project: project) }
+
   let(:target_issue) { create(:issue) }
 
   subject { described_class.new(project, user, issue: issue, target_issue: target_issue).execute }
@@ -190,8 +191,16 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             expect(commits_on_master(limit: 99)).to include(*target_issue.design_versions.ordered.pluck(:sha))
           end
 
-          it 'creates a master branch if none previously existed' do
-            expect { subject }.to change { target_repository.branch_names }.from([]).to(['master'])
+          it 'creates a default branch if none previously existed' do
+            expect { subject }.to change { target_repository.branch_names }.from([]).to([project.design_repository.root_ref])
+          end
+
+          it 'does not create default branch when one exists' do
+            target_repository.create_if_not_exists
+            target_repository.create_file(user, '.meta', '.gitlab', branch_name: 'new-branch', message: 'message')
+
+            expect { subject }.not_to change { target_repository.branch_names }
+            expect(target_repository.branch_names).to eq(['new-branch'])
           end
 
           it 'leaves the design collection in the correct copy state' do
@@ -246,7 +255,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
           end
 
           def commits_on_master(limit: 10)
-            target_repository.commits('master', limit: limit).map(&:id)
+            target_repository.commits(target_repository.root_ref, limit: limit).map(&:id)
           end
         end
       end

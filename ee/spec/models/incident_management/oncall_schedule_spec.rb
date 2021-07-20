@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::OncallSchedule do
-  let_it_be(:project) { create(:project) }
+  let_it_be_with_reload(:project) { create(:project) }
 
   describe '.associations' do
     it { is_expected.to belong_to(:project) }
@@ -32,6 +32,17 @@ RSpec.describe IncidentManagement::OncallSchedule do
         expect(subject).to be_invalid
         expect(subject.errors.full_messages.to_sentence).to eq('Name has already been taken')
       end
+    end
+  end
+
+  describe 'scopes' do
+    let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+    let_it_be(:other_schedule) { create(:incident_management_oncall_schedule) }
+
+    describe '.for_project' do
+      subject { described_class.for_project(project) }
+
+      it { is_expected.to contain_exactly(schedule) }
     end
   end
 

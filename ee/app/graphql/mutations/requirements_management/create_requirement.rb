@@ -14,9 +14,9 @@ module Mutations
         project = authorized_find!(project_path)
 
         requirement = ::RequirementsManagement::CreateRequirementService.new(
-          project,
-          context[:current_user],
-          args
+          project: project,
+          current_user: context[:current_user],
+          params: args
         ).execute
 
         {

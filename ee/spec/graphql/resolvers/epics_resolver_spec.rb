@@ -10,6 +10,7 @@ RSpec.describe Resolvers::EpicsResolver do
 
   context "with a group" do
     let_it_be_with_refind(:group) { create(:group) }
+
     let(:project) { create(:project, :public, group: group) }
     let(:epic1)   { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago) }
     let(:epic2)   { create(:epic, group: group, author: user2, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago) }
@@ -71,6 +72,14 @@ RSpec.describe Resolvers::EpicsResolver do
             expect(epics).to match_array([epic1, epic2])
           end
         end
+
+        context 'when timeframe start and end are present' do
+          it 'returns epics within timeframe' do
+            epics = resolve_epics(timeframe: { start: '2019-08-13', end: '2019-08-21' })
+
+            expect(epics).to match_array([epic1, epic2])
+          end
+        end
       end
 
       context 'with state' do
@@ -106,6 +115,37 @@ RSpec.describe Resolvers::EpicsResolver do
 
           expect(epics).to match_array([epic2, epic3])
         end
+
+        context 'with in param' do
+          it 'returns an error if param search is missing' do
+            error_message = "`search` should be present when including the `in` argument"
+            expect { resolve_epics(in: ['title']) }
+              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, error_message)
+          end
+
+          it 'filters epics by description only' do
+            epics_with_text = resolve_epics(search: 'text', in: ['description'])
+            epics_with_created = resolve_epics(search: 'created', in: ['description'])
+
+            expect(epics_with_created).to be_empty
+            expect(epics_with_text).to match_array([epic2, epic3])
+          end
+
+          it 'filters epics by title only' do
+            epics_with_text = resolve_epics(search: 'text', in: ['title'])
+            epics_with_created = resolve_epics(search: 'created', in: ['title'])
+
+            expect(epics_with_created).to match_array([epic1, epic2])
+            expect(epics_with_text).to be_empty
+          end
+
+          it 'filters epics by title and description' do
+            epic4 = create(:epic, group: group, title: 'fourth text', description: ['description'])
+            epics = resolve_epics(search: 'text', in: %w(title description))
+
+            expect(epics).to match_array([epic2, epic3, epic4])
+          end
+        end
       end
 
       context 'with author_username' do
@@ -131,6 +171,17 @@ RSpec.describe Resolvers::EpicsResolver do
           epics = resolve_epics(label_name: [label_1.title, label_2.title])
 
           expect(epics).to match_array([epic_1])
+        end
+      end
+
+      context 'with my_reaction_emoji' do
+        it 'filters epics by reaction emoji' do
+          create(:award_emoji, name: 'man_in_business_suit_levitating', user: current_user, awardable: epic1)
+          create(:award_emoji, name: 'thumbsdown', user: current_user, awardable: epic2)
+
+          epics = resolve_epics(my_reaction_emoji: 'man_in_business_suit_levitating')
+
+          expect(epics).to contain_exactly(epic1)
         end
       end
 
@@ -160,29 +211,42 @@ RSpec.describe Resolvers::EpicsResolver do
         let!(:epic1) { create(:epic, group: group, title: 'first created', description: 'description', start_date: 10.days.ago, end_date: 10.days.from_now) }
         let!(:epic2) { create(:epic, group: group, title: 'second created', description: 'text 1', start_date: 20.days.ago, end_date: 20.days.from_now) }
         let!(:epic3) { create(:epic, group: group, title: 'third', description: 'text 2', start_date: 30.days.ago, end_date: 30.days.from_now) }
+        let!(:epic4) { create(:epic, group: group, title: 'forth created', description: 'four', start_date: 40.days.ago, end_date: 40.days.from_now) }
 
         it 'orders epics by start date in descending order' do
           epics = resolve_epics(sort: 'start_date_desc')
 
-          expect(epics).to eq([epic1, epic2, epic3])
+          expect(epics).to eq([epic1, epic2, epic3, epic4])
         end
 
         it 'orders epics by start date in ascending order' do
           epics = resolve_epics(sort: 'start_date_asc')
 
-          expect(epics).to eq([epic3, epic2, epic1])
+          expect(epics).to eq([epic4, epic3, epic2, epic1])
         end
 
         it 'orders epics by end date in descending order' do
           epics = resolve_epics(sort: 'end_date_desc')
 
-          expect(epics).to eq([epic3, epic2, epic1])
+          expect(epics).to eq([epic4, epic3, epic2, epic1])
         end
 
         it 'orders epics by end date in ascending order' do
           epics = resolve_epics(sort: 'end_date_asc')
 
-          expect(epics).to eq([epic1, epic2, epic3])
+          expect(epics).to eq([epic1, epic2, epic3, epic4])
+        end
+
+        it 'orders epics by title in descending order' do
+          epics = resolve_epics(sort: 'title_desc')
+
+          expect(epics).to eq([epic3, epic2, epic4, epic1])
+        end
+
+        it 'orders epics by title in ascending order' do
+          epics = resolve_epics(sort: 'title_asc')
+
+          expect(epics).to eq([epic1, epic4, epic2, epic3])
         end
       end
 
@@ -215,6 +279,16 @@ RSpec.describe Resolvers::EpicsResolver do
           create(:issue, project: subgroup_project, epic: epic3, milestone: milestone)
 
           expect(resolve_epics(milestone_title: milestone.title)).to contain_exactly(epic1, epic3)
+        end
+
+        context 'when the resolved group is a subgroup' do
+          it 'returns only the epics belonging to the subgroup by default' do
+            expect(resolve_epics({}, sub_group)).to contain_exactly(epic3, epic4)
+          end
+
+          it 'returns the epics belonging to the ancestor groups when include_ancestor_groups is true' do
+            expect(resolve_epics({ include_ancestor_groups: true }, sub_group)).to contain_exactly(epic1, epic2, epic3, epic4)
+          end
         end
       end
 
@@ -251,6 +325,36 @@ RSpec.describe Resolvers::EpicsResolver do
         end
       end
     end
+
+    context 'with negated filters' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:author) { create(:user) }
+      let_it_be(:label) { create(:label) }
+      let_it_be(:epic_1) { create(:labeled_epic, group: group, labels: [label]) }
+      let_it_be(:epic_2) { create(:epic, group: group, author: author) }
+      let_it_be(:epic_3) { create(:epic, group: group) }
+      let_it_be(:awarded_emoji) { create(:award_emoji, name: 'thumbsup', awardable: epic_3, user: current_user) }
+
+      subject(:results) { resolve_epics(args) }
+
+      context 'for label' do
+        let(:args) { { not: { label_name: [label.title] } } }
+
+        it { is_expected.to contain_exactly(epic_2, epic_3) }
+      end
+
+      context 'for author' do
+        let(:args) { { not: { author_username: author.username } } }
+
+        it { is_expected.to contain_exactly(epic_1, epic_3) }
+      end
+
+      context 'for emoji' do
+        let(:args) { { not: { my_reaction_emoji: awarded_emoji.name } } }
+
+        it { is_expected.to contain_exactly(epic_1, epic_2) }
+      end
+    end
   end
 
   context "when passing a non existent, batch loaded group" do
@@ -265,7 +369,7 @@ RSpec.describe Resolvers::EpicsResolver do
     end
   end
 
-  def resolve_epics(args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: group, args: args, ctx: context)
+  def resolve_epics(args = {}, obj = group, context = { current_user: current_user })
+    resolve(described_class, obj: obj, args: args, ctx: context)
   end
 end

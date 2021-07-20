@@ -2,7 +2,7 @@
 import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import { mapState } from 'vuex';
-import issueCardInner from 'ee_else_ce/boards/mixins/issue_card_inner';
+import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { sprintf, __, n__ } from '~/locale';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
@@ -24,7 +24,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [issueCardInner],
+  mixins: [boardCardInner],
   inject: ['groupId', 'rootPath'],
   props: {
     issue: {
@@ -94,6 +94,9 @@ export default {
         return n__(`Blocked by %d issue`, `Blocked by %d issues`, this.issue.blockedByCount);
       }
       return __('Blocked issue');
+    },
+    assignees() {
+      return this.issue.assignees.filter((_, index) => this.shouldRenderAssignee(index));
     },
   },
   methods: {
@@ -207,7 +210,7 @@ export default {
           />
           <issue-time-estimate v-if="issue.timeEstimate" :estimate="issue.timeEstimate" />
           <issue-card-weight
-            v-if="validIssueWeight"
+            v-if="validIssueWeight(issue)"
             :weight="issue.weight"
             @click="filterByWeight(issue.weight)"
           />
@@ -215,8 +218,7 @@ export default {
       </div>
       <div class="board-card-assignee gl-display-flex">
         <user-avatar-link
-          v-for="(assignee, index) in issue.assignees"
-          v-if="shouldRenderAssignee(index)"
+          v-for="assignee in assignees"
           :key="assignee.id"
           :link-href="assigneeUrl(assignee)"
           :img-alt="avatarUrlTitle(assignee)"

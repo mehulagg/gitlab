@@ -7,6 +7,7 @@ import axios from '~/lib/utils/axios_utils';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import BranchesDropdown from '~/projects/commit/components/branches_dropdown.vue';
 import CommitFormModal from '~/projects/commit/components/form_modal.vue';
+import ProjectsDropdown from '~/projects/commit/components/projects_dropdown.vue';
 import eventHub from '~/projects/commit/event_hub';
 import createStore from '~/projects/commit/store';
 import mockData from '../mock_data';
@@ -16,12 +17,14 @@ describe('CommitFormModal', () => {
   let store;
   let axiosMock;
 
-  const createComponent = (method, state = {}, provide = {}) => {
+  const createComponent = (method, state = {}, provide = {}, propsData = {}) => {
     store = createStore({ ...mockData.mockModal, ...state });
     wrapper = extendedWrapper(
       method(CommitFormModal, {
-        provide,
-        propsData: { ...mockData.modalPropsData },
+        provide: {
+          ...provide,
+        },
+        propsData: { ...mockData.modalPropsData, ...propsData },
         store,
         attrs: {
           static: true,
@@ -33,7 +36,9 @@ describe('CommitFormModal', () => {
 
   const findModal = () => wrapper.findComponent(GlModal);
   const findStartBranch = () => wrapper.find('#start_branch');
-  const findDropdown = () => wrapper.findComponent(BranchesDropdown);
+  const findTargetProject = () => wrapper.find('#target_project_id');
+  const findBranchesDropdown = () => wrapper.findComponent(BranchesDropdown);
+  const findProjectsDropdown = () => wrapper.findComponent(ProjectsDropdown);
   const findForm = () => findModal().findComponent(GlForm);
   const findCheckBox = () => findForm().findComponent(GlFormCheckbox);
   const findPrependedText = () => wrapper.findByTestId('prepended-text');
@@ -146,11 +151,20 @@ describe('CommitFormModal', () => {
     });
 
     it('Changes the start_branch input value', async () => {
-      findDropdown().vm.$emit('selectBranch', '_changed_branch_value_');
+      findBranchesDropdown().vm.$emit('selectBranch', '_changed_branch_value_');
 
       await wrapper.vm.$nextTick();
 
       expect(findStartBranch().attributes('value')).toBe('_changed_branch_value_');
+    });
+
+    it('Changes the target_project_id input value', async () => {
+      createComponent(shallowMount, {}, {}, { isCherryPick: true });
+      findProjectsDropdown().vm.$emit('selectProject', '_changed_project_value_');
+
+      await wrapper.vm.$nextTick();
+
+      expect(findTargetProject().attributes('value')).toBe('_changed_project_value_');
     });
   });
 });

@@ -1,4 +1,4 @@
-# Builds a cached .tar.gz of the master branch with full history and
+# Builds a cached .tar.gz of the $CI_DEFAULT_BRANCH branch with full history and
 # uploads it to Google Cloud Storage. This archive is downloaded by a
 # script defined by a CI/CD variable named CI_PRE_CLONE_SCRIPT. This has
 # two benefits:
@@ -28,8 +28,9 @@ cache-repo:
   before_script:
     - '[ -z "$CI_REPO_CACHE_CREDENTIALS" ] || gcloud auth activate-service-account --key-file=$CI_REPO_CACHE_CREDENTIALS'
   script:
-    # Enable shallow repo caching only if the $ENABLE_SHALLOW_REPO_CACHING variable exists
-    - if [ -n "$ENABLE_SHALLOW_REPO_CACHING" ]; then
+    # Enable shallow repo caching unless the $DISABLE_SHALLOW_REPO_CACHING variable exists (in the case the shallow clone caching isn't working well)
+    # The `git repack` call works around a Git bug with shallow clones: https://gitlab.com/gitlab-org/git/-/issues/86
+    - if [ -z "$DISABLE_SHALLOW_REPO_CACHING" ]; then
         cd .. && rm -rf $CI_PROJECT_NAME;
         today=$(date +%Y-%m-%d);
         year=$(date +%Y);
@@ -38,19 +39,23 @@ cache-repo:
         echo "Cloning $CI_REPOSITORY_URL into $CI_PROJECT_NAME with commits from $one_year_ago.";
         time git clone --progress --no-checkout --shallow-since=$one_year_ago $CI_REPOSITORY_URL $CI_PROJECT_NAME;
         cd $CI_PROJECT_NAME;
+        time git repack -d;
         echo "Archiving $CI_PROJECT_NAME into /tmp/$SHALLOW_CLONE_TAR_FILENAME.";
+        time git remote rm origin;
         time tar cf /tmp/$SHALLOW_CLONE_TAR_FILENAME .;
         echo "GZipping /tmp/$SHALLOW_CLONE_TAR_FILENAME.";
         time gzip /tmp/$SHALLOW_CLONE_TAR_FILENAME;
         [ -z "$CI_REPO_CACHE_CREDENTIALS" ] || (echo "Uploading /tmp/$SHALLOW_CLONE_TAR_FILENAME.gz to GCloud." && time gsutil cp /tmp/$SHALLOW_CLONE_TAR_FILENAME.gz gs://gitlab-ci-git-repo-cache/project-$CI_PROJECT_ID/$SHALLOW_CLONE_TAR_FILENAME.gz);
       fi
-    # By default, we want to cache the full repo, unless the $DISABLE_FULL_REPO_CACHING variable exists (in the case the shallow clone caching is working well)
-    - if [ -z "$DISABLE_FULL_REPO_CACHING" ]; then
+    # Disable the full repo caching unless the $DISABLE_SHALLOW_REPO_CACHING variable exists (in the case the shallow clone caching isn't working well)
+    - if [ -n "$DISABLE_SHALLOW_REPO_CACHING" ]; then
         cd .. && rm -rf $CI_PROJECT_NAME;
         echo "Cloning $CI_REPOSITORY_URL into $CI_PROJECT_NAME.";
         time git clone --progress $CI_REPOSITORY_URL $CI_PROJECT_NAME;
         cd $CI_PROJECT_NAME;
+        time git repack -d;
         echo "Archiving $CI_PROJECT_NAME into /tmp/$FULL_CLONE_TAR_FILENAME.";
+        time git remote rm origin;
         time tar cf /tmp/$FULL_CLONE_TAR_FILENAME .;
         echo "GZipping /tmp/$FULL_CLONE_TAR_FILENAME.";
         time gzip /tmp/$FULL_CLONE_TAR_FILENAME;

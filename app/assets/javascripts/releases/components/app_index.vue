@@ -1,7 +1,7 @@
 <script>
 import { GlEmptyState, GlLink, GlButton } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { getParameterByName } from '~/lib/utils/common_utils';
+import { getParameterByName } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import ReleaseBlock from './release_block.vue';
 import ReleaseSkeletonLoader from './release_skeleton_loader.vue';
@@ -20,7 +20,7 @@ export default {
     ReleasesSort,
   },
   computed: {
-    ...mapState('list', [
+    ...mapState('index', [
       'documentationPath',
       'illustrationPath',
       'newReleasePath',
@@ -46,17 +46,13 @@ export default {
     window.addEventListener('popstate', this.fetchReleases);
   },
   methods: {
-    ...mapActions('list', {
+    ...mapActions('index', {
       fetchReleasesStoreAction: 'fetchReleases',
     }),
     fetchReleases() {
       this.fetchReleasesStoreAction({
-        // these two parameters are only used in "GraphQL mode"
         before: getParameterByName('before'),
         after: getParameterByName('after'),
-
-        // this parameter is only used when in "REST mode"
-        page: getParameterByName('page'),
       });
     },
   },
@@ -73,17 +69,17 @@ export default {
         :aria-describedby="shouldRenderEmptyState && 'releases-description'"
         category="primary"
         variant="success"
-        class="js-new-release-btn"
+        data-testid="new-release-button"
       >
         {{ __('New release') }}
       </gl-button>
     </div>
 
-    <release-skeleton-loader v-if="isLoading" class="js-loading" />
+    <release-skeleton-loader v-if="isLoading" />
 
     <gl-empty-state
       v-else-if="shouldRenderEmptyState"
-      class="js-empty-state"
+      data-testid="empty-state"
       :title="__('Getting started with releases')"
       :svg-path="illustrationPath"
     >
@@ -101,7 +97,7 @@ export default {
       </template>
     </gl-empty-state>
 
-    <div v-else-if="shouldRenderSuccessState" class="js-success-state">
+    <div v-else-if="shouldRenderSuccessState" data-testid="success-state">
       <release-block
         v-for="(release, index) in releases"
         :key="index"

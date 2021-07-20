@@ -27,7 +27,7 @@ have a high degree of confidence in being able to perform them accurately.
 
 ## Not all data is automatically replicated
 
-If you are using any GitLab features that Geo [doesn't support](../index.md#limitations),
+If you are using any GitLab features that Geo [doesn't support](../replication/datatypes.md#limitations-on-replicationverification),
 you must make separate provisions to ensure that the **secondary** node has an
 up-to-date copy of any data associated with that feature. This may extend the
 required scheduled maintenance period significantly.
@@ -35,13 +35,12 @@ required scheduled maintenance period significantly.
 A common strategy for keeping this period as short as possible for data stored
 in files is to use `rsync` to transfer the data. An initial `rsync` can be
 performed ahead of the maintenance window; subsequent `rsync`s (including a
-final transfer inside the maintenance window) will then transfer only the
+final transfer inside the maintenance window) then transfers only the
 *changes* between the **primary** node and the **secondary** nodes.
 
 Repository-centric strategies for using `rsync` effectively can be found in the
 [moving repositories](../../operations/moving_repositories.md) documentation; these strategies can
-be adapted for use with any other file-based data, such as GitLab Pages (to
-be found in `/var/opt/gitlab/gitlab-rails/shared/pages` if using Omnibus).
+be adapted for use with any other file-based data, such as [GitLab Pages](../../pages/index.md#change-storage-path).
 
 ## Preflight checks
 
@@ -51,7 +50,7 @@ this command reports `ERROR - Replication is not up-to-date` even if
 replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
 later.
 
-Run this command to list out all preflight checks and automatically check if replication and verification are complete before scheduling a planned failover to ensure the process will go smoothly:
+Run this command to list out all preflight checks and automatically check if replication and verification are complete before scheduling a planned failover to ensure the process goes smoothly:
 
 ```shell
 gitlab-ctl promotion-preflight-checks
@@ -74,7 +73,7 @@ In GitLab 12.4, you can optionally allow GitLab to manage replication of Object 
 Database settings are automatically replicated to the **secondary**  node, but the
 `/etc/gitlab/gitlab.rb` file must be set up manually, and differs between
 nodes. If features such as Mattermost, OAuth or LDAP integration are enabled
-on the **primary** node but not the **secondary** node, they will be lost during failover.
+on the **primary** node but not the **secondary** node, they are lost during failover.
 
 Review the `/etc/gitlab/gitlab.rb` file for both nodes and ensure the **secondary** node
 supports everything the **primary** node does **before** scheduling a planned failover.
@@ -110,17 +109,20 @@ The maintenance window won't end until Geo replication and verification is
 completely finished. To keep the window as short as possible, you should
 ensure these processes are close to 100% as possible during active use.
 
-Navigate to the **Admin Area > Geo** dashboard on the **secondary** node to
-review status. Replicated objects (shown in green) should be close to 100%,
-and there should be no failures (shown in red). If a large proportion of
-objects aren't yet replicated (shown in gray), consider giving the node more
-time to complete
+On the **secondary** node:
 
-![Replication status](img/replication-status.png)
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Geo > Nodes**.
+   Replicated objects (shown in green) should be close to 100%,
+   and there should be no failures (shown in red). If a large proportion of
+   objects aren't yet replicated (shown in gray), consider giving the node more
+   time to complete
+
+   ![Replication status](../replication/img/geo_node_dashboard_v14_0.png)
 
 If any objects are failing to replicate, this should be investigated before
 scheduling the maintenance window. Following a planned failover, anything that
-failed to replicate will be **lost**.
+failed to replicate is **lost**.
 
 You can use the [Geo status API](../../../api/geo_nodes.md#retrieve-project-sync-or-verification-failures-that-occurred-on-the-current-node) to review failed objects and
 the reasons for failure.
@@ -135,57 +137,65 @@ This [content was moved to another location](background_verification.md).
 
 ### Notify users of scheduled maintenance
 
-On the **primary** node, navigate to **Admin Area > Messages**, add a broadcast
-message. You can check under **Admin Area > Geo** to estimate how long it
-will take to finish syncing. An example message would be:
+On the **primary** node:
 
-> A scheduled maintenance will take place at XX:XX UTC. We expect it to take
-> less than 1 hour.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Messages**.
+1. Add a message notifying users on the maintenance window.
+   You can check under **Geo > Nodes** to estimate how long it
+   takes to finish syncing.
+1. Select **Add broadcast message**.
 
 ## Prevent updates to the **primary** node
 
 To ensure that all data is replicated to a secondary site, updates (write requests) need to
-be disabled on the primary site:
+be disabled on the **primary** site:
 
-1. Enable [maintenance mode](../../maintenance_mode/index.md).
-
-1. Disable non-Geo periodic background jobs on the **primary** node by navigating
-   to **Admin Area > Monitoring > Background Jobs > Cron**, pressing `Disable All`,
-   and then pressing `Enable` for the `geo_sidekiq_cron_config_worker` cron job.
-   This job will re-enable several other cron jobs that are essential for planned
+1. Enable [maintenance mode](../../maintenance_mode/index.md) on the **primary** node.
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Monitoring > Background Jobs**.
+1. On the Sidekiq dashboard, select **Cron**.
+1. Select `Disable All` to disable non-Geo periodic background jobs.
+1. Select `Enable` for the `geo_sidekiq_cron_config_worker` cron job.
+   This job re-enables several other cron jobs that are essential for planned
    failover to complete successfully.
 
 ## Finish replicating and verifying all data
 
 1. If you are manually replicating any data not managed by Geo, trigger the
    final replication process now.
-1. On the **primary** node, navigate to **Admin Area > Monitoring > Background Jobs > Queues**
-   and wait for all queues except those with `geo` in the name to drop to 0.
-   These queues contain work that has been submitted by your users; failing over
-   before it is completed will cause the work to be lost.
-1. On the **primary** node, navigate to **Admin Area > Geo** and wait for the
-   following conditions to be true of the **secondary** node you are failing over to:
+1. On the **primary** node:
+   1. On the top bar, select **Menu >** **{admin}** **Admin**.
+   1. On the left sidebar, select **Monitoring > Background Jobs**.
+   1. On the Sidekiq dashboard, select **Queues**, and wait for all queues except
+      those with `geo` in the name to drop to 0.
+      These queues contain work that has been submitted by your users; failing over
+      before it is completed, causes the work to be lost.
+   1. On the left sidebar, select **Geo > Nodes** and wait for the
+      following conditions to be true of the **secondary** node you are failing over to:
 
-   - All replication meters to each 100% replicated, 0% failures.
-   - All verification meters reach 100% verified, 0% failures.
-   - Database replication lag is 0ms.
-   - The Geo log cursor is up to date (0 events behind).
+      - All replication meters reach 100% replicated, 0% failures.
+      - All verification meters reach 100% verified, 0% failures.
+      - Database replication lag is 0ms.
+      - The Geo log cursor is up to date (0 events behind).
 
-1. On the **secondary** node, navigate to **Admin Area > Monitoring > Background Jobs > Queues**
-   and wait for all the `geo` queues to drop to 0 queued and 0 running jobs.
-1. On the **secondary** node, use [these instructions](../../raketasks/check.md)
-   to verify the integrity of CI artifacts, LFS objects, and uploads in file
-   storage.
+1. On the **secondary** node:
+   1. On the top bar, select **Menu >** **{admin}** **Admin**.
+   1. On the left sidebar, select **Monitoring > Background Jobs**.
+   1. On the Sidekiq dashboard, select **Queues**, and wait for all the `geo`
+      queues to drop to 0 queued and 0 running jobs.
+   1. [Run an integrity check](../../raketasks/check.md) to verify the integrity
+      of CI artifacts, LFS objects, and uploads in file storage.
 
-At this point, your **secondary** node will contain an up-to-date copy of everything the
-**primary** node has, meaning nothing will be lost when you fail over.
+At this point, your **secondary** node contains an up-to-date copy of everything the
+**primary** node has, meaning nothing was lost when you fail over.
 
 ## Promote the **secondary** node
 
 Finally, follow the [Disaster Recovery docs](index.md) to promote the
-**secondary** node to a **primary** node. This process will cause a brief outage on the **secondary** node, and users may need to log in again.
+**secondary** node to a **primary** node. This process causes a brief outage on the **secondary** node, and users may need to log in again.
 
-Once it is completed, the maintenance window is over! Your new **primary** node will now
+Once it is completed, the maintenance window is over! Your new **primary** node, now
 begin to diverge from the old one. If problems do arise at this point, failing
 back to the old **primary** node [is possible](bring_primary_back.md), but likely to result
 in the loss of any data uploaded to the new **primary** in the meantime.

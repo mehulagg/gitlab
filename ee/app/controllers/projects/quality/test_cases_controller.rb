@@ -5,7 +5,7 @@ class Projects::Quality::TestCasesController < Projects::ApplicationController
 
   before_action :check_quality_management_available!
   before_action :authorize_read_issue!
-  before_action :authorize_create_issue!, only: [:new]
+  before_action :authorize_create_test_case!, only: [:new]
 
   feature_category :quality_management
 

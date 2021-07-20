@@ -1,16 +1,15 @@
 - return unless Gitlab.dev_env_or_com?
 
-- if skip_setup_for_company?
+- if user_has_memberships?
   = f.hidden_field :setup_for_company, value: true
 - else
   .row
     .form-group.col-sm-12
       = f.label :setup_for_company, setup_for_company_label_text, class: 'label-bold'
-      .d-flex.flex-column.flex-lg-row
-        .flex-grow-1
+      .gl-display-flex.gl-flex-direction-column.gl-lg-flex-direction-row
+        .gl-flex-grow-1
           = f.radio_button :setup_for_company, true, class: 'js-setup-for-company'
           = f.label :setup_for_company, _('My company or team'), class: 'normal', value: 'true'
-        .flex-grow-1
+        .gl-flex-grow-1
           = f.radio_button :setup_for_company, false, class: 'js-setup-for-me'
           = f.label :setup_for_company, _('Just me'), class: 'normal', value: 'false'
-      = render_if_exists 'devise/shared/email_opted_in', f: f, hidden: true

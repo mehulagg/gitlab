@@ -31,7 +31,7 @@ RSpec.describe SearchController, type: :request do
   end
 
   describe 'GET /search' do
-    context 'when elasticsearch is enabled', :elastic, :sidekiq_inline do
+    context 'when elasticsearch is enabled', :elastic, :clean_gitlab_redis_shared_state, :sidekiq_inline do
       before do
         stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
       end
@@ -67,6 +67,16 @@ RSpec.describe SearchController, type: :request do
         #   - one count for open MRs
         #   - one count for open Issues
         let(:threshold) { 9 }
+
+        it_behaves_like 'an efficient database result'
+      end
+
+      context 'for notes scope' do
+        let(:creation_traits) { [:on_commit] }
+        let(:object) { :note }
+        let(:creation_args) { { project: project } }
+        let(:params) { { search: '*', scope: 'notes' } }
+        let(:threshold) { 0 }
 
         it_behaves_like 'an efficient database result'
       end

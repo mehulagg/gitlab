@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
   describe '#perform' do
-    subject do
+    subject(:sync_seat_link) do
       described_class.new.perform('2020-01-01T01:20:12+02:00', '123', 5, 4)
     end
 
@@ -13,40 +13,148 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
     it 'makes an HTTP POST request with passed params' do
       stub_request(:post, seat_link_url).to_return(status: 200)
 
-      subject
+      sync_seat_link
 
       expect(WebMock).to have_requested(:post, seat_link_url).with(
         headers: { 'Content-Type' => 'application/json' },
         body: {
+          gitlab_version: Gitlab::VERSION,
           timestamp: '2019-12-31T23:20:12Z',
-          date: '2019-12-31',
           license_key: '123',
           max_historical_user_count: 5,
-          active_users: 4
+          billable_users_count: 4,
+          hostname: Gitlab.config.gitlab.host,
+          instance_id: Gitlab::CurrentSettings.uuid,
+          license_md5: ::License.current.md5
         }.to_json
       )
     end
 
-    context 'with old date format string' do
-      subject do
-        described_class.new.perform('2020-01-01', '123', 5, 4)
+    context 'when response contains a license' do
+      let(:license_key) { build(:gitlab_license, :cloud).export }
+      let(:body) { { success: true, license: license_key }.to_json }
+
+      before do
+        stub_request(:post, seat_link_url).to_return(
+          status: 200,
+          body: body,
+          headers: { content_type: 'application/json' }
+        )
       end
 
-      it 'makes an HTTP POST request with passed params' do
-        stub_request(:post, seat_link_url).to_return(status: 200)
+      shared_examples 'successful license creation' do
+        it 'persists the new license' do
+          freeze_time do
+            expect { sync_seat_link }.to change(License, :count).by(1)
+            expect(License.current).to have_attributes(
+              data: license_key,
+              cloud: true,
+              last_synced_at: Time.current
+            )
+          end
+        end
+      end
 
-        subject
+      context 'when there is no previous license' do
+        before do
+          License.delete_all
+        end
 
-        expect(WebMock).to have_requested(:post, seat_link_url).with(
-          headers: { 'Content-Type' => 'application/json' },
-          body: {
-            timestamp: '2020-01-01T00:00:00Z',
-            date: '2020-01-01',
-            license_key: '123',
-            max_historical_user_count: 5,
-            active_users: 4
-          }.to_json
+        it_behaves_like 'successful license creation'
+      end
+
+      context 'when there is a previous license' do
+        context 'when it is a cloud license' do
+          context 'when the current license key does not match the one returned from sync' do
+            it 'creates a new license' do
+              freeze_time do
+                current_license = create(:license, cloud: true, last_synced_at: 1.day.ago)
+
+                expect { sync_seat_link }.to change(License.cloud, :count).by(1)
+
+                new_current_license = License.current
+                expect(new_current_license).not_to eq(current_license.id)
+                expect(new_current_license).to have_attributes(
+                  data: license_key,
+                  cloud: true,
+                  last_synced_at: Time.current
+                )
+              end
+            end
+          end
+
+          context 'when the current license key matches the one returned from sync' do
+            it 'reuses the current license and updates the last_synced_at', :request_store do
+              freeze_time do
+                current_license = create(:license, cloud: true, data: license_key, last_synced_at: 1.day.ago)
+
+                expect { sync_seat_link }.not_to change(License.cloud, :count)
+
+                expect(License.current).to have_attributes(
+                  id: current_license.id,
+                  data: license_key,
+                  cloud: true,
+                  last_synced_at: Time.current
+                )
+              end
+            end
+          end
+
+          context 'when persisting fails' do
+            let(:license_key) { 'invalid-key' }
+
+            it 'does not delete the current license and logs error' do
+              current_license = License.current
+              expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).and_call_original
+
+              expect { sync_seat_link }.to raise_error
+
+              expect(License).to exist(current_license.id)
+            end
+          end
+        end
+
+        context 'when it is not a cloud license' do
+          before do
+            create(:license)
+          end
+
+          it_behaves_like 'successful license creation'
+        end
+      end
+    end
+
+    context 'when response contains reconciliation dates' do
+      let(:body) { { success: true, next_reconciliation_date: today.to_s, display_alert_from: (today - 7.days).to_s }.to_json }
+      let(:today) { Date.current }
+
+      before do
+        stub_request(:post, seat_link_url).to_return(
+          status: 200,
+          body: body,
+          headers: { content_type: 'application/json' }
         )
+      end
+
+      it 'saves the reconciliation dates' do
+        sync_seat_link
+        upcoming_reconciliation = GitlabSubscriptions::UpcomingReconciliation.next
+
+        expect(upcoming_reconciliation.next_reconciliation_date).to eq(today)
+        expect(upcoming_reconciliation.display_alert_from).to eq(today - 7.days)
+      end
+
+      context 'when an upcoming_reconciliation already exists' do
+        it 'updates the upcoming_reconciliation' do
+          create(:upcoming_reconciliation, :self_managed, next_reconciliation_date: today + 2.days, display_alert_from: today + 1.day)
+
+          sync_seat_link
+
+          upcoming_reconciliation = GitlabSubscriptions::UpcomingReconciliation.next
+
+          expect(upcoming_reconciliation.next_reconciliation_date).to eq(today)
+          expect(upcoming_reconciliation.display_alert_from).to eq(today - 7.days)
+        end
       end
     end
 
@@ -58,7 +166,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
         end
 
         it 'raises an error with the expected message' do
-          expect { subject }.to raise_error(
+          expect { sync_seat_link }.to raise_error(
             described_class::RequestError,
             'Seat Link request failed! Code:400 Body:{"success":false,"error":"Bad Request"}'
           )

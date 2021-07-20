@@ -37,9 +37,11 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    state: STATE_IDLING,
-  }),
+  data() {
+    return {
+      state: STATE_IDLING,
+    };
+  },
   computed: {
     shortSha() {
       return truncateSha(this.diffFile.content_sha);
@@ -87,7 +89,7 @@ export default {
 
 <template>
   <div class="nothing-here-block">
-    <gl-loading-icon v-if="is($options.STATE_LOADING)" />
+    <gl-loading-icon v-if="is($options.STATE_LOADING)" size="sm" />
     <template v-else>
       <gl-alert
         v-show="is($options.STATE_ERRORED)"

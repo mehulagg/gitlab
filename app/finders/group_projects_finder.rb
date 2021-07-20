@@ -48,8 +48,7 @@ class GroupProjectsFinder < ProjectsFinder
 
   def filter_projects(collection)
     projects = super
-    projects = by_feature_availability(projects)
-    projects
+    by_feature_availability(projects)
   end
 
   def limit(collection)
@@ -127,4 +126,4 @@ class GroupProjectsFinder < ProjectsFinder
   end
 end
 
-GroupProjectsFinder.prepend_if_ee('EE::GroupProjectsFinder')
+GroupProjectsFinder.prepend_mod_with('GroupProjectsFinder')

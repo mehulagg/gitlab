@@ -2,23 +2,23 @@
 
 module Types
   module Boards
-    # rubocop: disable Graphql/AuthorizeTypes
-    class NegatedBoardIssueInputType < BoardIssueInputBaseType
-    end
-
     class BoardIssueInputType < BoardIssueInputBaseType
       graphql_name 'BoardIssueInput'
 
       argument :not, NegatedBoardIssueInputType,
                required: false,
-               description: 'List of negated params. Warning: this argument is experimental and a subject to change in future.'
+               prepare: ->(negated_args, ctx) { negated_args.to_h },
+               description: 'List of negated arguments.'
 
       argument :search, GraphQL::STRING_TYPE,
                required: false,
                description: 'Search query for issue title or description.'
+
+      argument :assignee_wildcard_id, ::Types::Boards::AssigneeWildcardIdEnum,
+               required: false,
+               description: 'Filter by assignee wildcard. Incompatible with assigneeUsername.'
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end
 
-Types::Boards::BoardIssueInputType.prepend_if_ee('::EE::Types::Boards::BoardIssueInputType')
+Types::Boards::BoardIssueInputType.prepend_mod_with('Types::Boards::BoardIssueInputType')

@@ -13,7 +13,6 @@ import * as types from 'ee/roadmap/store/mutation_types';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import {
   basePath,
-  epicsPath,
   mockFormattedEpic,
   mockFormattedChildEpic2,
   mockGroupId,
@@ -48,6 +47,7 @@ describe('RoadmapApp', () => {
         glFeatures: { asyncFiltering: true },
         groupFullPath: 'gitlab-org',
         groupMilestonesPath: '/groups/gitlab-org/-/milestones.json',
+        listEpicsPath: '/groups/gitlab-org/-/epics',
       },
       store,
     });
@@ -62,7 +62,6 @@ describe('RoadmapApp', () => {
       timeframe,
       hasFiltersApplied,
       filterQueryString: '',
-      initialEpicsPath: epicsPath,
       basePath,
     });
   });

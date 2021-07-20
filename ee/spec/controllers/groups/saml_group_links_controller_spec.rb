@@ -12,7 +12,6 @@ RSpec.describe Groups::SamlGroupLinksController do
 
   before do
     stub_licensed_features(group_saml: true, group_saml_group_sync: true)
-    stub_feature_flags(saml_group_links: true)
 
     sign_in(user)
   end
@@ -20,14 +19,6 @@ RSpec.describe Groups::SamlGroupLinksController do
   shared_examples 'checks authorization' do
     let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
     let_it_be(:params) { route_params }
-
-    it 'renders 404 when the feature is disabled' do
-      stub_feature_flags(saml_group_links: false)
-
-      call_action
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
 
     it 'renders 404 when the user is not authorized' do
       allow(controller).to receive(:can?).and_call_original

@@ -18,6 +18,14 @@ module Elastic
         ::Elastic::ProcessInitialBookkeepingService.track!(self)
       end
 
+      override :maintain_elasticsearch_update
+      def maintain_elasticsearch_update(updated_attributes: previous_changes.keys)
+        # avoid race condition if project is deleted before Elasticsearch update completes
+        return if pending_delete?
+
+        super
+      end
+
       override :maintain_elasticsearch_destroy
       def maintain_elasticsearch_destroy
         ElasticDeleteProjectWorker.perform_async(self.id, self.es_id)

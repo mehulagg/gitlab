@@ -7,8 +7,8 @@ RSpec.describe Resolvers::Boards::EpicListsResolver do
 
   let_it_be(:user) { create(:user) }
   let_it_be_with_refind(:group) { create(:group, :private) }
-  let_it_be(:epic_board) { create(:epic_board, group: group) }
-  let_it_be(:epic_list1) { create(:epic_list, epic_board: epic_board) }
+  let_it_be_with_reload(:epic_board) { create(:epic_board, group: group) }
+  let_it_be(:epic_list1) { create(:epic_list, epic_board: epic_board, list_type: :backlog) }
   let_it_be(:epic_list2) { create(:epic_list, epic_board: epic_board) }
 
   specify do
@@ -43,7 +43,17 @@ RSpec.describe Resolvers::Boards::EpicListsResolver do
         let(:resolver) { described_class.single }
 
         it 'returns an array with single epic list' do
-          expect(result).to eq epic_list1
+          expect(result).to eq(epic_list1)
+        end
+      end
+
+      context 'when the board has hidden lists' do
+        before do
+          epic_board.update_column(:hide_backlog_list, true)
+        end
+
+        it 'returns an array with single epic list' do
+          expect(result).to match_array(epic_list2)
         end
       end
     end

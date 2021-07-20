@@ -201,36 +201,41 @@ export default {
     </div>
 
     <div v-else-if="showChart" class="contributors-charts">
-      <h4>{{ __('Commits to') }} {{ branch }}</h4>
+      <h4 class="gl-mb-2 gl-mt-5">{{ __('Commits to') }} {{ branch }}</h4>
       <span>{{ __('Excluding merge commits. Limited to 6,000 commits.') }}</span>
       <resizable-chart-container>
-        <gl-area-chart
-          slot-scope="{ width }"
-          :width="width"
-          :data="masterChartData"
-          :option="masterChartOptions"
-          :height="masterChartHeight"
-          @created="onMasterChartCreated"
-        />
+        <template #default="{ width }">
+          <gl-area-chart
+            class="gl-mb-5"
+            :width="width"
+            :data="masterChartData"
+            :option="masterChartOptions"
+            :height="masterChartHeight"
+            @created="onMasterChartCreated"
+          />
+        </template>
       </resizable-chart-container>
 
       <div class="row">
         <div
           v-for="(contributor, index) in individualChartsData"
           :key="index"
-          class="col-lg-6 col-12"
+          class="col-lg-6 col-12 gl-my-5"
         >
-          <h4>{{ contributor.name }}</h4>
-          <p>{{ n__('%d commit', '%d commits', contributor.commits) }} ({{ contributor.email }})</p>
+          <h4 class="gl-mb-2 gl-mt-0">{{ contributor.name }}</h4>
+          <p class="gl-mb-3">
+            {{ n__('%d commit', '%d commits', contributor.commits) }} ({{ contributor.email }})
+          </p>
           <resizable-chart-container>
-            <gl-area-chart
-              slot-scope="{ width }"
-              :width="width"
-              :data="contributor.dates"
-              :option="individualChartOptions"
-              :height="individualChartHeight"
-              @created="onIndividualChartCreated"
-            />
+            <template #default="{ width }">
+              <gl-area-chart
+                :width="width"
+                :data="contributor.dates"
+                :option="individualChartOptions"
+                :height="individualChartHeight"
+                @created="onIndividualChartCreated"
+              />
+            </template>
           </resizable-chart-container>
         </div>
       </div>

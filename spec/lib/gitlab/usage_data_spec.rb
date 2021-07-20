@@ -91,7 +91,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(described_class.usage_activity_by_stage_package({})).to eq(
         projects_with_packages: 2
       )
-      expect(described_class.usage_activity_by_stage_package(described_class.last_28_days_time_period)).to eq(
+      expect(described_class.usage_activity_by_stage_package(described_class.monthly_time_range_db_params)).to eq(
         projects_with_packages: 1
       )
     end
@@ -135,7 +135,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         project_clusters_disabled: 2,
         project_clusters_enabled: 10
       )
-      expect(described_class.usage_activity_by_stage_configure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_configure(described_class.monthly_time_range_db_params)).to include(
         clusters_applications_cert_managers: 1,
         clusters_applications_helm: 1,
         clusters_applications_ingress: 1,
@@ -167,8 +167,12 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         create(:key, user: user)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: true)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: false)
-        create(:remote_mirror, project: project)
+        create(:remote_mirror, project: project, enabled: true)
+        another_user = create(:user)
+        another_project = create(:project, :repository, creator: another_user)
+        create(:remote_mirror, project: another_project, enabled: false)
         create(:snippet, author: user)
+        create(:suggestion, note: create(:note, project: project))
       end
 
       expect(described_class.usage_activity_by_stage_create({})).to include(
@@ -176,18 +180,20 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         keys: 2,
         merge_requests: 2,
         projects_with_disable_overriding_approvers_per_merge_request: 2,
-        projects_without_disable_overriding_approvers_per_merge_request: 4,
+        projects_without_disable_overriding_approvers_per_merge_request: 6,
         remote_mirrors: 2,
-        snippets: 2
+        snippets: 2,
+        suggestions: 2
       )
-      expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_create(described_class.monthly_time_range_db_params)).to include(
         deploy_keys: 1,
         keys: 1,
         merge_requests: 1,
         projects_with_disable_overriding_approvers_per_merge_request: 1,
-        projects_without_disable_overriding_approvers_per_merge_request: 2,
+        projects_without_disable_overriding_approvers_per_merge_request: 3,
         remote_mirrors: 1,
-        snippets: 1
+        snippets: 1,
+        suggestions: 1
       )
     end
   end
@@ -219,7 +225,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         omniauth_providers: ['google_oauth2'],
         user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4, 'standard' => 0, 'two-factor' => 0, 'two-factor-via-u2f-device' => 0, "two-factor-via-webauthn-device" => 0 }
       )
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         events: 1,
         groups: 1,
         users_created: 3,
@@ -246,7 +252,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         unique_users_all_imports: 10
       )
 
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         unique_users_all_imports: 5
       )
     end
@@ -288,7 +294,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 2,
             gitlab_migration: 2,
             gitlab_project: 2,
-            manifest: 2
+            manifest: 2,
+            total: 18
           },
           issue_imports: {
             jira: 2,
@@ -320,7 +327,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           groups_imported: Gitlab::UsageData::DEPRECATED_VALUE
         }
       )
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         {
           bulk_imports: {
             gitlab_v1: 1,
@@ -335,7 +342,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 1,
             gitlab_migration: 1,
             gitlab_project: 1,
-            manifest: 1
+            manifest: 1,
+            total: 9
           },
           issue_imports: {
             jira: 1,
@@ -365,7 +373,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             csv: Gitlab::UsageData::DEPRECATED_VALUE
           },
           groups_imported: Gitlab::UsageData::DEPRECATED_VALUE
-
         }
       )
     end
@@ -382,14 +389,15 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   describe 'usage_activity_by_stage_monitor' do
     it 'includes accurate usage_activity_by_stage data' do
       for_defined_days_back do
-        user    = create(:user, dashboard: 'operations')
+        user = create(:user, dashboard: 'operations')
         cluster = create(:cluster, user: user)
-        create(:project, creator: user)
+        project = create(:project, creator: user)
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
         create(:project_tracing_setting)
         create(:project_error_tracking_setting)
         create(:incident)
         create(:incident, alert_management_alert: create(:alert_management_alert))
+        create(:alert_management_http_integration, :active, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
@@ -399,10 +407,12 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_tracing_enabled: 2,
         projects_with_error_tracking_enabled: 2,
         projects_with_incidents: 4,
-        projects_with_alert_incidents: 2
+        projects_with_alert_incidents: 2,
+        projects_with_enabled_alert_integrations_histogram: { '1' => 2 }
       )
 
-      expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
+      data_28_days = described_class.usage_activity_by_stage_monitor(described_class.monthly_time_range_db_params)
+      expect(data_28_days).to include(
         clusters: 1,
         clusters_applications_prometheus: 1,
         operations_dashboard_default_dashboard: 1,
@@ -411,6 +421,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_incidents: 2,
         projects_with_alert_incidents: 1
       )
+
+      expect(data_28_days).not_to include(:projects_with_enabled_alert_integrations_histogram)
     end
   end
 
@@ -423,8 +435,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         create(:issue, project: project, author: User.support_bot)
         create(:note, project: project, noteable: issue, author: user)
         create(:todo, project: project, target: issue, author: user)
-        create(:jira_service, :jira_cloud_service, active: true, project: create(:project, :jira_dvcs_cloud, creator: user))
-        create(:jira_service, active: true, project: create(:project, :jira_dvcs_server, creator: user))
+        create(:jira_integration, :jira_cloud_service, active: true, project: create(:project, :jira_dvcs_cloud, creator: user))
+        create(:jira_integration, active: true, project: create(:project, :jira_dvcs_server, creator: user))
       end
 
       expect(described_class.usage_activity_by_stage_plan({})).to include(
@@ -438,7 +450,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_jira_dvcs_cloud_active: 2,
         projects_jira_dvcs_server_active: 2
       )
-      expect(described_class.usage_activity_by_stage_plan(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_plan(described_class.monthly_time_range_db_params)).to include(
         issues: 2,
         notes: 1,
         projects: 1,
@@ -467,7 +479,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         releases: 2,
         successful_deployments: 2
       )
-      expect(described_class.usage_activity_by_stage_release(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(
         deployments: 1,
         failed_deployments: 1,
         releases: 1,
@@ -501,7 +513,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         ci_triggers: 2,
         clusters_applications_runner: 2
       )
-      expect(described_class.usage_activity_by_stage_verify(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_verify(described_class.monthly_time_range_db_params)).to include(
         ci_builds: 1,
         ci_external_pipelines: 1,
         ci_internal_pipelines: 1,
@@ -528,14 +540,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(subject.keys).to include(*UsageDataHelpers::USAGE_DATA_KEYS)
     end
 
-    it 'gathers usage counts' do
+    it 'gathers usage counts', :aggregate_failures do
       count_data = subject[:counts]
 
       expect(count_data[:boards]).to eq(1)
       expect(count_data[:projects]).to eq(4)
-      expect(count_data.values_at(*UsageDataHelpers::SMAU_KEYS)).to all(be_an(Integer))
       expect(count_data.keys).to include(*UsageDataHelpers::COUNTS_KEYS)
       expect(UsageDataHelpers::COUNTS_KEYS - count_data.keys).to be_empty
+      expect(count_data.values).to all(be_a_kind_of(Integer))
     end
 
     it 'gathers usage counts correctly' do
@@ -563,9 +575,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:projects_with_repositories_enabled]).to eq(3)
       expect(count_data[:projects_with_error_tracking_enabled]).to eq(1)
       expect(count_data[:projects_with_tracing_enabled]).to eq(1)
-      expect(count_data[:projects_with_alerts_service_enabled]).to eq(1)
       expect(count_data[:projects_with_enabled_alert_integrations]).to eq(1)
-      expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
       expect(count_data[:projects_with_terraform_reports]).to eq(2)
       expect(count_data[:projects_with_terraform_states]).to eq(2)
       expect(count_data[:projects_with_alerts_created]).to eq(1)
@@ -696,10 +706,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   end
 
   describe '.system_usage_data_monthly' do
-    let_it_be(:project) { create(:project) }
+    let_it_be(:project) { create(:project, created_at: 3.days.ago) }
 
     before do
-      project = create(:project)
       env = create(:environment)
       create(:package, project: project, created_at: 3.days.ago)
       create(:package, created_at: 2.months.ago, project: project)
@@ -732,8 +741,32 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(counts_monthly[:personal_snippets]).to eq(1)
       expect(counts_monthly[:project_snippets]).to eq(1)
       expect(counts_monthly[:projects_with_alerts_created]).to eq(1)
+      expect(counts_monthly[:projects]).to eq(1)
       expect(counts_monthly[:packages]).to eq(1)
       expect(counts_monthly[:promoted_issues]).to eq(1)
+    end
+  end
+
+  describe '.runners_usage' do
+    before do
+      project = build(:project)
+      create_list(:ci_runner, 2, :instance_type, :online)
+      create(:ci_runner, :group, :online)
+      create(:ci_runner, :group, :inactive)
+      create_list(:ci_runner, 3, :project_type, :online, projects: [project])
+    end
+
+    subject { described_class.runners_usage }
+
+    it 'gathers runner usage counts correctly' do
+      expect(subject[:ci_runners]).to eq(7)
+      expect(subject[:ci_runners_instance_type_active]).to eq(2)
+      expect(subject[:ci_runners_group_type_active]).to eq(1)
+      expect(subject[:ci_runners_project_type_active]).to eq(3)
+
+      expect(subject[:ci_runners_instance_type_active_online]).to eq(2)
+      expect(subject[:ci_runners_group_type_active_online]).to eq(1)
+      expect(subject[:ci_runners_project_type_active_online]).to eq(3)
     end
   end
 
@@ -741,6 +774,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     subject { described_class.usage_counters }
 
     it { is_expected.to include(:kubernetes_agent_gitops_sync) }
+    it { is_expected.to include(:kubernetes_agent_k8s_api_proxy_request) }
     it { is_expected.to include(:static_site_editor_views) }
     it { is_expected.to include(:package_events_i_package_pull_package) }
     it { is_expected.to include(:package_events_i_package_delete_package_by_user) }
@@ -932,138 +966,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       end
     end
 
-    describe '.ingress_modsecurity_usage' do
-      subject { described_class.ingress_modsecurity_usage }
-
-      let(:environment) { create(:environment) }
-      let(:project) { environment.project }
-      let(:environment_scope) { '*' }
-      let(:deployment) { create(:deployment, :success, environment: environment, project: project, cluster: cluster) }
-      let(:cluster) { create(:cluster, environment_scope: environment_scope, projects: [project]) }
-      let(:ingress_mode) { :modsecurity_blocking }
-      let!(:ingress) { create(:clusters_applications_ingress, ingress_mode, cluster: cluster) }
-
-      context 'when cluster is disabled' do
-        let(:cluster) { create(:cluster, :disabled, projects: [project]) }
-
-        it 'gathers ingress data' do
-          expect(subject[:ingress_modsecurity_logging]).to eq(0)
-          expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-          expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-          expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-        end
-      end
-
-      context 'when deployment is unsuccessful' do
-        let!(:deployment) { create(:deployment, :failed, environment: environment, project: project, cluster: cluster) }
-
-        it 'gathers ingress data' do
-          expect(subject[:ingress_modsecurity_logging]).to eq(0)
-          expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-          expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-          expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-        end
-      end
-
-      context 'when deployment is successful' do
-        let!(:deployment) { create(:deployment, :success, environment: environment, project: project, cluster: cluster) }
-
-        context 'when modsecurity is in blocking mode' do
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(1)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'when modsecurity is in logging mode' do
-          let(:ingress_mode) { :modsecurity_logging }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(1)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'when modsecurity is disabled' do
-          let(:ingress_mode) { :modsecurity_disabled }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(1)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'when modsecurity is not installed' do
-          let(:ingress_mode) { :modsecurity_not_installed }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(1)
-          end
-        end
-
-        context 'with multiple projects' do
-          let(:environment_2) { create(:environment) }
-          let(:project_2) { environment_2.project }
-          let(:cluster_2) { create(:cluster, environment_scope: environment_scope, projects: [project_2]) }
-          let!(:ingress_2) { create(:clusters_applications_ingress, :modsecurity_logging, cluster: cluster_2) }
-          let!(:deployment_2) { create(:deployment, :success, environment: environment_2, project: project_2, cluster: cluster_2) }
-
-          it 'gathers non-duplicated ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(1)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(1)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'with multiple deployments' do
-          let!(:deployment_2) { create(:deployment, :success, environment: environment, project: project, cluster: cluster) }
-
-          it 'gathers non-duplicated ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(1)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'with multiple projects' do
-          let(:environment_2) { create(:environment) }
-          let(:project_2) { environment_2.project }
-          let!(:deployment_2) { create(:deployment, :success, environment: environment_2, project: project_2, cluster: cluster) }
-          let(:cluster) { create(:cluster, environment_scope: environment_scope, projects: [project, project_2]) }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(2)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'with multiple environments' do
-          let!(:environment_2) { create(:environment, project: project) }
-          let!(:deployment_2) { create(:deployment, :success, environment: environment_2, project: project, cluster: cluster) }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(2)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-      end
-    end
-
     describe '.grafana_embed_usage_data' do
       subject { described_class.grafana_embed_usage_data }
 
@@ -1129,11 +1031,62 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       end
     end
 
+    describe ".operating_system" do
+      let(:ohai_data) { { "platform" => "ubuntu", "platform_version" => "20.04" } }
+
+      before do
+        allow_next_instance_of(Ohai::System) do |ohai|
+          allow(ohai).to receive(:data).and_return(ohai_data)
+        end
+      end
+
+      subject { described_class.operating_system }
+
+      it { is_expected.to eq("ubuntu-20.04") }
+
+      context 'when on Debian with armv architecture' do
+        let(:ohai_data) { { "platform" => "debian", "platform_version" => "10", 'kernel' => { 'machine' => 'armv' } } }
+
+        it { is_expected.to eq("raspbian-10") }
+      end
+    end
+
     describe ".system_usage_data_settings" do
+      let(:prometheus_client) { double(Gitlab::PrometheusClient) }
+
+      before do
+        allow(described_class).to receive(:operating_system).and_return('ubuntu-20.04')
+        expect(prometheus_client).to receive(:query).with(/gitlab_usage_ping:gitaly_apdex:ratio_avg_over_time_5m/).and_return([
+          {
+            'metric' => {},
+            'value' => [1616016381.473, '0.95']
+          }
+        ])
+        expect(described_class).to receive(:with_prometheus_client).and_yield(prometheus_client)
+      end
+
       subject { described_class.system_usage_data_settings }
 
       it 'gathers settings usage data', :aggregate_failures do
         expect(subject[:settings][:ldap_encrypted_secrets_enabled]).to eq(Gitlab::Auth::Ldap::Config.encrypted_secrets.active?)
+      end
+
+      it 'populates operating system information' do
+        expect(subject[:settings][:operating_system]).to eq('ubuntu-20.04')
+      end
+
+      it 'gathers gitaly apdex', :aggregate_failures do
+        expect(subject[:settings][:gitaly_apdex]).to be_within(0.001).of(0.95)
+      end
+
+      it 'reports collected data categories' do
+        expected_value = %w[Standard Subscription Operational Optional]
+
+        allow_next_instance_of(ServicePing::PermitDataCategoriesService) do |instance|
+          expect(instance).to receive(:execute).and_return(expected_value)
+        end
+
+        expect(subject[:settings][:collected_data_categories]).to eq(expected_value)
       end
     end
   end
@@ -1257,7 +1210,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'i_analytics_dev_ops_score' => 123,
           'i_analytics_instance_statistics' => 123,
           'p_analytics_merge_request' => 123,
-          'g_analytics_merge_request' => 123,
+          'i_analytics_dev_ops_adoption' => 123,
+          'users_viewing_analytics_group_devops_adoption' => 123,
           'analytics_unique_visits_for_any_target' => 543,
           'analytics_unique_visits_for_any_target_monthly' => 987
         }
@@ -1325,47 +1279,54 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
     let(:ineligible_total_categories) do
-      %w[source_code ci_secrets_management incident_management_alerts snippets terraform pipeline_authoring]
+      %w[source_code ci_secrets_management incident_management_alerts snippets terraform incident_management_oncall secure network_policies]
     end
 
-    it 'has all known_events' do
-      expect(subject).to have_key(:redis_hll_counters)
+    context 'with redis_hll_tracking feature enabled' do
+      it 'has all known_events' do
+        stub_feature_flags(redis_hll_tracking: true)
 
-      expect(subject[:redis_hll_counters].keys).to match_array(categories)
+        expect(subject).to have_key(:redis_hll_counters)
 
-      categories.each do |category|
-        keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
+        expect(subject[:redis_hll_counters].keys).to match_array(categories)
 
-        metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+        categories.each do |category|
+          keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
 
-        if ineligible_total_categories.exclude?(category)
-          metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+          metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+
+          if ineligible_total_categories.exclude?(category)
+            metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+          end
+
+          expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
         end
+      end
+    end
 
-        expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
+    context 'with redis_hll_tracking disabled' do
+      it 'does not have redis_hll_tracking key' do
+        stub_feature_flags(redis_hll_tracking: false)
+
+        expect(subject).not_to have_key(:redis_hll_counters)
       end
     end
   end
 
-  describe '.aggregated_metrics_weekly' do
-    subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_weekly }
+  describe '.aggregated_metrics_data' do
+    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate methods', :aggregate_failures do
+      expected_payload = {
+        counts_weekly: { aggregated_metrics: { global_search_gmau: 123 } },
+        counts_monthly: { aggregated_metrics: { global_search_gmau: 456 } },
+        counts: { aggregate_global_search_gmau: 789 }
+      }
 
-    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate#weekly_data', :aggregate_failures do
       expect_next_instance_of(::Gitlab::Usage::Metrics::Aggregates::Aggregate) do |instance|
         expect(instance).to receive(:weekly_data).and_return(global_search_gmau: 123)
+        expect(instance).to receive(:monthly_data).and_return(global_search_gmau: 456)
+        expect(instance).to receive(:all_time_data).and_return(global_search_gmau: 789)
       end
-      expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
-    end
-  end
-
-  describe '.aggregated_metrics_monthly' do
-    subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_monthly }
-
-    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate#monthly_data', :aggregate_failures do
-      expect_next_instance_of(::Gitlab::Usage::Metrics::Aggregates::Aggregate) do |instance|
-        expect(instance).to receive(:monthly_data).and_return(global_search_gmau: 123)
-      end
-      expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
+      expect(described_class.aggregated_metrics_data).to eq(expected_payload)
     end
   end
 
@@ -1379,6 +1340,88 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(subject).to eq(service_desk_enabled_projects: 1,
                             service_desk_issues: 2)
+    end
+  end
+
+  describe '.email_campaign_counts' do
+    subject { described_class.send(:email_campaign_counts) }
+
+    context 'when queries time out' do
+      before do
+        allow_any_instance_of(ActiveRecord::Relation)
+          .to receive(:count).and_raise(ActiveRecord::StatementInvalid.new(''))
+      end
+
+      it 'returns -1 for email campaign data' do
+        expected_data = {
+          "in_product_marketing_email_create_0_sent" => -1,
+          "in_product_marketing_email_create_0_cta_clicked" => -1,
+          "in_product_marketing_email_create_1_sent" => -1,
+          "in_product_marketing_email_create_1_cta_clicked" => -1,
+          "in_product_marketing_email_create_2_sent" => -1,
+          "in_product_marketing_email_create_2_cta_clicked" => -1,
+          "in_product_marketing_email_verify_0_sent" => -1,
+          "in_product_marketing_email_verify_0_cta_clicked" => -1,
+          "in_product_marketing_email_verify_1_sent" => -1,
+          "in_product_marketing_email_verify_1_cta_clicked" => -1,
+          "in_product_marketing_email_verify_2_sent" => -1,
+          "in_product_marketing_email_verify_2_cta_clicked" => -1,
+          "in_product_marketing_email_trial_0_sent" => -1,
+          "in_product_marketing_email_trial_0_cta_clicked" => -1,
+          "in_product_marketing_email_trial_1_sent" => -1,
+          "in_product_marketing_email_trial_1_cta_clicked" => -1,
+          "in_product_marketing_email_trial_2_sent" => -1,
+          "in_product_marketing_email_trial_2_cta_clicked" => -1,
+          "in_product_marketing_email_team_0_sent" => -1,
+          "in_product_marketing_email_team_0_cta_clicked" => -1,
+          "in_product_marketing_email_team_1_sent" => -1,
+          "in_product_marketing_email_team_1_cta_clicked" => -1,
+          "in_product_marketing_email_team_2_sent" => -1,
+          "in_product_marketing_email_team_2_cta_clicked" => -1,
+          "in_product_marketing_email_experience_0_sent" => -1
+        }
+
+        expect(subject).to eq(expected_data)
+      end
+    end
+
+    context 'when there are entries' do
+      before do
+        create(:in_product_marketing_email, track: :create, series: 0, cta_clicked_at: Time.zone.now)
+        create(:in_product_marketing_email, track: :verify, series: 0)
+      end
+
+      it 'gathers email campaign data' do
+        expected_data = {
+          "in_product_marketing_email_create_0_sent" => 1,
+          "in_product_marketing_email_create_0_cta_clicked" => 1,
+          "in_product_marketing_email_create_1_sent" => 0,
+          "in_product_marketing_email_create_1_cta_clicked" => 0,
+          "in_product_marketing_email_create_2_sent" => 0,
+          "in_product_marketing_email_create_2_cta_clicked" => 0,
+          "in_product_marketing_email_verify_0_sent" => 1,
+          "in_product_marketing_email_verify_0_cta_clicked" => 0,
+          "in_product_marketing_email_verify_1_sent" => 0,
+          "in_product_marketing_email_verify_1_cta_clicked" => 0,
+          "in_product_marketing_email_verify_2_sent" => 0,
+          "in_product_marketing_email_verify_2_cta_clicked" => 0,
+          "in_product_marketing_email_trial_0_sent" => 0,
+          "in_product_marketing_email_trial_0_cta_clicked" => 0,
+          "in_product_marketing_email_trial_1_sent" => 0,
+          "in_product_marketing_email_trial_1_cta_clicked" => 0,
+          "in_product_marketing_email_trial_2_sent" => 0,
+          "in_product_marketing_email_trial_2_cta_clicked" => 0,
+          "in_product_marketing_email_team_0_sent" => 0,
+          "in_product_marketing_email_team_0_cta_clicked" => 0,
+          "in_product_marketing_email_team_1_sent" => 0,
+          "in_product_marketing_email_team_1_cta_clicked" => 0,
+          "in_product_marketing_email_team_2_sent" => 0,
+          "in_product_marketing_email_team_2_cta_clicked" => 0,
+          "in_product_marketing_email_experience_0_sent" => 0
+        }
+
+        expect(subject).to eq(expected_data)
+      end
     end
   end
 

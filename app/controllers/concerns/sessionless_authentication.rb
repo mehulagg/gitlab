@@ -7,9 +7,13 @@
 module SessionlessAuthentication
   # This filter handles personal access tokens, atom requests with rss tokens, and static object tokens
   def authenticate_sessionless_user!(request_format)
-    user = Gitlab::Auth::RequestAuthenticator.new(request).find_sessionless_user(request_format)
+    user = request_authenticator.find_sessionless_user(request_format)
 
     sessionless_sign_in(user) if user
+  end
+
+  def request_authenticator
+    @request_authenticator ||= Gitlab::Auth::RequestAuthenticator.new(request)
   end
 
   def sessionless_user?
@@ -27,7 +31,7 @@ module SessionlessAuthentication
   end
 
   def sessionless_bypass_admin_mode!(&block)
-    return yield unless Feature.enabled?(:user_mode_in_session)
+    return yield unless Gitlab::CurrentSettings.admin_mode
 
     Gitlab::Auth::CurrentUserMode.bypass_session!(current_user.id, &block)
   end

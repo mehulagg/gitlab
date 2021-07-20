@@ -16,7 +16,7 @@ RSpec.shared_examples 'common merge request metric refresh for' do |metric_name|
 
   context "when #{metric_name} is already present" do
     before do
-      merge_request.metrics.update(metric_name => calculated_value - 10)
+      merge_request.metrics.update!(metric_name => calculated_value - 10)
     end
 
     it "does not change #{metric_name}" do
@@ -36,7 +36,7 @@ RSpec.shared_examples 'common merge request metric refresh for' do |metric_name|
 
   context 'when no merge request metric is present' do
     before do
-      merge_request.metrics.destroy
+      merge_request.metrics.destroy!
       merge_request.reload
     end
 

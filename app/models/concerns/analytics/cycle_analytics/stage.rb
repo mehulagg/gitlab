@@ -27,6 +27,7 @@ module Analytics
         scope :default_stages, -> { where(custom: false) }
         scope :ordered, -> { order(:relative_position, :id) }
         scope :for_list, -> { includes(:start_event_label, :end_event_label).ordered }
+        scope :by_value_stream, -> (value_stream) { where(value_stream_id: value_stream.id) }
       end
 
       def parent=(_)
@@ -49,12 +50,8 @@ module Analytics
         end
       end
 
-      def start_event_identifier
-        backward_compatible_identifier(:start_event_identifier) || super
-      end
-
-      def end_event_identifier
-        backward_compatible_identifier(:end_event_identifier) || super
+      def events_hash_code
+        Digest::SHA256.hexdigest("#{start_event.hash_code}-#{end_event.hash_code}")
       end
 
       def start_event_label_based?
@@ -135,17 +132,6 @@ module Analytics
           .execute(skip_authorization: true)
           .id_in(label_id)
           .exists?
-      end
-
-      # Temporary, will be removed in 13.10
-      def backward_compatible_identifier(attribute_name)
-        removed_identifier = 6 # References IssueFirstMentionedInCommit removed on https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51975
-        replacement_identifier = :issue_first_mentioned_in_commit
-
-        # ActiveRecord returns nil if the column value is not part of the Enum definition
-        if self[attribute_name].nil? && read_attribute_before_type_cast(attribute_name) == removed_identifier
-          replacement_identifier
-        end
       end
     end
   end

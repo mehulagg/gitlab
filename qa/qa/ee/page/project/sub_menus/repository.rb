@@ -10,16 +10,14 @@ module QA
 
             def self.prepended(base)
               base.class_eval do
-                view 'ee/app/views/projects/sidebar/_repository_locked_files.html.haml' do
-                  element :path_locks_link
-                end
+                prepend QA::Page::Project::SubMenus::Common
               end
             end
 
             def go_to_repository_locked_files
               hover_repository do
                 within_submenu do
-                  click_element :path_locks_link
+                  click_element(:sidebar_menu_item_link, menu_item: 'Locked Files')
                 end
               end
             end

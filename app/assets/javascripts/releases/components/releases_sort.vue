@@ -1,7 +1,7 @@
 <script>
 import { GlSorting, GlSortingItem } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { ASCENDING_ODER, DESCENDING_ORDER, SORT_OPTIONS } from '../constants';
+import { ASCENDING_ORDER, DESCENDING_ORDER, SORT_OPTIONS } from '../constants';
 
 export default {
   name: 'ReleasesSort',
@@ -10,7 +10,7 @@ export default {
     GlSortingItem,
   },
   computed: {
-    ...mapState('list', {
+    ...mapState('index', {
       orderBy: (state) => state.sorting.orderBy,
       sort: (state) => state.sorting.sort,
     }),
@@ -22,13 +22,13 @@ export default {
       return option.label;
     },
     isSortAscending() {
-      return this.sort === ASCENDING_ODER;
+      return this.sort === ASCENDING_ORDER;
     },
   },
   methods: {
-    ...mapActions('list', ['setSorting']),
+    ...mapActions('index', ['setSorting']),
     onDirectionChange() {
-      const sort = this.isSortAscending ? DESCENDING_ORDER : ASCENDING_ODER;
+      const sort = this.isSortAscending ? DESCENDING_ORDER : ASCENDING_ORDER;
       this.setSorting({ sort });
       this.$emit('sort:changed');
     },

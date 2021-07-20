@@ -50,7 +50,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
   end
 
   shared_examples 'find user from job token' do |without_job_token_allowed|
-    context 'when route is allowed to be authenticated' do
+    context 'when route is allowed to be authenticated', :request_store do
       let(:route_authentication_setting) { { job_token_allowed: true } }
 
       context 'for an invalid token' do
@@ -68,6 +68,8 @@ RSpec.describe Gitlab::Auth::AuthFinders do
         it 'return user' do
           expect(subject).to eq(user)
           expect(@current_authenticated_job).to eq job
+          expect(subject).to be_from_ci_job_token
+          expect(subject.ci_job_token_scope.source_project).to eq(job.project)
         end
       end
 
@@ -81,7 +83,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       end
     end
 
-    context 'when route is not allowed to be authenticated' do
+    context 'when route is not allowed to be authenticated', :request_store do
       let(:route_authentication_setting) { { job_token_allowed: false } }
 
       context 'with a running job' do
@@ -96,6 +98,8 @@ RSpec.describe Gitlab::Auth::AuthFinders do
           it 'returns the user' do
             expect(subject).to eq(user)
             expect(@current_authenticated_job).to eq job
+            expect(subject).to be_from_ci_job_token
+            expect(subject.ci_job_token_scope.source_project).to eq(job.project)
           end
         else
           it 'returns nil' do
@@ -456,7 +460,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       expect { find_user_from_access_token }.to raise_error(Gitlab::Auth::UnauthorizedError)
     end
 
-    context 'no feed or API requests' do
+    context 'no feed, API or archive requests' do
       it 'returns nil if the request is not RSS' do
         expect(find_user_from_web_access_token(:rss)).to be_nil
       end
@@ -467,6 +471,10 @@ RSpec.describe Gitlab::Auth::AuthFinders do
 
       it 'returns nil if the request is not API' do
         expect(find_user_from_web_access_token(:api)).to be_nil
+      end
+
+      it 'returns nil if the request is not ARCHIVE' do
+        expect(find_user_from_web_access_token(:archive)).to be_nil
       end
     end
 
@@ -480,6 +488,24 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       set_header('SCRIPT_NAME', 'url.ics')
 
       expect(find_user_from_web_access_token(:ics)).to eq(user)
+    end
+
+    it 'returns the user for ARCHIVE requests' do
+      set_header('SCRIPT_NAME', '/-/archive/main.zip')
+
+      expect(find_user_from_web_access_token(:archive)).to eq(user)
+    end
+
+    context 'when allow_archive_as_web_access_format feature flag is disabled' do
+      before do
+        stub_feature_flags(allow_archive_as_web_access_format: false)
+      end
+
+      it 'returns nil for ARCHIVE requests' do
+        set_header('SCRIPT_NAME', '/-/archive/main.zip')
+
+        expect(find_user_from_web_access_token(:archive)).to be_nil
+      end
     end
 
     context 'for API requests' do
@@ -679,6 +705,122 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       end
 
       it_behaves_like 'find user from job token', :user
+    end
+  end
+
+  describe '#find_user_from_basic_auth_password' do
+    subject { find_user_from_basic_auth_password }
+
+    context 'when the request does not have AUTHORIZATION header' do
+      it { is_expected.to be_nil }
+    end
+
+    it 'returns nil without user and password' do
+      set_basic_auth_header(nil, nil)
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil without password' do
+      set_basic_auth_header('some-user', nil)
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil without user' do
+      set_basic_auth_header(nil, 'password')
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil with CI username' do
+      set_basic_auth_header(::Gitlab::Auth::CI_JOB_USER, 'password')
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil with wrong password' do
+      set_basic_auth_header(user.username, 'wrong-password')
+
+      is_expected.to be_nil
+    end
+
+    it 'returns user with correct credentials' do
+      set_basic_auth_header(user.username, user.password)
+
+      is_expected.to eq(user)
+    end
+  end
+
+  describe '#find_user_from_lfs_token' do
+    subject { find_user_from_lfs_token }
+
+    context 'when the request does not have AUTHORIZATION header' do
+      it { is_expected.to be_nil }
+    end
+
+    it 'returns nil without user and token' do
+      set_basic_auth_header(nil, nil)
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil without token' do
+      set_basic_auth_header('some-user', nil)
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil without user' do
+      set_basic_auth_header(nil, 'token')
+
+      is_expected.to be_nil
+    end
+
+    it 'returns nil with wrong token' do
+      set_basic_auth_header(user.username, 'wrong-token')
+
+      is_expected.to be_nil
+    end
+
+    it 'returns user with correct user and correct token' do
+      lfs_token = Gitlab::LfsToken.new(user).token
+      set_basic_auth_header(user.username, lfs_token)
+
+      is_expected.to eq(user)
+    end
+
+    it 'returns nil with wrong user and correct token' do
+      lfs_token = Gitlab::LfsToken.new(user).token
+      other_user = create(:user)
+      set_basic_auth_header(other_user.username, lfs_token)
+
+      is_expected.to be_nil
+    end
+  end
+
+  describe '#find_user_from_personal_access_token' do
+    subject { find_user_from_personal_access_token }
+
+    it 'returns nil without access token' do
+      allow_any_instance_of(described_class).to receive(:access_token).and_return(nil)
+
+      is_expected.to be_nil
+    end
+
+    it 'returns user with correct access token' do
+      personal_access_token = create(:personal_access_token, user: user)
+      allow_any_instance_of(described_class).to receive(:access_token).and_return(personal_access_token)
+
+      is_expected.to eq(user)
+    end
+
+    it 'returns exception if access token has no user' do
+      personal_access_token = create(:personal_access_token, user: user)
+      allow_any_instance_of(described_class).to receive(:access_token).and_return(personal_access_token)
+      allow_any_instance_of(PersonalAccessToken).to receive(:user).and_return(nil)
+
+      expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
     end
   end
 

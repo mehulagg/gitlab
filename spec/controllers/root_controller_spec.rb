@@ -68,6 +68,18 @@ RSpec.describe RootController do
         end
       end
 
+      context 'who has customized their dashboard setting for followed user activities' do
+        before do
+          user.dashboard = 'followed_user_activity'
+        end
+
+        it 'redirects to the activity list' do
+          get :index
+
+          expect(response).to redirect_to activity_dashboard_path(filter: 'followed')
+        end
+      end
+
       context 'who has customized their dashboard setting for groups' do
         before do
           user.dashboard = 'groups'
@@ -116,34 +128,30 @@ RSpec.describe RootController do
         end
       end
 
-      context 'who uses the default dashboard setting' do
-        it 'renders the default dashboard' do
-          get :index
+      context 'who uses the default dashboard setting', :aggregate_failures do
+        render_views
 
-          expect(response).to render_template 'dashboard/projects/index'
+        context 'with customize homepage banner' do
+          it 'renders the default dashboard' do
+            get :index
+
+            expect(response).to render_template 'root/index'
+            expect(response.body).to have_css('.js-customize-homepage-banner')
+          end
         end
 
-        context 'when experiment is enabled' do
+        context 'without customize homepage banner' do
           before do
-            stub_experiment_for_subject(customize_homepage: true)
+            Users::DismissUserCalloutService.new(
+              container: nil, current_user: user, params: { feature_name: UserCalloutsHelper::CUSTOMIZE_HOMEPAGE }
+            ).execute
           end
 
           it 'renders the default dashboard' do
             get :index
 
-            expect(assigns[:customize_homepage]).to be true
-          end
-        end
-
-        context 'when experiment not enabled' do
-          before do
-            stub_experiment(customize_homepage: false)
-          end
-
-          it 'renders the default dashboard' do
-            get :index
-
-            expect(assigns[:customize_homepage]).to be false
+            expect(response).to render_template 'root/index'
+            expect(response.body).not_to have_css('.js-customize-homepage-banner')
           end
         end
       end

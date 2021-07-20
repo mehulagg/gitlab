@@ -21,9 +21,9 @@ RSpec.describe DiffDiscussion do
 
   describe '#merge_request_version_params' do
     let(:merge_request) { create(:merge_request, source_project: project, target_project: project, importing: true) }
-    let!(:merge_request_diff1) { merge_request.merge_request_diffs.create(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
-    let!(:merge_request_diff2) { merge_request.merge_request_diffs.create(head_commit_sha: nil) }
-    let!(:merge_request_diff3) { merge_request.merge_request_diffs.create(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
+    let!(:merge_request_diff1) { merge_request.merge_request_diffs.create!(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
+    let!(:merge_request_diff2) { merge_request.merge_request_diffs.create!(head_commit_sha: nil) }
+    let!(:merge_request_diff3) { merge_request.merge_request_diffs.create!(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
 
     context 'when the discussion is active' do
       it 'returns an empty hash, which will end up showing the latest version' do
@@ -124,6 +124,15 @@ RSpec.describe DiffDiscussion do
           expect(subject.merge_request_version_params).to eq(commit_id: 'commit_123')
         end
       end
+    end
+  end
+
+  describe '#cache_key' do
+    it 'returns the cache key with the position sha' do
+      notes_sha = Digest::SHA1.hexdigest("#{diff_note.id}")
+      position_sha = Digest::SHA1.hexdigest(diff_note.position.to_json)
+
+      expect(subject.cache_key).to eq("#{described_class::CACHE_VERSION}:#{diff_note.latest_cached_markdown_version}:#{subject.id}:#{notes_sha}:#{diff_note.updated_at}::#{position_sha}")
     end
   end
 end

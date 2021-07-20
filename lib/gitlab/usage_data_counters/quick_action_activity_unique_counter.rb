@@ -7,7 +7,6 @@ module Gitlab
         # Tracks the quick action with name `name`.
         # `args` is expected to be a single string, will be split internally when necessary.
         def track_unique_action(name, args:, user:)
-          return unless Feature.enabled?(:usage_data_track_quickactions, default_enabled: :yaml)
           return unless user
 
           args ||= ''
@@ -28,12 +27,14 @@ module Gitlab
             'unassign_reviewer'
           when 'request_review', 'reviewer'
             'assign_reviewer'
-          when 'spend'
+          when 'spend', 'spent'
             event_name_for_spend(args)
           when 'unassign'
             event_name_for_unassign(args)
           when 'unlabel', 'remove_label'
             event_name_for_unlabel(args)
+          when 'invite_email'
+            'invite_email' + event_name_quantifier(args.split)
           else
             name
           end
@@ -44,10 +45,8 @@ module Gitlab
 
           if args.count == 1 && args.first == 'me'
             'assign_self'
-          elsif args.count == 1
-            'assign_single'
           else
-            'assign_multiple'
+            'assign' + event_name_quantifier(args)
           end
         end
 
@@ -80,6 +79,14 @@ module Gitlab
             'unlabel_specific'
           else
             'unlabel_all'
+          end
+        end
+
+        def event_name_quantifier(args)
+          if args.count == 1
+            '_single'
+          else
+            '_multiple'
           end
         end
       end

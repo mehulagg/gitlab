@@ -18,8 +18,8 @@ module Packages
       end
 
       def version_by(ref: nil, commit: nil)
-        raise ArgumentError.new 'no filter specified' unless ref || commit
-        raise ArgumentError.new 'ref and commit are mutually exclusive' if ref && commit
+        raise ArgumentError, 'no filter specified' unless ref || commit
+        raise ArgumentError, 'ref and commit are mutually exclusive' if ref && commit
 
         if commit
           return version_by_sha(commit) if commit.is_a? String
@@ -33,7 +33,7 @@ module Packages
       end
 
       def path_valid?(major)
-        m = /\/v(\d+)$/i.match(@name)
+        m = %r{/v(\d+)$}i.match(@name)
 
         case major
         when 0, 1

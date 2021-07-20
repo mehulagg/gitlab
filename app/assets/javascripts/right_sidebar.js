@@ -2,8 +2,8 @@
 
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import { fixTitle, hide } from '~/tooltips';
-import { deprecatedCreateFlash as flash } from './flash';
+import { hide } from '~/tooltips';
+import createFlash from './flash';
 import axios from './lib/utils/axios_utils';
 import { sprintf, s__, __ } from './locale';
 
@@ -26,6 +26,8 @@ Sidebar.prototype.removeListeners = function () {
   // eslint-disable-next-line @gitlab/no-global-event-off
   this.sidebar.off('hidden.gl.dropdown');
   // eslint-disable-next-line @gitlab/no-global-event-off
+  this.sidebar.off('hiddenGlDropdown');
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.dropdown').off('loading.gl.dropdown');
   // eslint-disable-next-line @gitlab/no-global-event-off
   $('.dropdown').off('loaded.gl.dropdown');
@@ -37,6 +39,7 @@ Sidebar.prototype.addEventListeners = function () {
 
   this.sidebar.on('click', '.sidebar-collapsed-icon', this, this.sidebarCollapseClicked);
   this.sidebar.on('hidden.gl.dropdown', this, this.onSidebarDropdownHidden);
+  this.sidebar.on('hiddenGlDropdown', this, this.onSidebarDropdownHidden);
 
   $document.on('click', '.js-sidebar-toggle', this.sidebarToggleClicked);
   return $(document)
@@ -95,43 +98,13 @@ Sidebar.prototype.toggleTodo = function (e) {
       this.todoUpdateDone(data);
     })
     .catch(() =>
-      flash(
-        sprintf(__('There was an error %{message} todo.'), {
+      createFlash({
+        message: sprintf(__('There was an error %{message} todo.'), {
           message:
             ajaxType === 'post' ? s__('RightSidebar|adding a') : s__('RightSidebar|deleting the'),
         }),
-      ),
+      }),
     );
-};
-
-Sidebar.prototype.todoUpdateDone = function (data) {
-  const deletePath = data.delete_path ? data.delete_path : null;
-  const attrPrefix = deletePath ? 'mark' : 'todo';
-  const $todoBtns = $('.js-issuable-todo');
-
-  $(document).trigger('todo:toggle', data.count);
-
-  $todoBtns.each((i, el) => {
-    const $el = $(el);
-    const $elText = $el.find('.js-issuable-todo-inner');
-
-    $el
-      .removeClass('is-loading')
-      .enable()
-      .attr('aria-label', $el.data(`${attrPrefix}Text`))
-      .attr('title', $el.data(`${attrPrefix}Text`))
-      .data('deletePath', deletePath);
-
-    if ($el.hasClass('has-tooltip')) {
-      fixTitle(el);
-    }
-
-    if (typeof $el.data('isCollapsed') !== 'undefined') {
-      $elText.html($el.data(`${attrPrefix}Icon`));
-    } else {
-      $elText.text($el.data(`${attrPrefix}Text`));
-    }
-  });
 };
 
 Sidebar.prototype.sidebarCollapseClicked = function (e) {

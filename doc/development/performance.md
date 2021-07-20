@@ -120,7 +120,7 @@ allowing you to profile which code is running on CPU in detail.
 It's important to note that profiling an application *alters its performance*.
 Different profiling strategies have different overheads. Stackprof is a sampling
 profiler. It samples stack traces from running threads at a configurable
-frequency (e.g. 100hz, that is 100 stacks per second). This type of profiling
+frequency (for example, 100hz, that is 100 stacks per second). This type of profiling
 has quite a low (albeit non-zero) overhead and is generally considered to be
 safe for production.
 
@@ -256,9 +256,9 @@ The following configuration options can be configured:
 - `STACKPROF_MODE`: See [sampling modes](https://github.com/tmm1/stackprof#sampling).
   Defaults to `cpu`.
 - `STACKPROF_INTERVAL`: Sampling interval. Unit semantics depend on `STACKPROF_MODE`.
-  For `object` mode this is a per-event interval (every `n`th event is sampled)
-  and defaults to `1000`.
-  For other modes such as `cpu` this is a frequency and defaults to `10000` μs (100hz).
+  For `object` mode this is a per-event interval (every `nth` event is sampled)
+  and defaults to `100`.
+  For other modes such as `cpu` this is a frequency interval and defaults to `10100` μs (99hz).
 - `STACKPROF_FILE_PREFIX`: File path prefix where profiles are stored. Defaults
   to `$TMPDIR` (often corresponds to `/tmp`).
 - `STACKPROF_TIMEOUT_S`: Profiling timeout in seconds. Profiling will
@@ -283,8 +283,8 @@ Currently supported profiling targets are:
 - Sidekiq
 
 NOTE:
-The Puma master process is not supported. Neither is Unicorn.
-Sending SIGUSR2 to either of those triggers restarts. In the case of Puma,
+The Puma master process is not supported.
+Sending SIGUSR2 to it triggers restarts. In the case of Puma,
 take care to only send the signal to Puma workers.
 
 This can be done via `pkill -USR2 puma:`. The `:` distinguishes between `puma
@@ -293,7 +293,7 @@ worker processes), selecting the latter.
 
 For Sidekiq, the signal can be sent to the `sidekiq-cluster` process via `pkill
 -USR2 bin/sidekiq-cluster`, which forwards the signal to all Sidekiq
-children. Alternatively, you can also select a specific pid of interest.
+children. Alternatively, you can also select a specific PID of interest.
 
 Production profiles can be especially noisy. It can be helpful to visualize them
 as a [flame graph](https://github.com/brendangregg/FlameGraph). This can be done
@@ -306,7 +306,7 @@ bundle exec stackprof --stackcollapse /tmp/stackprof.55769.c6c3906452.profile | 
 ## RSpec profiling
 
 The GitLab development environment also includes the
-[rspec_profiling](https://github.com/foraker/rspec_profiling) gem, which is used
+[`rspec_profiling`](https://github.com/foraker/rspec_profiling) gem, which is used
 to collect data on spec execution times. This is useful for analyzing the
 performance of the test suite itself, or seeing how the performance of a spec
 may have changed over time.
@@ -347,12 +347,113 @@ example, you can find which tests take longest to run or which execute the most
 queries. This can be handy for optimizing our tests or identifying performance
 issues in our code.
 
-## Memory profiling
+## Memory optimization
 
-We can use two approaches, often in combination, to track down memory issues:
+We can use a set of different techniques, often in combination, to track down memory issues:
 
 - Leaving the code intact and wrapping a profiler around it.
+- Use memory allocation counters for requests and services.
 - Monitor memory usage of the process while disabling/enabling different parts of the code we suspect could be problematic.
+
+### Memory allocations
+
+Ruby shipped with GitLab includes a special patch to allow [tracing memory allocations](https://gitlab.com/gitlab-org/gitlab/-/issues/296530).
+This patch is available by default for
+[Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4948),
+[CNG](https://gitlab.com/gitlab-org/build/CNG/-/merge_requests/591),
+[GitLab CI](https://gitlab.com/gitlab-org/gitlab-build-images/-/merge_requests/355),
+[GCK](https://gitlab.com/gitlab-org/gitlab-compose-kit/-/merge_requests/149)
+and can additionally be enabled for [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/advanced.md#apply-custom-patches-for-ruby).
+
+This patch provides the following metrics that make it easier to understand efficiency of memory use for a given codepath:
+
+- `mem_total_bytes`: the number of bytes consumed both due to new objects being allocated into existing object slots
+                     plus additional memory allocated for large objects (that is, `mem_bytes + slot_size * mem_objects`).
+- `mem_bytes`: the number of bytes allocated by `malloc` for objects that did not fit into an existing object slot.
+- `mem_objects`: the number of objects allocated.
+- `mem_mallocs`: the number of `malloc` calls.
+
+The number of objects and bytes allocated impact how often GC cycles happen.
+Fewer object allocations result in a significantly more responsive application.
+
+It is advised that web server requests do not allocate more than `100k mem_objects`
+and `100M mem_bytes`. You can view the current usage on [GitLab.com](https://log.gprd.gitlab.net/goto/3a9678bb595e3f89a0c7b5c61bcc47b9).
+
+#### Checking memory pressure of own code
+
+There are two ways of measuring your own code:
+
+1. Review `api_json.log`, `development_json.log`, `sidekiq.log` that includes memory allocation counters.
+1. Use `Gitlab::Memory::Instrumentation.with_memory_allocations` for a given codeblock and log it.
+1. Use [Measuring module](service_measurement.md)
+
+```json
+{"time":"2021-02-15T11:20:40.821Z","severity":"INFO","duration_s":0.27412,"db_duration_s":0.05755,"view_duration_s":0.21657,"status":201,"method":"POST","path":"/api/v4/projects/user/1","mem_objects":86705,"mem_bytes":4277179,"mem_mallocs":22693,"correlation_id":"...}
+```
+
+#### Different types of allocations
+
+The `mem_*` values represent different aspects of how objects and memory are allocated in Ruby:
+
+- The following example will create around of `1000` of `mem_objects` since strings
+   can be frozen, and while the underlying string object remains the same, we still need to allocate 1000 references to this string:
+
+  ```ruby
+  Gitlab::Memory::Instrumentation.with_memory_allocations do
+    1_000.times { '0123456789' }
+  end
+
+  => {:mem_objects=>1001, :mem_bytes=>0, :mem_mallocs=>0}
+  ```
+
+- The following example will create around of `1000` of `mem_objects`, as strings are created dynamically.
+   Each of them will not allocate additional memory, as they fit into Ruby slot of 40 bytes:
+
+  ```ruby
+  Gitlab::Memory::Instrumentation.with_memory_allocations do
+    s = '0'
+    1_000.times { s * 23 }
+  end
+
+  => {:mem_objects=>1002, :mem_bytes=>0, :mem_mallocs=>0}
+  ```
+
+- The following example will create around of `1000` of `mem_objects`, as strings are created dynamically.
+   Each of them will allocate additional memory as strings are larger than Ruby slot of 40 bytes:
+
+  ```ruby
+  Gitlab::Memory::Instrumentation.with_memory_allocations do
+    s = '0'
+    1_000.times { s * 24 }
+  end
+
+  => {:mem_objects=>1002, :mem_bytes=>32000, :mem_mallocs=>1000}
+  ```
+
+- The following example will allocate over 40kB of data, and perform only a single memory allocation.
+   The existing object will be reallocated/resized on subsequent iterations:
+
+  ```ruby
+  Gitlab::Memory::Instrumentation.with_memory_allocations do
+    str = ''
+    append = '0123456789012345678901234567890123456789' # 40 bytes
+    1_000.times { str.concat(append) }
+  end
+  => {:mem_objects=>3, :mem_bytes=>49152, :mem_mallocs=>1}
+  ```
+
+- The following example will create over 1k of objects, perform over 1k of allocations, each time mutating the object.
+   This does result in copying a lot of data and perform a lot of memory allocations
+  (as represented by `mem_bytes` counter) indicating very inefficient method of appending string:
+
+  ```ruby
+  Gitlab::Memory::Instrumentation.with_memory_allocations do
+    str = ''
+    append = '0123456789012345678901234567890123456789' # 40 bytes
+    1_000.times { str += append }
+  end
+  => {:mem_objects=>1003, :mem_bytes=>21968752, :mem_mallocs=>1000}
+  ```
 
 ### Using Memory Profiler
 
@@ -409,7 +510,7 @@ Fragmented Ruby heap snapshot could look like this:
 
 ![Ruby heap fragmentation](img/memory_ruby_heap_fragmentation.png)
 
-Memory fragmentation could be reduced by tuning GC parameters as described in [this post by Nate Berkopec](https://www.speedshop.co/2017/12/04/malloc-doubles-ruby-memory.html). This should be considered as a tradeoff, as it may affect overall performance of memory allocation and GC cycles.
+Memory fragmentation could be reduced by tuning GC parameters [as described in this post](https://www.speedshop.co/2017/12/04/malloc-doubles-ruby-memory.html). This should be considered as a tradeoff, as it may affect overall performance of memory allocation and GC cycles.
 
 ## Importance of Changes
 

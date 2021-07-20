@@ -1,4 +1,13 @@
-@import '../../../../../app/assets/stylesheets/page_bundles/dev_ops_report';
+@import 'page_bundles/mixins_and_variables_and_functions';
+
+@mixin important-background($color) {
+  background-color: $color !important;
+}
+
+@mixin circle-fill($color) {
+  border: 1px solid $color;
+  @include important-background($color);
+}
 
 .circle {
   width: $gl-spacing-scale-3;
@@ -8,8 +17,31 @@
   @include gl-display-inline-block;
 
   &-enabled {
-    border: 1px solid var(--indigo-800, $indigo-800);
-    background-color: var(--indigo-600, $indigo-600);
+    &-default {
+      @include circle-fill($indigo-600);
+    }
+
+    &-primary {
+      @include circle-fill($data-viz-blue-600);
+    }
+
+    &-warning {
+      @include circle-fill($data-viz-orange-600);
+    }
+
+    &-info {
+      @include circle-fill($data-viz-aqua-500);
+    }
+
+    &-success {
+      @include circle-fill($data-viz-green-600);
+    }
+  }
+}
+
+@include media-breakpoint-up(sm) {
+  .actions-cell {
+    width: $gl-spacing-scale-6;
   }
 }
 
@@ -19,5 +51,27 @@
       width: 100% !important;
       text-align: center !important;
     }
+  }
+
+  .actions-cell::before {
+    @include gl-display-none;
+  }
+}
+
+.progress-bar {
+  &.bg-primary {
+    @include important-background($data-viz-blue-600);
+  }
+
+  &.bg-warning {
+    @include important-background($data-viz-orange-600);
+  }
+
+  &.bg-info {
+    @include important-background($data-viz-aqua-500);
+  }
+
+  &.bg-success {
+    @include important-background($data-viz-green-600);
   }
 }

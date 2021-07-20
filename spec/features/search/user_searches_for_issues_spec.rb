@@ -23,6 +23,7 @@ RSpec.describe 'User searches for issues', :js do
     end
 
     include_examples 'top right search form'
+    include_examples 'search timeouts', 'issues'
 
     it 'finds an issue' do
       search_for_issue(issue1.title)
@@ -90,7 +91,7 @@ RSpec.describe 'User searches for issues', :js do
         wait_for_requests
 
         page.within('[data-testid="project-filter"]') do
-          click_on(project.full_name)
+          click_on(project.name)
         end
 
         search_for_issue(issue1.title)

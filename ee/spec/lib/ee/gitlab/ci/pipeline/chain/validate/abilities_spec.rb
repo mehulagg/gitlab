@@ -19,10 +19,12 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::Abilities do
   let(:ref) { 'master' }
 
   describe '#perform!' do
+    before do
+      project.add_developer(user)
+    end
+
     context 'when triggering builds for project mirrors is disabled' do
       it 'returns an error' do
-        project.add_developer(user)
-
         allow(command)
           .to receive(:allow_mirror_update)
           .and_return(true)

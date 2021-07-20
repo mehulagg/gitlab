@@ -13,15 +13,17 @@ RSpec.describe 'Admin searches application settings', :js do
 
   context 'in appearances page' do
     before do
-      visit(admin_appearances_path)
+      visit(admin_application_settings_appearances_path)
     end
 
     it_behaves_like 'cannot search settings'
   end
 
   context 'in ci/cd settings page' do
-    let(:visit_path) { ci_cd_admin_application_settings_path }
+    before do
+      visit(ci_cd_admin_application_settings_path)
+    end
 
-    it_behaves_like 'can search settings with feature flag check', 'Variables', 'Package Registry'
+    it_behaves_like 'can search settings', 'Variables', 'Package Registry'
   end
 end

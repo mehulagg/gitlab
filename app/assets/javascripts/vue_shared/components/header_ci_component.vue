@@ -102,10 +102,10 @@ export default {
     data-qa-selector="pipeline_header"
     data-testid="ci-header-content"
   >
-    <section class="header-main-content">
+    <section class="header-main-content gl-mr-3">
       <ci-icon-badge :status="status" />
 
-      <strong> {{ itemName }} #{{ itemId }} </strong>
+      <strong data-testid="ci-header-item-text"> {{ itemName }} #{{ itemId }} </strong>
 
       <template v-if="shouldRenderTriggeredLabel">{{ __('triggered') }}</template>
       <template v-else>{{ __('created') }}</template>
@@ -121,13 +121,7 @@ export default {
           :title="user.email"
           class="js-user-link commit-committer-link"
         >
-          <user-avatar-image
-            :img-src="avatarUrl"
-            :img-alt="userAvatarAltText"
-            :tooltip-text="user.name"
-            :img-size="24"
-          />
-
+          <user-avatar-image :img-src="avatarUrl" :img-alt="userAvatarAltText" :size="24" />
           {{ user.name }}
         </gl-link>
         <gl-tooltip v-if="message" :target="() => $refs[$options.EMOJI_REF]">
@@ -142,12 +136,16 @@ export default {
       </template>
     </section>
 
-    <section v-if="$slots.default" data-testid="headerButtons" class="gl-display-flex">
+    <section
+      v-if="$slots.default"
+      data-testid="ci-header-action-buttons"
+      class="gl-display-flex gl-mr-3"
+    >
       <slot></slot>
     </section>
     <gl-button
       v-if="hasSidebarButton"
-      class="d-sm-none js-sidebar-build-toggle gl-ml-auto"
+      class="gl-md-display-none gl-ml-auto gl-align-self-start js-sidebar-build-toggle"
       icon="chevron-double-lg-left"
       :aria-label="__('Toggle sidebar')"
       @click="onClickSidebarButton"

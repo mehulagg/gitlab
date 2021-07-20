@@ -14,6 +14,7 @@ RSpec.describe GitlabSchema.types['IncidentManagementOncallSchedule'] do
       description
       timezone
       rotations
+      rotation
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

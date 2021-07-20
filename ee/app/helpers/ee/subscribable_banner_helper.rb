@@ -37,11 +37,12 @@ module EE
       @project&.namespace || @group
     end
 
-    def license_message(signed_in: signed_in?, is_admin: current_user&.admin?, license: License.current)
+    def license_message(signed_in: signed_in?, is_admin: current_user&.admin?, license: License.current, force_notification: false)
       ::Gitlab::ExpiringSubscriptionMessage.new(
         subscribable: license,
         signed_in: signed_in,
-        is_admin: is_admin
+        is_admin: is_admin,
+        force_notification: force_notification
       ).message
     end
 
@@ -51,14 +52,16 @@ module EE
       ::Gitlab::ExpiringSubscriptionMessage.new(
         subscribable: decorated_subscription,
         signed_in: signed_in?,
-        is_admin: can?(current_user, :owner_access, entity),
+        is_admin: can?(current_user, :owner_access, entity.root_ancestor),
         namespace: current_namespace
       ).message
     end
 
     def decorated_subscription
       entity = @project || @group
-      subscription = entity&.closest_gitlab_subscription
+      return unless entity && entity.persisted?
+
+      subscription = entity.closest_gitlab_subscription
 
       return unless subscription
 

@@ -1,13 +1,14 @@
 import $ from 'jquery';
 import '~/lib/utils/jquery_at_who';
-import { escape, template } from 'lodash';
+import { escape, sortBy, template } from 'lodash';
 import * as Emoji from '~/emoji';
 import axios from '~/lib/utils/axios_utils';
-import { s__ } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
 import { isUserBusy } from '~/set_status_modal/utils';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
 import AjaxCache from './lib/utils/ajax_cache';
 import { spriteIcon } from './lib/utils/common_utils';
+import { parsePikadayDate } from './lib/utils/datetime_utility';
 import glRegexp from './lib/utils/regexp';
 
 function sanitize(str) {
@@ -237,10 +238,13 @@ class GfmAutoComplete {
     const MEMBER_COMMAND = {
       ASSIGN: '/assign',
       UNASSIGN: '/unassign',
+      ASSIGN_REVIEWER: '/assign_reviewer',
+      UNASSIGN_REVIEWER: '/unassign_reviewer',
       REASSIGN: '/reassign',
       CC: '/cc',
     };
     let assignees = [];
+    let reviewers = [];
     let command = '';
 
     // Team Members
@@ -266,6 +270,7 @@ class GfmAutoComplete {
       },
       // eslint-disable-next-line no-template-curly-in-string
       insertTpl: '${atwho-at}${username}',
+      limit: 10,
       searchKey: 'search',
       alwaysHighlightFirst: true,
       skipSpecialCharacterTest: true,
@@ -284,9 +289,11 @@ class GfmAutoComplete {
             return null;
           });
 
-          // Cache assignees list for easier filtering later
+          // Cache assignees & reviewers list for easier filtering later
           assignees =
             SidebarMediator.singleton?.store?.assignees?.map(createMemberSearchString) || [];
+          reviewers =
+            SidebarMediator.singleton?.store?.reviewers?.map(createMemberSearchString) || [];
 
           const match = GfmAutoComplete.defaultMatcher(flag, subtext, this.app.controllers);
           return match && match.length ? match[1] : null;
@@ -307,9 +314,29 @@ class GfmAutoComplete {
           } else if (command === MEMBER_COMMAND.UNASSIGN) {
             // Only include members which are assigned to Issuable currently
             return data.filter((member) => assignees.includes(member.search));
+          } else if (command === MEMBER_COMMAND.ASSIGN_REVIEWER) {
+            // Only include members which are not assigned as a reviewer to Issuable currently
+            return data.filter((member) => !reviewers.includes(member.search));
+          } else if (command === MEMBER_COMMAND.UNASSIGN_REVIEWER) {
+            // Only include members which are not assigned as a reviewer to Issuable currently
+            return data.filter((member) => reviewers.includes(member.search));
           }
 
           return data;
+        },
+        sorter(query, items) {
+          // Disable auto-selecting the loading icon
+          this.setting.highlightFirst = this.setting.alwaysHighlightFirst;
+          if (GfmAutoComplete.isLoading(items)) {
+            this.setting.highlightFirst = false;
+            return items;
+          }
+
+          if (!query) {
+            return items;
+          }
+
+          return GfmAutoComplete.Members.sort(query, items);
         },
       },
     });
@@ -359,7 +386,7 @@ class GfmAutoComplete {
       displayTpl(value) {
         let tmpl = GfmAutoComplete.Loading.template;
         if (value.title != null) {
-          tmpl = GfmAutoComplete.Milestones.templateFunction(value.title);
+          tmpl = GfmAutoComplete.Milestones.templateFunction(value.title, value.expired);
         }
         return tmpl;
       },
@@ -367,16 +394,39 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(milestones) {
-          return $.map(milestones, (m) => {
+          const parsedMilestones = $.map(milestones, (m) => {
             if (m.title == null) {
               return m;
             }
+
+            const dueDate = m.due_date ? parsePikadayDate(m.due_date) : null;
+            const expired = dueDate ? Date.now() > dueDate.getTime() : false;
+
             return {
               id: m.iid,
               title: sanitize(m.title),
               search: m.title,
+              expired,
+              dueDate,
             };
           });
+
+          // Sort milestones by due date when present.
+          if (typeof parsedMilestones[0] === 'object') {
+            return parsedMilestones.sort((mA, mB) => {
+              // Move all expired milestones to the bottom.
+              if (mA.expired) return 1;
+              if (mB.expired) return -1;
+
+              // Move milestones without due dates just above expired milestones.
+              if (!mA.dueDate) return 1;
+              if (!mB.dueDate) return -1;
+
+              // Sort by due date in ascending order.
+              return mA.dueDate - mB.dueDate;
+            });
+          }
+          return parsedMilestones;
         },
       },
     });
@@ -772,6 +822,23 @@ GfmAutoComplete.Members = {
       title,
     )}${availabilityStatus}</small> ${icon}</li>`;
   },
+  nameOrUsernameStartsWith(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.split(' ').some((name) => name.toLowerCase().startsWith(query));
+  },
+  nameOrUsernameIncludes(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.toLowerCase().includes(query);
+  },
+  sort(query, members) {
+    const lowercaseQuery = query.toLowerCase();
+    const { nameOrUsernameStartsWith, nameOrUsernameIncludes } = GfmAutoComplete.Members;
+
+    return sortBy(
+      members.filter((member) => nameOrUsernameIncludes(member, lowercaseQuery)),
+      (member) => (nameOrUsernameStartsWith(member, lowercaseQuery) ? -1 : 0),
+    );
+  },
 };
 GfmAutoComplete.Labels = {
   templateFunction(color, title) {
@@ -792,7 +859,12 @@ GfmAutoComplete.Issues = {
 };
 // Milestones
 GfmAutoComplete.Milestones = {
-  templateFunction(title) {
+  templateFunction(title, expired) {
+    if (expired) {
+      return `<li>${sprintf(__('%{milestone} (expired)'), {
+        milestone: escape(title),
+      })}</li>`;
+    }
     return `<li>${escape(title)}</li>`;
   },
 };

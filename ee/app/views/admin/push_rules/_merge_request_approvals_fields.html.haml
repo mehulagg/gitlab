@@ -1,14 +1,16 @@
 %fieldset
-  .form-group
-    .form-check
-      = f.check_box :prevent_merge_requests_author_approval, class: 'form-check-input'
-      = f.label :prevent_merge_requests_author_approval, class: 'form-check-label' do
+  %legend.h5.gl-border-none
+    = _('Approval settings')
+  .gl-form-checkbox-group
+    .gl-form-checkbox.custom-control.custom-checkbox
+      = f.check_box :prevent_merge_requests_author_approval, class: 'custom-control-input'
+      = f.label :prevent_merge_requests_author_approval, class: 'custom-control-label' do
         = _('Prevent MR approvals by author.')
-    .form-check
-      = f.check_box :prevent_merge_requests_committers_approval, class: 'form-check-input'
-      = f.label :prevent_merge_requests_committers_approval, class: 'form-check-label' do
+    .gl-form-checkbox.custom-control.custom-checkbox
+      = f.check_box :prevent_merge_requests_committers_approval, class: 'custom-control-input'
+      = f.label :prevent_merge_requests_committers_approval, class: 'custom-control-label' do
         = _('Prevent MR approvals from users who make commits to the MR.')
-    .form-check
-      = f.check_box :disable_overriding_approvers_per_merge_request , class: 'form-check-input'
-      = f.label :disable_overriding_approvers_per_merge_request , class: 'form-check-label' do
-        = _('Prevent users from modifying MR approval rules.')
+    .gl-form-checkbox.custom-control.custom-checkbox
+      = f.check_box :disable_overriding_approvers_per_merge_request , class: 'custom-control-input'
+      = f.label :disable_overriding_approvers_per_merge_request , class: 'custom-control-label' do
+        = _('Prevent users from modifying MR approval rules in projects and merge requests.')

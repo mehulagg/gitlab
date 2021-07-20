@@ -1,45 +1,85 @@
-import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
-import produce from 'immer';
-import ImportSourceGroupFragment from '../fragments/bulk_import_source_group_item.fragment.graphql';
+import { debounce, merge } from 'lodash';
 
-function extractTypeConditionFromFragment(fragment) {
-  return fragment.definitions[0]?.typeCondition.name.value;
-}
-
-function generateGroupId(id) {
-  return defaultDataIdFromObject({
-    __typename: extractTypeConditionFromFragment(ImportSourceGroupFragment),
-    id,
-  });
-}
+export const KEY = 'gl-bulk-imports-import-state';
+export const DEBOUNCE_INTERVAL = 200;
 
 export class SourceGroupsManager {
-  constructor({ client }) {
-    this.client = client;
+  constructor({ sourceUrl, storage = window.localStorage }) {
+    this.sourceUrl = sourceUrl;
+
+    this.storage = storage;
+    this.importStates = this.loadImportStatesFromStorage();
   }
 
-  findById(id) {
-    const cacheId = generateGroupId(id);
-    return this.client.readFragment({ fragment: ImportSourceGroupFragment, id: cacheId });
+  loadImportStatesFromStorage() {
+    try {
+      return Object.fromEntries(
+        Object.entries(JSON.parse(this.storage.getItem(KEY)) ?? {}).map(([jobId, config]) => {
+          // new format of storage
+          if (config.groups) {
+            return [jobId, config];
+          }
+
+          return [
+            jobId,
+            {
+              status: config.status,
+              groups: [{ id: config.id, importTarget: config.importTarget }],
+            },
+          ];
+        }),
+      );
+    } catch {
+      return {};
+    }
   }
 
-  update(group, fn) {
-    this.client.writeFragment({
-      fragment: ImportSourceGroupFragment,
-      id: generateGroupId(group.id),
-      data: produce(group, fn),
-    });
+  createImportState(importId, jobConfig) {
+    this.importStates[this.getStorageKey(importId)] = {
+      status: jobConfig.status,
+      groups: jobConfig.groups.map((g) => ({ importTarget: g.import_target, id: g.id })),
+    };
+    this.saveImportStatesToStorage();
   }
 
-  updateById(id, fn) {
-    const group = this.findById(id);
-    this.update(group, fn);
+  updateImportProgress(importId, status) {
+    const currentState = this.importStates[this.getStorageKey(importId)];
+    if (!currentState) {
+      return;
+    }
+
+    currentState.status = status;
+    this.saveImportStatesToStorage();
   }
 
-  setImportStatus(group, status) {
-    this.update(group, (sourceGroup) => {
-      // eslint-disable-next-line no-param-reassign
-      sourceGroup.status = status;
-    });
+  getImportStateFromStorageByGroupId(groupId) {
+    const PREFIX = this.getStorageKey('');
+    const [jobId, importState] =
+      Object.entries(this.importStates).find(
+        ([key, state]) => key.startsWith(PREFIX) && state.groups.some((g) => g.id === groupId),
+      ) ?? [];
+
+    if (!jobId) {
+      return null;
+    }
+
+    const group = importState.groups.find((g) => g.id === groupId);
+    return { jobId, importState: { ...group, status: importState.status } };
   }
+
+  getStorageKey(importId) {
+    return `${this.sourceUrl}|${importId}`;
+  }
+
+  saveImportStatesToStorage = debounce(() => {
+    try {
+      // storage might be changed in other tab so fetch first
+      this.storage.setItem(
+        KEY,
+        JSON.stringify(merge({}, this.loadImportStatesFromStorage(), this.importStates)),
+      );
+    } catch {
+      // empty catch intentional: storage might be unavailable or full
+    }
+  }, DEBOUNCE_INTERVAL);
 }

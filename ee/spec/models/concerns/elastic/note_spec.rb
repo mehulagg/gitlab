@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Note, :elastic do
+RSpec.describe Note, :elastic, :clean_gitlab_redis_shared_state do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -110,10 +110,6 @@ RSpec.describe Note, :elastic do
                   'confidential' => issue.confidential
                 },
                 'type' => note.es_type,
-                'join_field' => {
-                  'name' => note.es_type,
-                  'parent' => note.es_parent
-                },
                 'visibility_level' => project.visibility_level,
                 'issues_access_level' => project.issues_access_level
               })
@@ -121,42 +117,69 @@ RSpec.describe Note, :elastic do
       expect(note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
     end
 
-    it 'does not raise error for notes with null noteable references' do
+    it 'raises Elastic::Latest::DocumentShouldBeDeletedFromIndexError when noteable is nil' do
       note = create(:note_on_issue)
       allow(note).to receive(:noteable).and_return(nil)
 
-      expect { note.__elasticsearch__.as_indexed_json }.not_to raise_error
+      expect { note.__elasticsearch__.as_indexed_json }.to raise_error(::Elastic::Latest::DocumentShouldBeDeletedFromIndexError)
     end
 
-    where(:note_type, :permission, :access_level) do
-      :note_on_issue                      | ProjectFeature::ENABLED      | 'issues_access_level'
-      :note_on_project_snippet            | ProjectFeature::DISABLED     | 'snippets_access_level'
-      :note_on_merge_request              | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
-      :note_on_commit                     | ProjectFeature::PRIVATE      | 'repository_access_level'
+    where(:note_type, :project_feature_permission, :access_level) do
+      :note_on_issue                              | ProjectFeature::ENABLED      | 'issues_access_level'
+      :note_on_project_snippet                    | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :note_on_personal_snippet                   | nil                          | nil
+      :note_on_merge_request                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :note_on_commit                             | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :diff_note_on_merge_request                 | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :diff_note_on_commit                        | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :diff_note_on_design                        | ProjectFeature::ENABLED      | nil
+      :legacy_diff_note_on_merge_request          | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :legacy_diff_note_on_commit                 | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :note_on_alert                              | ProjectFeature::PRIVATE      | nil
+      :note_on_design                             | ProjectFeature::ENABLED      | nil
+      :note_on_epic                               | nil                          | nil
+      :note_on_vulnerability                      | ProjectFeature::PRIVATE      | nil
+      :discussion_note_on_vulnerability           | ProjectFeature::PRIVATE      | nil
+      :discussion_note_on_merge_request           | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :discussion_note_on_issue                   | ProjectFeature::ENABLED      | 'issues_access_level'
+      :discussion_note_on_project_snippet         | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :discussion_note_on_personal_snippet        | nil                          | nil
+      :discussion_note_on_commit                  | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :track_mr_picking_note                      | nil                          | nil
     end
 
     with_them do
-      let_it_be(:project) { create(:project, :repository) }
-      let!(:note) { create(note_type, project: project) } # rubocop:disable Rails/SaveBang
+      let!(:note) { create(note_type) } # rubocop:disable Rails/SaveBang
+      let(:project) { note.project }
+
       let(:note_json) { note.__elasticsearch__.as_indexed_json }
 
       before do
-        project.project_feature.update_attribute(access_level.to_sym, permission)
-      end
-
-      it 'does not contain permissions if remove_permissions_data_from_notes_documents is not finished' do
-        allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-                                                  .with(:remove_permissions_data_from_notes_documents)
-                                                  .and_return(false)
-
-        expect(note_json).not_to have_key(access_level)
-        expect(note_json).not_to have_key('visibility_level')
+        project.project_feature.update_attribute(access_level.to_sym, project_feature_permission) if access_level.present?
       end
 
       it 'contains the correct permissions', :aggregate_failures do
-        expect(note_json).to have_key(access_level)
-        expect(note_json[access_level]).to eq(permission)
+        if access_level
+          expect(note_json).to have_key(access_level)
+          expect(note_json[access_level]).to eq(project_feature_permission)
+        end
+
+        expected_visibility_level = project&.visibility_level || Gitlab::VisibilityLevel::PRIVATE
         expect(note_json).to have_key('visibility_level')
+        expect(note_json['visibility_level']).to eq(expected_visibility_level)
+      end
+
+      context 'when the project does not exist' do
+        before do
+          note.project = nil
+        end
+
+        it 'has DISABLED access_level' do
+          if access_level
+            expect(note_json).to have_key(access_level)
+            expect(note_json[access_level]).to eq(ProjectFeature::DISABLED)
+          end
+        end
       end
     end
   end

@@ -78,7 +78,7 @@ RSpec.describe Dashboard::Projects::CreateService do
         context 'with project for which user has no permission' do
           let(:input) { [project.id] }
           let(:feature) { nil }
-          let(:ability) { :read_vulnerability }
+          let(:ability) { :read_security_resource }
           let(:permission_available) { false }
 
           it 'does not check if feature is available' do

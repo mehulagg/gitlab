@@ -19,6 +19,7 @@ RSpec.describe GroupWiki do
 
         # Don't actually create the repository, because the storage shard doesn't exist.
         expect(subject.repository).to receive(:create_if_not_exists)
+        expect(subject).to receive(:change_head_to_default_branch)
         allow(subject).to receive(:repository_exists?).and_return(true)
 
         expect(subject).to receive(:track_wiki_repository).with(shard)
@@ -89,6 +90,14 @@ RSpec.describe GroupWiki do
     describe '#disk_path' do
       it 'returns the repository storage path' do
         expect(subject.disk_path).to eq("#{subject.storage.disk_path}.wiki")
+      end
+    end
+
+    describe '#after_post_receive' do
+      it 'updates group statistics' do
+        expect(Groups::UpdateStatisticsWorker).to receive(:perform_async).with(wiki.container.id, [:wiki_size])
+
+        subject.send(:after_post_receive)
       end
     end
   end

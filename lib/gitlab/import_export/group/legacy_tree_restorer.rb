@@ -45,7 +45,7 @@ module Gitlab
           return false if @shared.errors.any?
 
           true
-        rescue => e
+        rescue StandardError => e
           @shared.error(e)
           false
         end
@@ -55,11 +55,11 @@ module Gitlab
         def relation_reader
           strong_memoize(:relation_reader) do
             if @group_hash.present?
-              ImportExport::JSON::LegacyReader::Hash.new(
+              ImportExport::Json::LegacyReader::Hash.new(
                 @group_hash,
                 relation_names: reader.group_relation_names)
             else
-              ImportExport::JSON::LegacyReader::File.new(
+              ImportExport::Json::LegacyReader::File.new(
                 File.join(shared.export_path, 'group.json'),
                 relation_names: reader.group_relation_names)
             end

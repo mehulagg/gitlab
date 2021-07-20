@@ -138,8 +138,9 @@ RSpec.describe MergeRequestPolicy do
   context 'for a merge request on a protected branch' do
     let(:branch_name) { 'feature' }
     let_it_be(:user) { create :user }
-    let(:protected_branch) { create(:protected_branch, project: project, name: branch_name, code_owner_approval_required: true) }
+    let(:protected_branch) { create(:protected_branch, project: project, name: branch_name) }
     let_it_be(:approver_group) { create(:group) }
+
     let(:merge_request) { create(:merge_request, source_project: project, target_project: project, target_branch: branch_name) }
 
     before do
@@ -194,7 +195,7 @@ RSpec.describe MergeRequestPolicy do
       end
 
       context 'when the protected branch name is a wildcard' do
-        let(:wildcard_protected_branch) { create(:protected_branch, project: project, name: '*-stable', code_owner_approval_required: true) }
+        let(:wildcard_protected_branch) { create(:protected_branch, project: project, name: '*-stable') }
 
         before do
           approval_project_rule.protected_branches << wildcard_protected_branch

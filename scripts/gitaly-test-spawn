@@ -3,12 +3,13 @@
 
 # This script is used both in CI and in local development 'rspec' runs.
 
-require_relative 'gitaly_test'
+require_relative '../spec/support/helpers/gitaly_setup'
 
 class GitalyTestSpawn
-  include GitalyTest
+  include GitalySetup
 
   def run
+    set_bundler_config
     install_gitaly_gems if ENV['CI']
     check_gitaly_config!
 

@@ -6,6 +6,7 @@ RSpec.describe Gitlab::CodeOwners::Loader do
   include FakeBlobHelpers
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
+
   subject(:loader) { described_class.new(project, 'with-codeowners', paths) }
 
   let(:codeowner_content) do
@@ -41,6 +42,12 @@ RSpec.describe Gitlab::CodeOwners::Loader do
 
     it 'returns entries for the matched line' do
       expect(loader.entries).to contain_exactly(expected_entry)
+    end
+
+    it 'only calls out to the repository once' do
+      expect(project.repository).to receive(:code_owners_blob).once
+
+      2.times { loader.entries }
     end
 
     it 'loads all users that are members of the project into the entry' do

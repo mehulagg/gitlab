@@ -1,16 +1,22 @@
 [{
     "id": "gid://gitlab/IncidentManagement::OncallRotation/2",
     "name": "Rotation 242",
-    "startsAt": "2021-01-13T10:04:56.333Z",
-    "length": 1,
+    "startsAt": "2021-01-13T11:04:56.333Z",
+    "endsAt": "2021-03-13T15:04:56.333Z",
+    "length": 2,
     "lengthUnit": "WEEKS",
+    "activePeriod": {
+      "startTime": "02:00",
+      "endTime": "10:00"
+    },
     "participants": {
       "nodes": [
         {
           "user": {
             "id": "gid://gitlab/IncidentManagement::OncallParticipant/49",
             "username": "nora.schaden",
-            "avatarUrl": "/url"
+            "avatarUrl": "/url",
+            "name": "nora"
           },
           "colorWeight": "500",
           "colorPalette": "blue"
@@ -21,11 +27,13 @@
       "nodes": [
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/49",
             "colorWeight": "500",
             "colorPalette": "blue",
             "user": {
-              "username": "nora.schaden"
+              "id": "gid://gitlab/User/1",
+              "username": "nora.schaden",
+              "avatarUrl": "/url",
+              "name": "nora"
             }
           },
           "startsAt": "2021-01-12T10:04:56.333Z",
@@ -33,11 +41,13 @@
         },
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/232",
             "colorWeight": "500",
             "colorPalette": "orange",
             "user": {
-              "username": "racheal.loving"
+              "id": "gid://gitlab/User/2",
+              "username": "racheal.loving",
+              "avatarUrl": "/url",
+              "name": "racheal"
             }
           },
           "startsAt": "2021-01-16T10:04:56.333Z",
@@ -49,16 +59,22 @@
   {
     "id": "gid://gitlab/IncidentManagement::OncallRotation/55",
     "name": "Rotation 242",
-    "startsAt": "2021-01-13T10:04:56.333Z",
+    "startsAt": "2021-01-13T11:04:56.333Z",
+    "endsAt": "2021-03-13T15:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
+    "activePeriod": {
+      "startTime": "02:00",
+      "endTime": "10:00"
+    },
     "participants": {
       "nodes": [
         {
           "user": {
             "id": "gid://gitlab/IncidentManagement::OncallParticipant/99",
             "username": "david.oregan",
-            "avatarUrl": "/url"
+            "avatarUrl": "/url",
+            "name": "david"
           },
           "colorWeight": "500",
           "colorPalette": "aqua"
@@ -69,11 +85,13 @@
       "nodes": [
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/99",
             "colorWeight": "500",
             "colorPalette": "aqua",
             "user": {
-              "username": "david.oregan"
+              "id": "gid://gitlab/User/38",
+              "avatarUrl": "url",
+              "username": "david.oregan",
+              "name": "david"
             }
           },
           "startsAt": "2021-01-14T10:04:56.333Z",
@@ -81,11 +99,13 @@
         },
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/300",
             "colorWeight": "500",
             "colorPalette": "green",
             "user": {
-              "username": "david.keagan"
+              "id": "gid://gitlab/User/39",
+              "avatarUrl": "url",
+              "username": "david.keagan",
+              "name": "david k"
             }
           },
           "startsAt": "2021-01-21T10:04:56.333Z",
@@ -98,15 +118,21 @@
     "id": "gid://gitlab/IncidentManagement::OncallRotation/3",
     "name": "Rotation 244",
     "startsAt": "2021-01-06T10:04:56.333Z",
+    "endsAt": "2021-01-10T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
+    "activePeriod": {
+      "startTime": "02:00",
+      "endTime": "10:00"
+    },
     "participants": {
       "nodes": [
         {
           "user": {
             "id": "gid://gitlab/IncidentManagement::OncallParticipant/48",
             "username": "root",
-            "avatarUrl": "/url"
+            "avatarUrl": "/url",
+            "name": "Administrator"
           },
           "colorWeight": "500",
           "colorPalette": "magenta"
@@ -117,23 +143,27 @@
       "nodes": [
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/100",
             "colorWeight": "500",
             "colorPalette": "magenta",
             "user": {
-              "username": "root"
+              "id": "gid://gitlab/User/40",
+              "avatarUrl": "url",
+              "username": "root",
+              "name": "Administrator"
             }
           },
           "startsAt": "2021-01-10T10:04:56.333Z",
-          "endsAt": "2021-01-13T10:04:56.333Z"
+          "endsAt": "2021-01-13T11:04:56.333Z"
         },
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/109",
             "colorWeight": "600",
             "colorPalette": "blue",
             "user": {
-              "username": "root2"
+              "id": "gid://gitlab/User/41",
+              "avatarUrl": "url",
+              "username": "root2",
+              "name": "Administrator 2"
             }
           },
           "startsAt": "2021-01-15T10:04:56.333Z",
@@ -146,15 +176,21 @@
   "id": "gid://gitlab/IncidentManagement::OncallRotation/5",
   "name": "Rotation 247",
   "startsAt": "2021-01-06T10:04:56.333Z",
+  "endsAt": "2021-01-11T10:04:56.333Z",
   "length": 1,
   "lengthUnit": "WEEKS",
+  "activePeriod": {
+    "startTime": "02:00",
+    "endTime": "10:00"
+  },
   "participants": {
     "nodes": [
       {
         "user": {
           "id": "gid://gitlab/IncidentManagement::OncallParticipant/51",
           "username": "oregand",
-          "avatarUrl": "/url"
+          "avatarUrl": "/url",
+          "name": "david"
         },
         "colorWeight": "600",
         "colorPalette": "orange"
@@ -165,11 +201,13 @@
     "nodes": [
       {
         "participant": {
-          "id": "gid://gitlab/IncidentManagement::OncallParticipant/52",
           "colorWeight": "600",
           "colorPalette": "orange",
           "user": {
-            "username": "oregand"
+            "id": "gid://gitlab/User/43",
+            "avatarUrl": "url",
+            "username": "oregand",
+            "name": "david"
           }
         },
         "startsAt": "2021-01-12T10:04:56.333Z",
@@ -177,11 +215,13 @@
       },
       {
         "participant": {
-          "id": "gid://gitlab/IncidentManagement::OncallParticipant/77",
           "colorWeight": "600",
           "colorPalette": "aqua",
           "user": {
-            "username": "sarah.w"
+            "id": "gid://gitlab/User/44",
+            "avatarUrl": "url",
+            "username": "sarah.w",
+            "name": "sarah"
           }
         },
         "startsAt": "2021-01-16T10:04:56.333Z",

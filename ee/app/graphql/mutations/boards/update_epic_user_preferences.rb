@@ -25,7 +25,7 @@ module Mutations
             null: true,
             description: 'User preferences for the epic in the board after mutation.'
 
-      authorize :read_board
+      authorize :read_issue_board
 
       def resolve(board_id:, epic_id:, **args)
         board = authorized_find!(id: board_id)

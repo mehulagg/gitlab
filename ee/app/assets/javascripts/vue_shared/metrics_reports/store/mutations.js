@@ -12,22 +12,24 @@ export default {
     state.hasError = false;
     state.isLoading = false;
 
+    state.changedMetrics =
+      response.existing_metrics?.filter((metric) => metric?.previous_value) || [];
     state.newMetrics = response.new_metrics || [];
-    state.existingMetrics = response.existing_metrics || [];
     state.removedMetrics = response.removed_metrics || [];
+    state.unchangedMetrics =
+      response.existing_metrics?.filter((metric) => !metric?.previous_value) || [];
 
     state.numberOfChanges =
-      state.existingMetrics.filter((metric) => metric.previous_value !== undefined).length +
-      state.newMetrics.length +
-      state.removedMetrics.length;
+      state.changedMetrics.length + state.newMetrics.length + state.removedMetrics.length;
   },
   [types.RECEIVE_METRICS_ERROR](state) {
     state.isLoading = false;
     state.hasError = true;
 
+    state.changedMetrics = [];
     state.newMetrics = [];
-    state.existingMetrics = [];
     state.removedMetrics = [];
+    state.unchangedMetrics = [];
 
     state.numberOfChanges = 0;
   },

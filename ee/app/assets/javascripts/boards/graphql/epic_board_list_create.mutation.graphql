@@ -1,0 +1,10 @@
+#import "./epic_board_list.fragment.graphql"
+
+mutation CreateEpicBoardList($boardId: BoardsEpicBoardID!, $backlog: Boolean, $labelId: LabelID) {
+  epicBoardListCreate(input: { boardId: $boardId, backlog: $backlog, labelId: $labelId }) {
+    list {
+      ...EpicBoardListFragment
+    }
+    errors
+  }
+}

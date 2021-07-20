@@ -98,6 +98,42 @@ export const pipelineData = {
   ],
 };
 
+export const invalidNeedsData = {
+  stages: [
+    {
+      name: 'build',
+      groups: [
+        {
+          name: 'build_1',
+          jobs: [{ script: 'echo hello', stage: 'build' }],
+        },
+      ],
+    },
+    {
+      name: 'test',
+      groups: [
+        {
+          name: 'test_1',
+          jobs: [{ script: 'yarn test', stage: 'test' }],
+        },
+        {
+          name: 'test_2',
+          jobs: [{ script: 'yarn karma', stage: 'test' }],
+        },
+      ],
+    },
+    {
+      name: 'deploy',
+      groups: [
+        {
+          name: 'deploy_1',
+          jobs: [{ script: 'yarn magick', stage: 'deploy', needs: ['invalid_job'] }],
+        },
+      ],
+    },
+  ],
+};
+
 export const parallelNeedData = {
   stages: [
     {
@@ -120,6 +156,38 @@ export const parallelNeedData = {
         {
           name: 'test_1',
           jobs: [{ script: 'yarn test', stage: 'test', needs: ['build_1'] }],
+        },
+      ],
+    },
+  ],
+};
+
+export const sameStageNeeds = {
+  stages: [
+    {
+      name: 'build',
+      groups: [
+        {
+          name: 'build_1',
+          jobs: [{ script: 'echo hello', stage: 'build', name: 'build_1' }],
+        },
+      ],
+    },
+    {
+      name: 'build',
+      groups: [
+        {
+          name: 'build_2',
+          jobs: [{ script: 'yarn test', stage: 'build', needs: ['build_1'] }],
+        },
+      ],
+    },
+    {
+      name: 'build',
+      groups: [
+        {
+          name: 'build_3',
+          jobs: [{ script: 'yarn test', stage: 'build', needs: ['build_2'] }],
         },
       ],
     },

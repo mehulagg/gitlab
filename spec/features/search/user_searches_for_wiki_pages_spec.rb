@@ -15,6 +15,7 @@ RSpec.describe 'User searches for wiki pages', :js do
   end
 
   include_examples 'top right search form'
+  include_examples 'search timeouts', 'wiki_blobs'
 
   shared_examples 'search wiki blobs' do
     it 'finds a page' do
@@ -23,7 +24,7 @@ RSpec.describe 'User searches for wiki pages', :js do
       wait_for_requests
 
       page.within('[data-testid="project-filter"]') do
-        click_on(project.full_name)
+        click_on(project.name)
       end
 
       fill_in('dashboard_search', with: search_term)

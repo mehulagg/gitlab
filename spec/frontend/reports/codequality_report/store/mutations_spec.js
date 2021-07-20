@@ -16,6 +16,7 @@ describe('Codequality Reports mutations', () => {
       const headPath = 'head.json';
       const baseBlobPath = 'base/blob/path/';
       const headBlobPath = 'head/blob/path/';
+      const reportsPath = 'reports.json';
       const helpPath = 'help.html';
 
       mutations.SET_PATHS(localState, {
@@ -23,6 +24,7 @@ describe('Codequality Reports mutations', () => {
         headPath,
         baseBlobPath,
         headBlobPath,
+        reportsPath,
         helpPath,
       });
 
@@ -30,6 +32,7 @@ describe('Codequality Reports mutations', () => {
       expect(localState.headPath).toEqual(headPath);
       expect(localState.baseBlobPath).toEqual(baseBlobPath);
       expect(localState.headBlobPath).toEqual(headBlobPath);
+      expect(localState.reportsPath).toEqual(reportsPath);
       expect(localState.helpPath).toEqual(helpPath);
     });
   });

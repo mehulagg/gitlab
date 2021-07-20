@@ -46,6 +46,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
           expect(response).not_to be_redirect
           expect(subject).not_to disallow_request
         end
+
+        it "expects a POST #{description} URL with trailing slash to be allowed" do
+          response = request.post("#{path}/")
+
+          expect(response).not_to be_redirect
+          expect(subject).not_to disallow_request
+        end
       end
 
       where(:description, :path) do
@@ -59,6 +66,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
       with_them do
         it "expects a POST #{description} URL to not be allowed" do
           response = request.post(path)
+
+          expect(response).to be_redirect
+          expect(subject).to disallow_request
+        end
+
+        it "expects a POST #{description} URL with traling slash to not be allowed" do
+          response = request.post("#{path}/")
 
           expect(response).to be_redirect
           expect(subject).to disallow_request
@@ -91,6 +105,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
           expect(response).to be_redirect
           expect(subject).to disallow_request
         end
+
+        it "expects a POST #{description} URL with trailing backslash not to be allowed" do
+          response = request.post("#{path}/")
+
+          expect(response).to be_redirect
+          expect(subject).to disallow_request
+        end
       end
 
       where(:description, :path) do
@@ -101,6 +122,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
       with_them do
         it "expects a POST to #{description} URL to be allowed" do
           response = request.post(path)
+
+          expect(response).not_to be_redirect
+          expect(subject).not_to disallow_request
+        end
+
+        it "expects a POST to #{description} URL with trailing slash to be allowed" do
+          response = request.post("#{path}/")
 
           expect(response).not_to be_redirect
           expect(subject).not_to disallow_request

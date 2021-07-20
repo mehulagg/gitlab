@@ -9,7 +9,7 @@ RSpec.describe MergeRequests::ApprovalService do
     let(:project)       { merge_request.project }
     let!(:todo)         { create(:todo, user: user, project: project, target: merge_request) }
 
-    subject(:service) { described_class.new(project, user) }
+    subject(:service) { described_class.new(project: project, current_user: user) }
 
     before do
       project.add_developer(user)
@@ -148,7 +148,7 @@ RSpec.describe MergeRequests::ApprovalService do
         end
 
         it 'does not update the approvals' do
-          service_with_params = described_class.new(project, user, params)
+          service_with_params = described_class.new(project: project, current_user: user, params: params)
 
           expect { service_with_params.execute(merge_request) }.not_to change { merge_request.approvals.size }
         end
@@ -160,7 +160,7 @@ RSpec.describe MergeRequests::ApprovalService do
         end
 
         it 'approves the merge request' do
-          service_with_params = described_class.new(project, user, params)
+          service_with_params = described_class.new(project: project, current_user: user, params: params)
 
           expect { service_with_params.execute(merge_request) }.to change { merge_request.approvals.size }
         end

@@ -23,6 +23,7 @@ module QA
 
         @personal_access_token = Runtime::Env.personal_access_token
         Runtime::Env.personal_access_token = nil
+
         ldap_username = Runtime::Env.ldap_username
         Runtime::Env.ldap_username = nil
 
@@ -70,7 +71,7 @@ module QA
 
             Flow::Login.sign_in(as: user, skip_page_validation: true)
 
-            expect(page).to have_text("Invalid Login or password")
+            expect(page).to have_text("Invalid login or password")
 
             @recreated_user = Resource::User.fabricate_via_browser_ui! do |resource|
               resource.name = user.name
@@ -137,12 +138,12 @@ module QA
         Page::Admin::Overview::Users::Index.perform do |index|
           index.click_pending_approval_tab
           index.search_user(user.username)
-          index.click_user(user.username)
+          index.click_user(user.name)
         end
 
         Page::Admin::Overview::Users::Show.perform do |show|
           user.id = show.user_id.to_i
-          show.approve_user
+          show.approve_user(user)
         end
 
         expect(page).to have_text('Successfully approved')

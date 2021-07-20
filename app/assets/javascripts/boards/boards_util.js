@@ -1,6 +1,6 @@
-import { sortBy } from 'lodash';
+import { sortBy, cloneDeep } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { ListType, NOT_FILTER } from './constants';
+import { ListType } from './constants';
 
 export function getMilestone() {
   return null;
@@ -36,11 +36,11 @@ export function formatIssue(issue) {
 }
 
 export function formatListIssues(listIssues) {
-  const issues = {};
-  let listIssuesCount;
+  const boardItems = {};
+  let listItemsCount;
 
   const listData = listIssues.nodes.reduce((map, list) => {
-    listIssuesCount = list.issues.count;
+    listItemsCount = list.issuesCount;
     let sortedIssues = list.issues.edges.map((issueNode) => ({
       ...issueNode.node,
     }));
@@ -54,18 +54,19 @@ export function formatListIssues(listIssues) {
         const listIssue = {
           ...i,
           id,
+          fullId: i.id,
           labels: i.labels?.nodes || [],
           assignees: i.assignees?.nodes || [],
         };
 
-        issues[id] = listIssue;
+        boardItems[id] = listIssue;
 
         return id;
       }),
     };
   }, {});
 
-  return { listData, issues, listIssuesCount };
+  return { listData, boardItems, listItemsCount };
 }
 
 export function formatListsPageInfo(lists) {
@@ -106,54 +107,175 @@ export function formatIssueInput(issueInput, boardConfig) {
   const { labels, assigneeId, milestoneId } = boardConfig;
 
   return {
-    milestoneId: milestoneId ? fullMilestoneId(milestoneId) : null,
     ...issueInput,
+    milestoneId: milestoneId ? fullMilestoneId(milestoneId) : null,
     labelIds: [...labelIds, ...(labels?.map((l) => fullLabelId(l)) || [])],
     assigneeIds: [...assigneeIds, ...(assigneeId ? [fullUserId(assigneeId)] : [])],
   };
 }
 
-export function moveIssueListHelper(issue, fromList, toList) {
-  const updatedIssue = issue;
+export function shouldCloneCard(fromListType, toListType) {
+  const involvesClosed = fromListType === ListType.closed || toListType === ListType.closed;
+  const involvesBacklog = fromListType === ListType.backlog || toListType === ListType.backlog;
+
+  if (involvesClosed || involvesBacklog) {
+    return false;
+  }
+
+  if (fromListType !== toListType) {
+    return true;
+  }
+
+  return false;
+}
+
+export function getMoveData(state, params) {
+  const { boardItems, boardItemsByListId, boardLists } = state;
+  const { itemId, fromListId, toListId } = params;
+  const fromListType = boardLists[fromListId].listType;
+  const toListType = boardLists[toListId].listType;
+
+  return {
+    reordering: fromListId === toListId,
+    shouldClone: shouldCloneCard(fromListType, toListType),
+    itemNotInToList: !boardItemsByListId[toListId].includes(itemId),
+    originalIssue: cloneDeep(boardItems[itemId]),
+    originalIndex: boardItemsByListId[fromListId].indexOf(itemId),
+    ...params,
+  };
+}
+
+export function moveItemListHelper(item, fromList, toList) {
+  const updatedItem = item;
   if (
     toList.listType === ListType.label &&
-    !updatedIssue.labels.find((label) => label.id === toList.label.id)
+    !updatedItem.labels.find((label) => label.id === toList.label.id)
   ) {
-    updatedIssue.labels.push(toList.label);
+    updatedItem.labels.push(toList.label);
   }
   if (fromList?.label && fromList.listType === ListType.label) {
-    updatedIssue.labels = updatedIssue.labels.filter((label) => fromList.label.id !== label.id);
+    updatedItem.labels = updatedItem.labels.filter((label) => fromList.label.id !== label.id);
   }
 
   if (
     toList.listType === ListType.assignee &&
-    !updatedIssue.assignees.find((assignee) => assignee.id === toList.assignee.id)
+    !updatedItem.assignees.find((assignee) => assignee.id === toList.assignee.id)
   ) {
-    updatedIssue.assignees.push(toList.assignee);
+    updatedItem.assignees.push(toList.assignee);
   }
   if (fromList?.assignee && fromList.listType === ListType.assignee) {
-    updatedIssue.assignees = updatedIssue.assignees.filter(
+    updatedItem.assignees = updatedItem.assignees.filter(
       (assignee) => assignee.id !== fromList.assignee.id,
     );
   }
 
-  return updatedIssue;
+  return updatedItem;
 }
 
 export function isListDraggable(list) {
   return list.listType !== ListType.backlog && list.listType !== ListType.closed;
 }
 
-export function transformNotFilters(filters) {
-  return Object.keys(filters)
-    .filter((key) => key.startsWith(NOT_FILTER))
-    .reduce((obj, key) => {
-      return {
-        ...obj,
-        [key.substring(4, key.length - 1)]: filters[key],
-      };
-    }, {});
-}
+export const FiltersInfo = {
+  assigneeUsername: {
+    negatedSupport: true,
+  },
+  assigneeId: {
+    // assigneeId should be renamed to assigneeWildcardId.
+    // Classic boards used 'assigneeId'
+    remap: () => 'assigneeWildcardId',
+  },
+  assigneeWildcardId: {
+    negatedSupport: false,
+    transform: (val) => val.toUpperCase(),
+  },
+  authorUsername: {
+    negatedSupport: true,
+  },
+  labelName: {
+    negatedSupport: true,
+  },
+  milestoneTitle: {
+    negatedSupport: true,
+  },
+  myReactionEmoji: {
+    negatedSupport: true,
+  },
+  releaseTag: {
+    negatedSupport: true,
+  },
+  search: {
+    negatedSupport: false,
+  },
+};
+
+/**
+ * @param {Object} filters - ex. { search: "foobar", "not[authorUsername]": "root", }
+ * @returns {Object} - ex. [ ["search", "foobar", false], ["authorUsername", "root", true], ]
+ */
+const parseFilters = (filters) => {
+  /* eslint-disable-next-line @gitlab/require-i18n-strings */
+  const isNegated = (x) => x.startsWith('not[') && x.endsWith(']');
+
+  return Object.entries(filters).map(([k, v]) => {
+    const isNot = isNegated(k);
+    const filterKey = isNot ? k.slice(4, -1) : k;
+
+    return [filterKey, v, isNot];
+  });
+};
+
+/**
+ * Returns an object of filter key/value pairs used as variables in GraphQL requests.
+ * (warning: filter values are not validated)
+ *
+ * @param {Object} objParam.filters - filters extracted from url params. ex. { search: "foobar", "not[authorUsername]": "root", }
+ * @param {string} objParam.issuableType - issuable type e.g., issue.
+ * @param {Object} objParam.filterInfo - data on filters such as how to transform filter value, if filter can be negated, etc.
+ * @param {Object} objParam.filterFields - data on what filters are available for given issuableType (based on GraphQL schema)
+ */
+export const filterVariables = ({ filters, issuableType, filterInfo, filterFields }) =>
+  parseFilters(filters)
+    .map(([k, v, negated]) => {
+      // for legacy reasons, some filters need to be renamed to correct GraphQL fields.
+      const remapAvailable = filterInfo[k]?.remap;
+      const remappedKey = remapAvailable ? filterInfo[k].remap(k, v) : k;
+
+      return [remappedKey, v, negated];
+    })
+    .filter(([k, , negated]) => {
+      // remove unsupported filters (+ check if the filters support negation)
+      const supported = filterFields[issuableType].includes(k);
+      if (supported) {
+        return negated ? filterInfo[k].negatedSupport : true;
+      }
+
+      return false;
+    })
+    .map(([k, v, negated]) => {
+      // if the filter value needs a special transformation, apply it (e.g., capitalization)
+      const transform = filterInfo[k]?.transform;
+      const newVal = transform ? transform(v) : v;
+
+      return [k, newVal, negated];
+    })
+    .reduce(
+      (acc, [k, v, negated]) => {
+        return negated
+          ? {
+              ...acc,
+              not: {
+                ...acc.not,
+                [k]: v,
+              },
+            }
+          : {
+              ...acc,
+              [k]: v,
+            };
+      },
+      { not: {} },
+    );
 
 // EE-specific feature. Find the implementation in the `ee/`-folder
 export function transformBoardConfig() {
@@ -168,5 +290,4 @@ export default {
   fullLabelId,
   fullIterationId,
   isListDraggable,
-  transformNotFilters,
 };

@@ -7,9 +7,9 @@ describe('Approval MR edit module actions', () => {
     it('commits SET_TARGET_BRANCH', (done) => {
       testAction(
         actions.setTargetBranch,
-        'master',
+        'main',
         {},
-        [{ type: types.SET_TARGET_BRANCH, payload: 'master' }],
+        [{ type: types.SET_TARGET_BRANCH, payload: 'main' }],
         [],
         done,
       );

@@ -1,0 +1,37 @@
+query State {
+  namespaces @client {
+    id
+    name
+    users
+  }
+  isNewUser @client
+  fullName @client
+  isSetupForCompany @client
+  selectedPlanId @client
+  customer @client {
+    country
+    address1
+    address2
+    city
+    state
+    zipCode
+    company
+  }
+  paymentMethod @client {
+    id
+    creditCardExpirationMonth
+    creditCardExpirationYear
+    creditCardType
+    creditCardMaskNumber
+  }
+  subscription @client {
+    quantity
+    namespaceId
+  }
+  activeStep @client {
+    id
+  }
+  stepList @client {
+    id
+  }
+}

@@ -100,7 +100,7 @@ module UsersHelper
       badges << blocked_user_badge(user) if user.blocked?
       badges << { text: s_('AdminUsers|Admin'), variant: 'success' } if user.admin?
       badges << { text: s_('AdminUsers|External'), variant: 'secondary' } if user.external?
-      badges << { text: s_("AdminUsers|It's you!"), variant: nil } if current_user == user
+      badges << { text: s_("AdminUsers|It's you!"), variant: 'muted' } if current_user == user
     end
   end
 
@@ -123,85 +123,36 @@ module UsersHelper
     !user.confirmed?
   end
 
-  def user_block_data(user, message)
+  def ban_feature_available?
+    Feature.enabled?(:ban_user_feature_flag)
+  end
+
+  def confirm_user_data(user)
+    message = if user.unconfirmed_email.present?
+                _('This user has an unconfirmed email address (%{email}). You may force a confirmation.') % { email: user.unconfirmed_email }
+              else
+                _('This user has an unconfirmed email address. You may force a confirmation.')
+              end
+
+    modal_attributes = Gitlab::Json.dump({
+      title: s_('AdminUsers|Confirm user %{username}?') % { username: sanitize_name(user.name) },
+      messageHtml: message,
+      actionPrimary: {
+        text: s_('AdminUsers|Confirm user'),
+        attributes: [{ variant: 'info', 'data-qa-selector': 'confirm_user_confirm_button' }]
+      },
+      actionSecondary: {
+        text: _('Cancel'),
+        attributes: [{ variant: 'default' }]
+      }
+    })
+
     {
-      path: block_admin_user_path(user),
+      path: confirm_admin_user_path(user),
       method: 'put',
-      modal_attributes: {
-        title: s_('AdminUsers|Block user %{username}?') % { username: sanitize_name(user.name) },
-        messageHtml: message,
-        okVariant: 'warning',
-        okTitle: s_('AdminUsers|Block')
-      }.to_json
+      modal_attributes: modal_attributes,
+      qa_selector: 'confirm_user_button'
     }
-  end
-
-  def user_unblock_data(user)
-    {
-      path: unblock_admin_user_path(user),
-      method: 'put',
-      modal_attributes: {
-        title: s_('AdminUsers|Unblock user %{username}?') % { username: sanitize_name(user.name) },
-        message: s_('AdminUsers|You can always block their account again if needed.'),
-        okVariant: 'info',
-        okTitle: s_('AdminUsers|Unblock')
-      }.to_json
-    }
-  end
-
-  def user_block_effects
-    header = tag.p s_('AdminUsers|Blocking user has the following effects:')
-
-    list = tag.ul do
-      concat tag.li s_('AdminUsers|User will not be able to login')
-      concat tag.li s_('AdminUsers|User will not be able to access git repositories')
-      concat tag.li s_('AdminUsers|Personal projects will be left')
-      concat tag.li s_('AdminUsers|Owned groups will be left')
-    end
-
-    header + list
-  end
-
-  def user_deactivation_data(user, message)
-    {
-      path: deactivate_admin_user_path(user),
-      method: 'put',
-      modal_attributes: {
-        title: s_('AdminUsers|Deactivate user %{username}?') % { username: sanitize_name(user.name) },
-        messageHtml: message,
-        okVariant: 'warning',
-        okTitle: s_('AdminUsers|Deactivate')
-      }.to_json
-    }
-  end
-
-  def user_activation_data(user)
-    {
-      path: activate_admin_user_path(user),
-      method: 'put',
-      modal_attributes: {
-        title: s_('AdminUsers|Activate user %{username}?') % { username: sanitize_name(user.name) },
-        message: s_('AdminUsers|You can always deactivate their account again if needed.'),
-        okVariant: 'info',
-        okTitle: s_('AdminUsers|Activate')
-      }.to_json
-    }
-  end
-
-  def user_deactivation_effects
-    header = tag.p s_('AdminUsers|Deactivating a user has the following effects:')
-
-    list = tag.ul do
-      concat tag.li s_('AdminUsers|The user will be logged out')
-      concat tag.li s_('AdminUsers|The user will not be able to access git repositories')
-      concat tag.li s_('AdminUsers|The user will not be able to access the API')
-      concat tag.li s_('AdminUsers|The user will not receive any notifications')
-      concat tag.li s_('AdminUsers|The user will not be able to use slash commands')
-      concat tag.li s_('AdminUsers|When the user logs back in, their account will reactivate as a fully active account')
-      concat tag.li s_('AdminUsers|Personal projects, group and user history will be left intact')
-    end
-
-    header + list
   end
 
   def user_display_name(user)
@@ -211,6 +162,13 @@ module UsersHelper
     return s_('UserProfile|Unconfirmed user') unless user.confirmed? || can_read_profile
 
     user.name
+  end
+
+  def admin_user_actions_data_attributes(user)
+    {
+      user: Admin::UserEntity.represent(user, { current_user: current_user }).to_json,
+      paths: admin_users_paths.to_json
+    }
   end
 
   private
@@ -227,13 +185,18 @@ module UsersHelper
       unlock: unlock_admin_user_path(:id),
       delete: admin_user_path(:id),
       delete_with_contributions: admin_user_path(:id),
-      admin_user: admin_user_path(:id)
+      admin_user: admin_user_path(:id),
+      ban: ban_admin_user_path(:id),
+      unban: unban_admin_user_path(:id)
     }
   end
 
   def blocked_user_badge(user)
     pending_approval_badge = { text: s_('AdminUsers|Pending approval'), variant: 'info' }
     return pending_approval_badge if user.blocked_pending_approval?
+
+    banned_badge = { text: s_('AdminUsers|Banned'), variant: 'danger' }
+    return banned_badge if user.banned?
 
     { text: s_('AdminUsers|Blocked'), variant: 'danger' }
   end
@@ -322,4 +285,4 @@ module UsersHelper
   end
 end
 
-UsersHelper.prepend_if_ee('EE::UsersHelper')
+UsersHelper.prepend_mod_with('UsersHelper')

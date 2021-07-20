@@ -4,8 +4,8 @@ module Gitlab
   module Prometheus
     module Queries
       class PacketFlowQuery < BaseQuery
-        FORWARDED = "FORWARDED".freeze
-        DROPPED   = "DROPPED".freeze
+        FORWARDED = "FORWARDED"
+        DROPPED   = "DROPPED"
 
         def query(namespace, interval = "hour", from = 1.day.ago.to_s, to = Time.now.to_s)
           from = Time.parse(from)

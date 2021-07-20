@@ -126,13 +126,13 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(s3_config.keys).not_to include(%i(ServerSideEncryption SSEKMSKeyID))
       end
 
-      context 'when feature flag is disabled' do
+      context 'when no region is specified' do
         before do
-          stub_feature_flags(use_workhorse_s3_client: false)
+          raw_config.delete(:region)
         end
 
-        it 'does not enable Workhorse client' do
-          expect(subject[:UseWorkhorseClient]).to be false
+        it 'defaults to us-east-1' do
+          expect(subject[:ObjectStorage][:S3Config][:Region]).to eq('us-east-1')
         end
       end
 
@@ -223,6 +223,17 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(subject[:DeleteURL]).to start_with(storage_url)
         expect(subject[:CustomPutHeaders]).to be_truthy
         expect(subject[:PutHeaders]).to eq({})
+      end
+
+      context 'with an object with UTF-8 characters' do
+        let(:object_name) { 'tmp/uploads/テスト' }
+
+        it 'returns an escaped path' do
+          expect(subject[:GetURL]).to start_with(storage_url)
+
+          uri = Addressable::URI.parse(subject[:GetURL])
+          expect(uri.path).to include("tmp/uploads/#{CGI.escape("テスト")}")
+        end
       end
     end
 

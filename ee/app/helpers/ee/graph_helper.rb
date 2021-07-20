@@ -4,12 +4,13 @@ module EE
   module GraphHelper
     extend ::Gitlab::Utils::Override
 
-    override :should_render_deployment_frequency_charts
-    def should_render_deployment_frequency_charts
-      return false unless ::Feature.enabled?(:deployment_frequency_charts, @project, default_enabled: true)
-      return false unless @project.feature_available?(:project_activity_analytics)
+    override :should_render_dora_charts
+    def should_render_dora_charts
+      container = @project || @group
 
-      can?(current_user, :read_project_activity_analytics, @project)
+      return false unless container.feature_available?(:dora4_analytics)
+
+      can?(current_user, :read_dora4_analytics, container)
     end
   end
 end

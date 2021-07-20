@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe 'npm.latest.gitlab-ci.yml' do
-  subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('npm.latest') }
+RSpec.describe 'npm.gitlab-ci.yml' do
+  subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('npm') }
 
   describe 'the created pipeline' do
     let(:repo_files) { { 'package.json' => '{}', 'README.md' => '' } }
@@ -14,7 +14,7 @@ RSpec.describe 'npm.latest.gitlab-ci.yml' do
     let(:pipeline_tag) { 'v1.2.1' }
     let(:pipeline_ref) { pipeline_branch }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref ) }
-    let(:pipeline) { service.execute!(:push) }
+    let(:pipeline) { service.execute!(:push).payload }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     def create_branch(name:)

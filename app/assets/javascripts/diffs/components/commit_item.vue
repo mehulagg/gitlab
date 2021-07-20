@@ -1,7 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlButtonGroup, GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { mapActions } from 'vuex';
+import { GlButtonGroup, GlButton, GlTooltipDirective } from '@gitlab/ui';
 
 import CommitPipelineStatus from '~/projects/tree/components/commit_pipeline_status_component.vue';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
@@ -9,7 +8,6 @@ import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-import { setUrlParams } from '../../lib/utils/url_utility';
 import initUserPopovers from '../../user_popovers';
 
 /**
@@ -24,14 +22,6 @@ import initUserPopovers from '../../user_popovers';
  * coexist, but there is an issue to remove the duplication.
  * https://gitlab.com/gitlab-org/gitlab-foss/issues/51613
  *
- * EXCEPTION WARNING
- * 1. The commit navigation buttons (next neighbor, previous neighbor)
- *    are not duplicated because:
- *     - We don't have the same data available on the Rails side (yet,
- *        without backend work)
- *     - This Vue component should always be what's used when in the
- *        context of an MR diff, so the HAML should never have any idea
- *        about navigating among commits.
  */
 
 export default {
@@ -42,7 +32,6 @@ export default {
     CommitPipelineStatus,
     GlButtonGroup,
     GlButton,
-    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -94,27 +83,11 @@ export default {
       // Strip the newline at the beginning
       return this.commit.description_html.replace(/^&#x000A;/, '');
     },
-    nextCommitUrl() {
-      return this.commit.next_commit_id
-        ? setUrlParams({ commit_id: this.commit.next_commit_id })
-        : '';
-    },
-    previousCommitUrl() {
-      return this.commit.prev_commit_id
-        ? setUrlParams({ commit_id: this.commit.prev_commit_id })
-        : '';
-    },
-    hasNeighborCommits() {
-      return this.commit.next_commit_id || this.commit.prev_commit_id;
-    },
   },
   created() {
     this.$nextTick(() => {
       initUserPopovers(this.$el.querySelectorAll('.js-user-link'));
     });
-  },
-  methods: {
-    ...mapActions('diffs', ['moveToNeighboringCommit']),
   },
 };
 </script>
@@ -146,38 +119,6 @@ export default {
             class="input-group-text"
           />
         </gl-button-group>
-        <div v-if="hasNeighborCommits" class="commit-nav-buttons ml-3">
-          <gl-button-group>
-            <gl-button
-              :href="previousCommitUrl"
-              :disabled="!commit.prev_commit_id"
-              @click.prevent="moveToNeighboringCommit({ direction: 'previous' })"
-            >
-              <span
-                v-if="!commit.prev_commit_id"
-                v-gl-tooltip
-                class="h-100 w-100 position-absolute"
-                :title="__('You\'re at the first commit')"
-              ></span>
-              <gl-icon name="chevron-left" />
-              {{ __('Prev') }}
-            </gl-button>
-            <gl-button
-              :href="nextCommitUrl"
-              :disabled="!commit.next_commit_id"
-              @click.prevent="moveToNeighboringCommit({ direction: 'next' })"
-            >
-              <span
-                v-if="!commit.next_commit_id"
-                v-gl-tooltip
-                class="h-100 w-100 position-absolute"
-                :title="__('You\'re at the last commit')"
-              ></span>
-              {{ __('Next') }}
-              <gl-icon name="chevron-right" />
-            </gl-button>
-          </gl-button-group>
-        </div>
       </div>
       <div>
         <div class="d-flex float-left align-items-center align-self-start">
@@ -197,7 +138,7 @@ export default {
           />
         </div>
         <div class="commit-detail flex-list">
-          <div class="commit-content qa-commit-content">
+          <div class="commit-content" data-qa-selector="commit_content">
             <a
               :href="commit.commit_url"
               class="commit-row-message item-title"
@@ -232,7 +173,7 @@ export default {
       <pre
         v-if="commit.description_html"
         :class="{ 'js-toggle-content': collapsible, 'd-block': !collapsible }"
-        class="commit-row-description gl-mb-3 text-dark"
+        class="commit-row-description gl-mb-3 gl-text-body"
         v-html="commitDescription"
       ></pre>
     </div>

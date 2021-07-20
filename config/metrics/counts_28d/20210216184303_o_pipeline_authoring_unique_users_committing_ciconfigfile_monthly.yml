@@ -1,0 +1,19 @@
+---
+data_category: Optional
+key_path: redis_hll_counters.pipeline_authoring.o_pipeline_authoring_unique_users_committing_ciconfigfile_monthly
+description: Monthly unique user count doing commits which contains the CI config file
+product_section: ops
+product_stage: verify
+product_group: group::pipeline authoring
+product_category: pipeline_authoring
+value_type: number
+status: data_available
+time_frame: 28d
+data_source: redis_hll
+distribution:
+- ee
+- ce
+tier:
+- free
+- premium
+- ultimate

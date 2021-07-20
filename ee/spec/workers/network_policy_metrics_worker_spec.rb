@@ -8,7 +8,7 @@ RSpec.describe NetworkPolicyMetricsWorker, :clean_gitlab_redis_shared_state do
   let!(:cluster) { create(:cluster, :with_installed_helm, :provided_by_gcp, :project) }
   let!(:cilium_application) { create(:clusters_applications_cilium, :installed, cluster: cluster) }
   let!(:prometheus_application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
-  let!(:prometheus_service) { create(:prometheus_service, project: cluster.projects.first) }
+  let!(:prometheus_integration) { create(:prometheus_integration, project: cluster.projects.first) }
 
   let(:client) { instance_double('Gitlab::PrometheusClient') }
   let(:query_response) do
@@ -45,8 +45,8 @@ RSpec.describe NetworkPolicyMetricsWorker, :clean_gitlab_redis_shared_state do
       end
     end
 
-    context 'with prometheus service on another project' do
-      let!(:prometheus_service_without_cilium) { create(:prometheus_service) }
+    context 'with prometheus integration on another project' do
+      let!(:prometheus_integration_without_cilium) { create(:prometheus_integration) }
 
       it 'does not count projects without cilium' do
         worker.perform
@@ -58,7 +58,7 @@ RSpec.describe NetworkPolicyMetricsWorker, :clean_gitlab_redis_shared_state do
     context 'with Prometheus client error' do
       let!(:cluster2) { create(:cluster, :with_installed_helm, :provided_by_gcp, :project) }
       let!(:cilium_application2) { create(:clusters_applications_cilium, :installed, cluster: cluster2) }
-      let!(:prometheus_service2) { create(:prometheus_service, project: cluster2.projects.first) }
+      let!(:prometheus_integration2) { create(:prometheus_integration, project: cluster2.projects.first) }
 
       before do
         idx = 0
@@ -75,10 +75,10 @@ RSpec.describe NetworkPolicyMetricsWorker, :clean_gitlab_redis_shared_state do
     context 'with unconfigured adapter' do
       let!(:cluster2) { create(:cluster, :with_installed_helm, :provided_by_gcp, :project) }
       let!(:cilium_application2) { create(:clusters_applications_cilium, :installed, cluster: cluster2) }
-      let!(:prometheus_service2) { create(:prometheus_service, project: cluster2.projects.first) }
+      let!(:prometheus_integration2) { create(:prometheus_integration, project: cluster2.projects.first) }
 
       before do
-        prometheus_service.update_attribute(:api_url, 'invalid_url')
+        prometheus_integration.update_attribute(:api_url, 'invalid_url')
       end
 
       it 'adds usage of the rest' do

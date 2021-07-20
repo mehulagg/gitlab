@@ -32,6 +32,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
 
     describe '#validate_code_owners?' do
       let_it_be(:push_rule) { create(:push_rule, file_name_regex: 'READ*') }
+
       let(:validate_code_owners) { subject.send(:validate_code_owners?) }
       let(:protocol) { 'ssh' }
       let(:push_allowed) { false }
@@ -191,7 +192,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         it_behaves_like 'check ignored when push rule unlicensed'
 
         it "returns an error if a new or renamed filed doesn't match the file name regex" do
-          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "File name README was blacklisted by the pattern READ*.")
+          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "File name README was prohibited by the pattern \"READ*\".")
         end
 
         it 'returns an error if the regex is invalid' do
@@ -247,7 +248,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
               project.repository.commits_between(old_rev, new_rev)
             )
 
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /File name #{file_path} was blacklisted by the pattern/)
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /File name #{file_path} was prohibited by the pattern/)
           end
         end
       end
@@ -256,6 +257,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
     context 'file lock rules' do
       let_it_be(:push_rule) { create(:push_rule) }
       let_it_be(:owner) { create(:user) }
+
       let(:path_lock) { create(:path_lock, path: 'README', project: project) }
 
       before do

@@ -7,6 +7,10 @@ module Resolvers
       include ResolvesProject
 
       type Types::Ci::Config::ConfigType, null: true
+      description <<~MD
+        Linted and processed contents of a CI config.
+        Should not be requested more than once per request.
+      MD
 
       authorize :read_pipeline
 
@@ -14,19 +18,23 @@ module Resolvers
                required: true,
                description: 'The project of the CI config.'
 
+      argument :sha, GraphQL::STRING_TYPE,
+               required: false,
+               description: "Sha for the pipeline."
+
       argument :content, GraphQL::STRING_TYPE,
                required: true,
-               description: "Contents of '.gitlab-ci.yml'."
+               description: "Contents of `.gitlab-ci.yml`."
 
       argument :dry_run, GraphQL::BOOLEAN_TYPE,
                required: false,
                description: 'Run pipeline creation simulation, or only do static check.'
 
-      def resolve(project_path:, content:, dry_run: false)
+      def resolve(project_path:, content:, sha: nil, dry_run: false)
         project = authorized_find!(project_path: project_path)
 
         result = ::Gitlab::Ci::Lint
-          .new(project: project, current_user: context[:current_user])
+          .new(project: project, current_user: context[:current_user], sha: sha)
           .validate(content, dry_run: dry_run)
 
         response(result).merge(merged_yaml: result.merged_yaml)
@@ -55,7 +63,7 @@ module Resolvers
             name: job[:name],
             stage: job[:stage],
             group_name: CommitStatus.new(name: job[:name]).group_name,
-            needs: job.dig(:needs) || [],
+            needs: job[:needs] || [],
             allow_failure: job[:allow_failure],
             before_script: job[:before_script],
             script: job[:script],

@@ -2,7 +2,9 @@
   .issuable-info-container
     - if @can_bulk_update
       .issue-check.hidden
-        = check_box_tag dom_id(epic, "selected"), nil, false, 'data-id' => epic.id, class: "selected-issuable"
+        - checkbox_id = dom_id(epic, "selected")
+        %label.gl-sr-only{ for: checkbox_id }= epic.title
+        = check_box_tag checkbox_id, nil, false, 'data-id' => epic.id, class: "selected-issuable"
     .issuable-main-info
       .issue-title.title
         %span.issue-title-text{ data: { qa_selector: 'epic_title_text' } }
@@ -15,7 +17,7 @@
           = epic.to_reference(@group)
         %span.issuable-authored.d-none.d-sm-inline-block
           &middot;
-          opened #{time_ago_with_tooltip(epic.created_at, placement: 'bottom')}
+          created #{time_ago_with_tooltip(epic.created_at, placement: 'bottom')}
           by #{link_to_member(@group, epic.author, avatar: false)}
           = gitlab_team_member_badge(epic.author)
         - if epic.start_date? || epic.end_date?
@@ -26,7 +28,7 @@
         - if epic.labels.any?
           &nbsp;
           - epic.labels.each do |label|
-            = render_label(label.present(issuable_subject: @group), tooltip: true, link: group_epics_path(@group, label_name:[label.name]), small: true)
+            = render_label(label.present(issuable_subject: @group), tooltip: true, link: group_epics_path(@group, label_name: [label.name]), small: true)
 
     .issuable-meta
       %ul.controls

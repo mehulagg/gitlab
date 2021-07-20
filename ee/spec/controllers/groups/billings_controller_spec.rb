@@ -26,8 +26,8 @@ RSpec.describe Groups::BillingsController do
     context 'authorized' do
       before do
         add_group_owner
-        allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
-          allow(instance).to receive(:execute)
+        allow_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
+          allow(instance).to receive(:execute).and_return([])
         end
         allow(controller).to receive(:track_experiment_event)
       end
@@ -41,7 +41,7 @@ RSpec.describe Groups::BillingsController do
 
       it 'fetches subscription plans data from customers.gitlab.com' do
         data = double
-        expect_next_instance_of(FetchSubscriptionPlansService) do |instance|
+        expect_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
           expect(instance).to receive(:execute).and_return(data)
         end
 
@@ -60,6 +60,30 @@ RSpec.describe Groups::BillingsController do
         expect(controller).to receive(:record_experiment_user).with(:contact_sales_btn_in_app)
 
         get_index
+      end
+
+      context 'when CustomersDot is unavailable' do
+        before do
+          allow_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
+            allow(instance).to receive(:execute).and_return(nil)
+          end
+        end
+
+        it 'does not track the page view for the contact_sales_btn_in_app experiment' do
+          expect(controller).not_to receive(:track_experiment_event)
+
+          get_index
+
+          expect(response).to render_template('shared/billings/customers_dot_unavailable')
+        end
+
+        it 'does not record the user for the contact_sales_btn_in_app experiment' do
+          expect(controller).not_to receive(:record_experiment_user)
+
+          get_index
+
+          expect(response).to render_template('shared/billings/customers_dot_unavailable')
+        end
       end
     end
 

@@ -27,7 +27,7 @@ module AlertManagement
       first_id = project.alert_management_http_integrations
                         .ordered_by_id
                         .select(:id)
-                        .at_most(1)
+                        .limit(1)
 
       @collection = collection.id_in(first_id)
     end
@@ -51,4 +51,4 @@ module AlertManagement
   end
 end
 
-::AlertManagement::HttpIntegrationsFinder.prepend_if_ee('EE::AlertManagement::HttpIntegrationsFinder')
+::AlertManagement::HttpIntegrationsFinder.prepend_mod_with('AlertManagement::HttpIntegrationsFinder')

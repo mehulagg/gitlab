@@ -29,7 +29,7 @@ module Gitlab
     CI_JOB_USER = 'gitlab-ci-token'
 
     class << self
-      prepend_if_ee('EE::Gitlab::Auth') # rubocop: disable Cop/InjectEnterpriseEditionModule
+      prepend_mod_with('Gitlab::Auth') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
       def omniauth_enabled?
         Gitlab.config.omniauth.enabled
@@ -84,7 +84,7 @@ module Gitlab
         Gitlab::Auth::UniqueIpsLimiter.limit_user! do
           user = User.by_login(login)
 
-          break if user && !user.can?(:log_in)
+          break if user && !can_user_login_with_non_expired_password?(user)
 
           authenticators = []
 
@@ -156,15 +156,16 @@ module Gitlab
 
         underscored_service = matched_login['service'].underscore
 
-        if Service.available_services_names.include?(underscored_service)
-          # We treat underscored_service as a trusted input because it is included
-          # in the Service.available_services_names allowlist.
-          service = project.public_send("#{underscored_service}_service") # rubocop:disable GitlabSecurity/PublicSend
+        return unless Integration.available_integration_names.include?(underscored_service)
 
-          if service && service.activated? && service.valid_token?(password)
-            Gitlab::Auth::Result.new(nil, project, :ci, build_authentication_abilities)
-          end
-        end
+        # We treat underscored_service as a trusted input because it is included
+        # in the Integration.available_integration_names allowlist.
+        accessor = Project.integration_association_name(underscored_service)
+        service = project.public_send(accessor) # rubocop:disable GitlabSecurity/PublicSend
+
+        return unless service && service.activated? && service.valid_token?(password)
+
+        Gitlab::Auth::Result.new(nil, project, :ci, build_authentication_abilities)
       end
 
       def user_with_password_for_git(login, password)
@@ -182,7 +183,7 @@ module Gitlab
 
           if valid_oauth_token?(token)
             user = User.id_in(token.resource_owner_id).first
-            return unless user&.can?(:log_in)
+            return unless user && can_user_login_with_non_expired_password?(user)
 
             Gitlab::Auth::Result.new(user, nil, :oauth, full_authentication_abilities)
           end
@@ -198,12 +199,28 @@ module Gitlab
 
         return unless valid_scoped_token?(token, all_available_scopes)
 
-        return if project && token.user.project_bot? && !project.bots.include?(token.user)
+        if project && token.user.project_bot?
+          return unless token_bot_in_project?(token.user, project) || token_bot_in_group?(token.user, project)
+        end
 
-        if token.user.can?(:log_in) || token.user.project_bot?
+        if can_user_login_with_non_expired_password?(token.user) || token.user.project_bot?
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
+
+      def token_bot_in_project?(user, project)
+        project.bots.include?(user)
+      end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+
+      # A workaround for adding group-level automation is to add the bot user of a project access token as a group member.
+      # In order to make project access tokens work this way during git authentication, we need to add an additional check for group membership.
+      # This is a temporary workaround until service accounts are implemented.
+      def token_bot_in_group?(user, project)
+        project.group && project.group.members_with_parents.where(user_id: user.id).exists?
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def valid_oauth_token?(token)
         token && token.accessible? && valid_scoped_token?(token, [:api])
@@ -285,7 +302,7 @@ module Gitlab
         return unless build.project.builds_enabled?
 
         if build.user
-          return unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
+          return unless can_user_login_with_non_expired_password?(build.user) || (build.user.project_bot? && build.project.bots&.include?(build.user))
 
           # If user is assigned to build, use restricted credentials of user
           Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
@@ -371,7 +388,9 @@ module Gitlab
       end
 
       def find_build_by_token(token)
-        ::Ci::AuthJobFinder.new(token: token).execute
+        ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
+          ::Ci::AuthJobFinder.new(token: token).execute
+        end
       end
 
       def user_auth_attempt!(user, success:)
@@ -379,6 +398,10 @@ module Gitlab
         return user.unlock_access! if success
 
         user.increment_failed_attempts!
+      end
+
+      def can_user_login_with_non_expired_password?(user)
+        user.can?(:log_in) && !user.password_expired_if_applicable?
       end
     end
   end

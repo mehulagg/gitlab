@@ -16,11 +16,14 @@
 
   %h4
     - if namespace_for_user
-      = s_("BillingPlans|@%{user_name} you are currently using the %{plan_name} plan.").html_safe % { user_name: current_user.username, plan_name: plan.code.titleize }
+      = s_("BillingPlans|@%{user_name} you are currently using the %{plan_name}.").html_safe % { user_name: current_user.username, plan_name: plan.name }
     - else
       = s_("BillingPlans|%{group_name} is currently using the %{plan_name}.").html_safe % { group_name: namespace.full_name, plan_name: plan.name }
 
-  - if parent_group
+  - if namespace.free_personal?
+    - groups_link = link_to s_("BillingPlans|group"), dashboard_groups_path
+    %p= html_escape_once(s_("BillingPlans|Looking to purchase or manage a subscription for your group? Navigate to your %{groups_link} and go to %{strong_open}Settings &gt; Billing.%{strong_close}")).html_safe % { groups_link: groups_link.html_safe, strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
+  - elsif parent_group
     %p= s_("BillingPlans|This group uses the plan associated with its parent group.")
     - parent_billing_page_link = link_to parent_group.full_name, group_billings_path(parent_group)
     %p= s_("BillingPlans|To manage the plan for this group, visit the billing section of %{parent_billing_page_link}.").html_safe % { parent_billing_page_link: parent_billing_page_link }
@@ -28,6 +31,6 @@
   - else
     = render 'shared/billings/trial_status', namespace: namespace
 
-  - if namespace.eligible_for_trial?
+  - if show_start_free_trial_messages?(namespace)
     - glm_content = namespace_for_user ? 'user-billing' : 'group-billing'
-    %p= link_to 'Start your free trial', new_trial_registration_path(glm_source: 'gitlab.com', glm_content: glm_content), class: 'btn btn-primary gl-button'
+    %p= link_to 'Start your free trial', new_trial_registration_path(glm_source: 'gitlab.com', glm_content: glm_content), class: 'btn btn-confirm gl-button', data: { qa_selector: 'start_your_free_trial' }

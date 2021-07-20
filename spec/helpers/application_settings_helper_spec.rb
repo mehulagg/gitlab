@@ -37,8 +37,24 @@ RSpec.describe ApplicationSettingsHelper do
   it_behaves_like 'when HTTP protocol is in use', 'https'
   it_behaves_like 'when HTTP protocol is in use', 'http'
 
-  context 'with tracking parameters' do
-    it { expect(visible_attributes).to include(*%i(snowplow_collector_hostname snowplow_cookie_domain snowplow_enabled snowplow_app_id)) }
+  describe '.visible_attributes' do
+    it 'contains tracking parameters' do
+      expect(helper.visible_attributes).to include(*%i(snowplow_collector_hostname snowplow_cookie_domain snowplow_enabled snowplow_app_id))
+    end
+
+    it 'contains :deactivate_dormant_users' do
+      expect(helper.visible_attributes).to include(:deactivate_dormant_users)
+    end
+
+    context 'when GitLab.com' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+      end
+
+      it 'does not contain :deactivate_dormant_users' do
+        expect(helper.visible_attributes).not_to include(:deactivate_dormant_users)
+      end
+    end
   end
 
   describe '.integration_expanded?' do
@@ -130,20 +146,15 @@ RSpec.describe ApplicationSettingsHelper do
     before do
       helper.instance_variable_set(:@application_setting, application_setting)
       stub_storage_settings({ 'default': {}, 'storage_1': {}, 'storage_2': {} })
-      allow(ApplicationSetting).to receive(:repository_storages_weighted_attributes).and_return(
-        [:repository_storages_weighted_default,
-         :repository_storages_weighted_storage_1,
-         :repository_storages_weighted_storage_2])
-
       stub_application_setting(repository_storages_weighted: { 'default' => 100, 'storage_1' => 50, 'storage_2' => nil })
     end
 
     it 'returns storages correctly' do
-      expect(helper.storage_weights).to eq([
-          { name: :repository_storages_weighted_default, label: 'default', value: 100 },
-          { name: :repository_storages_weighted_storage_1, label: 'storage_1', value: 50 },
-          { name: :repository_storages_weighted_storage_2, label: 'storage_2', value: 0 }
-        ])
+      expect(helper.storage_weights).to eq(OpenStruct.new(
+                                             default: 100,
+                                             storage_1: 50,
+                                             storage_2: 0
+                                           ))
     end
   end
 
@@ -164,6 +175,26 @@ RSpec.describe ApplicationSettingsHelper do
       let(:feature_flag) { false }
 
       it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '.valid_runner_registrars' do
+    subject { helper.valid_runner_registrars }
+
+    context 'when only admins are permitted to register runners' do
+      before do
+        stub_application_setting(valid_runner_registrars: [])
+      end
+
+      it { is_expected.to eq [] }
+    end
+
+    context 'when group and project users are permitted to register runners' do
+      before do
+        stub_application_setting(valid_runner_registrars: ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
+      end
+
+      it { is_expected.to eq ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES }
     end
   end
 
@@ -192,6 +223,35 @@ RSpec.describe ApplicationSettingsHelper do
       end
 
       it { is_expected.to be false }
+    end
+  end
+
+  describe '.kroki_available_formats' do
+    let(:application_setting) { build(:application_setting) }
+
+    before do
+      helper.instance_variable_set(:@application_setting, application_setting)
+      stub_application_setting(kroki_formats: { 'blockdiag' => true, 'bpmn' => false, 'excalidraw' => false })
+    end
+
+    it 'returns available formats correctly' do
+      expect(helper.kroki_available_formats).to eq([
+                                             {
+                                               name: 'kroki_formats_blockdiag',
+                                               label: 'BlockDiag (includes BlockDiag, SeqDiag, ActDiag, NwDiag, PacketDiag, and RackDiag)',
+                                               value: true
+                                             },
+                                             {
+                                               name: 'kroki_formats_bpmn',
+                                               label: 'BPMN',
+                                               value: false
+                                             },
+                                             {
+                                               name: 'kroki_formats_excalidraw',
+                                               label: 'Excalidraw',
+                                               value: false
+                                             }
+                                           ])
     end
   end
 end

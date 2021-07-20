@@ -41,7 +41,7 @@ Before beginning, make sure:
 
 To follow this tutorial, you need:
 
-- Maintainer permissions to the existing Git repository
+- The [Maintainer role](../../../user/permissions.md) for the existing Git repository
   you'd like to migrate to LFS with access through the command line.
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
   and [Java Runtime Environment](https://www.java.com/en/download/manual.jsp)
@@ -137,8 +137,8 @@ Consider an example upstream project, `git@gitlab.com:gitlab-tests/test-git-lfs-
    # Change into the upstream repo directory:
    cd test-git-lfs-repo-migration
 
-   # You may need to reset your local copy with upstream's `master` after force-pushing from the mirror:
-   git reset --hard origin/master
+   # You may need to reset your local copy with upstream's `main` after force-pushing from the mirror:
+   git reset --hard origin/main
 
    # Track the files with LFS:
    git lfs track "*.gif" "*.png" "*.jpg" "*.psd" "*.mp4" "img/"
@@ -174,7 +174,6 @@ but commented out to help encourage others to add to it in the future. -->
 ## References
 
 - [Getting Started with Git LFS](https://about.gitlab.com/blog/2017/01/30/getting-started-with-git-lfs-tutorial/)
-- [Migrate from Git Annex to Git LFS](migrate_from_git_annex_to_git_lfs.md)
 - [GitLab Git LFS user documentation](index.md)
 - [GitLab Git LFS administrator documentation](../../../administration/lfs/index.md)
 - Alternative method to [migrate an existing repository to Git LFS](https://github.com/git-lfs/git-lfs/wiki/Tutorial#migrating-existing-repository-data-to-lfs)

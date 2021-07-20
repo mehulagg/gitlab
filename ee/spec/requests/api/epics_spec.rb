@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::Epics do
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
   let(:label) { create(:group_label, group: group) }
@@ -27,8 +28,8 @@ RSpec.describe API::Epics do
         end
 
         it 'returns 404 not found error for a user without permissions to see the group' do
-          project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-          group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
           get api(url, user), params: params
 
@@ -160,6 +161,7 @@ RSpec.describe API::Epics do
       let!(:epic) do
         create(:epic,
                group: group,
+               title: 'baz',
                state: :closed,
                created_at: 3.days.ago,
                updated_at: 2.days.ago)
@@ -267,6 +269,18 @@ RSpec.describe API::Epics do
         get api(url), params: { order_by: :updated_at, sort: :asc }
 
         expect_paginated_array_response([epic2.id, epic.id])
+      end
+
+      it 'sorts by title descending when requested' do
+        get api(url), params: { order_by: :title }
+
+        expect_paginated_array_response([epic2.id, epic.id])
+      end
+
+      it 'sorts by title ascending when requested' do
+        get api(url), params: { order_by: :title, sort: :asc }
+
+        expect_paginated_array_response([epic.id, epic2.id])
       end
 
       it 'returns an array of labeled epics' do
@@ -378,7 +392,7 @@ RSpec.describe API::Epics do
           let(:parent_group) { create(:group) }
 
           before do
-            group.update(parent_id: parent_group.id)
+            group.update!(parent_id: parent_group.id)
           end
 
           it 'exposes full reference path' do

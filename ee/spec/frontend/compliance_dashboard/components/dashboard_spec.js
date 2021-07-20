@@ -3,6 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import Cookies from 'js-cookie';
 
 import ComplianceDashboard from 'ee/compliance_dashboard/components/dashboard.vue';
+import MergeRequestDrawer from 'ee/compliance_dashboard/components/drawer.vue';
 import MergeRequestGrid from 'ee/compliance_dashboard/components/merge_requests/grid.vue';
 import MergeCommitsExportButton from 'ee/compliance_dashboard/components/merge_requests/merge_commits_export_button.vue';
 import { COMPLIANCE_TAB_COOKIE_KEY } from 'ee/compliance_dashboard/constants';
@@ -15,9 +16,10 @@ describe('ComplianceDashboard component', () => {
   const mergeRequests = createMergeRequests({ count: 2 });
   const mergeCommitsCsvExportPath = '/csv';
 
-  const findMergeRequestsGrid = () => wrapper.find(MergeRequestGrid);
-  const findMergeCommitsExportButton = () => wrapper.find(MergeCommitsExportButton);
-  const findDashboardTabs = () => wrapper.find(GlTabs);
+  const findMergeRequestsGrid = () => wrapper.findComponent(MergeRequestGrid);
+  const findMergeRequestsDrawer = () => wrapper.findComponent(MergeRequestDrawer);
+  const findMergeCommitsExportButton = () => wrapper.findComponent(MergeCommitsExportButton);
+  const findDashboardTabs = () => wrapper.findComponent(GlTabs);
 
   const createComponent = (props = {}) => {
     return shallowMount(ComplianceDashboard, {
@@ -104,6 +106,42 @@ describe('ComplianceDashboard component', () => {
       return wrapper.vm.$nextTick().then(() => {
         expect(findMergeCommitsExportButton().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('with the merge requests drawer', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('opens the drawer', async () => {
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(true);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toStrictEqual(mergeRequests[0]);
+    });
+
+    it('closes the drawer via the drawer close event', async () => {
+      await findMergeRequestsDrawer().vm.$emit('close');
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(false);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toEqual({});
+    });
+
+    it('closes the drawer via the grid toggle event', async () => {
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(false);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toEqual({});
+    });
+
+    it('swaps the drawer when a new merge request is selected', async () => {
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[0]);
+      await findMergeRequestsGrid().vm.$emit('toggleDrawer', mergeRequests[1]);
+
+      expect(findMergeRequestsDrawer().props('showDrawer')).toBe(true);
+      expect(findMergeRequestsDrawer().props('mergeRequest')).toStrictEqual(mergeRequests[1]);
     });
   });
 });

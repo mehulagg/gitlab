@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Issue Data and Actions
+# Issue Data and Actions **(FREE)**
 
 Please read through the [GitLab Issue Documentation](index.md) for an overview on GitLab Issues.
 
@@ -39,7 +39,7 @@ The numbers in the image correspond to the following features:
 - **15.** [Edit](#edit)
 - **16.** [Description](#description)
 - **17.** [Mentions](#mentions)
-- **18.** [Related Issues](#related-issues)
+- **18.** [Linked Issues](#linked-issues)
 - **19.** [Related Merge Requests](#related-merge-requests)
 - **20.** [Award emoji](#award-emoji)
 - **21.** [Show all activity](#show-all-activity)
@@ -67,7 +67,7 @@ To access additional actions, select the vertical ellipsis
 
 - To create a new issue in the same project, select **New issue** in the dropdown menu.
 
-- If you are not the issue author, you can [submit an abuse report](../../abuse_reports.md).
+- If you are not the issue author, you can [submit an abuse report](../../report_abuse.md).
   Select **Report abuse** in the dropdown menu.
 
 ### To Do
@@ -101,7 +101,7 @@ assigned to them if they created the issue themselves.
 Often, multiple people work on the same issue together. This can be difficult
 to track in large teams where there is shared ownership of an issue.
 
-In [GitLab Starter](https://about.gitlab.com/pricing/), you can
+To help with this, you can use GitLab to
 [assign multiple people](multiple_assignees_for_issues.md) to an issue.
 
 ### Epic **(PREMIUM)**
@@ -151,7 +151,7 @@ cannot access the issue, and it is not listed in the project's issue boards nor 
 
 ### Lock issue
 
-You can [lock the threads](../../discussions/index.md#lock-discussions) in the issue,
+You can [lock the issue](../../discussions/index.md#prevent-comments-by-locking-an-issue)
 to prevent further comments from being added.
 
 ### Participants
@@ -186,7 +186,7 @@ This icon is only displayed if the user has permission to edit the issue.
 ### Description
 
 The plain text title and description of the issue fill the top center of the issue page.
-The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm),
+The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown),
 allowing many formatting options.
 
 [In GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) and later, changes to an
@@ -205,10 +205,10 @@ in a different color, which allows you to quickly see which comments involve you
 Avoid mentioning `@all` in issues and merge requests, as it sends an email notification
 to all the members of that project's group. This might be interpreted as spam.
 
-### Related Issues
+### Linked Issues
 
-Issues that were mentioned as [related issues](related_issues.md) are listed here.
-You can also click the `+` to add more related issues.
+Issues that were mentioned as [linked issues](related_issues.md) are listed here.
+You can also click the `+` to add more linked issues.
 
 ### Related Merge Requests
 
@@ -221,7 +221,7 @@ merge request is also listed here.
 
 You can award emojis to issues. You can select the "thumbs up" and "thumbs down",
 or the gray "smiley-face" to choose from the list of available
-[GitLab Flavored Markdown Emoji](../../markdown.md#emoji).
+[GitLab Flavored Markdown Emoji](../../markdown.md#emojis).
 
 NOTE:
 Posting "+1" as a comment in a thread spams all subscribed participants of that issue,
@@ -249,7 +249,7 @@ Also:
 
 ### Create Merge Request
 
-Create a new branch and [**Draft** merge request](../merge_requests/work_in_progress_merge_requests.md)
+Create a new branch and [**Draft** merge request](../merge_requests/drafts.md)
 in one action. The branch is named `issuenumber-title` by default, but you can
 choose any name, and GitLab verifies that it is not already in use. The merge request
 inherits the milestone and labels of the issue, and is set to automatically
@@ -281,14 +281,14 @@ or newest items to be shown first.
 ### Comments
 
 Collaborate in the issue by posting comments in its thread. This text field also fully
-supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 ### Submit comment, start a thread, or comment and close
 
 After you write a comment, you can:
 
 - Click **Comment** to publish your comment.
-- Choose **Start thread** from the dropdown list and start a new [thread](../../discussions/index.md#threaded-discussions)
+- Choose **Start thread** from the dropdown list and start a new [thread](../../discussions/index.md#create-a-thread-without-replying-to-a-comment)
   in that issue's main thread to discuss specific points. This invites other participants
   to reply directly to your thread, keeping related comments grouped together.
 
@@ -301,7 +301,7 @@ You can also close the issue from here, so you don't need to scroll to the top o
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31103) in GitLab 12.3.
 
 You can attach and remove Zoom meetings to issues using the `/zoom` and `/remove_zoom` [quick actions](../quick_actions.md) as part of
-[GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+[GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 Attaching a [Zoom](https://zoom.us) call an issue
 results in a **Join Zoom meeting** button at the top of the issue, just under the header.

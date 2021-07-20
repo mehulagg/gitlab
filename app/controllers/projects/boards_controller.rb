@@ -5,10 +5,13 @@ class Projects::BoardsController < Projects::ApplicationController
   include IssuableCollections
 
   before_action :check_issues_available!
-  before_action :authorize_read_board!, only: [:index, :show]
   before_action :assign_endpoint_vars
   before_action do
-    push_frontend_feature_flag(:add_issues_button)
+    push_frontend_feature_flag(:swimlanes_buffered_rendering, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:graphql_board_lists, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:issue_boards_filtered_search, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:board_multi_select, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:iteration_cadences, project&.group, default_enabled: :yaml)
   end
 
   feature_category :boards
@@ -21,13 +24,13 @@ class Projects::BoardsController < Projects::ApplicationController
 
   def boards_finder
     strong_memoize :boards_finder do
-      Boards::ListService.new(parent, current_user)
+      Boards::BoardsFinder.new(parent, current_user)
     end
   end
 
   def board_finder
     strong_memoize :board_finder do
-      Boards::ListService.new(parent, current_user, board_id: params[:id])
+      Boards::BoardsFinder.new(parent, current_user, board_id: params[:id])
     end
   end
 
@@ -45,6 +48,6 @@ class Projects::BoardsController < Projects::ApplicationController
   end
 
   def authorize_read_board!
-    access_denied! unless can?(current_user, :read_board, project)
+    access_denied! unless can?(current_user, :read_issue_board, project)
   end
 end

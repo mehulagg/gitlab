@@ -7,6 +7,7 @@ RSpec.describe Projects::IncidentManagement::OncallSchedulesController do
   let_it_be(:user_with_read_permissions) { create(:user) }
   let_it_be(:user_with_admin_permissions) { create(:user) }
   let_it_be(:project) { create(:project) }
+
   let(:current_user) { user_with_admin_permissions }
 
   describe 'GET #index' do
@@ -47,18 +48,6 @@ RSpec.describe Projects::IncidentManagement::OncallSchedulesController do
 
     context 'unauthorized' do
       let(:current_user) { registered_user }
-
-      it 'responds with 404' do
-        request
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context 'with feature flag off' do
-      before do
-        stub_feature_flags(oncall_schedules_mvc: false)
-      end
 
       it 'responds with 404' do
         request

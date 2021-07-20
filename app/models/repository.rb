@@ -43,7 +43,7 @@ class Repository
                       changelog license_blob license_key gitignore
                       gitlab_ci_yml branch_names tag_names branch_count
                       tag_count avatar exists? root_ref merged_branch_names
-                      has_visible_content? issue_template_names_by_category merge_request_template_names_by_category
+                      has_visible_content? issue_template_names_hash merge_request_template_names_hash
                       user_defined_metrics_dashboard_paths xcode_project? has_ambiguous_refs?).freeze
 
   # Methods that use cache_method but only memoize the value
@@ -60,8 +60,8 @@ class Repository
     gitignore: :gitignore,
     gitlab_ci: :gitlab_ci_yml,
     avatar: :avatar,
-    issue_template: :issue_template_names_by_category,
-    merge_request_template: :merge_request_template_names_by_category,
+    issue_template: :issue_template_names_hash,
+    merge_request_template: :merge_request_template_names_hash,
     metrics_dashboard: :user_defined_metrics_dashboard_paths,
     xcode_config: :xcode_project?
   }.freeze
@@ -288,6 +288,10 @@ class Repository
     false
   end
 
+  def search_branch_names(pattern)
+    redis_set_cache.search('branch_names', pattern) { branch_names }
+  end
+
   def languages
     return [] if empty?
 
@@ -462,6 +466,7 @@ class Repository
   # Runs code after the HEAD of a repository is changed.
   def after_change_head
     expire_all_method_caches
+    container.after_repository_change_head
   end
 
   # Runs code after a new commit has been pushed.
@@ -573,15 +578,15 @@ class Repository
   cache_method :avatar
 
   # store issue_template_names as hash
-  def issue_template_names_by_category
+  def issue_template_names_hash
     Gitlab::Template::IssueTemplate.repository_template_names(project)
   end
-  cache_method :issue_template_names_by_category, fallback: {}
+  cache_method :issue_template_names_hash, fallback: {}
 
-  def merge_request_template_names_by_category
+  def merge_request_template_names_hash
     Gitlab::Template::MergeRequestTemplate.repository_template_names(project)
   end
-  cache_method :merge_request_template_names_by_category, fallback: {}
+  cache_method :merge_request_template_names_hash, fallback: {}
 
   def user_defined_metrics_dashboard_paths
     Gitlab::Metrics::Dashboard::RepoDashboardFinder.list_dashboards(project)
@@ -829,12 +834,6 @@ class Repository
     end
   end
 
-  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref, allow_conflicts = false)
-    branch = merge_request.target_branch
-
-    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
-  end
-
   def delete_refs(*ref_names)
     raw.delete_refs(*ref_names)
   end
@@ -940,6 +939,8 @@ class Repository
   end
 
   def fetch_as_mirror(url, forced: false, refmap: :all_refs, remote_name: nil, prune: true)
+    return fetch_remote(remote_name, url: url, refmap: refmap, forced: forced, prune: prune) if Feature.enabled?(:fetch_remote_params, project, default_enabled: :yaml)
+
     unless remote_name
       remote_name = "tmp-#{SecureRandom.hex}"
       tmp_remote_name = true
@@ -993,6 +994,18 @@ class Repository
     return [] if empty?
 
     raw_repository.search_files_by_name(query, ref)
+  end
+
+  def search_files_by_wildcard_path(path, ref = 'HEAD')
+    # We need to use RE2 to match Gitaly's regexp engine
+    regexp_string = RE2::Regexp.escape(path)
+
+    anything = '.*?'
+    anything_but_not_slash = '([^\/])*?'
+    regexp_string.gsub!('\*\*', anything)
+    regexp_string.gsub!('\*', anything_but_not_slash)
+
+    raw_repository.search_files_by_regexp("^#{regexp_string}$", ref)
   end
 
   def copy_gitattributes(ref)
@@ -1130,6 +1143,18 @@ class Repository
     Gitlab::CurrentSettings.pick_repository_storage
   end
 
+  def change_head(branch)
+    if branch_exists?(branch)
+      before_change_head
+      raw_repository.write_ref('HEAD', "refs/heads/#{branch}")
+      copy_gitattributes(branch)
+      after_change_head
+    else
+      container.errors.add(:base, _("Could not change HEAD: branch '%{branch}' does not exist") % { branch: branch })
+      false
+    end
+  end
+
   private
 
   # TODO Genericize finder, later split this on finders by Ref or Oid
@@ -1161,17 +1186,13 @@ class Repository
   end
 
   def tags_sorted_by_committed_date
-    tags.sort_by do |tag|
-      # Annotated tags can point to any object (e.g. a blob), but generally
-      # tags point to a commit. If we don't have a commit, then just default
-      # to putting the tag at the end of the list.
-      target = tag.dereferenced_target
+    # Annotated tags can point to any object (e.g. a blob), but generally
+    # tags point to a commit. If we don't have a commit, then just default
+    # to putting the tag at the end of the list.
+    default = Time.current
 
-      if target
-        target.committed_date
-      else
-        Time.current
-      end
+    tags.sort_by do |tag|
+      tag.dereferenced_target&.committed_date || default
     end
   end
 
@@ -1187,4 +1208,4 @@ class Repository
   end
 end
 
-Repository.prepend_if_ee('EE::Repository')
+Repository.prepend_mod_with('Repository')

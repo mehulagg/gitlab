@@ -10,6 +10,9 @@ import epicUtils from 'ee/epic/utils/epic_utils';
 
 import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 
+import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+
 import { mockEpicMeta, mockEpicData, mockAncestors } from '../mock_data';
 
 describe('EpicSidebarComponent', () => {
@@ -33,6 +36,9 @@ describe('EpicSidebarComponent', () => {
 
     return shallowMount(EpicSidebar, {
       store,
+      provide: {
+        iid: '1',
+      },
     });
   };
 
@@ -63,7 +69,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `toggleStartDateType` on component with `dateTypeIsFixed` param', () => {
         jest.spyOn(wrapper.vm, 'toggleStartDateType');
 
-        wrapper.vm.changeStartDateType(true, true);
+        wrapper.vm.changeStartDateType({ dateTypeIsFixed: true, typeChangeOnEdit: true });
 
         expect(wrapper.vm.toggleStartDateType).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -75,7 +81,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `saveDate` on component when `typeChangeOnEdit` param false', () => {
         jest.spyOn(wrapper.vm, 'saveDate');
 
-        wrapper.vm.changeStartDateType(true, false);
+        wrapper.vm.changeStartDateType({ dateTypeIsFixed: true, typeChangeOnEdit: false });
 
         expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -107,7 +113,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `toggleDueDateType` on component with `dateTypeIsFixed` param', () => {
         jest.spyOn(wrapper.vm, 'toggleDueDateType');
 
-        wrapper.vm.changeDueDateType(true, true);
+        wrapper.vm.changeDueDateType({ dateTypeIsFixed: true, typeChangeOnEdit: true });
 
         expect(wrapper.vm.toggleDueDateType).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -119,7 +125,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `saveDate` on component when `typeChangeOnEdit` param false', () => {
         jest.spyOn(wrapper.vm, 'saveDate');
 
-        wrapper.vm.changeDueDateType(true, false);
+        wrapper.vm.changeDueDateType({ dateTypeIsFixed: true, typeChangeOnEdit: false });
 
         expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -202,6 +208,14 @@ describe('EpicSidebarComponent', () => {
 
     it('renders labels select element', () => {
       expect(wrapper.find('[data-testid="labels-select"]').exists()).toBe(true);
+    });
+
+    it('renders SidebarSubscriptionsWidget', () => {
+      expect(wrapper.find(SidebarSubscriptionsWidget).exists()).toBe(true);
+    });
+
+    it('renders SidebarReferenceWidget', () => {
+      expect(wrapper.find(SidebarReferenceWidget).exists()).toBe(true);
     });
 
     describe('when sub-epics feature is available', () => {

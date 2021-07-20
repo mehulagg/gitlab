@@ -20,6 +20,12 @@ module Enums
           scheduler_failure: 11,
           data_integrity_failure: 12,
           forward_deployment_failure: 13,
+          user_blocked: 14,
+          project_deleted: 15,
+          ci_quota_exceeded: 16,
+          pipeline_loop_detected: 17,
+          no_matching_runner: 18, # not used anymore, but cannot be deleted because of old data
+          trace_size_exceeded: 19,
           insufficient_bridge_permissions: 1_001,
           downstream_bridge_project_not_found: 1_002,
           invalid_bridge_trigger: 1_003,
@@ -33,4 +39,4 @@ module Enums
   end
 end
 
-Enums::Ci::CommitStatus.prepend_if_ee('EE::Enums::Ci::CommitStatus')
+Enums::Ci::CommitStatus.prepend_mod_with('Enums::Ci::CommitStatus')

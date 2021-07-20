@@ -4,11 +4,11 @@ module ResolvesSnippets
   extend ActiveSupport::Concern
 
   included do
-    type Types::SnippetType.connection_type, null: false
+    type Types::SnippetType.connection_type, null: true
 
     argument :ids, [::Types::GlobalIDType[::Snippet]],
              required: false,
-             description: 'Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1".'
+             description: 'Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`.'
 
     argument :visibility, Types::Snippets::VisibilityScopesEnum,
              required: false,

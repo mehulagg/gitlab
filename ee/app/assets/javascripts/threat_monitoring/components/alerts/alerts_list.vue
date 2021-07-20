@@ -1,6 +1,9 @@
 <script>
 import {
   GlAlert,
+  GlAvatar,
+  GlAvatarLink,
+  GlAvatarsInline,
   GlIntersectionObserver,
   GlLoadingIcon,
   GlTable,
@@ -14,9 +17,18 @@ import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { joinPaths } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import AlertDrawer from './alert_drawer.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
+import {
+  DEFAULT_FILTERS,
+  FIELDS,
+  MESSAGES,
+  PAGE_SIZE,
+  STATUSES,
+  DOMAIN,
+  CLOSED,
+} from './constants';
 
 export default {
   PAGE_SIZE,
@@ -25,11 +37,16 @@ export default {
     FIELDS,
     MESSAGES,
     STATUSES,
+    CLOSED,
   },
   components: {
+    AlertDrawer,
     AlertStatus,
     AlertFilters,
     GlAlert,
+    GlAvatar,
+    GlAvatarLink,
+    GlAvatarsInline,
     GlIntersectionObserver,
     GlLink,
     GlLoadingIcon,
@@ -40,6 +57,9 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+  },
+  provide: {
+    statuses: STATUSES,
   },
   inject: ['documentationPath', 'projectPath'],
   apollo: {
@@ -56,7 +76,12 @@ export default {
       },
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
-        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo;
+        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
+        if (this.selectedAlert) {
+          this.selectedAlert = data?.project?.alertManagementAlerts?.nodes?.find(
+            (alert) => alert.iid === this.selectedAlert.iid,
+          );
+        }
       },
       error() {
         this.errored = true;
@@ -69,8 +94,10 @@ export default {
       errored: false,
       errorMsg: '',
       filters: DEFAULT_FILTERS,
+      isAlertDrawerOpen: false,
       isErrorAlertDismissed: false,
       pageInfo: {},
+      selectedAlert: null,
       sort: 'STARTED_AT_DESC',
       sortBy: 'startedAt',
       sortDesc: true,
@@ -103,7 +130,6 @@ export default {
           variables: { nextPageCursor: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const results = produce(fetchMoreResult, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.project.alertManagementAlerts.nodes = [
                 ...previousResult.project.alertManagementAlerts.nodes,
                 ...draftData.project.alertManagementAlerts.nodes,
@@ -120,6 +146,13 @@ export default {
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
+    getIssueState({ issue: { state } }) {
+      return state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '';
+    },
+    handleAlertDeselect() {
+      this.isAlertDrawerOpen = false;
+      this.selectedAlert = null;
+    },
     handleAlertError(msg) {
       this.errored = true;
       this.errorMsg = msg;
@@ -127,18 +160,25 @@ export default {
     handleFilterChange(newFilters) {
       this.filters = newFilters;
     },
-    handleStatusUpdate() {
+    handleAlertUpdate() {
       this.$apollo.queries.alerts.refetch();
+    },
+    hasAssignees(assignees) {
+      return Boolean(assignees.nodes?.length);
     },
     alertDetailsUrl({ iid }) {
       return joinPaths(window.location.pathname, 'alerts', iid);
+    },
+    openAlertDrawer(data) {
+      this.isAlertDrawerOpen = true;
+      this.selectedAlert = data;
     },
   },
 };
 </script>
 <template>
   <div>
-    <alert-filters @filter-change="handleFilterChange" />
+    <alert-filters :filters="filters" @filter-change="handleFilterChange" />
     <gl-alert v-if="showNoAlertsMsg" data-testid="threat-alerts-unconfigured" :dismissible="false">
       <gl-sprintf :message="$options.i18n.MESSAGES.CONFIGURE">
         <template #link="{ content }">
@@ -160,6 +200,7 @@ export default {
 
     <gl-table
       class="alert-management-table"
+      data-qa-selector="alerts_list"
       :busy="isLoadingFirstAlerts"
       :items="alerts"
       :fields="$options.i18n.FIELDS"
@@ -172,6 +213,7 @@ export default {
       sort-icon-left
       responsive
       show-empty
+      @row-clicked="openAlertDrawer"
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">
@@ -193,12 +235,60 @@ export default {
         </gl-link>
       </template>
 
+      <template #cell(eventCount)="{ item }">
+        <div data-testid="threat-alerts-event-count">
+          {{ item.eventCount }}
+        </div>
+      </template>
+
+      <template #cell(issue)="{ item }">
+        <div data-testid="threat-alerts-issue">
+          <gl-link
+            v-if="item.issue"
+            v-gl-tooltip
+            :title="item.issue.title"
+            :href="item.issue.webUrl"
+          >
+            #{{ item.issue.iid }} {{ getIssueState(item) }}
+          </gl-link>
+          <span v-else>-</span>
+        </div>
+      </template>
+
+      <template #cell(assignees)="{ item }">
+        <div class="gl-display-flex" data-testid="threat-alerts-assignee">
+          <gl-avatars-inline
+            v-if="hasAssignees(item.assignees)"
+            data-testid="assigneesField"
+            :avatars="item.assignees.nodes"
+            :collapsed="true"
+            :max-visible="4"
+            :avatar-size="24"
+            badge-tooltip-prop="name"
+            :badge-tooltip-max-chars="100"
+          >
+            <template #avatar="{ avatar }">
+              <gl-avatar-link
+                :key="avatar.username"
+                v-gl-tooltip
+                target="_blank"
+                :href="avatar.webUrl"
+                :title="avatar.name"
+              >
+                <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+              </gl-avatar-link>
+            </template>
+          </gl-avatars-inline>
+          <span v-else class="gl-ml-3">-</span>
+        </div>
+      </template>
+
       <template #cell(status)="{ item }">
         <alert-status
           :alert="item"
           :project-path="projectPath"
           @alert-error="handleAlertError"
-          @alert-update="handleStatusUpdate"
+          @alert-update="handleAlertUpdate"
         />
       </template>
 
@@ -227,5 +317,12 @@ export default {
       <gl-loading-icon v-if="isLoadingAlerts" size="md" />
       <span v-else>&nbsp;</span>
     </gl-intersection-observer>
+    <alert-drawer
+      v-if="selectedAlert"
+      :is-alert-drawer-open="isAlertDrawerOpen"
+      :selected-alert="selectedAlert"
+      @deselect-alert="handleAlertDeselect"
+      @alert-update="handleAlertUpdate"
+    />
   </div>
 </template>

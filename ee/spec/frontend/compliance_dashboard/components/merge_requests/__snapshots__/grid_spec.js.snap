@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = `
+exports[`MergeRequestsGrid component when initialized matches the snapshot 1`] = `
 <div>
   <div
     class="dashboard-grid gl-display-grid gl-grid-tpl-rows-auto"
@@ -25,64 +25,86 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
     />
      
     <div
-      data-testid="merge-request"
+      class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
+      data-testid="merge-request-drawer-toggle"
+      tabindex="0"
     >
-      Merge request 0
+      <div
+        data-testid="merge-request"
+      >
+        <a
+          data-testid="merge-request-link"
+          href=""
+        >
+          Merge request 0
+        </a>
+      </div>
+       
+      <status-stub
+        status="[object Object]"
+      />
+       
+      <status-stub
+        status="[object Object]"
+      />
+       
+      <div
+        class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
+      >
+        <approvers-stub
+          approvers=""
+        />
+         
+        <!---->
+         
+        <time-ago-tooltip-stub
+          class="gl-text-gray-500"
+          cssclass=""
+          time="2020-01-01T00:00:00.000Z"
+          tooltipplacement="bottom"
+        />
+      </div>
     </div>
-     
-    <status-stub
-      status="[object Object]"
-    />
-     
-    <status-stub
-      status="[object Object]"
-    />
-     
     <div
-      class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
+      class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
+      data-testid="merge-request-drawer-toggle"
+      tabindex="0"
     >
-      <approvers-stub
-        approvers=""
+      <div
+        data-testid="merge-request"
+      >
+        <a
+          data-testid="merge-request-link"
+          href=""
+        >
+          Merge request 1
+        </a>
+      </div>
+       
+      <status-stub
+        status="[object Object]"
       />
        
-      <!---->
-       
-      <time-ago-tooltip-stub
-        class="gl-text-gray-500"
-        cssclass=""
-        time="2020-01-01T00:00:00.000Z"
-        tooltipplacement="bottom"
-      />
-    </div>
-    <div
-      data-testid="merge-request"
-    >
-      Merge request 1
-    </div>
-     
-    <status-stub
-      status="[object Object]"
-    />
-     
-    <status-stub
-      status="[object Object]"
-    />
-     
-    <div
-      class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
-    >
-      <approvers-stub
-        approvers=""
+      <status-stub
+        status="[object Object]"
       />
        
-      <!---->
-       
-      <time-ago-tooltip-stub
-        class="gl-text-gray-500"
-        cssclass=""
-        time="2020-01-01T00:00:00.000Z"
-        tooltipplacement="bottom"
-      />
+      <div
+        class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
+      >
+        <approvers-stub
+          approvers=""
+        />
+         
+        <!---->
+         
+        <time-ago-tooltip-stub
+          class="gl-text-gray-500"
+          cssclass=""
+          time="2020-01-01T00:00:00.000Z"
+          tooltipplacement="bottom"
+        />
+      </div>
     </div>
   </div>
    

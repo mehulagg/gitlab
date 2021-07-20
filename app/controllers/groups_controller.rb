@@ -8,6 +8,7 @@ class GroupsController < Groups::ApplicationController
   include RecordUserLastActivity
   include SendFileUpload
   include FiltersEvents
+  include Recaptcha::Verify
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -15,6 +16,7 @@ class GroupsController < Groups::ApplicationController
   prepend_before_action(only: [:show, :issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
   prepend_before_action :ensure_export_enabled, only: [:export, :download_export]
+  prepend_before_action :check_captcha, only: :create, if: -> { captcha_enabled? }
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
@@ -22,6 +24,7 @@ class GroupsController < Groups::ApplicationController
   # Authorize
   before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
   before_action :authorize_create_group!, only: [:new]
+  before_action :load_recaptcha, only: [:new], if: -> { captcha_required? }
 
   before_action :group_projects, only: [:projects, :activity, :issues, :merge_requests]
   before_action :event_filter, only: [:activity]
@@ -30,14 +33,12 @@ class GroupsController < Groups::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:vue_issuables_list, @group)
-    push_frontend_feature_flag(:vue_notification_dropdown, @group, default_enabled: :yaml)
-  end
-
-  before_action do
-    set_not_query_feature_flag(@group)
+    push_frontend_feature_flag(:iteration_cadences, @group, default_enabled: :yaml)
   end
 
   before_action :export_rate_limit, only: [:export, :download_export]
+
+  helper_method :captcha_required?
 
   skip_cross_project_access_check :index, :new, :create, :edit, :update,
                                   :destroy, :projects
@@ -49,10 +50,9 @@ class GroupsController < Groups::ApplicationController
 
   feature_category :subgroups, [
                      :index, :new, :create, :show, :edit, :update,
-                     :destroy, :details, :transfer
+                     :destroy, :details, :transfer, :activity
                    ]
 
-  feature_category :audit_events, [:activity]
   feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
   feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
   feature_category :projects, [:projects]
@@ -183,7 +183,12 @@ class GroupsController < Groups::ApplicationController
 
   def download_export
     if @group.export_file_exists?
-      send_upload(@group.export_file, attachment: @group.export_file.filename)
+      if @group.export_archive_exists?
+        send_upload(@group.export_file, attachment: @group.export_file.filename)
+      else
+        redirect_to edit_group_path(@group),
+                    alert: _('The file containing the export is not available yet; it may still be transferring. Please try again later.')
+      end
     else
       redirect_to edit_group_path(@group),
         alert: _('Group export link has expired. Please generate a new export from your group settings.')
@@ -193,7 +198,7 @@ class GroupsController < Groups::ApplicationController
   def unfoldered_environment_names
     respond_to do |format|
       format.json do
-        render json: EnvironmentNamesFinder.new(@group, current_user).execute
+        render json: Environments::EnvironmentNamesFinder.new(@group, current_user).execute
       end
     end
   end
@@ -264,7 +269,9 @@ class GroupsController < Groups::ApplicationController
       :subgroup_creation_level,
       :default_branch_protection,
       :default_branch_name,
-      :allow_mfa_for_subgroups
+      :allow_mfa_for_subgroups,
+      :resource_access_token_creation_allowed,
+      :prevent_sharing_groups_outside_hierarchy
     ]
   end
 
@@ -320,6 +327,23 @@ class GroupsController < Groups::ApplicationController
 
   private
 
+  def load_recaptcha
+    Gitlab::Recaptcha.load_configurations!
+  end
+
+  def check_captcha
+    return if group_params[:parent_id].present? # Only require for top-level groups
+
+    load_recaptcha
+
+    return if verify_recaptcha
+
+    flash[:alert] = _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
+    flash.delete :recaptcha_error
+    @group = Group.new(group_params)
+    render action: 'new'
+  end
+
   def successful_creation_hooks; end
 
   def groups
@@ -337,6 +361,14 @@ class GroupsController < Groups::ApplicationController
   def has_project_list?
     %w(details show index).include?(action_name)
   end
+
+  def captcha_enabled?
+    Gitlab::Recaptcha.enabled? && Feature.enabled?(:recaptcha_on_top_level_group_creation, type: :ops)
+  end
+
+  def captcha_required?
+    captcha_enabled? && !params[:parent_id]
+  end
 end
 
-GroupsController.prepend_if_ee('EE::GroupsController')
+GroupsController.prepend_mod_with('GroupsController')

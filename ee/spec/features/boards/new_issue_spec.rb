@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe 'Issue Boards new issue', :js do
-  let(:project) { create(:project, :public) }
-  let(:board)   { create(:board, project: project) }
-  let!(:list)   { create(:list, board: board, position: 0) }
-  let(:user)    { create(:user) }
+  let_it_be(:user)         { create(:user) }
+  let_it_be(:project)      { create(:project, :public) }
+  let_it_be(:board)        { create(:board, project: project) }
+  let_it_be(:backlog_list) { create(:backlog_list, board: board) }
 
   context 'authorized user' do
     before do
@@ -17,7 +17,7 @@ RSpec.describe 'Issue Boards new issue', :js do
       visit project_board_path(project, board)
       wait_for_requests
 
-      expect(page).to have_selector('.board', count: 3)
+      expect(page).to have_selector('.board', count: 2)
     end
 
     it 'successfully assigns weight to newly-created issue' do
@@ -27,13 +27,17 @@ RSpec.describe 'Issue Boards new issue', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('new issue')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_requests
 
-      page.within(first('.issue-boards-sidebar')) do
-        find('.weight .js-weight-edit-link').click
+      page.within(first('.board')) do
+        find('.board-card').click
+      end
+
+      page.within(first('[data-testid="issue-boards-sidebar"]')) do
+        find('.weight [data-testid="edit-button"]').click
         find('.weight .form-control').set("10\n")
       end
 

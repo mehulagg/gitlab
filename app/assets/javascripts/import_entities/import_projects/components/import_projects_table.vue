@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlLoadingIcon, GlIntersectionObserver, GlModal } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlIntersectionObserver, GlModal, GlFormInput } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { n__, __, sprintf } from '~/locale';
 import ProviderRepoTableRow from './provider_repo_table_row.vue';
@@ -12,6 +12,7 @@ export default {
     GlButton,
     GlModal,
     GlIntersectionObserver,
+    GlFormInput,
   },
   props: {
     providerTitle: {
@@ -46,18 +47,7 @@ export default {
     },
 
     availableNamespaces() {
-      const serializedNamespaces = this.namespaces.map(({ fullPath }) => ({
-        id: fullPath,
-        text: fullPath,
-      }));
-
-      return [
-        { text: __('Groups'), children: serializedNamespaces },
-        {
-          text: __('Users'),
-          children: [{ id: this.defaultTargetNamespace, text: this.defaultTargetNamespace }],
-        },
-      ];
+      return this.namespaces.map(({ fullPath }) => fullPath);
     },
 
     importAllButtonText() {
@@ -115,13 +105,13 @@ export default {
 
 <template>
   <div>
-    <p class="light text-nowrap mt-2">
+    <p class="gl-text-gray-900 gl-white-space-nowrap gl-mt-3">
       {{ s__('ImportProjects|Select the repositories you want to import') }}
     </p>
     <template v-if="hasIncompatibleRepos">
       <slot name="incompatible-repos-warning"></slot>
     </template>
-    <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <div class="gl-display-flex gl-justify-content-space-between gl-flex-wrap gl-mb-5">
       <gl-button
         variant="success"
         :loading="isImportingAnyRepo"
@@ -148,24 +138,29 @@ export default {
 
       <slot name="actions"></slot>
       <form v-if="filterable" class="gl-ml-auto" novalidate @submit.prevent>
-        <input
+        <gl-form-input
           data-qa-selector="githubish_import_filter_field"
-          class="form-control"
           name="filter"
           :placeholder="__('Filter your repositories by name')"
           autofocus
-          size="40"
+          size="lg"
           @keyup.enter="setFilter($event.target.value)"
         />
       </form>
     </div>
-    <div v-if="repositories.length" class="table-responsive">
-      <table class="table import-table">
-        <thead>
-          <th class="import-jobs-from-col">{{ fromHeaderText }}</th>
-          <th class="import-jobs-to-col">{{ __('To GitLab') }}</th>
-          <th class="import-jobs-status-col">{{ __('Status') }}</th>
-          <th class="import-jobs-cta-col"></th>
+    <div v-if="repositories.length" class="gl-w-full">
+      <table>
+        <thead class="gl-border-0 gl-border-solid gl-border-t-1 gl-border-gray-100">
+          <th class="import-jobs-from-col gl-p-4 gl-vertical-align-top gl-border-b-1">
+            {{ fromHeaderText }}
+          </th>
+          <th class="import-jobs-to-col gl-p-4 gl-vertical-align-top gl-border-b-1">
+            {{ __('To GitLab') }}
+          </th>
+          <th class="import-jobs-status-col gl-p-4 gl-vertical-align-top gl-border-b-1">
+            {{ __('Status') }}
+          </th>
+          <th class="import-jobs-cta-col gl-p-4 gl-vertical-align-top gl-border-b-1"></th>
         </thead>
         <tbody>
           <template v-for="repo in repositories">
@@ -173,6 +168,7 @@ export default {
               :key="repo.importSource.providerLink"
               :repo="repo"
               :available-namespaces="availableNamespaces"
+              :user-namespace="defaultTargetNamespace"
             />
           </template>
         </tbody>
@@ -183,9 +179,9 @@ export default {
       :key="pagePaginationStateKey"
       @appear="fetchRepos"
     />
-    <gl-loading-icon v-if="isLoading" class="import-projects-loading-icon" size="md" />
+    <gl-loading-icon v-if="isLoading" class="gl-mt-7" size="md" />
 
-    <div v-if="!isLoading && repositories.length === 0" class="text-center">
+    <div v-if="!isLoading && repositories.length === 0" class="gl-text-center">
       <strong>{{ emptyStateText }}</strong>
     </div>
   </div>

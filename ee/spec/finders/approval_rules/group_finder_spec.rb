@@ -3,12 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe ApprovalRules::GroupFinder do
-  let(:rule) { create(:approval_project_rule) }
-  let(:user) { create(:user) }
+  let_it_be_with_reload(:rule) { create(:approval_project_rule) }
+  let_it_be(:user) { create(:user) }
 
-  let(:public_group) { create(:group, name: 'public_group') }
-  let(:private_inaccessible_group) { create(:group, :private, name: 'private_inaccessible_group') }
-  let(:private_accessible_group) { create(:group, :private, name: 'private_accessible_group') }
+  let_it_be(:public_group) { create(:group, name: 'public_group') }
+  let_it_be(:private_inaccessible_group) { create(:group, :private, name: 'private_inaccessible_group') }
+  let_it_be(:private_accessible_group) { create(:group, :private, name: 'private_accessible_group') }
 
   subject { described_class.new(rule, user) }
 

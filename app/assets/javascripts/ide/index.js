@@ -1,6 +1,7 @@
 import { identity } from 'lodash';
 import Vue from 'vue';
 import { mapActions } from 'vuex';
+import { DEFAULT_BRANCH } from '~/ide/constants';
 import PerformancePlugin from '~/performance/vue_performance_plugin';
 import Translate from '~/vue_shared/translate';
 import { parseBoolean } from '../lib/utils/common_utils';
@@ -38,7 +39,7 @@ export function initIde(el, options = {}) {
 
   const { rootComponent = ide, extendStore = identity } = options;
   const store = createStore();
-  const router = createRouter(store);
+  const router = createRouter(store, el.dataset.defaultBranch || DEFAULT_BRANCH);
 
   return new Vue({
     el,
@@ -53,14 +54,15 @@ export function initIde(el, options = {}) {
         promotionSvgPath: el.dataset.promotionSvgPath,
       });
       this.setLinks({
-        ciHelpPagePath: el.dataset.ciHelpPagePath,
         webIDEHelpPagePath: el.dataset.webIdeHelpPagePath,
+        forkInfo: el.dataset.forkInfo ? JSON.parse(el.dataset.forkInfo) : null,
       });
-      this.setInitialData({
+      this.init({
         clientsidePreviewEnabled: parseBoolean(el.dataset.clientsidePreviewEnabled),
         renderWhitespaceInCode: parseBoolean(el.dataset.renderWhitespaceInCode),
         editorTheme: window.gon?.user_color_scheme || DEFAULT_THEME,
         codesandboxBundlerUrl: el.dataset.codesandboxBundlerUrl,
+        environmentsGuidanceAlertDismissed: !parseBoolean(el.dataset.enableEnvironmentsGuidance),
       });
     },
     beforeDestroy() {
@@ -68,7 +70,7 @@ export function initIde(el, options = {}) {
       this.$emit('destroy');
     },
     methods: {
-      ...mapActions(['setEmptyStateSvgs', 'setLinks', 'setInitialData']),
+      ...mapActions(['setEmptyStateSvgs', 'setLinks', 'init']),
     },
     render(createElement) {
       return createElement(rootComponent);

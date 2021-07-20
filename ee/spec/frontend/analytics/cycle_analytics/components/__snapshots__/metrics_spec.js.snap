@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Metrics renders the recent activity 1`] = `"<time-metrics-card-stub grouppath=\\"foo\\" additionalparams=\\"[object Object]\\" requesttype=\\"RECENT_ACTIVITY\\"></time-metrics-card-stub>"`;
-
-exports[`Metrics renders the time summary 1`] = `"<time-metrics-card-stub grouppath=\\"foo\\" additionalparams=\\"[object Object]\\" requesttype=\\"TIME_SUMMARY\\"></time-metrics-card-stub>"`;

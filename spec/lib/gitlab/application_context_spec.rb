@@ -27,10 +27,24 @@ RSpec.describe Gitlab::ApplicationContext do
     end
   end
 
+  describe '.with_raw_context' do
+    it 'yields the block' do
+      expect { |b| described_class.with_raw_context({}, &b) }.to yield_control
+    end
+
+    it 'passes the attributes unaltered on to labkit' do
+      attrs = { foo: :bar }
+
+      expect(Labkit::Context).to receive(:with_context).with(attrs)
+
+      described_class.with_raw_context(attrs) {}
+    end
+  end
+
   describe '.push' do
     it 'passes the expected context on to labkit' do
       fake_proc = duck_type(:call)
-      expected_context = { user: fake_proc }
+      expected_context = { user: fake_proc, client_id: fake_proc }
 
       expect(Labkit::Context).to receive(:push).with(expected_context)
 
@@ -51,6 +65,24 @@ RSpec.describe Gitlab::ApplicationContext do
 
     it 'returns false if the key was not present in the current context' do
       expect(described_class.current_context_include?(:caller_id)).to be(false)
+    end
+  end
+
+  describe '.current_context_attribute' do
+    it 'returns the raw attribute value' do
+      described_class.with_context(caller_id: "Hello") do
+        expect(described_class.current_context_attribute(:caller_id)).to be('Hello')
+      end
+    end
+
+    it 'returns the attribute value with meta prefix' do
+      described_class.with_context(feature_category: "secure") do
+        expect(described_class.current_context_attribute('meta.feature_category')).to be('secure')
+      end
+    end
+
+    it 'returns nil if the key was not present in the current context' do
+      expect(described_class.current_context_attribute(:caller_id)).to be(nil)
     end
   end
 
@@ -92,6 +124,34 @@ RSpec.describe Gitlab::ApplicationContext do
       expect(result(context))
         .to include(project: project.full_path, root_namespace: project.full_path_components.first)
     end
+
+    describe 'setting the client' do
+      let_it_be(:remote_ip) { '127.0.0.1' }
+      let_it_be(:runner) { create(:ci_runner) }
+      let_it_be(:options) { { remote_ip: remote_ip, runner: runner, user: user } }
+
+      using RSpec::Parameterized::TableSyntax
+
+      where(:provided_options, :client) do
+        [:remote_ip]                 | :remote_ip
+        [:remote_ip, :runner]        | :runner
+        [:remote_ip, :runner, :user] | :user
+      end
+
+      with_them do
+        it 'sets the client_id to the expected value' do
+          context = described_class.new(**options.slice(*provided_options))
+
+          client_id = case client
+                      when :remote_ip then "ip/#{remote_ip}"
+                      when :runner then "runner/#{runner.id}"
+                      when :user then "user/#{user.id}"
+                      end
+
+          expect(result(context)[:client_id]).to eq(client_id)
+        end
+      end
+    end
   end
 
   describe '#use' do
@@ -110,7 +170,7 @@ RSpec.describe Gitlab::ApplicationContext do
     it 'does not cause queries' do
       context = described_class.new(project: create(:project), namespace: create(:group, :nested), user: create(:user))
 
-      expect { context.use { Labkit::Context.current.to_h } }.not_to exceed_query_limit(0)
+      expect { context.use { Gitlab::ApplicationContext.current } }.not_to exceed_query_limit(0)
     end
   end
 end

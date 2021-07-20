@@ -7,15 +7,12 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
   let_it_be(:end_date) { Date.current }
   let_it_be(:recorded_at) { Time.current }
   let_it_be(:time_period) { { created_at: (start_date..end_date) } }
+
   let(:metric_1) { 'metric_1' }
   let(:metric_2) { 'metric_2' }
   let(:metric_names) { [metric_1, metric_2] }
 
-  describe '.calculate_events_union' do
-    subject(:calculate_metrics_union) do
-      described_class.calculate_metrics_union(metric_names: metric_names, start_date: start_date, end_date: end_date, recorded_at: recorded_at)
-    end
-
+  describe 'metric calculations' do
     before do
       [
         {
@@ -35,23 +32,55 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
       end
     end
 
-    it 'returns the number of unique events in the union of all metrics' do
-      expect(calculate_metrics_union.round(2)).to eq(3.12)
-    end
+    describe '.calculate_events_union' do
+      subject(:calculate_metrics_union) do
+        described_class.calculate_metrics_union(metric_names: metric_names, start_date: start_date, end_date: end_date, recorded_at: recorded_at)
+      end
 
-    context 'when there is no aggregated data saved' do
-      let(:metric_names) { [metric_1, 'i do not have any records'] }
+      it 'returns the number of unique events in the union of all metrics' do
+        expect(calculate_metrics_union.round(2)).to eq(3.12)
+      end
 
-      it 'raises error when union data is missing' do
-        expect { calculate_metrics_union }.to raise_error Gitlab::Usage::Metrics::Aggregates::Sources::UnionNotAvailable
+      context 'when there is no aggregated data saved' do
+        let(:metric_names) { [metric_1, 'i do not have any records'] }
+
+        it 'raises error when union data is missing' do
+          expect { calculate_metrics_union }.to raise_error Gitlab::Usage::Metrics::Aggregates::Sources::UnionNotAvailable
+        end
+      end
+
+      context 'when there is only one metric defined as aggregated' do
+        let(:metric_names) { [metric_1] }
+
+        it 'returns the number of unique events for that metric' do
+          expect(calculate_metrics_union.round(2)).to eq(2.08)
+        end
       end
     end
 
-    context 'when there is only one metric defined as aggregated' do
-      let(:metric_names) { [metric_1] }
+    describe '.calculate_metrics_intersections' do
+      subject(:calculate_metrics_intersections) do
+        described_class.calculate_metrics_intersections(metric_names: metric_names, start_date: start_date, end_date: end_date, recorded_at: recorded_at)
+      end
 
-      it 'returns the number of unique events for that metric' do
-        expect(calculate_metrics_union.round(2)).to eq(2.08)
+      it 'returns the number of common events in the intersection of all metrics' do
+        expect(calculate_metrics_intersections.round(2)).to eq(1.04)
+      end
+
+      context 'when there is no aggregated data saved' do
+        let(:metric_names) { [metric_1, 'i do not have any records'] }
+
+        it 'raises error when union data is missing' do
+          expect { calculate_metrics_intersections }.to raise_error Gitlab::Usage::Metrics::Aggregates::Sources::UnionNotAvailable
+        end
+      end
+
+      context 'when there is only one metric defined in aggregate' do
+        let(:metric_names) { [metric_1] }
+
+        it 'returns the number of common/unique events for the intersection of that metric' do
+          expect(calculate_metrics_intersections.round(2)).to eq(2.08)
+        end
       end
     end
   end
@@ -69,7 +98,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
 
       it 'persists serialized data in Redis' do
         Gitlab::Redis::SharedState.with do |redis|
-          expect(redis).to receive(:set).with("#{metric_1}_weekly-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
+          expect(redis).to receive(:set).with("#{metric_1}_7d-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
         end
 
         save_aggregated_metrics
@@ -81,7 +110,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
 
         it 'persists serialized data in Redis' do
           Gitlab::Redis::SharedState.with do |redis|
-            expect(redis).to receive(:set).with("#{metric_1}_monthly-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
+            expect(redis).to receive(:set).with("#{metric_1}_28d-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
           end
 
           save_aggregated_metrics
@@ -93,7 +122,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
 
         it 'persists serialized data in Redis' do
           Gitlab::Redis::SharedState.with do |redis|
-            expect(redis).to receive(:set).with("#{metric_1}_all_time-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
+            expect(redis).to receive(:set).with("#{metric_1}_all-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
           end
 
           save_aggregated_metrics

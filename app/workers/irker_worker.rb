@@ -6,6 +6,8 @@ require 'socket'
 class IrkerWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :integrations
 
   def perform(project_id, channels, colors, push_data, settings)
@@ -147,8 +149,7 @@ class IrkerWorker # rubocop:disable Scalability/IdempotentWorker
   def files_count(commit)
     diff_size = commit.raw_deltas.size
 
-    files = "#{diff_size} file".pluralize(diff_size)
-    files
+    "#{diff_size} file".pluralize(diff_size)
   end
 
   def colorize_sha(sha)

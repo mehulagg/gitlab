@@ -36,10 +36,11 @@ RSpec.describe Packages::Maven::FindOrCreatePackageService do
         expect(pkg.version).to eq(version)
       end
 
-      context 'with a build' do
+      context 'with optional attributes' do
         subject { service.execute.payload[:package] }
 
         it_behaves_like 'assigns build to package'
+        it_behaves_like 'assigns status to package'
       end
     end
 
@@ -90,6 +91,7 @@ RSpec.describe Packages::Maven::FindOrCreatePackageService do
 
     context 'with a build' do
       let_it_be(:pipeline) { create(:ci_pipeline, user: user) }
+
       let(:build) { double('build', pipeline: pipeline) }
       let(:params) { { path: param_path, file_name: file_name, build: build } }
 
@@ -102,6 +104,7 @@ RSpec.describe Packages::Maven::FindOrCreatePackageService do
       let_it_be_with_refind(:package_settings) { create(:namespace_package_setting, :group, maven_duplicates_allowed: false) }
       let_it_be_with_refind(:group) { package_settings.namespace }
       let_it_be_with_refind(:project) { create(:project, group: group) }
+
       let!(:existing_package) { create(:maven_package, name: path, version: version, project: project) }
 
       it { expect { subject }.not_to change { project.package_files.count } }
@@ -129,7 +132,15 @@ RSpec.describe Packages::Maven::FindOrCreatePackageService do
 
       context 'when the package name matches the exception regex' do
         before do
-          package_settings.update!(maven_duplicate_exception_regex: '.*')
+          package_settings.update!(maven_duplicate_exception_regex: existing_package.name)
+        end
+
+        it_behaves_like 'reuse existing package'
+      end
+
+      context 'when the package version matches the exception regex' do
+        before do
+          package_settings.update!(maven_duplicate_exception_regex: existing_package.version)
         end
 
         it_behaves_like 'reuse existing package'

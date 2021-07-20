@@ -4,10 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Fast lookup of authorized SSH keys in the database
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
-> - [Available in](https://gitlab.com/gitlab-org/gitlab/-/issues/3953) GitLab Community Edition 10.4.
+# Fast lookup of authorized SSH keys in the database **(FREE SELF)**
 
 NOTE:
 This document describes a drop-in replacement for the
@@ -19,7 +16,7 @@ Regular SSH operations become slow as the number of users grows because OpenSSH
 searches for a key to authorize a user via a linear search. In the worst case,
 such as when the user is not authorized to access GitLab, OpenSSH will scan the
 entire file to search for a key. This can take significant time and disk I/O,
-which will delay users attempting to push or pull to a repository. Making
+which delays users attempting to push or pull to a repository. Making
 matters worse, if users add or remove keys frequently, the operating system may
 not be able to cache the `authorized_keys` file, which causes the disk to be
 accessed repeatedly.
@@ -31,21 +28,28 @@ lookup of authorized SSH keys.
 WARNING:
 OpenSSH version 6.9+ is required because
 `AuthorizedKeysCommand` must be able to accept a fingerprint. These
-instructions will break installations using older versions of OpenSSH, such as
+instructions break installations that use older versions of OpenSSH, such as
 those included with CentOS 6 as of September 2017. If you want to use this
 feature for CentOS 6, follow [the instructions on how to build and install a custom OpenSSH package](#compiling-a-custom-version-of-openssh-for-centos-6) before continuing.
 
 ## Fast lookup is required for Geo **(PREMIUM)**
 
-By default, GitLab manages an `authorized_keys` file, which contains all the
-public SSH keys for users allowed to access GitLab. However, to maintain a
+By default, GitLab manages an `authorized_keys` file that is located in the
+`git` user's home directory. For most installations, this will be located under
+`/var/opt/gitlab/.ssh/authorized_keys`, but you can use the following command to locate the `authorized_keys` on your system.:
+
+```shell
+getent passwd git | cut -d: -f6 | awk '{print $1"/.ssh/authorized_keys"}'
+```
+
+The `authorized_keys` file contains all the public SSH keys for users allowed to access GitLab. However, to maintain a
 single source of truth, [Geo](../geo/index.md) needs to be configured to perform SSH fingerprint
 lookups via database lookup.
 
 As part of [setting up Geo](../geo/index.md#setup-instructions),
-you will be required to follow the steps outlined below for both the primary and
+you are required to follow the steps outlined below for both the primary and
 secondary nodes, but note that the `Write to "authorized keys" file` checkbox
-only needs to be unchecked on the primary node since it will be reflected
+only needs to be unchecked on the primary node since it is reflected
 automatically on the secondary if database replication is working.
 
 ## Setting up fast lookup via GitLab Shell
@@ -76,7 +80,7 @@ sudo service sshd reload
 ```
 
 Confirm that SSH is working by commenting out your user's key in the `authorized_keys`
-(start the line with a `#` to comment it), and attempting to pull a repository.
+file (start the line with a `#` to comment it), and attempting to pull a repository.
 
 A successful pull would mean that GitLab was able to find the key in the database,
 since it is not present in the file anymore.
@@ -94,17 +98,19 @@ as required, but that might require temporary ownership changes during `gitlab-s
 
 WARNING:
 Do not disable writes until SSH is confirmed to be working
-perfectly, because the file will quickly become out-of-date.
+perfectly; otherwise, the file quickly becomes out-of-date.
 
 In the case of lookup failures (which are common), the `authorized_keys`
-file will still be scanned. So Git SSH performance will still be slow for many
+file is still scanned. So Git SSH performance would still be slow for many
 users as long as a large file exists.
 
-You can disable any more writes to the `authorized_keys` file by unchecking
-`Write to "authorized_keys" file` in the **Admin Area > Settings > Network > Performance optimization** of your GitLab
-installation.
+To disable any more writes to the `authorized_keys` file:
 
-![Write to authorized keys setting](img/write_to_authorized_keys_setting.png)
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Network**.
+1. Expand **Performance optimization**.
+1. Clear the **Write to "authorized_keys" file** checkbox.
+1. Select **Save changes**.
 
 Again, confirm that SSH is working by removing your user's SSH key in the UI,
 adding a new one, and attempting to pull a repository.
@@ -186,8 +192,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    -rw-r--r--. 1 root root 367516 Jun 20 19:37 openssh-server-7.5p1-1.x86_64.rpm
    ```
 
-1. Install the packages. OpenSSH packages will replace `/etc/pam.d/sshd`
-   with its own version, which may prevent users from logging in, so be sure
+1. Install the packages. OpenSSH packages replace `/etc/pam.d/sshd`
+   with their own versions, which may prevent users from logging in, so be sure
    that the file is backed up and restored after installation:
 
    ```shell
@@ -219,10 +225,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
 
 ## SELinux support and limitations
 
-> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/2855) in GitLab 10.5.
-
 GitLab supports `authorized_keys` database lookups with [SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux).
 
 Because the SELinux policy is static, GitLab doesn't support the ability to change
-internal Unicorn ports at the moment. Administrators would have to create a special `.te`
+internal webserver ports at the moment. Administrators would have to create a special `.te`
 file for the environment, since it isn't generated dynamically.

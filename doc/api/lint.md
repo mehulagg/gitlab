@@ -1,17 +1,26 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# CI Lint API
+# CI Lint API **(FREE)**
 
 ## Validate the CI YAML configuration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5953) in GitLab 8.12.
-
 Checks if CI/CD YAML configuration is valid. This endpoint validates basic CI/CD
 configuration syntax. It doesn't have any namespace specific context.
+
+Access to this endpoint does not require authentication when the instance
+[allows new sign ups](../user/admin_area/settings/sign_up_restrictions.md#disable-new-sign-ups)
+and:
+
+- Does not have an [allowlist or denylist](../user/admin_area/settings/sign_up_restrictions.md#allow-or-deny-sign-ups-using-specific-email-domains).
+- Does not [require administrator approval for new sign ups](../user/admin_area/settings/sign_up_restrictions.md#require-administrator-approval-for-new-sign-ups).
+- Does not have additional [sign up
+  restrictions](../user/admin_area/settings/sign_up_restrictions.html#sign-up-restrictions).
+
+Otherwise, authentication is required.
 
 ```plaintext
 POST /ci/lint
@@ -23,7 +32,7 @@ POST /ci/lint
 | `include_merged_yaml`  | boolean    | no       | If the [expanded CI/CD configuration](#yaml-expansion) should be included in the response. |
 
 ```shell
-curl --header "Content-Type: application/json" "https://gitlab.example.com/api/v4/ci/lint" --data '{"content": "{ \"image\": \"ruby:2.6\", \"services\": [\"postgres\"], \"before_script\": [\"bundle install\", \"bundle exec rake db:create\"], \"variables\": {\"DB_NAME\": \"postgres\"}, \"types\": [\"test\", \"deploy\", \"notify\"], \"rspec\": { \"script\": \"rake spec\", \"tags\": [\"ruby\", \"postgres\"], \"only\": [\"branches\"]}}"}'
+curl --header "Content-Type: application/json" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/ci/lint" --data '{"content": "{ \"image\": \"ruby:2.6\", \"services\": [\"postgres\"], \"before_script\": [\"bundle install\", \"bundle exec rake db:create\"], \"variables\": {\"DB_NAME\": \"postgres\"}, \"types\": [\"test\", \"deploy\", \"notify\"], \"rspec\": { \"script\": \"rake spec\", \"tags\": [\"ruby\", \"postgres\"], \"only\": [\"branches\"]}}"}'
 ```
 
 Be sure to paste the exact contents of your GitLab CI/CD YAML configuration because YAML
@@ -78,8 +87,8 @@ Example responses:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29568) in GitLab 13.5.
 
 The CI lint returns an expanded version of the configuration. The expansion does not
-work for CI configuration added with [`include: local`](../ci/yaml/README.md#includelocal),
-or with [`extends:`](../ci/yaml/README.md#extends).
+work for CI configuration added with [`include: local`](../ci/yaml/index.md#includelocal),
+or with [`extends:`](../ci/yaml/index.md#extends).
 
 Example contents of a `.gitlab-ci.yml` passed to the CI Lint API with
 `include_merged_yaml` set as true:
@@ -109,7 +118,7 @@ Example response:
 {
   "status": "valid",
   "errors": [],
-  "merged_config": "---\n:another_test:\n  :stage: test\n  :script: echo 2\n:test:\n  :stage: test\n  :script: echo 1\n"
+  "merged_yaml": "---\n:another_test:\n  :stage: test\n  :script: echo 2\n:test:\n  :stage: test\n  :script: echo 1\n"
 }
 ```
 

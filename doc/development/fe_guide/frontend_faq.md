@@ -32,15 +32,15 @@ question:
 document.body.dataset.page
 ```
 
-Find here the [source code setting the attribute](https://gitlab.com/gitlab-org/gitlab/blob/cc5095edfce2b4d4083a4fb1cdc7c0a1898b9921/app/views/layouts/application.html.haml#L4).
+Find here the [source code setting the attribute](https://gitlab.com/gitlab-org/gitlab/-/blob/cc5095edfce2b4d4083a4fb1cdc7c0a1898b9921/app/views/layouts/application.html.haml#L4).
 
 #### Rails routes
 
-The `rake routes` command can be used to list all the routes available in the application. Piping the output into `grep`, we can perform a search through the list of available routes.
+The `rails routes` command can be used to list all the routes available in the application. Piping the output into `grep`, we can perform a search through the list of available routes.
 The output includes the request types available, route parameters and the relevant controller.
 
 ```shell
-bundle exec rake routes | grep "issues"
+bundle exec rails routes | grep "issues"
 ```
 
 ### 2. `modal_copy_button` vs `clipboard_button`
@@ -82,7 +82,7 @@ follow up issue and attach it to the component implementation epic found in the
 
 ### 4. My submit form button becomes disabled after submitting
 
-A Submit button inside of a form attaches an `onSubmit` event listener on the form element. [This code](https://gitlab.com/gitlab-org/gitlab/blob/794c247a910e2759ce9b401356432a38a4535d49/app/assets/javascripts/main.js#L225) adds a `disabled` class selector to the submit button when the form is submitted. To avoid this behavior, add the class `js-no-auto-disable` to the button.
+A Submit button inside of a form attaches an `onSubmit` event listener on the form element. [This code](https://gitlab.com/gitlab-org/gitlab/-/blob/794c247a910e2759ce9b401356432a38a4535d49/app/assets/javascripts/main.js#L225) adds a `disabled` class selector to the submit button when the form is submitted. To avoid this behavior, add the class `js-no-auto-disable` to the button.
 
 ### 5. Should one use a full URL (for example `gon.gitlab_url`) or a full path (for example `gon.relative_url_root`) when referencing backend endpoints?
 
@@ -157,7 +157,7 @@ export const fetchFoos = ({ state }) => {
 Sometimes it's necessary to test locally what the frontend production build would produce, to do so the steps are:
 
 1. Stop webpack: `gdk stop webpack`.
-1. Open `gitlab.yaml` located in your `gitlab` installation folder, scroll down to the `webpack` section and change `dev_server` to `enabled: false`.
+1. Open `gitlab.yaml` located in `gitlab/config` folder, scroll down to the `webpack` section, and change `dev_server` to `enabled: false`.
 1. Run `yarn webpack-prod && gdk restart rails-web`.
 
 The production build takes a few minutes to be completed. Any code changes at this point are
@@ -172,7 +172,7 @@ To return to the normal development mode:
 
 ### 8. Babel polyfills
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/28837) in GitLab 12.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/28837) in GitLab 12.8.
 
 GitLab has enabled the Babel `preset-env` option
 [`useBuiltIns: 'usage'`](https://babeljs.io/docs/en/babel-preset-env#usebuiltins-usage).
@@ -198,3 +198,7 @@ To see what polyfills are being used:
    which polyfills are being loaded and where:
 
    ![Image of webpack report](img/webpack_report_v12_8.png)
+
+### 9. Why is my page broken in dark mode?
+
+See [dark mode docs](dark_mode.md)

@@ -1,0 +1,18 @@
+---
+data_category: Optional
+key_path: usage_activity_by_stage_monthly.configure.projects_slack_slash_active
+description: Unique projects created in the past 28 days that have Slack ‘/’ commands enabled
+product_section: ops
+product_stage: configure
+product_group: group::configure
+product_category: chatops
+value_type: number
+status: data_available
+time_frame: 28d
+data_source: database
+distribution:
+- ee
+tier:
+- free
+- premium
+- ultimate

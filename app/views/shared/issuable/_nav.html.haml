@@ -1,10 +1,10 @@
 - type = local_assigns.fetch(:type, :issues)
 - page_context_word = type.to_s.humanize(capitalize: false)
-- display_count = local_assigns.fetch(:display_count, :true)
+- display_count = local_assigns.fetch(:display_count, true)
 
 %ul.nav-links.issues-state-filters.mobile-separator.nav.nav-tabs
   %li{ class: active_when(params[:state] == 'opened') }>
-    = link_to page_filter_path(state: 'opened'), id: 'state-opened', title: _("Filter by %{page_context_word} that are currently opened.") % { page_context_word: page_context_word }, data: { state: 'opened' } do
+    = link_to page_filter_path(state: 'opened'), id: 'state-opened', title: _("Filter by %{page_context_word} that are currently open.") % { page_context_word: page_context_word }, data: { state: 'opened' } do
       #{issuables_state_counter_text(type, :opened, display_count)}
 
   - if type == :merge_requests

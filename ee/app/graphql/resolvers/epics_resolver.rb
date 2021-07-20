@@ -11,7 +11,7 @@ module Resolvers
 
     argument :iids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'List of IIDs of epics, e.g., [1, 2].'
+             description: 'List of IIDs of epics, e.g., `[1, 2]`.'
 
     argument :state, Types::EpicStateEnum,
              required: false,
@@ -20,6 +20,10 @@ module Resolvers
     argument :search, GraphQL::STRING_TYPE,
              required: false,
              description: 'Search query for epic title or description.'
+
+    argument :in, [Types::IssuableSearchableFieldEnum],
+             required: false,
+             description: 'Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'
 
     argument :sort, Types::EpicSortEnum,
              required: false,
@@ -41,6 +45,11 @@ module Resolvers
              required: false,
              description: 'Filter epics by IID for autocomplete.'
 
+    argument :include_ancestor_groups, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Include epics from ancestor groups.',
+             default_value: false
+
     argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
              required: false,
              description: 'Include epics from descendant groups.',
@@ -50,11 +59,20 @@ module Resolvers
              required: false,
              description: 'Filter epics by given confidentiality.'
 
+    argument :my_reaction_emoji, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Filter by reaction emoji applied by the current user.'
+
+    argument :not, ::Types::Epics::NegatedEpicFilterInputType,
+             required: false,
+             description: 'Negated epic arguments.'
+
     type Types::EpicType, null: true
 
     def ready?(**args)
       validate_timeframe_params!(args)
       validate_starts_with_iid!(args)
+      validate_search_in_params!(args)
 
       super(**args)
     end
@@ -88,16 +106,22 @@ module Resolvers
     end
 
     def epic_feature_enabled?
-      group.feature_available?(:epics)
+      group.licensed_feature_available?(:epics)
     end
 
     def transform_args(args)
       transformed               = args.dup
       transformed[:group_id]    = group
-      transformed[:parent_id]   = parent.id if parent
       transformed[:iids]      ||= [args[:iid]].compact
+      transformed[:in]          = args[:in].join(',') if args[:in].present?
 
-      transformed
+      transformed.merge(transform_timeframe_parameters(args)).merge(relative_param)
+    end
+
+    def relative_param
+      return {} unless parent
+
+      { parent_id: parent.id }
     end
 
     # `resolver_object` refers to the object we're currently querying on, and is usually a `Group`
@@ -138,6 +162,13 @@ module Resolvers
       unless EpicsFinder.valid_iid_query?(args[:iid_starts_with])
         raise Gitlab::Graphql::Errors::ArgumentError, 'Invalid `iidStartsWith` query'
       end
+    end
+
+    def validate_search_in_params!(args)
+      return unless args[:in].present? && args[:search].blank?
+
+      raise Gitlab::Graphql::Errors::ArgumentError,
+        '`search` should be present when including the `in` argument'
     end
   end
 end

@@ -51,29 +51,24 @@ RSpec.describe 'User interacts with awards' do
 
     it 'toggles a custom award emoji' do
       page.within('.awards') do
-        page.find('.js-add-award').click
+        page.find('.add-reaction-button').click
       end
 
-      page.find('.emoji-menu.is-visible')
-
-      expect(page).to have_selector('.js-emoji-menu-search')
-      expect(page.evaluate_script("document.activeElement.classList.contains('js-emoji-menu-search')")).to eq(true)
-
-      page.within('.emoji-menu-content') do
-        emoji_button = page.first('.js-emoji-btn')
+      page.within('.emoji-picker') do
+        emoji_button = page.first('gl-emoji[data-name="8ball"]')
         emoji_button.hover
         emoji_button.click
       end
 
       page.within('.awards') do
-        expect(page).to have_selector('.js-emoji-btn')
-        expect(page.find('.js-emoji-btn.active .js-counter')).to have_content('1')
-        expect(page).to have_css(".js-emoji-btn.active[title='You']")
+        expect(page).to have_selector('[data-testid="award-button"]')
+        expect(page.find('[data-testid="award-button"].selected .js-counter')).to have_content('1')
+        expect(page).to have_css('[data-testid="award-button"].selected[title="You reacted with :8ball:"]')
 
         expect do
-          page.find('.js-emoji-btn.active').click
+          page.find('[data-testid="award-button"].selected').click
           wait_for_requests
-        end.to change { page.all('.award-control.js-emoji-btn').size }.from(3).to(2)
+        end.to change { page.all('[data-testid="award-button"]').size }.from(3).to(2)
       end
     end
 
@@ -135,11 +130,9 @@ RSpec.describe 'User interacts with awards' do
 
       it 'allows adding a new emoji' do
         page.within('.note-actions') do
-          find('a.js-add-award').click
+          find('.note-emoji-button').click
         end
-        page.within('.emoji-menu-content') do
-          find('gl-emoji[data-name="8ball"]').click
-        end
+        find('gl-emoji[data-name="8ball"]').click
         wait_for_requests
 
         page.within('.note-awards') do
@@ -157,7 +150,7 @@ RSpec.describe 'User interacts with awards' do
           end
 
           page.within('.note-actions') do
-            expect(page).not_to have_css('a.js-add-award')
+            expect(page).not_to have_css('.btn.js-add-award')
           end
         end
 
@@ -210,31 +203,25 @@ RSpec.describe 'User interacts with awards' do
       end
 
       it 'adds award to issue' do
-        first('.js-emoji-btn').click
+        first('[data-testid="award-button"]').click
 
-        expect(page).to have_selector('.js-emoji-btn.active')
-        expect(first('.js-emoji-btn')).to have_content '1'
+        expect(page).to have_selector('[data-testid="award-button"].selected')
+        expect(first('[data-testid="award-button"]')).to have_content '1'
 
         visit project_issue_path(project, issue)
 
-        expect(first('.js-emoji-btn')).to have_content '1'
+        expect(first('[data-testid="award-button"]')).to have_content '1'
       end
 
       it 'removes award from issue' do
-        first('.js-emoji-btn').click
-        find('.js-emoji-btn.active').click
+        first('[data-testid="award-button"]').click
+        find('[data-testid="award-button"].selected').click
 
-        expect(first('.js-emoji-btn')).to have_content '0'
+        expect(first('[data-testid="award-button"]')).to have_content '0'
 
         visit project_issue_path(project, issue)
 
-        expect(first('.js-emoji-btn')).to have_content '0'
-      end
-
-      it 'only has one menu on the page' do
-        first('.js-add-award').click
-
-        expect(page).to have_selector('.emoji-menu', count: 1)
+        expect(first('[data-testid="award-button"]')).to have_content '0'
       end
     end
 
@@ -309,7 +296,7 @@ RSpec.describe 'User interacts with awards' do
         end
 
         context 'execute /award quick action' do
-          it 'toggles the emoji award on noteable', :js do
+          xit 'toggles the emoji award on noteable', :js do
             execute_quick_action('/award :100:')
 
             expect(find(noteable_award_counter)).to have_text("1")
@@ -328,7 +315,7 @@ RSpec.describe 'User interacts with awards' do
       end
 
       it 'has disabled emoji button' do
-        expect(first('.award-control')[:class]).to have_text('disabled')
+        expect(first('[data-testid="award-button"]')[:class]).to have_text('disabled')
       end
     end
 
@@ -354,7 +341,7 @@ RSpec.describe 'User interacts with awards' do
     end
 
     def noteable_award_counter
-      ".awards .active"
+      ".awards .is-active"
     end
 
     def toggle_smiley_emoji(status)

@@ -1,7 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import axios from 'axios';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
 import { sprintf, __, s__ } from '~/locale';
 import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
@@ -135,7 +135,9 @@ export default {
 
         if (hasErrors) {
           const messages = errors.map((error) => sprintf(RELATED_ISSUES_ERRORS.LINK_ERROR, error));
-          createFlash(messages.join(' '));
+          createFlash({
+            message: messages.join(' '),
+          });
         }
       });
     },
@@ -150,7 +152,9 @@ export default {
           this.store.removeRelatedIssue(issue);
         })
         .catch(() => {
-          createFlash(RELATED_ISSUES_ERRORS.UNLINK_ERROR);
+          createFlash({
+            message: RELATED_ISSUES_ERRORS.UNLINK_ERROR,
+          });
         });
     },
     fetchRelatedIssues() {
@@ -177,7 +181,9 @@ export default {
           );
         })
         .catch(() => {
-          createFlash(__('An error occurred while fetching issues.'));
+          createFlash({
+            message: __('An error occurred while fetching issues.'),
+          });
         })
         .finally(() => {
           this.isFetching = false;
@@ -238,8 +244,9 @@ export default {
       <template v-if="canCreateIssue" #header-actions>
         <gl-button
           ref="createIssue"
-          variant="success"
+          variant="confirm"
           category="secondary"
+          data-qa-selector="create_issue_button"
           :loading="isProcessingAction"
           @click="createIssue"
         >

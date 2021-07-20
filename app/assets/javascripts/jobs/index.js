@@ -13,8 +13,8 @@ export default () => {
   const {
     artifactHelpUrl,
     deploymentHelpUrl,
+    codeQualityHelpUrl,
     runnerSettingsUrl,
-    variablesSettingsUrl,
     subscriptionsMoreMinutesUrl,
     endpoint,
     pagePath,
@@ -38,8 +38,8 @@ export default () => {
         props: {
           artifactHelpUrl,
           deploymentHelpUrl,
+          codeQualityHelpUrl,
           runnerSettingsUrl,
-          variablesSettingsUrl,
           subscriptionsMoreMinutesUrl,
           endpoint,
           pagePath,

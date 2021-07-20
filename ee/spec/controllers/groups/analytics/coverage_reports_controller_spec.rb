@@ -8,8 +8,8 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:ref_path) { 'refs/heads/master' }
 
-  let_it_be(:first_coverage) { create_daily_coverage('rspec', project, 79.0, '2020-03-09') }
-  let_it_be(:last_coverage) { create_daily_coverage('karma', project, 95.0, '2020-03-10') }
+  let_it_be(:first_coverage) { create_daily_coverage('rspec', project, 79.0, '2020-03-09', group) }
+  let_it_be(:last_coverage) { create_daily_coverage('karma', project, 95.0, '2020-03-10', group) }
 
   let_it_be(:valid_request_params) do
     {
@@ -66,7 +66,9 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
           category: described_class.name,
           action: 'download_code_coverage_csv',
           label: 'group_id',
-          value: group.id
+          value: group.id,
+          user: user,
+          namespace: group
         )
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -75,23 +77,6 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
           [last_coverage.date.to_s, last_coverage.group_name, project.name, last_coverage.data['coverage'].to_s],
           [first_coverage.date.to_s, first_coverage.group_name, project.name, first_coverage.data['coverage'].to_s]
         ])
-      end
-
-      context 'with a project_id filter' do
-        let(:params) { valid_request_params.merge(project_ids: [project.id]) }
-
-        it 'responds 200 with CSV coverage data' do
-          expect(Ci::DailyBuildGroupReportResultsByGroupFinder).to receive(:new).with({
-            group: group,
-            current_user: user,
-            project_ids: [project.id.to_s],
-            start_date: Date.parse('2020-03-01'),
-            end_date: Date.parse('2020-03-31'),
-            ref_path: ref_path
-          }).and_call_original
-
-          get :index, params: params
-        end
       end
 
       context 'when ref_path is nil' do
@@ -112,7 +97,7 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
 
         expect(CSV.parse(response.body).length).to eq(3)
 
-        create_daily_coverage('rspec', project, 79.0, '2020-03-10')
+        create_daily_coverage('rspec', project, 79.0, '2020-03-10', group)
 
         expect { get :index, params: valid_request_params }.not_to exceed_query_limit(control)
 
@@ -131,14 +116,15 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
 
   private
 
-  def create_daily_coverage(group_name, project, coverage, date)
+  def create_daily_coverage(group_name, project, coverage, date, group = nil)
     create(
       :ci_daily_build_group_report_result,
       project: project,
       ref_path: ref_path,
       group_name: group_name,
       data: { 'coverage' => coverage },
-      date: date
+      date: date,
+      group: group
     )
   end
 end

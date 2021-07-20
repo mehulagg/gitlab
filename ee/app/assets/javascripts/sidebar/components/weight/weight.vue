@@ -146,15 +146,20 @@ export default {
       @click="onCollapsedClick"
     >
       <gl-icon :size="16" name="weight" />
-      <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
+      <gl-loading-icon v-if="fetching" size="sm" class="js-weight-collapsed-loading-icon" />
       <span v-else class="js-weight-collapsed-weight-label">
         {{ collapsedWeightLabel
         }}<template v-if="weight > $options.maxDisplayWeight">&hellip;</template>
       </span>
     </div>
-    <div class="title hide-collapsed">
+    <div class="hide-collapsed gl-line-height-20 gl-mb-2 gl-text-gray-900">
       {{ s__('Sidebar|Weight') }}
-      <gl-loading-icon v-if="fetching || loading" :inline="true" class="js-weight-loading-icon" />
+      <gl-loading-icon
+        v-if="fetching || loading"
+        size="sm"
+        :inline="true"
+        class="js-weight-loading-icon"
+      />
       <a
         v-if="editable"
         class="float-right edit-link js-weight-edit-link"

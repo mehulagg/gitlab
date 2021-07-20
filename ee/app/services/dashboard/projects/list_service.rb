@@ -14,9 +14,7 @@ module Dashboard
         return Project.none unless License.feature_available?(feature)
 
         project_ids = available_project_ids(project_ids) unless include_unavailable
-        projects = find_projects(project_ids)
-
-        projects
+        find_projects(project_ids)
       end
 
       private

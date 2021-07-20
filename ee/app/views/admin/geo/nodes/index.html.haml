@@ -1,19 +1,7 @@
-- page_title _('Geo Nodes')
+- page_title _('Geo sites')
 
 = render_enable_hashed_storage_warning
 = render_migrate_hashed_storage_warning
 = render partial: 'admin/geo/shared/license_alert'
 
-.d-flex.align-items-center.border-bottom.border-default.mb-4
-  %h3{ :class => "page-title" }
-    = _("Geo Nodes")
-  - if @nodes.any?
-    = link_to s_("GeoNodes|New node"), new_admin_geo_node_path, class: 'gl-button btn btn-success ml-auto qa-new-node-link'
-
-%p.page-subtitle.light
-  = s_('GeoNodes|With %{geo} you can install a special read-only and replicated instance anywhere. Before you add nodes, follow the %{instructions} in the exact order they appear.').html_safe % { geo: link_to('GitLab Geo', help_page_path('administration/geo/index.md'), target: '_blank'), instructions: link_to('setup instructions', help_page_path('administration/geo/setup/index.md'), target: '_blank') }
-
-- if @nodes.any?
-  #js-geo-nodes{ data: node_vue_list_properties }
-- else
-  = render 'shared/empty_states/geo'
+#js-geo-nodes{ data: node_vue_list_properties }

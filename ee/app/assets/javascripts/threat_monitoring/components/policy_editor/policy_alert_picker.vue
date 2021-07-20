@@ -127,6 +127,7 @@ export default {
           data-testid="remove-alert"
           icon="remove"
           category="tertiary"
+          :aria-label="__('Remove')"
           @click="$emit('update-alert', !policyAlert)"
         />
       </div>

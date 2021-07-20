@@ -2,6 +2,8 @@
 
 class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   # rubocop:disable Scalability/CronWorkerContext
   # This worker does not perform work scoped to a context
   # all queries are scoped across multiple namespaces
@@ -10,7 +12,7 @@ class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWo
   feature_category :continuous_integration
 
   LEASE_TIMEOUT = 3600
-  TIME_SPREAD = 3.hours.seconds.freeze
+  TIME_SPREAD = 8.hours.seconds.freeze
   BATCH_SIZE = 100_000
 
   def perform
@@ -18,7 +20,8 @@ class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWo
       start_id = Namespace.minimum(:id)
       last_id = Namespace.maximum(:id)
 
-      execution_offset = TIME_SPREAD / ((last_id - start_id) / BATCH_SIZE)
+      batches = [(last_id - start_id) / BATCH_SIZE, 1].max
+      execution_offset = (TIME_SPREAD / batches).to_i
 
       (start_id..last_id).step(BATCH_SIZE).with_index do |batch_start_id, batch_index|
         batch_end_id = batch_start_id + BATCH_SIZE - 1

@@ -1,4 +1,6 @@
-import { isArray } from 'lodash';
+import * as testingLibrary from '@testing-library/dom';
+import { createWrapper, WrapperArray, ErrorWrapper, mount, shallowMount } from '@vue/test-utils';
+import { isArray, upperFirst } from 'lodash';
 
 const vNodeContainsText = (vnode, text) =>
   (vnode.text && vnode.text.includes(text)) ||
@@ -37,6 +39,17 @@ export const waitForMutation = (store, expectedMutationType) =>
   });
 
 export const extendedWrapper = (wrapper) => {
+  // https://testing-library.com/docs/queries/about
+  const AVAILABLE_QUERIES = [
+    'byRole',
+    'byLabelText',
+    'byPlaceholderText',
+    'byText',
+    'byDisplayValue',
+    'byAltText',
+    'byTitle',
+  ];
+
   if (isArray(wrapper) || !wrapper?.find) {
     // eslint-disable-next-line no-console
     console.warn(
@@ -45,9 +58,69 @@ export const extendedWrapper = (wrapper) => {
     return wrapper;
   }
 
-  return Object.defineProperty(wrapper, 'findByTestId', {
-    value(id) {
-      return this.find(`[data-testid="${id}"]`);
+  return Object.defineProperties(wrapper, {
+    findByTestId: {
+      value(id) {
+        return this.find(`[data-testid="${id}"]`);
+      },
     },
+    findAllByTestId: {
+      value(id) {
+        return this.findAll(`[data-testid="${id}"]`);
+      },
+    },
+    // `findBy`
+    ...AVAILABLE_QUERIES.reduce((accumulator, query) => {
+      return {
+        ...accumulator,
+        [`find${upperFirst(query)}`]: {
+          value(text, options = {}) {
+            const elements = testingLibrary[`queryAll${upperFirst(query)}`](
+              wrapper.element,
+              text,
+              options,
+            );
+
+            // Element not found, return an `ErrorWrapper`
+            if (!elements.length) {
+              return new ErrorWrapper(query);
+            }
+
+            return createWrapper(elements[0], this.options || {});
+          },
+        },
+      };
+    }, {}),
+    // `findAllBy`
+    ...AVAILABLE_QUERIES.reduce((accumulator, query) => {
+      return {
+        ...accumulator,
+        [`findAll${upperFirst(query)}`]: {
+          value(text, options = {}) {
+            const elements = testingLibrary[`queryAll${upperFirst(query)}`](
+              wrapper.element,
+              text,
+              options,
+            );
+
+            const wrappers = elements.map((element) => {
+              const elementWrapper = createWrapper(element, this.options || {});
+              elementWrapper.selector = text;
+
+              return elementWrapper;
+            });
+
+            const wrapperArray = new WrapperArray(wrappers);
+            wrapperArray.selector = text;
+
+            return wrapperArray;
+          },
+        },
+      };
+    }, {}),
   });
 };
+
+export const shallowMountExtended = (...args) => extendedWrapper(shallowMount(...args));
+
+export const mountExtended = (...args) => extendedWrapper(mount(...args));

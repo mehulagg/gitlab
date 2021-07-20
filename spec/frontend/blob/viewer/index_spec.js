@@ -6,6 +6,10 @@ import { setTestTimeout } from 'helpers/timeout';
 import BlobViewer from '~/blob/viewer/index';
 import axios from '~/lib/utils/axios_utils';
 
+const execImmediately = (callback) => {
+  callback();
+};
+
 describe('Blob viewer', () => {
   let blob;
   let mock;
@@ -16,9 +20,8 @@ describe('Blob viewer', () => {
 
   setTestTimeout(2000);
 
-  preloadFixtures('blob/show_readme.html');
-
   beforeEach(() => {
+    jest.spyOn(window, 'requestIdleCallback').mockImplementation(execImmediately);
     $.fn.extend(jQueryMock);
     mock = new MockAdapter(axios);
 
@@ -85,9 +88,11 @@ describe('Blob viewer', () => {
 
   describe('copy blob button', () => {
     let copyButton;
+    let copyButtonTooltip;
 
     beforeEach(() => {
       copyButton = document.querySelector('.js-copy-blob-source-btn');
+      copyButtonTooltip = document.querySelector('.js-copy-blob-source-btn-tooltip');
     });
 
     it('disabled on load', () => {
@@ -95,7 +100,7 @@ describe('Blob viewer', () => {
     });
 
     it('has tooltip when disabled', () => {
-      expect(copyButton.getAttribute('title')).toBe(
+      expect(copyButtonTooltip.getAttribute('title')).toBe(
         'Switch to the source to copy the file contents',
       );
     });
@@ -131,7 +136,7 @@ describe('Blob viewer', () => {
       document.querySelector('.js-blob-viewer-switch-btn[data-viewer="simple"]').click();
 
       setImmediate(() => {
-        expect(copyButton.getAttribute('title')).toBe('Copy file contents');
+        expect(copyButtonTooltip.getAttribute('title')).toBe('Copy file contents');
 
         done();
       });

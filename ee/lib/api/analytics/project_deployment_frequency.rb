@@ -4,12 +4,11 @@ module API
   module Analytics
     class ProjectDeploymentFrequency < ::API::Base
       include Gitlab::Utils::StrongMemoize
-      include PaginationParams
 
       QUARTER_DAYS = 3.months / 1.day
-      DEPLOYMENT_FREQUENCY_INTERVAL_ALL = 'all'.freeze
-      DEPLOYMENT_FREQUENCY_INTERVAL_MONTHLY = 'monthly'.freeze
-      DEPLOYMENT_FREQUENCY_INTERVAL_DAILY = 'daily'.freeze
+      DEPLOYMENT_FREQUENCY_INTERVAL_ALL = 'all'
+      DEPLOYMENT_FREQUENCY_INTERVAL_MONTHLY = 'monthly'
+      DEPLOYMENT_FREQUENCY_INTERVAL_DAILY = 'daily'
       DEPLOYMENT_FREQUENCY_DEFAULT_INTERVAL = DEPLOYMENT_FREQUENCY_INTERVAL_ALL
       VALID_INTERVALS = [
         DEPLOYMENT_FREQUENCY_INTERVAL_ALL,
@@ -50,7 +49,9 @@ module API
               project: user_project,
               environment: environment_name,
               finished_after: start_date,
-              finished_before: end_date
+              finished_before: end_date,
+              status: :success,
+              order_by: :finished_at
             ).execute
           end
         end
@@ -110,7 +111,7 @@ module API
           get 'deployment_frequency' do
             bad_request!("Parameter `to` is before the `from` date") if start_date > end_date
             bad_request!("Date range is greater than #{QUARTER_DAYS} days") if days_between > QUARTER_DAYS
-            authorize! :read_project_activity_analytics, user_project
+            authorize! :read_dora4_analytics, user_project
             present deployment_frequencies, with: EE::API::Entities::Analytics::DeploymentFrequency
           end
         end

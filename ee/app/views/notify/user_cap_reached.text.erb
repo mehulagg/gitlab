@@ -1,0 +1,13 @@
+<%= s_('AdminUsers|Your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin.') % { user_doc_link: "#{s_('AdminUsers|user cap')} #{@url_to_user_cap}" } %>
+
+<%= s_('AdminUsers|What does this mean?') %>
+<%= s_('AdminUsers|Users can still be invited to your instance and/or add themselves if permitted based on your settings. They will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}.') % { approve_link: "#{s_('AdminUsers|approve them')} #{@url_to_manage_pending_users}" } %>
+
+<%= s_('AdminUsers|What can I do?') %>
+<%= s_('AdminUsers|Here are some helpful links to help you manage your instance:') %>
+
+<%= s_('AdminUsers|View pending member requests') %> <%= @url_to_pending_users %>
+<%= s_('AdminUsers|Manage (accept/reject) pending user sign ups') %> <%= @url_to_manage_pending_users %>
+<%= s_('AdminUsers|Adjust the user cap setting on your instance') %> <%= @url_to_adjust_user_cap %>
+
+<%= s_('AdminUsers|If you have any questions about this process please consult our %{doc_link} or %{support_link}.') % { doc_link: "#{s_('AdminUsers|docs')} #{@url_to_docs}", support_link: "#{s_('AdminUsers|contact our support team')} #{@url_to_support}" } %>

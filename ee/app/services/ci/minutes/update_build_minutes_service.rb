@@ -3,39 +3,41 @@
 module Ci
   module Minutes
     class UpdateBuildMinutesService < BaseService
+      # Calculates consumption and updates the project and namespace statistics(legacy)
+      # or ProjectMonthlyUsage and NamespaceMonthlyUsage(not legacy) based on the passed build.
       def execute(build)
         return unless build.shared_runners_minutes_limit_enabled?
         return unless build.complete?
         return unless build.duration&.positive?
 
-        count_projects_based_on_cost_factors(build)
+        consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build, build.duration).amount
+
+        return unless consumption > 0
+
+        # TODO(Issue #335338): Introduce async worker UpdateProjectAndNamespaceUsageWorker
+        Ci::Minutes::UpdateProjectAndNamespaceUsageService.new(project, namespace).execute(consumption)
+
+        compare_with_live_consumption(build, consumption)
       end
 
       private
 
-      def count_projects_based_on_cost_factors(build)
-        cost_factor = build.runner.minutes_cost_factor(project.visibility_level)
-        duration_with_cost_factor = (build.duration * cost_factor).to_i
+      def compare_with_live_consumption(build, consumption)
+        live_consumption = ::Ci::Minutes::TrackLiveConsumptionService.new(build).live_consumption
+        return if live_consumption == 0
 
-        return unless duration_with_cost_factor > 0
-
-        ProjectStatistics.update_counters(project_statistics,
-          shared_runners_seconds: duration_with_cost_factor)
-
-        NamespaceStatistics.update_counters(namespace_statistics,
-          shared_runners_seconds: duration_with_cost_factor)
-      end
-
-      def namespace_statistics
-        namespace.namespace_statistics || namespace.create_namespace_statistics
-      end
-
-      def project_statistics
-        project.statistics || project.create_statistics(namespace: project.namespace)
+        difference = consumption.to_f - live_consumption.to_f
+        observe_ci_minutes_difference(difference, plan: namespace.actual_plan_name)
       end
 
       def namespace
         project.shared_runners_limit_namespace
+      end
+
+      def observe_ci_minutes_difference(difference, plan:)
+        ::Gitlab::Ci::Pipeline::Metrics
+          .gitlab_ci_difference_live_vs_actual_minutes
+          .observe({ plan: plan }, difference)
       end
     end
   end

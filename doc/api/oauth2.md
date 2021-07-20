@@ -41,7 +41,7 @@ how all those flows work and pick the right one for your use case.
 Both **authorization code** (with or without PKCE) and **implicit grant** flows require `application` to be
 registered first via the `/profile/applications` page in your user's account.
 During registration, by enabling proper scopes, you can limit the range of
-resources which the `application` can access. Upon creation, you'll obtain the
+resources which the `application` can access. Upon creation, you obtain the
 `application` credentials: _Application ID_ and _Client Secret_ - **keep them secure**.
 
 ### Prevent CSRF attacks
@@ -63,7 +63,7 @@ and the [OAuth 2.0 Threat Model RFC](https://tools.ietf.org/html/rfc6819#section
 These factors are particularly important when using the
 [Implicit grant flow](#implicit-grant-flow), where actual credentials are included in the `redirect_uri`.
 
-In the following sections you will find detailed instructions on how to obtain
+In the following sections you can find detailed instructions on how to obtain
 authorization with each flow.
 
 ### Authorization code with Proof Key for Code Exchange (PKCE)
@@ -194,8 +194,10 @@ NOTE:
 For a detailed flow diagram, see the [RFC specification](https://tools.ietf.org/html/rfc6749#section-4.2).
 
 WARNING:
-The Implicit grant flow is inherently insecure. The IETF plans to remove it in
-[OAuth 2.1](https://oauth.net/2.1/).
+Implicit grant flow is inherently insecure and the IETF has removed it in [OAuth 2.1](https://oauth.net/2.1/).
+For this reason, [support for it is deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/288516).
+In GitLab 14.0, new applications can't be created using it. In GitLab 14.4, support for it is
+scheduled to be removed for existing applications.
 
 We recommend that you use [Authorization code with PKCE](#authorization-code-with-proof-key-for-code-exchange-pkce) instead. If you choose to use Implicit flow, be sure to verify the
 `application id` (or `client_id`) associated with the access token before granting
@@ -213,12 +215,12 @@ To request the access token, you should redirect the user to the
 https://gitlab.example.com/oauth/authorize?client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=token&state=YOUR_UNIQUE_STATE_HASH&scope=REQUESTED_SCOPES
 ```
 
-This will ask the user to approve the applications access to their account
+This prompts the user to approve the applications access to their account
 based on the scopes specified in `REQUESTED_SCOPES` and then redirect back to
 the `REDIRECT_URI` you provided. The [scope parameter](https://github.com/doorkeeper-gem/doorkeeper/wiki/Using-Scopes#requesting-particular-scopes)
-   is a space separated list of scopes you want to have access to (e.g. `scope=read_user+profile`
+   is a space separated list of scopes you want to have access to (for example, `scope=read_user+profile`
 would request `read_user` and `profile` scopes). The redirect
-will include a fragment with `access_token` as well as token details in GET
+includes a fragment with `access_token` as well as token details in GET
 parameters, for example:
 
 ```plaintext
@@ -270,17 +272,23 @@ the following parameters:
 }
 ```
 
-Also you must use HTTP Basic authentication using the `client_id` and`client_secret`
-values to authenticate the client that performs a request.
-
 Example cURL request:
 
 ```shell
 echo 'grant_type=password&username=<your_username>&password=<your_password>' > auth.txt
-curl --data "@auth.txt" --user client_id:client_secret --request POST "https://gitlab.example.com/oauth/token"
+curl --data "@auth.txt" --request POST "https://gitlab.example.com/oauth/token"
 ```
 
-Then, you'll receive the access token back in the response:
+You can also use this grant flow with registered OAuth applications, by using
+HTTP Basic Authentication with the application's `client_id` and `client_secret`:
+
+```shell
+echo 'grant_type=password&username=<your_username>&password=<your_password>' > auth.txt
+curl --data "@auth.txt" --user client_id:client_secret \
+     --request POST "https://gitlab.example.com/oauth/token"
+```
+
+Then, you receive a response containing the access token:
 
 ```json
 {
@@ -353,4 +361,14 @@ The fields `scopes` and `expires_in_seconds` are included in the response.
 These are aliases for `scope` and `expires_in` respectively, and have been included to
 prevent breaking changes introduced in [doorkeeper 5.0.2](https://github.com/doorkeeper-gem/doorkeeper/wiki/Migration-from-old-versions#from-4x-to-5x).
 
-Don't rely on these fields as they will be removed in a later release.
+Don't rely on these fields as they are slated for removal in a later release.
+
+## OAuth2 tokens and GitLab registries
+
+Standard OAuth2 tokens support different degrees of access to GitLab registries, as they:
+
+- Do not allow users to authenticate to:
+  - The GitLab [Container registry](../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
+  - Packages listed in the GitLab [Package registry](../user/packages/package_registry/index.md).
+- Allow users to get, list, and delete registries through
+  the [Container registry API](container_registry.md).

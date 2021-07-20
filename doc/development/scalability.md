@@ -23,8 +23,8 @@ users. We discuss each component below.
 ### PostgreSQL
 
 The PostgreSQL database holds all metadata for projects, issues, merge
-requests, users, etc. The schema is managed by the Rails application
-[db/structure.sql](https://gitlab.com/gitlab-org/gitlab/blob/master/db/structure.sql).
+requests, users, and so on. The schema is managed by the Rails application
+[db/structure.sql](https://gitlab.com/gitlab-org/gitlab/-/blob/master/db/structure.sql).
 
 GitLab Web/API servers and Sidekiq nodes talk directly to the database by using a
 Rails object relational model (ORM). Most SQL queries are accessed by using this
@@ -36,7 +36,7 @@ application starts, Rails queries the database schema, caching the tables and
 column types for the data requested. Because of this schema cache, dropping a
 column or table while the application is running can produce 500 errors to the
 user. This is why we have a [process for dropping columns and other
-no-downtime changes](what_requires_downtime.md).
+no-downtime changes](avoiding_downtime_in_migrations.md).
 
 #### Multi-tenancy
 
@@ -91,7 +91,7 @@ ownership. It shares a lot of challenges with traditional, data-oriented
 sharding, however. For instance, joining data has to happen in the
 application itself rather than on the query layer (although additional
 layers like GraphQL might mitigate that) and it requires true
-parallelism to run efficiently (i.e. a scatter-gather model to collect,
+parallelism to run efficiently (that is, a scatter-gather model to collect,
 then zip up data records), which is a challenge in itself in Ruby based
 systems.
 
@@ -119,7 +119,7 @@ that backup, the database can apply the WAL logs in order until the
 database has reached the target time.
 
 On GitLab.com, Consul and Patroni work together to coordinate failovers with
-the read replicas. [Omnibus ships with both repmgr and Patroni](../administration/postgresql/replication_and_failover.md).
+the read replicas. [Omnibus ships with Patroni](../administration/postgresql/replication_and_failover.md).
 
 #### Load-balancing
 
@@ -243,14 +243,14 @@ Ruby on Rails applications. In GitLab, Sidekiq performs the heavy
 lifting of many activities, including:
 
 - Updating merge requests after a push.
-- Sending e-mails.
+- Sending email messages.
 - Updating user authorizations.
 - Processing CI builds and pipelines.
 
 The full list of jobs can be found in the
-[`app/workers`](https://gitlab.com/gitlab-org/gitlab/tree/master/app/workers)
+[`app/workers`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/app/workers)
 and
-[`ee/app/workers`](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/workers)
+[`ee/app/workers`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/app/workers)
 directories in the GitLab codebase.
 
 #### Runaway Queues
@@ -276,7 +276,7 @@ in a timely manner:
   this to `ProcessCommitWorker`.
 - Redistribute/gerrymander Sidekiq processes by queue
   types. Long-running jobs (for example, relating to project import) can often
-  squeeze out jobs that run fast (for example, delivering e-mail). [This technique
+  squeeze out jobs that run fast (for example, delivering email). [This technique
   was used in to optimize our existing Sidekiq deployment](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7219#note_218019483).
 - Optimize jobs. Eliminating unnecessary work, reducing network calls
   (including SQL and Gitaly), and optimizing processor time can yield significant

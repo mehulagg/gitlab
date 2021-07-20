@@ -23,7 +23,7 @@ module Gitlab
       end
 
       def user
-        User.find_by_any_email(@email)
+        strong_memoize(:user) { User.find_by_any_email(@email) }
       end
 
       def verified_signature
@@ -31,9 +31,13 @@ module Gitlab
       end
 
       def verification_status
-        return :unverified if x509_certificate.nil? || x509_certificate.revoked?
+        return :unverified if
+          x509_certificate.nil? ||
+          x509_certificate.revoked? ||
+          !verified_signature ||
+          user.nil?
 
-        if verified_signature && certificate_email == @email
+        if user.verified_emails.include?(@email) && certificate_email == @email
           :verified
         else
           :unverified
@@ -52,6 +56,12 @@ module Gitlab
         strong_memoize(:cert_store) do
           store = OpenSSL::X509::Store.new
           store.set_default_paths
+
+          if Feature.enabled?(:x509_forced_cert_loading, type: :ops)
+            # Forcibly load the default cert file because the OpenSSL library seemingly ignores it
+            store.add_file(OpenSSL::X509::DEFAULT_CERT_FILE) if File.exist?(OpenSSL::X509::DEFAULT_CERT_FILE)
+          end
+
           # valid_signing_time? checks the time attributes already
           # this flag is required, otherwise expired certificates would become
           # unverified when notAfter within certificate attribute is reached
@@ -66,7 +76,7 @@ module Gitlab
           pkcs7_text = pkcs7_text.sub('-----END SIGNED MESSAGE-----', '-----END PKCS7-----')
 
           OpenSSL::PKCS7.new(pkcs7_text)
-        rescue
+        rescue StandardError
           nil
         end
       end
@@ -81,7 +91,7 @@ module Gitlab
 
       def valid_signature?
         p7.verify([], cert_store, signed_text, OpenSSL::PKCS7::NOVERIFY)
-      rescue
+      rescue StandardError
         nil
       end
 
@@ -98,7 +108,7 @@ module Gitlab
         else
           nil
         end
-      rescue
+      rescue StandardError
         nil
       end
 

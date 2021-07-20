@@ -3,8 +3,11 @@
 # Include these shared examples in specs of Replicators that include
 # BlobReplicatorStrategy.
 #
-# A let variable called model_record should be defined in the spec. It should be
-# a valid, unpersisted instance of the model class.
+# Required let variables:
+#
+# - model_record: A valid, unpersisted instance of the model class. Or a valid,
+#                 persisted instance of the model class in a not-yet loaded let
+#                 variable (so we can trigger creation).
 #
 RSpec.shared_examples 'a repository replicator' do
   include EE::GeoHelpers
@@ -21,7 +24,9 @@ RSpec.shared_examples 'a repository replicator' do
   it_behaves_like 'a replicator'
 
   # This could be included in each model's spec, but including it here is DRYer.
-  include_examples 'a replicable model'
+  include_examples 'a replicable model' do
+    let(:replicator_class) { described_class }
+  end
 
   describe '#handle_after_update' do
     it 'creates a Geo::Event' do
@@ -71,14 +76,16 @@ RSpec.shared_examples 'a repository replicator' do
   end
 
   describe 'updated event consumption' do
-    context 'in replicables_for_current_secondary list' do
-      it 'runs SnippetRepositorySyncService service' do
-        model_record.save!
+    before do
+      model_record.save!
+    end
 
+    context 'in replicables_for_current_secondary list' do
+      it 'runs Geo::FrameworkRepositorySyncService service' do
+        allow(replicator).to receive(:in_replicables_for_current_secondary?).and_return(true)
         sync_service = double
 
         expect(sync_service).to receive(:execute)
-
         expect(::Geo::FrameworkRepositorySyncService)
           .to receive(:new).with(replicator)
                 .and_return(sync_service)
@@ -88,7 +95,9 @@ RSpec.shared_examples 'a repository replicator' do
     end
 
     context 'not in replicables_for_current_secondary list' do
-      it 'runs SnippetRepositorySyncService service' do
+      it 'does not run Geo::FrameworkRepositorySyncService service' do
+        allow(replicator).to receive(:in_replicables_for_current_secondary?).and_return(false)
+
         expect(::Geo::FrameworkRepositorySyncService)
           .not_to receive(:new)
 

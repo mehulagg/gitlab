@@ -10,18 +10,22 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
+import ConfigurationSnippetModal from 'ee/security_configuration/components/configuration_snippet_modal.vue';
+import { CONFIGURATION_SNIPPET_MODAL_ID } from 'ee/security_configuration/components/constants';
 import { isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
+import { CODE_SNIPPET_SOURCE_API_FUZZING } from '~/pipeline_editor/components/code_snippet_alert/constants';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
-import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
-import createApiFuzzingConfigurationMutation from '../graphql/create_api_fuzzing_configuration.mutation.graphql';
-import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
+import { SCAN_MODES } from '../constants';
+import apiFuzzingCiConfigurationCreate from '../graphql/api_fuzzing_ci_configuration_create.mutation.graphql';
+import { insertTips } from '../utils';
 
 export default {
   CONFIGURATION_SNIPPET_MODAL_ID,
+  CODE_SNIPPET_SOURCE_API_FUZZING,
   components: {
     GlAccordion,
     GlAccordionItem,
@@ -54,18 +58,20 @@ export default {
   data() {
     return {
       isLoading: false,
-      showError: false,
+      isErrorVisible: false,
       targetUrl: {
         field: 'targetUrl',
         label: s__('APIFuzzing|Target URL'),
-        description: s__('APIFuzzing|Base URL of API fuzzing target.'),
-        placeholder: __('Ex: Example.com'),
+        description: s__(
+          'APIFuzzing|Base URL of API testing target. For example, http://www.example.com.',
+        ),
+        placeholder: __('http://www.example.com'),
         value: '',
       },
       scanMode: {
         field: 'scanMode',
         label: s__('APIFuzzing|Scan mode'),
-        description: s__('APIFuzzing|There are two ways to perform scans.'),
+        description: s__('APIFuzzing|There are three ways to perform scans.'),
         value: '',
         defaultText: s__('APIFuzzing|Choose a method'),
         options: this.apiFuzzingCiConfiguration.scanModes.map((value) => ({
@@ -84,9 +90,9 @@ export default {
           field: 'username',
           label: s__('APIFuzzing|Username for basic authentication'),
           description: s__(
-            'APIFuzzing|Instead of entering the username directly, enter the key of the CI variable set to the username.',
+            'APIFuzzing|Enter the name of the variable containing the username. For example, $VariableWithUsername.',
           ),
-          placeholder: s__('APIFuzzing|Ex: $TestUsername'),
+          placeholder: s__('APIFuzzing|$VariableWithUsername'),
           value: '',
         },
         {
@@ -94,18 +100,18 @@ export default {
           field: 'password',
           label: s__('APIFuzzing|Password for basic authentication'),
           description: s__(
-            'APIFuzzing|Instead of entering the password directly, enter the key of the CI variable set to the password.',
+            'APIFuzzing|Enter the name of the variable containing the password. For example, $VariableWithPassword.',
           ),
-          placeholder: s__('APIFuzzing|Ex: $TestPassword'),
+          placeholder: s__('APIFuzzing|$VariableWithPassword'),
           value: '',
         },
       ],
       scanProfile: {
         field: 'scanProfile',
         label: s__('APIFuzzing|Scan profile'),
-        description: 'Pre-defined profiles by GitLab.',
         value: '',
         defaultText: s__('APIFuzzing|Choose a profile'),
+        sectionHeader: s__('APIFuzzing|Predefined profiles'),
         options: this.apiFuzzingCiConfiguration.scanProfiles.map(
           ({ name: value, description: text }) => ({
             value,
@@ -113,7 +119,7 @@ export default {
           }),
         ),
       },
-      ciYamlEditUrl: '',
+      ciYamlEditPath: '',
       configurationYaml: '',
     };
   },
@@ -153,11 +159,35 @@ export default {
       }
       return fields.some(({ value }) => isEmptyValue(value));
     },
+    configurationYamlWithTips() {
+      if (!this.configurationYaml) {
+        return '';
+      }
+      return insertTips(this.configurationYaml, [
+        {
+          tip: s__('APIFuzzing|Tip: Insert this part below all stages'),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          token: 'stages:',
+        },
+        {
+          tip: s__('APIFuzzing|Tip: Insert this part below all include'),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          token: 'include:',
+        },
+        {
+          tip: s__(
+            'APIFuzzing|Tip: Insert the following variables anywhere below stages and include',
+          ),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          token: 'variables:',
+        },
+      ]);
+    },
   },
   methods: {
     async onSubmit() {
       this.isLoading = true;
-      this.showError = false;
+      this.dismissError();
       try {
         const input = {
           projectPath: this.fullPath,
@@ -173,32 +203,36 @@ export default {
         }
         const {
           data: {
-            createApiFuzzingCiConfiguration: {
-              gitlabCiYamlEditUrl,
+            apiFuzzingCiConfigurationCreate: {
+              gitlabCiYamlEditPath,
               configurationYaml,
               errors = [],
             },
           },
         } = await this.$apollo.mutate({
-          mutation: createApiFuzzingConfigurationMutation,
+          mutation: apiFuzzingCiConfigurationCreate,
           variables: { input },
         });
         if (errors.length) {
-          this.showError = true;
+          this.showError();
         } else {
-          this.ciYamlEditUrl = gitlabCiYamlEditUrl;
+          this.ciYamlEditPath = gitlabCiYamlEditPath;
           this.configurationYaml = configurationYaml;
           this.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show();
         }
       } catch (e) {
-        this.showError = true;
+        this.showError();
         Sentry.captureException(e);
       } finally {
         this.isLoading = false;
       }
     },
+    showError() {
+      this.isErrorVisible = true;
+      window.scrollTo({ top: 0 });
+    },
     dismissError() {
-      this.showError = false;
+      this.isErrorVisible = false;
     },
   },
   SCAN_MODES,
@@ -207,8 +241,8 @@ export default {
 
 <template>
   <form @submit.prevent="onSubmit">
-    <gl-alert v-if="showError" variant="danger" class="gl-mb-5" @dismiss="dismissError">
-      {{ s__('APIFuzzing|The configuration could not be saved, please try again later.') }}
+    <gl-alert v-if="isErrorVisible" variant="danger" class="gl-mb-5" @dismiss="dismissError">
+      {{ s__('APIFuzzing|Code snippet could not be generated. Try again later.') }}
     </gl-alert>
 
     <form-input v-model="targetUrl.value" v-bind="targetUrl" class="gl-mb-7" />
@@ -227,7 +261,7 @@ export default {
           <gl-sprintf
             :message="
               s__(
-                'APIFuzzing|Authentication is handled by providing HTTP basic authentication token as a header or cookie. %{linkStart}More information%{linkEnd}.',
+                'APIFuzzing|Configure HTTP basic authentication values. Other authentication methods are supported. %{linkStart}Learn more%{linkEnd}.',
               )
             "
           >
@@ -273,7 +307,7 @@ export default {
 
     <dropdown-input v-model="scanProfile.value" v-bind="scanProfile" />
     <template v-if="scanProfileYaml">
-      <gl-accordion>
+      <gl-accordion :header-level="3">
         <gl-accordion-item :title="s__('APIFuzzing|Show code snippet for the profile')">
           <pre data-testid="api-fuzzing-scan-profile-yaml-viewer">{{ scanProfileYaml }}</pre>
         </gl-accordion-item>
@@ -300,8 +334,10 @@ export default {
 
     <configuration-snippet-modal
       :ref="$options.CONFIGURATION_SNIPPET_MODAL_ID"
-      :ci-yaml-edit-url="ciYamlEditUrl"
-      :yaml="configurationYaml"
+      :ci-yaml-edit-url="ciYamlEditPath"
+      :yaml="configurationYamlWithTips"
+      :redirect-param="$options.CODE_SNIPPET_SOURCE_API_FUZZING"
+      scan-type="API Fuzzing"
     />
   </form>
 </template>

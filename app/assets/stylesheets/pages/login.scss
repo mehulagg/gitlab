@@ -109,13 +109,6 @@
 
     .omniauth-btn {
       width: 100%;
-      padding: $gl-padding-8;
-
-      img {
-        width: $default-icon-size;
-        height: $default-icon-size;
-        margin-right: $gl-padding;
-      }
     }
   }
 
@@ -190,8 +183,9 @@
   }
 
   input[type='submit'] {
-    @extend .btn-block;
     margin-bottom: 0;
+    display: block;
+    width: 100%;
   }
 
   .devise-errors {

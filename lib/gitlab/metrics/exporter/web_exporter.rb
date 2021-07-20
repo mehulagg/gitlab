@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'webrick'
-require 'prometheus/client/rack/exporter'
-
 module Gitlab
   module Metrics
     module Exporter
@@ -11,6 +8,10 @@ module Gitlab
           def readiness
             Gitlab::HealthChecks::Result.new(
               'web_exporter', exporter.running)
+          end
+
+          def available?
+            true
           end
         end
 
@@ -26,8 +27,7 @@ module Gitlab
           # application: https://gitlab.com/gitlab-org/gitlab/issues/35343
           self.readiness_checks = [
             WebExporter::ExporterCheck.new(self),
-            Gitlab::HealthChecks::PumaCheck,
-            Gitlab::HealthChecks::UnicornCheck
+            Gitlab::HealthChecks::PumaCheck
           ]
         end
 

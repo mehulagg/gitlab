@@ -17,7 +17,7 @@ RSpec.describe 'New project', :js do
 
       it 'shows mirror repository checkbox enabled', :js do
         visit new_project_path
-        find('[data-qa-selector="import_project_link"]').click
+        find('[data-qa-panel-name="import_project"]').click
         first('.js-import-git-toggle-button').click
 
         expect(page).to have_unchecked_field('Mirror repository', disabled: false)
@@ -31,7 +31,7 @@ RSpec.describe 'New project', :js do
 
       it 'does not show mirror repository option' do
         visit new_project_path
-        find('[data-qa-selector="import_project_link"]').click
+        find('[data-qa-panel-name="import_project"]').click
         first('.js-import-git-toggle-button').click
 
         expect(page).not_to have_content('Mirror repository')
@@ -60,16 +60,16 @@ RSpec.describe 'New project', :js do
       it 'shows CI/CD tab and pane' do
         visit new_project_path
 
-        expect(page).to have_css('[data-qa-selector="cicd_for_external_repo_link"]')
+        expect(page).to have_css('[data-qa-panel-name="cicd_for_external_repo"]')
 
-        find('[data-qa-selector="cicd_for_external_repo_link"]').click
+        find('[data-qa-panel-name="cicd_for_external_repo"]').click
 
         expect(page).to have_css('#ci-cd-project-pane')
       end
 
       it '"Import project" tab creates projects with features enabled' do
         visit new_project_path
-        find('[data-qa-selector="import_project_link"]').click
+        find('[data-qa-panel-name="import_project"]').click
 
         page.within '#import-project-pane' do
           first('.js-import-git-toggle-button').click
@@ -89,7 +89,7 @@ RSpec.describe 'New project', :js do
 
       it 'creates CI/CD project from repo URL', :sidekiq_might_not_need_inline do
         visit new_project_path
-        find('[data-qa-selector="cicd_for_external_repo_link"]').click
+        find('[data-qa-panel-name="cicd_for_external_repo"]').click
 
         page.within '#ci-cd-project-pane' do
           find('.js-import-git-toggle-button').click
@@ -109,7 +109,7 @@ RSpec.describe 'New project', :js do
 
       it 'creates CI/CD project from GitHub' do
         visit new_project_path
-        find('[data-qa-selector="cicd_for_external_repo_link"]').click
+        find('[data-qa-panel-name="cicd_for_external_repo"]').click
 
         page.within '#ci-cd-project-pane' do
           find('.js-import-github').click
@@ -136,7 +136,7 @@ RSpec.describe 'New project', :js do
         click_button 'Connect'
         wait_for_requests
 
-        expect(page).to have_text('Done')
+        expect(page).to have_text('Complete')
 
         created_project = Project.last
         expect(created_project.name).to eq('some-github-repo')
@@ -146,7 +146,7 @@ RSpec.describe 'New project', :js do
 
       it 'stays on GitHub import page after access token failure' do
         visit new_project_path
-        find('[data-qa-selector="cicd_for_external_repo_link"]').click
+        find('[data-qa-panel-name="cicd_for_external_repo"]').click
 
         page.within '#ci-cd-project-pane' do
           find('.js-import-github').click
@@ -170,7 +170,7 @@ RSpec.describe 'New project', :js do
       it 'does not show CI/CD only tab' do
         visit new_project_path
 
-        expect(page).not_to have_css('[data-qa-selector="cicd_for_external_repo_link"]')
+        expect(page).not_to have_css('[data-qa-panel-name="cicd_for_external_repo"]')
       end
     end
   end
@@ -361,7 +361,7 @@ RSpec.describe 'New project', :js do
 
               before do
                 allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
-                create(:gitlab_subscription, :gold, namespace: group1)
+                create(:gitlab_subscription, :ultimate, namespace: group1)
               end
 
               it 'show Group tab in Templates section' do
@@ -458,7 +458,7 @@ RSpec.describe 'New project', :js do
     def visit_create_from_built_in_templates_tab
       visit new_project_path
 
-      find('[data-qa-selector="create_from_template_link"]').click
+      find('[data-qa-panel-name="create_from_template"]').click
     end
   end
 end

@@ -55,7 +55,7 @@ module Geo
         "#{repository_retry_at_column}" => nil,
         "#{repository_retry_count_column}" => nil
       )
-    rescue => e
+    rescue StandardError => e
       log_error('Cannot reset repository checksum', e)
       raise RepositoryUpdateError, "Cannot reset repository checksum: #{e}"
     end

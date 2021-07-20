@@ -47,10 +47,6 @@ FactoryBot.define do
       hosts { [FFaker::Internet.ip_v4_address] }
     end
 
-    trait :with_ended_at do
-      ended_at { Time.current }
-    end
-
     trait :without_ended_at do
       ended_at { nil }
     end
@@ -67,7 +63,7 @@ FactoryBot.define do
 
     trait :resolved do
       status { AlertManagement::Alert.status_value(:resolved) }
-      with_ended_at
+      ended_at { Time.current }
     end
 
     trait :ignored do
@@ -99,6 +95,10 @@ FactoryBot.define do
       severity { 'unknown' }
     end
 
+    trait :threat_monitoring do
+      domain { :threat_monitoring }
+    end
+
     trait :prometheus do
       monitoring_tool { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus] }
       payload do
@@ -107,6 +107,20 @@ FactoryBot.define do
             title: 'This is a prometheus error',
             summary: 'Summary of the error',
             description: 'Description of the error'
+          },
+          startsAt: started_at
+        }.with_indifferent_access
+      end
+    end
+
+    trait :cilium do
+      monitoring_tool { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:cilium] }
+      payload do
+        {
+          annotations: {
+            title: 'This is a cilium alert',
+            summary: 'Summary of the alert',
+            description: 'Description of the alert'
           },
           startsAt: started_at
         }.with_indifferent_access

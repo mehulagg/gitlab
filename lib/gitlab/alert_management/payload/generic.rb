@@ -5,7 +5,7 @@ module Gitlab
   module AlertManagement
     module Payload
       class Generic < Base
-        DEFAULT_TITLE = 'New: Incident'
+        DEFAULT_TITLE = 'New: Alert'
 
         attribute :description, paths: 'description'
         attribute :ends_at, paths: 'end_time', type: :time
@@ -27,4 +27,4 @@ module Gitlab
   end
 end
 
-Gitlab::AlertManagement::Payload::Generic.prepend_if_ee('EE::Gitlab::AlertManagement::Payload::Generic')
+Gitlab::AlertManagement::Payload::Generic.prepend_mod_with('Gitlab::AlertManagement::Payload::Generic')

@@ -41,6 +41,10 @@ class SearchService
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
+  def projects
+    # overridden in EE
+  end
+
   def show_snippets?
     return @show_snippets if defined?(@show_snippets)
 
@@ -140,4 +144,4 @@ class SearchService
   attr_reader :current_user, :params
 end
 
-SearchService.prepend_if_ee('EE::SearchService')
+SearchService.prepend_mod_with('SearchService')

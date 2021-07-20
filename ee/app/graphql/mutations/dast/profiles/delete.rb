@@ -16,9 +16,8 @@ module Mutations
 
         def resolve(id:)
           dast_profile = authorized_find!(id)
-          raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless enabled?(dast_profile.project)
 
-          response = ::Dast::Profiles::DestroyService.new(
+          response = ::AppSec::Dast::Profiles::DestroyService.new(
             container: dast_profile.project,
             current_user: current_user,
             params: { dast_profile: dast_profile }
@@ -28,10 +27,6 @@ module Mutations
         end
 
         private
-
-        def enabled?(project)
-          Feature.enabled?(:dast_saved_scans, project, default_enabled: :yaml)
-        end
 
         def find_object(id)
           # TODO: remove this line when the compatibility layer is removed

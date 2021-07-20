@@ -34,11 +34,15 @@ module QA
 
         merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = project
-          mr.id = merge_request[:iid]
+          mr.iid = merge_request[:iid]
         end.merge_via_api!
 
         expect(merge_request[:state]).to eq('merged')
-        expect(project).not_to have_branch(branch)
+
+        # Retry in case the branch deletion takes more time to finish
+        QA::Support::Retrier.retry_on_exception(max_attempts: 5, sleep_interval: 5) do
+          expect(project).not_to have_branch(branch)
+        end
       end
     end
   end

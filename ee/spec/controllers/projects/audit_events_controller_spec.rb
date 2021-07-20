@@ -146,7 +146,10 @@ RSpec.describe Projects::AuditEventsController do
 
         expect_snowplow_event(
           category: 'Projects::AuditEventsController',
-          action: 'search_audit_event'
+          action: 'search_audit_event',
+          project: project,
+          user: maintainer,
+          namespace: project.namespace
         )
       end
     end

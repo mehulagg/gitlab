@@ -4,33 +4,6 @@ module EE
   module IssuesHelper
     extend ::Gitlab::Utils::Override
 
-    def weight_dropdown_tag(issuable, opts = {}, &block)
-      title = issuable.weight || 'Weight'
-      additional_toggle_class = opts.delete(:toggle_class)
-      options = {
-        toggle_class: "js-weight-select #{additional_toggle_class}",
-        dropdown_class: 'dropdown-menu-selectable dropdown-menu-weight',
-        title: 'Select weight',
-        placeholder: 'Search weight',
-        data: {
-          field_name: "#{issuable.class.model_name.param_key}[weight]",
-          default_label: 'Weight'
-        }
-      }.deep_merge(opts)
-
-      dropdown_tag(title, options: options) do
-        capture(&block)
-      end
-    end
-
-    def weight_dropdown_label(weight)
-      if Issue.weight_options.include?(weight)
-        weight
-      else
-        h(weight.presence || 'Weight')
-      end
-    end
-
     def issue_in_subepic?(issue, epic_id)
       # This helper is used if a list of issues are filtered by epic id
       return false if epic_id.blank?
@@ -67,6 +40,23 @@ module EE
       actions = super
       actions[:can_promote_to_epic] = issuable.can_be_promoted_to_epic?(current_user).to_s
       actions
+    end
+
+    override :issues_list_data
+    def issues_list_data(project, current_user, finder)
+      data = super.merge!(
+        has_blocked_issues_feature: project.feature_available?(:blocked_issues).to_s,
+        has_issuable_health_status_feature: project.feature_available?(:issuable_health_status).to_s,
+        has_issue_weights_feature: project.feature_available?(:issue_weights).to_s,
+        has_iterations_feature: project.feature_available?(:iterations).to_s,
+        has_multiple_issue_assignees_feature: project.feature_available?(:multiple_issue_assignees).to_s
+      )
+
+      if project.feature_available?(:epics) && project.group
+        data[:group_epics_path] = group_epics_path(project.group, format: :json)
+      end
+
+      data
     end
   end
 end

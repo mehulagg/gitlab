@@ -3,8 +3,8 @@
 - @content_class = 'limit-container-width' unless fluid_layout
 
 - epic_reference = @epic.to_reference
-- sub_epics_feature_available = @group.feature_available?(:subepics)
-- issuable_health_status_feature_available = @group.feature_available?(:issuable_health_status)
+- sub_epics_feature_available = @group.licensed_feature_available?(:subepics)
+- issuable_health_status_feature_available = @group.licensed_feature_available?(:issuable_health_status)
 
 - allow_sub_epics = sub_epics_feature_available ? 'true' : 'false'
 - allow_issuable_health_status = issuable_health_status_feature_available ? 'true' : 'false'
@@ -48,6 +48,7 @@
           #js-tree{ data: { id: @epic.to_global_id,
             numerical_id: @epic.id,
             iid: @epic.iid,
+            group_name: @group.name,
             group_id: @group.id,
             full_path: @group.full_path,
             auto_complete_epics: 'true',
@@ -76,7 +77,7 @@
               child_epics: 'true' } }
   %hr.epic-discussion-separator.mt-1.mb-0
   .d-flex.justify-content-between.content-block.content-block-small.emoji-list-container.js-noteable-awards
-    = render 'award_emoji/awards_block', awardable: @epic, inline: true
+    = render 'award_emoji/awards_block', awardable: @epic, inline: true, api_awards_path: award_emoji_epics_api_path(@epic)
     .d-flex.flex-wrap.align-items-center.justify-content-lg-end
       #js-vue-sort-issue-discussions
       #js-vue-discussion-filter{ data: { default_filter: current_user&.notes_filter_for(@epic),

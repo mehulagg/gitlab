@@ -3,7 +3,7 @@
 module EE
   module Gitlab
     module Checks
-      class PushRuleCheck < ::Gitlab::Checks::BaseChecker
+      class PushRuleCheck < ::Gitlab::Checks::BaseSingleChecker
         def validate!
           return unless push_rule
 

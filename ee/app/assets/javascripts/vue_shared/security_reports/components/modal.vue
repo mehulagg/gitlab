@@ -57,10 +57,12 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    localDismissalComment: '',
-    dismissalCommentErrorMessage: '',
-  }),
+  data() {
+    return {
+      localDismissalComment: '',
+      dismissalCommentErrorMessage: '',
+    };
+  },
   computed: {
     canCreateIssueForThisVulnerability() {
       return Boolean(!this.isResolved && !this.vulnerability.hasIssue && this.canCreateIssue);
@@ -196,6 +198,7 @@ export default {
     ref="modal"
     :modal-id="$options.VULNERABILITY_MODAL_ID"
     :title="modal.title"
+    size="lg"
     data-qa-selector="vulnerability_modal_content"
     class="modal-security-report-dast"
     v-bind="$attrs"

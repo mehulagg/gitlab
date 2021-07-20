@@ -15,7 +15,7 @@ creating upstream contributions like [this one](https://github.com/codesandbox/c
 Before using CodeSandbox with your local GitLab instance, you must:
 
 1. Enable HTTPS on your GDK. CodeSandbox uses Service Workers that require `https`.
-   Follow the GDK [NGINX configuration instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/nginx.md) to enable HTTPS for GDK.
+   Follow the GDK [NGINX configuration instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/nginx.md) to enable HTTPS for GDK.
 1. Clone the [`codesandbox-client` project](https://github.com/codesandbox/codesandbox-client)
    locally. If you plan on contributing upstream, you might want to fork and clone first.
 1. (Optional) Use correct `python` and `nodejs` versions. Otherwise, `yarn` may fail to
@@ -126,7 +126,7 @@ index 6eed627b502..1824669e881 100644
 +++ b/app/models/application_setting_implementation.rb
 @@ -391,7 +391,7 @@ def static_objects_external_storage_enabled?
    # This will eventually be configurable
-   # https://gitlab.com/gitlab-org/gitlab/issues/208161
+   # https://gitlab.com/gitlab-org/gitlab/-/issues/208161
    def web_ide_clientside_preview_bundler_url
 -    'https://sandbox-prod.gitlab-static.net'
 +    'https://sandpack.local:8044'

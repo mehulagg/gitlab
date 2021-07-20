@@ -7,6 +7,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Destroy do
   let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
   let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+
   let(:args) do
     {
       project_path: project.full_path,

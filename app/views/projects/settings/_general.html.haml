@@ -1,13 +1,12 @@
-= form_for [@project], remote: true, html: { multipart: true, class: "edit-project js-general-settings-form" }, authenticity_token: true do |f|
+= form_for [@project], html: { multipart: true, class: "edit-project js-general-settings-form" }, authenticity_token: true do |f|
   %input{ name: 'update_section', type: 'hidden', value: 'js-general-settings' }
-  = form_errors(@project)
 
   %fieldset
     .row
       .form-group.col-md-5
         = f.label :name, class: 'label-bold', for: 'project_name_edit' do
           = _('Project name')
-        = f.text_field :name, class: 'form-control gl-form-input qa-project-name-field', id: "project_name_edit"
+        = f.text_field :name, class: 'form-control gl-form-input', id: "project_name_edit", data: { qa_selector: 'project_name_field' }
 
       .form-group.col-md-7
         = f.label :id, class: 'label-bold' do
@@ -16,8 +15,8 @@
 
     .row
       .form-group.col-md-9
-        = f.label :tag_list, _('Topics (optional)'), class: 'label-bold'
-        = f.text_field :tag_list, value: @project.tag_list.join(', '), maxlength: 2000, class: "form-control gl-form-input"
+        = f.label :topics, _('Topics (optional)'), class: 'label-bold'
+        = f.text_field :topics, value: @project.topic_list.join(', '), maxlength: 2000, class: "form-control gl-form-input"
         %p.form-text.text-muted= _('Separate topics with commas.')
 
     = render_if_exists 'compliance_management/compliance_framework/project_settings', f: f
@@ -38,6 +37,6 @@
     = render 'shared/choose_avatar_button', f: f
     - if @project.avatar?
       %hr
-      = link_to _('Remove avatar'), project_avatar_path(@project), data: { confirm: _('Avatar will be removed. Are you sure?')}, method: :delete, class: 'btn btn-link'
+      = link_to _('Remove avatar'), project_avatar_path(@project), data: { confirm: _('Avatar will be removed. Are you sure?')}, method: :delete, class: 'gl-button btn btn-danger-secondary'
 
-  = f.submit _('Save changes'), class: "gl-button btn btn-success gl-mt-6 qa-save-naming-topics-avatar-button"
+  = f.submit _('Save changes'), class: "gl-button btn btn-confirm gl-mt-6", data: { qa_selector: 'save_naming_topics_avatar_button' }

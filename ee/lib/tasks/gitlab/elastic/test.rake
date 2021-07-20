@@ -8,7 +8,7 @@ namespace :gitlab do
         helper = Gitlab::Elastic::Helper.default
 
         indices = [helper.target_name]
-        indices += helper.standalone_indices_proxies.map(&:index_name) if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+        indices += helper.standalone_indices_proxies.map(&:index_name)
         indices.each do |index_name|
           puts "===== Size stats for index: #{index_name} ====="
           pp helper.index_size(index_name: index_name).slice(*%w(docs store))

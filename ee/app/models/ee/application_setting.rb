@@ -10,8 +10,15 @@ module EE
     extend ::Gitlab::Utils::Override
 
     prepended do
+      include IgnorableColumns
+
+      ignore_columns %i[elasticsearch_shards elasticsearch_replicas], remove_with: '14.1', remove_after: '2021-06-22'
+      ignore_column :seat_link_enabled, remove_with: '14.2', remove_after: '2021-07-22'
+      ignore_column :cloud_license_enabled, remove_with: '14.3', remove_after: '2021-08-22'
+
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
+      MASK_PASSWORD = '*****'
 
       belongs_to :file_template_project, class_name: "Project"
 
@@ -36,17 +43,9 @@ module EE
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
-      validates :elasticsearch_shards,
-                presence: true,
-                numericality: { only_integer: true, greater_than: 0 }
-
       validates :deletion_adjourned_period,
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 90 }
-
-      validates :elasticsearch_replicas,
-                presence: true,
-                numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
       validates :elasticsearch_max_bulk_size_mb,
                 presence: true,
@@ -59,6 +58,9 @@ module EE
       validates :elasticsearch_url,
                 presence: { message: "can't be blank when indexing is enabled" },
                 if: ->(setting) { setting.elasticsearch_indexing? }
+
+      validates :elasticsearch_username, length: { maximum: 255 }
+      validates :elasticsearch_password, length: { maximum: 255 }
 
       validates :secret_detection_revocation_token_types_url,
                 presence: { message: "can't be blank when secret detection token revocation is enabled" },
@@ -104,8 +106,6 @@ module EE
                 allow_blank: true,
                 numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 365 }
 
-      validate :allowed_frameworks, if: :compliance_frameworks_changed?
-
       validates :new_user_signups_cap,
                 allow_blank: true,
                 numericality: { only_integer: true, greater_than: 0 }
@@ -143,9 +143,9 @@ module EE
           elasticsearch_indexed_file_size_limit_kb: 1024, # 1 MiB (units in KiB)
           elasticsearch_max_bulk_concurrency: 10,
           elasticsearch_max_bulk_size_bytes: 10.megabytes,
-          elasticsearch_replicas: 1,
-          elasticsearch_shards: 5,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
+          elasticsearch_username: nil,
+          elasticsearch_password: nil,
           elasticsearch_client_request_timeout: 0,
           elasticsearch_analyzers_smartcn_enabled: false,
           elasticsearch_analyzers_smartcn_search: false,
@@ -157,13 +157,13 @@ module EE
           geo_node_allowed_ips: '0.0.0.0/0, ::/0',
           git_two_factor_session_expiry: 15,
           lock_memberships_to_ldap: false,
+          maintenance_mode: false,
           max_personal_access_token_lifetime: nil,
           mirror_capacity_threshold: Settings.gitlab['mirror_capacity_threshold'],
           mirror_max_capacity: Settings.gitlab['mirror_max_capacity'],
           mirror_max_delay: Settings.gitlab['mirror_max_delay'],
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
-          seat_link_enabled: Settings.gitlab['seat_link_enabled'],
           secret_detection_token_revocation_enabled: false,
           secret_detection_token_revocation_url: nil,
           secret_detection_token_revocation_token: nil,
@@ -182,6 +182,14 @@ module EE
 
     def elasticsearch_project_ids
       ElasticsearchIndexedProject.target_ids
+    end
+
+    def elasticsearch_shards
+      Elastic::IndexSetting.number_of_shards
+    end
+
+    def elasticsearch_replicas
+      Elastic::IndexSetting.number_of_replicas
     end
 
     def elasticsearch_indexes_project?(project)
@@ -238,18 +246,6 @@ module EE
       pseudonymizer_available? && super
     end
 
-    def seat_link_available?
-      License.feature_available?(:seat_link)
-    end
-
-    def seat_link_can_be_configured?
-      Settings.gitlab.seat_link_enabled
-    end
-
-    def seat_link_enabled?
-      seat_link_available? && seat_link_can_be_configured? && super
-    end
-
     def should_check_namespace_plan?
       check_namespace_plan? && (Rails.env.test? || ::Gitlab.dev_env_org_or_com?)
     end
@@ -286,6 +282,8 @@ module EE
         elasticsearch_indexes_namespace?(scope)
       when Project
         elasticsearch_indexes_project?(scope)
+      when Array
+        scope.any? { |project| elasticsearch_indexes_project?(project) }
       else
         ::Feature.enabled?(:advanced_global_search_for_limited_indexing)
       end
@@ -301,9 +299,27 @@ module EE
       write_attribute(:elasticsearch_url, cleaned.join(','))
     end
 
+    def elasticsearch_password=(value)
+      return if value == MASK_PASSWORD
+
+      super
+    end
+
+    def elasticsearch_url_with_credentials
+      return elasticsearch_url if elasticsearch_username.blank?
+
+      elasticsearch_url.map do |url|
+        uri = URI.parse(url)
+
+        uri.user = elasticsearch_username
+        uri.password = elasticsearch_password.presence || ''
+        uri.to_s
+      end
+    end
+
     def elasticsearch_config
       {
-        url:                    elasticsearch_url,
+        url:                    elasticsearch_url_with_credentials,
         aws:                    elasticsearch_aws,
         aws_access_key:         elasticsearch_aws_access_key,
         aws_secret_access_key:  elasticsearch_aws_secret_access_key,
@@ -435,12 +451,6 @@ module EE
       end
     rescue ::Gitlab::UrlBlocker::BlockedUrlError
       errors.add(:elasticsearch_url, "only supports valid HTTP(S) URLs.")
-    end
-
-    def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map(&:id).include?(value) }
-        errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
-      end
     end
   end
 end

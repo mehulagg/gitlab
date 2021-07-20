@@ -20,9 +20,7 @@ module Namespaces
                   free_size_limit: formatted(root_namespace.actual_size_limit) }
 
         if root_namespace.additional_purchased_storage_size == 0
-          ns_("NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on %{locked_project_count} project. To unlock it, please purchase additional storage",
-              "NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on %{locked_project_count} projects. To unlock them, please purchase additional storage",
-              params[:locked_project_count]) % params
+          s_("NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on one or more projects." % params)
         else
           ns_("NamespaceStorageSize|%{namespace_name} contains %{locked_project_count} locked project", "NamespaceStorageSize|%{namespace_name} contains %{locked_project_count} locked projects", params[:locked_project_count]) % params
         end
@@ -40,7 +38,7 @@ module Namespaces
     end
 
     def base_message
-      s_("NamespaceStorageSize|push to your repository, create pipelines, create issues or add comments. To learn more about reducing storage capacity please visit our docs.")
+      s_("NamespaceStorageSize|push to your repository, create pipelines, create issues or add comments. To reduce storage capacity, delete unused repositories, artifacts, wikis, issues, and pipelines. To learn more about reducing storage capacity please visit our docs.")
     end
 
     def formatted(number)

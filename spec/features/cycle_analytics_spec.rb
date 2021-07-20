@@ -6,6 +6,8 @@ RSpec.describe 'Value Stream Analytics', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:guest) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:stage_table_selector) { '[data-testid="vsa-stage-table"]' }
+
   let(:issue) { create(:issue, project: project, created_at: 2.days.ago) }
   let(:milestone) { create(:milestone, project: project) }
   let(:mr) { create_merge_request_closing_issue(user, project, issue, commit_message: "References #{issue.to_reference}") }
@@ -32,7 +34,7 @@ RSpec.describe 'Value Stream Analytics', :js do
       end
 
       it 'shows active stage with empty message' do
-        expect(page).to have_selector('.stage-nav-item.active', text: 'Issue')
+        expect(page).to have_selector('.gl-path-active-item-indigo', text: 'Issue')
         expect(page).to have_content("We don't have enough data to show this stage.")
       end
     end
@@ -118,13 +120,13 @@ RSpec.describe 'Value Stream Analytics', :js do
     end
 
     it 'needs permissions to see restricted stages' do
-      expect(find('.stage-events')).to have_content(issue.title)
+      expect(find(stage_table_selector)).to have_content(issue.title)
 
       click_stage('Code')
-      expect(find('.stage-events')).to have_content('You need permission.')
+      expect(find(stage_table_selector)).to have_content('You need permission.')
 
       click_stage('Review')
-      expect(find('.stage-events')).to have_content('You need permission.')
+      expect(find(stage_table_selector)).to have_content('You need permission.')
     end
   end
 
@@ -153,25 +155,25 @@ RSpec.describe 'Value Stream Analytics', :js do
   end
 
   def expect_issue_to_be_present
-    expect(find('.stage-events')).to have_content(issue.title)
-    expect(find('.stage-events')).to have_content(issue.author.name)
-    expect(find('.stage-events')).to have_content("##{issue.iid}")
+    expect(find(stage_table_selector)).to have_content(issue.title)
+    expect(find(stage_table_selector)).to have_content(issue.author.name)
+    expect(find(stage_table_selector)).to have_content("##{issue.iid}")
   end
 
   def expect_build_to_be_present
-    expect(find('.stage-events')).to have_content(@build.ref)
-    expect(find('.stage-events')).to have_content(@build.short_sha)
-    expect(find('.stage-events')).to have_content("##{@build.id}")
+    expect(find(stage_table_selector)).to have_content(@build.ref)
+    expect(find(stage_table_selector)).to have_content(@build.short_sha)
+    expect(find(stage_table_selector)).to have_content("##{@build.id}")
   end
 
   def expect_merge_request_to_be_present
-    expect(find('.stage-events')).to have_content(mr.title)
-    expect(find('.stage-events')).to have_content(mr.author.name)
-    expect(find('.stage-events')).to have_content("!#{mr.iid}")
+    expect(find(stage_table_selector)).to have_content(mr.title)
+    expect(find(stage_table_selector)).to have_content(mr.author.name)
+    expect(find(stage_table_selector)).to have_content("!#{mr.iid}")
   end
 
   def click_stage(stage_name)
-    find('.stage-nav li', text: stage_name).click
+    find('.gl-path-nav-list-item', text: stage_name).click
     wait_for_requests
   end
 end

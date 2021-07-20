@@ -40,20 +40,18 @@ button[disabled] {
   vertical-align: text-top;
 }
 
+.note.draft-note {
+  margin: 0 0 $gl-padding;
+  padding: 0;
+  border: 0;
+
+  &.is-editing {
+    margin-bottom: 0;
+  }
+}
+
 .discussion-body,
 .diff-file {
-  .notes .note {
-    &.draft-note {
-      margin: 0 0 $gl-padding;
-      padding: 0;
-      border: 0;
-
-      &.is-editing {
-        margin-bottom: 0;
-      }
-    }
-  }
-
   .notes_holder {
     .notes-content {
       .notes {

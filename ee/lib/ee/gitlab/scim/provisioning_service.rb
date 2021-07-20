@@ -24,7 +24,7 @@ module EE
           return create_identity_and_member if existing_user?
 
           create_user_and_member
-        rescue => e
+        rescue StandardError => e
           logger.error(error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
 
           error_response(errors: [e.message])
@@ -69,7 +69,7 @@ module EE
         end
 
         def build_user
-          ::Users::BuildService.new(nil, user_params).execute(skip_authorization: true)
+          ::Users::AuthorizedBuildService.new(nil, user_params).execute
         end
 
         def build_scim_identity
@@ -90,7 +90,7 @@ module EE
           conflict = errors.any? { |error| error.include?('has already been taken') }
 
           ProvisioningResponse.new(status: conflict ? :conflict : :error, message: errors.to_sentence)
-        rescue => e
+        rescue StandardError => e
           logger.error(error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
 
           ProvisioningResponse.new(status: :error, message: e.message)

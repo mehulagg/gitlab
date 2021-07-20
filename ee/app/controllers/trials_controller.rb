@@ -3,19 +3,18 @@
 class TrialsController < ApplicationController
   include ActionView::Helpers::SanitizeHelper
 
-  layout 'trial'
+  layout 'minimal'
 
   before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
-  before_action :record_user_for_group_only_trials_experiment, only: :select
+  before_action :find_namespace, only: [:extend_reactivate]
+  before_action :authenticate_namespace_owner!, only: [:extend_reactivate]
 
   feature_category :purchase
 
   def new
     record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
-    record_experiment_user(:trimmed_skip_trial_copy)
-    record_experiment_user(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
   end
 
   def select
@@ -42,17 +41,29 @@ class TrialsController < ApplicationController
 
     if @result&.dig(:success)
       record_experiment_user(:remove_known_trial_form_fields, namespace_id: @namespace.id)
-      record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @namespace.id)
-      record_experiment_user(:trial_registration_with_social_signin, namespace_id: @namespace.id)
       record_experiment_user(:trial_onboarding_issues, namespace_id: @namespace.id)
       record_experiment_conversion_event(:remove_known_trial_form_fields)
-      record_experiment_conversion_event(:trimmed_skip_trial_copy)
-      record_experiment_conversion_event(:trial_registration_with_social_signin)
       record_experiment_conversion_event(:trial_onboarding_issues)
 
-      redirect_to group_url(@namespace, { trial: true })
+      if discover_group_security_flow?
+        redirect_trial_user_to_feature_experiment_flow
+      else
+        redirect_to group_url(@namespace, { trial: true })
+      end
     else
       render :select
+    end
+  end
+
+  def extend_reactivate
+    render_404 unless Feature.enabled?(:allow_extend_reactivate_trial, default_enabled: :yaml)
+
+    result = GitlabSubscriptions::ExtendReactivateTrialService.new.execute(extend_reactivate_trial_params) if valid_extension?
+
+    if result&.success?
+      head 200
+    else
+      render_403
     end
   end
 
@@ -69,6 +80,16 @@ class TrialsController < ApplicationController
     return if current_user
 
     redirect_to new_trial_registration_path, alert: I18n.t('devise.failure.unauthenticated')
+  end
+
+  def authenticate_namespace_owner!
+    user_is_namespace_owner = if @namespace.is_a?(Group)
+                                @namespace.owners.include?(current_user)
+                              else
+                                @namespace.owner == current_user
+                              end
+
+    render_403 unless user_is_namespace_owner
   end
 
   def company_params
@@ -97,6 +118,15 @@ class TrialsController < ApplicationController
     }
   end
 
+  def extend_reactivate_trial_params
+    gl_com_params = { gitlab_com_trial: true }
+
+    {
+      trial_user: params.permit(:namespace_id, :trial_extension_type, :trial_entity, :glm_source, :glm_content).merge(gl_com_params),
+      uid: current_user.id
+    }
+  end
+
   def find_or_create_namespace
     @namespace = if find_namespace?
                    current_user.namespaces.find_by_id(params[:namespace_id])
@@ -107,8 +137,28 @@ class TrialsController < ApplicationController
     render_404 unless @namespace
   end
 
+  def find_namespace
+    @namespace = if find_namespace?
+                   current_user.namespaces.find_by_id(params[:namespace_id])
+                 end
+
+    render_404 unless @namespace
+  end
+
   def find_namespace?
     params[:namespace_id].present? && params[:namespace_id] != '0'
+  end
+
+  def valid_extension?
+    trial_extension_type = params[:trial_extension_type].to_i
+
+    return false unless GitlabSubscription.trial_extension_types.value?(trial_extension_type)
+
+    return false if trial_extension_type == GitlabSubscription.trial_extension_types[:extended] && !@namespace.can_extend_trial?
+
+    return false if trial_extension_type == GitlabSubscription.trial_extension_types[:reactivated] && !@namespace.can_reactivate_trial?
+
+    true
   end
 
   def can_create_group?
@@ -124,10 +174,6 @@ class TrialsController < ApplicationController
     group
   end
 
-  def record_user_for_group_only_trials_experiment
-    record_experiment_user(:group_only_trials)
-  end
-
   def remove_known_trial_form_fields_context
     {
       first_name_present: current_user.first_name.present?,
@@ -136,12 +182,15 @@ class TrialsController < ApplicationController
     }
   end
 
-  def trial_registration_with_social_signin_context
-    identities = current_user.identities.map(&:provider)
+  def redirect_trial_user_to_feature_experiment_flow
+    experiment(:redirect_trial_user_to_feature, namespace: @namespace) do |e|
+      e.record!
+      e.use { redirect_to group_url(@namespace, { trial: true }) }
+      e.try { redirect_to group_security_dashboard_url(@namespace, { trial: true }) }
+    end
+  end
 
-    {
-      google_signon: identities.include?('google_oauth2'),
-      github_signon: identities.include?('github')
-    }
+  def discover_group_security_flow?
+    params[:glm_content] == 'discover-group-security'
   end
 end

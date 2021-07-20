@@ -9,6 +9,7 @@ module EE
       def error_check!
         check_size_limit
         check_blocking_mrs
+        check_jira_issue_enforcement
       end
 
       override :hooks_validation_pass?
@@ -60,6 +61,13 @@ module EE
         return unless merge_request.merge_blocked_by_other_mrs?
 
         raise ::MergeRequests::MergeService::MergeError, _('Other merge requests block this MR')
+      end
+
+      def check_jira_issue_enforcement
+        return unless merge_request.project.prevent_merge_without_jira_issue?
+        return if Atlassian::JiraIssueKeyExtractor.has_keys?(merge_request.title, merge_request.description)
+
+        raise ::MergeRequests::MergeService::MergeError, _('Before this can be merged, a Jira issue must be linked in the title or description')
       end
     end
   end

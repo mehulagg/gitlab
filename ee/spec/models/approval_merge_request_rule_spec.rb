@@ -115,6 +115,8 @@ RSpec.describe ApprovalMergeRequestRule, factory_default: :keep do
     let!(:css_rule) { create(:code_owner_rule, name: '*.css') }
     let!(:approval_rule) { create(:approval_merge_request_rule) }
     let!(:report_approver_rule) { create(:report_approver_rule) }
+    let!(:coverage_rule) { create(:report_approver_rule, :code_coverage) }
+    let!(:license_rule) { create(:report_approver_rule, :license_scanning) }
 
     describe '.not_matching_pattern' do
       it 'returns the correct rules' do
@@ -141,6 +143,20 @@ RSpec.describe ApprovalMergeRequestRule, factory_default: :keep do
       it 'returns the correct rules' do
         expect(described_class.vulnerability_report)
           .to contain_exactly(report_approver_rule)
+      end
+    end
+
+    describe '.license_compliance' do
+      it 'returns the correct rules' do
+        expect(described_class.license_compliance)
+          .to contain_exactly(license_rule)
+      end
+    end
+
+    describe '.coverage' do
+      it 'returns the correct rules' do
+        expect(described_class.coverage)
+          .to contain_exactly(coverage_rule)
       end
     end
   end

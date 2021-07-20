@@ -9,7 +9,7 @@ module Analytics
         def initialize(group:, params:, current_user:, value_stream: ::Analytics::CycleAnalytics::GroupValueStream.new(group: group))
           @value_stream = value_stream
           @group = group
-          @params = process_params(params.dup)
+          @params = process_params(params.dup.to_h)
           @current_user = current_user
         end
 
@@ -34,17 +34,18 @@ module Analytics
         attr_reader :value_stream, :group, :params, :current_user
 
         def process_params(raw_params)
-          if raw_params[:stages]
-            raw_params[:stages_attributes] = raw_params.delete(:stages)
-            raw_params[:stages_attributes].map! { |attrs| build_stage_attributes(attrs) }
-          end
+          raw_params[:stages_attributes] = raw_params.delete(:stages) || []
+          raw_params[:stages_attributes].map! { |attrs| build_stage_attributes(attrs) }
+
+          remove_in_memory_stage_ids!(raw_params[:stages_attributes])
+          set_relative_positions!(raw_params[:stages_attributes])
 
           raw_params
         end
 
         def build_stage_attributes(stage_attributes)
           stage_attributes[:group] = group
-          return stage_attributes if stage_attributes[:custom]
+          return stage_attributes if Gitlab::Utils.to_boolean(stage_attributes[:custom])
 
           # if we're persisting a default stage, ignore the user provided attributes and use our attributes
           use_default_stage_params(stage_attributes)
@@ -62,6 +63,21 @@ module Analytics
         def authorize!
           unless can?(current_user, :read_group_cycle_analytics, group)
             ServiceResponse.error(message: 'Forbidden', http_status: :forbidden, payload: { errors: nil })
+          end
+        end
+
+        def set_relative_positions!(stages_attributes)
+          increment = (Gitlab::RelativePositioning::MAX_POSITION - Gitlab::RelativePositioning::START_POSITION).fdiv(stages_attributes.size + 1).floor
+          stages_attributes.each_with_index do |stage_attribute, i|
+            stage_attribute[:relative_position] = increment * i
+          end
+        end
+
+        def remove_in_memory_stage_ids!(stage_attributes)
+          stage_attributes.each do |stage_attribute|
+            if Gitlab::Analytics::CycleAnalytics::DefaultStages.names.include?(stage_attribute[:id])
+              stage_attribute.delete(:id)
+            end
           end
         end
       end

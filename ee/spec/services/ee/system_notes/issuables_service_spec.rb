@@ -60,4 +60,32 @@ RSpec.describe ::SystemNotes::IssuablesService do
       expect(subject.note).to eq 'published this issue to the status page'
     end
   end
+
+  describe '#cross_reference' do
+    let(:mentioner) { create(:issue, project: project) }
+
+    subject { service.cross_reference(mentioner) }
+
+    context 'when noteable is an epic' do
+      let(:noteable) { epic }
+
+      it_behaves_like 'a system note', exclude_project: true do
+        let(:action) { 'cross_reference' }
+      end
+
+      it 'tracks epic cross reference event in usage ping' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_cross_referenced).with(author: author)
+
+        subject
+      end
+    end
+
+    context 'when notable is not an epic' do
+      it 'does not tracks epic cross reference event in usage ping' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).not_to receive(:track_epic_cross_referenced)
+
+        subject
+      end
+    end
+  end
 end

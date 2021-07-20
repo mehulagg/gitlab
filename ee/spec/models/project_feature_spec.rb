@@ -29,13 +29,15 @@ RSpec.describe ProjectFeature do
     end
 
     where(:feature, :worker_expected, :associations) do
-      'issues'          | true        | %w[issues notes]
-      'wiki'            | false       | nil
-      'builds'          | false       | nil
-      'merge_requests'  | true        | %w[notes]
-      'repository'      | true        | %w[notes]
-      'snippets'        | true        | %w[notes]
-      'pages'           | false       | nil
+      'issues'                      | true        | %w[issues notes]
+      'wiki'                        | false       | nil
+      'builds'                      | false       | nil
+      'merge_requests'              | true        | %w[merge_requests notes]
+      'repository'                  | true        | %w[notes]
+      'snippets'                    | true        | %w[notes]
+      'operations'                  | false       | nil
+      'security_and_compliance'     | false       | nil
+      'pages'                       | false       | nil
     end
 
     with_them do
@@ -48,7 +50,7 @@ RSpec.describe ProjectFeature do
           expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
         end
 
-        project.project_feature.update_attribute("#{feature}_access_level".to_sym, ProjectFeature::PRIVATE)
+        project.project_feature.update_attribute("#{feature}_access_level".to_sym, ProjectFeature::DISABLED)
       end
     end
   end

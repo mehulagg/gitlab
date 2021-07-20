@@ -1,0 +1,17 @@
+---
+data_category: Optional
+key_path: counts.epic_issues
+description: Count of issues that are assigned to an epic
+product_section: dev
+product_stage: plan
+product_group: group::product planning
+product_category: epics
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ee
+tier:
+- premium
+- ultimate

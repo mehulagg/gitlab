@@ -24,7 +24,7 @@ module QA
           new_label_same_scope_multi_colon,
           new_label_different_scope_multi_colon
         ].each do |label|
-          Resource::Label.fabricate_via_api! do |l|
+          Resource::ProjectLabel.fabricate_via_api! do |l|
             l.project = issue.project
             l.title = label
           end
@@ -33,14 +33,19 @@ module QA
         issue.visit!
       end
 
-      it 'correctly applies simple and multiple colon scoped pairs labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1171' do
+      it(
+        'correctly applies simple and multiple colon scoped pairs labels',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1171'
+      ) do
         Page::Project::Issue::Show.perform do |show|
-          show.select_labels_and_refresh([
-            new_label_same_scope,
-            new_label_different_scope,
-            new_label_same_scope_multi_colon,
-            new_label_different_scope_multi_colon
-          ])
+          show.select_labels_and_refresh(
+            [
+              new_label_same_scope,
+              new_label_different_scope,
+              new_label_same_scope_multi_colon,
+              new_label_different_scope_multi_colon
+            ]
+          )
 
           aggregate_failures do
             expect(show).to have_label(new_label_same_scope)

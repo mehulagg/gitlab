@@ -4,6 +4,8 @@ require 'spec_helper'
 RSpec.describe Packages::Package, type: :model do
   include SortingHelper
 
+  it_behaves_like 'having unique enum values'
+
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:creator) }
@@ -18,6 +20,14 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to have_one(:debian_distribution).through(:debian_publication).source(:distribution).inverse_of(:packages).class_name('Packages::Debian::ProjectDistribution') }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:rubygems_metadatum).inverse_of(:package) }
+  end
+
+  describe '.with_debian_codename' do
+    let_it_be(:publication) { create(:debian_publication) }
+
+    subject { described_class.with_debian_codename(publication.distribution.codename).to_a }
+
+    it { is_expected.to contain_exactly(publication.package) }
   end
 
   describe '.with_composer_target' do
@@ -37,6 +47,7 @@ RSpec.describe Packages::Package, type: :model do
   describe '.sort_by_attribute' do
     let_it_be(:group) { create(:group, :public) }
     let_it_be(:project) { create(:project, :public, namespace: group, name: 'project A') }
+
     let!(:package1) { create(:npm_package, project: project, version: '3.1.0', name: "@#{project.root_namespace.path}/foo1") }
     let!(:package2) { create(:nuget_package, project: project, version: '2.0.4') }
     let(:package3) { create(:maven_package, project: project, version: '1.1.1', name: 'zzz') }
@@ -86,6 +97,22 @@ RSpec.describe Packages::Package, type: :model do
       let!(:package4) { create(:npm_package, project: another_project, version: '3.1.0', name: "@#{project.root_namespace.path}/bar") }
 
       let(:packages) { [package1, package2, package3, package4] }
+    end
+  end
+
+  describe '.for_projects' do
+    let_it_be(:package1) { create(:maven_package) }
+    let_it_be(:package2) { create(:maven_package) }
+    let_it_be(:package3) { create(:maven_package) }
+
+    let(:projects) { ::Project.id_in([package1.project_id, package2.project_id]) }
+
+    subject { described_class.for_projects(projects.select(:id)) }
+
+    it 'returns package1 and package2' do
+      expect(projects).not_to receive(:any?)
+
+      expect(subject).to match_array([package1, package2])
     end
   end
 
@@ -146,6 +173,15 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
       end
 
+      context 'helm package' do
+        subject { build(:helm_package) }
+
+        it { is_expected.to allow_value('prometheus').for(:name) }
+        it { is_expected.to allow_value('rook-ceph').for(:name) }
+        it { is_expected.not_to allow_value('a+b').for(:name) }
+        it { is_expected.not_to allow_value('Hé').for(:name) }
+      end
+
       context 'nuget package' do
         subject { build_stubbed(:nuget_package) }
 
@@ -159,6 +195,31 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('My/package').for(:name) }
         it { is_expected.not_to allow_value('../../../my_package').for(:name) }
         it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
+
+      context 'npm package' do
+        subject { build_stubbed(:npm_package) }
+
+        it { is_expected.to allow_value("@group-1/package").for(:name) }
+        it { is_expected.to allow_value("@any-scope/package").for(:name) }
+        it { is_expected.to allow_value("unscoped-package").for(:name) }
+        it { is_expected.not_to allow_value("@inv@lid-scope/package").for(:name) }
+        it { is_expected.not_to allow_value("@scope/../../package").for(:name) }
+        it { is_expected.not_to allow_value("@scope%2e%2e%fpackage").for(:name) }
+        it { is_expected.not_to allow_value("@scope/sub/package").for(:name) }
+      end
+
+      context 'terraform module package' do
+        subject { build_stubbed(:terraform_module_package) }
+
+        it { is_expected.to allow_value('my-module/my-system').for(:name) }
+        it { is_expected.to allow_value('my/module').for(:name) }
+        it { is_expected.not_to allow_value('my-module').for(:name) }
+        it { is_expected.not_to allow_value('My-Module').for(:name) }
+        it { is_expected.not_to allow_value('my_module').for(:name) }
+        it { is_expected.not_to allow_value('my.module').for(:name) }
+        it { is_expected.not_to allow_value('../../../my-module').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy-module').for(:name) }
       end
     end
 
@@ -317,7 +378,14 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.to validate_presence_of(:version) }
         it { is_expected.to allow_value('1.2.3').for(:version) }
         it { is_expected.to allow_value('1.3.350').for(:version) }
-        it { is_expected.not_to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.to allow_value('1.2.3-rc1').for(:version) }
+        it { is_expected.to allow_value('1.2.3g').for(:version) }
+        it { is_expected.to allow_value('1.2').for(:version) }
+        it { is_expected.to allow_value('1.2.bananas').for(:version) }
+        it { is_expected.to allow_value('v1.2.4-build').for(:version) }
+        it { is_expected.to allow_value('d50d836eb3de6177ce6c7a5482f27f9c2c84b672').for(:version) }
+        it { is_expected.to allow_value('this_is_a_string_only').for(:version) }
         it { is_expected.not_to allow_value('..1.2.3').for(:version) }
         it { is_expected.not_to allow_value('  1.2.3').for(:version) }
         it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
@@ -330,7 +398,18 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value(nil).for(:version) }
       end
 
+      context 'helm package' do
+        subject { build_stubbed(:helm_package) }
+
+        it { is_expected.not_to allow_value(nil).for(:version) }
+        it { is_expected.not_to allow_value('').for(:version) }
+        it { is_expected.to allow_value('v1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('v1.2').for(:version) }
+      end
+
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
+      it_behaves_like 'validating version to be SemVer compliant for', :terraform_module_package
 
       context 'nuget package' do
         it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
@@ -340,16 +419,6 @@ RSpec.describe Packages::Package, type: :model do
     end
 
     describe '#package_already_taken' do
-      context 'npm package' do
-        let!(:package) { create(:npm_package) }
-
-        it 'will not allow a package of the same name' do
-          new_package = build(:npm_package, project: create(:project), name: package.name)
-
-          expect(new_package).not_to be_valid
-        end
-      end
-
       context 'maven package' do
         let!(:package) { create(:maven_package) }
 
@@ -438,6 +507,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '.with_package_type' do
+    let!(:package1) { create(:terraform_module_package) }
+    let!(:package2) { create(:npm_package) }
+    let(:package_type) { :terraform_module }
+
+    subject { described_class.with_package_type(package_type) }
+
+    it { is_expected.to eq([package1]) }
+  end
+
+  describe '.without_package_type' do
+    let!(:package1) { create(:npm_package) }
+    let!(:package2) { create(:terraform_module_package) }
+    let(:package_type) { :terraform_module }
+
+    subject { described_class.without_package_type(package_type) }
+
+    it { is_expected.to eq([package1]) }
+  end
+
   context 'version scopes' do
     let!(:package1) { create(:npm_package, version: '1.0.0') }
     let!(:package2) { create(:npm_package, version: '1.0.1') }
@@ -509,28 +598,12 @@ RSpec.describe Packages::Package, type: :model do
 
   describe '.without_nuget_temporary_name' do
     let!(:package1) { create(:nuget_package) }
-    let!(:package2) { create(:nuget_package, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+    let!(:package2) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
     subject { described_class.without_nuget_temporary_name }
 
     it 'does not include nuget temporary packages' do
       expect(subject).to eq([package1])
-    end
-  end
-
-  describe '.processed' do
-    let!(:package1) { create(:nuget_package) }
-    let!(:package2) { create(:npm_package) }
-    let!(:package3) { create(:nuget_package) }
-
-    subject { described_class.processed }
-
-    it { is_expected.to match_array([package1, package2, package3]) }
-
-    context 'with temporary packages' do
-      let!(:package1) { create(:nuget_package, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
-
-      it { is_expected.to match_array([package2, package3]) }
     end
   end
 
@@ -605,6 +678,40 @@ RSpec.describe Packages::Package, type: :model do
 
       it { is_expected.to match_array([pypi_package]) }
     end
+
+    context 'status scopes' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+      let_it_be(:processing_package) { create(:maven_package, :processing) }
+      let_it_be(:error_package) { create(:maven_package, :error) }
+
+      describe '.displayable' do
+        subject { described_class.displayable }
+
+        it 'does not include non-displayable packages', :aggregate_failures do
+          is_expected.to include(error_package)
+          is_expected.not_to include(hidden_package)
+          is_expected.not_to include(processing_package)
+        end
+      end
+
+      describe '.installable' do
+        subject { described_class.installable }
+
+        it 'does not include non-displayable packages', :aggregate_failures do
+          is_expected.not_to include(error_package)
+          is_expected.not_to include(hidden_package)
+          is_expected.not_to include(processing_package)
+        end
+      end
+
+      describe '.with_status' do
+        subject { described_class.with_status(:hidden) }
+
+        it 'returns packages with specified status' do
+          is_expected.to match_array([hidden_package])
+        end
+      end
+    end
   end
 
   describe '.select_distinct_name' do
@@ -623,6 +730,38 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  context 'sorting' do
+    let_it_be(:project) { create(:project, name: 'aaa' ) }
+    let_it_be(:project2) { create(:project, name: 'bbb' ) }
+    let_it_be(:package1) { create(:package, project: project ) }
+    let_it_be(:package2) { create(:package, project: project2 ) }
+    let_it_be(:package3) { create(:package, project: project2 ) }
+    let_it_be(:package4) { create(:package, project: project ) }
+
+    it 'orders packages by their projects name ascending' do
+      expect(Packages::Package.order_project_name).to eq([package1, package4, package2, package3])
+    end
+
+    it 'orders packages by their projects name descending' do
+      expect(Packages::Package.order_project_name_desc).to eq([package2, package3, package1, package4])
+    end
+
+    shared_examples 'order_project_path scope' do
+      it 'orders packages by their projects path asc, then package id asc' do
+        expect(Packages::Package.order_project_path).to eq([package1, package4, package2, package3])
+      end
+    end
+
+    shared_examples 'order_project_path_desc scope' do
+      it 'orders packages by their projects path desc, then package id desc' do
+        expect(Packages::Package.order_project_path_desc).to eq([package3, package2, package4, package1])
+      end
+    end
+
+    it_behaves_like 'order_project_path scope'
+    it_behaves_like 'order_project_path_desc scope'
+  end
+
   describe '.order_by_package_file' do
     let_it_be(:project) { create(:project) }
     let_it_be(:package1) { create(:maven_package, project: project) }
@@ -634,6 +773,33 @@ RSpec.describe Packages::Package, type: :model do
       create(:package_file, :xml, package: package1)
 
       expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2, package1])
+    end
+  end
+
+  describe '.keyset_pagination_order' do
+    let(:join_class) { nil }
+    let(:column_name) { nil }
+    let(:direction) { nil }
+
+    subject { described_class.keyset_pagination_order(join_class: join_class, column_name: column_name, direction: direction) }
+
+    it { expect { subject }.to raise_error(NoMethodError) }
+
+    context 'with valid params' do
+      let(:join_class) { Project }
+      let(:column_name) { :name }
+
+      context 'ascending direction' do
+        let(:direction) { :asc }
+
+        it { is_expected.to eq('projects.name asc NULLS LAST, "packages_packages"."id" ASC') }
+      end
+
+      context 'descending direction' do
+        let(:direction) { :desc }
+
+        it { is_expected.to eq('projects.name desc NULLS FIRST, "packages_packages"."id" DESC') }
+      end
     end
   end
 
@@ -732,6 +898,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '#infrastructure_package?' do
+    let(:package) { create(:package) }
+
+    subject { package.infrastructure_package? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with generic package' do
+      let(:package) { create(:generic_package) }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with terraform module package' do
+      let(:package) { create(:terraform_module_package) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe 'plan_limits' do
     Packages::Package.package_types.keys.without('composer').each do |pt|
       plan_limit_name = if pt == 'generic'
@@ -777,6 +963,47 @@ RSpec.describe Packages::Package, type: :model do
 
     it 'returns the namespace package_settings' do
       expect(package.package_settings).to eq(group.package_settings)
+    end
+  end
+
+  describe '#sync_maven_metadata' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:package) { create(:maven_package) }
+
+    subject { package.sync_maven_metadata(user) }
+
+    shared_examples 'not enqueuing a sync worker job' do
+      it 'does not enqueue a sync worker job' do
+        expect(::Packages::Maven::Metadata::SyncWorker)
+          .not_to receive(:perform_async)
+
+        subject
+      end
+    end
+
+    it 'enqueues a sync worker job' do
+      expect(::Packages::Maven::Metadata::SyncWorker)
+        .to receive(:perform_async).with(user.id, package.project.id, package.name)
+
+      subject
+    end
+
+    context 'with no user' do
+      let(:user) { nil }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a versionless maven package' do
+      let_it_be(:package) { create(:maven_package, version: nil) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a non maven package' do
+      let_it_be(:package) { create(:npm_package) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
     end
   end
 end

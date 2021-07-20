@@ -7,7 +7,7 @@ type: reference, api
 
 # Project remote mirrors API **(FREE)**
 
-[Push mirrors](../user/project/repository/repository_mirroring.md#pushing-to-a-remote-repository)
+[Push mirrors](../user/project/repository/repository_mirroring.md#push-to-a-remote-repository)
 defined on a project's repository settings are called "remote mirrors", and the
 state of these mirrors can be queried and modified via the remote mirror API
 outlined below.
@@ -48,14 +48,14 @@ Example response:
 ```
 
 NOTE:
-For security reasons, the `url` attribute will always be scrubbed of username
+For security reasons, the `url` attribute is always scrubbed of username
 and password information.
 
 ## Create a remote mirror
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24189) in GitLab 12.9.
 
-Create a remote mirror for a project. The mirror will be disabled by default. You can enable it by including the optional parameter `enabled` when creating it:
+Create a remote mirror for a project. The mirror is disabled by default. You can enable it by including the optional parameter `enabled` when creating it:
 
 ```plaintext
 POST /projects/:id/remote_mirrors
@@ -71,7 +71,8 @@ POST /projects/:id/remote_mirrors
 Example request:
 
 ```shell
-curl --request POST --data "url=https://username:token@example.com/gitlab/example.git" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/42/remote_mirrors"
+curl --request POST --data "url=https://username:token@example.com/gitlab/example.git" \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/42/remote_mirrors"
 ```
 
 Example response:

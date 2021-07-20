@@ -135,7 +135,7 @@ export default {
         </div>
       </div>
     </a>
-    <gl-popover :target="generateKey(epic)" :title="epic.title" triggers="hover" placement="left">
+    <gl-popover :target="generateKey(epic)" :title="epic.title" placement="left">
       <p class="gl-text-gray-500 gl-m-0">{{ timeframeString(epic) }}</p>
       <p class="gl-m-0">{{ popoverWeightText }}</p>
     </gl-popover>

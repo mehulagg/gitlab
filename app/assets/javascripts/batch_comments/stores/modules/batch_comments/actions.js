@@ -1,4 +1,5 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import { isEmpty } from 'lodash';
+import createFlash from '~/flash';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import { CHANGES_TAB, DISCUSSION_TAB, SHOW_TAB } from '../../../constants';
@@ -17,7 +18,9 @@ export const addDraftToDiscussion = ({ commit }, { endpoint, data }) =>
       return res;
     })
     .catch(() => {
-      flash(__('An error occurred adding a draft to the thread.'));
+      createFlash({
+        message: __('An error occurred adding a draft to the thread.'),
+      });
     });
 
 export const createNewDraft = ({ commit }, { endpoint, data }) =>
@@ -29,7 +32,9 @@ export const createNewDraft = ({ commit }, { endpoint, data }) =>
       return res;
     })
     .catch(() => {
-      flash(__('An error occurred adding a new draft.'));
+      createFlash({
+        message: __('An error occurred adding a new draft.'),
+      });
     });
 
 export const deleteDraft = ({ commit, getters }, draft) =>
@@ -38,14 +43,29 @@ export const deleteDraft = ({ commit, getters }, draft) =>
     .then(() => {
       commit(types.DELETE_DRAFT, draft.id);
     })
-    .catch(() => flash(__('An error occurred while deleting the comment')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while deleting the comment'),
+      }),
+    );
 
-export const fetchDrafts = ({ commit, getters }) =>
+export const fetchDrafts = ({ commit, getters, state, dispatch }) =>
   service
     .fetchDrafts(getters.getNotesData.draftsPath)
     .then((res) => res.data)
     .then((data) => commit(types.SET_BATCH_COMMENTS_DRAFTS, data))
-    .catch(() => flash(__('An error occurred while fetching pending comments')));
+    .then(() => {
+      state.drafts.forEach((draft) => {
+        if (!draft.line_code) {
+          dispatch('convertToDiscussion', draft.discussion_id, { root: true });
+        }
+      });
+    })
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while fetching pending comments'),
+      }),
+    );
 
 export const publishSingleDraft = ({ commit, dispatch, getters }, draftId) => {
   commit(types.REQUEST_PUBLISH_DRAFT, draftId);
@@ -88,18 +108,27 @@ export const updateDiscussionsAfterPublish = async ({ dispatch, getters, rootGet
 export const updateDraft = (
   { commit, getters },
   { note, noteText, resolveDiscussion, position, callback },
-) =>
-  service
-    .update(getters.getNotesData.draftsPath, {
-      draftId: note.id,
-      note: noteText,
-      resolveDiscussion,
-      position: JSON.stringify(position),
-    })
+) => {
+  const params = {
+    draftId: note.id,
+    note: noteText,
+    resolveDiscussion,
+  };
+  // Stringifying an empty object yields `{}` which breaks graphql queries
+  // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
+  if (!isEmpty(position)) params.position = JSON.stringify(position);
+
+  return service
+    .update(getters.getNotesData.draftsPath, params)
     .then((res) => res.data)
     .then((data) => commit(types.RECEIVE_DRAFT_UPDATE_SUCCESS, data))
     .then(callback)
-    .catch(() => flash(__('An error occurred while updating the comment')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while updating the comment'),
+      }),
+    );
+};
 
 export const scrollToDraft = ({ dispatch, rootGetters }, draft) => {
   const discussion = draft.discussion_id && rootGetters.getDiscussion(draft.discussion_id);

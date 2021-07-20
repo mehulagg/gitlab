@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require 'pathname'
-require_relative '../../../browser_ui/8_monitor/cluster_with_prometheus.rb'
+require_relative '../../../browser_ui/8_monitor/cluster_with_prometheus'
 
 module QA
   RSpec.describe 'Monitor', :orchestrated, :kubernetes, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241448', type: :investigating } do
@@ -12,9 +12,9 @@ module QA
     end
 
     it 'allows configuration of alerts', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/869' do
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
-      Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
+      Page::Project::Monitor::Metrics::Show.perform do |on_dashboard|
         verify_metrics(on_dashboard)
         verify_add_alert(on_dashboard)
         verify_edit_alert(on_dashboard)
@@ -26,9 +26,9 @@ module QA
     it 'creates an incident template and opens an incident with template applied', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/981' do
       create_incident_template
 
-      Page::Project::Menu.perform(&:go_to_operations_settings)
+      Page::Project::Menu.perform(&:go_to_monitor_settings)
 
-      Page::Project::Settings::Operations.perform do |settings|
+      Page::Project::Settings::Monitor.perform do |settings|
         settings.expand_incidents do |incident_settings|
           incident_settings.enable_issues_for_incidents
           incident_settings.select_issue_template('incident')
@@ -79,9 +79,9 @@ module QA
     end
 
     def create_incident_template
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
-      chart_link = Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
+      chart_link = Page::Project::Monitor::Metrics::Show.perform do |on_dashboard|
         on_dashboard.wait_for_metrics
         on_dashboard.copy_link_to_first_chart
       end
@@ -104,9 +104,9 @@ module QA
     end
 
     def create_incident_issue
-      Page::Project::Menu.perform(&:go_to_operations_incidents)
+      Page::Project::Menu.perform(&:go_to_monitor_incidents)
 
-      Page::Project::Operations::Incidents::Index.perform do |incidents_page|
+      Page::Project::Monitor::Incidents::Index.perform do |incidents_page|
         incidents_page.create_incident
       end
 

@@ -9,6 +9,7 @@ module EE
       def update_old_entity
         rewrite_epic_issue
         rewrite_related_vulnerability_issues
+        track_epic_issue_moved_from_project
         super
       end
 
@@ -23,6 +24,12 @@ module EE
         ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_changed_epic_action(author: current_user) if updated
 
         original_entity.reset
+      end
+
+      def track_epic_issue_moved_from_project
+        return unless original_entity.epic_issue
+
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_issue_moved_from_project(author: current_user)
       end
 
       def rewrite_related_vulnerability_issues

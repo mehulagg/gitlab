@@ -12,8 +12,10 @@ To invoke the debugger, place `binding.pry` somewhere in your
 code. When the Ruby interpreter hits that code, execution stops,
 and you can type in commands to debug the state of the program.
 
-When debugging code in another process like Puma or Sidekiq, you can use `binding.remote_pry`.
-You can then connect to this session by running `pry-remote` from your terminal.
+When debugging code in another process like Puma or Sidekiq, you can use `binding.pry_shell`.
+You can then connect to this session by using the [pry-shell](https://github.com/meinac/pry-shell) executable.
+You can watch [this video](https://www.youtube.com/watch?v=Lzs_PL_BySo), for more information about
+how to use the `pry-shell`.
 
 ## `byebug` vs `binding.pry`
 
@@ -127,7 +129,7 @@ end
 ## Repeat last command
 
 You can repeat the last command by just hitting the <kbd>Enter</kbd>
-key (e.g., with `step` or`next`), if you place the following snippet
+key (for example, with `step` or`next`), if you place the following snippet
 in your `~/.pryrc`:
 
 ```ruby

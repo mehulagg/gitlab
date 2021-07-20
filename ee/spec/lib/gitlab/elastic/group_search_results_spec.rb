@@ -6,6 +6,7 @@ RSpec.describe Gitlab::Elastic::GroupSearchResults, :elastic do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:guest) { create(:user).tap { |u| group.add_user(u, Gitlab::Access::GUEST) } }
+
   let(:filters) { {} }
   let(:query) { '*' }
 

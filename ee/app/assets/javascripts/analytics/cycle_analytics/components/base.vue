@@ -1,35 +1,26 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
+import StageTable from '~/cycle_analytics/components/stage_table.vue';
+import ValueStreamFilters from '~/cycle_analytics/components/value_stream_filters.vue';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
-import DateRange from '../../shared/components/daterange.vue';
-import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
-import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE } from '../constants';
-import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
-import FilterBar from './filter_bar.vue';
 import Metrics from './metrics.vue';
-import PathNavigation from './path_navigation.vue';
-import StageTable from './stage_table.vue';
-import StageTableNav from './stage_table_nav.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
 export default {
   name: 'CycleAnalytics',
   components: {
-    DateRange,
     DurationChart,
     GlEmptyState,
-    ProjectsDropdownFilter,
-    StageTable,
     TypeOfWorkCharts,
-    CustomStageForm,
-    StageTableNav,
+    StageTable,
     PathNavigation,
-    FilterBar,
+    ValueStreamFilters,
     ValueStreamSelect,
     UrlSync,
     Metrics,
@@ -50,26 +41,21 @@ export default {
   },
   computed: {
     ...mapState([
-      'featureFlags',
       'isLoading',
       'isLoadingStage',
-      'isEmptyStage',
       'currentGroup',
       'selectedProjects',
       'selectedStage',
       'stages',
-      'currentStageEvents',
+      'selectedStageEvents',
       'errorCode',
-      'startDate',
-      'endDate',
-      'medians',
+      'createdAfter',
+      'createdBefore',
       'isLoadingValueStreams',
       'selectedStageError',
       'selectedValueStream',
+      'pagination',
     ]),
-    // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
-    // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
-    ...mapState('customStages', ['isCreatingCustomStage', 'formEvents']),
     ...mapGetters([
       'hasNoAccessError',
       'currentGroupPath',
@@ -78,94 +64,82 @@ export default {
       'enableCustomOrdering',
       'cycleAnalyticsRequestParams',
       'pathNavigationData',
+      'isOverviewStageSelected',
+      'selectedStageCount',
     ]),
-    ...mapGetters('customStages', ['customStageFormActive']),
     shouldRenderEmptyState() {
       return !this.currentGroup && !this.isLoading;
     },
     shouldDisplayFilters() {
-      return !this.errorCode;
+      return !this.errorCode && !this.hasNoAccessError;
     },
-    shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart && !this.hasNoAccessError;
-    },
-    shouldDisplayTypeOfWorkCharts() {
-      return !this.hasNoAccessError;
-    },
-    shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
+    selectedStageReady() {
+      return !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayCreateMultipleValueStreams() {
       return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
     },
     hasDateRangeSet() {
-      return this.startDate && this.endDate;
+      return this.createdAfter && this.createdBefore;
     },
     query() {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
+      const paginationUrlParams = !this.isOverviewStageSelected
+        ? {
+            sort: this.pagination?.sort || null,
+            direction: this.pagination?.direction || null,
+            page: this.pagination?.page || null,
+          }
+        : {
+            sort: null,
+            direction: null,
+            page: null,
+          };
 
       return {
         value_stream_id: this.selectedValueStream?.id || null,
         project_ids: selectedProjectIds,
-        created_after: toYmd(this.startDate),
-        created_before: toYmd(this.endDate),
+        created_after: toYmd(this.createdAfter),
+        created_before: toYmd(this.createdBefore),
+        stage_id: (!this.isOverviewStageSelected && this.selectedStage?.id) || null, // the `overview` stage is always the default, so dont persist the id if its selected
+        ...paginationUrlParams,
       };
     },
     stageCount() {
       return this.activeStages.length;
     },
-    projectsQueryParams() {
-      return {
-        first: PROJECTS_PER_PAGE,
-        includeSubgroups: true,
-      };
-    },
   },
-
   methods: {
     ...mapActions([
       'fetchCycleAnalyticsData',
       'fetchStageData',
       'setSelectedProjects',
       'setSelectedStage',
+      'setDefaultSelectedStage',
       'setDateRange',
-      'removeStage',
-      'updateStage',
-      'reorderStage',
+      'updateStageTablePagination',
     ]),
-    ...mapActions('customStages', ['hideForm', 'showCreateForm', 'showEditForm', 'createStage']),
     onProjectsSelect(projects) {
       this.setSelectedProjects(projects);
-      this.fetchCycleAnalyticsData();
     },
     onStageSelect(stage) {
-      this.hideForm();
-      this.setSelectedStage(stage);
-      this.fetchStageData(this.selectedStage.slug);
+      if (stage.slug === OVERVIEW_STAGE_ID) {
+        this.setDefaultSelectedStage();
+      } else {
+        this.setSelectedStage(stage);
+        this.updateStageTablePagination({ ...this.pagination, page: 1 });
+      }
     },
-    onShowAddStageForm() {
-      this.showCreateForm();
+    onSetDateRange({ startDate, endDate }) {
+      this.setDateRange({
+        createdAfter: new Date(startDate),
+        createdBefore: new Date(endDate),
+      });
     },
-    onShowEditStageForm(initData = {}) {
-      this.setSelectedStage(initData);
-      this.showEditForm(initData);
-    },
-    onCreateCustomStage(data) {
-      this.createStage(data);
-    },
-    onUpdateCustomStage(data) {
-      this.updateStage(data);
-    },
-    onRemoveStage(id) {
-      this.removeStage(id);
-    },
-    onStageReorder(data) {
-      this.reorderStage(data);
+    onHandleUpdatePagination(data) {
+      this.updateStageTablePagination(data);
     },
   },
-  multiProjectSelect: true,
-  dateOptions: [7, 30, 90],
-  maxDateRange: DATE_RANGE_LIMIT,
 };
 </script>
 <template>
@@ -177,7 +151,6 @@ export default {
       <value-stream-select
         v-if="shouldDisplayCreateMultipleValueStreams"
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
-        :has-extended-form-fields="featureFlags.hasExtendedFormFields"
       />
     </div>
     <gl-empty-state
@@ -189,48 +162,25 @@ export default {
       :svg-path="emptyStateSvgPath"
     />
     <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
-      <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
-        <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
-          <path-navigation
-            :key="`path_navigation_key_${pathNavigationData.length}`"
-            class="js-path-navigation"
-            :loading="isLoading"
-            :stages="pathNavigationData"
-            :selected-stage="selectedStage"
-            @selected="onStageSelect"
-          />
-        </div>
-        <div
-          v-if="shouldDisplayFilters"
-          class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
-        >
-          <projects-dropdown-filter
-            :key="currentGroup.id"
-            class="js-projects-dropdown-filter project-select gl-mb-2 gl-lg-mb-0"
-            :group-id="currentGroup.id"
-            :group-namespace="currentGroupPath"
-            :query-params="projectsQueryParams"
-            :multi-select="$options.multiProjectSelect"
-            :default-projects="selectedProjects"
-            @selected="onProjectsSelect"
-          />
-          <date-range
-            :start-date="startDate"
-            :end-date="endDate"
-            :max-date-range="$options.maxDateRange"
-            :include-selected-date="true"
-            class="js-daterange-picker"
-            @change="setDateRange"
-          />
-        </div>
-        <filter-bar
-          v-if="shouldDisplayFilters"
-          class="js-filter-bar filtered-search-box gl-display-flex gl-mt-3 gl-mr-3 gl-border-none"
-          :group-path="currentGroupPath"
-        />
-      </div>
+      <path-navigation
+        v-if="selectedStageReady"
+        class="js-path-navigation gl-w-full gl-pb-2"
+        :loading="isLoading"
+        :stages="pathNavigationData"
+        :selected-stage="selectedStage"
+        @selected="onStageSelect"
+      />
+      <value-stream-filters
+        :group-id="currentGroup.id"
+        :group-path="currentGroupPath"
+        :selected-projects="selectedProjects"
+        :start-date="createdAfter"
+        :end-date="createdBefore"
+        @selectProject="onProjectsSelect"
+        @setDateRange="onSetDateRange"
+      />
     </div>
-    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -242,48 +192,25 @@ export default {
           )
         "
       />
-      <div v-else>
-        <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
+      <template v-else>
+        <template v-if="isOverviewStageSelected">
+          <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
+          <duration-chart class="gl-mt-3" :stages="activeStages" />
+          <type-of-work-charts />
+        </template>
         <stage-table
-          :key="stageCount"
-          class="js-stage-table"
-          :current-stage="selectedStage"
-          :is-loading="isLoading"
-          :is-loading-stage="isLoadingStage"
-          :is-empty-stage="isEmptyStage"
-          :custom-stage-form-active="customStageFormActive"
-          :current-stage-events="currentStageEvents"
-          :no-data-svg-path="noDataSvgPath"
+          v-else
+          :is-loading="isLoading || isLoadingStage"
+          :stage-events="selectedStageEvents"
+          :selected-stage="selectedStage"
+          :stage-count="selectedStageCount"
           :empty-state-message="selectedStageError"
-        >
-          <template #nav>
-            <stage-table-nav
-              :current-stage="selectedStage"
-              :stages="activeStages"
-              :medians="medians"
-              :is-creating-custom-stage="isCreatingCustomStage"
-              :custom-ordering="enableCustomOrdering"
-              @reorderStage="onStageReorder"
-              @selectStage="onStageSelect"
-              @editStage="onShowEditStageForm"
-              @showAddStageForm="onShowAddStageForm"
-              @hideStage="onUpdateCustomStage"
-              @removeStage="onRemoveStage"
-            />
-          </template>
-          <template v-if="customStageFormActive" #content>
-            <custom-stage-form
-              :events="formEvents"
-              @createStage="onCreateCustomStage"
-              @updateStage="onUpdateCustomStage"
-              @clearErrors="$emit('clear-form-errors')"
-            />
-          </template>
-        </stage-table>
-        <url-sync :query="query" />
-      </div>
-      <duration-chart v-if="shouldDisplayDurationChart" class="gl-mt-3" :stages="activeStages" />
-      <type-of-work-charts v-if="shouldDisplayTypeOfWorkCharts" />
+          :no-data-svg-path="noDataSvgPath"
+          :pagination="pagination"
+          @handleUpdatePagination="onHandleUpdatePagination"
+        />
+        <url-sync v-if="selectedStageReady" :query="query" />
+      </template>
     </div>
   </div>
 </template>

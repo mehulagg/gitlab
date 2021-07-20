@@ -25,30 +25,6 @@ module AlertManagement
 
     attr_reader :project, :payload
 
-    override :process_new_alert
-    def process_new_alert
-      return if resolving_alert?
-
-      super
-    end
-
-    override :process_firing_alert
-    def process_firing_alert
-      super
-
-      reset_alert_status
-    end
-
-    def reset_alert_status
-      return if alert.trigger
-
-      logger.warn(
-        message: 'Unable to update AlertManagement::Alert status to triggered',
-        project_id: project.id,
-        alert_id: alert.id
-      )
-    end
-
     override :incoming_payload
     def incoming_payload
       strong_memoize(:incoming_payload) do

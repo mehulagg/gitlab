@@ -4,7 +4,7 @@ import todoMarkDoneMutation from '~/graphql_shared/mutations/todo_mark_done.muta
 import { s__ } from '~/locale';
 import Todo from '~/sidebar/components/todo_toggle/todo.vue';
 import createAlertTodoMutation from '../../graphql/mutations/alert_todo_create.mutation.graphql';
-import alertQuery from '../../graphql/queries/alert_details.query.graphql';
+import alertQuery from '../../graphql/queries/alert_sidebar_details.query.graphql';
 
 export default {
   i18n: {
@@ -116,7 +116,6 @@ export default {
       });
 
       const data = produce(sourceData, (draftData) => {
-        // eslint-disable-next-line no-param-reassign
         draftData.project.alertManagementAlerts.nodes[0].todos.nodes = [];
       });
 
@@ -135,7 +134,12 @@ export default {
 </script>
 
 <template>
-  <div :class="{ 'block todo': sidebarCollapsed, 'gl-ml-auto': !sidebarCollapsed }">
+  <div
+    :class="{
+      'block todo': sidebarCollapsed,
+      'gl-ml-auto': !sidebarCollapsed,
+    }"
+  >
     <todo
       data-testid="alert-todo-button"
       :collapsed="sidebarCollapsed"

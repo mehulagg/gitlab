@@ -1,36 +1,39 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import $ from 'jquery';
+import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import { removeBreakLine } from 'helpers/text_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import ConflictsComponent from '~/vue_merge_request_widget/components/states/mr_widget_conflicts.vue';
 
 describe('MRWidgetConflicts', () => {
-  let vm;
+  let wrapper;
   let mergeRequestWidgetGraphql = null;
   const path = '/conflicts';
 
-  function createComponent(propsData = {}) {
-    const localVue = createLocalVue();
+  const findResolveButton = () => wrapper.findByTestId('resolve-conflicts-button');
+  const findMergeLocalButton = () => wrapper.findByTestId('merge-locally-button');
 
-    vm = shallowMount(localVue.extend(ConflictsComponent), {
-      propsData,
-      provide: {
-        glFeatures: {
-          mergeRequestWidgetGraphql,
-        },
-      },
-      mocks: {
-        $apollo: {
-          queries: {
-            userPermissions: { loading: false },
-            stateData: { loading: false },
+  function createComponent(propsData = {}) {
+    wrapper = extendedWrapper(
+      shallowMount(ConflictsComponent, {
+        propsData,
+        provide: {
+          glFeatures: {
+            mergeRequestWidgetGraphql,
           },
         },
-      },
-    });
+        mocks: {
+          $apollo: {
+            queries: {
+              userPermissions: { loading: false },
+              stateData: { loading: false },
+            },
+          },
+        },
+      }),
+    );
 
     if (mergeRequestWidgetGraphql) {
-      vm.setData({
+      wrapper.setData({
         userPermissions: {
           canMerge: propsData.mr.canMerge,
           pushToSourceBranch: propsData.mr.canPushToSourceBranch,
@@ -42,16 +45,12 @@ describe('MRWidgetConflicts', () => {
       });
     }
 
-    return vm.vm.$nextTick();
+    return wrapper.vm.$nextTick();
   }
-
-  beforeEach(() => {
-    jest.spyOn($.fn, 'popover');
-  });
 
   afterEach(() => {
     mergeRequestWidgetGraphql = null;
-    vm.destroy();
+    wrapper.destroy();
   });
 
   [false, true].forEach((featureEnabled) => {
@@ -82,18 +81,16 @@ describe('MRWidgetConflicts', () => {
         });
 
         it('should tell you about conflicts without bothering other people', () => {
-          expect(vm.text()).toContain('There are merge conflicts');
-          expect(vm.text()).not.toContain('ask someone with write access');
+          expect(wrapper.text()).toContain('There are merge conflicts');
+          expect(wrapper.text()).not.toContain('ask someone with write access');
         });
 
         it('should not allow you to resolve the conflicts', () => {
-          expect(vm.text()).not.toContain('Resolve conflicts');
+          expect(wrapper.text()).not.toContain('Resolve conflicts');
         });
 
         it('should have merge buttons', () => {
-          const mergeLocallyButton = vm.find('.js-merge-locally-button');
-
-          expect(mergeLocallyButton.text()).toContain('Merge locally');
+          expect(findMergeLocalButton().text()).toContain('Merge locally');
         });
       });
 
@@ -110,19 +107,17 @@ describe('MRWidgetConflicts', () => {
         });
 
         it('should tell you about conflicts', () => {
-          expect(vm.text()).toContain('There are merge conflicts');
-          expect(vm.text()).toContain('ask someone with write access');
+          expect(wrapper.text()).toContain('There are merge conflicts');
+          expect(wrapper.text()).toContain('ask someone with write access');
         });
 
         it('should allow you to resolve the conflicts', () => {
-          const resolveButton = vm.find('.js-resolve-conflicts-button');
-
-          expect(resolveButton.text()).toContain('Resolve conflicts');
-          expect(resolveButton.attributes('href')).toEqual(path);
+          expect(findResolveButton().text()).toContain('Resolve conflicts');
+          expect(findResolveButton().attributes('href')).toEqual(path);
         });
 
         it('should not have merge buttons', () => {
-          expect(vm.text()).not.toContain('Merge locally');
+          expect(wrapper.text()).not.toContain('Merge locally');
         });
       });
 
@@ -139,21 +134,17 @@ describe('MRWidgetConflicts', () => {
         });
 
         it('should tell you about conflicts without bothering other people', () => {
-          expect(vm.text()).toContain('There are merge conflicts');
-          expect(vm.text()).not.toContain('ask someone with write access');
+          expect(wrapper.text()).toContain('There are merge conflicts');
+          expect(wrapper.text()).not.toContain('ask someone with write access');
         });
 
         it('should allow you to resolve the conflicts', () => {
-          const resolveButton = vm.find('.js-resolve-conflicts-button');
-
-          expect(resolveButton.text()).toContain('Resolve conflicts');
-          expect(resolveButton.attributes('href')).toEqual(path);
+          expect(findResolveButton().text()).toContain('Resolve conflicts');
+          expect(findResolveButton().attributes('href')).toEqual(path);
         });
 
         it('should have merge buttons', () => {
-          const mergeLocallyButton = vm.find('.js-merge-locally-button');
-
-          expect(mergeLocallyButton.text()).toContain('Merge locally');
+          expect(findMergeLocalButton().text()).toContain('Merge locally');
         });
       });
 
@@ -167,7 +158,7 @@ describe('MRWidgetConflicts', () => {
             },
           });
 
-          expect(vm.text().trim().replace(/\s\s+/g, ' ')).toContain(
+          expect(wrapper.text().trim().replace(/\s\s+/g, ' ')).toContain(
             'ask someone with write access',
           );
         });
@@ -181,8 +172,8 @@ describe('MRWidgetConflicts', () => {
             },
           });
 
-          expect(vm.find('.js-resolve-conflicts-button').exists()).toBe(false);
-          expect(vm.find('.js-merge-locally-button').exists()).toBe(false);
+          expect(findResolveButton().exists()).toBe(false);
+          expect(findMergeLocalButton().exists()).toBe(false);
         });
 
         it('should not have resolve button when no conflict resolution path', async () => {
@@ -194,7 +185,7 @@ describe('MRWidgetConflicts', () => {
             },
           });
 
-          expect(vm.find('.js-resolve-conflicts-button').exists()).toBe(false);
+          expect(findResolveButton().exists()).toBe(false);
         });
       });
 
@@ -207,8 +198,8 @@ describe('MRWidgetConflicts', () => {
             },
           });
 
-          expect(removeBreakLine(vm.text()).trim()).toContain(
-            'Fast-forward merge is not possible. To merge this request, first rebase locally.',
+          expect(removeBreakLine(wrapper.text()).trim()).toContain(
+            'Merge blocked: fast-forward merge is not possible. To merge this request, first rebase locally.',
           );
         });
       });
@@ -226,12 +217,8 @@ describe('MRWidgetConflicts', () => {
           });
         });
 
-        it('sets resolve button as disabled', () => {
-          expect(vm.find('.js-resolve-conflicts-button').attributes('disabled')).toBe('true');
-        });
-
-        it('renders popover', () => {
-          expect($.fn.popover).toHaveBeenCalled();
+        it('should not allow you to resolve the conflicts', () => {
+          expect(findResolveButton().exists()).toBe(false);
         });
       });
 
@@ -248,12 +235,9 @@ describe('MRWidgetConflicts', () => {
           });
         });
 
-        it('sets resolve button as disabled', () => {
-          expect(vm.find('.js-resolve-conflicts-button').attributes('disabled')).toBe(undefined);
-        });
-
-        it('renders popover', () => {
-          expect($.fn.popover).not.toHaveBeenCalled();
+        it('should allow you to resolve the conflicts', () => {
+          expect(findResolveButton().text()).toContain('Resolve conflicts');
+          expect(findResolveButton().attributes('href')).toEqual(TEST_HOST);
         });
       });
     });

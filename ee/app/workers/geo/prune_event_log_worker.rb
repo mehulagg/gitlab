@@ -3,6 +3,8 @@
 module Geo
   class PruneEventLogWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     # rubocop:disable Scalability/CronWorkerContext
     # This worker does not perform work scoped to a context
     include CronjobQueue
@@ -10,6 +12,7 @@ module Geo
     include ::Gitlab::Geo::LogHelpers
 
     feature_category :geo_replication
+    tags :exclude_from_gitlab_com
 
     def perform
       return if Gitlab::Database.read_only?

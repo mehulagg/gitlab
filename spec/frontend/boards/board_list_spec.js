@@ -1,92 +1,20 @@
-import { createLocalVue, mount } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
+import createComponent from 'jest/boards/board_list_helper';
 import BoardCard from '~/boards/components/board_card.vue';
-import BoardList from '~/boards/components/board_list.vue';
 import eventHub from '~/boards/eventhub';
-import defaultState from '~/boards/stores/state';
-import { mockList, mockIssuesByListId, issues, mockIssues } from './mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
-
-const actions = {
-  fetchIssuesForList: jest.fn(),
-};
-
-const createStore = (state = defaultState) => {
-  return new Vuex.Store({
-    state,
-    actions,
-  });
-};
-
-const createComponent = ({
-  listIssueProps = {},
-  componentProps = {},
-  listProps = {},
-  state = {},
-} = {}) => {
-  const store = createStore({
-    issuesByListId: mockIssuesByListId,
-    issues,
-    pageInfoByListId: {
-      'gid://gitlab/List/1': { hasNextPage: true },
-      'gid://gitlab/List/2': {},
-    },
-    listsFlags: {
-      'gid://gitlab/List/1': {},
-      'gid://gitlab/List/2': {},
-    },
-    ...state,
-  });
-
-  const list = {
-    ...mockList,
-    ...listProps,
-  };
-  const issue = {
-    title: 'Testing',
-    id: 1,
-    iid: 1,
-    confidential: false,
-    labels: [],
-    assignees: [],
-    ...listIssueProps,
-  };
-  if (!Object.prototype.hasOwnProperty.call(listProps, 'issuesCount')) {
-    list.issuesCount = 1;
-  }
-
-  const component = mount(BoardList, {
-    localVue,
-    propsData: {
-      disabled: false,
-      list,
-      issues: [issue],
-      canAdminList: true,
-      ...componentProps,
-    },
-    store,
-    provide: {
-      groupId: null,
-      rootPath: '/',
-      weightFeatureAvailable: false,
-      boardWeight: null,
-    },
-  });
-
-  return component;
-};
+import { mockIssues } from './mock_data';
 
 describe('Board list component', () => {
   let wrapper;
+
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findIssueCountLoadingIcon = () => wrapper.find('[data-testid="count-loading-icon"]');
+
   useFakeRequestAnimationFrame();
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('When Expanded', () => {
@@ -111,7 +39,7 @@ describe('Board list component', () => {
     });
 
     it('sets data attribute with issue id', () => {
-      expect(wrapper.find('.board-card').attributes('data-issue-id')).toBe('1');
+      expect(wrapper.find('.board-card').attributes('data-item-id')).toBe('1');
     });
 
     it('shows new issue form', async () => {
@@ -161,25 +89,24 @@ describe('Board list component', () => {
   });
 
   describe('load more issues', () => {
+    const actions = {
+      fetchItemsForList: jest.fn(),
+    };
+
     beforeEach(() => {
       wrapper = createComponent({
         listProps: { issuesCount: 25 },
       });
     });
 
-    it('loads more issues after scrolling', () => {
-      wrapper.vm.listRef.dispatchEvent(new Event('scroll'));
-
-      expect(actions.fetchIssuesForList).toHaveBeenCalled();
-    });
-
     it('does not load issues if already loading', () => {
       wrapper = createComponent({
+        actions,
         state: { listsFlags: { 'gid://gitlab/List/1': { isLoadingMore: true } } },
       });
       wrapper.vm.listRef.dispatchEvent(new Event('scroll'));
 
-      expect(actions.fetchIssuesForList).not.toHaveBeenCalled();
+      expect(actions.fetchItemsForList).not.toHaveBeenCalled();
     });
 
     it('shows loading more spinner', async () => {
@@ -189,7 +116,8 @@ describe('Board list component', () => {
       wrapper.vm.showCount = true;
 
       await wrapper.vm.$nextTick();
-      expect(wrapper.find('.board-list-count .gl-spinner').exists()).toBe(true);
+
+      expect(findIssueCountLoadingIcon().exists()).toBe(true);
     });
   });
 
@@ -243,7 +171,7 @@ describe('Board list component', () => {
 
     describe('handleDragOnEnd', () => {
       it('removes class `is-dragging` from document body', () => {
-        jest.spyOn(wrapper.vm, 'moveIssue').mockImplementation(() => {});
+        jest.spyOn(wrapper.vm, 'moveItem').mockImplementation(() => {});
         document.body.classList.add('is-dragging');
 
         findByTestId('tree-root-wrapper').vm.$emit('end', {
@@ -251,9 +179,9 @@ describe('Board list component', () => {
           newIndex: 0,
           item: {
             dataset: {
-              issueId: mockIssues[0].id,
-              issueIid: mockIssues[0].iid,
-              issuePath: mockIssues[0].referencePath,
+              itemId: mockIssues[0].id,
+              itemIid: mockIssues[0].iid,
+              itemPath: mockIssues[0].referencePath,
             },
           },
           to: { children: [], dataset: { listId: 'gid://gitlab/List/1' } },

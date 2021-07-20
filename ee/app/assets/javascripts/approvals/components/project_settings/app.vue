@@ -11,5 +11,9 @@ export default {
 </script>
 
 <template>
-  <app :is-mr-edit="false"><project-rules slot="rules" /></app>
+  <app :is-mr-edit="false">
+    <template #rules>
+      <project-rules />
+    </template>
+  </app>
 </template>

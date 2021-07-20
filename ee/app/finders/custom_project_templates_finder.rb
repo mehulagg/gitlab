@@ -14,7 +14,7 @@ class CustomProjectTemplatesFinder < ::ProjectsFinder
   def execute
     scope = super
 
-    ::ProjectFeature::FEATURES.reduce(scope) do |scope, feature|
+    ::ProjectFeature::EXPORTABLE_FEATURES.reduce(scope) do |scope, feature|
       scope.with_feature_access_level(feature, ::ProjectFeature::DISABLED)
         .or(scope.with_feature_available_for_user(feature, current_user))
     end

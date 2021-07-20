@@ -38,7 +38,7 @@ RSpec.describe Gitlab::DatabaseImporters::InstanceAdministrators::CreateGroup do
       end
     end
 
-    context 'with application settings and admin users' do
+    context 'with application settings and admin users', :do_not_mock_admin_mode_setting do
       let(:group) { result[:group] }
       let(:application_setting) { Gitlab::CurrentSettings.current_application_settings }
 
@@ -56,10 +56,10 @@ RSpec.describe Gitlab::DatabaseImporters::InstanceAdministrators::CreateGroup do
 
       it "tracks successful install" do
         expect(::Gitlab::Tracking).to receive(:event).with(
-          'instance_administrators_group', 'group_created'
+          'instance_administrators_group', 'group_created', namespace: group
         )
 
-        result
+        subject.execute
       end
 
       it 'creates group' do

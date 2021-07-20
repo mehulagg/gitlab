@@ -7,6 +7,7 @@ class CommitStatus < ApplicationRecord
   include Presentable
   include EnumWithNil
   include BulkInsertableAssociations
+  include TaggableQueries
 
   self.table_name = 'ci_builds'
 
@@ -52,10 +53,14 @@ class CommitStatus < ApplicationRecord
   scope :before_stage, -> (index) { where('stage_idx < ?', index) }
   scope :for_stage, -> (index) { where(stage_idx: index) }
   scope :after_stage, -> (index) { where('stage_idx > ?', index) }
-  scope :for_ids, -> (ids) { where(id: ids) }
   scope :for_ref, -> (ref) { where(ref: ref) }
   scope :by_name, -> (name) { where(name: name) }
   scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
+  scope :eager_load_pipeline, -> { eager_load(:pipeline, project: { namespace: :route }) }
+  scope :with_pipeline, -> { joins(:pipeline) }
+  scope :updated_before, ->(lookback:, timeout:) {
+    where('(ci_builds.created_at BETWEEN ? AND ?) AND (ci_builds.updated_at BETWEEN ? AND ?)', lookback, timeout, lookback, timeout)
+  }
 
   scope :for_project_paths, -> (paths) do
     where(project: Project.where_full_path_in(Array(paths)))
@@ -84,6 +89,8 @@ class CommitStatus < ApplicationRecord
   # We use `Enums::Ci::CommitStatus.failure_reasons` here so that EE can more easily
   # extend this `Hash` with new values.
   enum_with_nil failure_reason: Enums::Ci::CommitStatus.failure_reasons
+
+  default_value_for :retried, false
 
   ##
   # We still create some CommitStatuses outside of CreatePipelineService.
@@ -171,21 +178,19 @@ class CommitStatus < ApplicationRecord
       next if commit_status.processed?
       next unless commit_status.project
 
+      last_arg = transition.args.last
+      transition_options = last_arg.is_a?(Hash) && last_arg.extractable_options? ? last_arg : {}
+
       commit_status.run_after_commit do
-        PipelineProcessWorker.perform_async(pipeline_id)
+        PipelineProcessWorker.perform_async(pipeline_id) unless transition_options[:skip_pipeline_processing]
         ExpireJobCacheWorker.perform_async(id)
       end
     end
 
     after_transition any => :failed do |commit_status|
-      next unless commit_status.project
-
-      # rubocop: disable CodeReuse/ServiceClass
       commit_status.run_after_commit do
-        MergeRequests::AddTodoWhenBuildFailsService
-          .new(project, nil).execute(self)
+        ::Gitlab::Ci::Pipeline::Metrics.job_failure_reason_counter.increment(reason: commit_status.failure_reason)
       end
-      # rubocop: enable CodeReuse/ServiceClass
     end
   end
 
@@ -209,22 +214,21 @@ class CommitStatus < ApplicationRecord
   end
 
   def group_name
-    # 'rspec:linux: 1/10' => 'rspec:linux'
-    common_name = name.to_s.gsub(%r{\b\d+[\s:\/\\]+\d+\s*}, '')
-
-    # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux'
-    common_name.gsub!(%r{: \[.*\]\s*\z}, '')
-
-    common_name.strip!
-    common_name
+    name.to_s.sub(%r{([\b\s:]+((\[.*\])|(\d+[\s:\/\\]+\d+)))+\s*\z}, '').strip
   end
 
   def failed_but_allowed?
     allow_failure? && (failed? || canceled?)
   end
 
+  # Time spent running.
   def duration
-    calculate_duration
+    calculate_duration(started_at, finished_at)
+  end
+
+  # Time spent in the pending state.
+  def queued_duration
+    calculate_duration(queued_at, started_at)
   end
 
   def latest?
@@ -279,6 +283,15 @@ class CommitStatus < ApplicationRecord
     failed? && !unrecoverable_failure?
   end
 
+  def update_older_statuses_retried!
+    pipeline
+      .statuses
+      .latest
+      .where(name: name)
+      .where.not(id: id)
+      .update_all(retried: true, processed: true)
+  end
+
   private
 
   def unrecoverable_failure?
@@ -286,4 +299,4 @@ class CommitStatus < ApplicationRecord
   end
 end
 
-CommitStatus.prepend_if_ee('::EE::CommitStatus')
+CommitStatus.prepend_mod_with('CommitStatus')

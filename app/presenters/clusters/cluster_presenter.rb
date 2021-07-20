@@ -49,13 +49,25 @@ module Clusters
       end
     end
 
-    def show_path
+    def show_path(params: {})
       if cluster.project_type?
-        project_cluster_path(project, cluster)
+        project_cluster_path(project, cluster, params)
       elsif cluster.group_type?
-        group_cluster_path(group, cluster)
+        group_cluster_path(group, cluster, params)
       elsif cluster.instance_type?
-        admin_cluster_path(cluster)
+        admin_cluster_path(cluster, params)
+      else
+        raise NotImplementedError
+      end
+    end
+
+    def integrations_path
+      if cluster.project_type?
+        create_or_update_project_cluster_integration_path(project, cluster)
+      elsif cluster.group_type?
+        create_or_update_group_cluster_integration_path(group, cluster)
+      elsif cluster.instance_type?
+        create_or_update_admin_cluster_integration_path(cluster)
       else
         raise NotImplementedError
       end
@@ -64,7 +76,7 @@ module Clusters
     def gitlab_managed_apps_logs_path
       return unless logs_project && can_read_cluster?
 
-      if cluster.application_elastic_stack&.available?
+      if cluster.elastic_stack_adapter&.available?
         elasticsearch_project_logs_path(logs_project, cluster_id: cluster.id, format: :json)
       else
         k8s_project_logs_path(logs_project, cluster_id: cluster.id, format: :json)
@@ -132,4 +144,4 @@ module Clusters
   end
 end
 
-Clusters::ClusterPresenter.prepend_if_ee('EE::Clusters::ClusterPresenter')
+Clusters::ClusterPresenter.prepend_mod_with('Clusters::ClusterPresenter')

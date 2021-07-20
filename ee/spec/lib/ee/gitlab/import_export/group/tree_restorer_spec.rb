@@ -21,26 +21,45 @@ RSpec.describe Gitlab::ImportExport::Group::TreeRestorer do
   describe 'restore group tree' do
     context 'epics' do
       it 'has group epics' do
-        expect(group.epics.count).to eq(2)
+        expect(group.epics.count).to eq(3)
       end
 
       it 'has award emoji' do
-        expect(group.epics.first.award_emoji.first.name).to eq('thumbsup')
+        expect(group.epics.find_by_iid(1).award_emoji.first.name).to eq('thumbsup')
       end
 
       it 'preserves epic state' do
-        expect(group.epics.first.state).to eq('opened')
-        expect(group.epics.last.state).to eq('closed')
+        expect(group.epics.find_by_iid(1).state).to eq('opened')
+        expect(group.epics.find_by_iid(2).state).to eq('closed')
+        expect(group.epics.find_by_iid(3).state).to eq('opened')
       end
     end
 
     context 'epic notes' do
       it 'has epic notes' do
-        expect(group.epics.first.notes.count).to eq(1)
+        expect(group.epics.find_by_iid(1).notes.count).to eq(1)
       end
 
       it 'has award emoji on epic notes' do
-        expect(group.epics.first.notes.first.award_emoji.first.name).to eq('drum')
+        expect(group.epics.find_by_iid(1).notes.first.award_emoji.first.name).to eq('drum')
+      end
+
+      it 'has system note metadata' do
+        note = group.epics.find_by_title('system notes').notes.first
+
+        expect(note.system).to eq(true)
+        expect(note.system_note_metadata.action).to eq('relate_epic')
+      end
+    end
+
+    context 'epic labels' do
+      it 'has epic labels' do
+        label = group.epics.first.labels.first
+
+        expect(group.epics.first.labels.count).to eq(1)
+        expect(label.title).to eq('title')
+        expect(label.description).to eq('description')
+        expect(label.color).to eq('#cd2c5c')
       end
     end
 

@@ -19,12 +19,18 @@ module EE
       end
     end
 
+    def api_status_checks_path
+      if expose_mr_status_checks?
+        expose_path(api_v4_projects_merge_requests_status_checks_path(id: project.id, merge_request_iid: merge_request.iid))
+      end
+    end
+
     def merge_train_when_pipeline_succeeds_docs_path
-      help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md', anchor: 'add-a-merge-request-to-a-merge-train')
+      help_page_path('ci/pipelines/merge_trains.md', anchor: 'add-a-merge-request-to-a-merge-train')
     end
 
     def merge_immediately_docs_path
-      help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md', anchor: 'immediately-merge-a-merge-request-with-a-merge-train')
+      help_page_path('ci/pipelines/merge_trains.md', anchor: 'immediately-merge-a-merge-request-with-a-merge-train')
     end
 
     def target_project
@@ -56,7 +62,16 @@ module EE
       project_security_discover_path(project) if show_discover_project_security?(project)
     end
 
+    def issue_keys
+      Atlassian::JiraIssueKeyExtractor.new(merge_request.title, merge_request.description).issue_keys
+    end
+
     private
+
+    def expose_mr_status_checks?
+      current_user.present? &&
+        project.external_status_checks.applicable_to_branch(merge_request.target_branch).any?
+    end
 
     def expose_mr_approval_path?
       approval_feature_available? && merge_request.iid
@@ -69,4 +84,4 @@ module EE
   end
 end
 
-EE::MergeRequestPresenter.include_if_ee('::EE::ProjectsHelper')
+EE::MergeRequestPresenter.include_mod_with('ProjectsHelper')

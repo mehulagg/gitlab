@@ -4,7 +4,7 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Dealing with email in development
+# Working with email in development
 
 ## Ensuring compatibility with mailer Sidekiq jobs
 
@@ -54,8 +54,12 @@ See the [Rails guides](https://guides.rubyonrails.org/action_mailer_basics.html#
    incoming_email:
      enabled: true
 
-     # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
-     # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
+     # The email address including the %{key} placeholder that will be replaced to reference the
+     # item being replied to. This %{key} should be included in its entirety within the email
+     # address and not replaced by another value.
+     # For example: emailadress+%{key}@gmail.com.
+     # The placeholder must appear in the "user" part of the address (before the `@`). It can be omitted but some features,
+     # including Service Desk, may not work properly.
      address: "gitlab-incoming+%{key}@gmail.com"
 
      # Email account username
@@ -137,4 +141,4 @@ Please note that `path/to/project` is used in GitLab as the handler for the Serv
 
 ---
 
-[Return to Development documentation](README.md)
+[Return to Development documentation](index.md)

@@ -1,19 +1,20 @@
 import { GlIcon } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
+import Vuex from 'vuex';
 import HiddenGroupsItem from 'ee/approvals/components/hidden_groups_item.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
-const localVue = createLocalVue();
+Vue.use(Vuex);
 
 describe('Approvals HiddenGroupsItem', () => {
   let wrapper;
 
   const factory = (options = {}) => {
     wrapper = extendedWrapper(
-      shallowMount(localVue.extend(HiddenGroupsItem), {
+      shallowMount(HiddenGroupsItem, {
         ...options,
-        localVue,
         directives: {
           GlTooltip: createMockDirective(),
         },

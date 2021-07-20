@@ -29,10 +29,11 @@ RSpec.describe PreferencesHelper do
         ['Starred Projects',        'stars'],
         ["Your Projects' Activity", 'project_activity'],
         ["Starred Projects' Activity", 'starred_project_activity'],
+        ["Followed Users' Activity", 'followed_user_activity'],
         ["Your Groups", 'groups'],
         ["Your To-Do List", 'todos'],
         ["Assigned Issues", 'issues'],
-        ["Assigned Merge Requests", 'merge_requests']
+        ["Assigned merge requests", 'merge_requests']
       ]
     end
   end
@@ -120,12 +121,63 @@ RSpec.describe PreferencesHelper do
     end
   end
 
+  describe '#language_choices' do
+    include StubLanguagesTranslationPercentage
+
+    it 'lists all the selectable language options with their translation percent' do
+      stub_languages_translation_percentage(en: 100, es: 65)
+      stub_user(preferred_language: :en)
+
+      expect(helper.language_choices).to eq([
+        '<option selected="selected" value="en">English (100% translated)</option>',
+        '<option value="es">Spanish - español (65% translated)</option>'
+      ].join("\n"))
+    end
+  end
+
   def stub_user(messages = {})
     if messages.empty?
       allow(helper).to receive(:current_user).and_return(nil)
     else
       allow(helper).to receive(:current_user)
         .and_return(double('user', messages))
+    end
+  end
+
+  describe '#integration_views' do
+    let(:gitpod_url) { 'http://gitpod.test' }
+
+    before do
+      allow(Gitlab::CurrentSettings).to receive(:gitpod_enabled).and_return(gitpod_enabled)
+      allow(Gitlab::CurrentSettings).to receive(:gitpod_url).and_return(gitpod_url)
+    end
+
+    context 'when Gitpod is not enabled' do
+      let(:gitpod_enabled) { false }
+
+      it 'does not include Gitpod integration' do
+        expect(helper.integration_views).to be_empty
+      end
+    end
+
+    context 'when Gitpod is enabled' do
+      let(:gitpod_enabled) { true }
+
+      it 'includes Gitpod integration' do
+        expect(helper.integration_views[0][:name]).to eq 'gitpod'
+      end
+
+      it 'returns the Gitpod url configured in settings' do
+        expect(helper.integration_views[0][:message_url]).to eq gitpod_url
+      end
+
+      context 'when Gitpod url is not set' do
+        let(:gitpod_url) { '' }
+
+        it 'returns the Gitpod default url' do
+          expect(helper.integration_views[0][:message_url]).to eq 'https://gitpod.io/'
+        end
+      end
     end
   end
 end

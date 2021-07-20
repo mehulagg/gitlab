@@ -3,8 +3,9 @@ import { mapApprovalRuleRequest, mapApprovalSettingsResponse } from 'ee/approval
 import * as types from 'ee/approvals/stores/modules/base/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/project_settings/actions';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 
@@ -82,14 +83,16 @@ describe('EE approvals project settings module actions', () => {
       actions.receiveRulesError();
 
       expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('error occurred'));
+      expect(createFlash).toHaveBeenCalledWith({
+        message: expect.stringMatching('error occurred'),
+      });
     });
   });
 
   describe('fetchRules', () => {
     it('dispatches request/receive', () => {
       const data = { rules: [TEST_RULE_RESPONSE] };
-      mock.onGet(TEST_SETTINGS_PATH).replyOnce(200, data);
+      mock.onGet(TEST_SETTINGS_PATH).replyOnce(httpStatus.OK, data);
 
       return testAction(
         actions.fetchRules,
@@ -107,7 +110,7 @@ describe('EE approvals project settings module actions', () => {
     });
 
     it('dispatches request/receive on error', () => {
-      mock.onGet(TEST_SETTINGS_PATH).replyOnce(500);
+      mock.onGet(TEST_SETTINGS_PATH).replyOnce(httpStatus.INTERNAL_SERVER_ERROR);
 
       return testAction(
         actions.fetchRules,
@@ -133,7 +136,7 @@ describe('EE approvals project settings module actions', () => {
 
   describe('postRule', () => {
     it('dispatches success on success', () => {
-      mock.onPost(TEST_RULES_PATH).replyOnce(200);
+      mock.onPost(TEST_RULES_PATH).replyOnce(httpStatus.OK);
 
       return testAction(
         actions.postRule,
@@ -155,7 +158,7 @@ describe('EE approvals project settings module actions', () => {
 
   describe('putRule', () => {
     it('dispatches success on success', () => {
-      mock.onPut(`${TEST_RULES_PATH}/${TEST_RULE_ID}`).replyOnce(200);
+      mock.onPut(`${TEST_RULES_PATH}/${TEST_RULE_ID}`).replyOnce(httpStatus.OK);
 
       return testAction(
         actions.putRule,
@@ -193,13 +196,15 @@ describe('EE approvals project settings module actions', () => {
 
       actions.deleteRuleError();
 
-      expect(createFlash.mock.calls[0]).toEqual([expect.stringMatching('error occurred')]);
+      expect(createFlash.mock.calls[0]).toEqual([
+        { message: expect.stringMatching('error occurred') },
+      ]);
     });
   });
 
   describe('deleteRule', () => {
     it('dispatches success on success', () => {
-      mock.onDelete(`${TEST_RULES_PATH}/${TEST_RULE_ID}`).replyOnce(200);
+      mock.onDelete(`${TEST_RULES_PATH}/${TEST_RULE_ID}`).replyOnce(httpStatus.OK);
 
       return testAction(
         actions.deleteRule,
@@ -218,7 +223,9 @@ describe('EE approvals project settings module actions', () => {
     });
 
     it('dispatches error on error', () => {
-      mock.onDelete(`${TEST_RULES_PATH}/${TEST_RULE_ID}`).replyOnce(500);
+      mock
+        .onDelete(`${TEST_RULES_PATH}/${TEST_RULE_ID}`)
+        .replyOnce(httpStatus.INTERNAL_SERVER_ERROR);
 
       return testAction(actions.deleteRule, TEST_RULE_ID, state, [], [{ type: 'deleteRuleError' }]);
     });

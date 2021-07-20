@@ -3,116 +3,76 @@
 require 'spec_helper'
 
 RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:cursor) { 'cursor' }
-  let(:entity) do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:bulk_import) { create(:bulk_import, user: user) }
+  let_it_be(:filepath) { 'spec/fixtures/bulk_imports/gz/labels.ndjson.gz' }
+  let_it_be(:entity) do
     create(
       :bulk_import_entity,
+      group: group,
+      bulk_import: bulk_import,
       source_full_path: 'source/full/path',
       destination_name: 'My Destination Group',
-      destination_namespace: group.full_path,
-      group: group
+      destination_namespace: group.full_path
     )
   end
 
-  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
+
+  let(:tmpdir) { Dir.mktmpdir }
+
+  before do
+    FileUtils.copy_file(filepath, File.join(tmpdir, 'labels.ndjson.gz'))
+    group.add_owner(user)
+  end
 
   subject { described_class.new(context) }
 
-  def extractor_data(title:, has_next_page:, cursor: nil)
-    data = [
-      {
-        'title' => title,
-        'description' => 'desc',
-        'color' => '#428BCA'
-      }
-    ]
-
-    page_info = {
-      'end_cursor' => cursor,
-      'has_next_page' => has_next_page
-    }
-
-    BulkImports::Pipeline::ExtractedData.new(data: data, page_info: page_info)
-  end
-
   describe '#run' do
-    it 'imports a group labels' do
-      first_page = extractor_data(title: 'label1', has_next_page: true, cursor: cursor)
-      last_page = extractor_data(title: 'label2', has_next_page: false)
-
-      allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
-        allow(extractor)
-          .to receive(:extract)
-          .and_return(first_page, last_page)
+    it 'imports group labels into destination group and removes tmpdir' do
+      allow(Dir).to receive(:mktmpdir).and_return(tmpdir)
+      allow_next_instance_of(BulkImports::FileDownloadService) do |service|
+        allow(service).to receive(:execute)
       end
 
-      expect { subject.run }.to change(Label, :count).by(2)
+      expect { subject.run }.to change(::GroupLabel, :count).by(1)
 
-      label = group.labels.order(:created_at).last
+      label = group.labels.first
 
-      expect(label.title).to eq('label2')
-      expect(label.description).to eq('desc')
-      expect(label.color).to eq('#428BCA')
+      expect(label.title).to eq('Label 1')
+      expect(label.description).to eq('Label 1')
+      expect(label.color).to eq('#6699cc')
+      expect(File.directory?(tmpdir)).to eq(false)
     end
   end
 
-  describe '#after_run' do
-    context 'when extracted data has next page' do
-      it 'updates tracker information and runs pipeline again' do
-        data = extractor_data(title: 'label', has_next_page: true, cursor: cursor)
+  describe '#load' do
+    context 'when label is not persisted' do
+      it 'saves the label' do
+        label = build(:group_label, group: group)
 
-        expect(subject).to receive(:run)
+        expect(label).to receive(:save!)
 
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :labels)
-
-        expect(tracker.has_next_page).to eq(true)
-        expect(tracker.next_page).to eq(cursor)
+        subject.load(context, label)
       end
     end
 
-    context 'when extracted data has no next page' do
-      it 'updates tracker information and does not run pipeline' do
-        data = extractor_data(title: 'label', has_next_page: false)
+    context 'when label is persisted' do
+      it 'does not save label' do
+        label = create(:group_label, group: group)
 
-        expect(subject).not_to receive(:run)
+        expect(label).not_to receive(:save!)
 
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :labels)
-
-        expect(tracker.has_next_page).to eq(false)
-        expect(tracker.next_page).to be_nil
+        subject.load(context, label)
       end
     end
-  end
 
-  describe 'pipeline parts' do
-    it { expect(described_class).to include_module(BulkImports::Pipeline) }
-    it { expect(described_class).to include_module(BulkImports::Pipeline::Runner) }
-
-    it 'has extractors' do
-      expect(described_class.get_extractor)
-        .to eq(
-          klass: BulkImports::Common::Extractors::GraphqlExtractor,
-          options: {
-            query: BulkImports::Groups::Graphql::GetLabelsQuery
-          }
-        )
-    end
-
-    it 'has transformers' do
-      expect(described_class.transformers)
-        .to contain_exactly(
-          { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil }
-        )
-    end
-
-    it 'has loaders' do
-      expect(described_class.get_loader).to eq(klass: BulkImports::Groups::Loaders::LabelsLoader, options: nil)
+    context 'when label is missing' do
+      it 'returns' do
+        expect(subject.load(context, nil)).to be_nil
+      end
     end
   end
 end

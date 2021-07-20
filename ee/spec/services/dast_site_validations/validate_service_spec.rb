@@ -15,28 +15,17 @@ RSpec.describe DastSiteValidations::ValidateService do
   end
 
   describe 'execute!' do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-        expect { subject }.to raise_error(DastSiteValidations::ValidateService::PermissionsError)
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
 
         expect { subject }.to raise_error(DastSiteValidations::ValidateService::PermissionsError)
       end
     end
 
-    context 'when the feature is enabled' do
+    context 'when the feature is available' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
         stub_request(:get, dast_site_validation.validation_url).to_return(body: token, headers: headers)
       end
 
@@ -46,7 +35,7 @@ RSpec.describe DastSiteValidations::ValidateService do
 
         aggregate_failures do
           expect(Gitlab::UrlBlocker).to receive(:validate!).with(uri, opt).and_call_original
-          expect(Gitlab::HTTP).to receive(:get).with(dast_site_validation.validation_url).and_call_original
+          expect(Gitlab::HTTP).to receive(:get).with(dast_site_validation.validation_url, use_read_total_timeout: true).and_call_original
         end
 
         subject

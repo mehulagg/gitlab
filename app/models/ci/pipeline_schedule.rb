@@ -3,10 +3,12 @@
 module Ci
   class PipelineSchedule < ApplicationRecord
     extend Gitlab::Ci::Model
+    extend ::Gitlab::Utils::Override
     include Importable
     include StripAttribute
-    include Schedulable
+    include CronSchedulable
     include Limitable
+    include EachBatch
 
     self.limit_name = 'ci_pipeline_schedules'
     self.limit_scope = :project
@@ -28,6 +30,7 @@ module Ci
     scope :active, -> { where(active: true) }
     scope :inactive, -> { where(active: false) }
     scope :preloaded, -> { preload(:owner, project: [:route]) }
+    scope :owned_by, ->(user) { where(owner: user) }
 
     accepts_nested_attributes_for :variables, allow_destroy: true
 
@@ -49,38 +52,27 @@ module Ci
       update_attribute(:active, false)
     end
 
-    ##
-    # The `next_run_at` column is set to the actual execution date of `PipelineScheduleWorker`.
-    # This way, a schedule like `*/1 * * * *` won't be triggered in a short interval
-    # when PipelineScheduleWorker runs irregularly by Sidekiq Memory Killer.
-    def set_next_run_at
-      now = Time.zone.now
-      ideal_next_run = ideal_next_run_from(now)
-
-      self.next_run_at = if ideal_next_run == cron_worker_next_run_from(now)
-                           ideal_next_run
-                         else
-                           cron_worker_next_run_from(ideal_next_run)
-                         end
-    end
-
     def job_variables
       variables&.map(&:to_runner_variable) || []
     end
 
-    private
-
-    def ideal_next_run_from(start_time)
-      Gitlab::Ci::CronParser.new(cron, cron_timezone)
-                            .next_time_from(start_time)
+    override :set_next_run_at
+    def set_next_run_at
+      self.next_run_at = ::Ci::PipelineSchedules::CalculateNextRunService # rubocop: disable CodeReuse/ServiceClass
+                           .new(project)
+                           .execute(self, fallback_method: method(:calculate_next_run_at))
     end
 
-    def cron_worker_next_run_from(start_time)
-      Gitlab::Ci::CronParser.new(Settings.cron_jobs['pipeline_schedule_worker']['cron'],
-                                Time.zone.name)
-                            .next_time_from(start_time)
+    def daily_limit
+      project.actual_limits.limit_for(:ci_daily_pipeline_schedule_triggers)
+    end
+
+    private
+
+    def worker_cron_expression
+      Settings.cron_jobs['pipeline_schedule_worker']['cron']
     end
   end
 end
 
-Ci::PipelineSchedule.prepend_if_ee('EE::Ci::PipelineSchedule')
+Ci::PipelineSchedule.prepend_mod_with('Ci::PipelineSchedule')

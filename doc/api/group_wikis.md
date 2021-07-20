@@ -9,7 +9,8 @@ type: reference, api
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212199) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
 
-Available only in APIv4.
+The [group wikis](../user/project/wiki/index.md#group-wikis) API is available only in APIv4.
+An API for [project wikis](wikis.md) is also available.
 
 ## List wiki pages
 
@@ -21,7 +22,7 @@ GET /groups/:id/wikis
 
 | Attribute      | Type           | Required | Description                                                                   |
 | ---------      | -------        | -------- | ---------------------                                                         |
-| `id`           | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
+| `id`           | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) |
 | `with_content` | boolean        | no       | Include pages' content                                                        |
 
 ```shell
@@ -62,8 +63,8 @@ GET /groups/:id/wikis/:slug
 
 | Attribute | Type           | Required | Description                                                                   |
 | --------- | -------        | -------- | ---------------------                                                         |
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
-| `slug`    | string         | yes      | The slug (a unique string) of the wiki page                                   |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) |
+| `slug`    | string         | yes      | URL-encoded slug (a unique string) of the wiki page, such as `dir%2Fpage_name`      |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/wikis/home"
@@ -90,7 +91,7 @@ POST /projects/:id/wikis
 
 | Attribute     | Type           | Required | Description                                                                                            |
 | ------------- | -------        | -------- | ----------------------------                                                                           |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding)                          |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding)                          |
 | `content`     | string         | yes      | The content of the wiki page                                                                           |
 | `title`       | string         | yes      | The title of the wiki page                                                                             |
 | `format`      | string         | no       | The format of the wiki page. Available formats are: `markdown` (default), `rdoc`, `asciidoc` and `org` |
@@ -122,11 +123,11 @@ PUT /groups/:id/wikis/:slug
 
 | Attribute       | Type           | Required                          | Description                                                                                            |
 | --------------- | -------        | --------------------------------- | -------------------------------                                                                        |
-| `id`            | integer/string | yes                               | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding)                          |
+| `id`            | integer/string | yes                               | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding)                          |
 | `content`       | string         | yes if `title` is not provided    | The content of the wiki page                                                                           |
 | `title`         | string         | yes if `content` is not provided  | The title of the wiki page                                                                             |
 | `format`        | string         | no                                | The format of the wiki page. Available formats are: `markdown` (default), `rdoc`, `asciidoc` and `org` |
-| `slug`          | string         | yes                               | The slug (a unique identifier) of the wiki page                                                        |
+| `slug`          | string         | yes                               | URL encoded slug (a unique string) of the wiki page. Ex. dir%2Fpage_name                                                        |
 
 ```shell
 curl --request PUT --data "format=rdoc&content=documentation&title=Docs" \
@@ -155,8 +156,8 @@ DELETE /groups/:id/wikis/:slug
 
 | Attribute | Type           | Required | Description                                                                   |
 | --------- | -------        | -------- | ---------------------                                                         |
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
-| `slug`    | string         | yes      | The slug (a unique identifier) of the wiki page                               |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) |
+| `slug`    | string         | yes      | URL-encoded slug (a unique string) of the wiki page, such as `dir%2Fpage_name`      |
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/wikis/foo"
@@ -175,7 +176,7 @@ POST /groups/:id/wikis/attachments
 
 | Attribute     | Type           | Required | Description                                                                   |
 | ------------- | -------        | -------- | ----------------------------                                                  |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) |
 | `file`        | string         | yes      | The attachment to be uploaded                                                 |
 | `branch`      | string         | no       | The name of the branch. Defaults to the wiki repository default branch        |
 
@@ -185,7 +186,8 @@ The `file=` parameter must point to a file on your file system and be preceded
 by `@`. For example:
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "file=@dk.png" "https://gitlab.example.com/api/v4/groups/1/wikis/attachments"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --form "file=@dk.png" "https://gitlab.example.com/api/v4/groups/1/wikis/attachments"
 ```
 
 Example response:

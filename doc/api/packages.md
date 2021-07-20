@@ -23,12 +23,13 @@ GET /projects/:id/packages
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id`      | integer/string | yes | ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `order_by`| string | no | The field to use as order. One of `created_at` (default), `name`, `version`, or `type`. |
 | `sort`    | string | no | The direction of the order, either `asc` (default) for ascending order or `desc` for descending order. |
-| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, or `golang`. (_Introduced in GitLab 12.9_)
+| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, `helm`, or `golang`. (_Introduced in GitLab 12.9_)
 | `package_name` | string | no | Filter the project packages with a fuzzy search by name. (_Introduced in GitLab 12.9_)
 | `include_versionless` | boolean | no | When set to true, versionless packages are included in the response. (_Introduced in GitLab 13.8_)
+| `status` | string | no | Filter the returned packages by status. One of `default` (default), `hidden`, or `processing`. (_Introduced in GitLab 13.9_)
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages"
@@ -68,7 +69,10 @@ Example response:
 ]
 ```
 
-By default, the `GET` request returns 20 results, because the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, because the API is [paginated](index.md#pagination).
+
+Although you can filter packages by status, working with packages that have a `processing` status
+can result in malformed data or broken packages.
 
 ### Within a group
 
@@ -83,13 +87,14 @@ GET /groups/:id/packages
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | ID or [URL-encoded path of the group](README.md#namespaced-path-encoding). |
+| `id`      | integer/string | yes | ID or [URL-encoded path of the group](index.md#namespaced-path-encoding). |
 | `exclude_subgroups` | boolean | false | If the parameter is included as true, packages from projects from subgroups are not listed. Default is `false`. |
 | `order_by`| string | no | The field to use as order. One of `created_at` (default), `name`, `version`, `type`, or `project_path`. |
 | `sort`    | string | no | The direction of the order, either `asc` (default) for ascending order or `desc` for descending order. |
-| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, or `golang`. (_Introduced in GitLab 12.9_) |
+| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, `helm`, or `golang`. (_Introduced in GitLab 12.9_) |
 | `package_name` | string | no | Filter the project packages with a fuzzy search by name. (_[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30980) in GitLab 13.0_)
 | `include_versionless` | boolean | no | When set to true, versionless packages are included in the response. (_Introduced in GitLab 13.8_)
+| `status` | string | no | Filter the returned packages by status. One of `default` (default), `hidden`, or `processing`. (_Introduced in GitLab 13.9_)
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/packages?exclude_subgroups=false"
@@ -159,12 +164,15 @@ Example response:
 ]
 ```
 
-By default, the `GET` request returns 20 results, because the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, because the API is [paginated](index.md#pagination).
 
 The `_links` object contains the following properties:
 
 - `web_path`: The path which you can visit in GitLab and see the details of the package.
 - `delete_api_path`: The API path to delete the package. Only available if the request user has permission to do so.
+
+Although you can filter packages by status, working with packages that have a `processing` status
+can result in malformed data or broken packages.
 
 ## Get a project package
 
@@ -178,7 +186,7 @@ GET /projects/:id/packages/:package_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+| `id`      | integer/string | yes | ID or [URL-encoded path of the project](index.md#namespaced-path-encoding). |
 | `package_id`      | integer | yes | ID of a package. |
 
 ```shell
@@ -260,7 +268,7 @@ GET /projects/:id/packages/:package_id/package_files
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id`      | integer/string | yes | ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `package_id`      | integer | yes | ID of a package. |
 
 ```shell
@@ -279,6 +287,7 @@ Example response:
     "size": 2421,
     "file_md5": "58e6a45a629910c6ff99145a688971ac",
     "file_sha1": "ebd193463d3915d7e22219f52740056dfd26cbfe",
+    "file_sha256": "a903393463d3915d7e22219f52740056dfd26cbfeff321b",
     "pipelines": [
       {
         "id": 123,
@@ -302,7 +311,8 @@ Example response:
     "file_name": "my-app-1.5-20181107.152550-1.pom",
     "size": 1122,
     "file_md5": "d90f11d851e17c5513586b4a7e98f1b2",
-    "file_sha1": "9608d068fe88aff85781811a42f32d97feb440b5"
+    "file_sha1": "9608d068fe88aff85781811a42f32d97feb440b5",
+    "file_sha256": "2987d068fe88aff85781811a42f32d97feb4f092a399"
   },
   {
     "id": 27,
@@ -311,12 +321,13 @@ Example response:
     "file_name": "maven-metadata.xml",
     "size": 767,
     "file_md5": "6dfd0cce1203145a927fef5e3a1c650c",
-    "file_sha1": "d25932de56052d320a8ac156f745ece73f6a8cd2"
+    "file_sha1": "d25932de56052d320a8ac156f745ece73f6a8cd2",
+    "file_sha256": "ac849d002e56052d320a8ac156f745ece73f6a8cd2f3e82"
   }
 ]
 ```
 
-By default, the `GET` request returns 20 results, because the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, because the API is [paginated](index.md#pagination).
 
 ## Delete a project package
 
@@ -330,7 +341,7 @@ DELETE /projects/:id/packages/:package_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `id`      | integer/string | yes | ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) |
 | `package_id`      | integer | yes | ID of a package. |
 
 ```shell
@@ -341,3 +352,33 @@ Can return the following status codes:
 
 - `204 No Content`, if the package was deleted successfully.
 - `404 Not Found`, if the package was not found.
+
+## Delete a package file
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32107) in GitLab 13.12.
+
+WARNING:
+Deleting a package file may corrupt your package making it unusable or unpullable from your package
+manager client. When deleting a package file, be sure that you understand what you're doing.
+
+Delete a package file:
+
+```plaintext
+DELETE /projects/:id/packages/:package_id/package_files/:package_file_id
+```
+
+| Attribute         | Type           | Required | Description |
+| ----------------- | -------------- | -------- | ----------- |
+| `id`              | integer/string | yes | ID or [URL-encoded path of the project](index.md#namespaced-path-encoding). |
+| `package_id`      | integer        | yes | ID of a package. |
+| `package_file_id` | integer        | yes | ID of a package file. |
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages/:package_id/package_files/:package_file_id"
+```
+
+Can return the following status codes:
+
+- `204 No Content`: The package was deleted successfully.
+- `403 Forbidden`: The user does not have permission to delete the file.
+- `404 Not Found`: The package or package file was not found.

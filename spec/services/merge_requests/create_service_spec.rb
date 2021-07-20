@@ -21,7 +21,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         }
       end
 
-      let(:service) { described_class.new(project, user, opts) }
+      let(:service) { described_class.new(project: project, current_user: user, params: opts) }
       let(:merge_request) { service.execute }
 
       before do
@@ -47,16 +47,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           .to change { project.open_merge_requests_count }.from(0).to(1)
       end
 
-      it 'does not creates todos' do
-        attributes = {
-          project: project,
-          target_id: merge_request.id,
-          target_type: merge_request.class.name
-        }
-
-        expect(Todo.where(attributes).count).to be_zero
-      end
-
       it 'creates exactly 1 create MR event', :sidekiq_might_not_need_inline do
         attributes = {
           action: :created,
@@ -65,6 +55,10 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         }
 
         expect(Event.where(attributes).count).to eq(1)
+      end
+
+      it 'sets the merge_status to preparing' do
+        expect(merge_request.reload).to be_preparing
       end
 
       describe 'when marked with /wip' do
@@ -88,7 +82,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           let(:opts) do
             {
               title: 'Awesome merge_request',
-              description: "well this is not done yet\n/wip",
+              description: "well this is not done yet\n/draft",
               source_branch: 'feature',
               target_branch: 'master',
               assignees: [user2]
@@ -113,20 +107,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
 
         it { expect(merge_request.assignees).to eq([user2]) }
-
-        it 'creates a todo for new assignee' do
-          attributes = {
-            project: project,
-            author: user,
-            user: user2,
-            target_id: merge_request.id,
-            target_type: merge_request.class.name,
-            action: Todo::ASSIGNED,
-            state: :pending
-          }
-
-          expect(Todo.where(attributes).count).to eq 1
-        end
       end
 
       context 'when reviewer is assigned' do
@@ -141,20 +121,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
 
         it { expect(merge_request.reviewers).to eq([user2]) }
-
-        it 'creates a todo for new reviewer' do
-          attributes = {
-            project: project,
-            author: user,
-            user: user2,
-            target_id: merge_request.id,
-            target_type: merge_request.class.name,
-            action: Todo::REVIEW_REQUESTED,
-            state: :pending
-          }
-
-          expect(Todo.where(attributes).count).to eq 1
-        end
 
         it 'invalidates counter cache for reviewers', :use_clean_rails_memory_store_caching do
           expect { merge_request }
@@ -328,12 +294,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
       end
 
-      it 'increments the usage data counter of create event' do
-        counter = Gitlab::UsageDataCounters::MergeRequestCounter
-
-        expect { service.execute }.to change { counter.read(:create) }.by(1)
-      end
-
       context 'after_save callback to store_mentions' do
         let(:labels) { create_pair(:label, project: project) }
         let(:milestone) { create(:milestone, project: project) }
@@ -387,12 +347,12 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         }
       end
 
-      let(:issuable) { described_class.new(project, user, params).execute }
+      let(:issuable) { described_class.new(project: project, current_user: user, params: params).execute }
     end
 
     context 'Quick actions' do
       context 'with assignee and milestone in params and command' do
-        let(:merge_request) { described_class.new(project, user, opts).execute }
+        let(:merge_request) { described_class.new(project: project, current_user: user, params: opts).execute }
         let(:milestone) { create(:milestone, project: project) }
 
         let(:opts) do
@@ -430,7 +390,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         it 'removes assignee_id when user id is invalid' do
           opts = { title: 'Title', description: 'Description', assignee_ids: [-1] }
 
-          merge_request = described_class.new(project, user, opts).execute
+          merge_request = described_class.new(project: project, current_user: user, params: opts).execute
 
           expect(merge_request.assignee_ids).to be_empty
         end
@@ -438,7 +398,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         it 'removes assignee_id when user id is 0' do
           opts = { title: 'Title', description: 'Description', assignee_ids: [0] }
 
-          merge_request = described_class.new(project, user, opts).execute
+          merge_request = described_class.new(project: project, current_user: user, params: opts).execute
 
           expect(merge_request.assignee_ids).to be_empty
         end
@@ -447,7 +407,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           project.add_maintainer(user2)
           opts = { title: 'Title', description: 'Description', assignee_ids: [user2.id] }
 
-          merge_request = described_class.new(project, user, opts).execute
+          merge_request = described_class.new(project: project, current_user: user, params: opts).execute
 
           expect(merge_request.assignees).to eq([user2])
         end
@@ -466,7 +426,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           it 'invalidates open merge request counter for assignees when merge request is assigned' do
             project.add_maintainer(user2)
 
-            described_class.new(project, user, opts).execute
+            described_class.new(project: project, current_user: user, params: opts).execute
 
             expect(user2.assigned_open_merge_requests_count).to eq 1
           end
@@ -485,41 +445,12 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               project.update!(visibility_level: level)
               opts = { title: 'Title', description: 'Description', assignee_ids: [user2.id] }
 
-              merge_request = described_class.new(project, user, opts).execute
+              merge_request = described_class.new(project: project, current_user: user, params: opts).execute
 
               expect(merge_request.assignee_id).to be_nil
             end
           end
         end
-      end
-    end
-
-    context 'while saving references to issues that the created merge request closes' do
-      let(:first_issue) { create(:issue, project: project) }
-      let(:second_issue) { create(:issue, project: project) }
-
-      let(:opts) do
-        {
-          title: 'Awesome merge_request',
-          source_branch: 'feature',
-          target_branch: 'master',
-          force_remove_source_branch: '1'
-        }
-      end
-
-      before do
-        project.add_maintainer(user)
-        project.add_developer(user2)
-      end
-
-      it 'creates a `MergeRequestsClosingIssues` record for each issue' do
-        issue_closing_opts = opts.merge(description: "Closes #{first_issue.to_reference} and #{second_issue.to_reference}")
-        service = described_class.new(project, user, issue_closing_opts)
-        allow(service).to receive(:execute_hooks)
-        merge_request = service.execute
-
-        issue_ids = MergeRequestsClosingIssues.where(merge_request: merge_request).pluck(:issue_id)
-        expect(issue_ids).to match_array([first_issue.id, second_issue.id])
       end
     end
 
@@ -542,7 +473,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
 
         it 'raises an error' do
-          expect { described_class.new(project, user, opts).execute }
+          expect { described_class.new(project: project, current_user: user, params: opts).execute }
             .to raise_error Gitlab::Access::AccessDeniedError
         end
       end
@@ -554,7 +485,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
 
         it 'raises an error' do
-          expect { described_class.new(project, user, opts).execute }
+          expect { described_class.new(project: project, current_user: user, params: opts).execute }
             .to raise_error Gitlab::Access::AccessDeniedError
         end
       end
@@ -566,23 +497,15 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
 
         it 'creates the merge request', :sidekiq_might_not_need_inline do
-          merge_request = described_class.new(project, user, opts).execute
+          merge_request = described_class.new(project: project, current_user: user, params: opts).execute
 
           expect(merge_request).to be_persisted
-        end
-
-        it 'calls MergeRequests::LinkLfsObjectsService#execute', :sidekiq_might_not_need_inline do
-          expect_next_instance_of(MergeRequests::LinkLfsObjectsService) do |service|
-            expect(service).to receive(:execute).with(instance_of(MergeRequest))
-          end
-
-          described_class.new(project, user, opts).execute
         end
 
         it 'does not create the merge request when the target project is archived' do
           target_project.update!(archived: true)
 
-          expect { described_class.new(project, user, opts).execute }
+          expect { described_class.new(project: project, current_user: user, params: opts).execute }
             .to raise_error Gitlab::Access::AccessDeniedError
         end
       end
@@ -606,7 +529,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
       end
 
       it 'ignores source_project_id' do
-        merge_request = described_class.new(project, user, opts).execute
+        merge_request = described_class.new(project: project, current_user: user, params: opts).execute
 
         expect(merge_request.source_project_id).to eq(project.id)
       end

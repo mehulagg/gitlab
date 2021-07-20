@@ -20,7 +20,7 @@ RSpec.describe Issues::MoveService do
   end
 
   subject(:move_service) do
-    described_class.new(old_project, user)
+    described_class.new(project: old_project, current_user: user)
   end
 
   shared_context 'user can move issue' do
@@ -37,6 +37,10 @@ RSpec.describe Issues::MoveService do
 
     context 'issue movable' do
       include_context 'user can move issue'
+
+      it 'creates resource state event' do
+        expect { move_service.execute(old_issue, new_project) }.to change(ResourceStateEvent.where(issue_id: old_issue), :count).by(1)
+      end
 
       context 'generic issue' do
         include_context 'issue move executed'
@@ -85,6 +89,10 @@ RSpec.describe Issues::MoveService do
         it 'marks issue as moved' do
           expect(old_issue.moved?).to eq true
           expect(old_issue.moved_to).to eq new_issue
+        end
+
+        it 'marks issue as closed' do
+          expect(old_issue.closed?).to eq true
         end
 
         it 'preserves create time' do
@@ -206,6 +214,7 @@ RSpec.describe Issues::MoveService do
 
       context 'issue with a design', :clean_gitlab_redis_shared_state do
         let_it_be(:new_project) { create(:project) }
+
         let!(:design) { create(:design, :with_lfs_file, issue: old_issue) }
         let!(:note) { create(:diff_note_on_design, noteable: design, issue: old_issue, project: old_issue.project) }
         let(:subject) { move_service.execute(old_issue, new_project) }
@@ -243,6 +252,12 @@ RSpec.describe Issues::MoveService do
           expect(new_issue.designs.size).to eq(1)
           expect(new_issue.designs.first.notes.size).to eq(1)
         end
+      end
+
+      context 'issue relative position' do
+        let(:subject) { move_service.execute(old_issue, new_project) }
+
+        it_behaves_like 'copy or reset relative position'
       end
     end
 

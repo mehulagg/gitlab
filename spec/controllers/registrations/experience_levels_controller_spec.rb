@@ -24,7 +24,7 @@ RSpec.describe Registrations::ExperienceLevelsController do
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
-      it { is_expected.to render_template('layouts/signup_onboarding') }
+      it { is_expected.to render_template('layouts/minimal') }
       it { is_expected.to render_template(:show) }
     end
   end
@@ -76,7 +76,7 @@ RSpec.describe Registrations::ExperienceLevelsController do
           let(:learn_gitlab_available?) { true }
 
           before do
-            allow_next_instance_of(LearnGitlab) do |learn_gitlab|
+            allow_next_instance_of(LearnGitlab::Project) do |learn_gitlab|
               allow(learn_gitlab).to receive(:available?).and_return(learn_gitlab_available?)
               allow(learn_gitlab).to receive(:project).and_return(project)
               allow(learn_gitlab).to receive(:board).and_return(issues_board)
@@ -136,7 +136,7 @@ RSpec.describe Registrations::ExperienceLevelsController do
           let(:params) { super().merge(experience_level: :novice) }
 
           before do
-            allow_next(LearnGitlab).to receive(:available?).and_return(false)
+            allow_next(LearnGitlab::Project).to receive(:available?).and_return(false)
           end
 
           it 'does not add a BoardLabel' do

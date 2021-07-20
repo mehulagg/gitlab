@@ -28,7 +28,7 @@ module Milestoneable
 
     scope :without_release, -> do
       joins("LEFT OUTER JOIN milestone_releases ON #{table_name}.milestone_id = milestone_releases.milestone_id")
-        .where('milestone_releases.release_id IS NULL')
+        .where(milestone_releases: { release_id: nil })
     end
 
     scope :joins_milestone_releases, -> do
@@ -39,11 +39,13 @@ module Milestoneable
     private
 
     def milestone_is_valid
-      errors.add(:milestone_id, 'is invalid') if respond_to?(:milestone_id) && milestone_id.present? && !milestone_available?
+      errors.add(:milestone_id, 'is invalid') if respond_to?(:milestone_id) && !milestone_available?
     end
   end
 
   def milestone_available?
+    return true if milestone_id.blank?
+
     project_id == milestone&.project_id || project.ancestors_upto.compact.include?(milestone&.group)
   end
 
@@ -55,4 +57,4 @@ module Milestoneable
   end
 end
 
-Milestoneable.prepend_if_ee('EE::Milestoneable')
+Milestoneable.prepend_mod_with('Milestoneable')

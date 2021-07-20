@@ -7,6 +7,7 @@ class ContainerRepository < ApplicationRecord
   include Sortable
 
   WAITING_CLEANUP_STATUSES = %i[cleanup_scheduled cleanup_unfinished].freeze
+  REQUIRING_CLEANUP_STATUSES = %i[cleanup_unscheduled cleanup_scheduled].freeze
 
   belongs_to :project
 
@@ -23,7 +24,7 @@ class ContainerRepository < ApplicationRecord
   scope :for_group_and_its_subgroups, ->(group) do
     project_scope = Project
       .for_group_and_its_subgroups(group)
-      .with_container_registry
+      .with_feature_enabled(:container_registry)
       .select(:id)
 
     joins("INNER JOIN (#{project_scope.to_sql}) projects on projects.id=container_repositories.project_id")
@@ -31,12 +32,30 @@ class ContainerRepository < ApplicationRecord
   scope :for_project_id, ->(project_id) { where(project_id: project_id) }
   scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
   scope :waiting_for_cleanup, -> { where(expiration_policy_cleanup_status: WAITING_CLEANUP_STATUSES) }
+  scope :expiration_policy_started_at_nil_or_before, ->(timestamp) { where('expiration_policy_started_at < ? OR expiration_policy_started_at IS NULL', timestamp) }
+  scope :with_stale_ongoing_cleanup, ->(threshold) { cleanup_ongoing.where('expiration_policy_started_at < ?', threshold) }
 
   def self.exists_by_path?(path)
     where(
       project: path.repository_project,
       name: path.repository_name
     ).exists?
+  end
+
+  def self.with_enabled_policy
+    joins('INNER JOIN container_expiration_policies ON container_repositories.project_id = container_expiration_policies.project_id')
+      .where(container_expiration_policies: { enabled: true })
+  end
+
+  def self.requiring_cleanup
+    with_enabled_policy
+      .where(container_repositories: { expiration_policy_cleanup_status: REQUIRING_CLEANUP_STATUSES })
+      .where('container_repositories.expiration_policy_started_at IS NULL OR container_repositories.expiration_policy_started_at < container_expiration_policies.next_run_at')
+      .where('container_expiration_policies.next_run_at < ?', Time.zone.now)
+  end
+
+  def self.with_unfinished_cleanup
+    with_enabled_policy.cleanup_unfinished
   end
 
   # rubocop: disable CodeReuse/ServiceClass
@@ -127,7 +146,8 @@ class ContainerRepository < ApplicationRecord
   end
 
   def self.create_from_path!(path)
-    build_from_path(path).tap(&:save!)
+    safe_find_or_create_by!(project: path.repository_project,
+                                 name: path.repository_name)
   end
 
   def self.build_root_repository(project)
@@ -140,4 +160,4 @@ class ContainerRepository < ApplicationRecord
   end
 end
 
-ContainerRepository.prepend_if_ee('EE::ContainerRepository')
+ContainerRepository.prepend_mod_with('ContainerRepository')

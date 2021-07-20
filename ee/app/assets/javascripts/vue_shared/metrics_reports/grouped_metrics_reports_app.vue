@@ -92,25 +92,27 @@ export default {
     class="mr-widget-border-top grouped-security-reports mr-report"
     @toggleEvent="handleToggleEvent"
   >
-    <div slot="body" class="mr-widget-grouped-section report-block">
-      <smart-virtual-list
-        :length="metrics.length"
-        :remain="$options.maxShownReportItems"
-        :size="$options.typicalReportItemHeight"
-        class="report-block-container"
-        wtag="ul"
-        wclass="report-block-list"
-      >
-        <report-item
-          v-for="(metric, index) in metrics"
-          :key="index"
-          :issue="metric"
-          status="none"
-          :status-icon-size="24"
-          :component="$options.componentNames.MetricsReportsIssueBody"
-          class="gl-ml-2 gl-mt-2 gl-mb-3"
-        />
-      </smart-virtual-list>
-    </div>
+    <template #body>
+      <div class="mr-widget-grouped-section report-block">
+        <smart-virtual-list
+          :length="metrics.length"
+          :remain="$options.maxShownReportItems"
+          :size="$options.typicalReportItemHeight"
+          class="report-block-container"
+          wtag="ul"
+          wclass="report-block-list"
+        >
+          <report-item
+            v-for="(metric, index) in metrics"
+            :key="index"
+            :issue="metric"
+            status="none"
+            :status-icon-size="24"
+            :component="$options.componentNames.MetricsReportsIssueBody"
+            class="gl-ml-2 gl-mt-2 gl-mb-3"
+          />
+        </smart-virtual-list>
+      </div>
+    </template>
   </report-section>
 </template>

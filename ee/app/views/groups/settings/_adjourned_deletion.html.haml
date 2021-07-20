@@ -5,9 +5,9 @@
   %h4.danger-title= _('Remove group')
   = form_tag(group, method: :delete) do
     %p
-      = html_escape(_("Upon performing this action, the contents of this group, its subgroup and projects will be permanently removed after %{deletion_adjourned_period} days on %{date}. Until that time:")) % { date: tag.strong(date), deletion_adjourned_period: deletion_adjourned_period }
+      = html_escape(_("Upon performing this action, the contents of this group, its subgroup and projects will be permanently deleted after %{deletion_adjourned_period} days on %{date}. Until that time:")) % { date: tag.strong(date), deletion_adjourned_period: deletion_adjourned_period }
     %ul
-      %li= _("The group will be placed in 'pending removal' state")
+      %li= _("The group will be placed in 'pending deletion' state")
       %li= _("The group can be fully restored")
 
-    = button_to _('Remove group'), '#', class: 'gl-button btn btn-danger js-confirm-danger', data: { 'confirm-danger-message' => remove_group_message(group) }
+    = render 'groups/settings/remove_button', group: group

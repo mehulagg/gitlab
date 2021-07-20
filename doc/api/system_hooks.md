@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Create
+group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -8,8 +8,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 All methods require administrator authorization.
 
-The URL endpoint of the system hooks can also be configured using the UI in
-the **Admin Area > System Hooks** (`/admin/hooks`).
+You can configure the URL endpoint of the system hooks from the GitLab user interface:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. Select **System Hooks** (`/admin/hooks`).
 
 Read more about [system hooks](../system_hooks/system_hooks.md).
 
@@ -88,7 +90,7 @@ Example response:
 ## Test system hook
 
 ```plaintext
-GET /hooks/:id
+POST /hooks/:id
 ```
 
 | Attribute | Type | Required | Description |
@@ -98,7 +100,7 @@ GET /hooks/:id
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks/2"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks/1"
 ```
 
 Example response:

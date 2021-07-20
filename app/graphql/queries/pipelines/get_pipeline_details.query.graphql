@@ -27,6 +27,11 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
       __typename
       id
       iid
+      complete
+      usesNeeds
+      userPermissions {
+        updatePipeline
+      }
       downstream {
         __typename
         nodes {

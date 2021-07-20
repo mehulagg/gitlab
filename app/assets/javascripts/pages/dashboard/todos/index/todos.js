@@ -1,8 +1,10 @@
 /* eslint-disable class-methods-use-this, no-unneeded-ternary */
 
 import $ from 'jquery';
+import { getGroups } from '~/api/groups_api';
+import { getProjects } from '~/api/projects_api';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { isMetaClick } from '~/lib/utils/common_utils';
 import { addDelimiter } from '~/lib/utils/text_utility';
@@ -41,12 +43,35 @@ export default class Todos {
   }
 
   initFilters() {
-    this.initFilterDropdown($('.js-group-search'), 'group_id', ['text']);
-    this.initFilterDropdown($('.js-project-search'), 'project_id', ['text']);
+    this.initAjaxFilterDropdown(getGroups, $('.js-group-search'), 'group_id');
+    this.initAjaxFilterDropdown(getProjects, $('.js-project-search'), 'project_id');
     this.initFilterDropdown($('.js-type-search'), 'type');
     this.initFilterDropdown($('.js-action-search'), 'action_id');
 
     return new UsersSelect();
+  }
+
+  initAjaxFilterDropdown(apiMethod, $dropdown, fieldName) {
+    initDeprecatedJQueryDropdown($dropdown, {
+      fieldName,
+      selectable: true,
+      filterable: true,
+      filterRemote: true,
+      data(search, callback) {
+        return apiMethod(search, {}, (data) => {
+          callback(
+            data.map((d) => ({
+              id: d.id,
+              text: d.full_name || d.name_with_namespace,
+            })),
+          );
+        });
+      },
+      clicked: () => {
+        const $formEl = $dropdown.closest('form.filter-form');
+        $formEl.submit();
+      },
+    });
   }
 
   initFilterDropdown($dropdown, fieldName, searchFields) {
@@ -58,12 +83,6 @@ export default class Todos {
       data: $dropdown.data('data'),
       clicked: () => {
         const $formEl = $dropdown.closest('form.filter-form');
-        const mutexDropdowns = {
-          group_id: 'project_id',
-          project_id: 'group_id',
-        };
-
-        $formEl.find(`input[name="${mutexDropdowns[fieldName]}"]`).remove();
         $formEl.submit();
       },
     });
@@ -84,7 +103,9 @@ export default class Todos {
       })
       .catch(() => {
         this.updateRowState(target, true);
-        return flash(__('Error updating status of to-do item.'));
+        return createFlash({
+          message: __('Error updating status of to-do item.'),
+        });
       });
   }
 
@@ -126,7 +147,11 @@ export default class Todos {
         this.updateAllState(target, data);
         this.updateBadges(data);
       })
-      .catch(() => flash(__('Error updating status for all to-do items.')));
+      .catch(() =>
+        createFlash({
+          message: __('Error updating status for all to-do items.'),
+        }),
+      );
   }
 
   updateAllState(target, data) {

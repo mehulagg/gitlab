@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe IssuableExportCsvWorker do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, creator: user) }
+
   let(:params) { {} }
 
   subject { described_class.new.perform(issuable_type, user.id, project.id, params) }

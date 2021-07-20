@@ -46,13 +46,26 @@ RSpec.describe NamespacesHelper do
   end
 
   describe '#namespaces_options' do
-    it 'returns groups without being a member for admin' do
-      allow(helper).to receive(:current_user).and_return(admin)
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it 'returns groups without being a member for admin' do
+        allow(helper).to receive(:current_user).and_return(admin)
 
-      options = helper.namespaces_options(user_group.id, display_path: true, extra_group: user_group.id)
+        options = helper.namespaces_options(user_group.id, display_path: true, extra_group: user_group.id)
 
-      expect(options).to include(admin_group.name)
-      expect(options).to include(user_group.name)
+        expect(options).to include(admin_group.name)
+        expect(options).to include(user_group.name)
+      end
+    end
+
+    context 'when admin mode is disabled' do
+      it 'returns only allowed namespaces for admin' do
+        allow(helper).to receive(:current_user).and_return(admin)
+
+        options = helper.namespaces_options(user_group.id, display_path: true, extra_group: user_group.id)
+
+        expect(options).to include(admin_group.name)
+        expect(options).not_to include(user_group.name)
+      end
     end
 
     it 'returns only allowed namespaces for user' do
@@ -74,13 +87,16 @@ RSpec.describe NamespacesHelper do
       expect(options).to include(admin_group.name)
     end
 
-    it 'selects existing group' do
-      allow(helper).to receive(:current_user).and_return(admin)
+    context 'when admin mode is disabled' do
+      it 'selects existing group' do
+        allow(helper).to receive(:current_user).and_return(admin)
+        user_group.add_owner(admin)
 
-      options = helper.namespaces_options(:extra_group, display_path: true, extra_group: user_group)
+        options = helper.namespaces_options(:extra_group, display_path: true, extra_group: user_group)
 
-      expect(options).to include("selected=\"selected\" value=\"#{user_group.id}\"")
-      expect(options).to include(admin_group.name)
+        expect(options).to include("selected=\"selected\" value=\"#{user_group.id}\"")
+        expect(options).to include(admin_group.name)
+      end
     end
 
     it 'selects the new group by default' do
@@ -175,6 +191,85 @@ RSpec.describe NamespacesHelper do
           expect(options).to include(user_group.name)
           expect(options).to include(user.name)
         end
+      end
+    end
+  end
+
+  describe '#cascading_namespace_settings_popover_data' do
+    attribute = :delayed_project_removal
+
+    subject do
+      helper.cascading_namespace_settings_popover_data(
+        attribute,
+        subgroup1,
+        -> (locked_ancestor) { edit_group_path(locked_ancestor, anchor: 'js-permissions-settings') }
+      )
+    end
+
+    context 'when locked by an application setting' do
+      before do
+        allow(subgroup1.namespace_settings).to receive("#{attribute}_locked_by_application_setting?").and_return(true)
+        allow(subgroup1.namespace_settings).to receive("#{attribute}_locked_by_ancestor?").and_return(false)
+      end
+
+      it 'returns expected hash' do
+        expect(subject).to match({
+          popover_data: {
+            locked_by_application_setting: true,
+            locked_by_ancestor: false
+          }.to_json,
+          testid: 'cascading-settings-lock-icon'
+        })
+      end
+    end
+
+    context 'when locked by an ancestor namespace' do
+      before do
+        allow(subgroup1.namespace_settings).to receive("#{attribute}_locked_by_application_setting?").and_return(false)
+        allow(subgroup1.namespace_settings).to receive("#{attribute}_locked_by_ancestor?").and_return(true)
+        allow(subgroup1.namespace_settings).to receive("#{attribute}_locked_ancestor").and_return(admin_group.namespace_settings)
+      end
+
+      it 'returns expected hash' do
+        expect(subject).to match({
+          popover_data: {
+            locked_by_application_setting: false,
+            locked_by_ancestor: true,
+            ancestor_namespace: {
+              full_name: admin_group.full_name,
+              path: edit_group_path(admin_group, anchor: 'js-permissions-settings')
+            }
+          }.to_json,
+          testid: 'cascading-settings-lock-icon'
+        })
+      end
+    end
+  end
+
+  describe '#cascading_namespace_setting_locked?' do
+    let(:attribute) { :delayed_project_removal }
+
+    context 'when `group` argument is `nil`' do
+      it 'returns `false`' do
+        expect(helper.cascading_namespace_setting_locked?(attribute, nil)).to eq(false)
+      end
+    end
+
+    context 'when `*_locked?` method does not exist' do
+      it 'returns `false`' do
+        expect(helper.cascading_namespace_setting_locked?(:attribute_that_does_not_exist, admin_group)).to eq(false)
+      end
+    end
+
+    context 'when `*_locked?` method does exist' do
+      before do
+        allow(admin_group.namespace_settings).to receive(:delayed_project_removal_locked?).and_return(true)
+      end
+
+      it 'calls corresponding `*_locked?` method' do
+        helper.cascading_namespace_setting_locked?(attribute, admin_group, include_self: true)
+
+        expect(admin_group.namespace_settings).to have_received(:delayed_project_removal_locked?).with(include_self: true)
       end
     end
   end

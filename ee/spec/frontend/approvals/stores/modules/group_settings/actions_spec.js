@@ -74,13 +74,23 @@ describe('EE approvals group settings module actions', () => {
       state = {
         settings: {
           preventAuthorApproval: false,
+          preventCommittersApproval: false,
+          preventMrApprovalRuleEdit: false,
+          requireUserPassword: false,
+          removeApprovalsOnPush: false,
         },
       };
     });
 
     describe('on success', () => {
       it('dispatches the request and updates payload', () => {
-        const data = { allow_author_approval: true };
+        const data = {
+          allow_author_approval: true,
+          allow_committer_approval: true,
+          allow_overrides_to_approver_list_per_merge_request: true,
+          require_password_to_approve: true,
+          retain_approvals_on_push: true,
+        };
         mock.onPut(approvalSettingsPath).replyOnce(httpStatus.OK, data);
 
         return testAction(
@@ -92,7 +102,12 @@ describe('EE approvals group settings module actions', () => {
             { type: types.UPDATE_SETTINGS_SUCCESS, payload: data },
           ],
           [],
-        );
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'Merge request approval settings have been updated.',
+            type: 'notice',
+          });
+        });
       });
     });
 
@@ -118,6 +133,21 @@ describe('EE approvals group settings module actions', () => {
           });
         });
       });
+    });
+  });
+
+  describe.each`
+    action                            | type                                       | prop
+    ${'setPreventAuthorApproval'}     | ${types.SET_PREVENT_AUTHOR_APPROVAL}       | ${'preventAuthorApproval'}
+    ${'setPreventCommittersApproval'} | ${types.SET_PREVENT_COMMITTERS_APPROVAL}   | ${'preventCommittersApproval'}
+    ${'setPreventMrApprovalRuleEdit'} | ${types.SET_PREVENT_MR_APPROVAL_RULE_EDIT} | ${'preventMrApprovalRuleEdit'}
+    ${'setRemoveApprovalsOnPush'}     | ${types.SET_REMOVE_APPROVALS_ON_PUSH}      | ${'removeApprovalsOnPush'}
+    ${'setRequireUserPassword'}       | ${types.SET_REQUIRE_USER_PASSWORD}         | ${'requireUserPassword'}
+  `('$action', ({ action, type, prop }) => {
+    it(`commits ${type}`, () => {
+      const payload = { [prop]: true };
+
+      return testAction(actions[action], payload, state, [{ type, payload: true }], []);
     });
   });
 });

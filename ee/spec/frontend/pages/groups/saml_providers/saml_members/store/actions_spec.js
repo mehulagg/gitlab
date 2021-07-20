@@ -4,7 +4,7 @@ import createInitialState from 'ee/pages/groups/saml_providers/saml_members/stor
 import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
 
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 
 jest.mock('~/flash');
 jest.mock('~/api', () => ({
@@ -19,7 +19,7 @@ const state = {
 describe('saml_members actions', () => {
   afterEach(() => {
     Api.groupMembers.mockClear();
-    flash.mockClear();
+    createFlash.mockClear();
   });
 
   describe('fetchPage', () => {
@@ -75,7 +75,7 @@ describe('saml_members actions', () => {
     it('should show flash on wrong data', (done) => {
       Api.groupMembers.mockReturnValue(Promise.reject(new Error()));
       testAction(fetchPage, undefined, state, [], [], () => {
-        expect(flash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledTimes(1);
         done();
       });
     });

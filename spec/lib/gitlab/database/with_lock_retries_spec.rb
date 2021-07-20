@@ -37,8 +37,10 @@ RSpec.describe Gitlab::Database::WithLockRetries do
     context 'when lock retry is enabled' do
       let(:lock_fiber) do
         Fiber.new do
+          configuration = ActiveRecordSecond.configurations.find_db_config(Rails.env).configuration_hash
+
           # Initiating a second DB connection for the lock
-          conn = ActiveRecordSecond.establish_connection(Rails.configuration.database_configuration[Rails.env]).connection
+          conn = ActiveRecordSecond.establish_connection(configuration).connection
           conn.transaction do
             conn.execute("LOCK TABLE #{Project.table_name} in exclusive mode")
 
@@ -76,14 +78,14 @@ RSpec.describe Gitlab::Database::WithLockRetries do
           lock_attempts = 0
           lock_acquired = false
 
-          # the actual number of attempts to run_block_with_transaction can never exceed the number of
+          # the actual number of attempts to run_block_with_lock_timeout can never exceed the number of
           # timings_configurations, so here we limit the retry_count if it exceeds that value
           #
           # also, there is no call to sleep after the final attempt, which is why it will always be one less
           expected_runs_with_timeout = [retry_count, timing_configuration.size].min
           expect(subject).to receive(:sleep).exactly(expected_runs_with_timeout - 1).times
 
-          expect(subject).to receive(:run_block_with_transaction).exactly(expected_runs_with_timeout).times.and_wrap_original do |method|
+          expect(subject).to receive(:run_block_with_lock_timeout).exactly(expected_runs_with_timeout).times.and_wrap_original do |method|
             lock_fiber.resume if lock_attempts == retry_count
 
             method.call
@@ -116,8 +118,8 @@ RSpec.describe Gitlab::Database::WithLockRetries do
           context 'when there is no outer transaction: disable_ddl_transaction! is set in the migration' do
             it 'does not disable the idle transaction timeout' do
               allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
-              allow(subject).to receive(:run_block_with_transaction).once.and_raise(ActiveRecord::LockWaitTimeout)
-              allow(subject).to receive(:run_block_with_transaction).once
+              allow(subject).to receive(:run_block_with_lock_timeout).once.and_raise(ActiveRecord::LockWaitTimeout)
+              allow(subject).to receive(:run_block_with_lock_timeout).once
 
               expect(subject).not_to receive(:disable_idle_in_transaction_timeout)
 
@@ -130,7 +132,7 @@ RSpec.describe Gitlab::Database::WithLockRetries do
               allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
 
               n = 0
-              allow(subject).to receive(:run_block_with_transaction).twice do
+              allow(subject).to receive(:run_block_with_lock_timeout).twice do
                 n += 1
                 raise(ActiveRecord::LockWaitTimeout) if n == 1
               end
@@ -153,7 +155,7 @@ RSpec.describe Gitlab::Database::WithLockRetries do
         context 'when there is no outer transaction: disable_ddl_transaction! is set in the migration' do
           it 'does not disable the lock_timeout' do
             allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
-            allow(subject).to receive(:run_block_with_transaction).once.and_raise(ActiveRecord::LockWaitTimeout)
+            allow(subject).to receive(:run_block_with_lock_timeout).once.and_raise(ActiveRecord::LockWaitTimeout)
 
             expect(subject).not_to receive(:disable_lock_timeout)
 
@@ -164,7 +166,7 @@ RSpec.describe Gitlab::Database::WithLockRetries do
         context 'when there is outer transaction: disable_ddl_transaction! is not set in the migration' do
           it 'disables the lock_timeout' do
             allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
-            allow(subject).to receive(:run_block_with_transaction).once.and_raise(ActiveRecord::LockWaitTimeout)
+            allow(subject).to receive(:run_block_with_lock_timeout).once.and_raise(ActiveRecord::LockWaitTimeout)
 
             expect(subject).to receive(:disable_lock_timeout)
 
@@ -192,7 +194,7 @@ RSpec.describe Gitlab::Database::WithLockRetries do
           lock_acquired = false
 
           expect(subject).to receive(:sleep).exactly(expected_attempts_with_timeout - 1).times
-          expect(subject).to receive(:run_block_with_transaction).exactly(expected_attempts_with_timeout).times.and_call_original
+          expect(subject).to receive(:run_block_with_lock_timeout).exactly(expected_attempts_with_timeout).times.and_call_original
 
           expect do
             subject.run(raise_on_exhaustion: true) do
@@ -242,16 +244,16 @@ RSpec.describe Gitlab::Database::WithLockRetries do
     let(:timing_configuration) { [[0.015.seconds, 0.025.seconds], [0.015.seconds, 0.025.seconds]] } # 15ms, 25ms
 
     it 'executes `SET LOCAL lock_timeout` using the configured timeout value in milliseconds' do
-      expect(ActiveRecord::Base.connection).to receive(:execute).with("SAVEPOINT active_record_1").and_call_original
-      expect(ActiveRecord::Base.connection).to receive(:execute).with('RESET idle_in_transaction_session_timeout; RESET lock_timeout').and_call_original
+      expect(ActiveRecord::Base.connection).to receive(:execute).with("RESET idle_in_transaction_session_timeout; RESET lock_timeout").and_call_original
+      expect(ActiveRecord::Base.connection).to receive(:execute).with("SAVEPOINT active_record_1", "TRANSACTION").and_call_original
       expect(ActiveRecord::Base.connection).to receive(:execute).with("SET LOCAL lock_timeout TO '15ms'").and_call_original
-      expect(ActiveRecord::Base.connection).to receive(:execute).with("RELEASE SAVEPOINT active_record_1").and_call_original
+      expect(ActiveRecord::Base.connection).to receive(:execute).with("RELEASE SAVEPOINT active_record_1", "TRANSACTION").and_call_original
 
       subject.run { }
     end
 
     it 'calls `sleep` after the first iteration fails, using the configured sleep time' do
-      expect(subject).to receive(:run_block_with_transaction).and_raise(ActiveRecord::LockWaitTimeout).twice
+      expect(subject).to receive(:run_block_with_lock_timeout).and_raise(ActiveRecord::LockWaitTimeout).twice
       expect(subject).to receive(:sleep).with(0.025)
 
       subject.run { }

@@ -7,12 +7,12 @@ module QA
         module Geo
           module Nodes
             class Show < QA::Page::Base
-              view 'ee/app/views/admin/geo/nodes/index.html.haml' do
-                element :new_node_link
+              view 'ee/app/assets/javascripts/geo_nodes/components/app.vue' do
+                element :add_site_button
               end
 
               def new_node!
-                click_element :new_node_link
+                click_element(:add_site_button)
               end
             end
           end

@@ -1,9 +1,12 @@
 - @content_class = "limit-container-width" unless fluid_layout
 - page_itemtype    'https://schema.org/Organization'
 - @skip_current_level_breadcrumb = true
+- add_page_specific_style 'page_bundles/group'
 
 - if show_thanks_for_purchase_banner?
   = render_if_exists 'shared/thanks_for_purchase_banner', plan_title: plan_title, quantity: params[:purchased_quantity].to_i
+
+= render_if_exists 'shared/qrtly_reconciliation_alert', group: @group
 
 - if show_invite_banner?(@group)
   = content_for :group_invite_members_banner do
@@ -12,14 +15,10 @@
         is_dismissed_key: "invite_#{@group.id}_#{current_user.id}",
         track_label: 'invite_members_banner',
         invite_members_path: group_group_members_path(@group) } }
+  = render 'groups/invite_members_modal', group: @group
 
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, group_url(@group, rss_url_options), title: "#{@group.name} activity")
-
-= content_for :invite_members_sidebar do
-  - if can_invite_members_for_group?(@group)
-    %li
-      .js-invite-members-trigger{ data: { icon: 'plus', classes: 'gl-text-decoration-none! gl-shadow-none!', display_text: _('Invite team members') } }
 
 = render partial: 'flash_messages'
 

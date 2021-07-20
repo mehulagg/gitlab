@@ -9,10 +9,16 @@ module EE
       prepended do
         include DescriptionDiffActions
 
-        before_action :whitelist_query_limiting_ee, only: [:update]
+        before_action :disable_query_limiting_ee, only: [:update]
         before_action only: [:new, :create] do
           populate_vulnerability_id
         end
+
+        before_action only: :show do
+          push_frontend_feature_flag(:cve_id_request_button, project)
+        end
+
+        before_action :redirect_if_test_case, only: [:show]
 
         feature_category :issue_tracking, [:delete_description_version, :description_diff]
       end
@@ -36,8 +42,8 @@ module EE
         options.reject { |key| key == 'weight' }
       end
 
-      def whitelist_query_limiting_ee
-        ::Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/4794')
+      def disable_query_limiting_ee
+        ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/4794')
       end
 
       def issue_params
@@ -111,7 +117,13 @@ module EE
       end
 
       def populate_vulnerability_id
-        self.vulnerability_id = params[:vulnerability_id] if can?(current_user, :read_vulnerability, project)
+        self.vulnerability_id = params[:vulnerability_id] if can?(current_user, :read_security_resource, project)
+      end
+
+      def redirect_if_test_case
+        return unless issue.test_case?
+
+        redirect_to project_quality_test_case_path(project, issue)
       end
     end
   end

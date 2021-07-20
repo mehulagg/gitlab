@@ -57,4 +57,10 @@ module EpicsHelper
       s_("GroupRoadmap|No start date – %{dateWord}") % { dateWord: epic.end_date.strftime(long_format) }
     end
   end
+
+  def award_emoji_epics_api_path(epic)
+    if Feature.enabled?(:improved_emoji_picker, epic.group, default_enabled: :yaml)
+      api_v4_groups_epics_award_emoji_path(id: epic.group.id, epic_iid: epic.iid)
+    end
+  end
 end

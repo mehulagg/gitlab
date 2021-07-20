@@ -14,6 +14,11 @@ results in a `404` status code.
 Epics are available only in GitLab [Premium and higher](https://about.gitlab.com/pricing/).
 If the Epics feature is not available, a `403` status code is returned.
 
+## Epic Issues pagination
+
+API results [are paginated](index.md#pagination). Requests that return
+multiple issues default to returning 20 results at a time.
+
 ## List issues for an epic
 
 Gets all issues that are assigned to an epic and the authenticated user has access to.
@@ -24,7 +29,7 @@ GET /groups/:id/epics/:epic_iid/issues
 
 | Attribute           | Type             | Required   | Description                                                                            |
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user                |
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic.  |
 
 ```shell
@@ -102,7 +107,6 @@ Example response:
       "award_emoji": "http://localhost:3001/api/v4/projects/8/issues/6/award_emoji",
       "project": "http://localhost:3001/api/v4/projects/8"
     },
-    "subscribed": true,
     "epic_issue_id": 2
   }
 ]
@@ -120,7 +124,7 @@ POST /groups/:id/epics/:epic_iid/issues/:issue_id
 
 | Attribute           | Type             | Required   | Description                                                                            |
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user                |
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic.  |
 | `issue_id`          | integer/string   | yes        | The ID of the issue.          |
 
@@ -226,7 +230,7 @@ DELETE /groups/:id/epics/:epic_iid/issues/:epic_issue_id
 
 | Attribute           | Type             | Required   | Description                                                                                          |
 | ------------------- | ---------------- | ---------- | -----------------------------------------------------------------------------------------------------|
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user                |
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic.                |
 | `epic_issue_id`     | integer/string   | yes        | The ID of the issue - epic association.     |
 
@@ -332,7 +336,7 @@ PUT /groups/:id/epics/:epic_iid/issues/:epic_issue_id
 
 | Attribute           | Type             | Required   | Description                                                                                          |
 | ------------------- | ---------------- | ---------- | -----------------------------------------------------------------------------------------------------|
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](index.md#namespaced-path-encoding) owned by the authenticated user                |
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic.                |
 | `epic_issue_id`     | integer/string   | yes        | The ID of the issue - epic association.     |
 | `move_before_id`    | integer/string   | no         | The ID of the issue - epic association that should be placed before the link in the question.     |

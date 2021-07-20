@@ -59,6 +59,13 @@ If you have other target branches, include them in your regex. (See [Enabling pu
 The default branch also defaults to being a [protected branch](../user/project/protected_branches.md),
 which already limits users from pushing directly.
 
+Some example regular expressions you can use in push rules:
+
+- `^JIRA-` Branches must start with `JIRA-`.
+- `-JIRA$` Branches must end with `-JIRA`.
+- `^[a-z0-9\\-]{4,15}$` Branches must be between `4` and `15` characters long,
+  accepting only lowercase letters, numbers and dashes.
+
 #### Default restricted branch names
 
 > Introduced in GitLab 12.10.
@@ -75,14 +82,19 @@ See [server hooks](../administration/server_hooks.md) for more information.
 
 ## Enabling push rules
 
-NOTE:
-GitLab administrators can set push rules globally under
-**Admin Area > Push Rules** that all new projects inherit. You can later
-override them in a project's settings. They can be also set on a [group level](../user/group/index.md#group-push-rules).
+You can create push rules for all new projects to inherit, but they can be overridden
+at the project level or the [group level](../user/group/index.md#group-push-rules).
 
-1. Navigate to your project's **Settings > Repository** and expand **Push rules**
-1. Set the rule you want
-1. Click **Save Push Rules** for the changes to take effect
+To create global push rules:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Push rules**.
+
+To override global push rules in a project's settings:
+
+1. Navigate to your project's **Settings > Repository** and expand **Push rules**.
+1. Set the rule you want.
+1. Select **Save Push Rules** for the changes to take effect.
 
 The following options are available:
 
@@ -103,6 +115,28 @@ The following options are available:
 NOTE:
 GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in push rules, and you can test them at the [regex101 regex tester](https://regex101.com/).
 
+### Caveat to "Reject unsigned commits" push rule **(PREMIUM)**
+
+This push rule ignores commits that are authenticated and created by GitLab
+(either through the UI or API). When the **Reject unsigned commits** push rule is
+enabled, unsigned commits may still show up in the commit history if a commit was
+created **within** GitLab itself. As expected, commits created outside GitLab and
+pushed to the repository are rejected. For more information about how GitLab
+plans to fix this issue, read [issue #19185](https://gitlab.com/gitlab-org/gitlab/-/issues/19185).
+
+#### "Reject unsigned commits" push rule disables Web IDE
+
+In 13.10, if a project has the "Reject unsigned commits" push rule, the user will not be allowed to
+commit through GitLab Web IDE.
+
+To allow committing through the Web IDE on a project with this push rule, a GitLab administrator will
+need to disable the feature flag `reject_unsigned_commits_by_gitlab`. This can be done through a
+[rails console](../administration/operations/rails_console.md) and running:
+
+```ruby
+Feature.disable(:reject_unsigned_commits_by_gitlab)
+```
+
 ## Prevent pushing secrets to the repository
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385) in GitLab 8.12.
@@ -114,7 +148,7 @@ pushed to a repository. The list stops those commits from reaching the remote re
 
 By selecting the checkbox *Prevent committing secrets to Git*, GitLab prevents
 pushes to the repository when a file matches a regular expression as read from
-[`files_denylist.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/gitlab/checks/files_denylist.yml) (make sure you are at the right branch
+[`files_denylist.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/checks/files_denylist.yml) (make sure you are at the right branch
 as your GitLab version when viewing this file).
 
 NOTE:

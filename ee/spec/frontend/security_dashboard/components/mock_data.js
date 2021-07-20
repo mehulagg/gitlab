@@ -26,7 +26,7 @@ export const generateVulnerabilities = () => [
     resolvedOnDefaultBranch: true,
     location: {
       image:
-        'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
     },
     project: {
       nameWithNamespace: 'Administrator / Security reports',
@@ -58,6 +58,8 @@ export const generateVulnerabilities = () => [
     location: {
       file: 'src/main/java/com/gitlab/security_products/tests/App.java',
       startLine: '1337',
+      blobPath:
+        '/gitlab-org/security-reports2/-/blob/e5c61e4d5d0b8418011171def04ca0aa36532621/src/main/java/com/gitlab/security_products/tests/App.java',
     },
     project: {
       nameWithNamespace: 'Administrator / Vulnerability reports',

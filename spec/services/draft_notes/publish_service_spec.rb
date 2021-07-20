@@ -202,7 +202,7 @@ RSpec.describe DraftNotes::PublishService do
         expect(newrev).to be_present
 
         # Generates new MR revision at DB level
-        refresh = MergeRequests::RefreshService.new(project, user)
+        refresh = MergeRequests::RefreshService.new(project: project, current_user: user)
         refresh.execute(oldrev, newrev, merge_request.source_branch_ref)
 
         expect { publish(draft: draft) }.to change { Suggestion.count }.by(1)
@@ -229,7 +229,7 @@ RSpec.describe DraftNotes::PublishService do
     expect(DraftNote.count).to eq(2)
   end
 
-  context 'with quick actions' do
+  context 'with quick actions', :sidekiq_inline do
     it 'performs quick actions' do
       other_user = create(:user)
       project.add_developer(other_user)

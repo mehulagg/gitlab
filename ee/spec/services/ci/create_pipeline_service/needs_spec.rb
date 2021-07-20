@@ -3,9 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService do
-  subject(:execute) { service.execute(:push) }
-
   let_it_be(:downstream_project) { create(:project, name: 'project', namespace: create(:namespace, name: 'some')) }
+
   let(:project) { create(:project, :repository) }
   let(:user) { project.owner }
   let(:service) { described_class.new(project, user, { ref: 'refs/heads/master' }) }
@@ -30,29 +29,34 @@ RSpec.describe Ci::CreatePipelineService do
   end
 
   it 'persists pipeline' do
-    expect(execute).to be_persisted
+    pipeline = create_pipeline!
+
+    expect(pipeline).to be_persisted
   end
 
   it 'persists both jobs' do
-    expect { execute }.to change(Ci::Build, :count).from(0).to(1)
+    expect { create_pipeline! }.to change(Ci::Build, :count).from(0).to(1)
       .and change(Ci::Bridge, :count).from(0).to(1)
   end
 
   it 'persists bridge needs' do
-    job = execute.builds.first
-    bridge = execute.stages.last.bridges.first
+    pipeline = create_pipeline!
+    job = pipeline.builds.first
+    bridge = pipeline.bridges.first
 
     expect(bridge.needs.first.name).to eq(job.name)
   end
 
   it 'persists bridge target project' do
-    bridge = execute.stages.last.bridges.first
+    pipeline = create_pipeline!
+    bridge = pipeline.bridges.first
 
     expect(bridge.downstream_project).to eq downstream_project
   end
 
   it "sets scheduling_type of bridge_dag_job as 'dag'" do
-    bridge = execute.stages.last.bridges.first
+    pipeline = create_pipeline!
+    bridge = pipeline.bridges.first
 
     expect(bridge.scheduling_type).to eq('dag')
   end
@@ -71,12 +75,14 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'creates a pipeline with regular_job and bridge_dag_job pending' do
-      processables = execute.processables
+      pipeline = create_pipeline!
+      processables = pipeline.processables
+      Ci::InitialPipelineProcessWorker.new.perform(pipeline.id)
 
       regular_job = processables.find { |processable| processable.name == 'regular_job' }
       bridge_dag_job = processables.find { |processable| processable.name == 'bridge_dag_job' }
 
-      expect(execute).to be_persisted
+      expect(pipeline).to be_persisted
       expect(regular_job.status).to eq('pending')
       expect(bridge_dag_job.status).to eq('pending')
     end
@@ -110,11 +116,16 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'has dependencies and variables', :aggregate_failures do
-      job = execute.builds.first
+      pipeline = create_pipeline!
+      job = pipeline.builds.first
 
       expect(job).to be_present
       expect(job.all_dependencies).to include(dependency)
-      expect(job.scoped_variables_hash).to include(dependency_variable.key => dependency_variable.value)
+      expect(job.scoped_variables.to_hash).to include(dependency_variable.key => dependency_variable.value)
     end
+  end
+
+  def create_pipeline!
+    service.execute(:push).payload
   end
 end

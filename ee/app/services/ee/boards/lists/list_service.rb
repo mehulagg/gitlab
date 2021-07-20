@@ -16,19 +16,11 @@ module EE
         private
 
         def unavailable_list_types_for(board)
-          list_types = hidden_lists_for(board) + unlicensed_lists_for(board)
-          list_types << ::List.list_types[:iteration] if ::Feature.disabled?(:iteration_board_lists, board.resource_parent)
+          list_types = super
+          list_types += unlicensed_lists_for(board)
+          list_types << ::List.list_types[:iteration] if ::Feature.disabled?(:iteration_board_lists, board.resource_parent, default_enabled: :yaml)
 
           list_types.uniq
-        end
-
-        def hidden_lists_for(board)
-          hidden = []
-
-          hidden << ::List.list_types[:backlog] if board.hide_backlog_list
-          hidden << ::List.list_types[:closed] if board.hide_closed_list
-
-          hidden
         end
 
         def unlicensed_lists_for(board)

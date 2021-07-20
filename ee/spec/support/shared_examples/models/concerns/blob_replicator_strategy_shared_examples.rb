@@ -3,8 +3,11 @@
 # Include these shared examples in specs of Replicators that include
 # BlobReplicatorStrategy.
 #
-# A let variable called model_record should be defined in the spec. It should be
-# a valid, unpersisted instance of the model class.
+# Required let variables:
+#
+# - model_record: A valid, unpersisted instance of the model class. Or a valid,
+#                 persisted instance of the model class in a not-yet loaded let
+#                 variable (so we can trigger creation).
 #
 RSpec.shared_examples 'a blob replicator' do
   include EE::GeoHelpers
@@ -21,10 +24,14 @@ RSpec.shared_examples 'a blob replicator' do
   it_behaves_like 'a replicator'
 
   # This could be included in each model's spec, but including it here is DRYer.
-  include_examples 'a replicable model'
+  include_examples 'a replicable model' do
+    let(:replicator_class) { described_class }
+  end
 
   describe '#handle_after_create_commit' do
     it 'creates a Geo::Event' do
+      model_record.save!
+
       expect do
         replicator.handle_after_create_commit
       end.to change { ::Geo::Event.count }.by(1)

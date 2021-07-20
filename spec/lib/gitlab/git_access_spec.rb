@@ -265,7 +265,7 @@ RSpec.describe Gitlab::GitAccess do
     it 'enqueues a redirected message for pushing' do
       push_access_check
 
-      expect(Gitlab::Checks::ProjectMoved.fetch_message(user.id, project.id)).not_to be_nil
+      expect(Gitlab::Checks::ContainerMoved.fetch_message(user, project.repository)).not_to be_nil
     end
 
     it 'allows push and pull access' do
@@ -433,6 +433,21 @@ RSpec.describe Gitlab::GitAccess do
       expect { pull_access_check }.to raise_forbidden("Your account has been deactivated by your administrator. Please log back in from a web browser to reactivate your account at #{Gitlab.config.gitlab.url}")
     end
 
+    it 'disallows users with expired password to pull' do
+      project.add_maintainer(user)
+      user.update!(password_expires_at: 2.minutes.ago, password_automatically_set: true)
+
+      expect { pull_access_check }.to raise_forbidden("Your password expired. Please access GitLab from a web browser to update your password.")
+    end
+
+    it 'allows ldap users with expired password to pull' do
+      project.add_maintainer(user)
+      user.update!(password_expires_at: 2.minutes.ago)
+      allow(user).to receive(:ldap_user?).and_return(true)
+
+      expect { pull_access_check }.not_to raise_error
+    end
+
     context 'when the project repository does not exist' do
       before do
         project.add_guest(user)
@@ -554,19 +569,19 @@ RSpec.describe Gitlab::GitAccess do
             context 'when the repository is public' do
               let(:options) { %i[repository_enabled] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
 
             context 'when the repository is private' do
               let(:options) { %i[repository_private] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
 
             context 'when the repository is disabled' do
               let(:options) { %i[repository_disabled] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
           end
         end
@@ -596,13 +611,13 @@ RSpec.describe Gitlab::GitAccess do
             context 'when the repository is private' do
               let(:options) { %i[repository_private] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
 
             context 'when the repository is disabled' do
               let(:options) { %i[repository_disabled] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
           end
         end
@@ -724,6 +739,8 @@ RSpec.describe Gitlab::GitAccess do
 
     context 'when LFS is not enabled' do
       it 'does not run LFSIntegrity check' do
+        allow(project).to receive(:lfs_enabled?).and_return(false)
+
         expect(Gitlab::Checks::LfsIntegrity).not_to receive(:new)
 
         push_access_check
@@ -969,6 +986,27 @@ RSpec.describe Gitlab::GitAccess do
         expect { push_access_check }.to raise_forbidden("Your account has been deactivated by your administrator. Please log back in from a web browser to reactivate your account at #{Gitlab.config.gitlab.url}")
       end
 
+      it 'disallows users with expired password to push' do
+        user.update!(password_expires_at: 2.minutes.ago, password_automatically_set: true)
+
+        expect { push_access_check }.to raise_forbidden("Your password expired. Please access GitLab from a web browser to update your password.")
+      end
+
+      it 'allows ldap users with expired password to push' do
+        user.update!(password_expires_at: 2.minutes.ago)
+        allow(user).to receive(:ldap_user?).and_return(true)
+
+        expect { push_access_check }.not_to raise_error
+      end
+
+      it 'disallows blocked ldap users with expired password to push' do
+        user.block
+        user.update!(password_expires_at: 2.minutes.ago)
+        allow(user).to receive(:ldap_user?).and_return(true)
+
+        expect { push_access_check }.to raise_forbidden("Your account has been blocked.")
+      end
+
       it 'cleans up the files' do
         expect(project.repository).to receive(:clean_stale_repository_files).and_call_original
         expect { push_access_check }.not_to raise_error
@@ -990,10 +1028,10 @@ RSpec.describe Gitlab::GitAccess do
         expect { access.check('git-receive-pack', changes) }.not_to exceed_query_limit(control_count).with_threshold(2)
       end
 
-      it 'raises TimeoutError when #check_single_change_access raises a timeout error' do
+      it 'raises TimeoutError when #check_access! raises a timeout error' do
         message = "Push operation timed out\n\nTiming information for debugging purposes:\nRunning checks for ref: wow"
 
-        expect_next_instance_of(Gitlab::Checks::ChangeAccess) do |check|
+        expect_next_instance_of(Gitlab::Checks::SingleChangeAccess) do |check|
           expect(check).to receive(:validate!).and_raise(Gitlab::Checks::TimedLogger::TimeoutError)
         end
 
@@ -1034,7 +1072,7 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
-  context 'when the repository is read only' do
+  context 'when the repository is read-only' do
     let(:project) { create(:project, :repository, :read_only) }
 
     it 'denies push access' do

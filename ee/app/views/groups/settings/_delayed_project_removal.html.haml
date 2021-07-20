@@ -1,8 +1,19 @@
 - return unless show_delayed_project_removal_setting?(group)
 
-.form-group.gl-mb-3
-  .form-check
-    = f.check_box :delayed_project_removal, checked: group.delayed_project_removal?, class: 'form-check-input'
-    = f.label :delayed_project_removal, class: 'form-check-label' do
-      %span.gl-display-block= s_('GroupSettings|Enable delayed project removal')
-      %span.gl-text-gray-400= s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{customization_link} in instance settings').html_safe % { waiting_period: ::Gitlab::CurrentSettings.deletion_adjourned_period, customization_link: link_to('customized by an admin', general_admin_application_settings_path) }
+- setting_locked = cascading_namespace_setting_locked?(:delayed_project_removal, group)
+
+.form-group{ data: { testid: 'delayed-project-removal-form-group' } }
+  .gl-form-checkbox.custom-control.custom-checkbox
+    = f.check_box :delayed_project_removal, checked: group.namespace_settings.delayed_project_removal?, disabled: setting_locked, class: 'custom-control-input', data: { testid: 'delayed-project-removal-checkbox' }
+    = render 'shared/namespaces/cascading_settings/setting_label_checkbox', attribute: :delayed_project_removal,
+        group: group,
+        form: f,
+        setting_locked: setting_locked,
+        settings_path_helper: -> (locked_ancestor) { edit_group_path(locked_ancestor, anchor: 'js-permissions-settings') },
+        help_text: delayed_project_removal_help_text do
+      = s_('GroupSettings|Enable delayed project removal')
+    = render 'shared/namespaces/cascading_settings/enforcement_checkbox',
+        attribute: :delayed_project_removal,
+        group: group,
+        form: f,
+        setting_locked: setting_locked

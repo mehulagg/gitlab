@@ -4,12 +4,13 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# NuGet packages in the Package Registry
+# NuGet packages in the Package Registry **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20050) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20050) in GitLab Premium 12.8.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
+> - Symbol package support [added](https://gitlab.com/gitlab-org/gitlab/-/issues/262081) in GitLab 14.1.
 
-Publish NuGet packages in your project’s Package Registry. Then, install the
+Publish NuGet packages in your project's Package Registry. Then, install the
 packages whenever you need to use them as a dependency.
 
 The Package Registry works with:
@@ -18,6 +19,9 @@ The Package Registry works with:
 - [.NET Core CLI](https://docs.microsoft.com/en-us/dotnet/core/tools/)
 - [Visual Studio](https://visualstudio.microsoft.com/vs/)
 
+For documentation of the specific API endpoints that these
+clients use, see the [NuGet API documentation](../../../api/packages/nuget.md).
+
 ## Install NuGet
 
 The required minimum versions are:
@@ -25,7 +29,7 @@ The required minimum versions are:
 - [NuGet CLI 5.1 or later](https://www.nuget.org/downloads). If you have
   [Visual Studio](https://visualstudio.microsoft.com/vs/), the NuGet CLI is
   probably already installed.
-- Alternatively, you can use [.NET SDK 3.0 or later](https://dotnet.microsoft.com/download/dotnet-core/3.0),
+- Alternatively, you can use [.NET SDK 3.0 or later](https://dotnet.microsoft.com/download/dotnet/3.0),
   which installs the NuGet CLI.
 - NuGet protocol version 3 or later.
 
@@ -219,7 +223,7 @@ To use the [project-level](#use-the-gitlab-endpoint-for-nuget-packages) Package 
    <configuration>
     <packageSources>
         <clear />
-        <add key="gitlab" value="https://gitlab.example.com/api/v4/project/<your_project_id>/packages/nuget/index.json" />
+        <add key="gitlab" value="https://gitlab.example.com/api/v4/projects/<your_project_id>/packages/nuget/index.json" />
     </packageSources>
     <packageSourceCredentials>
         <gitlab>
@@ -263,7 +267,7 @@ Prerequisite:
 
 When publishing packages:
 
-- The Package Registry on GitLab.com can store up to 500 MB of content.
+- The Package Registry on GitLab.com can store up to 5 GB of content.
   This limit is [configurable for self-managed GitLab instances](../../../administration/instance_limits.md#package-registry-limits).
 - If you publish the same package with the same version multiple times, each
   consecutive upload is saved as a separate file. When installing a package,
@@ -314,7 +318,7 @@ dotnet nuget push MyPackage.1.0.0.nupkg --source gitlab
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36424) in GitLab 13.3.
 
-If you’re using NuGet with GitLab CI/CD, a CI job token can be used instead of a
+If you're using NuGet with GitLab CI/CD, a CI job token can be used instead of a
 personal access token or deploy token. The token inherits the permissions of the
 user that generates the pipeline.
 
@@ -333,7 +337,7 @@ updated:
      stage: deploy
      script:
        - dotnet pack -c Release
-       - dotnet nuget add source "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/nuget/index.json" --name gitlab --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
+       - dotnet nuget add source "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/nuget/index.json" --name gitlab --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
        - dotnet nuget push "bin/Release/*.nupkg" --source gitlab
      only:
        - master
@@ -390,3 +394,40 @@ dotnet add package <package_id> \
 
 - `<package_id>` is the package ID.
 - `<package_version>` is the package version. Optional.
+
+## Symbol packages
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262081) in GitLab 14.1.
+
+If you push a `.nupkg`, symbol package files in the `.snupkg` format are uploaded automatically. You
+can also push them manually:
+
+```shell
+nuget push My.Package.snupkg -Source <source_name>
+```
+
+Consuming symbol packages is not yet guaranteed using clients such as Visual Studio or
+dotnet-symbol. The `.snupkg` files are available for download through the UI or the
+[API](../../../api/packages/nuget.md#download-a-package-file).
+
+Follow the [NuGet symbol package issue](https://gitlab.com/gitlab-org/gitlab/-/issues/262081)
+for further updates.
+
+## Supported CLI commands
+
+The GitLab NuGet repository supports the following commands for the NuGet CLI (`nuget`) and the .NET
+CLI (`dotnet`):
+
+- `nuget push`: Upload a package to the registry.
+- `dotnet nuget push`: Upload a package to the registry.
+- `nuget install`: Install a package from the registry.
+- `dotnet add`: Install a package from the registry.
+
+## Troubleshooting
+
+To improve performance, NuGet caches files related to a package. If you encounter issues, clear the
+cache with this command:
+
+```shell
+nuget locals all -clear
+```

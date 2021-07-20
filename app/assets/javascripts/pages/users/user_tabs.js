@@ -166,7 +166,7 @@ export default class UserTabs {
         const tabSelector = `div#${action}`;
         this.$parentEl.find(tabSelector).html(data.html);
         this.loaded[action] = true;
-        localTimeAgo($('.js-timeago', tabSelector));
+        localTimeAgo(document.querySelectorAll(`${tabSelector} .js-timeago`));
 
         this.toggleLoading(false);
       })
@@ -209,7 +209,7 @@ export default class UserTabs {
       container,
       url: $(`${container} .overview-content-list`).data('href'),
       ...options,
-      postRenderCallback: () => localTimeAgo($('.js-timeago', container)),
+      postRenderCallback: () => localTimeAgo(document.querySelectorAll(`${container} .js-timeago`)),
     });
   }
 
@@ -223,14 +223,14 @@ export default class UserTabs {
       .then((data) => UserTabs.renderActivityCalendar(data, $calendarWrap))
       .catch(() => {
         const cWrap = $calendarWrap[0];
-        cWrap.querySelector('.spinner').classList.add('invisible');
+        cWrap.querySelector('.gl-spinner').classList.add('invisible');
         cWrap.querySelector('.user-calendar-error').classList.remove('invisible');
         cWrap
           .querySelector('.user-calendar-error .js-retry-load')
           .addEventListener('click', (e) => {
             e.preventDefault();
             cWrap.querySelector('.user-calendar-error').classList.add('invisible');
-            cWrap.querySelector('.spinner').classList.remove('invisible');
+            cWrap.querySelector('.gl-spinner').classList.remove('invisible');
             this.loadActivityCalendar();
           });
       });

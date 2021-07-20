@@ -3,16 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe API::Triggers do
+  include AfterNextHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, :auto_devops, creator: user) }
+  let_it_be(:other_project) { create(:project) }
 
   describe 'POST /projects/:project_id/trigger/pipeline' do
     context 'when triggering a pipeline from a job token' do
-      let(:other_job) { create(:ci_build, :running, user: other_user) }
+      let(:other_job) { create(:ci_build, :running, user: other_user, project: other_project) }
       let(:params) { { ref: 'refs/heads/other-branch' } }
 
       subject do
         post api("/projects/#{project.id}/ref/master/trigger/pipeline?token=#{other_job.token}"), params: params
+      end
+
+      before do
+        allow_next(Ci::JobToken::Scope).to receive(:includes?).with(project).and_return(true)
       end
 
       context 'without user' do
@@ -70,6 +77,21 @@ RSpec.describe API::Triggers do
             )
           end
 
+          context 'when project is not in the job token scope' do
+            before do
+              allow_next(Ci::JobToken::Scope)
+                .to receive(:includes?)
+                .with(project)
+                .and_return(false)
+            end
+
+            it 'forbids to create a pipeline' do
+              subject
+
+              expect(response).to have_gitlab_http_status(:not_found)
+            end
+          end
+
           context 'when build is complete' do
             before do
               other_job.success
@@ -96,7 +118,7 @@ RSpec.describe API::Triggers do
               expect(response).to have_gitlab_http_status(:created)
               expect(Ci::Pipeline.last.source).to eq('pipeline')
               expect(Ci::Pipeline.last.triggered_by_pipeline).not_to be_nil
-              expect(Ci::Pipeline.last.variables.map { |v| { v.key => v.value } }.last).to eq(params[:variables])
+              expect(Ci::Pipeline.last.variables.find { |v| v.key == 'KEY' }.value).to eq('VALUE')
             end
           end
         end

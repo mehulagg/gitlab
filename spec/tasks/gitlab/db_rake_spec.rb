@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'rake'
 
-RSpec.describe 'gitlab:db namespace rake task' do
+RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
   before :all do
     Rake.application.rake_require 'active_record/railties/databases'
     Rake.application.rake_require 'tasks/seed_fu'
@@ -124,64 +124,31 @@ RSpec.describe 'gitlab:db namespace rake task' do
   describe 'clean_structure_sql' do
     let_it_be(:clean_rake_task) { 'gitlab:db:clean_structure_sql' }
     let_it_be(:test_task_name) { 'gitlab:db:_test_multiple_structure_cleans' }
-    let_it_be(:structure_file) { 'db/structure.sql' }
     let_it_be(:input) { 'this is structure data' }
+
     let(:output) { StringIO.new }
 
     before do
-      stub_file_read(structure_file, content: input)
-      allow(File).to receive(:open).with(structure_file, any_args).and_yield(output)
-    end
+      structure_files = %w[db/structure.sql db/ci_structure.sql]
 
-    after do
-      Rake::Task[test_task_name].clear if Rake::Task.task_defined?(test_task_name)
-    end
+      allow(File).to receive(:open).and_call_original
 
-    it 'can be executed multiple times within another rake task' do
-      expect_multiple_executions_of_task(test_task_name, clean_rake_task) do
-        expect_next_instance_of(Gitlab::Database::SchemaCleaner) do |cleaner|
-          expect(cleaner).to receive(:clean).with(output)
-        end
+      structure_files.each do |structure_file|
+        stub_file_read(structure_file, content: input)
+        allow(File).to receive(:open).with(Rails.root.join(structure_file).to_s, any_args).and_yield(output)
       end
     end
-  end
-
-  describe 'load_custom_structure' do
-    let_it_be(:db_config) { Rails.application.config_for(:database) }
-    let_it_be(:custom_load_task) { 'gitlab:db:load_custom_structure' }
-    let_it_be(:custom_filepath) { Pathname.new('db/directory') }
-
-    it 'uses the psql command to load the custom structure file' do
-      expect(Gitlab::Database::CustomStructure).to receive(:custom_dump_filepath).and_return(custom_filepath)
-
-      expect(Kernel).to receive(:system)
-        .with('psql', any_args, custom_filepath.to_path, db_config['database']).and_return(true)
-
-      run_rake_task(custom_load_task)
-    end
-
-    it 'raises an error when the call to the psql command fails' do
-      expect(Gitlab::Database::CustomStructure).to receive(:custom_dump_filepath).and_return(custom_filepath)
-
-      expect(Kernel).to receive(:system)
-        .with('psql', any_args, custom_filepath.to_path, db_config['database']).and_return(nil)
-
-      expect { run_rake_task(custom_load_task) }.to raise_error(/failed to execute:\s*psql/)
-    end
-  end
-
-  describe 'dump_custom_structure' do
-    let_it_be(:test_task_name) { 'gitlab:db:_test_multiple_task_executions' }
-    let_it_be(:custom_dump_task) { 'gitlab:db:dump_custom_structure' }
 
     after do
       Rake::Task[test_task_name].clear if Rake::Task.task_defined?(test_task_name)
     end
 
     it 'can be executed multiple times within another rake task' do
-      expect_multiple_executions_of_task(test_task_name, custom_dump_task) do
-        expect_next_instance_of(Gitlab::Database::CustomStructure) do |custom_structure|
-          expect(custom_structure).to receive(:dump)
+      expect_multiple_executions_of_task(test_task_name, clean_rake_task, count: 2) do
+        database_count = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).size
+
+        expect_next_instances_of(Gitlab::Database::SchemaCleaner, database_count) do |cleaner|
+          expect(cleaner).to receive(:clean).with(output)
         end
       end
     end
@@ -298,15 +265,15 @@ RSpec.describe 'gitlab:db namespace rake task' do
   end
 
   describe '#migrate_with_instrumentation' do
-    subject { run_rake_task('gitlab:db:migration_testing', "[#{filename}]") }
+    subject { run_rake_task('gitlab:db:migration_testing') }
 
     let(:ctx) { double('ctx', migrations: all_migrations, schema_migration: double, get_all_versions: existing_versions) }
     let(:instrumentation) { instance_double(Gitlab::Database::Migrations::Instrumentation, observations: observations) }
     let(:existing_versions) { [1] }
     let(:all_migrations) { [double('migration1', version: 1), pending_migration] }
     let(:pending_migration) { double('migration2', version: 2) }
-    let(:filename) { 'results-file.json'}
-    let(:buffer) { StringIO.new }
+    let(:filename) { Gitlab::Database::Migrations::Instrumentation::STATS_FILENAME }
+    let(:result_dir) { Dir.mktmpdir }
     let(:observations) { %w[some data] }
 
     before do
@@ -316,17 +283,17 @@ RSpec.describe 'gitlab:db namespace rake task' do
 
       allow(instrumentation).to receive(:observe).and_yield
 
-      allow(File).to receive(:open).with(filename, 'wb+').and_yield(buffer)
+      stub_const('Gitlab::Database::Migrations::Instrumentation::RESULT_DIR', result_dir)
     end
 
-    it 'fails when given no filename argument' do
-      expect { run_rake_task('gitlab:db:migration_testing') }.to raise_error(/specify result_file/)
+    after do
+      FileUtils.rm_rf(result_dir)
     end
 
-    it 'fails when the given file already exists' do
-      expect(File).to receive(:exist?).with(filename).and_return(true)
+    it 'creates result directory when one does not exist' do
+      FileUtils.rm_rf(result_dir)
 
-      expect { subject }.to raise_error(/File exists/)
+      expect { subject }.to change { Dir.exist?(result_dir) }.from(false).to(true)
     end
 
     it 'instruments the pending migration' do
@@ -344,7 +311,27 @@ RSpec.describe 'gitlab:db namespace rake task' do
     it 'writes observations out to JSON file' do
       subject
 
-      expect(buffer.string).to eq(observations.to_json)
+      expect(File.read(File.join(result_dir, filename))).to eq(observations.to_json)
+    end
+  end
+
+  describe '#execute_batched_migrations' do
+    subject { run_rake_task('gitlab:db:execute_batched_migrations') }
+
+    let(:migrations) { create_list(:batched_background_migration, 2) }
+    let(:runner) { instance_double('Gitlab::Database::BackgroundMigration::BatchedMigrationRunner') }
+
+    before do
+      allow(Gitlab::Database::BackgroundMigration::BatchedMigration).to receive_message_chain(:active, :queue_order).and_return(migrations)
+      allow(Gitlab::Database::BackgroundMigration::BatchedMigrationRunner).to receive(:new).and_return(runner)
+    end
+
+    it 'executes all migrations' do
+      migrations.each do |migration|
+        expect(runner).to receive(:run_entire_migration).with(migration)
+      end
+
+      subject
     end
   end
 

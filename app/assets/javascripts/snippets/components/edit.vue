@@ -2,7 +2,7 @@
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 
 import eventHub from '~/blob/components/eventhub';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { redirectTo, joinPaths } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
 import {
@@ -33,7 +33,6 @@ export default {
     SnippetBlobActionsEdit,
     TitleField,
     FormFooterActions,
-    CaptchaModal: () => import('~/captcha/captcha_modal.vue'),
     GlButton,
     GlLoadingIcon,
   },
@@ -68,10 +67,6 @@ export default {
         description: '',
         visibilityLevel: this.selectedLevel,
       },
-      captchaResponse: '',
-      needsCaptchaResponse: false,
-      captchaSiteKey: '',
-      spamLogId: '',
     };
   },
   computed: {
@@ -103,8 +98,6 @@ export default {
         description: this.snippet.description,
         visibilityLevel: this.snippet.visibilityLevel,
         blobActions: this.actions,
-        ...(this.spamLogId && { spamLogId: this.spamLogId }),
-        ...(this.captchaResponse && { captchaResponse: this.captchaResponse }),
       };
     },
     saveButtonLabel() {
@@ -142,7 +135,9 @@ export default {
       const defaultErrorMsg = this.newSnippet
         ? SNIPPET_CREATE_MUTATION_ERROR
         : SNIPPET_UPDATE_MUTATION_ERROR;
-      Flash(sprintf(defaultErrorMsg, { err }));
+      createFlash({
+        message: sprintf(defaultErrorMsg, { err }),
+      });
       this.isUpdating = false;
     },
     getAttachedFiles() {
@@ -171,20 +166,14 @@ export default {
     },
     handleFormSubmit() {
       this.isUpdating = true;
+
       this.$apollo
         .mutate(this.newSnippet ? this.createMutation() : this.updateMutation())
         .then(({ data }) => {
           const baseObj = this.newSnippet ? data?.createSnippet : data?.updateSnippet;
 
-          if (baseObj.needsCaptchaResponse) {
-            // If we need a captcha response, start process for receiving captcha response.
-            // We will resubmit after the response is obtained.
-            this.requestCaptchaResponse(baseObj.captchaSiteKey, baseObj.spamLogId);
-            return;
-          }
-
           const errors = baseObj?.errors;
-          if (errors.length) {
+          if (errors?.length) {
             this.flashAPIFailure(errors[0]);
           } else {
             redirectTo(baseObj.snippet.webUrl);
@@ -199,35 +188,6 @@ export default {
     },
     updateActions(actions) {
       this.actions = actions;
-    },
-    /**
-     * Start process for getting captcha response from user
-     *
-     * @param captchaSiteKey Stored in data and used to display the captcha.
-     * @param spamLogId Stored in data and included when the form is re-submitted.
-     */
-    requestCaptchaResponse(captchaSiteKey, spamLogId) {
-      this.captchaSiteKey = captchaSiteKey;
-      this.spamLogId = spamLogId;
-      this.needsCaptchaResponse = true;
-    },
-    /**
-     * Handle the captcha response from the user
-     *
-     * @param captchaResponse The captchaResponse value emitted from the modal.
-     */
-    receivedCaptchaResponse(captchaResponse) {
-      this.needsCaptchaResponse = false;
-      this.captchaResponse = captchaResponse;
-
-      if (this.captchaResponse) {
-        // If the user solved the captcha resubmit the form.
-        this.handleFormSubmit();
-      } else {
-        // If the user didn't solve the captcha (e.g. they just closed the modal),
-        // finish the update and allow them to continue editing or manually resubmit the form.
-        this.isUpdating = false;
-      }
     },
   },
 };
@@ -246,11 +206,6 @@ export default {
       class="loading-animation prepend-top-20 gl-mb-6"
     />
     <template v-else>
-      <captcha-modal
-        :captcha-site-key="captchaSiteKey"
-        :needs-captcha-response="needsCaptchaResponse"
-        @receivedCaptchaResponse="receivedCaptchaResponse"
-      />
       <title-field
         id="snippet-title"
         v-model="snippet.title"

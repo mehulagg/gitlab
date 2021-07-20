@@ -12,7 +12,6 @@ import {
 import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { updateSiteProfilesStatuses } from '../graphql/cache_utils';
 import ProfilesList from './dast_profiles_list.vue';
 
@@ -40,9 +39,7 @@ export default {
       },
       pollInterval: DAST_SITE_VALIDATION_POLLING_INTERVAL,
       skip() {
-        return (
-          !this.glFeatures.securityOnDemandScansSiteValidation || !this.urlsPendingValidation.length
-        );
+        return !this.urlsPendingValidation.length;
       },
       result({
         data: {
@@ -60,7 +57,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
       type: String,
@@ -112,7 +108,7 @@ export default {
         : s__('DastSiteValidation|Validate');
     },
     shouldShowValidationStatus(status) {
-      return this.glFeatures.securityOnDemandScansSiteValidation && status !== NONE;
+      return status !== NONE;
     },
     hasValidationPassed(status) {
       return status === PASSED;
@@ -169,23 +165,17 @@ export default {
 
     <template #actions="{ profile }">
       <gl-button
-        v-if="
-          glFeatures.securityOnDemandScansSiteValidation &&
-          !hasValidationPassed(profile.validationStatus)
-        "
+        v-if="!hasValidationPassed(profile.validationStatus)"
         :disabled="!canValidateProfile(profile.validationStatus)"
-        variant="info"
+        variant="confirm"
         category="tertiary"
         size="small"
         @click="setValidatingProfile(profile)"
         >{{ validateBtnLabel(profile.validationStatus) }}</gl-button
       >
       <gl-button
-        v-else-if="
-          glFeatures.securityOnDemandScansSiteValidation &&
-          hasValidationPassed(profile.validationStatus)
-        "
-        variant="info"
+        v-else
+        variant="confirm"
         category="tertiary"
         size="small"
         @click="setRevokeValidationProfile(profile)"

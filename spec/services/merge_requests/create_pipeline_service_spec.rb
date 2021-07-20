@@ -7,7 +7,8 @@ RSpec.describe MergeRequests::CreatePipelineService do
 
   let_it_be(:project, reload: true) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
-  let(:service) { described_class.new(project, actor, params) }
+
+  let(:service) { described_class.new(project: project, current_user: actor, params: params) }
   let(:actor) { user }
   let(:params) { {} }
 
@@ -17,7 +18,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
   end
 
   describe '#execute' do
-    subject { service.execute(merge_request) }
+    subject(:response) { service.execute(merge_request) }
 
     before do
       stub_ci_pipeline_yaml_file(YAML.dump(config))
@@ -38,25 +39,27 @@ RSpec.describe MergeRequests::CreatePipelineService do
     let(:source_project) { project }
 
     it 'creates a detached merge request pipeline' do
-      expect { subject }.to change { Ci::Pipeline.count }.by(1)
+      expect { response }.to change { Ci::Pipeline.count }.by(1)
 
-      expect(subject).to be_persisted
-      expect(subject).to be_detached_merge_request_pipeline
+      expect(response).to be_success
+      expect(response.payload).to be_persisted
+      expect(response.payload).to be_detached_merge_request_pipeline
     end
 
     it 'defaults to merge_request_event' do
-      expect(subject.source).to eq('merge_request_event')
+      expect(response.payload.source).to eq('merge_request_event')
     end
 
     context 'with fork merge request' do
       let_it_be(:forked_project) { fork_project(project, nil, repository: true, target_project: create(:project, :private, :repository)) }
+
       let(:source_project) { forked_project }
 
       context 'when actor has permission to create pipelines in target project' do
         let(:actor) { user }
 
         it 'creates a pipeline in the target project' do
-          expect(subject.project).to eq(project)
+          expect(response.payload.project).to eq(project)
         end
 
         context 'when source branch is protected' do
@@ -64,7 +67,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
             let!(:protected_branch) { create(:protected_branch, name: '*', project: project) }
 
             it 'creates a pipeline in the source project' do
-              expect(subject.project).to eq(source_project)
+              expect(response.payload.project).to eq(source_project)
             end
           end
 
@@ -72,7 +75,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
             let!(:protected_branch) { create(:protected_branch, :developers_can_merge, name: '*', project: project) }
 
             it 'creates a pipeline in the target project' do
-              expect(subject.project).to eq(project)
+              expect(response.payload.project).to eq(project)
             end
           end
         end
@@ -83,7 +86,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
           end
 
           it 'creates a pipeline in the source project' do
-            expect(subject.project).to eq(source_project)
+            expect(response.payload.project).to eq(source_project)
           end
         end
       end
@@ -97,15 +100,16 @@ RSpec.describe MergeRequests::CreatePipelineService do
         end
 
         it 'creates a pipeline in the source project' do
-          expect(subject.project).to eq(source_project)
+          expect(response.payload.project).to eq(source_project)
         end
       end
 
       context 'when actor does not have permission to create pipelines' do
         let(:actor) { create(:user) }
 
-        it 'returns nothing' do
-          expect(subject.full_error_messages).to include('Insufficient permissions to create a new pipeline')
+        it 'responds with error' do
+          expect(response).to be_error
+          expect(response.message).to include('Insufficient permissions to create a new pipeline')
         end
       end
     end
@@ -137,7 +141,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
         end
 
         it 'does not create a pipeline' do
-          expect { subject }.not_to change { Ci::Pipeline.count }
+          expect { response }.not_to change { Ci::Pipeline.count }
         end
       end
 
@@ -152,7 +156,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
         end
 
         it 'does not create a pipeline' do
-          expect { subject }.not_to change { Ci::Pipeline.count }
+          expect { response }.not_to change { Ci::Pipeline.count }
         end
       end
     end
@@ -168,11 +172,12 @@ RSpec.describe MergeRequests::CreatePipelineService do
           }
         end
 
-        it 'creates a detached merge request pipeline' do
-          expect { subject }.to change { Ci::Pipeline.count }.by(1)
+        it 'creates a detached merge request pipeline', :aggregate_failures do
+          expect { response }.to change { Ci::Pipeline.count }.by(1)
 
-          expect(subject).to be_persisted
-          expect(subject).to be_detached_merge_request_pipeline
+          expect(response).to be_success
+          expect(response.payload).to be_persisted
+          expect(response.payload).to be_detached_merge_request_pipeline
         end
       end
 
@@ -186,9 +191,24 @@ RSpec.describe MergeRequests::CreatePipelineService do
           }
         end
 
-        it 'does not create a pipeline' do
-          expect { subject }.not_to change { Ci::Pipeline.count }
+        it 'does not create a pipeline', :aggregate_failures do
+          expect { response }.not_to change { Ci::Pipeline.count }
+          expect(response).to be_error
         end
+      end
+    end
+
+    context 'when merge request has no commits' do
+      before do
+        allow(merge_request).to receive(:has_no_commits?).and_return(true)
+      end
+
+      it 'does not create a pipeline', :aggregate_failures do
+        expect { response }.not_to change { Ci::Pipeline.count }
+
+        expect(response).to be_error
+        expect(response.message).to eq('Cannot create a pipeline for this merge request.')
+        expect(response.payload).to be_nil
       end
     end
   end

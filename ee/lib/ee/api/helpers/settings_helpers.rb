@@ -22,6 +22,8 @@ module EE
               optional :elasticsearch_search, type: Grape::API::Boolean, desc: 'Enable Elasticsearch search'
               optional :elasticsearch_pause_indexing, type: Grape::API::Boolean, desc: 'Pause Elasticsearch indexing'
               requires :elasticsearch_url, type: String, desc: 'The url to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201")'
+              optional :elasticsearch_username, type: String, desc: 'The username of your Elasticsearch instance.'
+              optional :elasticsearch_password, type: String, desc: 'The password of your Elasticsearch instance.'
               optional :elasticsearch_limit_indexing, type: Grape::API::Boolean, desc: 'Limit Elasticsearch to index certain namespaces and projects'
             end
 

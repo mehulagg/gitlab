@@ -11,21 +11,27 @@ module Gitlab
   module Experimentation
     module ControllerConcern
       include ::Gitlab::Experimentation::GroupTypes
+      include Gitlab::Tracking::Helpers
       extend ActiveSupport::Concern
 
       included do
         before_action :set_experimentation_subject_id_cookie, unless: :dnt_enabled?
-        helper_method :experiment_enabled?, :experiment_tracking_category_and_group, :tracking_label
+        helper_method :experiment_enabled?, :experiment_tracking_category_and_group, :record_experiment_group, :tracking_label
       end
 
       def set_experimentation_subject_id_cookie
-        return if cookies[:experimentation_subject_id].present?
+        if Gitlab.dev_env_or_com?
+          return if cookies[:experimentation_subject_id].present?
 
-        cookies.permanent.signed[:experimentation_subject_id] = {
-          value: SecureRandom.uuid,
-          secure: ::Gitlab.config.gitlab.https,
-          httponly: true
-        }
+          cookies.permanent.signed[:experimentation_subject_id] = {
+            value: SecureRandom.uuid,
+            secure: ::Gitlab.config.gitlab.https,
+            httponly: true
+          }
+        else
+          # We set the cookie before, although experiments are not conducted on self managed instances.
+          cookies.delete(:experimentation_subject_id)
+        end
       end
 
       def push_frontend_experiment(experiment_key, subject: nil)
@@ -51,7 +57,7 @@ module Gitlab
         return if dnt_enabled?
 
         track_experiment_event_for(experiment_key, action, value, subject: subject) do |tracking_data|
-          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), **tracking_data)
+          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), **tracking_data.merge!(user: current_user))
         end
       end
 
@@ -72,12 +78,22 @@ module Gitlab
         ::Experiment.add_user(experiment_key, tracking_group(experiment_key, nil, subject: subject), current_user, context)
       end
 
-      def record_experiment_conversion_event(experiment_key)
+      def record_experiment_group(experiment_key, group)
+        return if dnt_enabled?
+        return unless Experimentation.active?(experiment_key) && group
+
+        variant_subject = Experimentation.rollout_strategy(experiment_key) == :cookie ? nil : group
+        variant = tracking_group(experiment_key, nil, subject: variant_subject)
+
+        ::Experiment.add_group(experiment_key, group: group, variant: variant)
+      end
+
+      def record_experiment_conversion_event(experiment_key, context = {})
         return if dnt_enabled?
         return unless current_user
         return unless Experimentation.active?(experiment_key)
 
-        ::Experiment.record_conversion_event(experiment_key, current_user)
+        ::Experiment.record_conversion_event(experiment_key, current_user, context)
       end
 
       def experiment_tracking_category_and_group(experiment_key, subject: nil)
@@ -85,10 +101,6 @@ module Gitlab
       end
 
       private
-
-      def dnt_enabled?
-        Gitlab::Utils.to_boolean(request.headers['DNT'])
-      end
 
       def experimentation_subject_id
         cookies.signed[:experimentation_subject_id]

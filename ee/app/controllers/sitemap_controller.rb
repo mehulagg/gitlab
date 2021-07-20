@@ -7,7 +7,6 @@ class SitemapController < ApplicationController
 
   def show
     return render_404 unless Gitlab.com?
-    return render_404 unless Feature.enabled?(:gitlab_org_sitemap)
 
     respond_to do |format|
       format.xml do

@@ -79,7 +79,7 @@ module EE
       text = sanitize(search_highlight[issuable.id].description.first)
       text.gsub!(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG, '<span class="gl-text-gray-900 gl-font-weight-bold">')
       text.gsub!(::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG, '</span>')
-      Truncato.truncate(text, count_tags: false, count_tail: false, max_length: 200).html_safe
+      search_truncate(text).html_safe
     end
 
     def advanced_search_status_marker(project)
@@ -88,7 +88,7 @@ module EE
 
       tags = {}
       tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
-                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         href: help_page_path('user/search/advanced_search'),
                                                          rel: :noopener,
                                                          target: '_blank')
                                                      .split(PLACEHOLDER)
@@ -118,16 +118,25 @@ module EE
 
     override :search_sort_options
     def search_sort_options
+      original_options = super
+
       options = []
+
       if search_service.use_elasticsearch?
         options << {
           title: _('Most relevant'),
           sortable: false,
           sortParam: 'relevant'
         }
+
+        unless Elastic::DataMigrationService.migration_has_finished?(:add_upvotes_to_issues)
+          original_options.delete_if do |option|
+            option[:title] == _('Popularity')
+          end
+        end
       end
 
-      options + super
+      options + original_options
     end
 
     private

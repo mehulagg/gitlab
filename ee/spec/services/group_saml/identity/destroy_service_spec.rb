@@ -18,13 +18,13 @@ RSpec.describe GroupSaml::Identity::DestroyService do
   end
 
   it "does not use a transaction" do
-    expect(::Identity).to receive(:transaction).and_yield.once
+    expect(::Identity).not_to receive(:transaction)
 
     subject.execute
   end
 
   it "uses a transaction when transactional is set" do
-    expect(::Identity).to receive(:transaction).and_yield.twice
+    expect(::Identity).to receive(:transaction).and_yield.once
 
     subject.execute(transactional: true)
   end

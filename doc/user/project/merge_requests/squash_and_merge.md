@@ -7,8 +7,7 @@ type: reference, concepts
 
 # Squash and merge **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1024) in [GitLab Starter](https://about.gitlab.com/pricing/) 8.17.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18956) from [GitLab Starter](https://about.gitlab.com/pricing/)to GitLab Free in 11.0.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18956) from GitLab Premium to GitLab Free in 11.0.
 
 With squash and merge you can combine all your merge request's commits into one
 and retain a clean history.
@@ -31,10 +30,7 @@ NOTE:
 The squashed commit in this example is followed by a merge commit, because the merge method for this repository uses a merge commit. You can disable merge commits in
 **Project Settings > General > Merge requests > Merge method > Fast-forward merge**.
 
-The squashed commit's commit message will be either:
-
-- Taken from the first multi-line commit message in the merge.
-- The merge request's title if no multi-line commit message is found.
+The squashed commit's default commit message is taken from the merge request title.
 
 NOTE:
 This only takes effect if there are at least 2 commits. As there is nothing to squash, the commit message does not change if there is only 1 commit.
@@ -60,7 +56,7 @@ This way, the history of your base branch remains clean with
 meaningful commit messages and:
 
 - It's simpler to [revert](revert_changes.md) if necessary.
-- The merged branch will retain the full commit history.
+- The merged branch retains the full commit history.
 
 ## Enabling squash for a merge request
 
@@ -105,26 +101,26 @@ squashing can itself be considered equivalent to rebasing.
 ## Squash Commits Options
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17613) in GitLab 13.2.
-> - It was deployed behind a feature flag, disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39382) on GitLab 13.3.
-> - It's enabled on GitLab.com.
-> - It can be enabled per project.
-> - It's recommended for production use.
+> - Deployed behind a feature flag, disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39382) in GitLab 13.3.
+> - Enabled on GitLab.com.
+> - Can be enabled per project.
+> - Recommended for production use.
 
 With Squash Commits Options you can configure the behavior of Squash and Merge for your project.
 To set it up, navigate to your project's **Settings > General** and expand **Merge requests**.
-You will find the following options to choose, which will affect existing and new merge requests
+You can choose from these options, which affect existing and new merge requests
 submitted to your project:
 
 - **Do not allow**: users cannot use Squash and Merge to squash all the commits immediately before
-  merging. The checkbox to enable or disable it will be unchecked and hidden from the users.
-- **Allow**: users will have the option to enable Squash and Merge on a merge request basis.
-  The checkbox will be unchecked (disabled) by default, but and the user is allowed to enable it.
-- **Encourage**: users will have the option to enable Squash and Merge on a merge request basis.
-  The checkbox will be checked (enabled) by default to encourage its use, but the user is allowed to
+  merging. The checkbox to enable or disable it is unchecked and hidden from the users.
+- **Allow**: users can enable Squash and Merge on a merge request basis.
+  The checkbox is unchecked (disabled) by default, but and the user is allowed to enable it.
+- **Encourage**: users can enable Squash and Merge on a merge request basis.
+  The checkbox is checked (enabled) by default to encourage its use, but the user is allowed to
   disable it.
-- **Require**: Squash and Merge is enabled for all merge requests, so it will always be performed.
-  The checkbox to enable or disable it will be checked and hidden from the users.
+- **Require**: Squash and Merge is enabled for all merge requests, so it is always performed.
+  The checkbox to enable or disable it is checked and hidden from the users.
 
 The Squash and Merge checkbox is displayed when you create a merge request and when you edit the description of an existing one, except when Squash Commit Options is set to **Do not allow** or **Require**.
 

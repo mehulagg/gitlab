@@ -5,7 +5,7 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Pages
+# GitLab Pages **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/80) in GitLab Enterprise Edition 8.3.
 > - Custom CNAMEs with TLS support were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/173) in GitLab Enterprise Edition 8.5.
@@ -46,10 +46,10 @@ To create a GitLab Pages website:
 
 | Document | Description |
 | -------- | ----------- |
-| [Fork a sample project](getting_started/pages_forked_sample_project.md)               | Create a new project with Pages already configured by forking a sample project. |
-| [Use a new project template](getting_started/pages_new_project_template.md)       | Create a new project with Pages already configured by using a new project template. |
-| [Use a `.gitlab-ci.yml` template](getting_started/pages_ci_cd_template.md) | Add a Pages site to an existing project. Use a pre-populated CI template file. |
 | [Create a `gitlab-ci.yml` file from scratch](getting_started/pages_from_scratch.md)    | Add a Pages site to an existing project. Learn how to create and configure your own CI file. |
+| [Use a `.gitlab-ci.yml` template](getting_started/pages_ci_cd_template.md) | Add a Pages site to an existing project. Use a pre-populated CI template file. |
+| [Fork a sample project](getting_started/pages_forked_sample_project.md)               | Create a new project with Pages already configured by forking a sample project. |
+| [Use a project template](getting_started/pages_new_project_template.md)       | Create a new project with Pages already configured by using a template. |
 
 To update a GitLab Pages website:
 
@@ -78,7 +78,7 @@ GitLab always deploys your website from a very specific folder called `public` i
 repository. When you create a new project in GitLab, a [repository](../repository/index.md)
 becomes available automatically.
 
-To deploy your site, GitLab uses its built-in tool called [GitLab CI/CD](../../../ci/README.md)
+To deploy your site, GitLab uses its built-in tool called [GitLab CI/CD](../../../ci/index.md)
 to build your site and publish it to the GitLab Pages server. The sequence of
 scripts that GitLab CI/CD runs to accomplish this task is created from a file named
 `.gitlab-ci.yml`, which you can [create and modify](getting_started/pages_from_scratch.md).
@@ -116,7 +116,7 @@ to use and adapt to your own needs:
 
 - [Posting to your GitLab Pages blog from iOS](https://about.gitlab.com/blog/2016/08/19/posting-to-your-gitlab-pages-blog-from-ios/).
 - [GitLab CI: Run jobs sequentially, in parallel, or build a custom pipeline](https://about.gitlab.com/blog/2016/07/29/the-basics-of-gitlab-ci/).
-- [GitLab CI: Deployment & environments](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/).
+- [GitLab CI: Deployment & environments](https://about.gitlab.com/blog/2021/02/05/ci-deployment-and-environments/).
 - [Building a new GitLab docs site with Nanoc, GitLab CI, and GitLab Pages](https://about.gitlab.com/blog/2016/12/07/building-a-new-gitlab-docs-site-with-nanoc-gitlab-ci-and-gitlab-pages/).
 - [Publish code coverage reports with GitLab Pages](https://about.gitlab.com/blog/2016/11/03/publish-code-coverage-report-with-gitlab-pages/).
 

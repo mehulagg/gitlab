@@ -1,27 +1,28 @@
 import Vue from 'vue';
-import Checkout from './components/checkout.vue';
-import OrderSummary from './components/order_summary.vue';
+import VueApollo from 'vue-apollo';
+import App from './components/app.vue';
+import defaultClient from './graphql';
 import createStore from './store';
 
-export default () => {
-  const checkoutEl = document.getElementById('checkout');
-  const summaryEl = document.getElementById('summary');
-  const store = createStore(checkoutEl.dataset);
+Vue.use(VueApollo);
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: checkoutEl,
-    store,
-    render(createElement) {
-      return createElement(Checkout);
-    },
-  });
+const apolloProvider = new VueApollo({
+  defaultClient,
+});
+
+export default () => {
+  const el = document.getElementById('js-new-subscription');
+  const store = createStore(el.dataset);
 
   return new Vue({
-    el: summaryEl,
+    el,
     store,
+    apolloProvider,
+    components: {
+      App,
+    },
     render(createElement) {
-      return createElement(OrderSummary);
+      return createElement(App);
     },
   });
 };

@@ -11,6 +11,10 @@
 
 .code.none {
   // Line numbers
+  .file-line-num {
+    @include line-number-link($black-transparent);
+  }
+
   .line-numbers,
   .diff-line-num {
     background-color: $gray-light;
@@ -52,7 +56,10 @@
 
     .line-coverage {
       @include line-coverage-border-color($green-500, $orange-500);
+    }
 
+    .line-coverage,
+    .line-codequality {
       &.old,
       &.new {
         background-color: $white-normal;

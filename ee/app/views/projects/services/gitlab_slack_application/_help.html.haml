@@ -6,5 +6,5 @@
     %p.inline
       = _("See the list of available commands in Slack after setting up this service by entering")
   %kbd.inline /gitlab help
-  - unless @service.template? || @service.instance?
-    = render "projects/services/#{@service.to_param}/slack_integration_form"
+  - if integration.project_level?
+    = render "projects/services/#{integration.to_param}/slack_integration_form", integration: integration

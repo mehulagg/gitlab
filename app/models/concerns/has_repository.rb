@@ -14,10 +14,11 @@ module HasRepository
   include Gitlab::Utils::StrongMemoize
 
   delegate :base_dir, :disk_path, to: :storage
+  delegate :change_head, to: :repository
 
   def valid_repo?
     repository.exists?
-  rescue
+  rescue StandardError
     errors.add(:base, _('Invalid repository path'))
     false
   end
@@ -25,7 +26,7 @@ module HasRepository
   def repo_exists?
     strong_memoize(:repo_exists) do
       repository.exists?
-    rescue
+    rescue StandardError
       false
     end
   end
@@ -77,9 +78,14 @@ module HasRepository
   def default_branch_from_preferences
     return unless empty_repo?
 
-    group_branch_default_name = group&.default_branch_name if respond_to?(:group)
+    (default_branch_from_group_preferences || Gitlab::CurrentSettings.default_branch_name).presence
+  end
 
-    (group_branch_default_name || Gitlab::CurrentSettings.default_branch_name).presence
+  def default_branch_from_group_preferences
+    return unless respond_to?(:group)
+    return unless group
+
+    group.default_branch_name || group.root_ancestor.default_branch_name
   end
 
   def reload_default_branch
@@ -111,5 +117,9 @@ module HasRepository
 
   def repository_size_checker
     raise NotImplementedError
+  end
+
+  def after_repository_change_head
+    reload_default_branch
   end
 end

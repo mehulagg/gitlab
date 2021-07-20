@@ -10,11 +10,13 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
+      VALIDATE_SCHEMA_VARIABLE_NAME = 'VALIDATE_SCHEMA'
       LICENSED_PARSER_FEATURES = {
         sast: :sast,
         secret_detection: :secret_detection,
         dependency_scanning: :dependency_scanning,
         container_scanning: :container_scanning,
+        cluster_image_scanning: :cluster_image_scanning,
         dast: :dast,
         coverage_fuzzing: :coverage_fuzzing,
         api_fuzzing: :api_fuzzing
@@ -30,7 +32,12 @@ module EE
 
         has_many :security_scans, class_name: 'Security::Scan'
 
-        after_save :stick_build_if_status_changed
+        has_one :dast_site_profiles_build, class_name: 'Dast::SiteProfilesBuild', foreign_key: :ci_build_id, inverse_of: :ci_build
+        has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_build
+
+        has_one :dast_scanner_profiles_build, class_name: 'Dast::ScannerProfilesBuild', foreign_key: :ci_build_id, inverse_of: :ci_build
+        has_one :dast_scanner_profile, class_name: 'DastScannerProfile', through: :dast_scanner_profiles_build
+
         after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
 
@@ -41,17 +48,32 @@ module EE
             .for_ref(ref)
             .for_project_paths(project_path)
         end
+
+        state_machine :status do
+          after_transition any => [:success, :failed, :canceled] do |build|
+            build.run_after_commit do
+              # TODO(Issue #331891): before enabling this feature flag. Move update consumption to async while keeping consumption calculation sync.
+              # This will ensure consumption is calculated before related records are deleted.
+              if ::Feature.enabled?(:cancel_pipelines_prior_to_destroy, default_enabled: :yaml)
+                ::Ci::Minutes::UpdateBuildMinutesService.new(build.project, nil).execute(build)
+              end
+            end
+          end
+        end
+      end
+
+      override :variables
+      def variables
+        strong_memoize(:variables) do
+          super.tap do |collection|
+            collection.concat(dast_on_demand_variables)
+            collection.concat(dast_configuration_variables)
+          end
+        end
       end
 
       def shared_runners_minutes_limit_enabled?
-        project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
-      end
-
-      def stick_build_if_status_changed
-        return unless saved_change_to_status?
-        return unless running?
-
-        ::Gitlab::Database::LoadBalancing::Sticking.stick(:build, id)
+        project.shared_runners_minutes_limit_enabled? && runner&.cost_factor_enabled?(project)
       end
 
       def log_geo_deleted_event
@@ -65,16 +87,31 @@ module EE
           artifacts_metadata?
       end
 
+      def has_security_reports?
+        job_artifacts.security_reports.any?
+      end
+
       def collect_security_reports!(security_reports)
         each_report(::Ci::JobArtifact::SECURITY_REPORT_FILE_TYPES) do |file_type, blob, report_artifact|
           security_reports.get_report(file_type, report_artifact).tap do |security_report|
             next unless project.feature_available?(LICENSED_PARSER_FEATURES.fetch(file_type))
 
             parse_security_artifact_blob(security_report, blob)
-          rescue => e
-            security_report.error = e
+          rescue StandardError
+            security_report.add_error('ParsingError')
           end
         end
+      end
+
+      def unmerged_security_reports
+        security_reports = ::Gitlab::Ci::Reports::Security::Reports.new(pipeline)
+
+        each_report(::Ci::JobArtifact::SECURITY_REPORT_FILE_TYPES) do |file_type, blob, report_artifact|
+          report = security_reports.get_report(file_type, report_artifact)
+          parse_raw_security_artifact_blob(report, blob)
+        end
+
+        security_reports
       end
 
       def collect_license_scanning_reports!(license_scanning_report)
@@ -89,7 +126,7 @@ module EE
 
       def collect_dependency_list_reports!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::DEPENDENCY_LIST_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse!(blob, dependency_list_report)
@@ -101,7 +138,7 @@ module EE
 
       def collect_licenses_for_dependency_list!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse_licenses!(blob, dependency_list_report)
@@ -150,18 +187,54 @@ module EE
         variables_hash.fetch(key, default)
       end
 
+      def validate_schema?
+        variables[VALIDATE_SCHEMA_VARIABLE_NAME]&.value&.casecmp?('true')
+      end
+
       private
 
       def variables_hash
-        @variables_hash ||= variables.map do |variable|
+        @variables_hash ||= variables.to_h do |variable|
           [variable[:key], variable[:value]]
-        end.to_h
+        end
+      end
+
+      def dast_on_demand_variables
+        ::Gitlab::Ci::Variables::Collection.new.tap do |collection|
+          break collection unless pipeline.triggered_for_ondemand_dast_scan?
+
+          # Subject to change. Please see gitlab-org/gitlab#330950 for more info.
+          profile = pipeline.dast_profile || pipeline.dast_site_profile
+
+          collection.concat(profile.secret_ci_variables(pipeline.user))
+        end
+      end
+
+      def dast_configuration_variables
+        ::Gitlab::Ci::Variables::Collection.new.tap do |collection|
+          break collection unless ::Feature.enabled?(:dast_configuration_ui, project, default_enabled: :yaml)
+          break collection unless (dast_configuration = options[:dast_configuration])
+
+          if dast_configuration[:site_profile] && dast_site_profile
+            collection.concat(dast_site_profile.ci_variables)
+            collection.concat(dast_site_profile.secret_ci_variables(user))
+          end
+
+          if dast_configuration[:scanner_profile] && dast_scanner_profile
+            collection.concat(dast_scanner_profile.ci_variables)
+          end
+        end
       end
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone).parse!
+        parse_raw_security_artifact_blob(report_clone, blob)
         security_report.merge!(report_clone)
+      end
+
+      def parse_raw_security_artifact_blob(security_report, blob)
+        signatures_enabled = ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, security_report, signatures_enabled).parse!
       end
 
       def ee_runner_required_feature_names
@@ -173,7 +246,6 @@ module EE
       end
 
       def track_ci_secrets_management_usage
-        return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
         return unless ci_secrets_management_available? && secrets?
 
         ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)

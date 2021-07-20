@@ -56,8 +56,6 @@ RSpec.describe ApplicationController do
     end
   end
 
-  it_behaves_like 'a Trackable Controller'
-
   describe '#add_gon_variables' do
     before do
       Gon.clear
@@ -706,7 +704,7 @@ RSpec.describe ApplicationController do
 
         get :index
 
-        expect(response.headers['Cache-Control']).to eq 'max-age=0, private, must-revalidate, no-store'
+        expect(response.headers['Cache-Control']).to eq 'no-store'
         expect(response.headers['Pragma']).to eq 'no-cache'
       end
 
@@ -727,7 +725,7 @@ RSpec.describe ApplicationController do
           format.csv do
             stream_csv_headers('test.csv')
 
-            self.response_body = fixture_file_upload('spec/fixtures/csv_comma.csv')
+            self.response_body = Rack::Test::UploadedFile.new('spec/fixtures/csv_comma.csv')
           end
         end
       end
@@ -742,7 +740,7 @@ RSpec.describe ApplicationController do
     it 'sets no-cache headers', :aggregate_failures do
       subject
 
-      expect(response.headers['Cache-Control']).to eq 'no-cache, no-store'
+      expect(response.headers['Cache-Control']).to eq 'no-store'
       expect(response.headers['Pragma']).to eq 'no-cache'
       expect(response.headers['Expires']).to eq 'Fri, 01 Jan 1990 00:00:00 GMT'
     end
@@ -900,7 +898,7 @@ RSpec.describe ApplicationController do
       feature_category :issue_tracking
 
       def index
-        Labkit::Context.with_context do |context|
+        Gitlab::ApplicationContext.with_raw_context do |context|
           render json: context.to_h
         end
       end
@@ -1027,6 +1025,46 @@ RSpec.describe ApplicationController do
       expect(Gitlab::I18n).to receive(:with_locale).with('uk')
 
       get :index
+    end
+  end
+
+  describe 'setting permissions-policy header' do
+    controller do
+      skip_before_action :authenticate_user!
+
+      def index
+        render html: 'It is a flock of sheep, not a floc of sheep.'
+      end
+    end
+
+    before do
+      routes.draw do
+        get 'index' => 'anonymous#index'
+      end
+    end
+
+    context 'with FloC enabled' do
+      before do
+        stub_application_setting floc_enabled: true
+      end
+
+      it 'does not set the Permissions-Policy header' do
+        get :index
+
+        expect(response.headers['Permissions-Policy']).to eq(nil)
+      end
+    end
+
+    context 'with FloC disabled' do
+      before do
+        stub_application_setting floc_enabled: false
+      end
+
+      it 'sets the Permissions-Policy header' do
+        get :index
+
+        expect(response.headers['Permissions-Policy']).to eq('interest-cohort=()')
+      end
     end
   end
 end

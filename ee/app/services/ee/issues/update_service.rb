@@ -10,7 +10,7 @@ module EE
       def filter_params(issue)
         params.delete(:sprint_id) unless can_admin_issuable?(issue)
 
-        handle_epic(issue)
+        filter_epic(issue)
         filter_iteration
 
         super
@@ -36,6 +36,7 @@ module EE
         super
 
         handle_iteration_change(issue)
+        handle_issue_type_change(issue)
       end
 
       private
@@ -54,10 +55,16 @@ module EE
         end
       end
 
+      def handle_issue_type_change(issue)
+        return unless issue.previous_changes.include?('issue_type')
+
+        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
+      end
+
       def handle_promotion(issue)
         return unless params.delete(:promote_to_epic)
 
-        Epics::IssuePromoteService.new(issue.project, current_user).execute(issue)
+        Epics::IssuePromoteService.new(project: issue.project, current_user: current_user).execute(issue)
       end
     end
   end

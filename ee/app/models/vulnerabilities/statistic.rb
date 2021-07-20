@@ -5,6 +5,7 @@ module Vulnerabilities
     self.table_name = 'vulnerability_statistics'
 
     belongs_to :project, optional: false
+    belongs_to :pipeline, class_name: 'Ci::Pipeline', foreign_key: :latest_pipeline_id
 
     enum letter_grade: { a: 0, b: 1, c: 2, d: 3, f: 4 }
 
@@ -36,6 +37,32 @@ module Vulnerabilities
         else
           letter_grades[:a]
         end
+      end
+
+      def set_latest_pipeline_with(pipeline)
+        upsert_sql = upsert_latest_pipeline_id_sql(pipeline)
+
+        connection.execute(upsert_sql)
+      end
+
+      private
+
+      UPSERT_LATEST_PIPELINE_ID_SQL_TEMPLATE = <<~SQL
+        INSERT INTO %<table_name>s AS target (project_id, latest_pipeline_id, letter_grade, created_at, updated_at)
+          VALUES (%{project_id}, %<latest_pipeline_id>d, %<letter_grade>d, now(), now())
+        ON CONFLICT (project_id)
+          DO UPDATE SET
+            latest_pipeline_id = %<latest_pipeline_id>d, updated_at = now()
+      SQL
+
+      private_constant :UPSERT_LATEST_PIPELINE_ID_SQL_TEMPLATE
+
+      def upsert_latest_pipeline_id_sql(pipeline)
+        format(UPSERT_LATEST_PIPELINE_ID_SQL_TEMPLATE,
+               table_name: table_name,
+               project_id: pipeline.project.id,
+               latest_pipeline_id: pipeline.id,
+               letter_grade: letter_grades[:a])
       end
     end
 

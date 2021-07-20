@@ -1,4 +1,4 @@
-import { GlDrawer, GlInfiniteScroll, GlTabs } from '@gitlab/ui';
+import { GlDrawer, GlInfiniteScroll } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
@@ -21,12 +21,9 @@ describe('App', () => {
   let actions;
   let state;
   let trackingSpy;
-  let gitlabDotCom = true;
 
   const buildProps = () => ({
-    storageKey: 'storage-key',
-    versions: ['3.11', '3.10'],
-    gitlabDotCom,
+    versionDigest: 'version-digest',
   });
 
   const buildWrapper = () => {
@@ -85,13 +82,14 @@ describe('App', () => {
     });
 
     const getDrawer = () => wrapper.find(GlDrawer);
+    const getBackdrop = () => wrapper.find('.whats-new-modal-backdrop');
 
     it('contains a drawer', () => {
       expect(getDrawer().exists()).toBe(true);
     });
 
     it('dispatches openDrawer and tracking calls when mounted', () => {
-      expect(actions.openDrawer).toHaveBeenCalledWith(expect.any(Object), 'storage-key');
+      expect(actions.openDrawer).toHaveBeenCalledWith(expect.any(Object), 'version-digest');
       expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_whats_new_drawer', {
         label: 'namespace_id',
         value: 'namespace-840',
@@ -100,6 +98,11 @@ describe('App', () => {
 
     it('dispatches closeDrawer when clicking close', () => {
       getDrawer().vm.$emit('close');
+      expect(actions.closeDrawer).toHaveBeenCalled();
+    });
+
+    it('dispatches closeDrawer when clicking the backdrop', () => {
+      getBackdrop().trigger('click');
       expect(actions.closeDrawer).toHaveBeenCalled();
     });
 
@@ -152,7 +155,10 @@ describe('App', () => {
         wrapper.vm.$store.state.pageInfo = { nextPage: 840 };
         emitBottomReached();
 
-        expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), { page: 840 });
+        expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), {
+          page: 840,
+          versionDigest: 'version-digest',
+        });
       });
 
       it('when nextPage does not exist it does not call fetchItems', () => {
@@ -174,56 +180,6 @@ describe('App', () => {
         expect.any(Object),
         MOCK_DRAWER_BODY_HEIGHT,
       );
-    });
-  });
-
-  describe('self managed', () => {
-    const findTabs = () => wrapper.find(GlTabs);
-
-    const clickSecondTab = async () => {
-      const secondTab = wrapper.findAll('.nav-link').at(1);
-      await secondTab.trigger('click');
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-    };
-
-    beforeEach(() => {
-      gitlabDotCom = false;
-      setup();
-    });
-
-    it('renders tabs with drawer body height and content', () => {
-      const scroll = findInfiniteScroll();
-      const tabs = findTabs();
-
-      expect(scroll.exists()).toBe(false);
-      expect(tabs.attributes().style).toBe(`height: ${MOCK_DRAWER_BODY_HEIGHT}px;`);
-      expect(wrapper.find('h5').text()).toBe('Whats New Drawer');
-    });
-
-    describe('fetchVersion', () => {
-      beforeEach(() => {
-        actions.fetchItems.mockClear();
-      });
-
-      it('when version isnt fetched, clicking a tab calls fetchItems', async () => {
-        const fetchVersionSpy = jest.spyOn(wrapper.vm, 'fetchVersion');
-        await clickSecondTab();
-
-        expect(fetchVersionSpy).toHaveBeenCalledWith('3.10');
-        expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), { version: '3.10' });
-      });
-
-      it('when version has been fetched, clicking a tab calls fetchItems', async () => {
-        wrapper.vm.$store.state.features.push({ title: 'GitLab Stories', release: 3.1 });
-        await wrapper.vm.$nextTick();
-
-        const fetchVersionSpy = jest.spyOn(wrapper.vm, 'fetchVersion');
-        await clickSecondTab();
-
-        expect(fetchVersionSpy).toHaveBeenCalledWith('3.10');
-        expect(actions.fetchItems).not.toHaveBeenCalled();
-        expect(wrapper.find('.tab-pane.active h5').text()).toBe('GitLab Stories');
-      });
     });
   });
 });

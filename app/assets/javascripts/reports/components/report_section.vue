@@ -1,17 +1,22 @@
 <script>
+import { GlButton } from '@gitlab/ui';
+import api from '~/api';
 import { __ } from '~/locale';
 import StatusIcon from '~/vue_merge_request_widget/components/mr_widget_status_icon.vue';
 import Popover from '~/vue_shared/components/help_popover.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { status, SLOT_SUCCESS, SLOT_LOADING, SLOT_ERROR } from '../constants';
 import IssuesList from './issues_list.vue';
 
 export default {
   name: 'ReportSection',
   components: {
+    GlButton,
     IssuesList,
-    StatusIcon,
     Popover,
+    StatusIcon,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     alwaysOpen: {
       type: Boolean,
@@ -96,6 +101,11 @@ export default {
       required: false,
       default: false,
     },
+    trackAction: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
 
   data() {
@@ -162,6 +172,10 @@ export default {
   },
   methods: {
     toggleCollapsed() {
+      if (this.trackAction && this.glFeatures.usersExpandingWidgetsUsageData) {
+        api.trackRedisHllUserEvent(this.trackAction);
+      }
+
       if (this.shouldEmitToggleEvent) {
         this.$emit('toggleEvent');
       }
@@ -176,25 +190,29 @@ export default {
       <status-icon :status="statusIconName" :size="24" class="align-self-center" />
       <div class="media-body d-flex flex-align-self-center align-items-center">
         <div data-testid="report-section-code-text" class="js-code-text code-text">
-          <div>
-            {{ headerText }}
+          <div class="gl-display-flex gl-align-items-center">
+            <p class="gl-line-height-normal gl-m-0">{{ headerText }}</p>
             <slot :name="slotName"></slot>
-            <popover v-if="hasPopover" :options="popoverOptions" class="gl-ml-2" />
+            <popover
+              v-if="hasPopover"
+              :options="popoverOptions"
+              class="gl-ml-2 gl-display-inline-flex"
+            />
           </div>
           <slot name="sub-heading"></slot>
         </div>
 
-        <slot name="action-buttons"></slot>
+        <slot name="action-buttons" :is-collapsible="isCollapsible"></slot>
 
-        <button
+        <gl-button
           v-if="isCollapsible"
-          type="button"
+          class="js-collapse-btn"
           data-testid="report-section-expand-button"
-          class="js-collapse-btn btn float-right btn-sm align-self-center qa-expand-report-button"
+          data-qa-selector="expand_report_button"
           @click="toggleCollapsed"
         >
           {{ collapseText }}
-        </button>
+        </gl-button>
       </div>
     </div>
 

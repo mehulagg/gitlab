@@ -5,6 +5,7 @@ module Mutations
     class Update < Base
       include ServiceCompatibility
       include CanMutateSpammable
+      include Mutations::SpamProtection
 
       graphql_name 'UpdateSnippet'
 
@@ -33,7 +34,9 @@ module Mutations
 
         process_args_for_params!(args)
 
-        service_response = ::Snippets::UpdateService.new(snippet.project, current_user, args).execute(snippet)
+        spam_params = ::Spam::SpamParams.new_from_request(request: context[:request])
+        service = ::Snippets::UpdateService.new(project: snippet.project, current_user: current_user, params: args, spam_params: spam_params)
+        service_response = service.execute(snippet)
 
         # TODO: DRY this up - From here down, this is all duplicated with Mutations::Snippets::Create#resolve, except for
         #    `snippet.reset`, which is required in order to return the object in its non-dirty, unmodified, database state
@@ -45,12 +48,12 @@ module Mutations
         end
 
         snippet = service_response.payload[:snippet]
-        with_spam_action_fields(snippet) do
-          {
-            snippet: service_response.success? ? snippet : snippet.reset,
-            errors: errors_on_object(snippet)
-          }
-        end
+        check_spam_action_response!(snippet)
+
+        {
+          snippet: service_response.success? ? snippet : snippet.reset,
+          errors: errors_on_object(snippet)
+        }
       end
 
       private
@@ -60,12 +63,6 @@ module Mutations
       # Modifies/adds/deletes mutation resolve args as necessary to be passed as params to service layer.
       def process_args_for_params!(args)
         convert_blob_actions_to_snippet_actions!(args)
-
-        if Feature.enabled?(:snippet_spam)
-          args.merge!(additional_spam_params)
-        else
-          args[:disable_spam_action_service] = true
-        end
 
         # Return nil to make it explicit that this method is mutating the args parameter, and that
         # the return value is not relevant and is not to be used.

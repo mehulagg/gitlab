@@ -3,7 +3,7 @@ import * as actions from 'ee/geo_node_form/store/actions';
 import * as types from 'ee/geo_node_form/store/mutation_types';
 import createState from 'ee/geo_node_form/store/state';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { MOCK_SYNC_NAMESPACES, MOCK_NODE, MOCK_ERROR_MESSAGE } from '../mock_data';
@@ -20,8 +20,8 @@ describe('GeoNodeForm Store Actions', () => {
 
   const noCallback = () => {};
   const flashCallback = () => {
-    expect(flash).toHaveBeenCalledTimes(1);
-    flash.mockClear();
+    expect(createFlash).toHaveBeenCalledTimes(1);
+    createFlash.mockClear();
   };
   const visitUrlCallback = () => {
     expect(visitUrl).toHaveBeenCalledWith('/admin/geo/nodes');
@@ -86,8 +86,10 @@ describe('GeoNodeForm Store Actions', () => {
         [],
       ).then(() => {
         const errors = "Errors: name can't be blank, url can't be blank, url must be a valid URL";
-        expect(flash).toHaveBeenCalledWith(`${defaultErrorMessage} ${errors}`);
-        flash.mockClear();
+        expect(createFlash).toHaveBeenCalledWith({
+          message: `${defaultErrorMessage} ${errors}`,
+        });
+        createFlash.mockClear();
       });
     });
 
@@ -99,8 +101,10 @@ describe('GeoNodeForm Store Actions', () => {
         [{ type: types.RECEIVE_SAVE_GEO_NODE_COMPLETE }],
         [],
       ).then(() => {
-        expect(flash).toHaveBeenCalledWith(defaultErrorMessage);
-        flash.mockClear();
+        expect(createFlash).toHaveBeenCalledWith({
+          message: defaultErrorMessage,
+        });
+        createFlash.mockClear();
       });
     });
   });

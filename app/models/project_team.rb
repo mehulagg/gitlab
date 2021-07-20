@@ -42,7 +42,7 @@ class ProjectTeam
   end
 
   def add_users(users, access_level, current_user: nil, expires_at: nil)
-    ProjectMember.add_users(
+    Members::Projects::CreatorService.add_users( # rubocop:todo CodeReuse/ServiceClass
       project,
       users,
       access_level,
@@ -52,13 +52,12 @@ class ProjectTeam
   end
 
   def add_user(user, access_level, current_user: nil, expires_at: nil)
-    ProjectMember.add_user(
-      project,
-      user,
-      access_level,
-      current_user: current_user,
-      expires_at: expires_at
-    )
+    Members::Projects::CreatorService.new(project, # rubocop:todo CodeReuse/ServiceClass
+                                          user,
+                                          access_level,
+                                          current_user: current_user,
+                                          expires_at: expires_at)
+                                     .execute
   end
 
   # Remove all users from project team
@@ -130,7 +129,7 @@ class ProjectTeam
     end
 
     true
-  rescue
+  rescue StandardError
     false
   end
 
@@ -172,6 +171,10 @@ class ProjectTeam
              .group(:user_id)
              .maximum(:access_level)
     end
+  end
+
+  def write_member_access_for_user_id(user_id, project_access_level)
+    merge_value_to_request_store(User, user_id, project.id, project_access_level)
   end
 
   def max_member_access(user_id)
@@ -230,4 +233,4 @@ class ProjectTeam
   end
 end
 
-ProjectTeam.prepend_if_ee('EE::ProjectTeam')
+ProjectTeam.prepend_mod_with('ProjectTeam')

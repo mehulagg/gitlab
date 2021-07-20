@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Installation from source
+# Installation from source **(FREE SELF)**
 
 This is the official installation guide to set up a production GitLab server
 using the source files. To set up a **development installation** or for many
@@ -24,7 +24,7 @@ they changed the location of directories or run services as the wrong user.
 
 If you find a bug/error in this guide, **submit a merge request**
 following the
-[contributing guide](https://gitlab.com/gitlab-org/gitlab/blob/master/CONTRIBUTING.md).
+[contributing guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/CONTRIBUTING.md).
 
 ## Consider the Omnibus package installation
 
@@ -40,10 +40,19 @@ can't be terminated and its memory usage grows over time.
 
 ## Select a version to install
 
-Make sure you view [this installation guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/install/installation.md) from the branch (version) of GitLab you would like to install (e.g., `11-7-stable`).
+Make sure you view [this installation guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/install/installation.md) from the branch (version) of GitLab you would like to install (e.g., `11-7-stable`).
 You can select the branch in the version dropdown in the top left corner of GitLab (below the menu bar).
 
 If the highest number stable branch is unclear, check the [GitLab blog](https://about.gitlab.com/blog/) for installation guide links by version.
+
+## Software requirements
+
+| Software | Minimum version | Notes |
+| -------- | --------------- | ----- |
+| [Ruby](#2-ruby)     | `2.7`             | From GitLab 13.6, Ruby 2.7 is required. Ruby 3.0 is not supported yet (see [the relevant epic](https://gitlab.com/groups/gitlab-org/-/epics/5149) for the current status). You must use the standard MRI implementation of Ruby. We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab needs several Gems that have native extensions. |
+| [Go](#3-go) | `1.15` | |
+| [Git](#git) | `2.31.x` | From GitLab 13.11, Git 2.31.x and later is required. It's highly recommended that you use the [Git version provided by Gitaly](#git). |
+| [Node.js](#4-node) | `12.22.1` | GitLab uses [webpack](https://webpack.js.org/) to compile frontend assets. Node.js 14.x is recommended, as it's faster. You can check which version you're running with `node -v`. You need to update it to a newer version if needed. |
 
 ## GitLab directory structure
 
@@ -108,13 +117,9 @@ Install the required packages (needed to compile Ruby and native extensions to R
 
 ```shell
 sudo apt-get install -y build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libre2-dev \
-  libreadline-dev libncurses5-dev libffi-dev curl openssh-server checkinstall libxml2-dev \
-  libxslt-dev libcurl4-openssl-dev libicu-dev logrotate rsync python-docutils pkg-config cmake \
-  runit-systemd
+  libreadline-dev libncurses5-dev libffi-dev curl openssh-server libxml2-dev libxslt-dev \
+  libcurl4-openssl-dev libicu-dev logrotate rsync python-docutils pkg-config cmake runit-systemd
 ```
-
-Ubuntu 14.04 (Trusty Tahr) doesn't have the `libre2-dev` package available, but
-you can [install re2 manually](https://github.com/google/re2/wiki/Install).
 
 If you want to use Kerberos for user authentication, install `libkrb5-dev`
 (if you don't know what Kerberos is, you can assume you don't need it):
@@ -132,22 +137,45 @@ that:
 - Is always at the version required by GitLab.
 - May contain custom patches required for proper operation.
 
-```shell
-# Install dependencies
-sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential
+1. Install the needed dependencies:
 
-# Clone the Gitaly repository
-git clone https://gitlab.com/gitlab-org/gitaly.git -b <X-Y-stable> /tmp/gitaly
+   ```shell
+   sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential git-core
+   ```
 
-# Compile and install Git
-cd /tmp/gitaly
-sudo make git GIT_PREFIX=/usr/local
-```
+1. Clone the Gitaly repository and compile Git. Replace `<X-Y-stable>` with the
+   stable branch that matches the GitLab version you want to install. For example,
+   if you want to install GitLab 13.6, use the branch name `13-6-stable`:
 
-Replace `<X-Y-stable>` with the stable branch that matches the GitLab version you want to
-install. For example, if you want to install GitLab 13.6, use the branch name `13-6-stable`.
+   ```shell
+   git clone https://gitlab.com/gitlab-org/gitaly.git -b <X-Y-stable> /tmp/gitaly
+   cd /tmp/gitaly
+   sudo make git GIT_PREFIX=/usr/local
+   ```
 
-When editing `config/gitlab.yml` later, change the `git -> bin_path` to `/usr/local/bin/git`.
+1. Optionally, you can remove the system Git and its dependencies:
+
+   ```shell
+   sudo apt remove -y git-core
+   sudo apt autoremove
+   ```
+
+When [editing `config/gitlab.yml` later](#configure-it), remember to change
+the Git path:
+
+- From:
+
+  ```yaml
+  git:
+    bin_path: /usr/bin/git
+  ```
+
+- To:
+
+  ```yaml
+  git:
+    bin_path: /usr/local/bin/git
+  ```
 
 ### GraphicsMagick
 
@@ -188,7 +216,7 @@ sudo apt-get install -y libimage-exiftool-perl
 ## 2. Ruby
 
 The Ruby interpreter is required to run GitLab.
-See the [requirements page](requirements.md#ruby-versions) for the minimum
+See the [requirements section of this page](#software-requirements) for the minimum
 Ruby requirements.
 
 The use of Ruby version managers such as [`RVM`](https://rvm.io/), [`rbenv`](https://github.com/rbenv/rbenv) or [`chruby`](https://github.com/postmodern/chruby) with GitLab
@@ -199,12 +227,6 @@ below to use a system Ruby.
 Linux distributions generally have older versions of Ruby available, so these
 instructions are designed to install Ruby from the official source code.
 
-Remove the old Ruby 1.8 if present:
-
-```shell
-sudo apt-get remove ruby1.8
-```
-
 Download Ruby and compile it:
 
 ```shell
@@ -213,14 +235,14 @@ curl --remote-name --progress-bar "https://cache.ruby-lang.org/pub/ruby/2.7/ruby
 echo 'cb9731a17487e0ad84037490a6baf8bfa31a09e8  ruby-2.7.2.tar.gz' | shasum -c - && tar xzf ruby-2.7.2.tar.gz
 cd ruby-2.7.2
 
-./configure --disable-install-rdoc
+./configure --disable-install-rdoc --enable-shared
 make
 sudo make install
 ```
 
 ## 3. Go
 
-In GitLab 8.0 and later, GitLab has several daemons written in Go. To install
+GitLab has several daemons written in Go. To install
 GitLab we need a Go compiler. The instructions below assume you use 64-bit
 Linux. You can find downloads for other platforms at the [Go download
 page](https://golang.org/dl).
@@ -229,21 +251,21 @@ page](https://golang.org/dl).
 # Remove former Go installation folder
 sudo rm -rf /usr/local/go
 
-curl --remote-name --progress-bar "https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz"
-echo '512103d7ad296467814a6e3f635631bd35574cab3369a97a323c9a585ccaa569  go1.13.5.linux-amd64.tar.gz' | shasum -a256 -c - && \
-  sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
+curl --remote-name --progress-bar "https://dl.google.com/go/go1.15.12.linux-amd64.tar.gz"
+echo 'bbdb935699e0b24d90e2451346da76121b2412d30930eabcd80907c230d098b7  go1.15.12.linux-amd64.tar.gz' | shasum -a256 -c - && \
+  sudo tar -C /usr/local -xzf go1.15.12.linux-amd64.tar.gz
 sudo ln -sf /usr/local/go/bin/{go,godoc,gofmt} /usr/local/bin/
-rm go1.13.5.linux-amd64.tar.gz
+rm go1.15.12.linux-amd64.tar.gz
 ```
 
 ## 4. Node
 
-In GitLab 8.17 and later, GitLab requires the use of Node to compile JavaScript
+GitLab requires the use of Node to compile JavaScript
 assets, and Yarn to manage JavaScript dependencies. The current minimum
 requirements for these are:
 
-- `node` >= v10.14.2. (We recommend node 14.x as it is faster)
-- `yarn` >= v1.10.0.
+- `node` >= v12.22.1. (We recommend node 14.x as it is faster)
+- `yarn` = v1.22.x (Yarn 2 is not supported yet)
 
 In many distributions,
 the versions provided by the official package repositories are out of date, so
@@ -254,10 +276,7 @@ we need to install through the following commands:
 curl --location "https://deb.nodesource.com/setup_14.x" | sudo bash -
 sudo apt-get install -y nodejs
 
-curl --silent --show-error "https://dl.yarnpkg.com/debian/pubkey.gpg" | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-sudo apt-get update
-sudo apt-get install yarn
+npm install --global yarn
 ```
 
 Visit the official websites for [node](https://nodejs.org/en/download/package-manager/) and [yarn](https://classic.yarnpkg.com/en/docs/install/) if you have any trouble with these steps.
@@ -273,7 +292,7 @@ sudo adduser --disabled-login --gecos 'GitLab' git
 ## 6. Database
 
 NOTE:
-In GitLab 12.1 and later, only PostgreSQL is supported. In GitLab 13.0 and later, we [require PostgreSQL 11+](requirements.md#postgresql-requirements).
+In GitLab 12.1 and later, only PostgreSQL is supported. In GitLab 14.0 and later, we [require PostgreSQL 12+](requirements.md#postgresql-requirements).
 
 1. Install the database packages.
 
@@ -288,9 +307,9 @@ In GitLab 12.1 and later, only PostgreSQL is supported. In GitLab 13.0 and later
 
    ```shell
    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-   RELEASE=$(lsb_release -cs) echo "deb http://apt.postgresql.org/pub/repos/apt/ ${RELEASE}"-pgdg main | sudo tee  /etc/apt/sources.list.d/pgdg.list
+   sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
    sudo apt update
-   sudo apt -y install postgresql-11 postgresql-client-11 libpq-dev
+   sudo apt -y install postgresql-12 postgresql-client-12 libpq-dev
    ```
 
 1. Verify the PostgreSQL version you have is supported by the version of GitLab you're
@@ -526,7 +545,6 @@ sudo -u git -H editor config/resque.yml
 ```
 
 Make sure to edit both `gitlab.yml` and `puma.rb` to match your setup.
-If you want to use the Unicorn web server, see [Using Unicorn](#using-unicorn) for the additional steps.
 
 If you want to use HTTPS, see [Using HTTPS](#using-https) for the additional steps.
 
@@ -571,7 +589,9 @@ Install the gems (if you want to use Kerberos for user authentication, omit
 `kerberos` in the `--without` option below):
 
 ```shell
-sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
+sudo -u git -H bundle config set --local deployment 'true'
+sudo -u git -H bundle config set --local without 'development test mysql aws kerberos'
+sudo -u git -H bundle install
 ```
 
 ### Install GitLab Shell
@@ -628,7 +648,7 @@ You then need to update `gitlab.yml`'s `production -> elasticsearch -> indexer_p
 
 ### Install GitLab Pages
 
-GitLab Pages uses [GNU Make](https://www.gnu.org/software/make/). This step is optional and only needed if you wish to host static sites from within GitLab. The following commands install GitLab Pages in `/home/git/gitlab-pages`. For additional setup steps, consult the [administration guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/administration/pages/source.md) for your version of GitLab as the GitLab Pages daemon can be run several different ways.
+GitLab Pages uses [GNU Make](https://www.gnu.org/software/make/). This step is optional and only needed if you wish to host static sites from within GitLab. The following commands install GitLab Pages in `/home/git/gitlab-pages`. For additional setup steps, consult the [administration guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/administration/pages/source.md) for your version of GitLab as the GitLab Pages daemon can be run several different ways.
 
 ```shell
 cd /home/git
@@ -676,7 +696,7 @@ gitlab_path=/home/git/gitlab
 gitaly_path=/home/git/gitaly
 
 sudo -u git -H sh -c "$gitlab_path/bin/daemon_with_pidfile $gitlab_path/tmp/pids/gitaly.pid \
-  $gitaly_path/gitaly $gitaly_path/config.toml >> $gitlab_path/log/gitaly.log 2>&1 &"
+  $gitaly_path/_build/bin/gitaly $gitaly_path/config.toml >> $gitlab_path/log/gitaly.log 2>&1 &"
 ```
 
 ### Initialize Database and Activate Advanced Features
@@ -806,6 +826,8 @@ to use. Read all about the needed configuration at the
 [GitLab Pages administration guide](../administration/pages/index.md).
 
 If you want to use HTTPS, replace the `gitlab` NGINX configuration with `gitlab-ssl`. See [Using HTTPS](#using-https) for HTTPS configuration details.
+
+For the NGINX to be able to read the GitLab-Workhorse socket, you need to make sure, that the `www-data` user can read the socket, which will be owned by the GitLab user. This is most easily achieved, if it is world-readable, for example that it has permissions `0755`, which is the default. `www-data` also needs to be able to list the parent directories.
 
 ### Test Configuration
 
@@ -973,24 +995,6 @@ You also need to change the corresponding options (e.g. `ssh_user`, `ssh_host`, 
 
 Apart from the always supported Markdown style, there are other rich text files that GitLab can display. But you might have to install a dependency to do so. See the [`github-markup` gem README](https://github.com/gitlabhq/markup#markups) for more information.
 
-### Using Unicorn
-
-As of GitLab 12.9, [Puma](https://github.com/puma/puma) has replaced Unicorn as the default web server for installations from source.
-If you want to switch back to Unicorn, follow these steps:
-
-1. Finish the GitLab setup so you have it up and running.
-1. Copy the supplied example Unicorn configuration file into place:
-
-   ```shell
-   cd /home/git/gitlab
-
-   # Copy config file for the web server
-   sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
-   ```
-
-1. Edit the system `init.d` script and set `USE_WEB_SERVER="unicorn"`. If you have `/etc/default/gitlab`, then you should edit it instead.
-1. Restart GitLab.
-
 ### Using Sidekiq instead of Sidekiq Cluster
 
 As of GitLab 12.10, Source installations are using `bin/sidekiq-cluster` for managing Sidekiq processes.
@@ -999,6 +1003,17 @@ Using Sidekiq directly is still supported until 14.0. So if you're experiencing 
 1. Edit the system `init.d` script to remove the `SIDEKIQ_WORKERS` flag. If you have `/etc/default/gitlab`, then you should edit it instead.
 1. Restart GitLab.
 1. [Create an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/-/new) describing the problem.
+
+### Prometheus server setup
+
+You can configure the Prometheus server in `config/gitlab.yml`:
+
+```yaml
+# example
+prometheus:
+  enabled: true
+  server_address: '10.1.2.3:9090' 
+```
 
 ## Troubleshooting
 

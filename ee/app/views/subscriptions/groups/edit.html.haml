@@ -36,8 +36,7 @@
                 pattern: Gitlab::PathRegex::NAMESPACE_FORMAT_REGEX_JS,
                 title: _('Please choose a group URL with no special characters.')
             %p.validation-error.gl-field-error.field-validation.hide
-              = _('Group path is already taken. Suggestions: ')
-              %span.gl-path-suggestions
+              = _("Group path is already taken. We've suggested one that is available.")
             %p.validation-success.gl-field-success.field-validation.hide= _('Group path is available.')
             %p.validation-pending.gl-field-error-ignore.field-validation.hide= _('Checking group path availability...')
         .row
@@ -47,5 +46,5 @@
             = render 'shared/visibility_level', f: f, visibility_level: default_group_visibility, can_change_visibility_level: true, form_model: @group, with_label: false
         .row
           .form-group.col-sm-12.mb-0
-            = button_tag class: %w[btn btn-success w-100] do
+            = button_tag class: %w[btn gl-button btn-success gl-w-full!] do
               = _('Get started')

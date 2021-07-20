@@ -13,7 +13,7 @@ module API
 
       helpers do
         def authenticate_gitlab_kas_request!
-          unauthorized! unless Gitlab::Kas.verify_api_request(headers)
+          render_api_error!('KAS JWT authentication invalid', 401) unless Gitlab::Kas.verify_api_request(headers)
         end
 
         def agent_token
@@ -51,9 +51,9 @@ module API
         end
 
         def check_agent_token
-          forbidden! unless agent_token
+          unauthorized! unless agent_token
 
-          forbidden! unless Gitlab::Kas.included_in_gitlab_com_rollout?(agent.project)
+          agent_token.track_usage
         end
       end
 
@@ -105,18 +105,18 @@ module API
             detail 'Updates usage metrics for agent'
           end
           params do
-            requires :gitops_sync_count, type: Integer, desc: 'The count to increment the gitops_sync metric by'
+            optional :gitops_sync_count, type: Integer, desc: 'The count to increment the gitops_sync metric by'
+            optional :k8s_api_proxy_request_count, type: Integer, desc: 'The count to increment the k8s_api_proxy_request_count metric by'
           end
           post '/' do
-            gitops_sync_count = params[:gitops_sync_count]
+            events = params.slice(:gitops_sync_count, :k8s_api_proxy_request_count)
+            events.transform_keys! { |event| event.to_s.chomp('_count') }
 
-            if gitops_sync_count < 0
-              bad_request!('gitops_sync_count must be greater than or equal to zero')
-            else
-              Gitlab::UsageDataCounters::KubernetesAgentCounter.increment_gitops_sync(gitops_sync_count)
+            Gitlab::UsageDataCounters::KubernetesAgentCounter.increment_event_counts(events)
 
-              no_content!
-            end
+            no_content!
+          rescue ArgumentError => e
+            bad_request!(e.message)
           end
         end
       end
@@ -124,4 +124,4 @@ module API
   end
 end
 
-API::Internal::Kubernetes.prepend_if_ee('EE::API::Internal::Kubernetes')
+API::Internal::Kubernetes.prepend_mod_with('API::Internal::Kubernetes')

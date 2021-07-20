@@ -46,10 +46,6 @@ RSpec.describe Resolvers::IssuesResolver do
         expect(resolve_issues(milestone_title: [milestone.title])).to contain_exactly(issue1)
       end
 
-      it 'filters by assignee_username' do
-        expect(resolve_issues(assignee_username: [assignee.username])).to contain_exactly(issue2)
-      end
-
       it 'filters by two assignees' do
         assignee2 = create(:user)
         issue2.update!(assignees: [assignee, assignee2])
@@ -76,6 +72,24 @@ RSpec.describe Resolvers::IssuesResolver do
       it 'filters by labels' do
         expect(resolve_issues(label_name: [label1.title])).to contain_exactly(issue1, issue2)
         expect(resolve_issues(label_name: [label1.title, label2.title])).to contain_exactly(issue2)
+      end
+
+      describe 'filters by assignee_username' do
+        it 'filters by assignee_username' do
+          expect(resolve_issues(assignee_username: [assignee.username])).to contain_exactly(issue2)
+        end
+
+        it 'filters by assignee_usernames' do
+          expect(resolve_issues(assignee_usernames: [assignee.username])).to contain_exactly(issue2)
+        end
+
+        context 'when both assignee_username and assignee_usernames are provided' do
+          it 'raises a mutually exclusive filter error' do
+            expect do
+              resolve_issues(assignee_usernames: [assignee.username], assignee_username: assignee.username)
+            end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'only one of [assigneeUsernames, assigneeUsername] arguments is allowed at the same time.')
+          end
+        end
       end
 
       describe 'filters by created_at' do
@@ -141,6 +155,29 @@ RSpec.describe Resolvers::IssuesResolver do
           expect(IssuesFinder).to receive(:new).with(anything, expected_arguments).and_call_original
 
           resolve_issues(search: 'foo')
+        end
+      end
+
+      describe 'filters by negated params' do
+        it 'returns issues without the specified iids' do
+          expect(resolve_issues(not: { iids: [issue1.iid] })).to contain_exactly(issue2)
+        end
+
+        it 'returns issues without the specified label names' do
+          expect(resolve_issues(not: { label_name: [label1.title] })).to be_empty
+          expect(resolve_issues(not: { label_name: [label2.title] })).to contain_exactly(issue1)
+        end
+
+        it 'returns issues without the specified milestone' do
+          expect(resolve_issues(not: { milestone_title: [milestone.title] })).to contain_exactly(issue2)
+        end
+
+        it 'returns issues without the specified assignee_usernames' do
+          expect(resolve_issues(not: { assignee_usernames: [assignee.username] })).to contain_exactly(issue1)
+        end
+
+        it 'returns issues without the specified assignee_id' do
+          expect(resolve_issues(not: { assignee_id: [assignee.id] })).to contain_exactly(issue1)
         end
       end
 
@@ -253,6 +290,42 @@ RSpec.describe Resolvers::IssuesResolver do
             expect(resolve_issues(sort: :severity_desc).to_a).to eq([issue_high_severity, issue_low_severity, issue_no_severity])
           end
         end
+
+        context 'when sorting by popularity' do
+          let_it_be(:project) { create(:project, :public) }
+          let_it_be(:issue1) { create(:issue, project: project) } # has one upvote
+          let_it_be(:issue2) { create(:issue, project: project) } # has two upvote
+          let_it_be(:issue3) { create(:issue, project: project) }
+          let_it_be(:issue4) { create(:issue, project: project) } # has one upvote
+
+          before do
+            create(:award_emoji, :upvote, awardable: issue1)
+            create(:award_emoji, :upvote, awardable: issue2)
+            create(:award_emoji, :upvote, awardable: issue2)
+            create(:award_emoji, :upvote, awardable: issue4)
+          end
+
+          it 'sorts issues ascending (ties broken by id in desc order)' do
+            expect(resolve_issues(sort: :popularity_asc).to_a).to eq([issue3, issue4, issue1, issue2])
+          end
+
+          it 'sorts issues descending (ties broken by id in desc order)' do
+            expect(resolve_issues(sort: :popularity_desc).to_a).to eq([issue2, issue4, issue1, issue3])
+          end
+        end
+
+        context 'when sorting with non-stable cursors' do
+          %i[priority_asc priority_desc
+             popularity_asc popularity_desc
+             label_priority_asc label_priority_desc
+             milestone_due_asc milestone_due_desc].each do |sort_by|
+            it "uses offset-pagination when sorting by #{sort_by}" do
+              resolved = resolve_issues(sort: sort_by)
+
+              expect(resolved).to be_a(::Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection)
+            end
+          end
+        end
       end
 
       it 'returns issues user can see' do
@@ -264,7 +337,7 @@ RSpec.describe Resolvers::IssuesResolver do
       end
 
       it 'finds a specific issue with iid', :request_store do
-        result = batch_sync(max_queries: 4) { resolve_issues(iid: issue1.iid) }
+        result = batch_sync(max_queries: 4) { resolve_issues(iid: issue1.iid).to_a }
 
         expect(result).to contain_exactly(issue1)
       end
@@ -281,7 +354,7 @@ RSpec.describe Resolvers::IssuesResolver do
 
       it 'finds a specific issue with iids', :request_store do
         result = batch_sync(max_queries: 4) do
-          resolve_issues(iids: [issue1.iid])
+          resolve_issues(iids: [issue1.iid]).to_a
         end
 
         expect(result).to contain_exactly(issue1)
@@ -290,7 +363,7 @@ RSpec.describe Resolvers::IssuesResolver do
       it 'finds multiple issues with iids' do
         create(:issue, project: project, author: current_user)
 
-        expect(batch_sync { resolve_issues(iids: [issue1.iid, issue2.iid]) })
+        expect(batch_sync { resolve_issues(iids: [issue1.iid, issue2.iid]).to_a })
           .to contain_exactly(issue1, issue2)
       end
 
@@ -302,7 +375,7 @@ RSpec.describe Resolvers::IssuesResolver do
           create(:issue, project: another_project, iid: iid)
         end
 
-        expect(batch_sync { resolve_issues(iids: iids) }).to contain_exactly(issue1, issue2)
+        expect(batch_sync { resolve_issues(iids: iids).to_a }).to contain_exactly(issue1, issue2)
       end
     end
   end

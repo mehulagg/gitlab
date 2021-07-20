@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'migrate', '20200728080250_replace_unique_index_on_cycle_analytics_stages.rb')
+require_migration!('replace_unique_index_on_cycle_analytics_stages')
 
-RSpec.describe ReplaceUniqueIndexOnCycleAnalyticsStages, :migration, schema: 20200728080250 do
+RSpec.describe ReplaceUniqueIndexOnCycleAnalyticsStages, :migration, schema: 20200727142337 do
   let(:namespaces) { table(:namespaces) }
   let(:group_value_streams) { table(:analytics_cycle_analytics_group_value_streams) }
   let(:group_stages) { table(:analytics_cycle_analytics_group_stages) }

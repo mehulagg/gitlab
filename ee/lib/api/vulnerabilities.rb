@@ -32,7 +32,7 @@ module API
     end
     resource :vulnerabilities do
       before do
-        @vulnerability = find_and_authorize_vulnerability!(:read_vulnerability)
+        @vulnerability = find_and_authorize_vulnerability!(:read_security_resource)
       end
 
       desc 'Get a vulnerability' do
@@ -94,7 +94,7 @@ module API
         use :pagination
       end
       get ':id/vulnerabilities' do
-        authorize! :read_vulnerability, user_project
+        authorize! :read_security_resource, user_project
 
         vulnerabilities = paginate(
           vulnerabilities_by(user_project)

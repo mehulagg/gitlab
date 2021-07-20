@@ -3,6 +3,8 @@
 class RepositoryPushAuditEventWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :authentication_and_authorization
 
   def perform(changes, project_id, user_id)
@@ -10,9 +12,11 @@ class RepositoryPushAuditEventWorker # rubocop:disable Scalability/IdempotentWor
     user = User.find(user_id)
 
     changes.map! do |change|
-      before, after, ref = change['before'], change['after'], change['ref']
+      before = change['before']
+      after = change['after']
+      ref = change['ref']
 
-      service = EE::AuditEvents::RepositoryPushAuditEventService
+      service = AuditEvents::RepositoryPushAuditEventService
         .new(user, project, ref, before, after)
         .tap { |event| event.prepare_security_event }
 
@@ -21,6 +25,6 @@ class RepositoryPushAuditEventWorker # rubocop:disable Scalability/IdempotentWor
       service if service.enabled?
     end.compact!
 
-    EE::AuditEvents::BulkInsertService.new(changes).execute
+    AuditEvents::BulkInsertService.new(changes).execute
   end
 end

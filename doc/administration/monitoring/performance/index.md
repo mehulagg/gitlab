@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -69,6 +69,5 @@ The following environment variables are recognized:
 - `DATABASE_SAMPLER_INTERVAL_SECONDS`
 - `ACTION_CABLE_SAMPLER_INTERVAL_SECONDS`
 - `PUMA_SAMPLER_INTERVAL_SECONDS`
-- `UNICORN_SAMPLER_INTERVAL_SECONDS`
 - `THREADS_SAMPLER_INTERVAL_SECONDS`
 - `GLOBAL_SEARCH_SAMPLER_INTERVAL_SECONDS`

@@ -81,6 +81,7 @@ RSpec.describe API::SystemHooks do
       expect(json_response['push_events']).to be false
       expect(json_response['tag_push_events']).to be false
       expect(json_response['merge_requests_events']).to be false
+      expect(json_response['repository_update_events']).to be true
     end
 
     it 'sets explicit values for events' do
@@ -92,7 +93,8 @@ RSpec.describe API::SystemHooks do
           enable_ssl_verification: false,
           push_events: true,
           tag_push_events: true,
-          merge_requests_events: true
+          merge_requests_events: true,
+          repository_update_events: false
         }
 
       expect(response).to have_gitlab_http_status(:created)
@@ -100,18 +102,19 @@ RSpec.describe API::SystemHooks do
       expect(json_response['push_events']).to be true
       expect(json_response['tag_push_events']).to be true
       expect(json_response['merge_requests_events']).to be true
+      expect(json_response['repository_update_events']).to be false
     end
   end
 
-  describe "GET /hooks/:id" do
-    it "returns hook by id" do
-      get api("/hooks/#{hook.id}", admin)
-      expect(response).to have_gitlab_http_status(:ok)
+  describe 'POST /hooks/:id' do
+    it "returns and trigger hook by id" do
+      post api("/hooks/#{hook.id}", admin)
+      expect(response).to have_gitlab_http_status(:created)
       expect(json_response['event_name']).to eq('project_create')
     end
 
     it "returns 404 on failure" do
-      get api("/hooks/404", admin)
+      post api("/hooks/404", admin)
       expect(response).to have_gitlab_http_status(:not_found)
     end
   end

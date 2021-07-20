@@ -6,10 +6,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Place GitLab into a read-only state **(FREE SELF)**
 
-WARNING:
-This document should be used as a temporary solution.
-There's work in progress to make this
-[possible with Geo](https://gitlab.com/groups/gitlab-org/-/epics/2149).
+NOTE:
+In GitLab 13.9 and later, the recommended method to
+place GitLab in a read-only state is to enable
+[maintenance mode](../administration/maintenance_mode/index.md).
 
 In some cases, you might want to place GitLab under a read-only state.
 The configuration for doing so depends on your desired outcome.
@@ -19,10 +19,10 @@ The configuration for doing so depends on your desired outcome.
 The first thing you'll want to accomplish is to ensure that no changes can be
 made to your repositories. There's two ways you can accomplish that:
 
-- Either stop Unicorn/Puma to make the internal API unreachable:
+- Either stop Puma to make the internal API unreachable:
 
   ```shell
-  sudo gitlab-ctl stop puma  # or unicorn
+  sudo gitlab-ctl stop puma
   ```
 
 - Or, open up a Rails console:
@@ -46,19 +46,19 @@ made to your repositories. There's two ways you can accomplish that:
 ## Shut down the GitLab UI
 
 If you don't mind shutting down the GitLab UI, then the easiest approach is to
-stop `sidekiq` and `puma`/`unicorn`, and you'll effectively ensure that no
+stop `sidekiq` and `puma`, and you'll effectively ensure that no
 changes can be made to GitLab:
 
 ```shell
 sudo gitlab-ctl stop sidekiq
-sudo gitlab-ctl stop puma  # or unicorn
+sudo gitlab-ctl stop puma
 ```
 
 When you're ready to revert this:
 
 ```shell
 sudo gitlab-ctl start sidekiq
-sudo gitlab-ctl start puma  # or unicorn
+sudo gitlab-ctl start puma
 ```
 
 ## Make the database read-only

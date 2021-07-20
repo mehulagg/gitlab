@@ -21,7 +21,7 @@ module Gitlab
         end
 
         def group_saml_enabled?
-          saml_provider&.enabled? && group.feature_available?(:group_saml)
+          saml_provider&.enabled? && group.licensed_feature_available?(:group_saml)
         end
 
         def token_discoverable?

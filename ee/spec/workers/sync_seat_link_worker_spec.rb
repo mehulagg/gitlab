@@ -9,15 +9,15 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
 
       before do
         # Setting the date as 12th March 2020 12:00 UTC for tests and creating new license
-        create_current_license(starts_at: '2020-02-12'.to_date)
+        create_current_license(cloud_licensing_enabled: true, starts_at: '2020-02-12'.to_date)
 
-        HistoricalData.create!(recorded_at: '2020-02-11T00:00:00Z', active_user_count: 100)
-        HistoricalData.create!(recorded_at: '2020-02-12T00:00:00Z', active_user_count: 10)
-        HistoricalData.create!(recorded_at: '2020-02-13T00:00:00Z', active_user_count: 15)
+        create(:historical_data, recorded_at: '2020-02-11T00:00:00Z', active_user_count: 100)
+        create(:historical_data, recorded_at: '2020-02-12T00:00:00Z', active_user_count: 10)
+        create(:historical_data, recorded_at: '2020-02-13T00:00:00Z', active_user_count: 15)
 
-        HistoricalData.create!(recorded_at: '2020-03-11T00:00:00Z', active_user_count: 10)
-        HistoricalData.create!(recorded_at: '2020-03-12T00:00:00Z', active_user_count: 12)
-        HistoricalData.create!(recorded_at: '2020-03-15T00:00:00Z', active_user_count: 25)
+        create(:historical_data, recorded_at: '2020-03-11T00:00:00Z', active_user_count: 10)
+        create(:historical_data, recorded_at: '2020-03-12T00:00:00Z', active_user_count: 12)
+        create(:historical_data, recorded_at: '2020-03-15T00:00:00Z', active_user_count: 25)
         allow(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
       end
 
@@ -90,6 +90,14 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
       end
     end
 
+    shared_examples 'seat link sync' do
+      it 'executes the SyncSeatLinkRequestWorker' do
+        expect(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
+
+        subject.perform
+      end
+    end
+
     context 'license checks' do
       let_it_be(:historical_data) { create(:historical_data) }
 
@@ -111,7 +119,7 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
 
       context 'when the license has no expiration date' do
         before do
-          create_current_license(expires_at: nil, block_changes_at: nil)
+          create_current_license(cloud_licensing_enabled: true, expires_at: nil, block_changes_at: nil)
         end
 
         include_examples 'no seat link sync'
@@ -119,38 +127,18 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
 
       context 'when using an expired license' do
         before do
-          create_current_license(expires_at: expiration_date)
+          create_current_license(cloud_licensing_enabled: true, expires_at: Time.zone.now.utc.to_date - 15.days)
         end
 
-        context 'the license expired over 14 days ago' do
-          let(:expiration_date) { Time.zone.now.utc.to_date - 15.days }
-
-          include_examples 'no seat link sync'
-        end
-
-        context 'the license expired less than or equal to 14 days ago' do
-          let(:expiration_date) { Time.zone.now.utc.to_date - 14.days }
-
-          it 'executes the SyncSeatLinkRequestWorker' do
-            expect(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
-
-            subject.perform
-          end
-        end
+        include_examples 'seat link sync'
       end
     end
 
-    context 'when seat link has been disabled' do
+    context 'with a non cloud license' do
       before do
-        create(:historical_data)
-
-        allow(Gitlab::CurrentSettings).to receive(:seat_link_enabled?).and_return(false)
+        create_current_license(starts_at: '2020-02-12'.to_date)
       end
 
-      include_examples 'no seat link sync'
-    end
-
-    context 'when no historical data exists' do
       include_examples 'no seat link sync'
     end
   end

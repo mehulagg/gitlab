@@ -12,6 +12,9 @@ describe('UserAvatar', () => {
         isCurrentUser: false,
         ...propsData,
       },
+      provide: {
+        canManageMembers: true,
+      },
     });
   };
 

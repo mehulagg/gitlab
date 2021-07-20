@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -23,14 +23,18 @@ you never miss a page.
 
 ## Email notifications
 
-Email notifications are available in projects that have been
-[configured to create incidents automatically](incidents.md#create-incidents-automatically)
-for triggered alerts. Project members with the **Owner** or **Maintainer** roles are
-sent an email notification automatically. (This is not configurable.) To optionally
-send additional email notifications to project members with the **Developer** role:
+Email notifications are available in projects for triggered alerts. Project
+members with the **Owner** or **Maintainer** roles have the option to receive
+a single email notification for new alerts.
 
-1. Navigate to **Settings > Operations**.
-1. Expand the **Incidents** section.
-1. In the **Alert Integration** tab, select the **Send a separate email notification to Developers**
-   check box.
+1. Navigate to **Settings > Monitor**.
+1. Expand the **Alerts** section.
+1. In the **Integration settings** tab, select the checkbox
+   **Send a single email notification to Owners and Maintainers for new alerts**.
 1. Select **Save changes**.
+
+## Paging **(PREMIUM)**
+
+In projects that have an [on-call schedule](oncall_schedules.md) configured, on-call responders are
+paged through email for triggered alerts. The on-call responder(s) receive one email for triggered
+alerts.

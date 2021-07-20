@@ -10,11 +10,11 @@ RSpec.describe Gitlab::HookData::GroupMemberBuilder do
 
     context 'data' do
       context 'group_plan attribute' do
-        let(:group) { create(:group_with_plan, plan: :gold_plan) }
+        let(:group) { create(:group_with_plan, plan: :ultimate_plan) }
 
         it 'returns correct group_plan' do
           expect(data).to include(:group_plan)
-          expect(data[:group_plan]).to eq('gold')
+          expect(data[:group_plan]).to eq('ultimate')
         end
       end
     end

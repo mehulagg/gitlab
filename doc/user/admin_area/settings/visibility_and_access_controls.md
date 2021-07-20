@@ -11,14 +11,18 @@ GitLab allows administrators to enforce specific controls.
 
 To access the visibility and access control options:
 
-1. Sign in to GitLab as a user with Administrator [permissions](../../permissions.md).
-1. Go to **Admin Area > Settings > General**.
+1. Sign in to GitLab as a user with [Administrator role](../../permissions.md).
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**.
 1. Expand the **Visibility and access controls** section.
 
 ## Default branch protection
 
-This global option defines the branch protection that applies to every repository's default branch. [Branch protection](../../project/protected_branches.md) specifies which roles can push to branches and which roles can delete
-branches. In this case _Default_ refers to a repository's default branch, which in most cases is `master`.
+This global option defines the branch protection that applies to every repository's
+[default branch](../../project/repository/branches/default.md).
+[Branch protection](../../project/protected_branches.md) specifies which roles can push
+to branches and which roles can delete branches. In this case _Default_ refers to a
+repository's [default branch](../../project/repository/branches/default.md).
 
 This setting applies only to each repositories' default branch. To protect other branches, you must configure branch protection in repository. For details, see [protected branches](../../project/protected_branches.md).
 
@@ -29,7 +33,7 @@ To change the default branch protection:
 
 For more details, see [Protected branches](../../project/protected_branches.md).
 
-To change this setting for a specific group, see [Default branch protection for groups](../../group/index.md#changing-the-default-branch-protection-of-a-group)
+To change this setting for a specific group, see [Default branch protection for groups](../../group/index.md#change-the-default-branch-protection-of-a-group)
 
 ### Disable group owners from updating default branch protection **(PREMIUM SELF)**
 
@@ -55,7 +59,7 @@ To change the default project creation protection:
 1. Select the desired option.
 1. Click **Save changes**.
 
-For more details, see [Default project-creation level](../../group/index.md#default-project-creation-level).
+For more details, see [Specify who can add projects to a group](../../group/index.md#specify-who-can-add-projects-to-a-group).
 
 ## Default project deletion protection **(PREMIUM SELF)**
 
@@ -79,7 +83,7 @@ The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
 Projects in a group (but not a personal namespace) can be deleted after a delayed period, by
-[configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
+[configuring in Group Settings](../../group/index.md#enable-delayed-project-removal).
 The default period is seven days, and can be changed. Setting this period to `0` enables immediate removal
 of projects or groups.
 
@@ -93,7 +97,8 @@ To change this period:
 Alternatively, projects that are marked for removal can be deleted immediately. To do so:
 
 1. [Restore the project](../../project/settings/#restore-a-project).
-1. Delete the project as described in the [Administering Projects page](../../admin_area/#administering-projects).
+1. Delete the project as described in the
+   [Administering Projects page](../../admin_area/#administering-projects).
 
 ## Default project visibility
 
@@ -102,7 +107,8 @@ To set the default visibility levels for new projects:
 1. Select the desired default project visibility.
 1. Click **Save changes**.
 
-For more details on project visibility, see [Public access](../../../public_access/public_access.md).
+For more details on project visibility, see
+[Project visibility](../../../public_access/public_access.md).
 
 ## Default snippet visibility
 
@@ -111,7 +117,8 @@ To set the default visibility levels for new snippets:
 1. Select the desired default snippet visibility.
 1. Click **Save changes**.
 
-For more details on snippet visibility, see [Public access](../../../public_access/public_access.md).
+For more details on snippet visibility, see
+[Project visibility](../../../public_access/public_access.md).
 
 ## Default group visibility
 
@@ -120,7 +127,8 @@ To set the default visibility levels for new groups:
 1. Select the desired default group visibility.
 1. Click **Save changes**.
 
-For more details on group visibility, see [Public access](../../../public_access/public_access.md).
+For more details on group visibility, see
+[Group visibility](../../group/index.md#group-visibility).
 
 ## Restricted visibility levels
 
@@ -129,7 +137,8 @@ To set the restricted visibility levels for projects, snippets, and selected pag
 1. Select the desired visibility levels to restrict.
 1. Select **Save changes**.
 
-For more details on project visibility, see [Public access](../../../public_access/public_access.md).
+For more details on project visibility, see
+[Project visibility](../../../public_access/public_access.md).
 
 ## Import sources
 

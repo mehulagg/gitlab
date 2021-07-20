@@ -27,7 +27,9 @@ module Projects
       # Git data (e.g. a list of branch names).
       flush_caches(project)
 
-      ::Ci::AbortProjectPipelinesService.new.execute(project)
+      if Feature.enabled?(:abort_deleted_project_pipelines, default_enabled: :yaml)
+        ::Ci::AbortPipelinesService.new.execute(project.all_pipelines, :project_deleted)
+      end
 
       Projects::UnlinkForkService.new(project, current_user).execute
 
@@ -39,7 +41,7 @@ module Projects
       current_user.invalidate_personal_projects_count
 
       true
-    rescue => error
+    rescue StandardError => error
       attempt_rollback(project, error.message)
       false
     rescue Exception => error # rubocop:disable Lint/RescueException
@@ -107,18 +109,14 @@ module Projects
       end
 
       project.leave_pool_repository
-
-      if Gitlab::Ci::Features.project_transactionless_destroy?(project)
-        destroy_project_related_records(project)
-      else
-        Project.transaction { destroy_project_related_records(project) }
-      end
+      destroy_project_related_records(project)
     end
 
     def destroy_project_related_records(project)
       log_destroy_event
       trash_relation_repositories!
       trash_project_repositories!
+      destroy_web_hooks!
 
       # Rails attempts to load all related records into memory before
       # destroying: https://github.com/rails/rails/issues/22510
@@ -132,6 +130,23 @@ module Projects
 
     def log_destroy_event
       log_info("Attempting to destroy #{project.full_path} (#{project.id})")
+    end
+
+    # The project can have multiple webhooks with hundreds of thousands of web_hook_logs.
+    # By default, they are removed with "DELETE CASCADE" option defined via foreign_key.
+    # But such queries can exceed the statement_timeout limit and fail to delete the project.
+    # (see https://gitlab.com/gitlab-org/gitlab/-/issues/26259)
+    #
+    # To prevent that we use WebHooks::DestroyService. It deletes logs in batches and
+    # produces smaller and faster queries to the database.
+    def destroy_web_hooks!
+      project.hooks.find_each do |web_hook|
+        result = ::WebHooks::DestroyService.new(current_user).sync_destroy(web_hook)
+
+        unless result[:status] == :success
+          raise_error(s_('DeleteProject|Failed to remove webhooks. Please try again or contact administrator.'))
+        end
+      end
     end
 
     def remove_registry_tags
@@ -159,7 +174,7 @@ module Projects
     end
 
     def raise_error(message)
-      raise DestroyError.new(message)
+      raise DestroyError, message
     end
 
     def flush_caches(project)
@@ -168,4 +183,4 @@ module Projects
   end
 end
 
-Projects::DestroyService.prepend_if_ee('EE::Projects::DestroyService')
+Projects::DestroyService.prepend_mod_with('Projects::DestroyService')

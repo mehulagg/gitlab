@@ -1,49 +1,42 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
 require_relative '../../../../rubocop/cop/migration/prevent_strings'
 
 RSpec.describe RuboCop::Cop::Migration::PreventStrings do
-  include CopHelper
-
   subject(:cop) { described_class.new }
 
-  context 'in migration' do
+  context 'when in migration' do
     before do
       allow(cop).to receive(:in_migration?).and_return(true)
     end
 
     context 'when the string data type is used' do
       it 'registers an offense' do
-        expect_offense(<<~RUBY)
+        expect_offense(<<~RUBY, msg: "Do not use the `string` data type, use `text` instead.[...]")
           class Users < ActiveRecord::Migration[6.0]
-            DOWNTIME = false
-
             def up
               create_table :users do |t|
                 t.string :username, null: false
-                  ^^^^^^ #{described_class::MSG}
+                  ^^^^^^ %{msg}
 
                 t.timestamps_with_timezone null: true
 
                 t.string :password
-                  ^^^^^^ #{described_class::MSG}
+                  ^^^^^^ %{msg}
               end
 
               add_column(:users, :bio, :string)
-              ^^^^^^^^^^ #{described_class::MSG}
+              ^^^^^^^^^^ %{msg}
 
               add_column_with_default(:users, :url, :string, default: '/-/user', allow_null: false, limit: 255)
-              ^^^^^^^^^^^^^^^^^^^^^^^ #{described_class::MSG}
+              ^^^^^^^^^^^^^^^^^^^^^^^ %{msg}
 
               change_column_type_concurrently :users, :commit_id, :string
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{described_class::MSG}
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ %{msg}
             end
           end
         RUBY
-
-        expect(cop.offenses.map(&:cop_name)).to all(eq('Migration/PreventStrings'))
       end
     end
 
@@ -51,8 +44,6 @@ RSpec.describe RuboCop::Cop::Migration::PreventStrings do
       it 'registers no offense' do
         expect_no_offenses(<<~RUBY)
           class Users < ActiveRecord::Migration[6.0]
-            DOWNTIME = false
-
             def up
               create_table :users do |t|
                 t.integer :not_a_string, null: false
@@ -70,8 +61,6 @@ RSpec.describe RuboCop::Cop::Migration::PreventStrings do
       it 'registers no offense' do
         expect_no_offenses(<<~RUBY)
           class Users < ActiveRecord::Migration[6.0]
-            DOWNTIME = false
-
             def up
               create_table :users do |t|
                 t.text :username, null: false
@@ -92,8 +81,6 @@ RSpec.describe RuboCop::Cop::Migration::PreventStrings do
       it 'registers no offense' do
         expect_no_offenses(<<~RUBY)
           class TestStringArrays < ActiveRecord::Migration[6.0]
-            DOWNTIME = false
-
             def up
               create_table :test_string_arrays, id: false do |t|
                 t.integer :test_id, null: false
@@ -109,12 +96,10 @@ RSpec.describe RuboCop::Cop::Migration::PreventStrings do
       end
     end
 
-    context 'on down' do
+    context 'when using down method' do
       it 'registers no offense' do
         expect_no_offenses(<<~RUBY)
           class Users < ActiveRecord::Migration[6.0]
-            DOWNTIME = false
-
             def up
               remove_column :users, :bio
               remove_column :users, :url
@@ -138,12 +123,10 @@ RSpec.describe RuboCop::Cop::Migration::PreventStrings do
     end
   end
 
-  context 'outside of migration' do
+  context 'when outside of migration' do
     it 'registers no offense' do
       expect_no_offenses(<<~RUBY)
         class Users < ActiveRecord::Migration[6.0]
-          DOWNTIME = false
-
           def up
             create_table :users do |t|
               t.string :username, null: false

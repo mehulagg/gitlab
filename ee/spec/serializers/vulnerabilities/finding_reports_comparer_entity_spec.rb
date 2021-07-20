@@ -6,6 +6,7 @@ RSpec.describe Vulnerabilities::FindingReportsComparerEntity do
   describe 'container scanning report comparison' do
     let_it_be(:user) { create(:user) }
 
+    let(:project) { build(:project) }
     let(:base_findings) { create_list(:vulnerabilities_finding, 2) }
     let(:base_combined_reports) { build_list(:ci_reports_security_report, 1, created_at: nil) }
     let(:base_report) { build(:ci_reports_security_aggregated_reports, reports: base_combined_reports, findings: base_findings)}
@@ -14,7 +15,7 @@ RSpec.describe Vulnerabilities::FindingReportsComparerEntity do
     let(:head_combined_reports) { build_list(:ci_reports_security_report, 1, created_at: 2.days.ago) }
     let(:head_report) { build(:ci_reports_security_aggregated_reports, reports: head_combined_reports, findings: head_findings)}
 
-    let(:comparer) { Gitlab::Ci::Reports::Security::VulnerabilityReportsComparer.new(base_report, head_report) }
+    let(:comparer) { Gitlab::Ci::Reports::Security::VulnerabilityReportsComparer.new(project, base_report, head_report) }
 
     let(:request) { double('request') }
 

@@ -8,7 +8,7 @@ require 'set'
 # The verification depend on the presence of actual test files,
 # so they would fail if one of the test files mentioned here is deleted.
 # To minimize the chance of this test failing due to unrelated changes,
-# the test files are chosen to be critical files that are unlikely to be deleted in a typical Merge Request
+# the test files are chosen to be critical files that are unlikely to be deleted in a typical merge request
 tests = [
   {
     explanation: 'EE code should map to respective spec',
@@ -84,14 +84,14 @@ tests = [
 
   {
     explanation: 'FOSS views should map to respective spec',
-    source: 'app/views/admin/users/_user.html.haml',
-    expected: ['spec/views/admin/users/_user.html.haml_spec.rb']
+    source: 'app/views/admin/dashboard/index.html.haml',
+    expected: ['spec/views/admin/dashboard/index.html.haml_spec.rb']
   },
 
   {
     explanation: 'EE views should map to respective spec',
-    source: 'ee/app/views/admin/licenses/show.html.haml',
-    expected: ['ee/spec/views/admin/licenses/show.html.haml_spec.rb']
+    source: 'ee/app/views/subscriptions/new.html.haml',
+    expected: ['ee/spec/views/subscriptions/new.html.haml_spec.rb']
   },
 
   {
@@ -110,6 +110,12 @@ tests = [
     explanation: 'Migration should map to its timestamped spec',
     source: 'db/post_migrate/20190924152703_migrate_issue_trackers_data.rb',
     expected: ['spec/migrations/20190924152703_migrate_issue_trackers_data_spec.rb']
+  },
+
+  {
+    explanation: 'Whats New should map to its respective spec',
+    source: 'data/whats_new/202101140001_13_08.yml',
+    expected: ['spec/lib/release_highlights/validator_spec.rb']
   }
 ]
 

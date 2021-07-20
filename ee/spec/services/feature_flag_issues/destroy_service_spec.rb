@@ -19,9 +19,7 @@ RSpec.describe FeatureFlagIssues::DestroyService do
   def setup
     feature_flag = create(:operations_feature_flag, project: project)
     issue = create(:issue, project: project)
-    feature_flag_issue = create(:feature_flag_issue, feature_flag: feature_flag, issue: issue)
-
-    feature_flag_issue
+    create(:feature_flag_issue, feature_flag: feature_flag, issue: issue)
   end
 
   describe '#execute' do

@@ -3,8 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe MergeRequests::MergeService do
+  include ExclusiveLeaseHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:user2) { create(:user) }
+
   let(:merge_request) { create(:merge_request, :simple, author: user2, assignees: [user2]) }
   let(:project) { merge_request.project }
 
@@ -14,10 +17,13 @@ RSpec.describe MergeRequests::MergeService do
   end
 
   describe '#execute' do
-    let(:service) { described_class.new(project, user, merge_params) }
+    let(:service) { described_class.new(project: project, current_user: user, params: merge_params) }
     let(:merge_params) do
       { commit_message: 'Awesome message', sha: merge_request.diff_head_sha }
     end
+
+    let(:lease_key) { "merge_requests_merge_service:#{merge_request.id}" }
+    let!(:lease) { stub_exclusive_lease(lease_key) }
 
     context 'valid params' do
       before do
@@ -89,6 +95,20 @@ RSpec.describe MergeRequests::MergeService do
       end
     end
 
+    context 'running the service multiple time' do
+      it 'is idempotent' do
+        2.times { service.execute(merge_request) }
+
+        expect(merge_request.merge_error).to be_falsey
+        expect(merge_request).to be_valid
+        expect(merge_request).to be_merged
+
+        commit_messages = project.repository.commits('master', limit: 2).map(&:message)
+        expect(commit_messages.uniq.size).to eq(2)
+        expect(merge_request.in_progress_merge_commit_sha).to be_nil
+      end
+    end
+
     context 'when an invalid sha is passed' do
       let(:merge_request) do
         create(:merge_request, :simple,
@@ -143,14 +163,14 @@ RSpec.describe MergeRequests::MergeService do
       context 'with Jira integration' do
         include JiraServiceHelper
 
-        let(:jira_tracker) { project.create_jira_service }
+        let(:jira_tracker) { project.create_jira_integration }
         let(:jira_issue)   { ExternalIssue.new('JIRA-123', project) }
         let(:commit)       { double('commit', safe_message: "Fixes #{jira_issue.to_reference}") }
 
         before do
-          stub_jira_service_test
+          stub_jira_integration_test
           project.update!(has_external_issue_tracker: true)
-          jira_service_settings
+          jira_integration_settings
           stub_jira_urls(jira_issue.id)
           allow(merge_request).to receive(:commits).and_return([commit])
         end
@@ -161,23 +181,9 @@ RSpec.describe MergeRequests::MergeService do
           commit = double('commit', safe_message: "Fixes #{jira_issue.to_reference}")
           allow(merge_request).to receive(:commits).and_return([commit])
 
-          expect_any_instance_of(JiraService).to receive(:close_issue).with(merge_request, jira_issue, user).once
+          expect_any_instance_of(Integrations::Jira).to receive(:close_issue).with(merge_request, jira_issue, user).once
 
           service.execute(merge_request)
-        end
-
-        context 'when jira_issue_transition_id is not present' do
-          before do
-            allow_any_instance_of(JIRA::Resource::Issue).to receive(:resolution).and_return(nil)
-          end
-
-          it 'does not close issue' do
-            jira_tracker.update!(jira_issue_transition_id: nil)
-
-            expect_any_instance_of(JiraService).not_to receive(:transition_issue)
-
-            service.execute(merge_request)
-          end
         end
 
         context 'wrong issue markdown' do
@@ -187,7 +193,7 @@ RSpec.describe MergeRequests::MergeService do
             commit = double('commit', safe_message: "Fixes #{jira_issue.to_reference}")
             allow(merge_request).to receive(:commits).and_return([commit])
 
-            expect_any_instance_of(JiraService).not_to receive(:close_issue)
+            expect_any_instance_of(Integrations::Jira).not_to receive(:close_issue)
 
             service.execute(merge_request)
           end
@@ -222,7 +228,7 @@ RSpec.describe MergeRequests::MergeService do
     context 'source branch removal' do
       context 'when the source branch is protected' do
         let(:service) do
-          described_class.new(project, user, merge_params.merge('should_remove_source_branch' => true))
+          described_class.new(project: project, current_user: user, params: merge_params.merge('should_remove_source_branch' => true))
         end
 
         before do
@@ -238,7 +244,7 @@ RSpec.describe MergeRequests::MergeService do
 
       context 'when the source branch is the default branch' do
         let(:service) do
-          described_class.new(project, user, merge_params.merge('should_remove_source_branch' => true))
+          described_class.new(project: project, current_user: user, params: merge_params.merge('should_remove_source_branch' => true))
         end
 
         before do
@@ -258,17 +264,17 @@ RSpec.describe MergeRequests::MergeService do
           end
 
           it 'removes the source branch using the author user' do
-            expect(::Branches::DeleteService).to receive(:new)
-              .with(merge_request.source_project, merge_request.author)
-              .and_call_original
+            expect(::MergeRequests::DeleteSourceBranchWorker).to receive(:perform_async).with(merge_request.id, merge_request.source_branch_sha, merge_request.author.id)
+
             service.execute(merge_request)
           end
 
           context 'when the merger set the source branch not to be removed' do
-            let(:service) { described_class.new(project, user, merge_params.merge('should_remove_source_branch' => false)) }
+            let(:service) { described_class.new(project: project, current_user: user, params: merge_params.merge('should_remove_source_branch' => false)) }
 
             it 'does not delete the source branch' do
-              expect(::Branches::DeleteService).not_to receive(:new)
+              expect(::MergeRequests::DeleteSourceBranchWorker).not_to receive(:perform_async)
+
               service.execute(merge_request)
             end
           end
@@ -276,13 +282,12 @@ RSpec.describe MergeRequests::MergeService do
 
         context 'when MR merger set the source branch to be removed' do
           let(:service) do
-            described_class.new(project, user, merge_params.merge('should_remove_source_branch' => true))
+            described_class.new(project: project, current_user: user, params: merge_params.merge('should_remove_source_branch' => true))
           end
 
           it 'removes the source branch using the current user' do
-            expect(::Branches::DeleteService).to receive(:new)
-              .with(merge_request.source_project, user)
-              .and_call_original
+            expect(::MergeRequests::DeleteSourceBranchWorker).to receive(:perform_async).with(merge_request.id, merge_request.source_branch_sha, user.id)
+
             service.execute(merge_request)
           end
         end
@@ -320,10 +325,12 @@ RSpec.describe MergeRequests::MergeService do
       end
 
       it 'logs and saves error if user is not authorized' do
+        stub_exclusive_lease
+
         unauthorized_user = create(:user)
         project.add_reporter(unauthorized_user)
 
-        service = described_class.new(project, unauthorized_user)
+        service = described_class.new(project: project, current_user: unauthorized_user)
 
         service.execute(merge_request)
 
@@ -437,6 +444,7 @@ RSpec.describe MergeRequests::MergeService do
               merge_request.project.update!(merge_method: merge_method)
               error_message = 'Only fast-forward merge is allowed for your project. Please update your source branch'
               allow(service).to receive(:execute_hooks)
+              expect(lease).to receive(:cancel)
 
               service.execute(merge_request)
 
@@ -485,6 +493,18 @@ RSpec.describe MergeRequests::MergeService do
             end
           end
         end
+      end
+    end
+
+    context 'when the other sidekiq worker has already been running' do
+      before do
+        stub_exclusive_lease_taken(lease_key)
+      end
+
+      it 'does not execute service' do
+        expect(service).not_to receive(:commit)
+
+        service.execute(merge_request)
       end
     end
   end

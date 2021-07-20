@@ -1,4 +1,5 @@
 mutation commitCIFile(
+  $action: CommitActionMode!
   $projectPath: ID!
   $branch: String!
   $startBranch: String
@@ -14,13 +15,14 @@ mutation commitCIFile(
       startBranch: $startBranch
       message: $message
       actions: [
-        { action: UPDATE, filePath: $filePath, lastCommitId: $lastCommitId, content: $content }
+        { action: $action, filePath: $filePath, lastCommitId: $lastCommitId, content: $content }
       ]
     }
   ) {
     commit {
       sha
     }
+    commitPipelinePath
     errors
   }
 }

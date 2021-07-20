@@ -53,6 +53,21 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::UpdateService do
         expect(last_stage.reload.name).to eq('updated')
       end
 
+      context 'relative positioning' do
+        before do
+          params[:stages].reverse!
+        end
+
+        it 'calculates and sets relative_position for the stages based on the incoming stages array' do
+          incoming_stage_names = params[:stages].map { |stage| stage[:name] }
+
+          value_stream = subject.payload[:value_stream]
+          persisted_stages_sorted_by_relative_position = value_stream.stages.sort_by(&:relative_position).map(&:name)
+
+          expect(persisted_stages_sorted_by_relative_position).to eq(incoming_stage_names)
+        end
+      end
+
       context 'when the params are invalid' do
         before do
           params[:stages].last[:name] = ''
@@ -99,6 +114,25 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::UpdateService do
       it 'creates the stage' do
         expect(subject).to be_success
         expect(subject.payload[:value_stream].stages.last.name).to eq('plan')
+      end
+    end
+
+    context 'when removing a stage and adding a new stage' do
+      let(:params) do
+        {
+          name: 'VS 1',
+          stages: [
+            { id: first_stage.id, name: first_stage.name, custom: true },
+            { name: 'new stage', custom: true, start_event_identifier: 'merge_request_created', end_event_identifier: 'merge_request_closed' }
+          ]
+        }
+      end
+
+      it 'creates the stage' do
+        expect(subject).to be_success
+
+        current_stage_names = subject.payload[:value_stream].stages.map(&:name)
+        expect(current_stage_names).to match_array([first_stage.name, 'new stage'])
       end
     end
   end

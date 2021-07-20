@@ -13,7 +13,7 @@ eventually.
 
 ## Quarantined tests
 
-When a test frequently fails in `master`,
+When a test frequently fails in `main`,
 [a ~"master:broken" issue](https://about.gitlab.com/handbook/engineering/workflow/#broken-master)
 should be created.
 If the test cannot be fixed in a timely fashion, there is an impact on the
@@ -53,10 +53,10 @@ Quarantined tests are run on the CI in dedicated jobs that are allowed to fail:
 ## Automatic retries and flaky tests detection
 
 On our CI, we use [RSpec::Retry](https://github.com/NoRedInk/rspec-retry) to automatically retry a failing example a few
-times (see [`spec/spec_helper.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/spec_helper.rb) for the precise retries count).
+times (see [`spec/spec_helper.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/spec_helper.rb) for the precise retries count).
 
 We also use a home-made `RspecFlaky::Listener` listener which records flaky
-examples in a JSON report file on `master` (`retrieve-tests-metadata` and
+examples in a JSON report file on `main` (`retrieve-tests-metadata` and
 `update-tests-metadata` jobs).
 
 This was originally implemented in: <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13021>.
@@ -75,6 +75,33 @@ For instance `RETRIES=1 bin/rspec ...` would retry the failing examples once.
   - [Transient failure in `spec/requests/api/commits_spec.rb`](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/27988#note_25342521): <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9944>
   - [Replace FFaker factory data with sequences](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/29643): <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10184>
   - [Transient failure in spec/finders/issues_finder_spec.rb](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30211#note_26707685): <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10404>
+
+### Order-dependent flaky tests
+
+These flaky tests can fail depending on the order they run with other tests. For example:
+
+- <https://gitlab.com/gitlab-org/gitlab/-/issues/327668>
+
+To identify the tests that lead to such failure, we can use `rspec --bisect`,
+which would give us the minimal test combination to reproduce the failure:
+
+```shell
+rspec --bisect ee/spec/services/ee/merge_requests/update_service_spec.rb ee/spec/services/ee/notes/quick_actions_service_spec.rb ee/spec/services/epic_links/create_service_spec.rb  ee/spec/services/ee/issuable/bulk_update_service_spec.rb
+Bisect started using options: "ee/spec/services/ee/merge_requests/update_service_spec.rb ee/spec/services/ee/notes/quick_actions_service_spec.rb ee/spec/services/epic_links/create_service_spec.rb ee/spec/services/ee/issuable/bulk_update_service_spec.rb"
+Running suite to find failures... (2 minutes 18.4 seconds)
+Starting bisect with 3 failing examples and 144 non-failing examples.
+Checking that failure(s) are order-dependent... failure appears to be order-dependent
+
+Round 1: bisecting over non-failing examples 1-144 . ignoring examples 1-72 (1 minute 11.33 seconds)
+...
+Round 7: bisecting over non-failing examples 132-133 . ignoring example 132 (43.78 seconds)
+Bisect complete! Reduced necessary non-failing examples from 144 to 1 in 8 minutes 31 seconds.
+
+The minimal reproduction command is:
+  rspec ./ee/spec/services/ee/issuable/bulk_update_service_spec.rb[1:2:1:1:1:1,1:2:1:2:1:1,1:2:1:3:1] ./ee/spec/services/epic_links/create_service_spec.rb[1:1:2:2:6:4]
+```
+
+We can reproduce the test failure with the reproduction command above. If we change the order of the tests, the test would pass.
 
 ### Time-sensitive flaky tests
 
@@ -108,7 +135,7 @@ For instance `RETRIES=1 bin/rspec ...` would retry the failing examples once.
 
 #### PhantomJS / WebKit related issues
 
-- Memory is through the roof! (TL;DR: Load images but block images requests!): <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12003>
+- Memory is through the roof! (Load images but block images requests!): <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12003>
 
 #### Capybara expectation times out
 

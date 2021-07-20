@@ -25,6 +25,10 @@ module EE
         mount_mutation ::Mutations::GitlabSubscriptions::Activate
         mount_mutation ::Mutations::Iterations::Create
         mount_mutation ::Mutations::Iterations::Update
+        mount_mutation ::Mutations::Iterations::Delete
+        mount_mutation ::Mutations::Iterations::Cadences::Create
+        mount_mutation ::Mutations::Iterations::Cadences::Update
+        mount_mutation ::Mutations::Iterations::Cadences::Destroy
         mount_mutation ::Mutations::RequirementsManagement::CreateRequirement
         mount_mutation ::Mutations::RequirementsManagement::ExportRequirements
         mount_mutation ::Mutations::RequirementsManagement::UpdateRequirement
@@ -37,7 +41,13 @@ module EE
         mount_mutation ::Mutations::Boards::Update
         mount_mutation ::Mutations::Boards::UpdateEpicUserPreferences
         mount_mutation ::Mutations::Boards::EpicBoards::Create
+        mount_mutation ::Mutations::Boards::EpicBoards::Destroy
+        mount_mutation ::Mutations::Boards::EpicBoards::EpicMoveList
+        mount_mutation ::Mutations::Boards::EpicBoards::Update
         mount_mutation ::Mutations::Boards::EpicLists::Create
+        mount_mutation ::Mutations::Boards::EpicLists::Destroy
+        mount_mutation ::Mutations::Boards::EpicLists::Update
+        mount_mutation ::Mutations::Boards::Epics::Create
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
@@ -57,14 +67,23 @@ module EE
         mount_mutation ::Mutations::DastSiteTokens::Create
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
-        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
-        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::Enable
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::BulkEnable
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::Disable
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Create
+        mount_mutation ::Mutations::IncidentManagement::OncallRotation::Update
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Destroy
-        mount_mutation ::Mutations::Security::CiConfiguration::ApiFuzzing::Create
+        mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Create
+        mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Update
+        mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Destroy
+        mount_mutation ::Mutations::AppSec::Fuzzing::API::CiConfiguration::Create
+        mount_mutation ::Mutations::SecurityPolicy::CommitScanExecutionPolicy
+        mount_mutation ::Mutations::SecurityPolicy::AssignSecurityPolicyProject
+        mount_mutation ::Mutations::SecurityPolicy::CreateSecurityPolicyProject
+        mount_mutation ::Mutations::Security::CiConfiguration::ConfigureDependencyScanning
 
         prepend(Types::DeprecatedMutations)
       end

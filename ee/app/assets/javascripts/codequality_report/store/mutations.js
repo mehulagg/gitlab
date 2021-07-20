@@ -1,3 +1,4 @@
+import { SEVERITY_SORT_ORDER } from './constants';
 import * as types from './mutation_types';
 
 export default {
@@ -14,7 +15,11 @@ export default {
   [types.RECEIVE_REPORT_SUCCESS](state, allCodequalityIssues) {
     Object.assign(state, {
       isLoadingCodequality: false,
-      allCodequalityIssues: Object.freeze(allCodequalityIssues),
+      allCodequalityIssues: Object.freeze(
+        allCodequalityIssues.sort(
+          (a, b) => SEVERITY_SORT_ORDER[a.severity] - SEVERITY_SORT_ORDER[b.severity],
+        ),
+      ),
       pageInfo: Object.assign(state.pageInfo, {
         total: allCodequalityIssues.length,
       }),

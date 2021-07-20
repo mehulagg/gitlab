@@ -13,9 +13,9 @@ export default {
       required: true,
     },
     issuableTemplates: {
-      type: Array,
+      type: [Object, Array],
       required: false,
-      default: () => [],
+      default: () => {},
     },
     projectPath: {
       type: String,
@@ -53,14 +53,15 @@ export default {
 </script>
 
 <template>
-  <div class="dropdown js-issuable-selector-wrap" data-issuable-type="issues">
+  <!-- eslint-disable @gitlab/vue-no-data-toggle -->
+  <div class="dropdown js-issuable-selector-wrap gl-mb-0" data-issuable-type="issues">
     <button
       ref="toggle"
       :data-namespace-path="projectNamespace"
       :data-project-path="projectPath"
       :data-project-id="projectId"
       :data-data="issuableTemplatesJson"
-      class="dropdown-menu-toggle js-issuable-selector"
+      class="dropdown-menu-toggle js-issuable-selector gl-button"
       type="button"
       data-field-name="issuable_template"
       data-selected="null"

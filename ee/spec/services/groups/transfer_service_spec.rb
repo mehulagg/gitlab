@@ -60,18 +60,18 @@ RSpec.describe Groups::TransferService, '#execute' do
       context 'when visibility changes' do
         let(:new_group) { create(:group, :private) }
 
-        it 'does not invalidate the cache and reindexes projects and associated issues' do
+        it 'does not invalidate the cache and reindexes projects and associated issues, merge_requests and notes' do
           project1 = create(:project, :repository, :public, namespace: group)
           project2 = create(:project, :repository, :public, namespace: group)
           project3 = create(:project, :repository, :private, namespace: group)
 
           expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
           expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, %w[issues notes])
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, %w[issues merge_requests notes])
           expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, %w[issues notes])
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, %w[issues merge_requests notes])
           expect(Elastic::ProcessBookkeepingService).not_to receive(:track!).with(project3)
-          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, %w[issues notes])
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, %w[issues merge_requests notes])
 
           transfer_service.execute(new_group)
 

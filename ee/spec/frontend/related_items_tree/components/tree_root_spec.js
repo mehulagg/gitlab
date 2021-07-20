@@ -377,26 +377,67 @@ describe('RelatedItemsTree', () => {
       });
 
       describe('onMove', () => {
-        it('calls toggleItem action if move event finds epic element', () => {
-          jest.spyOn(wrapper.vm, 'toggleItem').mockImplementation(() => {});
-          const evt = {
+        let mockEvt;
+        let mockOriginalEvt;
+
+        beforeEach(() => {
+          mockEvt = {
             relatedContext: {
               element: mockParentItem,
             },
           };
-          wrapper.vm.onMove(evt);
+          mockOriginalEvt = {
+            clientX: 10,
+            clientY: 10,
+            target: {
+              getBoundingClientRect() {
+                return {
+                  top: 5,
+                  left: 5,
+                };
+              },
+            },
+          };
+        });
+
+        it('calls toggleItem action after a delay if move event finds epic with children and mouse cursor is over it', () => {
+          jest.spyOn(wrapper.vm, 'toggleItem').mockImplementation(() => {});
+          wrapper.vm.onMove(mockEvt, mockOriginalEvt);
+
+          jest.runAllTimers();
 
           expect(wrapper.vm.toggleItem).toHaveBeenCalled();
         });
 
-        it(' does not call toggleItem action if move event does not find epic element', () => {
+        it('does not call toggleItem action if move event does not find epic with children', () => {
           jest.spyOn(wrapper.vm, 'toggleItem').mockImplementation(() => {});
-          const evt = {
+          mockEvt = {
             relatedContext: {
               element: mockIssue2,
             },
           };
-          wrapper.vm.onMove(evt);
+          mockOriginalEvt = {
+            clientX: 10,
+            clientY: 10,
+          };
+
+          wrapper.vm.onMove(mockEvt, mockOriginalEvt);
+
+          expect(wrapper.vm.toggleItem).not.toHaveBeenCalled();
+        });
+
+        it('does not call toggleItem action if move event no longer have cursor over an epic with children', () => {
+          jest.spyOn(wrapper.vm, 'toggleItem').mockImplementation(() => {});
+
+          wrapper.vm.onMove(mockEvt, mockOriginalEvt);
+
+          // Simulate cursor movement.
+          wrapper.setData({
+            currentClientX: 10,
+            currentClientY: 20,
+          });
+
+          jest.runAllTimers();
 
           expect(wrapper.vm.toggleItem).not.toHaveBeenCalled();
         });

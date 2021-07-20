@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'epics swimlanes', :js do
+  include BoardHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:project) { create(:project, :public, group: group) }
@@ -10,6 +12,7 @@ RSpec.describe 'epics swimlanes', :js do
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:label) { create(:label, project: project, name: 'Label1') }
   let_it_be(:list) { create(:list, board: board, label: label, position: 0) }
+  let_it_be(:backlog_list) { create(:backlog_list, board: board) }
 
   let_it_be(:issue1) { create(:issue, project: project, labels: [label]) }
   let_it_be(:issue2) { create(:issue, project: project) }
@@ -31,12 +34,18 @@ RSpec.describe 'epics swimlanes', :js do
     it 'displays epics swimlanes when link to boards with group_by epic in URL' do
       expect(page).to have_selector('[data-testid="board-swimlanes"]')
 
+      wait_for_all_requests
+
       epic_lanes = page.all(:css, '.board-epic-lane')
       expect(epic_lanes.length).to eq(2)
     end
 
-    it 'displays issue not assigned to epic in unassigned issues lane' do
+    it 'displays issue not assigned to epic title and unassigned issues lane only on expand' do
       page.within('.board-lane-unassigned-issues-title') do
+        expect(page).not_to have_selector('span[data-testid="issues-lane-issue-count"]')
+
+        load_unassigned_issues
+
         expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
       end
     end
@@ -58,7 +67,7 @@ RSpec.describe 'epics swimlanes', :js do
     stub_licensed_features(epics: true, swimlanes: true)
     sign_in(user)
     visit_board_page
-    select_epics
+    load_epic_swimlanes
   end
 
   context 'switch to swimlanes view' do
@@ -69,14 +78,46 @@ RSpec.describe 'epics swimlanes', :js do
       expect(epic_lanes.length).to eq(2)
     end
 
-    it 'displays issue not assigned to epic in unassigned issues lane' do
+    it 'displays issue not assigned to epic title and unassigned issues lane only on expand' do
       page.within('.board-lane-unassigned-issues-title') do
+        expect(page).not_to have_selector('span[data-testid="issues-lane-issue-count"]')
+
+        load_unassigned_issues
+
         expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
       end
     end
   end
 
+  context 'issue cards' do
+    let(:issue_card) { first("[data-testid='board-epic-lane-issues'] [data-testid='board_card']") }
+
+    before do
+      wait_for_all_requests
+
+      issue_card.click
+    end
+
+    it 'highlights an issue card on click' do
+      expect(issue_card[:class]).to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
+    end
+
+    it 'unhighlights a selected issue card on click' do
+      issue_card.click
+
+      expect(issue_card[:class]).not_to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
+    end
+  end
+
   context 'add issue to swimlanes list' do
+    before do
+      wait_for_all_requests
+
+      load_unassigned_issues
+    end
+
     it 'displays new issue button' do
       expect(first('.board')).to have_selector('.issue-count-badge-add-button', count: 1)
     end
@@ -114,7 +155,7 @@ RSpec.describe 'epics swimlanes', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_all_requests
@@ -138,13 +179,6 @@ RSpec.describe 'epics swimlanes', :js do
   def visit_board_page
     visit project_boards_path(project)
     wait_for_requests
-  end
-
-  def select_epics
-    page.within('.board-swimlanes-toggle-wrapper') do
-      page.find('.dropdown-toggle').click
-      page.find('.dropdown-item', text: 'Epic').click
-    end
   end
 
   def visit_epics_swimlanes_page

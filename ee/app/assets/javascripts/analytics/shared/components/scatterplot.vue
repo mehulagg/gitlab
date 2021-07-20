@@ -1,7 +1,8 @@
 <script>
 import { GlDiscreteScatterChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
-import { scatterChartLineProps, dateFormats } from '../constants';
+import { dateFormats } from '~/analytics/shared/constants';
+import { scatterChartLineProps } from '../constants';
 
 export default {
   components: {
@@ -89,10 +90,14 @@ export default {
     :x-axis-title="xAxisTitle"
     :format-tooltip-text="renderTooltip"
   >
-    <div slot="tooltip-title">{{ tooltipTitle }} ({{ xAxisTitle }})</div>
-    <div slot="tooltip-content" class="d-flex">
-      <div class="flex-grow-1">{{ yAxisTitle }}:&nbsp;</div>
-      <div class="font-weight-bold">{{ tooltipContent }}</div>
-    </div>
+    <template #tooltip-title>
+      <div>{{ tooltipTitle }} ({{ xAxisTitle }})</div>
+    </template>
+    <template #tooltip-content>
+      <div class="d-flex">
+        <div class="flex-grow-1">{{ yAxisTitle }}:&nbsp;</div>
+        <div class="font-weight-bold">{{ tooltipContent }}</div>
+      </div>
+    </template>
   </gl-discrete-scatter-chart>
 </template>

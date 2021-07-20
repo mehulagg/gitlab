@@ -7,6 +7,7 @@ RSpec.describe Geo::RepositoryVerification::Primary::SingleWorker, :clean_gitlab
   include ExclusiveLeaseHelpers
 
   let_it_be(:project) { create(:project) }
+
   let!(:primary) { create(:geo_node, :primary) }
 
   before do

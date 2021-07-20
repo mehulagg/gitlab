@@ -181,14 +181,22 @@ RSpec.describe GroupMember do
   end
 
   describe 'scopes' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:member1) { create(:group_member, group: group) }
+    let_it_be(:member2) { create(:group_member, group: group) }
+    let_it_be(:member3) { create(:group_member) }
+    let_it_be(:guest1) { create(:group_member, :guest) }
+    let_it_be(:guest2) { create(:group_member, :guest, group: group) }
+
     describe '.by_group_ids' do
       it 'returns only members from selected groups' do
-        group = create(:group)
-        member1 = create(:group_member, group: group)
-        member2 = create(:group_member, group: group)
-        create(:group_member)
+        expect(described_class.by_group_ids([group.id])).to contain_exactly(member1, member2, guest2)
+      end
+    end
 
-        expect(described_class.by_group_ids([group.id])).to match_array([member1, member2])
+    describe '.guests' do
+      it 'returns only guests members' do
+        expect(described_class.guests).to contain_exactly(guest1, guest2)
       end
     end
 
@@ -254,7 +262,7 @@ RSpec.describe GroupMember do
   end
 
   context 'group member webhooks', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be_with_refind(:group) { create(:group_with_plan, plan: :ultimate_plan) }
     let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
     let_it_be(:user) { create(:user) }
 
@@ -350,8 +358,8 @@ RSpec.describe GroupMember do
         expect(WebMock).not_to have_requested(:post, group_hook.url)
       end
 
-      it 'does not execute webhooks if feature flag is disabled' do
-        stub_feature_flags(group_webhooks: false)
+      it 'does not execute webhooks if license is disabled' do
+        stub_licensed_features(group_webhooks: false)
 
         group.add_guest(user)
 
@@ -361,7 +369,8 @@ RSpec.describe GroupMember do
   end
 
   context 'group member welcome email', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
+
     let(:user) { create(:user) }
 
     context 'when user is provisioned by group' do
@@ -391,6 +400,32 @@ RSpec.describe GroupMember do
     end
   end
 
+  describe '#provisioned_by_this_group?' do
+    let_it_be(:group) { create(:group) }
+
+    let(:user) { build(:user) }
+    let(:member) { build(:group_member, group: group, user: user) }
+    let(:invited) { build(:group_member, :invited, group: group, user: user) }
+
+    subject { member.provisioned_by_this_group? }
+
+    context 'when user is provisioned by the group' do
+      let!(:user_detail) { build(:user_detail, user: user, provisioned_by_group_id: group.id) }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when user is not provisioned by the group' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when member does not have a related user (invited member)' do
+      let(:member) { invited }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
   def webhook_data(group_member, event)
     {
       headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
@@ -406,7 +441,7 @@ RSpec.describe GroupMember do
         user_id: group_member.user.id,
         group_access: group_member.human_access,
         expires_at: group_member.expires_at&.xmlschema,
-        group_plan: 'gold',
+        group_plan: 'ultimate',
         event_name: event
       }.to_json
     }

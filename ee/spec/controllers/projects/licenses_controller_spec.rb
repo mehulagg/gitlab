@@ -6,6 +6,7 @@ RSpec.describe Projects::LicensesController do
   describe "GET #index" do
     let_it_be(:project) { create(:project, :repository, :private) }
     let_it_be(:user) { create(:user) }
+
     let(:params) { { namespace_id: project.namespace, project_id: project } }
     let(:get_licenses) { get :index, params: params, format: :json }
 
@@ -69,7 +70,7 @@ RSpec.describe Projects::LicensesController do
           end
 
           context 'with existing report' do
-            let!(:pipeline) { create(:ci_pipeline, project: project, builds: [create(:ee_ci_build, :success, :license_scan_v2_1)]) }
+            let!(:pipeline) { create(:ci_pipeline, project: project, builds: [create(:ee_ci_build, :success, :license_scan_v2_1)], status: :success) }
 
             before do
               get_licenses
@@ -126,7 +127,7 @@ RSpec.describe Projects::LicensesController do
             let_it_be(:mit_policy) { create(:software_license_policy, :denied, software_license: mit, project: project) }
             let_it_be(:other_license) { create(:software_license, spdx_identifier: "Other-Id") }
             let_it_be(:other_license_policy) { create(:software_license_policy, :allowed, software_license: other_license, project: project) }
-            let_it_be(:pipeline) { create(:ee_ci_pipeline, project: project, builds: [create(:ee_ci_build, :license_scan_v2_1, :success)]) }
+            let_it_be(:pipeline) { create(:ee_ci_pipeline, project: project, builds: [create(:ee_ci_build, :license_scan_v2_1, :success)], status: :success) }
 
             context "when loading all policies" do
               before do

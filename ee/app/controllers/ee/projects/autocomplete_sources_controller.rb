@@ -11,7 +11,7 @@ module EE
       end
 
       def epics
-        return render_404 unless project.group.feature_available?(:epics)
+        return render_404 unless project.group.licensed_feature_available?(:epics)
 
         render json: autocomplete_service.epics
       end
