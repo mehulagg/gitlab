@@ -12,10 +12,6 @@ module EE
           ::Gitlab::Geo.secondary? || ::Gitlab.maintenance_mode?
         end
 
-        def healthy?
-          !Postgresql::ReplicationSlot.lag_too_great?
-        end
-
         def geo_uncached_queries(&block)
           raise 'No block given' unless block_given?
 

@@ -48,20 +48,6 @@ RSpec.describe Gitlab::Database::Connection do
     end
   end
 
-  describe '#healthy?' do
-    it 'returns true when replication lag is not too great' do
-      allow(Postgresql::ReplicationSlot).to receive(:lag_too_great?).and_return(false)
-
-      expect(connection.healthy?).to be_truthy
-    end
-
-    it 'returns false when replication lag is too great' do
-      allow(Postgresql::ReplicationSlot).to receive(:lag_too_great?).and_return(true)
-
-      expect(connection.healthy?).to be_falsey
-    end
-  end
-
   describe '#geo_uncached_queries' do
     context 'when no block is given' do
       it 'raises error' do

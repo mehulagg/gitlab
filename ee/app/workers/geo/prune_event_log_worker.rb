@@ -16,7 +16,7 @@ module Geo
 
     def perform
       return if Gitlab::Database.main.read_only?
-      return unless Gitlab::Database.main.healthy?
+      return if Postgresql::ReplicationSlot.lag_too_great?
 
       unless ::GeoNode.secondary_nodes.any?
         Geo::PruneEventLogService.new(:all).execute
