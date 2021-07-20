@@ -15,10 +15,14 @@ module API
 
         experiment(:null_hypothesis, canary: true, user: current_user) do |e|
           e.use { bad_request! 'experimentation may not be working right now' }
-          e.try { experiments = Feature::Definition.definitions.values.select { |d| d.attributes[:type] == 'experiment' } }
+          e.try do
+            experiments = Feature.all.select do |f|
+              Feature::Definition.get(f.name)&.type == 'experiment'
+            end
+          end
         end
 
-        present experiments, with: EE::API::Entities::Experiment, current_user: current_user
+        present experiments, with: Entities::Feature, current_user: current_user
       end
     end
 
