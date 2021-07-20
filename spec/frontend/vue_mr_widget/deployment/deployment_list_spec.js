@@ -7,7 +7,6 @@ import MrCollapsibleExtension from '~/vue_merge_request_widget/components/mr_col
 import { mockStore } from '../mock_data';
 
 const DEFAULT_PROPS = {
-  showVisualReviewAppLink: false,
   hasDeploymentMetrics: false,
   deploymentClass: 'js-pre-deployment',
 };
