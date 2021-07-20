@@ -1951,6 +1951,42 @@ RSpec.describe User do
     end
   end
 
+  describe 'banning a user' do
+    let(:user) { create(:user) }
+
+    context 'an active user' do
+      it 'bans and blocks the user', :aggregate_failures do
+        user.ban
+
+        expect(user.banned?).to eq(true)
+        expect(user.blocked?).to eq(true)
+      end
+
+      it 'creates a BannedUser record' do
+        expect { user.ban }.to change { Users::BannedUser.count }.by(1)
+        expect(Users::BannedUser.last.user_id).to eq(user.id)
+      end
+    end
+
+    context 'a banned user' do
+      before do
+        user.ban!
+      end
+
+      it 'activates the user', :aggregate_failures do
+        user.activate
+
+        expect(user.banned?).to eq(false)
+        expect(user.blocked?).to eq(false)
+        expect(user.active?).to eq(true)
+      end
+
+      it 'deletes the BannedUser record' do
+        expect { user.activate }.to change { Users::BannedUser.count }.by(-1)
+      end
+    end
+  end
+
   describe '.filter_items' do
     let(:user) { double }
 
