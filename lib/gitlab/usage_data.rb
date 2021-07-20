@@ -82,7 +82,7 @@ module Gitlab
       end
 
       def recorded_at
-        @recorded_at ||= alt_usage_data(fallback: Time.current) { Gitlab::Usage::Metrics::Instrumentations::TimeStampMetric.new.value }
+        @recorded_at ||= alt_usage_data { Gitlab::Usage::Metrics::Instrumentations::TimeStampMetric.new(time_frame: 'none').value }
       end
 
       # rubocop: disable Metrics/AbcSize
