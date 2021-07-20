@@ -149,7 +149,7 @@ The following table lists project permissions available for each role:
 | Add deploy keys to project                        |         |            |             | ✓        | ✓      |
 | Add new team members                              |         |            |             | ✓        | ✓      |
 | Configure project hooks                           |         |            |             | ✓        | ✓      |
-| Change project features visibility level          |         |            |             | ✓        | ✓      |
+| Change project features visibility level          |         |            |             | ✓ (14)   | ✓      |
 | Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
@@ -209,6 +209,8 @@ The following table lists project permissions available for each role:
 1. Project access tokens are supported for self-managed instances on Free and above. They are also
    supported on GitLab SaaS Premium and above (excluding [trial licenses](https://about.gitlab.com/free-trial/)).
 1. If the [tag is protected](#release-permissions-with-protected-tags), this depends on the access Developers and Maintainers are given.
+1. A Maintainer can't change project features visibility level if
+   [project visibility](../public_access/public_access.md) is set to private.
 
 ## Project features permissions
 
