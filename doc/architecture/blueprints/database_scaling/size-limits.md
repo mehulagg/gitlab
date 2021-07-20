@@ -131,7 +131,7 @@ Note that this target is *pragmatic*: We understand table sizes depend on featur
 There is no standard solution to reduce table sizes - there are many!
 
 1. **Normalization**: Review relational modeling and apply normalization techniques to remove duplicate data
-1. **Optimise data types**: Review data type decisions and optimise data types where possible (example: use integer instead of text for a enum column)
+1. **Optimise data types**: Review data type decisions and optimise data types where possible (example: use integer instead of text for an enum column)
 1. **Vertical table splits**: Review column usage and split table vertically.
 1. **Partitioning**: Apply a partitioning scheme if there is a common access dimension.
 1. **Retention**: Delete unnecessary data, for example expire old and unneeded records.
