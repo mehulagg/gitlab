@@ -14,8 +14,6 @@ module QA
               prepend QA::Page::Group::SubMenus::Common
 
               view 'app/views/layouts/nav/sidebar/_group_menus.html.haml' do
-                element :group_issue_boards_link
-                element :group_issues_item
                 element :group_sidebar_submenu
                 element :group_settings
               end
@@ -68,17 +66,17 @@ module QA
           end
 
           def go_to_issue_boards
-            hover_element(:group_issues_item) do
-              within_submenu(:group_issues_sidebar_submenu) do
-                click_element(:group_issue_boards_link)
+            hover_issues do
+              within_submenu do
+                click_element(:sidebar_menu_item_link, menu_item: 'Boards')
               end
             end
           end
 
           def go_to_group_iterations
-            hover_element(:group_issues_item) do
-              within_submenu(:group_issues_sidebar_submenu) do
-                click_element(:group_iterations_link)
+            hover_issues do
+              within_submenu do
+                click_element(:sidebar_menu_item_link, menu_item: 'Iterations')
               end
             end
           end
