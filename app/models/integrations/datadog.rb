@@ -2,6 +2,7 @@
 
 module Integrations
   class Datadog < Integration
+    include ActionView::Helpers::UrlHelper
     include HasWebHook
     extend Gitlab::Utils::Override
 
@@ -51,9 +52,8 @@ module Integrations
     end
 
     def help
-      nil
-      # docs_link = link_to _('How do I set up this service?'), Rails.application.routes.url_helpers.help_page_url('integration/datadog'), target: '_blank', rel: 'noopener noreferrer'
-      # s_('Send CI/CD pipeline information to Datadog to monitor for job failures and troubleshoot performance issues. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
+      docs_link = link_to s_('DatadogIntegration|How do I set up this service?'), Rails.application.routes.url_helpers.help_page_url('integration/datadog'), target: '_blank', rel: 'noopener noreferrer'
+      s_('DatadogIntegration|Send CI/CD pipeline information to Datadog to monitor for job failures and troubleshoot performance issues. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
     end
 
     def self.to_param
