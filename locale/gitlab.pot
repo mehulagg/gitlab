@@ -12241,6 +12241,9 @@ msgstr ""
 msgid "EnableReviewApp|%{stepStart}Step 3%{stepEnd}. Add it to the project %{linkStart}gitlab-ci.yml%{linkEnd} file."
 msgstr ""
 
+msgid "EnableReviewApp|%{stepStart}Step 4 (optional)%{stepEnd}. Enable Visual Reviews by following the %{linkStart}setup instructions%{linkEnd}."
+msgstr ""
+
 msgid "EnableReviewApp|Close"
 msgstr ""
 
