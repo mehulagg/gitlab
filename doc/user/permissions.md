@@ -186,6 +186,7 @@ The following table lists project permissions available for each role:
 | Remove fork relationship                          |         |            |             |          | ✓      |
 | Delete project                                    |         |            |             |          | ✓      |
 | Archive project                                   |         |            |             |          | ✓      |
+| Move issues (*14*)                                |         | ✓         | ✓           | ✓       | ✓      |
 | Delete issues                                     |         |            |             |          | ✓      |
 | Delete pipelines                                  |         |            |             |          | ✓      |
 | Delete merge request                              |         |            |             |          | ✓      |
@@ -209,6 +210,7 @@ The following table lists project permissions available for each role:
 1. Project access tokens are supported for self-managed instances on Free and above. They are also
    supported on GitLab SaaS Premium and above (excluding [trial licenses](https://about.gitlab.com/free-trial/)).
 1. If the [tag is protected](#release-permissions-with-protected-tags), this depends on the access Developers and Maintainers are given.
+1. If the issue to be moved has attached design files they will also be moved into the target project even if the actor doesn't have developer permissions.
 
 ## Project features permissions
 
