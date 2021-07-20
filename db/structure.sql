@@ -22601,6 +22601,8 @@ CREATE INDEX cadence_create_iterations_automation ON iterations_cadences USING b
 
 CREATE INDEX ci_builds_gitlab_monitor_metrics ON ci_builds USING btree (status, created_at, project_id) WHERE ((type)::text = 'Ci::Build'::text);
 
+CREATE INDEX ci_builds_id_test_index ON ci_builds USING btree (id);
+
 CREATE INDEX code_owner_approval_required ON protected_branches USING btree (project_id, code_owner_approval_required) WHERE (code_owner_approval_required = true);
 
 CREATE INDEX commit_id_and_note_id_index ON commit_user_mentions USING btree (commit_id, note_id);
@@ -23281,9 +23283,13 @@ CREATE INDEX index_ci_sources_projects_on_pipeline_id ON ci_sources_projects USI
 
 CREATE UNIQUE INDEX index_ci_sources_projects_on_source_project_id_and_pipeline_id ON ci_sources_projects USING btree (source_project_id, pipeline_id);
 
+CREATE UNIQUE INDEX index_ci_stages_on_id_convert_to_bigint ON ci_stages USING btree (id_convert_to_bigint);
+
 CREATE INDEX index_ci_stages_on_pipeline_id ON ci_stages USING btree (pipeline_id);
 
 CREATE INDEX index_ci_stages_on_pipeline_id_and_id ON ci_stages USING btree (pipeline_id, id) WHERE (status = ANY (ARRAY[0, 1, 2, 8, 9, 10]));
+
+CREATE INDEX index_ci_stages_on_pipeline_id_and_id_convert_to_bigint ON ci_stages USING btree (pipeline_id, id_convert_to_bigint) WHERE (status = ANY (ARRAY[0, 1, 2, 8, 9, 10]));
 
 CREATE UNIQUE INDEX index_ci_stages_on_pipeline_id_and_name ON ci_stages USING btree (pipeline_id, name);
 
