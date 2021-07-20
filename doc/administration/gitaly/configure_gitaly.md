@@ -797,8 +797,14 @@ You can observe the behavior of this queue using the Gitaly logs and Prometheus:
 - In Prometheus, look for the following metrics:
 
   - `gitaly_rate_limiting_in_progress`.
-  - `gitaly_rate_limiting_queued` representing RPC calls queued.
-  - `gitaly_rate_limiting_seconds` representing RPC call queue latency.
+  - `gitaly_rate_limiting_queued`.
+  - `gitaly_rate_limiting_seconds`.
+
+The metric definitions are available:
+
+- Directly from raw Prometheus output.
+- Using [Grafana Explore](https://grafana.com/docs/grafana/latest/explore/) on a
+  Grafana instance configured against Prometheus.
 
 NOTE:
 Although the name of the Prometheus metric contains `rate_limiting`, it's a concurrency limiter, not
