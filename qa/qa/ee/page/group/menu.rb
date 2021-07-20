@@ -33,14 +33,6 @@ module QA
                 element :billing_link
               end
 
-              view 'ee/app/views/layouts/nav/ee/_security_link.html.haml' do
-                element :security_compliance_link
-                element :group_secure_submenu
-                element :security_dashboard_link
-                element :vulnerability_report_link
-                element :audit_events_settings_link
-              end
-
               view 'ee/app/views/layouts/nav/_group_insights_link.html.haml' do
                 element :group_insights_link
               end
