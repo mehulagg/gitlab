@@ -86,4 +86,20 @@ class ApplicationRecord < ActiveRecord::Base
     values = enum_mod.definition.transform_values { |v| v[:value] }
     enum(enum_mod.key => values)
   end
+
+  ##
+  # TODO extrat this somewhere and make private\
+  # TODO strong memoize this
+  def self.subtrans_counter
+    name = :gitlab_active_record_subtransactions_total
+    comment = 'Total amount of subtransactions created by ActiveRecord'
+
+    Gitlab::Metrics.counter(name, comment)
+  end
+
+  def self.transaction(**options, &block)
+    subtrans_counter.increment if options[:require_new]
+
+    super(**options, &block)
+  end
 end
