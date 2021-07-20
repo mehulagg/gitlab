@@ -48,8 +48,11 @@ module QA
             Support::WaitForRequests.wait_for_requests
             click_button username
 
-            click_element :access_level_dropdown
-            click_button access_level
+            # Guest option is selected by default, skipping these steps if desired option is 'Guest'
+            unless access_level == 'Guest'
+              click_element :access_level_dropdown
+              click_button access_level
+            end
 
             click_element :invite_button
           end
