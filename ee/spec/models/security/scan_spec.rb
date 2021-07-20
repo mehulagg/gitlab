@@ -116,5 +116,15 @@ RSpec.describe Security::Scan do
     it { is_expected.to contain_exactly(scan_2) }
   end
 
+  describe '#report_findings' do
+    let(:artifact) { create(:ee_ci_job_artifact, :dast) }
+    let(:scan) { create(:security_scan, build: artifact.job) }
+    let(:artifact_finding_uuids) { artifact.security_report.findings.map(&:uuid) }
+
+    subject { scan.report_findings.map(&:uuid) }
+
+    it { is_expected.to match_array(artifact_finding_uuids) }
+  end
+
   it_behaves_like 'having unique enum values'
 end

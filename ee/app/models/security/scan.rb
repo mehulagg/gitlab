@@ -47,5 +47,20 @@ module Security
     def has_errors?
       info&.fetch('errors', []).present?
     end
+
+    # Returns the findings from the source report
+    def report_findings
+      @report_findings ||= security_report.findings
+    end
+
+    private
+
+    def security_report
+      job_artifact.security_report
+    end
+
+    def job_artifact
+      build.job_artifacts.find { |artifact| artifact.file_type == scan_type }
+    end
   end
 end
