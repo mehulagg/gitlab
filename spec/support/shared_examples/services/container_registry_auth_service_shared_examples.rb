@@ -814,7 +814,7 @@ RSpec.shared_examples 'a container registry auth service' do
 
   context 'for deploy tokens' do
     let(:current_params) do
-      { scopes: ["repository:#{project.full_path}:pull"] }
+      { scopes: ["repository:#{project.full_path}:pull"] }.merge(params)
     end
 
     context 'when deploy token has read and write registry as scopes' do
@@ -885,9 +885,11 @@ RSpec.shared_examples 'a container registry auth service' do
     end
 
     context 'when deploy token does not have read_registry scope' do
-      let(:deploy_token) { create(:deploy_token, projects: [project], read_registry: false) }
+      let(:deploy_token) do
+        create(:deploy_token, projects: [project], read_registry: false)
+      end
 
-      let(:current_params) { { deploy_token: deploy_token } }
+      let(:params) { { deploy_token: deploy_token } }
 
       shared_examples 'unable to login' do
         context 'registry provides no container authentication_abilities' do
@@ -904,7 +906,7 @@ RSpec.shared_examples 'a container registry auth service' do
       end
 
       context 'for public project' do
-        let_it_be(:project) { create(:project, :public) }
+        let(:project) { create(:project, :public) }
 
         context 'when pulling' do
           it_behaves_like 'a pullable'
@@ -944,7 +946,7 @@ RSpec.shared_examples 'a container registry auth service' do
     context 'when deploy token is not related to the project' do
       let_it_be(:deploy_token) { create(:deploy_token, read_registry: false) }
 
-      let(:current_params) { { deploy_token: deploy_token } }
+      let(:params) { { deploy_token: deploy_token } }
 
       context 'for public project' do
         let_it_be(:project) { create(:project, :public) }
@@ -974,7 +976,7 @@ RSpec.shared_examples 'a container registry auth service' do
     context 'when deploy token has been revoked' do
       let(:deploy_token) { create(:deploy_token, :revoked, projects: [project]) }
 
-      let(:current_params) { { deploy_token: deploy_token } }
+      let(:params) { { deploy_token: deploy_token } }
 
       context 'for public project' do
         let_it_be(:project) { create(:project, :public) }

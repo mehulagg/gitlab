@@ -199,18 +199,6 @@ CREATE TABLE audit_events (
 )
 PARTITION BY RANGE (created_at);
 
-CREATE TABLE incident_management_pending_alert_escalations (
-    id bigint NOT NULL,
-    rule_id bigint,
-    alert_id bigint NOT NULL,
-    schedule_id bigint NOT NULL,
-    process_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    status smallint NOT NULL
-)
-PARTITION BY RANGE (process_at);
-
 CREATE TABLE web_hook_logs (
     id bigint NOT NULL,
     web_hook_id integer NOT NULL,
@@ -9543,9 +9531,9 @@ CREATE TABLE application_settings (
     elasticsearch_username text,
     encrypted_elasticsearch_password bytea,
     encrypted_elasticsearch_password_iv bytea,
+    valid_runner_registrars character varying[] DEFAULT '{project,group}'::character varying[],
     diff_max_lines integer DEFAULT 50000 NOT NULL,
     diff_max_files integer DEFAULT 1000 NOT NULL,
-    valid_runner_registrars character varying[] DEFAULT '{project,group}'::character varying[],
     encrypted_mailgun_signing_key bytea,
     encrypted_mailgun_signing_key_iv bytea,
     mailgun_events_enabled boolean DEFAULT false NOT NULL,
@@ -13967,6 +13955,18 @@ CREATE SEQUENCE incident_management_oncall_shifts_id_seq
     CACHE 1;
 
 ALTER SEQUENCE incident_management_oncall_shifts_id_seq OWNED BY incident_management_oncall_shifts.id;
+
+CREATE TABLE incident_management_pending_alert_escalations (
+    id bigint NOT NULL,
+    rule_id bigint,
+    alert_id bigint NOT NULL,
+    schedule_id bigint NOT NULL,
+    process_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    status smallint NOT NULL
+)
+PARTITION BY RANGE (process_at);
 
 CREATE SEQUENCE incident_management_pending_alert_escalations_id_seq
     START WITH 1
