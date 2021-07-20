@@ -66,15 +66,15 @@ module Integrations
           type: 'text',
           name: 'datadog_site',
           placeholder: DEFAULT_DOMAIN,
-          help: 'The Datadog site to send data to. To send data to the EU site, use <code>datadoghq.eu</code>.',
+          help: s_('DatadogIntegration|The Datadog site to send data to. To send data to the EU site, use <code>datadoghq.eu</code>.'),
           required: false
         },
         {
           type: 'text',
           name: 'api_url',
-          title: 'API URL',
+          title: s_('DatadogIntegration|API URL'),
           placeholder: 'gitlab.example.com',
-          help: '(Advanced) The full URL for your Datadog site.',
+          help: s_('DatadogIntegration|(Advanced) The full URL for your Datadog site.'),
           required: false
         },
         {
@@ -89,16 +89,16 @@ module Integrations
         {
           type: 'text',
           name: 'datadog_service',
-          title: 'Service',
+          title: s_('DatadogIntegration|Service'),
           placeholder: 'gitlab-ci',
-          help: 'Include this string with all data sent from this GitLab instance.'
+          help: s_('DatadogIntegration|Include this string with all data sent from this GitLab instance.')
         },
         {
           type: 'text',
           name: 'datadog_env',
-          title: 'Environment',
+          title: s_('DatadogIntegration|Environment'),
           placeholder: 'production',
-          help: 'Include this environment tag with all traces sent from this environment.'
+          help: s_('DatadogIntegration|Include this environment tag with all traces sent from this environment.')
         }
       ]
     end
