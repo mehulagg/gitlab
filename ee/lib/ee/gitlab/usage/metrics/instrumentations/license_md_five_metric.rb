@@ -4,7 +4,7 @@ module Gitlab
   module Usage
     module Metrics
       module Instrumentations
-        class LicenseMD5Metric < GenericMetric
+        class LicenseMdFiveMetric < GenericMetric
           def value
             ::License.current.md5
           end
