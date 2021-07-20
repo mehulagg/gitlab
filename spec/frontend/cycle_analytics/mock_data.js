@@ -11,8 +11,8 @@ export const getStageByTitle = (stages, title) =>
   stages.find((stage) => stage.title && stage.title.toLowerCase().trim() === title) || {};
 
 const fixtureEndpoints = {
-  customizableCycleAnalyticsStagesAndEvents: 'project/analytics/value_stream_analytics/stages',
-  stageEvents: (stage) => `project/analytics/value_stream_analytics/events/${stage}`,
+  customizableCycleAnalyticsStagesAndEvents: 'projects/analytics/value_stream_analytics/stages',
+  stageEvents: (stage) => `projects/analytics/value_stream_analytics/events/${stage}`,
 };
 
 export const customizableStagesAndEvents = getJSONFixture(
