@@ -309,6 +309,12 @@ production: &base
     seat_link_enabled: false
 ```
 
+### Quarterly Subscription Reconciliation
+
+<!--- Linked to from 14.1 self managed instances of GitLab, so we need to redirect. -->
+
+This information has moved to another location, please see [the reconciliation process docs instead](https://docs.gitlab.com/ee/subscriptions/quarterly_reconciliation.md#the-quarterly-subscription-reconciliation-process).
+
 ## Upgrade your subscription tier
 
 To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
