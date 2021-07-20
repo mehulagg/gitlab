@@ -8,6 +8,7 @@ class PipelineNotificationWorker # rubocop:disable Scalability/IdempotentWorker
 
   urgency :high
   worker_resource_boundary :cpu
+  data_consistency :sticky, feature_flag: :load_balancing_for_pipeline_notification_worker
 
   def perform(pipeline_id, args = {})
     case args
