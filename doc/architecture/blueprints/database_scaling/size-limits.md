@@ -162,7 +162,7 @@ Identifying solutions for offending tables is driven by the [GitLab Database Tea
 |------------------------------|-------------------------|
 | Author                       |    Andreas Brandl       |
 | Architecture Evolution Coach |                         |
-| Engineering Leader           |                         |
+| Engineering Leader           | Craig Gomes |
 | Domain Expert                |                         |
 | Domain Expert                |                         |
 
