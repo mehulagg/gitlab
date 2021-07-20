@@ -41,23 +41,23 @@ RSpec.describe Gitlab::HTTP do
 
     subject(:request_slow_responder) { described_class.post('http://example.org', **options) }
 
-    specify do
-      expect { request_slow_responder }.not_to raise_error
+    it 'raises a timeout error' do
+      expect { request_slow_responder }.to raise_error(Gitlab::HTTP::ReadTotalTimeout, /Request timed out after ?([0-9]*[.])?[0-9]+ seconds/)
     end
 
-    context 'with use_read_total_timeout option' do
-      let(:options) { { use_read_total_timeout: true } }
+    context 'and timeout option' do
+      let(:options) { { timeout: 10.seconds } }
 
-      it 'raises a timeout error' do
-        expect { request_slow_responder }.to raise_error(Gitlab::HTTP::ReadTotalTimeout, /Request timed out after ?([0-9]*[.])?[0-9]+ seconds/)
+      it 'overrides the default timeout when timeout option is present' do
+        expect { request_slow_responder }.not_to raise_error
       end
+    end
 
-      context 'and timeout option' do
-        let(:options) { { use_read_total_timeout: true, timeout: 10.seconds } }
+    context 'and skip_read_total_timeout option' do
+      let(:options) { { skip_read_total_timeout: true } }
 
-        it 'overrides the default timeout when timeout option is present' do
-          expect { request_slow_responder }.not_to raise_error
-        end
+      specify do
+        expect { request_slow_responder }.not_to raise_error
       end
     end
   end

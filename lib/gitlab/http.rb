@@ -43,7 +43,7 @@ module Gitlab
           options
         end
 
-      unless options.has_key?(:use_read_total_timeout)
+      if options.has_key?(:skip_read_total_timeout)
         return httparty_perform_request(http_method, path, options_with_timeouts, &block)
       end
 

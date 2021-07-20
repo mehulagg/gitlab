@@ -32,7 +32,7 @@ module DastSiteValidations
     end
 
     def make_http_request!
-      Gitlab::HTTP.get(dast_site_validation.validation_url, use_read_total_timeout: true)
+      Gitlab::HTTP.get(dast_site_validation.validation_url)
     end
 
     def token_found?(response)

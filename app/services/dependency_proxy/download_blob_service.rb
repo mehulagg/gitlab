@@ -11,7 +11,7 @@ module DependencyProxy
 
     def execute
       File.open(@temp_file.path, "wb") do |file|
-        Gitlab::HTTP.get(blob_url, headers: auth_headers, stream_body: true) do |fragment|
+        Gitlab::HTTP.get(blob_url, headers: auth_headers, stream_body: true, skip_read_total_timeout: true) do |fragment|
           if [301, 302, 307].include?(fragment.code)
             # do nothing
           elsif fragment.code == 200

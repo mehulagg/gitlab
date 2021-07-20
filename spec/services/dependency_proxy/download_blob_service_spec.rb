@@ -8,7 +8,7 @@ RSpec.describe DependencyProxy::DownloadBlobService do
   let(:token) { Digest::SHA256.hexdigest('123') }
   let(:blob_sha) { Digest::SHA256.hexdigest('ruby:2.7.0') }
 
-  subject { described_class.new(image, blob_sha, token).execute }
+  subject(:download_blob) { described_class.new(image, blob_sha, token).execute }
 
   context 'remote request is successful' do
     before do
@@ -18,6 +18,13 @@ RSpec.describe DependencyProxy::DownloadBlobService do
     it { expect(subject[:status]).to eq(:success) }
     it { expect(subject[:file]).to be_a(Tempfile) }
     it { expect(subject[:file].size).to eq(6) }
+
+    it 'skips read total timeout' do
+      expected_options = { headers: anything, stream_body: true, skip_read_total_timeout: true }
+      expect(Gitlab::HTTP).to receive(:perform_request).with(Net::HTTP::Get, anything, expected_options)
+
+      download_blob
+    end
   end
 
   context 'remote request is not found' do
