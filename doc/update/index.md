@@ -72,13 +72,17 @@ from the chart version to GitLab version to determine the [upgrade path](#upgrad
 
 ## Checking for background migrations before upgrading
 
-Certain major/minor releases may require a set of background migrations to be
-finished. The number of remaining migrations jobs can be found by running the
-following command:
+Certain major/minor releases may require different sets of background migrations to be
+finished before you update to a newer version.
+
+**For GitLab 14.0.4 or newer**
+
+Check the numner of [batched background migrations](../user/admin_area/monitoring/background_migrations.md)
+in the GitLab web interface, in addition to the following.
 
 **For Omnibus installations**
 
-If using GitLab 12.9 and newer, run:
+If using GitLab 12.9 and newer, also run:
 
 ```shell
 sudo gitlab-rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
@@ -106,12 +110,6 @@ If using GitLab 12.8 and older, run the following using a [Rails console](../adm
 Sidekiq::Queue.new("background_migration").size
 Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
 ```
-
-### Batched background migrations
-
-Batched background migrations need to finish before you update to a newer version.
-
-Read more about [batched background migrations](../user/admin_area/monitoring/background_migrations.md).
 
 ### What do I do if my background migrations are stuck?
 
