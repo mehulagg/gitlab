@@ -68,4 +68,21 @@ RSpec.describe TimeZoneHelper, :aggregate_failures do
       end
     end
   end
+
+  describe '#local_time' do
+    context 'when a valid timezone is passed' do
+      it 'displays local time' do
+        timezone = 'America/Los_Angeles'
+        travel_to Time.find_zone(timezone).local(2021, 7, 20, 15, 30, 45)
+
+        expect(helper.local_time(timezone)).to eq('15:30 (UTC -07:00)')
+      end
+    end
+
+    context 'when an invalid timezone is passed' do
+      it 'returns `nil`' do
+        expect(helper.local_time('Foo/Bar')).to be_nil
+      end
+    end
+  end
 end
