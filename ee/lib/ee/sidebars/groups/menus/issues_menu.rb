@@ -16,11 +16,6 @@ module EE
             true
           end
 
-          override :active_routes
-          def active_routes
-            { path: 'issues_analytics#show' }
-          end
-
           private
 
           def iterations_menu_item

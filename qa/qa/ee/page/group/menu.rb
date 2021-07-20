@@ -45,10 +45,6 @@ module QA
                 element :group_insights_link
               end
 
-              view 'ee/app/views/layouts/nav/sidebar/_group_iterations_link.html.haml' do
-                element :group_iterations_link
-              end
-
               view 'ee/app/views/groups/sidebar/_packages.html.haml' do
                 element :group_packages_item
                 element :group_packages_link
