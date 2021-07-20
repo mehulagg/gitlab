@@ -53,7 +53,7 @@ They appear in the public access directory (`/public`) for project members only.
 
 ## Change project visibility
 
-Users with at least the Owner role for a project can change its visibility:
+Users with the Owner role for a project can change its visibility:
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Settings > General**.
