@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -161,6 +162,13 @@ func TestGeoProxyWithAPIError(t *testing.T) {
 
 func runTestCases(t *testing.T, ws *httptest.Server, testCases []testCase) {
 	t.Helper()
+
+	// Allow the first async callGeoProxyAPI() to finish. This is done on all
+	// tests, including the ones where we expect geoProxyURL to be nil or error,
+	// to ensure the test runs do not pass by coincidence.
+	// We don't have to wait long, since the call is made to a httptest.Server.
+	time.Sleep(1 * time.Second)
+
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			resp, err := http.Get(ws.URL + tc.path)

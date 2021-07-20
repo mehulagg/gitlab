@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"net/http"
 	"net/url"
@@ -34,6 +35,7 @@ var (
 	requestHeaderBlacklist = []string{
 		upload.RewrittenFieldsHeader,
 	}
+	geoProxyApiPollingInterval = 10 * time.Second
 )
 
 type upstream struct {
@@ -81,6 +83,10 @@ func newUpstream(cfg config.Config, accessLogger *logrus.Logger, routesCallback 
 	// Kind of a feature flag. See https://gitlab.com/groups/gitlab-org/-/epics/5914#note_564974130
 	up.enableGeoProxyFeature = os.Getenv("GEO_SECONDARY_PROXY") == "1"
 	routesCallback(&up)
+
+	if up.enableGeoProxyFeature {
+		go up.pollGeoProxyAPI()
+	}
 
 	var correlationOpts []correlation.InboundHandlerOption
 	if cfg.PropagateCorrelationID {
@@ -152,16 +158,29 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *upstream) findGeoProxyRoute(cleanedPath string, r *http.Request) *routeEntry {
-	geoProxyURL, err := u.APIClient.GetGeoProxyURL()
+	u.mu.RLock()
+	defer u.mu.RUnlock()
 
-	if err == nil {
-		u.setGeoProxyRoutes(geoProxyURL)
-		return u.matchGeoProxyRoute(cleanedPath, r)
-	} else if err != apipkg.ErrNotGeoSecondary {
-		log.WithRequest(r).WithError(err).Error("Geo Proxy: Unable to determine Geo Proxy URL. Falling back to normal routing")
+	if u.geoProxyBackend == nil {
+		log.WithRequest(r).Debug("Geo Proxy: Not a Geo proxy")
+		return nil
 	}
 
-	return nil
+	// Some routes are safe to serve from this GitLab instance
+	for _, ro := range u.geoLocalRoutes {
+		if ro.isMatch(cleanedPath, r) {
+			log.WithRequest(r).Debug("Geo Proxy: Handle this request locally")
+			return &ro
+		}
+	}
+
+	log.WithRequest(r).WithFields(log.Fields{"geoProxyBackend": u.geoProxyBackend}).Debug("Geo Proxy: Forward this request")
+
+	if cleanedPath == "/-/cable" {
+		return &u.geoProxyCableRoute
+	}
+
+	return &u.geoProxyRoute
 }
 
 func (u *upstream) findRoute(cleanedPath string, r *http.Request) *routeEntry {
@@ -174,32 +193,37 @@ func (u *upstream) findRoute(cleanedPath string, r *http.Request) *routeEntry {
 	return nil
 }
 
-func (u *upstream) matchGeoProxyRoute(cleanedPath string, r *http.Request) *routeEntry {
-	// Some routes are safe to serve from this GitLab instance
-	for _, ro := range u.geoLocalRoutes {
-		if ro.isMatch(cleanedPath, r) {
-			log.WithRequest(r).Debug("Geo Proxy: Handle this request locally")
-			return &ro
-		}
+func (u *upstream) pollGeoProxyAPI() {
+	for {
+		u.callGeoProxyAPI()
+		time.Sleep(geoProxyApiPollingInterval)
 	}
-
-	log.WithRequest(r).WithFields(log.Fields{"geoProxyBackend": u.geoProxyBackend}).Debug("Geo Proxy: Forward this request")
-
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	if cleanedPath == "/-/cable" {
-		return &u.geoProxyCableRoute
-	}
-
-	return &u.geoProxyRoute
 }
 
-func (u *upstream) setGeoProxyRoutes(geoProxyURL *url.URL) {
+// Calls /api/v4/geo/proxy and sets up routes
+func (u *upstream) callGeoProxyAPI() {
+	geoProxyURL, err := u.APIClient.GetGeoProxyURL()
+
+	if err != nil && err != apipkg.ErrNotGeoSecondary {
+		log.WithError(err).WithFields(log.Fields{"geoProxyBackend": u.geoProxyBackend}).Error("Geo Proxy: Unable to determine Geo Proxy URL. Fallback on cached value.")
+		return
+	}
+
+	noChange := (u.geoProxyBackend == nil && geoProxyURL == nil) || (u.geoProxyBackend != nil && u.geoProxyBackend.String() == geoProxyURL.String())
+
+	if noChange {
+		log.WithFields(log.Fields{"geoProxyURL": geoProxyURL}).Debug("Geo Proxy: URL did not change")
+		return
+	}
+
+	log.WithFields(log.Fields{"oldGeoProxyURL": u.geoProxyBackend, "newGeoProxyURL": geoProxyURL}).Debug("Geo Proxy: URL changed")
+
 	u.mu.Lock()
 	defer u.mu.Unlock()
-	if u.geoProxyBackend == nil || u.geoProxyBackend.String() != geoProxyURL.String() {
-		log.WithFields(log.Fields{"geoProxyURL": geoProxyURL}).Debug("Geo Proxy: Update GeoProxyRoute")
-		u.geoProxyBackend = geoProxyURL
+
+	u.geoProxyBackend = geoProxyURL
+
+	if u.geoProxyBackend != nil {
 		geoProxyRoundTripper := roundtripper.NewBackendRoundTripper(u.geoProxyBackend, "", u.ProxyHeadersTimeout, u.DevelopmentMode)
 		geoProxyUpstream := proxypkg.NewProxy(u.geoProxyBackend, u.Version, geoProxyRoundTripper)
 		u.geoProxyCableRoute = u.wsRoute(`^/-/cable\z`, geoProxyUpstream)
