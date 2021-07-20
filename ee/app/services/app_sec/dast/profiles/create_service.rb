@@ -16,6 +16,20 @@ module AppSec
             dast_scanner_profile: dast_scanner_profile
           )
 
+          # TODO: Explore option to put this in an AR transaction
+          # TODO: Refactory execute method as per DRY principle.
+          if params.fetch(:dast_profile_schedule).fetch(:active)
+            response = ::AppSec::Dast::ProfileSchedules::CreateService.new(
+              container: project,
+              current_user: current_user,
+              params: {
+                dast_profile_schedule: dast_profile_schedule
+              }
+            ).execute
+
+            return response if response.error?
+          end
+
           create_audit_event(dast_profile)
 
           return ServiceResponse.success(payload: { dast_profile: dast_profile, pipeline_url: nil }) unless params.fetch(:run_after_create)

@@ -16,6 +16,12 @@ module Mutations
               null: true,
               description: 'The URL of the pipeline that was created. Requires `runAfterCreate` to be set to `true`.'
 
+        # TODO: Add validation for starts_at and repeats to be present when active is true
+        field :dast_profile_schedule, ::Types::Dast::ProfileScheduleType
+              required: true,
+              null: false,
+              description: 'Represents a DAST Profile Schedule'
+
         argument :full_path, GraphQL::ID_TYPE,
                  required: true,
                  description: 'The project the profile belongs to.'
@@ -70,7 +76,8 @@ module Mutations
               branch_name: branch_name,
               dast_site_profile: dast_site_profile,
               dast_scanner_profile: dast_scanner_profile,
-              run_after_create: run_after_create
+              run_after_create: run_after_create,
+              dast_profile_schedule: dast_profile_schedule
             }
           ).execute
 

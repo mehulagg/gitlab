@@ -9542,9 +9542,9 @@ CREATE TABLE application_settings (
     elasticsearch_username text,
     encrypted_elasticsearch_password bytea,
     encrypted_elasticsearch_password_iv bytea,
+    valid_runner_registrars character varying[] DEFAULT '{project,group}'::character varying[],
     diff_max_lines integer DEFAULT 50000 NOT NULL,
     diff_max_files integer DEFAULT 1000 NOT NULL,
-    valid_runner_registrars character varying[] DEFAULT '{project,group}'::character varying[],
     encrypted_mailgun_signing_key bytea,
     encrypted_mailgun_signing_key_iv bytea,
     mailgun_events_enabled boolean DEFAULT false NOT NULL,
@@ -12013,6 +12013,7 @@ CREATE TABLE dast_profile_schedules (
     updated_at timestamp with time zone NOT NULL,
     active boolean DEFAULT true NOT NULL,
     cron text NOT NULL,
+    repeats boolean DEFAULT true NOT NULL,
     CONSTRAINT check_86531ea73f CHECK ((char_length(cron) <= 255))
 );
 
