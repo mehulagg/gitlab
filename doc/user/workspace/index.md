@@ -19,9 +19,11 @@ Workspace will take many of the features from the
 - Namespace, for GitLab.com.
 
 NOTE:
-Workspace are currently in development.
+Workspace is currently in development.
 
 ## Concept previews
+
+The following provide a preview to the Workspace concept.
 
 ![Workspace Overview](img/1.1-Instance_overview.png)
 
