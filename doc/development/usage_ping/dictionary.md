@@ -19822,17 +19822,17 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.projects_with_compliance_framework`
 
-Number of projects labeled with a compliance framework label [see](https://gitlab.com/gitlab-org/gitlab/-/issues/118671)
+Number of projects labeled with a compliance framework label
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180805_projects_with_compliance_framework.yml)
 
-Group: `group::manage`
+Group: `group::compliance`
 
 Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.unique_users_all_imports`
 
