@@ -4,22 +4,22 @@ require 'spec_helper'
 RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   include JavaScriptFixturesHelpers
 
-  # let_it_be(:group) { create(:group) }
+  let_it_be(:group) { create(:group) }
   # let_it_be(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:project) { create(:project, :repository, namespace: group) }
-  let_it_be(:user) { create(:user, :admin) }
+  let_it_be(:user) { create(:user) }
   let_it_be(:value_stream_id) { 'default' }
-  # let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:milestone) { create(:milestone, project: project) }
 
-  # let(:issue) { create(:issue, project: project, created_at: 4.days.ago) }
-  # let(:issue_1) { create(:issue, project: project, created_at: 5.days.ago) }
-  # let(:issue_2) { create(:issue, project: project, created_at: 4.days.ago) }
-  # let(:issue_3) { create(:issue, project: project, created_at: 3.days.ago) }
+  let(:issue) { create(:issue, project: project, created_at: 4.days.ago) }
+  let(:issue_1) { create(:issue, project: project, created_at: 5.days.ago) }
+  let(:issue_2) { create(:issue, project: project, created_at: 4.days.ago) }
+  let(:issue_3) { create(:issue, project: project, created_at: 3.days.ago) }
 
-  # let(:label) { create(:group_label, name: 'in-code-review', group: group) }
+  let(:label) { create(:group_label, name: 'in-code-review', group: group) }
 
-  # let(:mr_1) { create(:merge_request, source_project: project, allow_broken: true, created_at: 20.days.ago) }
-  # let(:mr_2) { create(:merge_request, source_project: project, allow_broken: true, created_at: 19.days.ago) }
+  let(:mr_1) { create(:merge_request, source_project: project, allow_broken: true, created_at: 20.days.ago) }
+  let(:mr_2) { create(:merge_request, source_project: project, allow_broken: true, created_at: 19.days.ago) }
 
   # let(:pipeline_1) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_1.source_branch, sha: mr_1.source_branch_sha, head_pipeline_of: mr_1) }
   # let(:pipeline_2) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_2.source_branch, sha: mr_2.source_branch_sha, head_pipeline_of: mr_2) }
@@ -106,18 +106,67 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   #   end
   # end
 
-  # before(:all) do
-  #   clean_frontend_fixtures('analytics/value_stream_analytics/')
-  # end
+  before(:all) do
+    clean_frontend_fixtures('Projects/analytics/')
+  end
+
+  describe Projects::CycleAnalyticsController, type: :controller do
+    render_views
+
+    let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
+
+    before do
+      project.add_developer(user)
+
+      sign_in(user)
+    end
+
+    it 'project/analytics/lol.json' do
+      get(:show, params: params, format: :json)
+
+      print response
+      binding.pry
+      expect(response).to have_gitlab_http_status(:not_found)
+      # expect(response).to be_successful
+    end
+  end
 
   describe Projects::Analytics::CycleAnalytics::StagesController, type: :controller do
     render_views
 
-    it 'project/analytics/value_stream_analytics/stages.json' do
-      get(:index, params: { value_stream_id: value_stream_id }, format: :json)
+    let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
+
+    before do
+      project.add_developer(user)
+
+      sign_in(user)
+    end
+
+    it 'project/analytics/value_stream_analytics/stages' do
+      get(:index, params: params, format: :json)
 
       expect(response).to be_successful
-      print response
+    end
+  end
+
+
+  describe Projects::Analytics::CycleAnalytics::StagesController, type: :controller do
+    render_views    
+        let(:params) { { namespace_id: group, project_id: project, value_stream_id: value_stream_id } }
+
+    before do
+      project.add_developer(user)
+
+      sign_in(user)
+    end
+    
+    Gitlab::Analytics::CycleAnalytics::DefaultStages.all.each do |stage|
+      it "analytics/ value_stream_analytics/events/#{stage[:name]}" do
+        stage_id = project.cycle_analytics_stages.find_by(name: stage[:name]).id
+        get(:records, params: params.merge({ id: stage_id }), format: :json)
+
+        expect(response).to be_successful
+      end
     end
   end
 
