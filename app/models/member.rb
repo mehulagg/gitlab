@@ -175,7 +175,14 @@ class Member < ApplicationRecord
   after_update :post_update_hook, unless: [:pending?, :importing?], if: :hook_prerequisites_met?
   after_destroy :destroy_notification_setting
   after_destroy :post_destroy_hook, unless: :pending?, if: :hook_prerequisites_met?
-  after_commit :refresh_member_authorized_projects
+
+  after_commit on: [:create, :update] do
+    refresh_member_authorized_projects(blocking: true)
+  end
+
+  after_commit on: [:destroy] do
+    refresh_member_authorized_projects(blocking: false)
+  end
 
   default_value_for :notification_level, NotificationSetting.levels[:global]
 
@@ -390,13 +397,13 @@ class Member < ApplicationRecord
   # transaction has been committed, resulting in the job either throwing an
   # error or not doing any meaningful work.
   # rubocop: disable CodeReuse/ServiceClass
-  def refresh_member_authorized_projects
+  def refresh_member_authorized_projects(blocking: true)
     # If user/source is being destroyed, project access are going to be
     # destroyed eventually because of DB foreign keys, so we shouldn't bother
     # with refreshing after each member is destroyed through association
     return if destroyed_by_association.present?
 
-    UserProjectAccessChangedService.new(user_id).execute
+    UserProjectAccessChangedService.new(user_id).execute(blocking: blocking)
   end
   # rubocop: enable CodeReuse/ServiceClass
 
