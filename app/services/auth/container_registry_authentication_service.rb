@@ -250,7 +250,7 @@ module Auth
     end
 
     def deploy_token
-      params[:deploy_token] # || (current_user if current_user.is_a?(DeployToken))
+      params[:deploy_token]
     end
 
     def log_if_actions_denied(type, requested_project, requested_actions, authorized_actions)

@@ -814,15 +814,15 @@ RSpec.shared_examples 'a container registry auth service' do
 
   context 'for deploy tokens' do
     let(:current_params) do
-      { scopes: ["repository:#{project.full_path}:pull"] }.merge(params)
+      { scopes: ["repository:#{project.full_path}:pull"], deploy_token: deploy_token }
     end
 
     context 'when deploy token has read and write registry as scopes' do
-      let(:current_user) { create(:deploy_token, write_registry: true, projects: [project]) }
+      let(:deploy_token) { create(:deploy_token, write_registry: true, projects: [project]) }
 
       shared_examples 'able to login' do
         context 'registry provides read_container_image authentication_abilities' do
-          let(:current_params) { {} }
+          let(:current_params) { { deploy_token: deploy_token } }
           let(:authentication_abilities) { [:read_container_image] }
 
           it_behaves_like 'an authenticated'
@@ -838,7 +838,7 @@ RSpec.shared_examples 'a container registry auth service' do
 
         context 'when pushing' do
           let(:current_params) do
-            { scopes: ["repository:#{project.full_path}:push"] }
+            { scopes: ["repository:#{project.full_path}:push"], deploy_token: deploy_token }
           end
 
           it_behaves_like 'a pushable'
@@ -856,7 +856,7 @@ RSpec.shared_examples 'a container registry auth service' do
 
         context 'when pushing' do
           let(:current_params) do
-            { scopes: ["repository:#{project.full_path}:push"] }
+            { scopes: ["repository:#{project.full_path}:push"], deploy_token: deploy_token }
           end
 
           it_behaves_like 'a pushable'
@@ -874,7 +874,7 @@ RSpec.shared_examples 'a container registry auth service' do
 
         context 'when pushing' do
           let(:current_params) do
-            { scopes: ["repository:#{project.full_path}:push"] }
+            { scopes: ["repository:#{project.full_path}:push"], deploy_token: deploy_token }
           end
 
           it_behaves_like 'a pushable'
@@ -888,8 +888,6 @@ RSpec.shared_examples 'a container registry auth service' do
       let(:deploy_token) do
         create(:deploy_token, projects: [project], read_registry: false)
       end
-
-      let(:params) { { deploy_token: deploy_token } }
 
       shared_examples 'unable to login' do
         context 'registry provides no container authentication_abilities' do
@@ -944,9 +942,7 @@ RSpec.shared_examples 'a container registry auth service' do
     end
 
     context 'when deploy token is not related to the project' do
-      let_it_be(:deploy_token) { create(:deploy_token, read_registry: false) }
-
-      let(:params) { { deploy_token: deploy_token } }
+      let(:deploy_token) { create(:deploy_token, read_registry: false) }
 
       context 'for public project' do
         let_it_be(:project) { create(:project, :public) }
@@ -975,8 +971,6 @@ RSpec.shared_examples 'a container registry auth service' do
 
     context 'when deploy token has been revoked' do
       let(:deploy_token) { create(:deploy_token, :revoked, projects: [project]) }
-
-      let(:params) { { deploy_token: deploy_token } }
 
       context 'for public project' do
         let_it_be(:project) { create(:project, :public) }
