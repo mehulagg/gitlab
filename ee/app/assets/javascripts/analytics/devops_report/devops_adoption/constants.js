@@ -128,6 +128,12 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         tooltip: s__('DevopsAdoption|SAST enabled for at least one project'),
         testId: 'sastCol',
       },
+      {
+        key: 'coverageFuzzingEnabledCount',
+        label: s__('DevopsAdoption|Fuzz Testing'),
+        tooltip: s__('DevopsAdoption|Fuzz Testing enabled for at least one project'),
+        testId: 'fuzzCol',
+      },
     ],
   },
   {

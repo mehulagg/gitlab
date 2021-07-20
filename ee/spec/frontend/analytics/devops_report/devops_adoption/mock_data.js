@@ -130,6 +130,10 @@ export const overallAdoptionData = {
     },
     {
       adopted: false,
+      title: 'Fuzz Testing',
+    },
+    {
+      adopted: false,
       title: 'Deploys',
     },
     {
