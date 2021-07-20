@@ -480,7 +480,7 @@ module EE
 
         prepended do
           argument :name,
-                   GraphQL::STRING_TYPE,
+                   GraphQL::Types::String,
                    required: false,
                    description: 'Tanuki name'
         end
@@ -673,19 +673,17 @@ class definition to make it easy and clear:
 
 ```ruby
 module API
-  module Ci
-    class JobArtifacts < Grape::API::Instance
-      # EE::API::Ci::JobArtifacts would override the following helpers
-      helpers do
-        def authorize_download_artifacts!
-          authorize_read_builds!
-        end
+  class JobArtifacts < Grape::API::Instance
+    # EE::API::JobArtifacts would override the following helpers
+    helpers do
+      def authorize_download_artifacts!
+        authorize_read_builds!
       end
     end
   end
 end
 
-API::Ci::JobArtifacts.prepend_mod_with('API::Ci::JobArtifacts')
+API::JobArtifacts.prepend_mod_with('API::JobArtifacts')
 ```
 
 And then we can follow regular object-oriented practices to override it:
@@ -693,16 +691,14 @@ And then we can follow regular object-oriented practices to override it:
 ```ruby
 module EE
   module API
-    module Ci
-      module JobArtifacts
-        extend ActiveSupport::Concern
+    module JobArtifacts
+      extend ActiveSupport::Concern
 
-        prepended do
-          helpers do
-            def authorize_download_artifacts!
-              super
-              check_cross_project_pipelines_feature!
-            end
+      prepended do
+        helpers do
+          def authorize_download_artifacts!
+            super
+            check_cross_project_pipelines_feature!
           end
         end
       end
