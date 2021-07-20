@@ -173,6 +173,9 @@ namespace :gitlab do
 
       ActiveRecord::Base.logger = Logger.new($stdout) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
 
+      # Hack: Before we do actual reindexing work, create async indexes
+      Gitlab::Database::AsyncIndexes.create_pending_indexes! if Feature.enabled?(:database_async_index_creation, type: :ops)
+
       Gitlab::Database::Reindexing.perform(indexes)
     rescue StandardError => e
       Gitlab::AppLogger.error(e)
