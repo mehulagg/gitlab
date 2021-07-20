@@ -25,6 +25,9 @@ export default {
     step3: s__(
       `EnableReviewApp|%{stepStart}Step 3%{stepEnd}. Add it to the project %{linkStart}gitlab-ci.yml%{linkEnd} file.`,
     ),
+    step4: s__(
+      `EnableReviewApp|%{stepStart}Step 4 (optional)%{stepEnd}. Enable Visual Reviews by following the %{linkStart}setup instructions%{linkEnd}.`,
+    ),
   },
   modalInfo: {
     closeText: s__('EnableReviewApp|Close'),
@@ -100,6 +103,20 @@ export default {
           <gl-link :href="`blob/${defaultBranchName}/.gitlab-ci.yml`" target="_blank">{{
             content
           }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </p>
+    <p>
+      <gl-sprintf :message="$options.instructionText.step4">
+        <template #step="{ content }">
+          <strong>{{ content }}</strong>
+        </template>
+        <template #link="{ content }">
+          <gl-link
+            href="https://docs.gitlab.com/ee/ci/review_apps/#visual-reviews"
+            target="_blank"
+            >{{ content }}</gl-link
+          >
         </template>
       </gl-sprintf>
     </p>

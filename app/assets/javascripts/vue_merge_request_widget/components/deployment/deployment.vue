@@ -1,6 +1,5 @@
 <script>
 import { MANUAL_DEPLOY, WILL_DEPLOY, CREATED } from './constants';
-import DeploymentActions from './deployment_actions.vue';
 import DeploymentInfo from './deployment_info.vue';
 
 export default {
@@ -8,7 +7,6 @@ export default {
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'Deployment',
   components: {
-    DeploymentActions,
     DeploymentInfo,
   },
   props: {
@@ -19,21 +17,6 @@ export default {
     showMetrics: {
       type: Boolean,
       required: true,
-    },
-    showVisualReviewApp: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    visualReviewAppMeta: {
-      type: Object,
-      required: false,
-      default: () => ({
-        sourceProjectId: '',
-        sourceProjectPath: '',
-        mergeRequestId: '',
-        appUrl: '',
-      }),
     },
   },
   computed: {
@@ -59,12 +42,6 @@ export default {
             :computed-deployment-status="computedDeploymentStatus"
             :deployment="deployment"
             :show-metrics="showMetrics"
-          />
-          <deployment-actions
-            :deployment="deployment"
-            :computed-deployment-status="computedDeploymentStatus"
-            :show-visual-review-app="showVisualReviewApp"
-            :visual-review-app-meta="visualReviewAppMeta"
           />
         </div>
       </div>
