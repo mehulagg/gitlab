@@ -17,7 +17,7 @@ module Types
             description: 'Favicon of the status.'
       field :details_path, GraphQL::STRING_TYPE, null: true,
             description: 'Path of the details for the status.'
-      field :has_details, GraphQL::BOOLEAN_TYPE, null: true,
+      field :has_details, GraphQL::Types::Boolean, null: true,
             description: 'Indicates if the status has further details.',
             method: :has_details?
       field :label, GraphQL::STRING_TYPE, null: true,
