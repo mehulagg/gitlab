@@ -31,7 +31,7 @@ module EE
             ::Sidebars::MenuItem.new(
               title: _('Iterations'),
               link: iterations_link,
-              active_routes: { path: iteration_paths },
+              active_routes: { path: iterations_paths },
               item_id: :iterations
             )
           end

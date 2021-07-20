@@ -32,6 +32,11 @@ module Sidebars
           'issues'
         end
 
+        override :has_pill?
+        def has_pill?
+          true
+        end
+
         override :pill_count
         def pill_count
           strong_memoize(:pill_count) do
