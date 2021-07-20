@@ -12,7 +12,6 @@ RSpec.describe 'Destroying a package file' do
 
   let(:project) { package.project }
   let(:id) { package.package_files.first.to_global_id.to_s }
-  let(:package_file_errors) { double('full_messages', )}
 
   let(:query) do
     <<~GQL
@@ -73,7 +72,7 @@ RSpec.describe 'Destroying a package file' do
     end
 
     context 'when an error occures' do
-      let(:error_messages) {  ['some error'] }
+      let(:error_messages) { ['some error'] }
 
       before do
         project.add_maintainer(user)
