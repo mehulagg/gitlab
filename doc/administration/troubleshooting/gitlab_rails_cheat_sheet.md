@@ -927,6 +927,16 @@ license.save
 License.current # check to make sure it applied
 ```
 
+### Remove trial licenses
+
+This cleans up the License History table:
+
+```ruby
+License.
+  select { |l| l.trial? }.
+  each   { |t| t.destroy! }
+```
+
 ## Registry
 
 ### Registry Disk Space Usage by Project
