@@ -21,7 +21,7 @@ When we describe GitLab analytics, we use the following terms:
       improvements and features faster. GitLab measures this as the number of deployments to a
       [production environment](../../ci/environments/index.md#deployment-tier-of-environments) in
       the given time period.
-      GitLab displays deployment frequency in [group-level Value Stream Analytics](../group/value_stream_analytics/index.md) and [project-level Value Stream Analytics](https://docs.gitlab.com/ee/user/analytics/value_stream_analytics.html).
+      GitLab displays deployment frequency in [group-level Value Stream Analytics](../group/value_stream_analytics/index.md) and [project-level Value Stream Analytics](./value_stream_analytics.html).
     - **Lead Time for Changes:** The time it takes for a commit to get into production. (1) GitLab
       measures this as the median duration between merge request merge and deployment to a
       [production environment](../../ci/environments/index.md#deployment-tier-of-environments) for
