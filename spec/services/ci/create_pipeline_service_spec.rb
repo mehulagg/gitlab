@@ -1174,16 +1174,31 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     context 'when pipeline variables are specified' do
-      let(:variables_attributes) do
-        [{ key: 'first', secret_value: 'world' },
-         { key: 'second', secret_value: 'second_world' }]
-      end
-
       subject(:pipeline) { execute_service(variables_attributes: variables_attributes).payload }
 
-      it 'creates a pipeline with specified variables' do
-        expect(pipeline.variables.map { |var| var.slice(:key, :secret_value) })
-          .to eq variables_attributes.map(&:with_indifferent_access)
+      context 'with valid pipeline variables' do
+        let(:variables_attributes) do
+          [{ key: 'first', secret_value: 'world' },
+           { key: 'second', secret_value: 'second_world' }]
+        end
+
+        it 'creates a pipeline with specified variables' do
+          expect(pipeline.variables.map { |var| var.slice(:key, :secret_value) })
+            .to eq variables_attributes.map(&:with_indifferent_access)
+        end
+      end
+
+      context 'with invalid pipeline variables' do
+        let(:variables_attributes) do
+          [{ key: 'hello', secret_value: 'world' },
+           { key: 'hello', secret_value: 'second_world' }]
+        end
+
+        it 'fails to create the pipeline' do
+          expect(pipeline).to be_failed
+          expect(pipeline.variables).to be_empty
+          expect(pipeline.errors[:base]).to eq(["Variable name hello has already been taken"])
+        end
       end
     end
 

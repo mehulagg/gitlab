@@ -246,4 +246,20 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Build do
       end
     end
   end
+
+  context 'with duplicate pipeline variables' do
+    let(:variables_attributes) do
+      [{ key: 'first', secret_value: 'world' },
+       { key: 'first', secret_value: 'second_world' }]
+    end
+
+    it_behaves_like 'breaks the chain'
+    it_behaves_like 'builds pipeline'
+
+    it 'returns an error on variables_attributes' do
+      step.perform!
+
+      expect(pipeline.errors.full_messages).to eq(["Variable name first has already been taken"])
+    end
+  end
 end

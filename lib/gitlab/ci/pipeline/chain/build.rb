@@ -23,9 +23,10 @@ module Gitlab
               pipeline_schedule: @command.schedule,
               merge_request: @command.merge_request,
               external_pull_request: @command.external_pull_request,
-              locked: @command.project.default_pipeline_lock,
-              variables_attributes: variables_attributes
-            )
+              locked: @command.project.default_pipeline_lock)
+
+            @pipeline.variables_attributes = variables_attributes
+            @pipeline
           end
 
           def break?
@@ -36,7 +37,11 @@ module Gitlab
 
           def variables_attributes
             variables = Array(@command.variables_attributes)
+            variables = apply_permissions(variables)
+            validate_uniqueness(variables)
+          end
 
+          def apply_permissions(variables)
             # We allow parent pipelines to pass variables to child pipelines since
             # these variables are coming from internal configurations. We will check
             # permissions to :set_pipeline_variables when those are injected upstream,
@@ -51,6 +56,18 @@ module Gitlab
             end
 
             variables
+          end
+
+          def validate_uniqueness(variables)
+            unique = true
+            variables.map { |var| var[:key] }.tally.each do |key, count|
+              next unless count > 1
+
+              error("Variable name #{key} has already been taken", config_error: true)
+              unique = false
+            end
+
+            unique ? variables : []
           end
         end
       end
