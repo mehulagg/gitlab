@@ -1,5 +1,6 @@
 <script>
 import { GlAlert, GlButton, GlLink, GlModal, GlModalDirective, GlSprintf } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import { mapState, mapMutations } from 'vuex';
 import { retrieveAlert, getLocation } from '~/jira_connect/utils';
 import { __ } from '~/locale';
@@ -24,6 +25,9 @@ export default {
   inject: {
     usersPath: {
       default: '',
+    },
+    subscriptions: {
+      default: [],
     },
   },
   data() {
@@ -64,6 +68,7 @@ export default {
       const { linkUrl, title, message, variant } = retrieveAlert() || {};
       this.setAlert({ linkUrl, title, message, variant });
     },
+    isEmpty,
   },
 };
 </script>
@@ -103,12 +108,14 @@ export default {
         >
         <template v-else>
           <gl-button
+            v-if="!isEmpty(subscriptions)"
             v-gl-modal-directive="'add-namespace-modal'"
             category="primary"
             variant="info"
             class="gl-align-self-center"
-            >{{ s__('Integrations|Add namespace') }}</gl-button
           >
+            {{ s__('Integrations|Add namespace') }}
+          </gl-button>
           <gl-modal
             modal-id="add-namespace-modal"
             :title="s__('Integrations|Link namespaces')"

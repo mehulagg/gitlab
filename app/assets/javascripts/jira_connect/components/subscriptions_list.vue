@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlEmptyState, GlTable } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlTable, GlModalDirective } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapMutations } from 'vuex';
 import { removeSubscription } from '~/jira_connect/api';
@@ -16,6 +16,9 @@ export default {
     GlTable,
     GroupItemName,
     TimeagoTooltip,
+  },
+  directives: {
+    GlModalDirective,
   },
   inject: {
     subscriptions: {
@@ -86,7 +89,17 @@ export default {
       v-if="isEmpty(subscriptions)"
       :title="$options.i18n.emptyTitle"
       :description="$options.i18n.emptyDescription"
-    />
+    >
+      <template #actions>
+        <gl-button
+          v-gl-modal-directive="'add-namespace-modal'"
+          category="primary"
+          variant="confirm"
+        >
+          {{ __('Add namespace') }}
+        </gl-button>
+      </template>
+    </gl-empty-state>
     <gl-table v-else :items="subscriptions" :fields="$options.fields">
       <template #cell(name)="{ item }">
         <group-item-name :group="item.group" />
@@ -101,8 +114,9 @@ export default {
           :loading="isLoadingItem(item)"
           :disabled="!isEmpty(loadingItem)"
           @click.prevent="onClick(item)"
-          >{{ __('Unlink') }}</gl-button
         >
+          {{ __('Unlink') }}
+        </gl-button>
       </template>
     </gl-table>
   </div>
