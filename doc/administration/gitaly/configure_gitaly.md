@@ -802,7 +802,7 @@ You can observe the behavior of this queue using the Gitaly logs and Prometheus:
 
 The metric definitions are available:
 
-- Directly from raw Prometheus output.
+- Directly from Prometheus `/metrics` endpoint.
 - Using [Grafana Explore](https://grafana.com/docs/grafana/latest/explore/) on a
   Grafana instance configured against Prometheus.
 
