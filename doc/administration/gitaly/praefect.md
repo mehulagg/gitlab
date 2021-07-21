@@ -11,11 +11,11 @@ Configure Gitaly Cluster using either:
 
 - Gitaly Cluster configuration instructions available as part of
   [reference architectures](../reference_architectures/index.md) for installations of up to:
-  - [3000 users](../reference_architectures/3k_users.md#configure-gitaly-cluster).
-  - [5000 users](../reference_architectures/5k_users.md#configure-gitaly-cluster).
-  - [10,000 users](../reference_architectures/10k_users.md#configure-gitaly-cluster).
-  - [25,000 users](../reference_architectures/25k_users.md#configure-gitaly-cluster).
-  - [50,000 users](../reference_architectures/50k_users.md#configure-gitaly-cluster).
+  - [3000 users](../reference_architectures/3k_users.md#configure-gitaly-cluster)
+  - [5000 users](../reference_architectures/5k_users.md#configure-gitaly-cluster)
+  - [10,000 users](../reference_architectures/10k_users.md#configure-gitaly-cluster)
+  - [25,000 users](../reference_architectures/25k_users.md#configure-gitaly-cluster)
+  - [50,000 users](../reference_architectures/50k_users.md#configure-gitaly-cluster)
 - The custom configuration instructions that follow on this page.
 
 Smaller GitLab installations may need only [Gitaly itself](index.md).
@@ -45,15 +45,15 @@ default value. The default value depends on the GitLab version.
 Gitaly Cluster [components](index.md#components) need to communicate with each other over many
 routes. Your firewall rules must allow the following for Gitaly Cluster to function properly:
 
-| From                   | To                      | Default port / TLS port |
-|:-----------------------|:------------------------|:------------------------|
-| GitLab                 | Praefect load balancer  | `2305` / `3305`         |
-| Praefect load balancer | Praefect                | `2305` / `3305`         |
-| Praefect               | Gitaly                  | `8075` / `9999`         |
-| Gitaly                 | GitLab (internal API)   | `80` / `443`            |
-| Gitaly                 | Praefect load balancer  | `2305` / `3305`         |
-| Gitaly                 | Praefect                | `2305` / `3305`         |
-| Gitaly                 | Gitaly                  | `8075` / `9999`         |
+| From                   | To                      | Default port | TLS port |
+|:-----------------------|:------------------------|:-------------|:---------|
+| GitLab                 | Praefect load balancer  | `2305`       | `3305`   |
+| Praefect load balancer | Praefect                | `2305`       | `3305`   |
+| Praefect               | Gitaly                  | `8075`       | `9999`   |
+| Gitaly                 | GitLab (internal API)   | `80`         | `443`    |
+| Gitaly                 | Praefect load balancer  | `2305`       | `3305`   |
+| Gitaly                 | Praefect                | `2305`       | `3305`   |
+| Gitaly                 | Gitaly                  | `8075`       | `9999`   |
 
 NOTE:
 Gitaly does not directly connect to Praefect. However, requests from Gitaly to the Praefect
@@ -108,27 +108,27 @@ are described below. Before you begin, generate a unique secret for each, and
 make note of it. This enables you to replace these placeholder tokens
 with secure tokens as you complete the setup process.
 
-1. `GITLAB_SHELL_SECRET_TOKEN`: this is used by Git hooks to make callback HTTP
-   API requests to GitLab when accepting a Git push. This secret is shared with
-   GitLab Shell for legacy reasons.
-1. `PRAEFECT_EXTERNAL_TOKEN`: repositories hosted on your Praefect cluster can
-   only be accessed by Gitaly clients that carry this token.
-1. `PRAEFECT_INTERNAL_TOKEN`: this token is used for replication traffic inside
-   your Praefect cluster. This is distinct from `PRAEFECT_EXTERNAL_TOKEN`
-   because Gitaly clients must not be able to access internal nodes of the
-   Praefect cluster directly; that could lead to data loss.
-1. `PRAEFECT_SQL_PASSWORD`: this password is used by Praefect to connect to
-   PostgreSQL.
-1. `PRAEFECT_SQL_PASSWORD_HASH`: the hash of password of the Praefect user.
-   Use `gitlab-ctl pg-password-md5 praefect` to generate the hash. The command
-   asks for the password for `praefect` user. Enter `PRAEFECT_SQL_PASSWORD`
-   plaintext password. By default, Praefect uses `praefect` user, but you can
-   change it.
-1. `PGBOUNCER_SQL_PASSWORD_HASH`: the hash of password of the PgBouncer user.
-   PgBouncer uses this password to connect to PostgreSQL. For more details
-   see [bundled PgBouncer](../postgresql/pgbouncer.md) documentation.
+- `GITLAB_SHELL_SECRET_TOKEN`: this is used by Git hooks to make callback HTTP
+  API requests to GitLab when accepting a Git push. This secret is shared with
+  GitLab Shell for legacy reasons.
+- `PRAEFECT_EXTERNAL_TOKEN`: repositories hosted on your Praefect cluster can
+  only be accessed by Gitaly clients that carry this token.
+- `PRAEFECT_INTERNAL_TOKEN`: this token is used for replication traffic inside
+  your Praefect cluster. This is distinct from `PRAEFECT_EXTERNAL_TOKEN`
+  because Gitaly clients must not be able to access internal nodes of the
+  Praefect cluster directly; that could lead to data loss.
+- `PRAEFECT_SQL_PASSWORD`: this password is used by Praefect to connect to
+  PostgreSQL.
+- `PRAEFECT_SQL_PASSWORD_HASH`: the hash of password of the Praefect user.
+  Use `gitlab-ctl pg-password-md5 praefect` to generate the hash. The command
+  asks for the password for `praefect` user. Enter `PRAEFECT_SQL_PASSWORD`
+  plaintext password. By default, Praefect uses `praefect` user, but you can
+  change it.
+- `PGBOUNCER_SQL_PASSWORD_HASH`: the hash of password of the PgBouncer user.
+  PgBouncer uses this password to connect to PostgreSQL. For more details
+  see [bundled PgBouncer](../postgresql/pgbouncer.md) documentation.
 
-We note in the instructions below where these secrets are required.
+We note in the following instructions where these secrets are required.
 
 NOTE:
 Omnibus GitLab installations can use `gitlab-secrets.json` for `GITLAB_SHELL_SECRET_TOKEN`.
