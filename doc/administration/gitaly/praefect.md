@@ -1654,7 +1654,7 @@ When creating the storage, see some
 
 ### Move Repositories
 
-DANGER:
+WARNING:
 GitLab v13.12 and above currently require the `gitaly_replicate_repository_direct_fetch`
 feature flag to be enabled for migrations into a Gitaly Cluster to work.
 This can be done from an application node with the following command:
