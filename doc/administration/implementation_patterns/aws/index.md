@@ -857,3 +857,5 @@ The AWS EKS Quick Start for GitLab Cloud Native implements Gitaly as a multi-zon
 ### Gitaly Long Term Management
 
 Gitaly node disk sizes will need to be monitored and increased to accommodate Git repository growth and Gitaly temporary and caching storage needs. The storage configuration on all nodes should be kept identical.
+
+Another line.
