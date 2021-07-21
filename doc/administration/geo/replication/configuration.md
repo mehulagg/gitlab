@@ -93,7 +93,7 @@ This causes all SSH requests to the newly promoted **primary** site to
 fail due to SSH host key mismatch. To prevent this, the primary SSH host
 keys must be manually replicated to the **secondary** site.
 
-1. SSH into the **each OpenSSH node on your secondary** site and login as the `root` user:
+1. SSH into the **each node on your secondary** site and login as the `root` user:
 
    ```shell
    sudo -i
