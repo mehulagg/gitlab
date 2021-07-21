@@ -21,10 +21,11 @@ Implementation patterns are built on the foundational information and testing do
 
 [Omnibus GitLab on AWS EC2 (HA)](manual_install_aws.md) - instructions for installing GitLab on EC2 instances. Manual instructions from which you may build out a GitLab instance or create your own Infrastructure as Code (IaC).
 
-# Additional details on implementation patterns
+## Additional details on implementation patterns
 
 GitLab implementation patterns build upon [GitLab Reference Architectures](../../administration/reference_architectures/index.md) in the following ways:
-## Cloud platform well architected compliance
+
+### Cloud platform well architected compliance
 
 Testing-backed architectural qualification is a fundamental concept behind implementation patterns.
 
@@ -33,7 +34,7 @@ Testing-backed architectural qualification is a fundamental concept behind imple
 - Implementation patterns may specify and test Cloud Platform PaaS services for suitability for GitLab - this testing can be coordinated and help qualify these technologies for Reference Architectures. For instance qualifying compatibility with and availability of runtime versions of top level PaaS such as those for PostgreSQL and Redis.
 - Implementation patterns can provided qualified testing for platform limitations, for example, ensuring Gitaly Cluster can work correctly on specific Cloud Platform availability zone latency and throughput characteristics or qualifying what levels of available platform partner local disk performance is workable for Gitaly server to operate with integrity.
 
-## Platform partner specificity
+### Platform partner specificity
 
 Implementation patterns enable platform specific terminology, best practice architecture and platform specific build manifests.
 
@@ -49,7 +50,7 @@ Platform as a Service options are a huge portion of the value provided by Cloud 
 - Implementation patterns help implementers understand what PaaS options are known to work and how to choose between PaaS solutions when a single platform has more than one PaaS option for the same GitLab role (e.g. AWS RDS versus AWS Aurora RDS)
 - For instance, where reference architectures do not have a specific recommendation on what technology is leveraged for GitLab outbound email services or what the sizing should be - a Reference Implementation may advise using a cloud providers Email as a Service (PaaS) and possibly even with specific settings.
 
-## Cost optimizing engineering
+### Cost optimizing engineering
 
 Cost engineering is a fundamental aspect of Cloud Architecture and frequently the savings capabilities available on a platform exert strong influence on how to build out scaled computing.
 
@@ -79,7 +80,7 @@ For example:
 
 The primary audiences for and contributors to this information is the GitLab **Implementation Eco System** which consists of at least:
 
-Gitlab Implementation Community:
+GitLab Implementation Community:
 
 - Customers
 - GitLab Channel Partners (Integrators)
