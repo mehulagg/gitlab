@@ -137,6 +137,7 @@ describe('Iterations report', () => {
         iterationQueryHandler: jest.fn().mockResolvedValue({
           data: {
             group: {
+              id: 'gid://gitlab/Group/1',
               iterations: {
                 nodes: [],
               },
