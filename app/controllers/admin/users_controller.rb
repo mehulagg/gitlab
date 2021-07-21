@@ -126,7 +126,7 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def ban
-    result = Users::BanService.new(current_user).execute(user)
+    result = Users::BannedUserService.new(current_user).execute(user, :ban)
 
     if result[:status] == :success
       redirect_back_or_admin_user(notice: _("Successfully banned"))
@@ -136,7 +136,7 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def unban
-    result = Users::UnbanService.new(current_user).execute(user)
+    result = Users::BannedUserService.new(current_user).execute(user, :unban)
 
     if result[:status] == :success
       redirect_back_or_admin_user(notice: _("Successfully unbanned"))

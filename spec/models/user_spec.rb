@@ -1951,11 +1951,11 @@ RSpec.describe User do
     end
   end
 
-  describe 'banning a user' do
+  describe 'banning and unbanning a user', :aggregate_failures do
     let(:user) { create(:user) }
 
     context 'an active user' do
-      it 'bans and blocks the user', :aggregate_failures do
+      it 'bans and blocks the user' do
         user.ban
 
         expect(user.banned?).to eq(true)
@@ -1968,12 +1968,12 @@ RSpec.describe User do
       end
     end
 
-    context 'a banned user' do
+    context 'unbanning a user' do
       before do
         user.ban!
       end
 
-      it 'activates the user', :aggregate_failures do
+      it 'activates the user' do
         user.activate
 
         expect(user.banned?).to eq(false)
