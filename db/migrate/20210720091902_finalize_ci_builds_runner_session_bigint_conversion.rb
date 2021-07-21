@@ -30,6 +30,7 @@ class FinalizeCiBuildsRunnerSessionBigintConversion < ActiveRecord::Migration[6.
   def swap
     add_concurrent_index TABLE_NAME, :build_id_convert_to_bigint, unique: true, name: 'index_ci_builds_runner_session_on_build_id_convert_to_bigint'
 
+    # Add a foreign key on `build_id_convert_to_bigint` before we swap the columns and drop the old FK ()
     add_concurrent_foreign_key TABLE_NAME, :ci_builds, column: :build_id_convert_to_bigint, on_delete: :cascade, name: 'fk_rails_70707857d3_tmp'
 
     with_lock_retries(raise_on_exhaustion: true) do
