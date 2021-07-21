@@ -1,0 +1,13 @@
+#import "~/runner/graphql/runner_node.fragment.graphql"
+
+query getGroupRunners($groupFullPath: ID!) {
+  group(fullPath: $groupFullPath) {
+    id
+    fullName
+    runners(membership: ALL) {
+      nodes {
+        ...RunnerNode
+      }
+    }
+  }
+}
