@@ -159,6 +159,27 @@ This machine's Geo node name matches a database record ... no
   doc/administration/geo/replication/troubleshooting.md#can-geo-detect-the-current-node-correctly
 ```
 
+### Message `WARNING: oldest xmin is far in the past` and `pg_wal` size growing
+
+If a replication slot is inactive,
+the `pg_wal` file grow faster than expected,
+and the following messages appear repeatedly in the
+[PostgreSQL logs](../../logs.md#postgresql-logs):
+
+```plaintext
+WARNING: oldest xmin is far in the past
+HINT: Close open transactions soon to avoid wraparound problems.
+You might also need to commit or roll back old prepared transactions, or drop stale replication slots.
+```
+
+To fix this, doublecheck the following:
+
+1. [Connect to the primary database](https://docs.gitlab.com/omnibus/settings/database.html#connecting-to-the-bundled-postgresql-database)
+1. Run `SELECT * FROM pg_prepared_xacts;`
+1. Note the `slot_name` which reports `active` as `f` (false)
+
+Afterwards, you can apply the [steps to remove the corresponding Geo site](remove_geo_site.md).
+
 ## Fixing errors found when running the Geo check Rake task
 
 When running this Rake task, you may see errors if the nodes are not properly configured:
