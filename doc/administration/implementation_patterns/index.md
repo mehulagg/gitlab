@@ -5,7 +5,7 @@ group: Alliances
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Implementation patterns **(FREE SELF)**
+## Cloud provider implementation patterns **(FREE SELF)**
 
 <!--- (Should this be the new landing page for https://docs.gitlab.com/ee/install/#install-gitlab-on-cloud-providers) -->
 
@@ -27,7 +27,7 @@ Each platform partner introduces a huge number of small and large innovations ea
 
 GitLab implementation patterns relate to [GitLab Reference Architectures](../reference_architectures/index.md) in the following ways:
 
-## GitLab Reference Architecture and Platform Well Architected Compliance
+## GitLab reference architecture and cloud platform well architected compliance
 
 Testing-backed architectural qualification is a fundamental concept behind implementation patterns.
 
@@ -69,7 +69,7 @@ Implementation patterns are one step closer to specifics that can be used as a s
 - Implementation patterns enable builders to generate a list of vendor specific resources required to implement GitLab for a given Reference Architecture.
 - Implementation patterns enable builders to use manual instructions or to create automation to build out the reference implementation.
 
-### Complimentary Implementation Patterns
+### Supplementary implementation patterns
 
 Implementation patterns may also provide specialized implementations beyond the scope of reference architecture compliance, especially where the cost of enablement can be more appropriately managed.
 
@@ -78,13 +78,7 @@ For example:
 - Small, self-contained GitLab Instances for per-person admin training - perhaps on Kubernetes so a deployment cluster is self-contained as well.
 - GitLab Runner implementation patterns - including using platform specific PaaS.
 
-### Example Platform Implementation Pattern Subsections
-
-- [Amazon Web Service (AWS)](aws/index.md) - MVC of this type of documentation.
-- Google Cloud (GCP) (Coming Soon)
-- IBM (Coming Soon)
-
-### Audiences and Contributors
+### Intended audiences and contributors
 
 The "Implementation Eco System".
 
@@ -99,3 +93,8 @@ The "Implementation Eco System".
   - Customers
   - GitLab Channel Partners (Integrators)
   - Platform Partners
+### Example Platform Implementation Pattern Subsections
+
+- [Amazon Web Service (AWS)](aws/index.md) - MVC of this type of documentation.
+- Google Cloud (GCP) (Coming Soon)
+- IBM (Coming Soon)
