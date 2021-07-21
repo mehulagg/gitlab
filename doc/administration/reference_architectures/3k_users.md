@@ -47,7 +47,7 @@ For a full list of reference architectures, see
 1. Can be optionally run on reputable third-party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work, however Azure Database for PostgreSQL is [not recommended](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/61) due to performance issues. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
 2. Can be optionally run on reputable third-party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 3. Can be optionally run on reputable third-party load balancing services (LB PaaS). AWS ELB is known to work.
-4. Should be run on reputable third party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
+4. Should be run on reputable third-party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
 <!-- markdownlint-enable MD029 -->
 
 NOTE:
@@ -2099,7 +2099,7 @@ in Kubernetes via our official [Helm Charts](https://docs.gitlab.com/charts/).
 In this setup, we support running the equivalent of GitLab Rails and Sidekiq nodes
 in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition,
 the following other supporting services are supported: NGINX, Task Runner, Migrations,
-Prometheus and Grafana.
+Prometheus, and Grafana.
 
 Hybrid installations leverage the benefits of both cloud native and traditional
 compute deployments. With this, _stateless_ components can benefit from cloud native
@@ -2110,15 +2110,15 @@ NOTE:
 This is an **advanced** setup. Running services in Kubernetes is well known
 to be complex. **This setup is only recommended** if you have strong working
 knowledge and experience in Kubernetes. The rest of this
-section will assume this.
+section assumes this.
 
 ### Cluster topology
 
-The following tables and diagram details the hybrid environment using the same formats
+The following tables and diagram detail the hybrid environment using the same formats
 as the normal environment above.
 
-First starting with the components that run in Kubernetes. The recommendations at this
-time use Google Cloud’s Kubernetes Engine (GKE) and associated machine types, but the memory
+First are the components that run in Kubernetes. The recommendation at this time is to
+use Google Cloud’s Kubernetes Engine (GKE) and associated machine types, but the memory
 and CPU requirements should translate to most other providers. We hope to update this in the
 future with further specific cloud provider details.
 
@@ -2154,7 +2154,7 @@ services where applicable):
 1. Can be optionally run on reputable third-party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work, however Azure Database for PostgreSQL is [not recommended](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/61) due to performance issues. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
 2. Can be optionally run on reputable third-party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 3. Can be optionally run on reputable third-party load balancing services (LB PaaS). AWS ELB is known to work.
-4. Should be run on reputable third party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
+4. Should be run on reputable third-party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
 <!-- markdownlint-enable MD029 -->
 
 NOTE:
@@ -2248,11 +2248,11 @@ documents how to apply the calculated configuration to the Helm Chart.
 #### Webservice
 
 Webservice pods typically need about 1 vCPU and 1.25 GB of memory _per worker_.
-Each Webservice pod will consume roughly 4 vCPUs and 5 GB of memory using
+Each Webservice pod consumes roughly 4 vCPUs and 5 GB of memory using
 the [recommended topology](#cluster-topology) because four worker processes
 are created by default and each pod has other small processes running.
 
-For 3k users we recommend a total Puma worker count of around 16.
+For 3,000 users we recommend a total Puma worker count of around 16.
 With the [provided recommendations](#cluster-topology) this allows the deployment of up to 4
 Webservice pods with 4 workers per pod and 2 pods per node. Expand available resources using
 the ratio of 1 vCPU to 1.25 GB of memory _per each worker process_ for each additional
