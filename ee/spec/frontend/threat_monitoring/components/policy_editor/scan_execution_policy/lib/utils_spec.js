@@ -1,4 +1,4 @@
-import { savePolicy } from 'ee/threat_monitoring/components/policy_editor/scan_execution_policy/lib/utils';
+import { modifyPolicy } from 'ee/threat_monitoring/components/policy_editor/scan_execution_policy/lib/utils';
 import { DEFAULT_ASSIGNED_POLICY_PROJECT } from 'ee/threat_monitoring/constants';
 import assignPolicyProject from 'ee/threat_monitoring/graphql/mutations/assign_policy_project.mutation.graphql';
 import createPolicyProject from 'ee/threat_monitoring/graphql/mutations/create_policy_project.mutation.graphql';
@@ -12,7 +12,8 @@ const defaultAssignedPolicyProject = { fullPath: 'path/to/policy-project', branc
 const newAssignedPolicyProject = { fullPath: 'path/to/new-project', branch: 'main' };
 const projectPath = 'path/to/current-project';
 const yamlEditorValue = 'some yaml';
-const createSavePolicyInput = (assignedPolicyProject = defaultAssignedPolicyProject) => ({
+const createSavePolicyInput = (assignedPolicyProject = defaultAssignedPolicyProject, action) => ({
+  action,
   assignedPolicyProject,
   projectPath,
   yamlEditorValue,
@@ -55,32 +56,32 @@ const mockApolloResponses = (shouldReject) => {
   };
 };
 
-describe('savePolicy', () => {
-  it('returns the policy project and merge request on success when a policy project does not exist', async () => {
+describe('modifyPolicy', () => {
+  beforeEach(() => {
     gqClient.mutate.mockImplementation(mockApolloResponses());
+  });
 
-    const { currentAssignedPolicyProject, mergeRequest } = await savePolicy(
+  it('returns the policy project and merge request on success when a policy project does not exist', async () => {
+    const { mergeRequest, policyProject } = await modifyPolicy(
       createSavePolicyInput(DEFAULT_ASSIGNED_POLICY_PROJECT),
     );
 
-    expect(currentAssignedPolicyProject).toStrictEqual({ ...newAssignedPolicyProject, errors: [] });
     expect(mergeRequest).toStrictEqual({ id: '01', errors: [] });
+    expect(policyProject).toStrictEqual({ ...newAssignedPolicyProject, errors: [] });
   });
 
   it('returns the policy project and merge request on success when a policy project does exist', async () => {
     gqClient.mutate.mockImplementation(mockApolloResponses());
 
-    const { currentAssignedPolicyProject, mergeRequest } = await savePolicy(
-      createSavePolicyInput(),
-    );
+    const { mergeRequest, policyProject } = await modifyPolicy(createSavePolicyInput());
 
-    expect(currentAssignedPolicyProject).toStrictEqual(defaultAssignedPolicyProject);
     expect(mergeRequest).toStrictEqual({ id: '01', errors: [] });
+    expect(policyProject).toStrictEqual(defaultAssignedPolicyProject);
   });
 
   it('throws when an error is detected', async () => {
     gqClient.mutate.mockImplementation(mockApolloResponses(true));
 
-    await expect(savePolicy(createSavePolicyInput())).rejects.toThrowError(error);
+    await expect(modifyPolicy(createSavePolicyInput())).rejects.toThrowError(error);
   });
 });

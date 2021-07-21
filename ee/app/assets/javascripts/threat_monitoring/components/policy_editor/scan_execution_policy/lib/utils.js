@@ -82,7 +82,7 @@ const createMergeRequest = async ({ projectPath, sourceBranch, targetBranch }) =
  * @param {Object} payload contains the path to the project and the policy yaml value
  * @returns {Object} contains the branch containing the updated policy file and any errors
  */
-const updatePolicy = async ({ projectPath, yamlEditorValue }) => {
+const updatePolicy = async ({ action, projectPath, yamlEditorValue }) => {
   const {
     data: {
       scanExecutionPolicyCommit: { branch, errors },
@@ -90,6 +90,7 @@ const updatePolicy = async ({ projectPath, yamlEditorValue }) => {
   } = await gqClient.mutate({
     mutation: createScanExecutionPolicy,
     variables: {
+      mode: action,
       projectPath,
       policyYaml: yamlEditorValue,
     },
@@ -103,7 +104,12 @@ const updatePolicy = async ({ projectPath, yamlEditorValue }) => {
  * @param {Object} payload contains the currently assigned security policy project (if one exists), the path to the project, and the policy yaml value
  * @returns {Object} contains the currently assigned security policy project and the created merge request
  */
-export const savePolicy = async ({ assignedPolicyProject, projectPath, yamlEditorValue }) => {
+export const modifyPolicy = async ({
+  action = 'APPEND',
+  assignedPolicyProject,
+  projectPath,
+  yamlEditorValue,
+}) => {
   let currentAssignedPolicyProject = assignedPolicyProject;
 
   if (!currentAssignedPolicyProject.fullPath) {
@@ -113,6 +119,7 @@ export const savePolicy = async ({ assignedPolicyProject, projectPath, yamlEdito
   checkForErrors(currentAssignedPolicyProject);
 
   const newPolicyCommitBranch = await updatePolicy({
+    action,
     projectPath: currentAssignedPolicyProject.fullPath,
     yamlEditorValue,
   });
@@ -127,5 +134,5 @@ export const savePolicy = async ({ assignedPolicyProject, projectPath, yamlEdito
 
   checkForErrors(mergeRequest);
 
-  return { currentAssignedPolicyProject, mergeRequest };
+  return { mergeRequest, policyProject: currentAssignedPolicyProject };
 };
