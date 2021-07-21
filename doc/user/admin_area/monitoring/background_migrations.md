@@ -106,3 +106,20 @@ sudo gitlab-rake gitlab:background_migrations:finalize[CopyColumnUsingBackground
 ```
 
 1. You can now update to GitLab 14.2 or higher.
+
+### GitLab faces slow performance when batched background migrations are in-progress
+
+When updating to GitLab 14.0 or higher if the regular activities over GitLab appear slow while the [batched migrations are running](#check-the-status-of-background-migrations) such as slower merge request updates, or the time taken to launch a pipeline after a push, etc. then its possible that the batched migrations are taking up all of the free Sidekiq workers and blocking all other functions.
+
+In this case, temporarily changing the Sidekiq confguration [to run an isolated queue for the batched migrations](../../../administration/operations/extra_sidekiq_processes.md#start-multiple-processes) may help in restoring the performance. On Omnibus installations, the following configuration change to `/etc/gitlab/gitlab.rb` can be attempted (save change, and run `gitlab-ctl reconfigure` to set it into effect):
+
+```ruby
+sidekiq['queue_groups'] = [
+  "cronjob:database_batched_background_migration",
+  "*",
+  "*",
+  "*"
+]
+```
+
+These change can be removed after the batched migrations have completed.
