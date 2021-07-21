@@ -89,7 +89,7 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                                 |                                 |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 2vCPU, 7.5 GB<br />Tested with Graviton ARM                  | **db.r6g.large** x 3 nodes <br />(6vCPU, 48 GB)         | 3 nodes x $0.26 = $0.78/hr      | 2 nodes x $0.26 = $0.52/hr      |
 | **Redis**                                                    | 1vCPU, 3.75GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m6g.large** x 3 nodes<br />(6vCPU, 19GB)        | 3 nodes x $0.15 = $0.45/hr      | 2 nodes x $0.15 = $0.30/hr      |
-| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |                                                         |                                 |                                 |
+| **<u>Gitaly Cluster</u>** [Details](../gitaly_on_aws.md) | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |                                                         |                                 |                                 |
 | Gitaly Instances (in ASG)                                    | 12 vCPU, 45GB<br />(across 3 nodes)                          | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr           | $0.192 x 3 = $0.58/hr           |
 |                                                              | The GitLab Reference architecture for 2K is not Highly Available and therefore has a single Gitaly no Praefect. AWS Quick Starts MUST be HA, so it implements Prafect from the 3K Ref Architecture to meet that requirement |                                                         |                                 |                                 |
 | Praefect (Instances in ASG with load balancer)               | 6 vCPU, 10 GB<br />(across 3 nodes)                          | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | $0.09 x 3 = $0.21/hr            |
@@ -147,9 +147,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                                 |                                                              |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 18vCPU, 36 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul)<br />Tested with Graviton ARM | **db.r6g.xlarge** x 3 nodes <br />(12vCPU, 96 GB)       | 3 nodes x $0.52 = $1.56/hr      | 2 nodes x $0.52 = $1.04/hr                                   |
 | **Redis**                                                    | 6vCPU, 18GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m6g.large** x 3 nodes<br />(6vCPU, 19GB)        | 3 nodes x $0.15 = $0.45/hr      | 2 nodes x $0.15 = $0.30/hr                                   |
-| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |                                                              |                                                         |                                 |                                                              |
-| Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr           | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
-| Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
+| **<u>Gitaly Cluster</u>** [Details](../gitaly_on_aws.md) |                                                              |                                                         |                                 |                                                              |
+| Gitaly Instances (in ASG)                                    | 48 vCPU, 180GB<br />(across 3 nodes)                         | **m5.xlarge** x 3 nodes<br />(48 vCPU, 180 GB)          | $0.192 x 3 = $0.58/hr           | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |
+| Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |
 | Praefect PostgreSQL(1) (AWS RDS)                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              |                                                              |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
@@ -229,9 +229,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)**                               | 1 HA instance in ASG                                         | **t2.micro** for prod, **m4.2xlarge** for perf. testing |                                 |                                                              |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 12vCPU, 48 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul)<br />Tested with Graviton ARM | **db.r6g.xlarge** x 3 nodes <br />(12vCPU, 96 GB)       | 3 nodes x $0.52 = $1.56/hr      | 2 nodes x $0.52 = $1.04/hr                                   |
 | **Redis**                                                    | 6vCPU, 24GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m6g.large** x 3 nodes<br />(6vCPU, 19GB)        | 3 nodes x $0.15 = $0.45/hr      | 2 nodes x $0.15 = $0.30/hr                                   |
-| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |                                                              |                                                         |                                 |                                                              |
-| Gitaly Instances (in ASG)                                    | 24 vCPU, 90GB<br />(across 3 nodes)                          | **m5.2xlarge** x 3 nodes<br />(24 vCPU, 96GB)           | $0.384 x 3 = $1.15/hr           | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
-| Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
+| **<u>Gitaly Cluster</u>** [Details](../gitaly_on_aws.md) |                                                              |                                                         |                                 |                                                              |
+| Gitaly Instances (in ASG)                                    | 24 vCPU, 90GB<br />(across 3 nodes)                          | **m5.2xlarge** x 3 nodes<br />(24 vCPU, 96GB)           | $0.384 x 3 = $1.15/hr           | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |
+| Praefect (Instances in ASG with load balancer)               | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB)             | $0.09 x 3 = $0.21/hr            | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |
 | Praefect PostgreSQL(1) (AWS RDS)                             | 6 vCPU, 5.4 GB<br />(across 3 nodes)                         | N/A Reuses GitLab PostgreSQL                            | $0                              |                                                              |
 | Internal Load Balancing Node                                 | 2 vCPU, 1.8 GB                                               | AWS ELB                                                 | $0.10/hr                        | $0.10/hr                                                     |
 
@@ -308,9 +308,9 @@ IMPORTANT: If EKS node autoscaling is employed, it is likely that your average l
 | **Bastion Host (Quick Start)** | 1 HA instance in ASG | **t2.micro** for prod, **m4.2xlarge** for perf. testing |  |  |
 | **PostgreSQL**<br />AWS Aurora RDS Nodes Configuration (GPT tested) | 36vCPU, 100 GB <br />(across 9 nodes for PostgreSQL, PgBouncer, Consul) | **db.r6g.2xlarge** x 3 nodes <br />(24vCPU, 192 GB) | 3 nodes x $1.04 = $3.12/hr | 2 nodes x $1.04 = $2.08/hr |
 | **Redis** | 30vCPU, 114GB<br />(across 12 nodes for Redis Cache, Redis Queues/Shared State, Sentinel Cache, Sentinel Queues/Shared State) | **cache.m5.2xlarge** x 3 nodes<br />(24vCPU, 78GB) | 3 nodes x $0.62 = $1.86/hr | 2 nodes x $0.62 = $1.24/hr |
-| **<u>Gitaly Cluster</u>** [Details](#gitaly-sre-considerations) |  |  |  |  |
-| Gitaly Instances (in ASG) | 48 vCPU, 180GB<br />(across 3 nodes) | **m5.4xlarge** x 3 nodes<br />(48 vCPU, 180 GB) | $0.77 x 3 = $2.31/hr | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
-| Praefect (Instances in ASG with load balancer) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB) | $0.09 x 3 = $0.21/hr | [Gitaly & Praefect Must Have an Uneven Node Count for HA](#gitaly-and-praefect-elections) |
+| **<u>Gitaly Cluster</u>** [Details](../gitaly_on_aws.md) |  |  |  |  |
+| Gitaly Instances (in ASG) | 48 vCPU, 180GB<br />(across 3 nodes) | **m5.4xlarge** x 3 nodes<br />(48 vCPU, 180 GB) | $0.77 x 3 = $2.31/hr | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |
+| Praefect (Instances in ASG with load balancer) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | **c5.large** x 3 nodes<br />(6 vCPU, 12 GB) | $0.09 x 3 = $0.21/hr | [Gitaly & Praefect Must Have an Uneven Node Count for HA](../gitaly_on_aws.md#gitaly-and-praefect-elections) |
 | Praefect PostgreSQL(1) (AWS RDS) | 6 vCPU, 5.4 GB<br />(across 3 nodes) | N/A Reuses GitLab PostgreSQL | $0 |  |
 | Internal Load Balancing Node | 2 vCPU, 1.8 GB | AWS ELB | $0.10/hr | $0.10/hr |
 
@@ -504,45 +504,3 @@ web_user                                                 | 20/s  | 19.82/s (>9.6
 ---
 
 </details>
-
-## Gitaly SRE Considerations
-
-Gitaly and Gitaly Cluster have been engineered by GitLab to overcome fundamental challenges with horizontal scaling of the open source Git binaries. Here is indepth technical reading on the topic:
-
-### Why Gitaly Was Built
-
-- [Git Characteristics That Make Horizontal Scaling Difficult](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/DESIGN.md#git-characteristics-that-make-horizontal-scaling-difficult)
-- [Git Architectural Characteristics and Assumptions](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/DESIGN.md#git-architectural-characteristics-and-assumptions)
-- [Affects on Horizontal Compute Architecture](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/DESIGN.md#affects-on-horizontal-compute-architecture)
-- [Evidence To Back Building a New Horizontal Layer to Scale Git](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/DESIGN.md#evidence-to-back-building-a-new-horizontal-layer-to-scale-git)
-
-### Gitaly and Praefect Elections
-
-As part of Gitaly cluster consistency, Praefect nodes will occasionally need to vote on what data copy is the most accurate. This requires an uneven number of Praefect nodes to avoid stalemates. This means that for HA, Gitaly and Praefect require a minimum of three nodes.
-
-### Gitaly Performance Monitoring
-
-Complete performance metrics should be collected for Gitaly instances for identification of bottlenecks - as they could have to do with disk IO, network IO or memory.
-
-Gitaly must be implemented on instance compute.
-
-### Gitaly EBS Volume Sizing Guidelines
-
-Gitaly storage is expected to be local (not NFS of any type including EFS).
-
-Gitaly servers also need disk space for building and caching Git pack files.
-
-Background:
-
-- When not using provisioned EBS IO, EBS volume size determines the IO level - so provisioning volumes that are much larger than needed can be the least expensive way to improve EBS IO.
-- Only use nitro instance types due to higher IO and EBS Optimization
-- Use Amazon Linux 2 to ensure the best disk and memory optimizations (e.g. ENA network adapters and drivers)
-- If GitLab backup scripts are used, they need a temporary space location large enough to hold 2 times the current size of the Git File system. If that will be done on Gitaly servers, separate volumes should be used. 
-
-### Gitaly HA in EKS Quick Start
-
-The AWS EKS Quick Start for GitLab Cloud Native implements Gitaly as a multi-zone, self-healing infrastructure. It has specific code for reestablishing a Gitaly node when one fails - including AZ failure.
-
-### Gitaly Long Term Management
-
-Gitaly node disk sizes will need to be monitored and increased to accommodate Git repository growth and Gitaly temporary and caching storage needs. The storage configuration on all nodes should be kept identical.

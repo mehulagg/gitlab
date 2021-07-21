@@ -13,13 +13,19 @@ GitLab  [GitLab Reference Architectures](../../administration/reference_architec
 
 Implementation patterns are built on the foundational information and testing done for Reference Architectures and allow architects and implementers at GitLab, GitLab Customers, and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
 
-## Install GitLab Cloud Native Hybrid on AWS EKS (HA)
+# Implementation patterns
+
+### Install GitLab Cloud Native Hybrid on AWS EKS (HA)
 
 [GitLab Cloud Native Hybrid on AWS EKS (HA)](gitlab_hybrid_on_aws.md) - instructions, patterns and automation for installing GitLab Cloud Native Hybrid on AWS EKS. Includes Bill of Materials listings and links to Infrastructure as Code. GitLab Cloud Native Hybrid is the supported way to put as much of GitLab as possible into Kubernetes.
 
-## Install Omnibus GitLab on AWS EC2 (HA)
+### Install Omnibus GitLab on AWS EC2 (HA)
 
 [Omnibus GitLab on AWS EC2 (HA)](manual_install_aws.md) - instructions for installing GitLab on EC2 instances. Manual instructions from which you may build out a GitLab instance or create your own Infrastructure as Code (IaC).
+
+### Gitaly SRE Considerations for AWS
+
+[Gitaly SRE Considerations for AWS](gitaly_on_aws.md) - important information for implementing and managing GitLab Gitaly on AWS.
 
 ## Additional details on implementation patterns
 
@@ -43,7 +49,7 @@ Implementation patterns enable platform specific terminology, best practice arch
 - Implementation patterns are written to an audience who is familiar with building on the infrastructure that the implementation pattern targets. For example, if the implementation pattern is for GCP, the specific terminology of GCP is used - including using the specific names for PaaS services.
 - Implementation patterns can test and qualify if the versions of PaaS available are compatible with GitLab (e.g. PostgreSQL, Redis, etc)
 
-## Platform as a Service (PaaS) specification and usage
+### Platform as a Service (PaaS) specification and usage
 
 Platform as a Service options are a huge portion of the value provided by Cloud Platforms as they simplify operational complexity and reduce the SRE and security skilling required to operate advanced, highly available technology services. Implementation patterns can be prequalified against the partner PaaS options.
 
@@ -60,7 +66,7 @@ Cost engineering is a fundamental aspect of Cloud Architecture and frequently th
 - Implementation patterns may leverage emphemeral compute where appropriate and with appropriate customer guidelines. For instance a Kubernetes node group dedicated to runners on emphemeral compute - with appropriate GitLab Runner tagging to indicate the compute type.
 - Implementation patterns may include vendor specific cost calculators.
 
-## Actionability and automatability orientation
+### Actionability and automatability orientation
 
 Implementation patterns are one step closer to specifics that can be used as a source for build instructions and automation code.
 
