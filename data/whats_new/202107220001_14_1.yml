@@ -51,6 +51,17 @@
   image_url: https://about.gitlab.com/images/14_1/coverage-mr-approval-rule.png
   published_at: 2021-07-22
   release: 14.1
+- title: Registration Features
+  body: |
+   [Registration Features](https://docs.gitlab.com/ee/development/service_ping/index.html#registration-features-program) introduces the ability for free, self-managed users running GitLab EE to access paid features by registering with GitLab and sharing activity data via [Service Ping](https://docs.gitlab.com/ee/development/service_ping/index.html#what-is-service-ping). The first feature introduced is [email from GitLab](https://docs.gitlab.com/ee/tools/email.html), enabling instance administrators to email users within their instance.
+  stage: Growth
+  self-managed: true
+  gitlab-com: false
+  packages: [Free]
+  url: 'https://docs.gitlab.com/ee/development/service_ping/index.html#registration-features-program'
+  image_url: https://about.gitlab.com/images/14_1/registration-features.png
+  published_at: 2021-07-22
+  release: 14.1
 - title: Build, publish, and share Helm charts
   body: |
    Helm defines a [chart](https://helm.sh/docs/intro/using_helm/#three-big-concepts) as a Helm package that contains all of the resource definitions necessary to run an application, tool, or service inside of a Kubernetes cluster. For organizations that create and manage their own Helm charts, it's important to have a central repository to collect and share them.
