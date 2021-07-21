@@ -37320,9 +37320,6 @@ msgstr ""
 msgid "You are not allowed to reject a user"
 msgstr ""
 
-msgid "You are not allowed to unban a user"
-msgstr ""
-
 msgid "You are not allowed to unlink your primary login account"
 msgstr ""
 

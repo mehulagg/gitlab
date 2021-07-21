@@ -15,6 +15,13 @@ RSpec.describe Users::BannedUserService do
     end
   end
 
+  shared_examples 'does not modify the BannedUser record or user state' do
+    it 'does not modify the BannedUser record or user state' do
+      expect { operation }.not_to change { Users::BannedUser.count }
+      expect { operation }.not_to change { user.state }
+    end
+  end
+
   context 'ban', :aggregate_failures do
     subject(:operation) { service.execute(user, :ban) }
 
@@ -47,10 +54,7 @@ RSpec.describe Users::BannedUserService do
 
         it_behaves_like 'user is in the wrong state'
 
-        it 'does not ban the user' do
-          expect { operation }.not_to change { Users::BannedUser.count }
-          expect(user.state).not_to eq('banned')
-        end
+        it_behaves_like 'does not modify the BannedUser record or user state'
       end
 
       context 'when user is not an admin' do
@@ -59,10 +63,7 @@ RSpec.describe Users::BannedUserService do
           expect(operation[:message]).to match(/You are not allowed to ban a user/)
         end
 
-        it 'does not ban the user', :aggregate_failures do
-          expect { operation }.not_to change { Users::BannedUser.count }
-          expect(user.state).to eq('active')
-        end
+        it_behaves_like 'does not modify the BannedUser record or user state'
       end
     end
   end
@@ -99,9 +100,7 @@ RSpec.describe Users::BannedUserService do
       context 'when user is already active', :enable_admin_mode do
         it_behaves_like 'user is in the wrong state'
 
-        it 'does not unban the user' do
-          expect { operation }.not_to change { Users::BannedUser.count }
-        end
+        it_behaves_like 'does not modify the BannedUser record or user state'
       end
 
       context 'when user is not an admin' do
@@ -114,10 +113,7 @@ RSpec.describe Users::BannedUserService do
           expect(operation[:message]).to match(/You are not allowed to unban a user/)
         end
 
-        it 'does not unban the user' do
-          expect { operation }.not_to change { Users::BannedUser.count }
-          expect(user.state).to eq('banned')
-        end
+        it_behaves_like 'does not modify the BannedUser record or user state'
       end
     end
   end
