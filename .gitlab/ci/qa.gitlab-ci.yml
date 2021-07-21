@@ -51,6 +51,8 @@ update-qa-cache:
   image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7-alpine
   stage: qa
   retry: 0
+  variables:
+    OMNIBUS_BRANCH: "use-project-access-token-in-trigger-qa-test"
   script:
     - source scripts/utils.sh
     - install_gitlab_gem
