@@ -154,12 +154,17 @@ class SearchController < ApplicationController
   end
 
   def render_timeout(exception)
-    raise exception unless action_name.to_sym == :show
+    raise exception unless [:count, :show].include?(action_name.to_sym)
 
     log_exception(exception)
 
     @timeout = true
-    render status: :request_timeout
+
+    if action_name.to_sym == :count
+      render json: { count: 0 }, status: :request_timeout
+    else
+      render status: :request_timeout
+    end
   end
 end
 
