@@ -88,7 +88,7 @@ Use **active** or **on** instead. ([Vale](../testing.md#vale) rule: [`InclusionA
 
 ## etc.
 
-Try to avoid. Be as specific as you can. Do not use "and so on" as a replacement.
+Try to avoid. Be as specific as you can. Do not use **and so on** as a replacement.
 
 - Avoid: You can update objects, like merge requests, issues, etc.
 - Use instead: You can update objects, like merge requests and issues.
