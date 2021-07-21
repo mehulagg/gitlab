@@ -1105,17 +1105,6 @@ RSpec.describe Ci::Build do
     end
   end
 
-  describe '#parse_trace_sections!' do
-    it 'calls ExtractSectionsFromBuildTraceService' do
-      expect(Ci::ExtractSectionsFromBuildTraceService)
-          .to receive(:new).with(project, build.user).once.and_call_original
-      expect_any_instance_of(Ci::ExtractSectionsFromBuildTraceService)
-        .to receive(:execute).with(build).once
-
-      build.parse_trace_sections!
-    end
-  end
-
   describe '#trace' do
     subject { build.trace }
 
