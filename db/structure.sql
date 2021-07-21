@@ -10,6 +10,17 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+CREATE FUNCTION integrations_set_type_new() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+UPDATE integrations SET type_new = concat('Integrations::', replace(NEW.type, 'Service', ''))
+WHERE integrations.id = NEW.id;
+RETURN NULL;
+
+END
+$$;
+
 CREATE FUNCTION set_has_external_issue_tracker() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -14041,7 +14052,9 @@ CREATE TABLE integrations (
     comment_detail smallint,
     inherit_from_id bigint,
     alert_events boolean,
-    group_id bigint
+    group_id bigint,
+    type_new text,
+    CONSTRAINT check_a948a0aa7e CHECK ((char_length(type_new) <= 255))
 );
 
 CREATE SEQUENCE integrations_id_seq
@@ -25751,6 +25764,10 @@ CREATE TRIGGER trigger_has_external_wiki_on_delete AFTER DELETE ON integrations 
 CREATE TRIGGER trigger_has_external_wiki_on_insert AFTER INSERT ON integrations FOR EACH ROW WHEN (((new.active = true) AND ((new.type)::text = 'ExternalWikiService'::text) AND (new.project_id IS NOT NULL))) EXECUTE FUNCTION set_has_external_wiki();
 
 CREATE TRIGGER trigger_has_external_wiki_on_update AFTER UPDATE ON integrations FOR EACH ROW WHEN ((((new.type)::text = 'ExternalWikiService'::text) AND (old.active <> new.active) AND (new.project_id IS NOT NULL))) EXECUTE FUNCTION set_has_external_wiki();
+
+CREATE TRIGGER trigger_type_new_on_insert AFTER INSERT ON integrations FOR EACH ROW WHEN ((pg_trigger_depth() = 0)) EXECUTE FUNCTION integrations_set_type_new();
+
+CREATE TRIGGER trigger_type_new_on_update AFTER UPDATE ON integrations FOR EACH ROW WHEN ((pg_trigger_depth() = 0)) EXECUTE FUNCTION integrations_set_type_new();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES integrations(id) ON DELETE CASCADE;
