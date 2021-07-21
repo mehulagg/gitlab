@@ -19,6 +19,9 @@ module SpammableActions
   private
 
   def recaptcha_check_with_fallback(should_redirect = true, &fallback)
+    # TODO: should_redirect is only false in the case of format.json
+    #   (see IssuableActions#update). Can we eliminate it as a parameter
+    #   and just rely on format.json?
     if should_redirect && spammable.valid?
       redirect_to spammable_path
     elsif spammable.render_recaptcha?

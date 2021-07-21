@@ -149,6 +149,8 @@ class Projects::IssuesController < Projects::ApplicationController
                        end
     end
 
+    # TODO: What is the purpose of this respond_to...format.html block, if recaptcha_check_with_fallback
+    #   already does a format check?
     respond_to do |format|
       format.html do
         recaptcha_check_with_fallback { render :new }
