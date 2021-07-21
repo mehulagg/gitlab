@@ -18,7 +18,7 @@ const checkForErrors = ({ errors }) => {
 /**
  * Creates a new security policy project and assigns it to the current project
  * @param {String} projectPath
- * @returns {Object} containts the new security policy project and any errors
+ * @returns {Object} contains the new security policy project and any errors
  */
 const assignSecurityPolicyProject = async (projectPath) => {
   const {

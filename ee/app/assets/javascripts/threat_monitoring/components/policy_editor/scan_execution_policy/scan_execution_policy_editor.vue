@@ -65,12 +65,11 @@ export default {
           ),
         );
       } catch (e) {
-        if (e.message.includes('GraphQL')) {
+        if (e.message.toLowerCase().includes('graphql')) {
           this.$emit('error', GRAPHQL_ERROR_MESSAGE);
         } else {
           this.$emit('error', e.message);
         }
-      } finally {
         this.isCreatingMR = false;
       }
     },
