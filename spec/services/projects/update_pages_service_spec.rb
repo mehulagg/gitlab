@@ -106,17 +106,34 @@ RSpec.describe Projects::UpdatePagesService do
         end
       end
 
-      it 'fails if sha on branch was updated before deployment was uploaded' do
-        expect(subject).to receive(:create_pages_deployment).and_wrap_original do |m, *args|
-          build.update!(ref: 'feature')
-          m.call(*args)
+      context 'when pages_check_outdated_sha feature flag is disabled' do
+        before do
+          stub_feature_flags(pages_check_outdated_sha: false)
         end
 
-        expect(execute).not_to eq(:success)
-        expect(project.pages_metadatum).not_to be_deployed
+        it 'fails if sha on branch was updated before deployment was uploaded' do
+          expect(subject).to receive(:create_pages_deployment).and_wrap_original do |m, *args|
+            build.update!(ref: 'feature')
+            m.call(*args)
+          end
 
-        expect(deploy_status).to be_failed
-        expect(deploy_status.description).to eq('build SHA is outdated for this ref')
+          expect(execute).not_to eq(:success)
+          expect(project.pages_metadatum).not_to be_deployed
+
+          expect(deploy_status).to be_failed
+          expect(deploy_status.description).to eq('build SHA is outdated for this ref')
+        end
+
+        it 'fails if sha on branch is not latest' do
+          build.update!(ref: 'feature')
+  
+          expect(execute).not_to eq(:success)
+          expect(project.pages_metadatum).not_to be_deployed
+  
+          expect(deploy_status).to be_failed
+          expect(deploy_status.description).to eq('build SHA is outdated for this ref')
+        end
+
       end
 
       it 'does not fail if pages_metadata is absent' do
@@ -188,16 +205,6 @@ RSpec.describe Projects::UpdatePagesService do
 
         expect(Dir.exist?(File.join(project.pages_path))).to be_falsey
         expect(ProjectPagesMetadatum.find_by_project_id(project)).to be_nil
-      end
-
-      it 'fails if sha on branch is not latest' do
-        build.update!(ref: 'feature')
-
-        expect(execute).not_to eq(:success)
-        expect(project.pages_metadatum).not_to be_deployed
-
-        expect(deploy_status).to be_failed
-        expect(deploy_status.description).to eq('build SHA is outdated for this ref')
       end
 
       context 'when using empty file' do

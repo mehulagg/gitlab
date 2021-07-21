@@ -236,7 +236,16 @@ module Projects
     end
 
     def validate_outdated_sha!
-      raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
+      return if latest?
+
+      if Feature.enabled?(:pages_check_outdated_sha, default_enabled: :yaml)
+        deployed_build_id = project.pages_metadatum&.pages_deployment&.ci_build_id
+
+        return unless deployed_build_id
+        return if deployed_build_id < build.id
+      end
+
+      raise InvalidStateError, 'build SHA is outdated for this ref'
     end
 
     def latest?
