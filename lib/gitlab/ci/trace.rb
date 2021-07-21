@@ -251,11 +251,14 @@ module Gitlab
         File.open(path) do |stream|
           # TODO: Set `file_format: :raw` after we've cleaned up legacy traces migration
           # https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20307
-          job.create_job_artifacts_trace!(
+          job_artifact = ::Ci::JobArtifact.find_or_initialize_by(
             project: job.project,
             file_type: :trace,
-            file: stream,
-            file_sha256: self.class.hexdigest(path))
+            job_id: job.id
+          )
+          job_artifact.file_sha256 = self.class.hexdigest(path)
+          job_artifact.file = stream
+          job_artifact.save!
         end
       end
 

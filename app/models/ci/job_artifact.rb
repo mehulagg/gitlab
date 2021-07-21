@@ -2,6 +2,9 @@
 
 module Ci
   class JobArtifact < ApplicationRecord
+    after_initialize do |a|
+      a.file_location = 3
+    end
     include AfterCommitQueue
     include ObjectStorage::BackgroundMove
     include UpdateProjectStatistics
@@ -122,9 +125,17 @@ module Ci
 
     mount_file_store_uploader JobArtifactUploader
 
-    if Feature.enabled?(:store_trace_outside_transaction)
-      skip_callback :save, :after, :store_file!
-      set_callback :commit, :after, :store_file!
+    skip_callback :save, :after, :store_file!
+    set_callback :save, :before, :store_file!
+
+    def store_file!
+      Gitlab::AppLogger.info('storing file')
+      puts 'storing file'
+
+      super
+
+      Gitlab::AppLogger.info('done storing file')
+      puts 'done storing file'
     end
 
     validates :file_format, presence: true, unless: :trace?, on: :create
@@ -235,7 +246,8 @@ module Ci
     #                 This is the default value.
     enum file_location: {
       legacy_path: 1,
-      hashed_path: 2
+      hashed_path: 2,
+      hashed_job_project_path: 3
     }
 
     def validate_file_format!
@@ -332,6 +344,10 @@ module Ci
     end
 
     private
+
+    def default_values
+      self.file_location = 3
+    end
 
     def set_size
       self.size = file.size
