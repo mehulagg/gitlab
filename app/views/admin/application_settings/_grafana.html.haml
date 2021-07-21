@@ -8,10 +8,12 @@
         = f.label :grafana_enabled, class: 'form-check-label' do
           = _("Add a link to Grafana")
         .form-text.text-muted
-          = _("In the Admin Area's Monitoring section add a Metrics Dashboard link which opens the Grafana home dashboard.")
-          = link_to s_('Learn more.'), help_page_path('administration/monitoring/performance/grafana_configuration.md'), target: '_blank', rel: 'noopener noreferrer'
+          = _("A Metrics Dashboard menu item appears in the Monitoring section of the Admin Area.")
     .form-group
       = f.label :grafana_url, _('Grafana URL'), class: 'label-bold'
       = f.text_field :grafana_url, class: 'form-control gl-form-input', placeholder: '/-/grafana'
+      %span.form-text.text-muted#support_help_block= _('URL of the Grafana instance to link to from the Metrics Dashboard menu item.')
+      -# .form-text.text-muted
+      -#     = _("")
 
   = f.submit _('Save changes'), class: "gl-button btn btn-confirm"
