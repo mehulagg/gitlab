@@ -69,7 +69,7 @@ For example:
 
 ### Intended audiences and contributors
 
-The primary audience for this information is GitLab's **Implementation Eco System** which consists of at least:
+The primary audience for this information is GitLab **Implementation Eco System** which consists of at least:
 
 Community: 
 - Customers
@@ -86,4 +86,4 @@ GitLab Internal:
 | GitLab Installaton                          | Description |
 |---------------------------------------------------------------|-------------|
 | [GitLab Cloud Native Hybrid on AWS EKS (HA)](gitlab_hybrid_on_aws.md)                                      | Install GitLab Cloud Native Hybrid on AWS EKS. Includes Bill of Materials listings and links to Infrastructure as Code |
-| [GitLab Omnibus on AWS EC2 (HA)](manual_install_aws) | Install GitLab on EC2 instances.  Manual instructions from which you may build out a GitLab instance or create your own Infastructure as Code (IaC). |
+| [Omnibus GitLab on AWS EC2 (HA)](manual_install_aws) | Install GitLab on EC2 instances. Manual instructions from which you may build out a GitLab instance or create your own Infrastructure as Code (IaC). |
