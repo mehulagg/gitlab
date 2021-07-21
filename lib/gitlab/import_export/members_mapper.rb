@@ -95,7 +95,7 @@ module Gitlab
       end
 
       def find_user_query(member)
-        user_arel[:email].eq(member['user']['email'])
+        user_arel[:email].eq(member['user']['public_email'])
       end
 
       def user_arel
