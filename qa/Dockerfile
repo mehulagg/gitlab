@@ -51,7 +51,7 @@ RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
 # Download from our local S3 bucket, populated by https://gitlab.com/gitlab-org/gitlab-build-images/-/blob/master/scripts/cache-google-chrome
 #
 # https://s3.amazonaws.com/gitlab-google-chrome-stable
-ENV CHROME_VERSION="91.0.4472.77-1"
+ENV CHROME_VERSION="92.0.4515.107"
 ENV CHROME_DEB="google-chrome-stable_${CHROME_VERSION}_amd64.deb"
 ENV CHROME_URL="https://s3.amazonaws.com/gitlab-google-chrome-stable/${CHROME_DEB}"
 RUN curl --silent --show-error --fail -O "${CHROME_URL}" && \
