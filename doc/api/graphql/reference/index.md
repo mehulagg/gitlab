@@ -45,7 +45,7 @@ Should not be requested more than once per request.
 
 Returns [`CiConfig`](#ciconfig).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -60,7 +60,7 @@ Find a container repository.
 
 Returns [`ContainerRepositoryDetails`](#containerrepositorydetails).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -94,7 +94,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -106,7 +106,7 @@ Testing endpoint to validate the API with.
 
 Returns [`String!`](#string).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -118,7 +118,7 @@ Find a Geo node.
 
 Returns [`GeoNode`](#geonode).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -130,7 +130,7 @@ Find a group.
 
 Returns [`Group`](#group).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -157,7 +157,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -171,7 +171,7 @@ Find an issue.
 
 Returns [`Issue`](#issue).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -183,7 +183,7 @@ Find an iteration.
 
 Returns [`Iteration`](#iteration).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -205,7 +205,7 @@ Find a merge request.
 
 Returns [`MergeRequest`](#mergerequest).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -223,7 +223,7 @@ Find a milestone.
 
 Returns [`Milestone`](#milestone).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -235,7 +235,7 @@ Find a namespace.
 
 Returns [`Namespace`](#namespace).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -247,7 +247,7 @@ Find a package.
 
 Returns [`PackageDetailsType`](#packagedetailstype).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -259,7 +259,7 @@ Find a project.
 
 Returns [`Project`](#project).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -275,7 +275,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -298,7 +298,7 @@ Find a runner. Available only when feature flag `runner_graphql_query` is enable
 
 Returns [`CiRunner`](#cirunner).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -320,7 +320,7 @@ Runner setup instructions.
 
 Returns [`RunnerSetup`](#runnersetup).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -339,7 +339,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -359,7 +359,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -380,7 +380,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -394,7 +394,7 @@ Find a user.
 
 Returns [`UserCore`](#usercore).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -411,7 +411,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -431,7 +431,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -455,7 +455,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -468,7 +468,7 @@ Find a vulnerability.
 
 Returns [`Vulnerability`](#vulnerability).
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -497,7 +497,7 @@ mutation($id: NoteableID!, $body: String!) {
 
 Input type: `AddProjectToSecurityDashboardInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -516,7 +516,7 @@ Input type: `AddProjectToSecurityDashboardInput`
 
 Input type: `AdminSidekiqQueuesDeleteJobsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -544,7 +544,7 @@ Input type: `AdminSidekiqQueuesDeleteJobsInput`
 
 Input type: `AlertSetAssigneesInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -568,7 +568,7 @@ Input type: `AlertSetAssigneesInput`
 
 Input type: `AlertTodoCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -590,7 +590,7 @@ Input type: `AlertTodoCreateInput`
 
 Input type: `ApiFuzzingCiConfigurationCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -616,7 +616,7 @@ Input type: `ApiFuzzingCiConfigurationCreateInput`
 
 Input type: `AwardEmojiAddInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -636,7 +636,7 @@ Input type: `AwardEmojiAddInput`
 
 Input type: `AwardEmojiRemoveInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -656,7 +656,7 @@ Input type: `AwardEmojiRemoveInput`
 
 Input type: `AwardEmojiToggleInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -677,7 +677,7 @@ Input type: `AwardEmojiToggleInput`
 
 Input type: `BoardEpicCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -699,7 +699,7 @@ Input type: `BoardEpicCreateInput`
 
 Input type: `BoardListCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -723,7 +723,7 @@ Input type: `BoardListCreateInput`
 
 Input type: `BoardListUpdateLimitMetricsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -747,7 +747,7 @@ Input type: `BoardListUpdateLimitMetricsInput`
 
 Input type: `BulkEnableDevopsAdoptionNamespacesInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -767,7 +767,7 @@ Input type: `BulkEnableDevopsAdoptionNamespacesInput`
 
 Input type: `CiCdSettingsUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -790,7 +790,7 @@ Input type: `CiCdSettingsUpdateInput`
 
 Input type: `CiJobTokenScopeAddProjectInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -810,7 +810,7 @@ Input type: `CiJobTokenScopeAddProjectInput`
 
 Input type: `CiJobTokenScopeRemoveProjectInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -830,7 +830,7 @@ Input type: `CiJobTokenScopeRemoveProjectInput`
 
 Input type: `ClusterAgentDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -848,7 +848,7 @@ Input type: `ClusterAgentDeleteInput`
 
 Input type: `ClusterAgentTokenCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -870,7 +870,7 @@ Input type: `ClusterAgentTokenCreateInput`
 
 Input type: `ClusterAgentTokenDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -888,7 +888,7 @@ Input type: `ClusterAgentTokenDeleteInput`
 
 Input type: `CommitCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -917,7 +917,7 @@ create a Merge Request are a part of the response.
 
 Input type: `ConfigureDependencyScanningInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -941,7 +941,7 @@ create a Merge Request are a part of the response.
 
 Input type: `ConfigureSastInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -967,7 +967,7 @@ response.
 
 Input type: `ConfigureSecretDetectionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -987,7 +987,7 @@ Input type: `ConfigureSecretDetectionInput`
 
 Input type: `CreateAlertIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1009,7 +1009,7 @@ Input type: `CreateAlertIssueInput`
 
 Input type: `CreateAnnotationInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1033,7 +1033,7 @@ Input type: `CreateAnnotationInput`
 
 Input type: `CreateBoardInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1062,7 +1062,7 @@ Input type: `CreateBoardInput`
 
 Input type: `CreateBranchInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1083,7 +1083,7 @@ Input type: `CreateBranchInput`
 
 Input type: `CreateClusterAgentInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1103,7 +1103,7 @@ Input type: `CreateClusterAgentInput`
 
 Input type: `CreateComplianceFrameworkInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1125,7 +1125,7 @@ Available only when feature flag `custom_emoji` is enabled. This flag is disable
 
 Input type: `CreateCustomEmojiInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1146,7 +1146,7 @@ Input type: `CreateCustomEmojiInput`
 
 Input type: `CreateDiffNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1168,7 +1168,7 @@ Input type: `CreateDiffNoteInput`
 
 Input type: `CreateEpicInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1196,7 +1196,7 @@ Input type: `CreateEpicInput`
 
 Input type: `CreateImageDiffNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1218,7 +1218,7 @@ Input type: `CreateImageDiffNoteInput`
 
 Input type: `CreateIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1258,7 +1258,7 @@ Use iterationCreate.
 
 Input type: `CreateIterationInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1283,7 +1283,7 @@ Input type: `CreateIterationInput`
 
 Input type: `CreateNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1305,7 +1305,7 @@ Input type: `CreateNoteInput`
 
 Input type: `CreateRequirementInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1326,7 +1326,7 @@ Input type: `CreateRequirementInput`
 
 Input type: `CreateSnippetInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1356,7 +1356,7 @@ Input type: `CreateSnippetInput`
 
 Input type: `CreateTestCaseInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1378,7 +1378,7 @@ Input type: `CreateTestCaseInput`
 
 Input type: `DastOnDemandScanCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1399,7 +1399,7 @@ Input type: `DastOnDemandScanCreateInput`
 
 Input type: `DastProfileCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1425,7 +1425,7 @@ Input type: `DastProfileCreateInput`
 
 Input type: `DastProfileDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1443,7 +1443,7 @@ Input type: `DastProfileDeleteInput`
 
 Input type: `DastProfileRunInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1463,7 +1463,7 @@ Input type: `DastProfileRunInput`
 
 Input type: `DastProfileUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1490,7 +1490,7 @@ Input type: `DastProfileUpdateInput`
 
 Input type: `DastScannerProfileCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1515,7 +1515,7 @@ Input type: `DastScannerProfileCreateInput`
 
 Input type: `DastScannerProfileDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1534,7 +1534,7 @@ Input type: `DastScannerProfileDeleteInput`
 
 Input type: `DastScannerProfileUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1560,7 +1560,7 @@ Input type: `DastScannerProfileUpdateInput`
 
 Input type: `DastSiteProfileCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1585,7 +1585,7 @@ Input type: `DastSiteProfileCreateInput`
 
 Input type: `DastSiteProfileDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1604,7 +1604,7 @@ Input type: `DastSiteProfileDeleteInput`
 
 Input type: `DastSiteProfileUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1630,7 +1630,7 @@ Input type: `DastSiteProfileUpdateInput`
 
 Input type: `DastSiteTokenCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1652,7 +1652,7 @@ Input type: `DastSiteTokenCreateInput`
 
 Input type: `DastSiteValidationCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1675,7 +1675,7 @@ Input type: `DastSiteValidationCreateInput`
 
 Input type: `DastSiteValidationRevokeInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1694,7 +1694,7 @@ Input type: `DastSiteValidationRevokeInput`
 
 Input type: `DeleteAnnotationInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1712,7 +1712,7 @@ Input type: `DeleteAnnotationInput`
 
 Input type: `DesignManagementDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1733,7 +1733,7 @@ Input type: `DesignManagementDeleteInput`
 
 Input type: `DesignManagementMoveInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1754,7 +1754,7 @@ Input type: `DesignManagementMoveInput`
 
 Input type: `DesignManagementUploadInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1776,7 +1776,7 @@ Input type: `DesignManagementUploadInput`
 
 Input type: `DestroyBoardInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1795,7 +1795,7 @@ Input type: `DestroyBoardInput`
 
 Input type: `DestroyBoardListInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1814,7 +1814,7 @@ Input type: `DestroyBoardListInput`
 
 Input type: `DestroyComplianceFrameworkInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1832,7 +1832,7 @@ Input type: `DestroyComplianceFrameworkInput`
 
 Input type: `DestroyContainerRepositoryInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1851,7 +1851,7 @@ Input type: `DestroyContainerRepositoryInput`
 
 Input type: `DestroyContainerRepositoryTagsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1871,7 +1871,7 @@ Input type: `DestroyContainerRepositoryTagsInput`
 
 Input type: `DestroyEpicBoardInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1890,7 +1890,7 @@ Input type: `DestroyEpicBoardInput`
 
 Input type: `DestroyNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1909,7 +1909,7 @@ Input type: `DestroyNoteInput`
 
 Input type: `DestroyPackageInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1927,7 +1927,7 @@ Input type: `DestroyPackageInput`
 
 Input type: `DestroySnippetInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1948,7 +1948,7 @@ Input type: `DestroySnippetInput`
 
 Input type: `DisableDevopsAdoptionNamespaceInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1968,7 +1968,7 @@ Toggles the resolved state of a discussion.
 
 Input type: `DiscussionToggleResolveInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -1993,7 +1993,7 @@ that a user has mutation access.
 
 Input type: `EchoCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2015,7 +2015,7 @@ Input type: `EchoCreateInput`
 
 Input type: `EnableDevopsAdoptionNamespaceInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2035,7 +2035,7 @@ Input type: `EnableDevopsAdoptionNamespaceInput`
 
 Input type: `EnvironmentsCanaryIngressUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2054,7 +2054,7 @@ Input type: `EnvironmentsCanaryIngressUpdateInput`
 
 Input type: `EpicAddIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2077,7 +2077,7 @@ Input type: `EpicAddIssueInput`
 
 Input type: `EpicBoardCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2101,7 +2101,7 @@ Input type: `EpicBoardCreateInput`
 
 Input type: `EpicBoardListCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2124,7 +2124,7 @@ Destroys an epic board list.
 
 Input type: `EpicBoardListDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2143,7 +2143,7 @@ Input type: `EpicBoardListDestroyInput`
 
 Input type: `EpicBoardUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2167,7 +2167,7 @@ Input type: `EpicBoardUpdateInput`
 
 Input type: `EpicMoveListInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2191,7 +2191,7 @@ Input type: `EpicMoveListInput`
 
 Input type: `EpicSetSubscriptionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2212,7 +2212,7 @@ Input type: `EpicSetSubscriptionInput`
 
 Input type: `EpicTreeReorderInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2231,7 +2231,7 @@ Input type: `EpicTreeReorderInput`
 
 Input type: `EscalationPolicyCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2253,7 +2253,7 @@ Input type: `EscalationPolicyCreateInput`
 
 Input type: `EscalationPolicyDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2272,7 +2272,7 @@ Input type: `EscalationPolicyDestroyInput`
 
 Input type: `EscalationPolicyUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2294,7 +2294,7 @@ Input type: `EscalationPolicyUpdateInput`
 
 Input type: `ExportRequirementsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2317,7 +2317,7 @@ Input type: `ExportRequirementsInput`
 
 Input type: `GitlabSubscriptionActivateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2336,7 +2336,7 @@ Input type: `GitlabSubscriptionActivateInput`
 
 Input type: `HttpIntegrationCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2359,7 +2359,7 @@ Input type: `HttpIntegrationCreateInput`
 
 Input type: `HttpIntegrationDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2378,7 +2378,7 @@ Input type: `HttpIntegrationDestroyInput`
 
 Input type: `HttpIntegrationResetTokenInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2397,7 +2397,7 @@ Input type: `HttpIntegrationResetTokenInput`
 
 Input type: `HttpIntegrationUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2420,7 +2420,7 @@ Input type: `HttpIntegrationUpdateInput`
 
 Input type: `IssueMoveInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2441,7 +2441,7 @@ Input type: `IssueMoveInput`
 
 Input type: `IssueMoveListInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2467,7 +2467,7 @@ Input type: `IssueMoveListInput`
 
 Input type: `IssueSetAssigneesInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2489,7 +2489,7 @@ Input type: `IssueSetAssigneesInput`
 
 Input type: `IssueSetConfidentialInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2510,7 +2510,7 @@ Input type: `IssueSetConfidentialInput`
 
 Input type: `IssueSetDueDateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2531,7 +2531,7 @@ Input type: `IssueSetDueDateInput`
 
 Input type: `IssueSetEpicInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2552,7 +2552,7 @@ Input type: `IssueSetEpicInput`
 
 Input type: `IssueSetIterationInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2573,7 +2573,7 @@ Input type: `IssueSetIterationInput`
 
 Input type: `IssueSetLockedInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2594,7 +2594,7 @@ Input type: `IssueSetLockedInput`
 
 Input type: `IssueSetSeverityInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2615,7 +2615,7 @@ Input type: `IssueSetSeverityInput`
 
 Input type: `IssueSetSubscriptionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2636,7 +2636,7 @@ Input type: `IssueSetSubscriptionInput`
 
 Input type: `IssueSetWeightInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2657,7 +2657,7 @@ Input type: `IssueSetWeightInput`
 
 Input type: `IterationCadenceCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2684,7 +2684,7 @@ Input type: `IterationCadenceCreateInput`
 
 Input type: `IterationCadenceDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2703,7 +2703,7 @@ Input type: `IterationCadenceDestroyInput`
 
 Input type: `IterationCadenceUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2730,7 +2730,7 @@ Input type: `IterationCadenceUpdateInput`
 
 Input type: `iterationCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2755,7 +2755,7 @@ Input type: `iterationCreateInput`
 
 Input type: `IterationDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2774,7 +2774,7 @@ Input type: `IterationDeleteInput`
 
 Input type: `JiraImportStartInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2796,7 +2796,7 @@ Input type: `JiraImportStartInput`
 
 Input type: `JiraImportUsersInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2816,7 +2816,7 @@ Input type: `JiraImportUsersInput`
 
 Input type: `JobPlayInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2835,7 +2835,7 @@ Input type: `JobPlayInput`
 
 Input type: `JobRetryInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2854,7 +2854,7 @@ Input type: `JobRetryInput`
 
 Input type: `LabelCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2877,7 +2877,7 @@ Input type: `LabelCreateInput`
 
 Input type: `MarkAsSpamSnippetInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2900,7 +2900,7 @@ immediately if possible, or using one of the automatic merge strategies.
 
 Input type: `MergeRequestAcceptInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2926,7 +2926,7 @@ Input type: `MergeRequestAcceptInput`
 
 Input type: `MergeRequestCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2950,7 +2950,7 @@ Input type: `MergeRequestCreateInput`
 
 Input type: `MergeRequestReviewerRereviewInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2971,7 +2971,7 @@ Input type: `MergeRequestReviewerRereviewInput`
 
 Input type: `MergeRequestSetAssigneesInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -2993,7 +2993,7 @@ Input type: `MergeRequestSetAssigneesInput`
 
 Input type: `MergeRequestSetDraftInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3014,7 +3014,7 @@ Input type: `MergeRequestSetDraftInput`
 
 Input type: `MergeRequestSetLabelsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3036,7 +3036,7 @@ Input type: `MergeRequestSetLabelsInput`
 
 Input type: `MergeRequestSetLockedInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3057,7 +3057,7 @@ Input type: `MergeRequestSetLockedInput`
 
 Input type: `MergeRequestSetMilestoneInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3078,7 +3078,7 @@ Input type: `MergeRequestSetMilestoneInput`
 
 Input type: `MergeRequestSetSubscriptionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3103,7 +3103,7 @@ Use mergeRequestSetDraft.
 
 Input type: `MergeRequestSetWipInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3126,7 +3126,7 @@ Update attributes of a merge request.
 
 Input type: `MergeRequestUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3150,7 +3150,7 @@ Input type: `MergeRequestUpdateInput`
 
 Input type: `NamespaceIncreaseStorageTemporarilyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3169,7 +3169,7 @@ Input type: `NamespaceIncreaseStorageTemporarilyInput`
 
 Input type: `OncallRotationCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3195,7 +3195,7 @@ Input type: `OncallRotationCreateInput`
 
 Input type: `OncallRotationDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3216,7 +3216,7 @@ Input type: `OncallRotationDestroyInput`
 
 Input type: `OncallRotationUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3241,7 +3241,7 @@ Input type: `OncallRotationUpdateInput`
 
 Input type: `OncallScheduleCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3263,7 +3263,7 @@ Input type: `OncallScheduleCreateInput`
 
 Input type: `OncallScheduleDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3283,7 +3283,7 @@ Input type: `OncallScheduleDestroyInput`
 
 Input type: `OncallScheduleUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3306,7 +3306,7 @@ Input type: `OncallScheduleUpdateInput`
 
 Input type: `PipelineCancelInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3324,7 +3324,7 @@ Input type: `PipelineCancelInput`
 
 Input type: `PipelineDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3342,7 +3342,7 @@ Input type: `PipelineDestroyInput`
 
 Input type: `PipelineRetryInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3361,7 +3361,7 @@ Input type: `PipelineRetryInput`
 
 Input type: `PrometheusIntegrationCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3382,7 +3382,7 @@ Input type: `PrometheusIntegrationCreateInput`
 
 Input type: `PrometheusIntegrationResetTokenInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3401,7 +3401,7 @@ Input type: `PrometheusIntegrationResetTokenInput`
 
 Input type: `PrometheusIntegrationUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3422,7 +3422,7 @@ Input type: `PrometheusIntegrationUpdateInput`
 
 Input type: `PromoteToEpicInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3444,7 +3444,7 @@ Input type: `PromoteToEpicInput`
 
 Input type: `ReleaseAssetLinkCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3468,7 +3468,7 @@ Input type: `ReleaseAssetLinkCreateInput`
 
 Input type: `ReleaseAssetLinkDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3487,7 +3487,7 @@ Input type: `ReleaseAssetLinkDeleteInput`
 
 Input type: `ReleaseAssetLinkUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3510,7 +3510,7 @@ Input type: `ReleaseAssetLinkUpdateInput`
 
 Input type: `ReleaseCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3536,7 +3536,7 @@ Input type: `ReleaseCreateInput`
 
 Input type: `ReleaseDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3556,7 +3556,7 @@ Input type: `ReleaseDeleteInput`
 
 Input type: `ReleaseUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3580,7 +3580,7 @@ Input type: `ReleaseUpdateInput`
 
 Input type: `RemoveProjectFromSecurityDashboardInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3600,7 +3600,7 @@ Repositions a DiffNote on an image (a `Note` where the `position.positionType` i
 
 Input type: `RepositionImageDiffNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3622,7 +3622,7 @@ Available only when feature flag `runner_graphql_query` is enabled. This flag is
 
 Input type: `RunnerDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3642,7 +3642,7 @@ Available only when feature flag `runner_graphql_query` is enabled. This flag is
 
 Input type: `RunnerUpdateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3672,7 +3672,7 @@ Available only when feature flag `runner_graphql_query` is enabled. This flag is
 
 Input type: `RunnersRegistrationTokenResetInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3692,7 +3692,7 @@ Input type: `RunnersRegistrationTokenResetInput`
 
 Input type: `ScanExecutionPolicyCommitInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3713,7 +3713,7 @@ Input type: `ScanExecutionPolicyCommitInput`
 
 Input type: `SecurityPolicyProjectAssignInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3732,7 +3732,7 @@ Input type: `SecurityPolicyProjectAssignInput`
 
 Input type: `SecurityPolicyProjectCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3751,7 +3751,7 @@ Input type: `SecurityPolicyProjectCreateInput`
 
 Input type: `TerraformStateDeleteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3769,7 +3769,7 @@ Input type: `TerraformStateDeleteInput`
 
 Input type: `TerraformStateLockInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3787,7 +3787,7 @@ Input type: `TerraformStateLockInput`
 
 Input type: `TerraformStateUnlockInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3805,7 +3805,7 @@ Input type: `TerraformStateUnlockInput`
 
 Input type: `TodoCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3824,7 +3824,7 @@ Input type: `TodoCreateInput`
 
 Input type: `TodoMarkDoneInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3843,7 +3843,7 @@ Input type: `TodoMarkDoneInput`
 
 Input type: `TodoRestoreInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3862,7 +3862,7 @@ Input type: `TodoRestoreInput`
 
 Input type: `TodoRestoreManyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3881,7 +3881,7 @@ Input type: `TodoRestoreManyInput`
 
 Input type: `TodosMarkAllDoneInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3899,7 +3899,7 @@ Input type: `TodosMarkAllDoneInput`
 
 Input type: `UpdateAlertStatusInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3922,7 +3922,7 @@ Input type: `UpdateAlertStatusInput`
 
 Input type: `UpdateBoardInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3950,7 +3950,7 @@ Input type: `UpdateBoardInput`
 
 Input type: `UpdateBoardEpicUserPreferencesInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3971,7 +3971,7 @@ Input type: `UpdateBoardEpicUserPreferencesInput`
 
 Input type: `UpdateBoardListInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -3992,7 +3992,7 @@ Input type: `UpdateBoardListInput`
 
 Input type: `UpdateComplianceFrameworkInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4012,7 +4012,7 @@ Input type: `UpdateComplianceFrameworkInput`
 
 Input type: `UpdateContainerExpirationPolicyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4037,7 +4037,7 @@ Input type: `UpdateContainerExpirationPolicyInput`
 
 Input type: `UpdateEpicInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4067,7 +4067,7 @@ Input type: `UpdateEpicInput`
 
 Input type: `UpdateEpicBoardListInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4093,7 +4093,7 @@ returned.
 
 Input type: `UpdateImageDiffNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4114,7 +4114,7 @@ Input type: `UpdateImageDiffNoteInput`
 
 Input type: `UpdateIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4147,7 +4147,7 @@ Input type: `UpdateIssueInput`
 
 Input type: `UpdateIterationInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4171,7 +4171,7 @@ Input type: `UpdateIterationInput`
 
 Input type: `UpdateNamespacePackageSettingsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4199,7 +4199,7 @@ returned.
 
 Input type: `UpdateNoteInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4220,7 +4220,7 @@ Input type: `UpdateNoteInput`
 
 Input type: `UpdateRequirementInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4244,7 +4244,7 @@ Input type: `UpdateRequirementInput`
 
 Input type: `UpdateSnippetInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4273,7 +4273,7 @@ Input type: `UpdateSnippetInput`
 
 Input type: `UserCalloutCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4292,7 +4292,7 @@ Input type: `UserCalloutCreateInput`
 
 Input type: `VulnerabilityConfirmInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4311,7 +4311,7 @@ Input type: `VulnerabilityConfirmInput`
 
 Input type: `VulnerabilityDismissInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4332,7 +4332,7 @@ Input type: `VulnerabilityDismissInput`
 
 Input type: `VulnerabilityExternalIssueLinkCreateInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4353,7 +4353,7 @@ Input type: `VulnerabilityExternalIssueLinkCreateInput`
 
 Input type: `VulnerabilityExternalIssueLinkDestroyInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4371,7 +4371,7 @@ Input type: `VulnerabilityExternalIssueLinkDestroyInput`
 
 Input type: `VulnerabilityResolveInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -4390,7 +4390,7 @@ Input type: `VulnerabilityResolveInput`
 
 Input type: `VulnerabilityRevertToDetectedInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7184,7 +7184,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7396,7 +7396,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7412,7 +7412,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7486,7 +7486,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7519,7 +7519,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7552,7 +7552,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7564,7 +7564,7 @@ Internal reference of the epic. Returned in shortened format by default.
 
 Returns [`String!`](#string).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7615,7 +7615,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -7947,7 +7947,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8276,7 +8276,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8292,7 +8292,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8340,7 +8340,7 @@ Find a specific design.
 
 Returns [`Design`](#design).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8353,7 +8353,7 @@ Find a design as of a version.
 
 Returns [`DesignAtVersion`](#designatversion).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8369,7 +8369,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8383,7 +8383,7 @@ A specific version.
 
 Returns [`DesignVersion`](#designversion).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8400,7 +8400,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8417,7 +8417,7 @@ Find a design as of a version.
 
 Returns [`DesignAtVersion`](#designatversion).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8429,7 +8429,7 @@ Find a version.
 
 Returns [`DesignVersion`](#designversion).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8457,7 +8457,7 @@ A particular design as of this version, provided it is visible at this version.
 
 Returns [`DesignAtVersion!`](#designatversion).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8475,7 +8475,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8524,7 +8524,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8638,7 +8638,7 @@ DORA metrics for the current group or project.
 
 Returns [`[DoraMetric!]`](#dorametric).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8679,7 +8679,7 @@ Metrics dashboard schema for the environment.
 
 Returns [`MetricsDashboard`](#metricsdashboard).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8751,7 +8751,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8784,7 +8784,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8817,7 +8817,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8829,7 +8829,7 @@ Internal reference of the epic. Returned in shortened format by default.
 
 Returns [`String!`](#string).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8863,7 +8863,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8985,7 +8985,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -8997,7 +8997,7 @@ Internal reference of the issue. Returned in shortened format by default.
 
 Returns [`String!`](#string).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9031,7 +9031,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9144,7 +9144,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9160,7 +9160,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9176,7 +9176,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9192,7 +9192,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9208,7 +9208,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9224,7 +9224,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9240,7 +9240,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9314,7 +9314,7 @@ A single board of the group.
 
 Returns [`Board`](#board).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9330,7 +9330,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9346,7 +9346,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9362,7 +9362,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9378,7 +9378,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9391,7 +9391,7 @@ Find a single epic.
 
 Returns [`Epic`](#epic).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9420,7 +9420,7 @@ Find a single epic board.
 
 Returns [`EpicBoard`](#epicboard).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9436,7 +9436,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9469,7 +9469,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9486,7 +9486,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9525,7 +9525,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9546,7 +9546,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9566,7 +9566,7 @@ A label available on this group.
 
 Returns [`Label`](#label).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9582,7 +9582,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9601,7 +9601,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9629,7 +9629,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9655,7 +9655,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9675,7 +9675,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9696,7 +9696,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9715,7 +9715,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9739,7 +9739,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9752,7 +9752,7 @@ Represents vulnerable project counts for each grade.
 
 Returns [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9764,7 +9764,7 @@ Counts for each vulnerability severity in the group and its subgroups.
 
 Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9870,7 +9870,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9899,7 +9899,7 @@ On-call rotation for the on-call schedule.
 
 Returns [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9938,7 +9938,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -9950,7 +9950,7 @@ Counts for each vulnerability severity from projects selected in Instance Securi
 
 Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10038,7 +10038,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10050,7 +10050,7 @@ Internal reference of the issue. Returned in shortened format by default.
 
 Returns [`String!`](#string).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10173,7 +10173,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10385,7 +10385,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10397,7 +10397,7 @@ Details about which files were changed in this merge request.
 
 Returns [`[DiffStats!]`](#diffstats).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10413,7 +10413,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10427,7 +10427,7 @@ Internal reference of the merge request. Returned in shortened format by default
 
 Returns [`String!`](#string).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10472,7 +10472,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10501,7 +10501,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10530,7 +10530,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10559,7 +10559,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10577,7 +10577,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10593,7 +10593,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10678,7 +10678,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10707,7 +10707,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10736,7 +10736,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10765,7 +10765,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10783,7 +10783,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10799,7 +10799,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10855,7 +10855,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10950,7 +10950,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -10966,7 +10966,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11261,7 +11261,7 @@ A specific job in this pipeline, either by name or ID.
 
 Returns [`CiJob`](#cijob).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11278,7 +11278,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11295,7 +11295,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11310,7 +11310,7 @@ A specific test suite in a pipeline test report.
 
 Returns [`TestSuite`](#testsuite).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11475,7 +11475,7 @@ A single Alert Management alert of the project.
 
 Returns [`AlertManagementAlert`](#alertmanagementalert).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11492,7 +11492,7 @@ Counts of alerts by status for the project.
 
 Returns [`AlertManagementAlertStatusCountsType`](#alertmanagementalertstatuscountstype).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11509,7 +11509,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11530,7 +11530,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11546,7 +11546,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11558,7 +11558,7 @@ Extract alert fields from payload for custom mapping.
 
 Returns [`[AlertManagementPayloadAlertField!]`](#alertmanagementpayloadalertfield).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11570,7 +11570,7 @@ A single board of the project.
 
 Returns [`Board`](#board).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11586,7 +11586,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11598,7 +11598,7 @@ Find a single CI/CD template by name.
 
 Returns [`CiTemplate`](#citemplate).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11610,7 +11610,7 @@ Find a single cluster agent by name.
 
 Returns [`ClusterAgent`](#clusteragent).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11626,7 +11626,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11639,7 +11639,7 @@ DAST Site Profile associated with the project.
 
 Returns [`DastSiteProfile`](#dastsiteprofile).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11655,7 +11655,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11667,7 +11667,7 @@ A single environment of the project.
 
 Returns [`Environment`](#environment).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11685,7 +11685,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11699,7 +11699,7 @@ Incident Management escalation policy of the project.
 
 Returns [`EscalationPolicyType`](#escalationpolicytype).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11715,7 +11715,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11727,7 +11727,7 @@ A single issue of the project.
 
 Returns [`Issue`](#issue).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11761,7 +11761,7 @@ Counts of issues by status for the project.
 
 Returns [`IssueStatusCountsType`](#issuestatuscountstype).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11793,7 +11793,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11831,7 +11831,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11852,7 +11852,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11876,7 +11876,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11888,7 +11888,7 @@ A label available on this project.
 
 Returns [`Label`](#label).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11904,7 +11904,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11917,7 +11917,7 @@ A single merge request of the project.
 
 Returns [`MergeRequest`](#mergerequest).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11933,7 +11933,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11961,7 +11961,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -11986,7 +11986,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12002,7 +12002,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12018,7 +12018,7 @@ Build pipeline of the project.
 
 Returns [`Pipeline`](#pipeline).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12035,7 +12035,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12053,7 +12053,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12066,7 +12066,7 @@ A single release of the project.
 
 Returns [`Release`](#release).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12082,7 +12082,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12094,7 +12094,7 @@ Find a single requirement.
 
 Returns [`Requirement`](#requirement).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12116,7 +12116,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12134,7 +12134,7 @@ Detailed version of a Sentry error on the project.
 
 Returns [`SentryDetailedError`](#sentrydetailederror).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12150,7 +12150,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12167,7 +12167,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12180,7 +12180,7 @@ Find a single Terraform state by name.
 
 Returns [`TerraformState`](#terraformstate).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12196,7 +12196,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12220,7 +12220,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12233,7 +12233,7 @@ Counts for each vulnerability severity in the project.
 
 Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12506,7 +12506,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12519,7 +12519,7 @@ Names of branches available in this repository that match the search pattern.
 
 Returns [`[String!]`](#string).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12533,7 +12533,7 @@ Tree of the repository.
 
 Returns [`Tree`](#tree).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12607,7 +12607,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12896,7 +12896,7 @@ Detailed version of a Sentry error on the project.
 
 Returns [`SentryDetailedError`](#sentrydetailederror).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12908,7 +12908,7 @@ Stack Trace of Sentry Error.
 
 Returns [`SentryErrorStackTrace`](#sentryerrorstacktrace).
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -12924,7 +12924,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13026,7 +13026,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13430,7 +13430,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13459,7 +13459,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13488,7 +13488,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13517,7 +13517,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13535,7 +13535,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13551,7 +13551,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -13665,7 +13665,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-###### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16053,7 +16053,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16255,7 +16255,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16284,7 +16284,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16313,7 +16313,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16342,7 +16342,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16360,7 +16360,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16376,7 +16376,7 @@ This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
 
-####### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16399,7 +16399,7 @@ see the associated mutation type above.
 
 Field that are available while modifying the custom mapping attributes for an HTTP integration.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16410,7 +16410,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 
 ### `BoardIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16434,7 +16434,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 
 ### `CommitAction`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16448,7 +16448,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 
 ### `ComplianceFrameworkInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16461,7 +16461,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 
 Input type for DastSiteProfile authentication.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16474,7 +16474,7 @@ Input type for DastSiteProfile authentication.
 
 ### `DiffImagePositionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16489,7 +16489,7 @@ Input type for DastSiteProfile authentication.
 
 ### `DiffPathsInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16498,7 +16498,7 @@ Input type for DastSiteProfile authentication.
 
 ### `DiffPositionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16511,7 +16511,7 @@ Input type for DastSiteProfile authentication.
 
 ### `EpicFilters`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16525,7 +16525,7 @@ Input type for DastSiteProfile authentication.
 
 A node of an epic tree.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16538,7 +16538,7 @@ A node of an epic tree.
 
 Represents an escalation rule.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16548,7 +16548,7 @@ Represents an escalation rule.
 
 ### `JiraUsersMappingInputType`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16557,7 +16557,7 @@ Represents an escalation rule.
 
 ### `MergeRequestsResolverNegatedParams`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16566,7 +16566,7 @@ Represents an escalation rule.
 
 ### `NegatedBoardIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16585,7 +16585,7 @@ Represents an escalation rule.
 
 ### `NegatedEpicBoardIssueInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16595,7 +16595,7 @@ Represents an escalation rule.
 
 ### `NegatedEpicFilterInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16605,7 +16605,7 @@ Represents an escalation rule.
 
 ### `NegatedIssueFilterInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16623,7 +16623,7 @@ Represents an escalation rule.
 
 Active period time range for on-call rotation.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16634,7 +16634,7 @@ Active period time range for on-call rotation.
 
 Date input type for on-call rotation.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16645,7 +16645,7 @@ Date input type for on-call rotation.
 
 The rotation length of the on-call rotation.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16656,7 +16656,7 @@ The rotation length of the on-call rotation.
 
 The rotation user and color palette.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16668,7 +16668,7 @@ The rotation user and color palette.
 
 Fields that are available when modifying a release asset link.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16681,7 +16681,7 @@ Fields that are available when modifying a release asset link.
 
 Fields that are available when modifying release assets.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16691,7 +16691,7 @@ Fields that are available when modifying release assets.
 
 Represents the analyzers entity in SAST CI configuration.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16703,7 +16703,7 @@ Represents the analyzers entity in SAST CI configuration.
 
 Represents an entity in SAST CI configuration.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16715,7 +16715,7 @@ Represents an entity in SAST CI configuration.
 
 Represents a CI configuration of SAST.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16727,7 +16727,7 @@ Represents a CI configuration of SAST.
 
 Represents an action to perform over a snippet file.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16740,7 +16740,7 @@ Represents an action to perform over a snippet file.
 
 A time-frame defined as a closed inclusive range of two dates.
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -16749,7 +16749,7 @@ A time-frame defined as a closed inclusive range of two dates.
 
 ### `UpdateDiffImagePositionInput`
 
-#### Arguments
+** Arguments **
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |

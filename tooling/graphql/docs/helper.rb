@@ -33,7 +33,7 @@ module Tooling
       MD
 
       ARG_HEADER = <<~MD
-        # Arguments
+        ** Arguments **
 
         | Name | Type | Description |
         | ---- | ---- | ----------- |
@@ -81,16 +81,15 @@ module Tooling
             render_return_type(field),
             render_input_type(field),
             render_connection_note(field),
-            render_argument_table(heading_level, args, arg_owner),
+            render_argument_table(args, arg_owner),
             render_return_fields(field, owner: owner)
           ]
 
           join(:block, chunks)
         end
 
-        def render_argument_table(level, args, owner)
-          arg_header = ('#' * level) + ARG_HEADER
-          render_field_table(arg_header, args, owner)
+        def render_argument_table(args, owner)
+          render_field_table(ARG_HEADER, args, owner)
         end
 
         def render_name_and_description(object, owner: nil, level: 3)
