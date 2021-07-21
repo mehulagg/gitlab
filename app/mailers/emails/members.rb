@@ -6,6 +6,8 @@ module Emails
     include MembersHelper
     include Gitlab::Experiment::Dsl
 
+    INITIAL_INVITE = 'initial_email'
+
     included do
       helper_method :member_source, :member
       helper_method :experiment
