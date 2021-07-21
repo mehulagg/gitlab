@@ -5,6 +5,8 @@ group: Alliances
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
+{::options parse_block_html="true" /}
+
 # GitLab Cloud Native Hybrid on AWS EKS **(FREE SELF)**
 
 Amazon provides a managed Kubernetes offering via Elastic Kubernetes Service (EKS).
