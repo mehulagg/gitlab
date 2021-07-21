@@ -39,7 +39,8 @@ describe('Iterations report', () => {
 
   const mountComponent = ({
     props = defaultProps,
-    iterationQueryHandler = jest.fn().mockResolvedValue(mockGroupIterations),
+    mockQueryResponse = mockGroupIterations,
+    iterationQueryHandler = jest.fn().mockResolvedValue(mockQueryResponse),
   } = {}) => {
     localVue.use(VueApollo);
     mockApollo = createMockApollo([[query, iterationQueryHandler]]);
@@ -104,7 +105,7 @@ describe('Iterations report', () => {
       ],
     ])('when viewing an iteration in a %s', (_, props, mockIteration, expectedParams) => {
       it('calls a query with correct parameters', () => {
-        const iterationQueryHandler = jest.fn();
+        const iterationQueryHandler = jest.fn().mockResolvedValue(mockIteration);
         mountComponent({
           props,
           iterationQueryHandler,
@@ -128,7 +129,6 @@ describe('Iterations report', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('empty state', () => {
@@ -213,12 +213,18 @@ describe('Iterations report', () => {
         'when user $description and they are viewing an iteration within a $namespaceType',
         ({ canEdit, namespaceType, canEditIteration }) => {
           beforeEach(() => {
+            const mockQueryResponse = {
+              [Namespace.Group]: mockGroupIterations,
+              [Namespace.Project]: mockProjectIterations,
+            }[namespaceType];
+
             mountComponent({
               props: {
                 ...defaultProps,
                 canEditIteration,
                 namespaceType,
               },
+              mockQueryResponse,
             });
           });
 
