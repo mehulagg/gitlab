@@ -107,32 +107,32 @@ keys must be manually replicated to the **secondary** site.
 
 1. Copy OpenSSH host keys from the **primary** site:
 
-   If you can access your **the OpenSSH node on your primary** site using the **root** user:
+   If you can access one of the **nodes on your primary** site serving SSH traffic (usually, the main GitLab Rails application nodes) using the **root** user:
 
    ```shell
    # Run this from the secondary site, change `<primary_site_fqdn>` for the IP or FQDN of the server
-   scp root@<primary_openssh_node_fqdn>:/etc/ssh/ssh_host_*_key* /etc/ssh
+   scp root@<primary_node_fqdn>:/etc/ssh/ssh_host_*_key* /etc/ssh
    ```
 
    If you only have access through a user with `sudo` privileges:
 
    ```shell
-   # Run this from the a OpenSSH node on your primary site:
+   # Run this from the node on your primary site:
    sudo tar --transform 's/.*\///g' -zcvf ~/geo-host-key.tar.gz /etc/ssh/ssh_host_*_key*
 
-   # Run this on each OpenSSH node on your secondary site:
+   # Run this on each node on your secondary site:
    scp <user_with_sudo>@<primary_site_fqdn>:geo-host-key.tar.gz .
    tar zxvf ~/geo-host-key.tar.gz -C /etc/ssh
    ```
 
-1. On **each OpenSSH node on your secondary** site, ensure the file permissions are correct:
+1. On **each node on your secondary** site, ensure the file permissions are correct:
 
    ```shell
    chown root:root /etc/ssh/ssh_host_*_key*
    chmod 0600 /etc/ssh/ssh_host_*_key*
    ```
 
-1. To verify key fingerprint matches, execute the following command on both primary and secondary OpenSSH nodes on each site:
+1. To verify key fingerprint matches, execute the following command on both primary and secondary nodes on each site:
 
    ```shell
    for file in /etc/ssh/ssh_host_*_key; do ssh-keygen -lf $file; done
@@ -160,7 +160,7 @@ keys must be manually replicated to the **secondary** site.
    NOTE:
    The output for private keys and public keys command should generate the same fingerprint.
 
-1. Restart `sshd` on **each OpenSSH node on your secondary** site:
+1. Restart `sshd` on **each node on your secondary** site:
 
    ```shell
    # Debian or Ubuntu installations
