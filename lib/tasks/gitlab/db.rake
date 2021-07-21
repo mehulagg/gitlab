@@ -154,14 +154,14 @@ namespace :gitlab do
       Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
     end
 
-    desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
+    desc 'reindex a regular index without downtime to eliminate bloat'
     task :reindex, [:index_name] => :environment do |_, args|
       unless Feature.enabled?(:database_reindexing, type: :ops)
         puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
         exit
       end
 
-      indexes = Gitlab::Database::Reindexing.candidate_indexes
+      indexes = Gitlab::Database::PostgresIndex.reindexing_support
 
       if identifier = args[:index_name]
         raise ArgumentError, "Index name is not fully qualified with a schema: #{identifier}" unless identifier =~ /^\w+\.\w+$/
@@ -172,6 +172,9 @@ namespace :gitlab do
       end
 
       ActiveRecord::Base.logger = Logger.new($stdout) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
+
+      # Cleanup leftover temporary indexes from previous, possibly aborted runs (if any)
+      Gitlab::Database::Reindexing.cleanup_leftovers!
 
       Gitlab::Database::Reindexing.perform(indexes)
     rescue StandardError => e

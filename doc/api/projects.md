@@ -60,7 +60,7 @@ GET /projects
 | `simple`                                   | boolean  | **{dotted-circle}** No | Return only limited fields for each project. This is a no-op without authentication as then _only_ simple fields are returned. |
 | `sort`                                     | string   | **{dotted-circle}** No | Return projects sorted in `asc` or `desc` order. Default is `desc`. |
 | `starred`                                  | boolean  | **{dotted-circle}** No | Limit by projects starred by the current user. |
-| `statistics`                               | boolean  | **{dotted-circle}** No | Include project statistics. |
+| `statistics`                               | boolean  | **{dotted-circle}** No | Include project statistics. Only available to Reporter or higher level role members. |
 | `topic`                                    | string   | **{dotted-circle}** No | Comma-separated topic names. Limit results to projects that match all of given topics. See `topics` attribute. |
 | `visibility`                               | string   | **{dotted-circle}** No | Limit by visibility `public`, `internal`, or `private`. |
 | `wiki_checksum_failed` **(PREMIUM)**       | boolean  | **{dotted-circle}** No | Limit projects where the wiki checksum calculation has failed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6137) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2). |
@@ -379,7 +379,7 @@ GET /users/:user_id/projects
 | `simple`                      | boolean | **{dotted-circle}** No | Return only limited fields for each project. This is a no-op without authentication as then _only_ simple fields are returned. |
 | `sort`                        | string  | **{dotted-circle}** No | Return projects sorted in `asc` or `desc` order. Default is `desc`. |
 | `starred`                     | boolean | **{dotted-circle}** No | Limit by projects starred by the current user. |
-| `statistics`                  | boolean | **{dotted-circle}** No | Include project statistics. |
+| `statistics`                  | boolean | **{dotted-circle}** No | Include project statistics. Only available to Reporter or higher level role members. |
 | `user_id`                     | string  | **{check-circle}** Yes | The ID or username of the user. |
 | `visibility`                  | string  | **{dotted-circle}** No | Limit by visibility `public`, `internal`, or `private`. |
 | `with_custom_attributes`      | boolean | **{dotted-circle}** No | Include [custom attributes](custom_attributes.md) in response. _(admins only)_ |
@@ -612,7 +612,7 @@ GET /users/:user_id/starred_projects
 | `simple`                      | boolean | **{dotted-circle}** No | Return only limited fields for each project. This is a no-op without authentication as then _only_ simple fields are returned.. |
 | `sort`                        | string  | **{dotted-circle}** No | Return projects sorted in `asc` or `desc` order. Default is `desc`. |
 | `starred`                     | boolean | **{dotted-circle}** No | Limit by projects starred by the current user. |
-| `statistics`                  | boolean | **{dotted-circle}** No | Include project statistics. |
+| `statistics`                  | boolean | **{dotted-circle}** No | Include project statistics. Only available to Reporter or higher level role members. |
 | `user_id`                     | string  | **{check-circle}** Yes | The ID or username of the user. |
 | `visibility`                  | string  | **{dotted-circle}** No | Limit by visibility `public`, `internal`, or `private`. |
 | `with_custom_attributes`      | boolean | **{dotted-circle}** No | Include [custom attributes](custom_attributes.md) in response. _(admins only)_ |
@@ -831,7 +831,7 @@ GET /projects/:id
 |--------------------------|----------------|------------------------|-------------|
 | `id`                     | integer or string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding). |
 | `license`                | boolean        | **{dotted-circle}** No | Include project license data. |
-| `statistics`             | boolean        | **{dotted-circle}** No | Include project statistics. |
+| `statistics`             | boolean        | **{dotted-circle}** No | Include project statistics. Only available to Reporter or higher level role members. |
 | `with_custom_attributes` | boolean        | **{dotted-circle}** No | Include [custom attributes](custom_attributes.md) in response. _(admins only)_ |
 
 ```json
@@ -1215,6 +1215,7 @@ POST /projects
 | `show_default_award_emojis`                                 | boolean | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
+| `squash_option`                                             | string  | **{dotted-circle}** No | One of `never`, `always`, `default_on`, or `default_off`. |
 | `tag_list`                                                  | array   | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
 | `template_project_id` **(PREMIUM)**                         | integer | **{dotted-circle}** No | When used with `use_custom_template`, project ID of a custom project template. This is preferable to using `template_name` since `template_name` may be ambiguous. |
@@ -1290,6 +1291,7 @@ POST /projects/user/:user_id
 | `show_default_award_emojis`                                 | boolean | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
+| `squash_option`                                             | string  | **{dotted-circle}** No | One of `never`, `always`, `default_on`, or `default_off`. |
 | `suggestion_commit_message`                                 | string  | **{dotted-circle}** No | The commit message used to apply merge request [suggestions](../user/project/merge_requests/reviews/suggestions.md). |
 | `tag_list`                                                  | array   | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
@@ -1369,6 +1371,7 @@ PUT /projects/:id
 | `show_default_award_emojis`                                 | boolean        | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
+| `squash_option`                                             | string         | **{dotted-circle}** No | One of `never`, `always`, `default_on`, or `default_off`. |
 | `suggestion_commit_message`                                 | string         | **{dotted-circle}** No | The commit message used to apply merge request suggestions. |
 | `tag_list`                                                  | array          | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `topics`                                                    | array          | **{dotted-circle}** No | The list of topics for the project. This replaces any existing topics that are already added to the project. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0.)_ |
@@ -1425,7 +1428,7 @@ GET /projects/:id/forks
 | `simple`                      | boolean        | **{dotted-circle}** No | Return only limited fields for each project. This is a no-op without authentication as then _only_ simple fields are returned. |
 | `sort`                        | string         | **{dotted-circle}** No | Return projects sorted in `asc` or `desc` order. Default is `desc`. |
 | `starred`                     | boolean        | **{dotted-circle}** No | Limit by projects starred by the current user. |
-| `statistics`                  | boolean        | **{dotted-circle}** No | Include project statistics. |
+| `statistics`                  | boolean        | **{dotted-circle}** No | Include project statistics. Only available to Reporter or higher level role members. |
 | `visibility`                  | string         | **{dotted-circle}** No | Limit by visibility `public`, `internal`, or `private`. |
 | `with_custom_attributes`      | boolean        | **{dotted-circle}** No | Include [custom attributes](custom_attributes.md) in response. _(admins only)_ |
 | `with_issues_enabled`         | boolean        | **{dotted-circle}** No | Limit by enabled issues feature. |

@@ -22,30 +22,6 @@ RSpec.describe Gitlab::Database::PostgresIndex do
 
   it_behaves_like 'a postgres model'
 
-  describe '.regular' do
-    it 'only non-unique indexes' do
-      expect(described_class.regular).to all(have_attributes(unique: false))
-    end
-
-    it 'only non partitioned indexes' do
-      expect(described_class.regular).to all(have_attributes(partitioned: false))
-    end
-
-    it 'only indexes that dont serve an exclusion constraint' do
-      expect(described_class.regular).to all(have_attributes(exclusion: false))
-    end
-
-    it 'only non-expression indexes' do
-      expect(described_class.regular).to all(have_attributes(expression: false))
-    end
-
-    it 'only btree and gist indexes' do
-      types = described_class.regular.map(&:type).uniq
-
-      expect(types & %w(btree gist)).to eq(types)
-    end
-  end
-
   describe '.reindexing_support' do
     it 'only non partitioned indexes' do
       expect(described_class.reindexing_support).to all(have_attributes(partitioned: false))
@@ -63,6 +39,37 @@ RSpec.describe Gitlab::Database::PostgresIndex do
       types = described_class.reindexing_support.map(&:type).uniq
 
       expect(types & %w(btree gist)).to eq(types)
+    end
+
+    context 'with leftover indexes' do
+      before do
+        ActiveRecord::Base.connection.execute(<<~SQL)
+          CREATE INDEX foobar_ccnew ON users (id);
+          CREATE INDEX foobar_ccnew1 ON users (id);
+        SQL
+      end
+
+      subject { described_class.reindexing_support.map(&:name) }
+
+      it 'excludes temporary indexes from reindexing' do
+        expect(subject).not_to include('foobar_ccnew')
+        expect(subject).not_to include('foobar_ccnew1')
+      end
+    end
+  end
+
+  describe '.reindexing_leftovers' do
+    subject { described_class.reindexing_leftovers }
+
+    before do
+      ActiveRecord::Base.connection.execute(<<~SQL)
+        CREATE INDEX foobar_ccnew ON users (id);
+        CREATE INDEX foobar_ccnew1 ON users (id);
+      SQL
+    end
+
+    it 'retrieves leftover indexes matching the /_ccnew[0-9]*$/ pattern' do
+      expect(subject.map(&:name)).to eq(%w(foobar_ccnew foobar_ccnew1))
     end
   end
 

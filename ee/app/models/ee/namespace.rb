@@ -45,6 +45,12 @@ module EE
           .where(gitlab_subscriptions: { trial: true, trial_ends_on: Date.today.. })
       end
 
+      scope :not_in_active_trial, -> do
+        left_joins(gitlab_subscription: :hosted_plan)
+          .where(gitlab_subscriptions: { trial: [nil, false] })
+          .or(GitlabSubscription.where(trial_ends_on: ..Date.yesterday))
+      end
+
       scope :in_default_plan, -> do
         left_joins(gitlab_subscription: :hosted_plan)
           .where(plans: { name: [nil, *::Plan.default_plans] })
@@ -303,10 +309,14 @@ module EE
     end
 
     def can_extend_trial?
+      return false unless ::Feature.enabled?(:allow_extend_reactivate_trial, default_enabled: :yaml)
+
       trial_active? && !trial_extended_or_reactivated?
     end
 
     def can_reactivate_trial?
+      return false unless ::Feature.enabled?(:allow_extend_reactivate_trial, default_enabled: :yaml)
+
       !trial_active? && !never_had_trial? && !trial_extended_or_reactivated? && free_plan?
     end
 

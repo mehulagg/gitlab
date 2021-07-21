@@ -9669,7 +9669,8 @@ CREATE TABLE approval_project_rules (
     project_id integer NOT NULL,
     approvals_required smallint DEFAULT 0 NOT NULL,
     name character varying NOT NULL,
-    rule_type smallint DEFAULT 0 NOT NULL
+    rule_type smallint DEFAULT 0 NOT NULL,
+    scanners text[]
 );
 
 CREATE TABLE approval_project_rules_groups (
@@ -14662,8 +14663,7 @@ CREATE TABLE members (
     requested_at timestamp without time zone,
     expires_at date,
     ldap boolean DEFAULT false NOT NULL,
-    override boolean DEFAULT false NOT NULL,
-    invite_email_success boolean DEFAULT true NOT NULL
+    override boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE members_id_seq
@@ -19047,7 +19047,8 @@ CREATE TABLE vulnerabilities (
     dismissed_at timestamp with time zone,
     dismissed_by_id bigint,
     resolved_on_default_branch boolean DEFAULT false NOT NULL,
-    present_on_default_branch boolean DEFAULT true NOT NULL
+    present_on_default_branch boolean DEFAULT true NOT NULL,
+    detected_at timestamp with time zone DEFAULT now()
 );
 
 CREATE SEQUENCE vulnerabilities_id_seq
@@ -19330,6 +19331,27 @@ CREATE SEQUENCE vulnerability_findings_remediations_id_seq
     CACHE 1;
 
 ALTER SEQUENCE vulnerability_findings_remediations_id_seq OWNED BY vulnerability_findings_remediations.id;
+
+CREATE TABLE vulnerability_flags (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    vulnerability_occurrence_id bigint NOT NULL,
+    flag_type smallint DEFAULT 0 NOT NULL,
+    origin text NOT NULL,
+    description text NOT NULL,
+    CONSTRAINT check_45e743349f CHECK ((char_length(description) <= 1024)),
+    CONSTRAINT check_49c1d00032 CHECK ((char_length(origin) <= 255))
+);
+
+CREATE SEQUENCE vulnerability_flags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_flags_id_seq OWNED BY vulnerability_flags.id;
 
 CREATE TABLE vulnerability_historical_statistics (
     id bigint NOT NULL,
@@ -20611,6 +20633,8 @@ ALTER TABLE ONLY vulnerability_finding_links ALTER COLUMN id SET DEFAULT nextval
 ALTER TABLE ONLY vulnerability_finding_signatures ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_signatures_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_findings_remediations ALTER COLUMN id SET DEFAULT nextval('vulnerability_findings_remediations_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_flags ALTER COLUMN id SET DEFAULT nextval('vulnerability_flags_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_historical_statistics ALTER COLUMN id SET DEFAULT nextval('vulnerability_historical_statistics_id_seq'::regclass);
 
@@ -22341,6 +22365,9 @@ ALTER TABLE ONLY vulnerability_finding_signatures
 
 ALTER TABLE ONLY vulnerability_findings_remediations
     ADD CONSTRAINT vulnerability_findings_remediations_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vulnerability_flags
+    ADD CONSTRAINT vulnerability_flags_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY vulnerability_historical_statistics
     ADD CONSTRAINT vulnerability_historical_statistics_pkey PRIMARY KEY (id);
@@ -25251,6 +25278,8 @@ CREATE INDEX index_vulnerability_findings_remediations_on_remediation_id ON vuln
 
 CREATE UNIQUE INDEX index_vulnerability_findings_remediations_on_unique_keys ON vulnerability_findings_remediations USING btree (vulnerability_occurrence_id, vulnerability_remediation_id);
 
+CREATE INDEX index_vulnerability_flags_on_vulnerability_occurrence_id ON vulnerability_flags USING btree (vulnerability_occurrence_id);
+
 CREATE INDEX index_vulnerability_historical_statistics_on_date_and_id ON vulnerability_historical_statistics USING btree (date, id);
 
 CREATE UNIQUE INDEX index_vulnerability_identifiers_on_project_id_and_fingerprint ON vulnerability_identifiers USING btree (project_id, fingerprint);
@@ -27900,6 +27929,9 @@ ALTER TABLE ONLY clusters_integration_prometheus
 
 ALTER TABLE ONLY vulnerability_occurrence_identifiers
     ADD CONSTRAINT fk_rails_e4ef6d027c FOREIGN KEY (occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_flags
+    ADD CONSTRAINT fk_rails_e59393b48b FOREIGN KEY (vulnerability_occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY serverless_domain_cluster
     ADD CONSTRAINT fk_rails_e59e868733 FOREIGN KEY (clusters_applications_knative_id) REFERENCES clusters_applications_knative(id) ON DELETE CASCADE;

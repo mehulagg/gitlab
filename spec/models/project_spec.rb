@@ -3156,35 +3156,19 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#change_head' do
-    let_it_be(:project) { create(:project, :repository) }
-
-    it 'returns error if branch does not exist' do
-      expect(project.change_head('unexisted-branch')).to be false
-      expect(project.errors.size).to eq(1)
-    end
-
-    it 'calls the before_change_head and after_change_head methods' do
-      expect(project.repository).to receive(:before_change_head)
-      expect(project.repository).to receive(:after_change_head)
-
-      project.change_head(project.default_branch)
-    end
+  describe '#after_repository_change_head' do
+    let_it_be(:project) { create(:project) }
 
     it 'updates commit count' do
       expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:commit_count])
 
-      project.change_head(project.default_branch)
-    end
-
-    it 'copies the gitattributes' do
-      expect(project.repository).to receive(:copy_gitattributes).with(project.default_branch)
-      project.change_head(project.default_branch)
+      project.after_repository_change_head
     end
 
     it 'reloads the default branch' do
       expect(project).to receive(:reload_default_branch)
-      project.change_head(project.default_branch)
+
+      project.after_repository_change_head
     end
   end
 
@@ -5927,10 +5911,9 @@ RSpec.describe Project, factory_default: :keep do
       end
     end
 
-    context 'with an instance-level and template integrations' do
+    context 'with an instance-level integration' do
       before do
         create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/')
-        create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/')
       end
 
       it 'builds the integration from the instance integration' do
@@ -5938,17 +5921,7 @@ RSpec.describe Project, factory_default: :keep do
       end
     end
 
-    context 'with a template integration and no instance-level' do
-      before do
-        create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/')
-      end
-
-      it 'builds the integration from the template' do
-        expect(subject.find_or_initialize_integration('prometheus').api_url).to eq('https://prometheus.template.com/')
-      end
-    end
-
-    context 'without an exisiting integration, or instance-level or template' do
+    context 'without an existing integration or instance-level' do
       it 'builds the integration' do
         expect(subject.find_or_initialize_integration('prometheus')).to be_a(::Integrations::Prometheus)
         expect(subject.find_or_initialize_integration('prometheus').api_url).to be_nil

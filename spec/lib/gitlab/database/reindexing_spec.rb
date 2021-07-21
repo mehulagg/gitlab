@@ -26,32 +26,30 @@ RSpec.describe Gitlab::Database::Reindexing do
     end
   end
 
-  describe '.candidate_indexes' do
-    subject { described_class.candidate_indexes }
+  describe '.cleanup_leftovers!' do
+    subject { described_class.cleanup_leftovers! }
 
-    context 'with deprecated method for < PG12' do
-      before do
-        stub_feature_flags(database_reindexing_pg12: false)
-      end
-
-      it 'retrieves regular indexes that are no left-overs from previous runs' do
-        result = double
-        expect(Gitlab::Database::PostgresIndex).to receive_message_chain('not_match.not_match.not_match.regular').with('^tmp_reindex_').with('^old_reindex_').with('\_ccnew[0-9]*$').with(no_args).and_return(result)
-
-        expect(subject).to eq(result)
-      end
+    before do
+      ApplicationRecord.connection.execute(<<~SQL)
+        CREATE INDEX foobar_ccnew ON users (id);
+        CREATE INDEX foobar_ccnew1 ON users (id);
+      SQL
     end
 
-    context 'with deprecated method for >= PG12' do
-      before do
-        stub_feature_flags(database_reindexing_pg12: true)
-      end
+    it 'drops both leftover indexes' do
+      expect_query("SET lock_timeout TO '60000ms'")
+      expect_query("DROP INDEX CONCURRENTLY IF EXISTS \"public\".\"foobar_ccnew\"")
+      expect_query("RESET idle_in_transaction_session_timeout; RESET lock_timeout")
+      expect_query("SET lock_timeout TO '60000ms'")
+      expect_query("DROP INDEX CONCURRENTLY IF EXISTS \"public\".\"foobar_ccnew1\"")
+      expect_query("RESET idle_in_transaction_session_timeout; RESET lock_timeout")
 
-      it 'retrieves regular indexes that are no left-overs from previous runs' do
-        result = double
-        expect(Gitlab::Database::PostgresIndex).to receive_message_chain('not_match.not_match.not_match.reindexing_support').with('^tmp_reindex_').with('^old_reindex_').with('\_ccnew[0-9]*$').with(no_args).and_return(result)
+      subject
+    end
 
-        expect(subject).to eq(result)
+    def expect_query(sql)
+      expect(ApplicationRecord.connection).to receive(:execute).ordered.with(sql).and_wrap_original do |method, sql|
+        method.call(sql.sub(/CONCURRENTLY/, ''))
       end
     end
   end

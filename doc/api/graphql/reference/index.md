@@ -294,7 +294,7 @@ Returns [`QueryComplexity`](#querycomplexity).
 
 ### `Query.runner`
 
-Find a runner. Available only when feature flag `runner_graphql_query` is enabled.
+Find a runner. Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Returns [`CiRunner`](#cirunner).
 
@@ -331,7 +331,7 @@ Returns [`RunnerSetup`](#runnersetup).
 
 ### `Query.runners`
 
-Find runners visible to the current user. Available only when feature flag `runner_graphql_query` is enabled.
+Find runners visible to the current user. Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Returns [`CiRunnerConnection`](#cirunnerconnection).
 
@@ -1121,7 +1121,7 @@ Input type: `CreateComplianceFrameworkInput`
 
 ### `Mutation.createCustomEmoji`
 
-Available only when feature flag `custom_emoji` is enabled.
+Available only when feature flag `custom_emoji` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice.
 
 Input type: `CreateCustomEmojiInput`
 
@@ -3618,7 +3618,7 @@ Input type: `RepositionImageDiffNoteInput`
 
 ### `Mutation.runnerDelete`
 
-Available only when feature flag `runner_graphql_query` is enabled.
+Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Input type: `RunnerDeleteInput`
 
@@ -3638,7 +3638,7 @@ Input type: `RunnerDeleteInput`
 
 ### `Mutation.runnerUpdate`
 
-Available only when feature flag `runner_graphql_query` is enabled.
+Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Input type: `RunnerUpdateInput`
 
@@ -3668,7 +3668,7 @@ Input type: `RunnerUpdateInput`
 
 ### `Mutation.runnersRegistrationTokenReset`
 
-Available only when feature flag `runner_graphql_query` is enabled.
+Available only when feature flag `runner_graphql_query` is enabled. This flag is enabled by default.
 
 Input type: `RunnersRegistrationTokenResetInput`
 
@@ -5484,6 +5484,29 @@ The edge type for [`Event`](#event).
 | ---- | ---- | ----------- |
 | <a id="eventedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="eventedgenode"></a>`node` | [`Event`](#event) | The item at the end of the edge. |
+
+#### `GroupConnection`
+
+The connection type for [`Group`](#group).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="groupconnectionedges"></a>`edges` | [`[GroupEdge]`](#groupedge) | A list of edges. |
+| <a id="groupconnectionnodes"></a>`nodes` | [`[Group]`](#group) | A list of nodes. |
+| <a id="groupconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `GroupEdge`
+
+The edge type for [`Group`](#group).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="groupedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="groupedgenode"></a>`node` | [`Group`](#group) | The item at the end of the edge. |
 
 #### `GroupMemberConnection`
 
@@ -8552,7 +8575,7 @@ Snapshot.
 | <a id="devopsadoptionsnapshotrecordedat"></a>`recordedAt` | [`Time!`](#time) | The time the snapshot was recorded. |
 | <a id="devopsadoptionsnapshotrunnerconfigured"></a>`runnerConfigured` | [`Boolean!`](#boolean) | At least one runner was used. |
 | <a id="devopsadoptionsnapshotsastenabledcount"></a>`sastEnabledCount` | [`Int`](#int) | Total number of projects with enabled SAST. |
-| <a id="devopsadoptionsnapshotsecurityscansucceeded"></a>`securityScanSucceeded` | [`Boolean!`](#boolean) | At least one security scan succeeded. |
+| <a id="devopsadoptionsnapshotsecurityscansucceeded"></a>`securityScanSucceeded` **{warning-solid}** | [`Boolean!`](#boolean) | **Deprecated** in 14.1. Substituted with specific security metrics. Always false. |
 | <a id="devopsadoptionsnapshotstarttime"></a>`startTime` | [`Time!`](#time) | The start time for the snapshot where the data points were collected. |
 | <a id="devopsadoptionsnapshottotalprojectscount"></a>`totalProjectsCount` | [`Int`](#int) | Total number of projects. |
 | <a id="devopsadoptionsnapshotvulnerabilitymanagementusedcount"></a>`vulnerabilityManagementUsedCount` | [`Int`](#int) | Total number of projects with vulnerability management used at least once. |
@@ -9271,7 +9294,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupbillablememberscount"></a>`billableMembersCount` | [`Int`](#int) | The number of billable users in the group. |
 | <a id="groupcontainerrepositoriescount"></a>`containerRepositoriesCount` | [`Int!`](#int) | Number of container repositories in the group. |
 | <a id="groupcontainslockedprojects"></a>`containsLockedProjects` | [`Boolean!`](#boolean) | Includes at least one project where the repository size exceeds the limit. |
-| <a id="groupcustomemoji"></a>`customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. (see [Connections](#connections)) |
+| <a id="groupcustomemoji"></a>`customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice. (see [Connections](#connections)) |
 | <a id="groupdescription"></a>`description` | [`String`](#string) | Description of the namespace. |
 | <a id="groupdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
 | <a id="groupdora"></a>`dora` | [`Dora`](#dora) | The group's DORA metrics. |
@@ -9384,6 +9407,24 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="groupcontainerrepositoriesname"></a>`name` | [`String`](#string) | Filter the container repositories by their name. |
 | <a id="groupcontainerrepositoriessort"></a>`sort` | [`ContainerRepositorySort`](#containerrepositorysort) | Sort container repositories by this criteria. |
+
+##### `Group.descendantGroups`
+
+List of descendant groups of this group.
+
+Returns [`GroupConnection`](#groupconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="groupdescendantgroupsincludeparentdescendants"></a>`includeParentDescendants` | [`Boolean`](#boolean) | List of descendant groups of the parent group. |
+| <a id="groupdescendantgroupsowned"></a>`owned` | [`Boolean`](#boolean) | Limit result to groups owned by authenticated user. |
+| <a id="groupdescendantgroupssearch"></a>`search` | [`String`](#string) | Search query for group name or group full path. |
 
 ##### `Group.epic`
 
@@ -11237,6 +11278,7 @@ Represents a file or directory in the project repository that has been locked.
 | <a id="pipelinepath"></a>`path` | [`String`](#string) | Relative path to the pipeline's page. |
 | <a id="pipelineproject"></a>`project` | [`Project`](#project) | Project the pipeline belongs to. |
 | <a id="pipelinequeuedduration"></a>`queuedDuration` | [`Duration`](#duration) | How long the pipeline was queued before starting. |
+| <a id="pipelineref"></a>`ref` | [`String`](#string) | Reference to the branch from which the pipeline was triggered. |
 | <a id="pipelineretryable"></a>`retryable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be retried. |
 | <a id="pipelinesecurityreportsummary"></a>`securityReportSummary` | [`SecurityReportSummary`](#securityreportsummary) | Vulnerability and scanned resource counts for each security scanner of the pipeline. |
 | <a id="pipelinesha"></a>`sha` | [`String!`](#string) | SHA of the pipeline's commit. |
@@ -11401,7 +11443,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectcodecoveragesummary"></a>`codeCoverageSummary` | [`CodeCoverageSummary`](#codecoveragesummary) | Code coverage summary associated with the project. |
 | <a id="projectcomplianceframeworks"></a>`complianceFrameworks` | [`ComplianceFrameworkConnection`](#complianceframeworkconnection) | Compliance frameworks associated with the project. (see [Connections](#connections)) |
 | <a id="projectcontainerexpirationpolicy"></a>`containerExpirationPolicy` | [`ContainerExpirationPolicy`](#containerexpirationpolicy) | The container expiration policy of the project. |
-| <a id="projectcontainerregistryenabled"></a>`containerRegistryEnabled` | [`Boolean`](#boolean) | Indicates if the project stores Docker container images in a container registry. |
+| <a id="projectcontainerregistryenabled"></a>`containerRegistryEnabled` | [`Boolean`](#boolean) | Indicates if Container Registry is enabled for the current user. |
 | <a id="projectcontainerrepositoriescount"></a>`containerRepositoriesCount` | [`Int!`](#int) | Number of container repositories in the project. |
 | <a id="projectcreatedat"></a>`createdAt` | [`Time`](#time) | Timestamp of the project creation. |
 | <a id="projectdastprofiles"></a>`dastProfiles` | [`DastProfileConnection`](#dastprofileconnection) | DAST Profiles associated with the project. (see [Connections](#connections)) |
@@ -15292,7 +15334,6 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumregistration_enabled_callout"></a>`REGISTRATION_ENABLED_CALLOUT` | Callout feature name for registration_enabled_callout. |
 | <a id="usercalloutfeaturenameenumsecurity_configuration_devops_alert"></a>`SECURITY_CONFIGURATION_DEVOPS_ALERT` | Callout feature name for security_configuration_devops_alert. |
 | <a id="usercalloutfeaturenameenumsecurity_configuration_upgrade_banner"></a>`SECURITY_CONFIGURATION_UPGRADE_BANNER` | Callout feature name for security_configuration_upgrade_banner. |
-| <a id="usercalloutfeaturenameenumservice_templates_deprecated_callout"></a>`SERVICE_TEMPLATES_DEPRECATED_CALLOUT` | Callout feature name for service_templates_deprecated_callout. |
 | <a id="usercalloutfeaturenameenumsuggest_pipeline"></a>`SUGGEST_PIPELINE` | Callout feature name for suggest_pipeline. |
 | <a id="usercalloutfeaturenameenumsuggest_popover_dismissed"></a>`SUGGEST_POPOVER_DISMISSED` | Callout feature name for suggest_popover_dismissed. |
 | <a id="usercalloutfeaturenameenumtabs_position_highlight"></a>`TABS_POSITION_HIGHLIGHT` | Callout feature name for tabs_position_highlight. |

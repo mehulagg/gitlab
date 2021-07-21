@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
+RSpec.describe API::Ci::Runner, :clean_gitlab_redis_trace_chunks do
   include StubGitlabCalls
   include RedisHelpers
   include WorkhorseHelpers
@@ -33,7 +33,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
                project: project, user: user, runner_id: runner.id, pipeline: pipeline)
       end
 
-      let(:headers) { { API::Helpers::Runner::JOB_TOKEN_HEADER => job.token, 'Content-Type' => 'text/plain' } }
+      let(:headers) { { API::Ci::Helpers::Runner::JOB_TOKEN_HEADER => job.token, 'Content-Type' => 'text/plain' } }
       let(:headers_with_range) { headers.merge({ 'Content-Range' => '11-20' }) }
       let(:update_interval) { 10.seconds.to_i }
 
@@ -142,7 +142,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
           context 'when redis data are flushed' do
             before do
-              redis_shared_state_cleanup!
+              redis_trace_chunks_cleanup!
             end
 
             it 'has empty trace' do

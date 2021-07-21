@@ -417,7 +417,7 @@ class Project < ApplicationRecord
   delegate :scheduled?, :started?, :in_progress?, :failed?, :finished?,
     prefix: :import, to: :import_state, allow_nil: true
   delegate :squash_always?, :squash_never?, :squash_enabled_by_default?, :squash_readonly?, to: :project_setting
-  delegate :squash_option, to: :project_setting
+  delegate :squash_option, :squash_option=, to: :project_setting
   delegate :previous_default_branch, :previous_default_branch=, to: :project_setting
   delegate :no_import?, to: :import_state, allow_nil: true
   delegate :name, to: :owner, allow_nil: true, prefix: true
@@ -1411,7 +1411,7 @@ class Project < ApplicationRecord
   def find_or_initialize_integration(name)
     return if disabled_integrations.include?(name)
 
-    find_integration(integrations, name) || build_from_instance_or_template(name) || build_integration(name)
+    find_integration(integrations, name) || build_from_instance(name) || build_integration(name)
   end
 
   # rubocop: disable CodeReuse/ServiceClass
@@ -1649,18 +1649,11 @@ class Project < ApplicationRecord
     :visibility_level
   end
 
-  def change_head(branch)
-    if repository.branch_exists?(branch)
-      repository.before_change_head
-      repository.raw_repository.write_ref('HEAD', "refs/heads/#{branch}")
-      repository.copy_gitattributes(branch)
-      repository.after_change_head
-      ProjectCacheWorker.perform_async(self.id, [], [:commit_count])
-      reload_default_branch
-    else
-      errors.add(:base, _("Could not change HEAD: branch '%{branch}' does not exist") % { branch: branch })
-      false
-    end
+  override :after_repository_change_head
+  def after_repository_change_head
+    ProjectCacheWorker.perform_async(self.id, [], [:commit_count])
+
+    super
   end
 
   def forked_from?(other_project)
@@ -2680,20 +2673,16 @@ class Project < ApplicationRecord
     integrations.find { _1.to_param == name }
   end
 
-  def build_from_instance_or_template(name)
+  def build_from_instance(name)
     instance = find_integration(integration_instances, name)
-    return Integration.build_from_integration(instance, project_id: id) if instance
 
-    template = find_integration(integration_templates, name)
-    return Integration.build_from_integration(template, project_id: id) if template
+    return unless instance
+
+    Integration.build_from_integration(instance, project_id: id)
   end
 
   def build_integration(name)
     Integration.integration_name_to_model(name).new(project_id: id)
-  end
-
-  def integration_templates
-    @integration_templates ||= Integration.for_template
   end
 
   def integration_instances

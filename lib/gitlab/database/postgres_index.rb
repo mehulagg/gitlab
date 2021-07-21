@@ -18,19 +18,17 @@ module Gitlab
         find(identifier)
       end
 
-      # A 'regular' index is a non-unique index,
-      # that does not serve an exclusion constraint and
-      # is defined on a table that is not partitioned.
-      #
-      # Deprecated: Switch to scope .reindexing_support
-      scope :regular, -> { where(unique: false, partitioned: false, exclusion: false, expression: false, type: Gitlab::Database::Reindexing::SUPPORTED_TYPES)}
+      # Indexes with reindexing support
+      scope :reindexing_support, -> do
+        where(partitioned: false, exclusion: false, expression: false, type: Gitlab::Database::Reindexing::SUPPORTED_TYPES)
+          .not_match("#{Gitlab::Database::Reindexing::ReindexConcurrently::TEMPORARY_INDEX_PATTERN}$")
+      end
 
-      # Indexes for reindexing with PG12
-      scope :reindexing_support, -> { where(partitioned: false, exclusion: false, expression: false, type: Gitlab::Database::Reindexing::SUPPORTED_TYPES) }
+      scope :reindexing_leftovers, -> { match("#{Gitlab::Database::Reindexing::ReindexConcurrently::TEMPORARY_INDEX_PATTERN}$") }
 
-      scope :not_match, ->(regex) { where("name !~ ?", regex)}
+      scope :not_match, ->(regex) { where("name !~ ?", regex) }
 
-      scope :match, ->(regex) { where("name ~* ?", regex)}
+      scope :match, ->(regex) { where("name ~* ?", regex) }
 
       scope :not_recently_reindexed, -> do
         recent_actions = Reindexing::ReindexAction.recent.where('index_identifier = identifier')

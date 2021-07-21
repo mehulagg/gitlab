@@ -2,7 +2,7 @@
 
 class Projects::PipelinesController < Projects::ApplicationController
   include ::Gitlab::Utils::StrongMemoize
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
   before_action :disable_query_limiting, only: [:create, :retry]
   before_action :pipeline, except: [:index, :new, :create, :charts, :config_variables]
@@ -24,7 +24,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
-  track_unique_visits :charts, target_id: 'p_analytics_pipelines'
+  track_redis_hll_event :charts, name: 'p_analytics_pipelines'
 
   wrap_parameters Ci::Pipeline
 
@@ -68,20 +68,22 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def create
-    @pipeline = Ci::CreatePipelineService
+    service_response = Ci::CreatePipelineService
       .new(project, current_user, create_params)
       .execute(:web, ignore_skip_ci: true, save_on_errors: false)
 
+    @pipeline = service_response.payload
+
     respond_to do |format|
       format.html do
-        if @pipeline.created_successfully?
+        if service_response.success?
           redirect_to project_pipeline_path(project, @pipeline)
         else
           render 'new', status: :bad_request
         end
       end
       format.json do
-        if @pipeline.created_successfully?
+        if service_response.success?
           render json: PipelineSerializer
                          .new(project: project, current_user: current_user)
                          .represent(@pipeline),
