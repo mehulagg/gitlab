@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Installing GitLab on Amazon Web Services (AWS) **(FREE SELF)**
+# Installing GitLab on Amazon Web Services (AWS) (DEPRECIATED) **(FREE SELF)**
 
 This page offers a walkthrough of a common configuration
 for GitLab on AWS using the official GitLab Linux package. You should customize it to accommodate your needs.
