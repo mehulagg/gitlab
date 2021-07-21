@@ -2,29 +2,29 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::Security::PoliciesController, type: :request do
+RSpec.describe Projects::Security::PoliciesController do
   let_it_be(:owner) { create(:user) }
   let_it_be(:user) { create(:user) }
   let_it_be(:project, reload: true) { create(:project, namespace: owner.namespace) }
-  let_it_be(:environment) { create(:environment, :with_review_app, project: project) }
-
-  let(:environment_id) { environment.id }
+  let_it_be(:policy) { project }
+  # Still not working...
+  # Try looking at ./ee/spec/graphql/resolvers/scan_execution_policy_spec.rb
+  # Might need to create new factory for scan execution policies in ./ee/spec/factories/
+  # See ./ee/spec/factories/security_orchestration_policy_configurations.rb
 
   before do
     project.add_developer(user)
-    login_as(user)
+    sign_in(user)
   end
 
   describe 'GET #edit' do
-    subject do
-      get :edit, params: { namespace_id: project.namespace, project_id: project, id: 'policy', environment_id: environment_id }
-    end
+    subject(:request) { get :edit, params: { namespace_id: project.namespace, project_id: project, id: policy.name } }
 
     context 'with authorized user' do
       context 'when feature is available' do
         before do
           stub_feature_flags(security_orchestration_policies_configuration: true)
-          stub_licensed_features(security_orchestration: true)
+          stub_licensed_features(security_orchestration_policies: true)
         end
 
         it 'renders the new template' do
@@ -33,22 +33,12 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template(:edit)
         end
-
-        context 'when environment is missing' do
-          let(:environment_id) { 'missing' }
-
-          it 'returns 404' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
-        end
       end
 
       context 'when feature is not available' do
         before do
           stub_feature_flags(security_orchestration_policies_configuration: false)
-          stub_licensed_features(security_orchestration: false)
+          stub_licensed_features(security_orchestration_policies: false)
         end
 
         it 'returns 404' do
@@ -67,7 +57,7 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
       context 'when feature is available' do
         before do
           stub_feature_flags(security_orchestration_policies_configuration: true)
-          stub_licensed_features(security_orchestration: true)
+          stub_licensed_features(security_orchestration_policies: true)
         end
 
         it 'returns 404' do
@@ -88,7 +78,7 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
     end
   end
 
-  context 'displaying page' do
+  describe 'GET #show' do
     using RSpec::Parameterized::TableSyntax
 
     where(:feature_flag, :license, :status) do
@@ -98,7 +88,7 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
       true | false | :not_found
     end
 
-    subject { get project_security_policy_url(project) }
+    subject(:request) { get :show, params: { namespace_id: project.namespace, project_id: project} }
 
     with_them do
       before do
@@ -107,7 +97,7 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
       end
 
       specify do
-        get project_security_policy_url(project)
+        subject
 
         expect(response).to have_gitlab_http_status(status)
       end
