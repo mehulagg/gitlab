@@ -93,16 +93,15 @@ You can also create and modify project push mirrors through the
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208828) in GitLab 13.0.
 
 By default, if any ref on the remote mirror has diverged from the local
-repository, the *entire push* fails, and no updates occur.
+repository, they are forcibly pushed to.
 
-For example, if a repository has `main`, `develop`, and `stable` branches that
+For example, if a repository has `main` and `develop` branches that
 have been mirrored to a remote, and then a new commit is added to `develop` on
-the mirror, the next push attempt fails, leaving `main` and `stable`
-out-of-date despite not having diverged. No change on any branch can be mirrored
-until the divergence is resolved.
+the mirror. The next push updates all of the references on the mirror, including
+the diverged `develop`.
 
 With the **Keep divergent refs** option enabled, the `develop` branch is
-skipped, allowing `main` and `stable` to be updated. The mirror status
+skipped, causing only `main` to be updated. The mirror status
 reflects that `develop` has diverged and was skipped, and be marked as a failed
 update.
 

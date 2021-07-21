@@ -11,5 +11,5 @@
     = check_box_tag :keep_divergent_refs, '1', false, class: 'js-mirror-keep-divergent-refs form-check-input'
     = label_tag :keep_divergent_refs, _('Keep divergent refs'), class: 'form-check-label'
     .form-text.text-muted
-      = _('By default, if any ref (branch, tag, or commit) on the remote mirror has diverged from the local repository, the entire push will fail, and nothing will be updated. Choose this option to override this behavior. After the mirror is created, this can only be modified via the API.')
+      = _('By default, if any ref (branch or tag) on the remote mirror has diverged from the local repository, they are forcibly pushed over. Choose this option to override this behavior and not force push over diverged refs. After the mirror is created, this can only be modified via the API.')
       = link_to _('Learn more.'), help_page_path('user/project/repository/repository_mirroring', anchor: 'keep-divergent-refs'), target: '_blank', rel: 'noopener noreferrer'
