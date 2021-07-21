@@ -127,6 +127,13 @@ export default {
         this.newUsersToInvite.length === 0 && Object.keys(this.groupToBeSharedWith).length === 0
       );
     },
+    errorFieldDescription() {
+      if (this.inviteeType === 'group' && this.invalidFeedbackMessage === '') {
+        return '';
+      }
+
+      return this.$options.labels[this.inviteeType].placeHolder;
+    },
   },
   mounted() {
     eventHub.$on('openModal', (options) => {
@@ -325,7 +332,7 @@ export default {
         class="gl-mt-2"
         :invalid-feedback="invalidFeedbackMessage"
         :state="validationState"
-        :description="$options.labels[inviteeType].placeHolder"
+        :description="errorFieldDescription"
         data-testid="members-form-group"
       >
         <label :id="$options.membersTokenSelectLabelId" class="col-form-label">{{
