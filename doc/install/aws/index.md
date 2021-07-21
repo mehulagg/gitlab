@@ -9,11 +9,11 @@ type: index
 
 # AWS implementation patterns **(FREE SELF)**
 
-GitLab  [GitLab Reference Architectures](../../../administration/reference_architectures/index.md) give qualified and tested guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose-designed to be as non-implementation specific as possible to apply to the most different types of implementations possible. This generally means they have a highly granular "machine" to "server role" specification and focus on system elements that impact performance. Reference Architectures can be adapted to the broadest number of supported implementations.
+GitLab  [GitLab Reference Architectures](../../administration/reference_architectures/index.md) give qualified and tested guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose-designed to be as non-implementation specific as possible to apply to the most different types of implementations possible. This generally means they have a highly granular "machine" to "server role" specification and focus on system elements that impact performance. Reference Architectures can be adapted to the broadest number of supported implementations.
 
 Implementation patterns are built on the foundational information and testing done for Reference Architectures and allow architects and implementers at GitLab, GitLab Customers, and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
 
-GitLab implementation patterns build upon [GitLab Reference Architectures](../reference_architectures/index.md) in the following ways:
+GitLab implementation patterns build upon [GitLab Reference Architectures](../../reference_architectures/index.md) in the following ways:
 
 ## GitLab reference architecture and cloud platform well architected compliance
 
