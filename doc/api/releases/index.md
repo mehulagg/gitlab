@@ -15,6 +15,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [The permission model for create, update and delete actions was fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/327505) in GitLab 14.1.
     See [Release permissions](../../user/project/releases/index.md#release-permissions) for more information.
 
+## Authentication
+
+The Releases API accepts a [Personal Access Token](../../user/profile/personal_access_tokens.md) for authentication using the `PRIVATE-TOKEN` header.
+The [GitLab CI/CD job token](../index.md#gitlab-cicd-job-token) `$CI_JOB_TOKEN` is also supported by specifying the `JOB-TOKEN` header instead.
+
 ## List Releases
 
 Paginated list of Releases, sorted by `released_at`.
