@@ -18,6 +18,16 @@ module Projects
         render :show, locals: { project: project }
       end
 
+      def edit
+        @environment = project.environments.find(params[:environment_id])
+        @policy_name = params[:id]
+        @policy = project&.security_orchestration_policy_configuration&.scan_execution_policy&.find do |policy|
+          policy[:name] == @policy_name
+        end
+
+        render :edit
+      end
+
       private
 
       def check_feature_flag!

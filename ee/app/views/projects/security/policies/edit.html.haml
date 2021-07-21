@@ -1,0 +1,6 @@
+- add_to_breadcrumbs s_("SecurityOrchestration|Scan Execution Policy"), project_security_policies_path(@project)
+- breadcrumb_title @policy_name
+- page_title s_("SecurityOrchestration|Policy editor")
+- policy_details = policy_details(@project, @policy, @environment)
+
+#js-policy-builder-app{ data: policy_details }

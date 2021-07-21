@@ -62,6 +62,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
           resource :policy, only: [:show]
 
+          resources :policies, only: [:edit], controller: :policy, constraints: { id: %r{[^/]+} }
+
           resource :configuration, only: [], controller: :configuration do
             post :auto_fix, on: :collection
             resource :corpus_management, only: [:show], controller: :corpus_management
