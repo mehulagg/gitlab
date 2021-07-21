@@ -216,28 +216,35 @@ export default {
   },
 
   moveList: (
-    { state, commit, dispatch },
-    { listId, replacedListId, newIndex, adjustmentValue },
+    { state: { boardLists }, commit, dispatch },
+    {
+      item: {
+        dataset: { listId: movedListId },
+      },
+      newIndex,
+      to: { children },
+    },
   ) => {
-    if (listId === replacedListId) {
+    const displacedListId = children[newIndex].dataset.listId;
+
+    if (movedListId === displacedListId) {
       return;
     }
 
-    const { boardLists } = state;
     const backupList = { ...boardLists };
-    const movedList = boardLists[listId];
+    const movedListPos = boardLists[movedListId].position;
+    const displacedListPos = boardLists[displacedListId].position;
+    const newDisplacedListPos =
+      movedListPos < displacedListPos // true if dragged list moves right
+        ? // displaced list should shift left (bounded at 0).
+          Math.max(0, displacedListPos - 1)
+        : // displaced list should shift right (bounded at # of board lists).
+          Math.min(displacedListPos + 1, Object.keys(boardLists).length - 1);
 
-    const newPosition = newIndex - 1;
-    const listAtNewIndex = boardLists[replacedListId];
+    commit(types.MOVE_LIST, { listId: movedListId, position: displacedListPos });
+    commit(types.MOVE_LIST, { listId: displacedListId, position: newDisplacedListPos });
 
-    movedList.position = newPosition;
-    listAtNewIndex.position += adjustmentValue;
-    commit(types.MOVE_LIST, {
-      movedList,
-      listAtNewIndex,
-    });
-
-    dispatch('updateList', { listId, position: newPosition, backupList });
+    dispatch('updateList', { listId: movedListId, position: displacedListPos, backupList });
   },
 
   updateList: (
@@ -263,6 +270,9 @@ export default {
         if (!boardItemsByListId[listId]) {
           dispatch('fetchItemsForList', { listId });
         }
+
+        // TODO Always update the client state in sync with the backend state after mutation.
+        // Issue link here
       })
       .catch(() => {
         commit(types.UPDATE_LIST_FAILURE, backupList);

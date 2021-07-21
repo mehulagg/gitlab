@@ -103,10 +103,8 @@ export default {
     Vue.set(state.boardLists, list.id, list);
   },
 
-  [mutationTypes.MOVE_LIST]: (state, { movedList, listAtNewIndex }) => {
-    const { boardLists } = state;
-    Vue.set(boardLists, movedList.id, movedList);
-    Vue.set(boardLists, listAtNewIndex.id, listAtNewIndex);
+  [mutationTypes.MOVE_LIST]: ({ boardLists }, { listId, position }) => {
+    Vue.set(boardLists, listId, { ...boardLists[listId], position });
   },
 
   [mutationTypes.UPDATE_LIST_FAILURE]: (state, backupList) => {
