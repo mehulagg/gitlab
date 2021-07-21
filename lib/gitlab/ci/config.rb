@@ -114,7 +114,14 @@ module Gitlab
           sha: sha || find_sha(project),
           user: user,
           parent_pipeline: parent_pipeline,
-          variables: project&.predefined_variables&.to_runner_variables)
+          variables: build_variables.to_runner_variables)
+      end
+
+      def build_variables
+        Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(project.predefined_variables) if project
+          variables.append(key: 'CI_COMMIT_SHA', value: sha || find_sha(project))
+        end
       end
 
       def track_and_raise_for_dev_exception(error)
