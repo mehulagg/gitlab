@@ -521,7 +521,7 @@ to start again from scratch, there are a few steps that can help you:
    gitlab-ctl stop geo-logcursor
    ```
 
-   You can watch Sidekiq logs to know when Sidekiq jobs processing have finished:
+   You can watch the Sidekiq logs to know when Sidekiq jobs processing has finished:
 
    ```shell
    gitlab-ctl tail sidekiq
