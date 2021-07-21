@@ -280,16 +280,6 @@ RSpec.describe RemoteMirror, :mailer do
     end
   end
 
-  context 'when remote mirror gets destroyed' do
-    it 'does not remove the remote' do
-      mirror = create_mirror(url: 'http://foo:bar@test.com')
-
-      expect(RepositoryRemoveRemoteWorker).not_to receive(:perform_async)
-
-      mirror.destroy!
-    end
-  end
-
   context 'stuck mirrors' do
     it 'includes mirrors that were started over an hour ago' do
       mirror = create_mirror(url: 'http://cantbeblank',

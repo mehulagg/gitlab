@@ -1060,16 +1060,6 @@ RSpec.describe Project do
     end
   end
 
-  describe 'updating import_url' do
-    it 'removes previous remote' do
-      project = create(:project, :repository, :mirror)
-
-      expect(RepositoryRemoveRemoteWorker).to receive(:perform_async).with(project.id, ::Repository::MIRROR_REMOTE).and_call_original
-
-      project.update(import_url: "http://test.com")
-    end
-  end
-
   describe '#any_online_runners?' do
     let!(:shared_runner) { create(:ci_runner, :instance, :online) }
 
