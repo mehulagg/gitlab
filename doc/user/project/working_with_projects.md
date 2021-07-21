@@ -329,6 +329,65 @@ git config --global url."https://${user}:${personal_access_token}@gitlab.example
 git config --global url."git@gitlab.example.com".insteadOf "https://gitlab.example.com"
 ```
 
+### Fetching Go modules from Geo secondary sites
+
+As Go modules are stored in git repositories, the Geo feature that allows Git repositories to be
+accessed on the secondary Geo servers can be used.
+
+The steps required are as follows, with an example deployment comprising:
+
+- A primary server called `gitlab.example.com`
+- A Geo secondary called `gitlab-secondary.example.com`
+
+Using SSH to access the Geo seconday:
+
+- Reconfigure Git on the client to send traffic for the primary to the secondary:
+
+```plaintext
+git config --global url."git@gitlab-secondary.example.com".insteadOf "https://gitlab.example.com"
+git config --global url."git@gitlab-secondary.example.com".insteadOf "http://gitlab.example.com"
+```
+
+- Or modify `~/.gitconfig` direct  (the `global` configuration, [here are also`system` and `local` configuration files](https://git-scm.com/docs/git-config#FILES))
+
+```plaintext
+[url "git@gitlab-secondary.example.com:"]
+          insteadOf = https://primary.example.com
+[url "git@gitlab-secondary.example.com:"]
+          insteadOf = http://primary.example.com
+```
+
+- Ensure the client is set up for SSH access to GitLab repositories. This can be tested on the primary,
+  GitLab will replicate the public key to the secondary.
+- `go get` will initially generate some HTTP traffic to the primary, but when the module
+  download commences, the `insteadOf` configuration sends the traffic to the secondary.
+
+Using HTTP 
+
+This does not work with CI job tokens, only with persistent access tokens that are replicated
+to the secondary.
+
+- Generate a project access token.
+- Put in place a Git `insteadOf` redirect on the client
+
+```plaintext
+git config --global url."https://gitlab-secondary.example.com".insteadOf "https://gitlab.example.com"
+```
+
+- Or modify `~/.gitconfig` direct  (the `global` configuration, [here are also`system` and `local` configuration files](https://git-scm.com/docs/git-config#FILES))
+
+```plaintext
+[url "https://gitlab-secondary.example.com"]
+          insteadOf = https://primary.example.com
+```
+
+- Provide credentials in the client's `~/.netrc`
+
+```
+machine primary.example.com login USERNAME password TOKEN
+machine secondary.example.com login USERNAME password TOKEN
+```
+
 ## Access project page with project ID
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53671) in GitLab 11.8.
