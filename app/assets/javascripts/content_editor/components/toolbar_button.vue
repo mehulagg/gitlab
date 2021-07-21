@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlTooltipDirective as GlTooltip } from '@gitlab/ui';
+import toolbarControlMixin from '~/content_editor/mixins/toolbar_control_mixin';
 
 export default {
   components: {
@@ -8,7 +9,7 @@ export default {
   directives: {
     GlTooltip,
   },
-  inject: ['tiptapEditor'],
+  mixins: [toolbarControlMixin],
   props: {
     iconName: {
       type: String,
@@ -28,10 +29,13 @@ export default {
       default: '',
     },
   },
-  computed: {
-    isActive() {
-      return this.tiptapEditor.isActive(this.contentType) && this.tiptapEditor.isFocused;
-    },
+  data() {
+    return {
+      isActive: null,
+    };
+  },
+  onTiptapSelectionUpdate({ editor }) {
+    this.isActive = editor.isActive(this.contentType) && editor.isFocused;
   },
   methods: {
     execute() {

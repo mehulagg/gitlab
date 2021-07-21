@@ -8,6 +8,7 @@ import {
   GlDropdownItem,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
+import toolbarControlMixin from '~/content_editor/mixins/toolbar_control_mixin';
 import { hasSelection } from '../services/utils';
 
 export const linkContentType = 'link';
@@ -24,23 +25,18 @@ export default {
   directives: {
     GlTooltip,
   },
-  inject: ['tiptapEditor'],
+  mixins: [toolbarControlMixin],
   data() {
     return {
       linkHref: '',
+      isActive: false,
     };
   },
-  computed: {
-    isActive() {
-      return this.tiptapEditor.isActive(linkContentType);
-    },
-  },
-  mounted() {
-    this.tiptapEditor.on('selectionUpdate', ({ editor }) => {
-      const { canonicalSrc, href } = editor.getAttributes(linkContentType);
+  onTiptapSelectionUpdate({ editor }) {
+    const { canonicalSrc, href } = editor.getAttributes(linkContentType);
 
-      this.linkHref = canonicalSrc || href;
-    });
+    this.isActive = editor.isActive(linkContentType);
+    this.linkHref = canonicalSrc || href;
   },
   methods: {
     updateLink() {
