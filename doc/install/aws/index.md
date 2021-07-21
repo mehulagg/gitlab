@@ -13,7 +13,7 @@ GitLab  [GitLab Reference Architectures](../../administration/reference_architec
 
 Implementation patterns are built on the foundational information and testing done for Reference Architectures and allow architects and implementers at GitLab, GitLab Customers, and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
 
-# Implementation patterns
+## Implementation patterns information
 
 ### Install GitLab Cloud Native Hybrid on AWS EKS (HA)
 
