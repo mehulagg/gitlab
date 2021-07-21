@@ -5,7 +5,7 @@ group: Alliances
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-## Cloud provider implementation patterns **(FREE SELF)**
+# Cloud provider implementation patterns **(FREE SELF)**
 
 <!--- (Should this be the new landing page for https://docs.gitlab.com/ee/install/#install-gitlab-on-cloud-providers) -->
 
@@ -82,19 +82,16 @@ For example:
 
 The "Implementation Eco System".
 
-- GitLab Internal
-  - Quality / Distribution / Self-Managed
-  - Alliances
-  - Support
-  - GitLab Professional Services
-  - GitLab Private
-  - Public Sector
-- External: 
-  - Customers
-  - GitLab Channel Partners (Integrators)
-  - Platform Partners
-### Example Platform Implementation Pattern Subsections
+Community: 
 
-- [Amazon Web Service (AWS)](aws/index.md) - MVC of this type of documentation.
-- Google Cloud (GCP) (Coming Soon)
-- IBM (Coming Soon)
+- Customers
+- GitLab Channel Partners (Integrators)
+- Platform Partners
+
+GitLab Internal
+
+- Quality / Distribution / Self-Managed
+- Alliances
+- Support
+- Professional Services
+- Public Sector

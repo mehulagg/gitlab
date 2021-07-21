@@ -81,7 +81,7 @@ GitLab Internal:
 - Quality / Distribution / Self-Managed
 - Alliances
 - Support
-- GitLab Professional Services
+- Professional Services
 - Public Sector
 
 | GitLab Installaton                          | Description |
