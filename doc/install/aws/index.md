@@ -13,18 +13,27 @@ GitLab  [GitLab Reference Architectures](../../administration/reference_architec
 
 Implementation patterns are built on the foundational information and testing done for Reference Architectures and allow architects and implementers at GitLab, GitLab Customers, and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
 
-GitLab implementation patterns build upon [GitLab Reference Architectures](../../administration/reference_architectures/index.md) in the following ways:
+## Install GitLab Cloud Native Hybrid on AWS EKS (HA)
 
-## GitLab reference architecture and cloud platform well architected compliance
+[GitLab Cloud Native Hybrid on AWS EKS (HA)](gitlab_hybrid_on_aws.md) - instructions, patterns and automation for installing GitLab Cloud Native Hybrid on AWS EKS. Includes Bill of Materials listings and links to Infrastructure as Code. GitLab Cloud Native Hybrid is the supported way to put as much of GitLab as possible into Kubernetes.
+
+## Install Omnibus GitLab on AWS EC2 (HA)
+
+[Omnibus GitLab on AWS EC2 (HA)](manual_install_aws.md) - instructions for installing GitLab on EC2 instances. Manual instructions from which you may build out a GitLab instance or create your own Infrastructure as Code (IaC).
+
+# Additional details on implementation patterns
+
+GitLab implementation patterns build upon [GitLab Reference Architectures](../../administration/reference_architectures/index.md) in the following ways:
+## Cloud platform well architected compliance
 
 Testing-backed architectural qualification is a fundamental concept behind implementation patterns.
 
-- Implementation patterns maintain Reference Architecture compliance and provide [GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance) (gpt) reports to demonstrate adherance to them.
+- Implementation patterns maintain GitLab Reference Architecture compliance and provide [GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance) (gpt) reports to demonstrate adherance to them.
 - Implementation patterns may be qualified by and/or contributed to by the technology vendor - for instance, an implementation pattern for AWS may be officially reviewed by AWS.
 - Implementation patterns may specify and test Cloud Platform PaaS services for suitability for GitLab - this testing can be coordinated and help qualify these technologies for Reference Architectures. For instance qualifying compatibility with and availability of runtime versions of top level PaaS such as those for PostgreSQL and Redis.
 - Implementation patterns can provided qualified testing for platform limitations, for example, ensuring Gitaly Cluster can work correctly on specific Cloud Platform availability zone latency and throughput characteristics or qualifying what levels of available platform partner local disk performance is workable for Gitaly server to operate with integrity.
 
-## Platform Partner Specificity
+## Platform partner specificity
 
 Implementation patterns enable platform specific terminology, best practice architecture and platform specific build manifests.
 
@@ -33,7 +42,7 @@ Implementation patterns enable platform specific terminology, best practice arch
 - Implementation patterns are written to an audience who is familiar with building on the infrastructure that the implementation pattern targets. For example, if the implementation pattern is for GCP, the specific terminology of GCP is used - including using the specific names for PaaS services.
 - Implementation patterns can test and qualify if the versions of PaaS available are compatible with GitLab (e.g. PostgreSQL, Redis, etc)
 
-## Platform as a Service
+## Platform as a Service (PaaS) specification and usage
 
 Platform as a Service options are a huge portion of the value provided by Cloud Platforms as they simplify operational complexity and reduce the SRE and security skilling required to operate advanced, highly available technology services. Implementation patterns can be prequalified against the partner PaaS options.
 
@@ -68,23 +77,19 @@ For example:
 
 ## Intended audiences and contributors
 
-The primary audience for this information is GitLab **Implementation Eco System** which consists of at least:
+The primary audiences for and contributors to this information is the GitLab **Implementation Eco System** which consists of at least:
 
-Community:
+Gitlab Implementation Community:
 
 - Customers
 - GitLab Channel Partners (Integrators)
 - Platform Partners
 
-GitLab Internal:
+GitLab Internal Implementation Teams:
 
 - Quality / Distribution / Self-Managed
 - Alliances
+- Training
 - Support
 - Professional Services
 - Public Sector
-
-| GitLab Installaton                          | Description |
-|---------------------------------------------------------------|-------------|
-| [GitLab Cloud Native Hybrid on AWS EKS (HA)](gitlab_hybrid_on_aws.md)                                      | Install GitLab Cloud Native Hybrid on AWS EKS. Includes Bill of Materials listings and links to Infrastructure as Code |
-| [Omnibus GitLab on AWS EC2 (HA)](manual_install_aws.md) | Install GitLab on EC2 instances. Manual instructions from which you may build out a GitLab instance or create your own Infrastructure as Code (IaC). |
