@@ -83,9 +83,9 @@ card "Database" as database {
   postgres_primary .[#4EA7FF]> postgres_secondary
 }
 
-node "**Consul + Sentinel** x3" as consul_sentinel {
- component Consul as consul #e76a9b
- component Sentinel as sentinel #e6e727
+card "**Consul + Sentinel**" as consul_sentinel {
+ collections "**Consul** x3" as consul #e76a9b
+ collections "**Redis Sentinel** x3" as sentinel #e6e727
 }
 
 card "Redis" as redis {
@@ -2177,9 +2177,9 @@ card "Kubernetes via Helm Charts" as kubernetes {
 
 card "**Internal Load Balancer**" as ilb #9370DB
 
-node "**Consul + Sentinel** x3" as consul_sentinel {
- component Consul as consul #e76a9b
- component Sentinel as sentinel #e6e727
+card "**Consul + Sentinel**" as consul_sentinel {
+ collections "**Consul** x3" as consul #e76a9b
+ collections "**Redis Sentinel** x3" as sentinel #e6e727
 }
 
 card "Gitaly Cluster" as gitaly_cluster {
