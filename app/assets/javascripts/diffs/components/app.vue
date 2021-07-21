@@ -361,6 +361,30 @@ export default {
         api.trackRedisHllUserEvent(TRACKING_MULTIPLE_FILES_MODE);
       }
     }
+
+    if (window.gon?.features?.diffSearchingUsageData) {
+      let keydownTime;
+
+      window.addEventListener('blur', () => {
+        if (keydownTime) {
+          const delta = new Date().getTime() - keydownTime;
+
+          // To make sure the user is using the find function we need to wait for blur
+          // and max 1000ms to be sure it the search box is filtered
+          if (delta >= 0 && delta < 1000) {
+            api.trackRedisHllUserEvent('i_code_review_user_searches_diff');
+          }
+
+          keydownTime = null;
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+          keydownTime = new Date().getTime();
+        }
+      });
+    }
   },
   beforeCreate() {
     diffsApp.instrument();

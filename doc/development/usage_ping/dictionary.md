@@ -14286,6 +14286,34 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `redis_hll_counters.issues.i_code_review_user_searches_diff_monthly`
+
+Count of users who search merge request diffs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210720144005_i_code_review_user_searches_diff_monthly.yml)
+
+Group: `group::code review`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.issues.i_code_review_user_searches_diff_weekly`
+
+Count of users who search merge request diffs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210720144001_i_code_review_user_searches_diff_weekly.yml)
+
+Group: `group::code review`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.issues_edit.g_project_management_issue_added_to_epic_monthly`
 
 Count of MAU adding an issue to an epic
