@@ -254,12 +254,13 @@ Gitlab/HTTParty:
 Gitlab/Json:
   Enabled: true
   Exclude:
-    - 'db/**/*'
     - 'qa/**/*'
     - 'scripts/**/*'
     - 'tooling/rspec_flaky/**/*'
     - 'lib/quality/**/*'
     - 'tooling/danger/**/*'
+    - 'spec/**/*'
+    - 'ee/spec/**/*'
 
 Gitlab/AvoidUploadedFileFromParams:
   Enabled: true
